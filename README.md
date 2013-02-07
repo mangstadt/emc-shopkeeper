@@ -1,0 +1,1 @@
+A utility for saving all your EMC shop transactions to a database.
