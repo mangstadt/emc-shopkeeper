@@ -8,6 +8,6 @@ import java.sql.SQLException;
  */
 public class DirbyMemoryDbDao extends DirbyDbDao {
 	public DirbyMemoryDbDao() throws SQLException {
-		init("jdbc:derby:memory:emc-shopkeeper", true);
+		init("jdbc:derby:memory:emc-shopkeeper", true, null);
 	}
 }

@@ -47,9 +47,10 @@ public abstract class DirbyDbDao implements DbDao {
 	 * doesn't exist.
 	 * @param jdbcUrl the JDBC URL
 	 * @param create true to create the database schema, false not to
+	 * @param listener
 	 * @throws SQLException
 	 */
-	protected void init(String jdbcUrl, boolean create) throws SQLException {
+	protected void init(String jdbcUrl, boolean create, DbListener listener) throws SQLException {
 		logger.info("Starting database...");
 
 		//shutdown Derby when the program terminates
@@ -82,6 +83,9 @@ public abstract class DirbyDbDao implements DbDao {
 
 		//create tables if database doesn't exist
 		if (create) {
+			if (listener != null) {
+				listener.onCreate();
+			}
 			logger.info("Database not found.  Creating the database...");
 			String sql = null;
 			SQLStatementReader in = null;
@@ -117,6 +121,10 @@ public abstract class DirbyDbDao implements DbDao {
 			//update the database schema if it's not up to date
 			int version = selectDbVersion();
 			if (version < schemaVersion) {
+				if (listener != null) {
+					listener.onMigrate(version, schemaVersion);
+				}
+
 				logger.info("Database schema out of date.  Upgrading from version " + version + " to " + schemaVersion + ".");
 				String sql = null;
 				Statement statement = null;
@@ -367,6 +375,7 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void close() throws SQLException {
 		try {
+			logger.info("Closing database.");
 			DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		} catch (SQLException se) {
 			if (se.getErrorCode() == 50000 && "XJ015".equals(se.getSQLState())) {
