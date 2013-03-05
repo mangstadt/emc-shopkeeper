@@ -38,11 +38,12 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		timeThread = new Thread() {
 			@Override
 			public void run() {
-				int time = 0;
+				long start = System.currentTimeMillis();
 				NumberFormat nf = new DecimalFormat("00");
 				while (isVisible()) {
-					int minutes = time / 60;
-					int seconds = time % 60;
+					long elapsedSeconds = (System.currentTimeMillis() - start) / 1000;
+					long minutes = elapsedSeconds / 60;
+					long seconds = elapsedSeconds % 60;
 					timeElapsed.setText(nf.format(minutes) + ":" + nf.format(seconds));
 
 					try {
@@ -50,7 +51,6 @@ public class UpdateDialog extends JDialog implements WindowListener {
 					} catch (InterruptedException e) {
 						break;
 					}
-					time++;
 				}
 			}
 		};
