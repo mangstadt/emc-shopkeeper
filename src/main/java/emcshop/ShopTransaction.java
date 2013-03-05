@@ -6,7 +6,7 @@ import java.util.Date;
  * Represents a shop transaction.
  * @author Michael Angstadt
  */
-public class Transaction {
+public class ShopTransaction {
 	private Date ts;
 	private String player;
 	private String item;
@@ -84,7 +84,7 @@ public class Transaction {
 			return false;
 		}
 
-		Transaction that = (Transaction) obj;
+		ShopTransaction that = (ShopTransaction) obj;
 
 		if (!ts.equals(that.ts)) {
 			return false;

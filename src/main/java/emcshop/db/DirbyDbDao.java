@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
-import emcshop.Transaction;
+import emcshop.ShopTransaction;
 import emcshop.util.ClasspathUtils;
 
 /**
@@ -284,7 +284,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void insertTransaction(Transaction transaction) throws SQLException {
+	public void insertTransaction(ShopTransaction transaction) throws SQLException {
 		Integer playerId = getPlayerId(transaction.getPlayer());
 		Integer itemId = getItemId(transaction.getItem());
 
@@ -311,17 +311,17 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public List<Transaction> getTransactions() throws SQLException {
+	public List<ShopTransaction> getTransactions() throws SQLException {
 		return getTransactions(-1);
 	}
 
 	@Override
-	public Transaction getLatestTransaction() throws SQLException {
-		List<Transaction> transactions = getTransactions(1);
+	public ShopTransaction getLatestTransaction() throws SQLException {
+		List<ShopTransaction> transactions = getTransactions(1);
 		return transactions.isEmpty() ? null : transactions.get(0);
 	}
 
-	public List<Transaction> getTransactions(int limit) throws SQLException {
+	public List<ShopTransaction> getTransactions(int limit) throws SQLException {
 		//@formatter:off
 		String sql =
 		"SELECT t.ts, t.amount, t.balance, t.quantity, p.name AS playerName, i.name AS itemName " +
@@ -338,9 +338,9 @@ public abstract class DirbyDbDao implements DbDao {
 				selectStmt.setMaxRows(limit);
 			}
 			ResultSet rs = selectStmt.executeQuery();
-			List<Transaction> transactions = new ArrayList<Transaction>();
+			List<ShopTransaction> transactions = new ArrayList<ShopTransaction>();
 			while (rs.next()) {
-				Transaction transaction = new Transaction();
+				ShopTransaction transaction = new ShopTransaction();
 				transaction.setAmount(rs.getInt("amount"));
 				transaction.setBalance(rs.getInt("balance"));
 				transaction.setItem(rs.getString("itemName"));

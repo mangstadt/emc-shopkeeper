@@ -3,7 +3,7 @@ package emcshop.db;
 import java.sql.SQLException;
 import java.util.List;
 
-import emcshop.Transaction;
+import emcshop.ShopTransaction;
 
 public interface DbDao {
 	/**
@@ -65,21 +65,21 @@ public interface DbDao {
 	 * @param transaction
 	 * @throws SQLException
 	 */
-	void insertTransaction(Transaction transaction) throws SQLException;
+	void insertTransaction(ShopTransaction transaction) throws SQLException;
 
 	/**
 	 * Gets all transactions in the database.
 	 * @return the transactions
 	 * @throws SQLException
 	 */
-	List<Transaction> getTransactions() throws SQLException;
+	List<ShopTransaction> getTransactions() throws SQLException;
 
 	/**
 	 * Gets the latest transaction from the database.
 	 * @return the latest transaction or null if there are no transactions
 	 * @throws SQLException
 	 */
-	Transaction getLatestTransaction() throws SQLException;
+	ShopTransaction getLatestTransaction() throws SQLException;
 
 	/**
 	 * Commits the current database transaction.

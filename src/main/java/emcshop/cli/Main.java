@@ -24,8 +24,8 @@ import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import emcshop.PageScraper;
-import emcshop.Transaction;
+import emcshop.ShopTransaction;
+import emcshop.TransactionPage;
 import emcshop.db.DirbyDbDao;
 import emcshop.db.DirbyEmbeddedDbDao;
 
@@ -41,7 +41,7 @@ public class Main {
 	private static int pagesProcessed = 0;
 	private static int transactionsSaved = 0;
 	private static Date page1TransactionDate = null;
-	private static Transaction latestTransactionFromDb = null;
+	private static ShopTransaction latestTransactionFromDb = null;
 	private static Map<String, String> cookies;
 
 	private static final Set<String> validArgs = new HashSet<String>();
@@ -225,14 +225,15 @@ public class Main {
 
 					logger.info("Getting page " + page + ".");
 					Document document = getPage(page);
-					List<Transaction> transactions = PageScraper.scrape(document);
+					TransactionPage transactionPage = new TransactionPage(document);
+					List<ShopTransaction> transactions = transactionPage.getShopTransactions();
 
 					boolean quitAfterInsert = false;
 					if (latestTransactionFromDb != null) {
 						int end = -1;
 						Date latestTransactionFromDbDate = latestTransactionFromDb.getTs();
 						for (int i = 0; i < transactions.size(); i++) {
-							Transaction transaction = transactions.get(i);
+							ShopTransaction transaction = transactions.get(i);
 							if (transaction.getTs().getTime() <= latestTransactionFromDbDate.getTime()) {
 								end = i;
 								break;
@@ -245,7 +246,7 @@ public class Main {
 					} else if (page1TransactionDate != null && page > 1) {
 						int end = -1;
 						for (int i = 0; i < transactions.size(); i++) {
-							Transaction transaction = transactions.get(i);
+							ShopTransaction transaction = transactions.get(i);
 							if (transaction.getTs().getTime() >= page1TransactionDate.getTime()) {
 								end = i;
 								break;
@@ -258,7 +259,7 @@ public class Main {
 					}
 
 					synchronized (dao) {
-						for (Transaction transaction : transactions) {
+						for (ShopTransaction transaction : transactions) {
 							dao.insertTransaction(transaction);
 						}
 						dao.commit();
@@ -281,7 +282,8 @@ public class Main {
 
 	private static Date getLatestTransactionDateOnPage1() throws IOException {
 		Document page = getPage(1);
-		List<Transaction> transactions = PageScraper.scrape(page);
+		TransactionPage transactionPage = new TransactionPage(page);
+		List<ShopTransaction> transactions = transactionPage.getShopTransactions();
 		//TODO what if there are no shop transactions on this page?
 		return transactions.get(0).getTs();
 	}
