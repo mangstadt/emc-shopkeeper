@@ -95,7 +95,7 @@ public class Settings {
 		windowWidth = props.getInteger("window.width", 600);
 		windowHeight = props.getInteger("window.height", 400);
 		try {
-			lastUpdated = props.getDate("lastUpdate");
+			lastUpdated = props.getDate("lastUpdated");
 		} catch (ParseException e) {
 			logger.log(Level.WARNING, "Problem parsing date in \"lastUpdate\" property.", e);
 			lastUpdated = null;
