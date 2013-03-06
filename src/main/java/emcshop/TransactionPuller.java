@@ -148,9 +148,7 @@ public class TransactionPuller {
 						}
 					}
 
-					synchronized (listener) {
-						listener.onPageScraped(page, transactions);
-					}
+					listener.onPageScraped(page, transactions);
 				}
 			} catch (Throwable e) {
 				thrown = e;

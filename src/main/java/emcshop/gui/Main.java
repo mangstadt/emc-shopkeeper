@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.SplashScreen;
 import java.io.File;
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,7 +42,7 @@ public class Main {
 			throw new IOException("Could not create config folder: " + config.getAbsolutePath());
 		}
 
-		File defaultDbFolder = new File(config, "db");
+		File defaultDbFolder = new File(config, "db/data");
 		File defaultSettingsFile = new File(config, "settings.properties");
 
 		Arguments arguments = new Arguments(args);
@@ -104,6 +105,13 @@ public class Main {
 				splash.setMessage("Migrating database...");
 			}
 		};
+
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread thread, Throwable thrown) {
+				ErrorDialog.show(null, "An error occurred.", thrown);
+			}
+		});
 
 		DbDao dao = new DirbyEmbeddedDbDao(dbFolder, listener);
 

@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,14 +20,18 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.ShopTransaction;
+import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
 import emcshop.util.Settings;
+import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame implements WindowListener {
@@ -111,8 +116,23 @@ public class MainFrame extends JFrame implements WindowListener {
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				UpdateDialog w = new UpdateDialog(MainFrame.this);
-				w.setVisible(true);
+				try {
+					TransactionPuller puller = new TransactionPuller(settings.getCookies());
+					ShopTransaction latest = dao.getLatestTransaction();
+					if (latest == null) {
+						int answer = JOptionPane.showConfirmDialog(MainFrame.this, "This is the first time you're updating your transactions.  If you have a large transaction history, it is highly recommended that you disable move perms on your res before starting the update.  If any transactions occur during the update, it will skew the results.\n\n/res set move false\n\nIt could take up to 20 minutes to parse your entire transaction history.\n\nAre you ready to perform the update?", "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+						if (answer == JOptionPane.NO_OPTION) {
+							return;
+						}
+					} else {
+						puller.setStopAtDate(latest.getTs());
+					}
+
+					UpdateDialog w = new UpdateDialog(MainFrame.this, puller, dao);
+					w.setVisible(true);
+				} catch (SQLException e) {
+					ErrorDialog.show(MainFrame.this, "An error occurred connecting to the database.", e);
+				}
 			}
 		});
 
@@ -126,6 +146,27 @@ public class MainFrame extends JFrame implements WindowListener {
 		groupBy.addItem("Item");
 		groupBy.addItem("Player");
 		show = new JButton("Show Transactions");
+	}
+
+	void updateSuccessful(Date started, long time, int transactionCount) {
+		long components[] = TimeUtils.parseTimeComponents(time);
+		String message;
+		if (transactionCount == 0) {
+			message = "No new transactions found.";
+		} else {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Update complete.\n");
+			sb.append(transactionCount).append(" transactions added in ");
+			if (components[2] > 0) {
+				sb.append(components[2]).append(" minutes and ");
+			}
+			sb.append(components[1]).append(" seconds.");
+			message = sb.toString();
+		}
+		JOptionPane.showMessageDialog(this, message, "Update complete", JOptionPane.INFORMATION_MESSAGE);
+
+		settings.setLastUpdated(started);
+		lastUpdateDate.setText(started.toString());
 	}
 
 	private void layoutWidgets() {
