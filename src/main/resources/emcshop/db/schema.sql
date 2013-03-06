@@ -28,7 +28,19 @@ CREATE TABLE transactions(
 	ts TIMESTAMP NOT NULL,
 	player SMALLINT NOT NULL REFERENCES players(id),
 	item SMALLINT NOT NULL REFERENCES items(id),
-	amount SMALLINT NOT NULL, --the amount earned/lost in the transaction
-	quantity SMALLINT NOT NULL, --negative=player bought from you, positive=player sold to you
+	
+	--the amount lost/earned in the transaction
+	--(negative=player sold to you, positive=player bought from you)
+	amount INT NOT NULL,
+	
+	--the quantity bought/sold
+	--(negative=player bought from you, positive=player sold to you)
+	quantity INT NOT NULL,
+	
+	--the player's rupee balance after the transaction occurred
 	balance INT NOT NULL
 );
+
+CREATE INDEX ts_index ON transactions(ts);
+CREATE INDEX player_index ON transactions(player);
+CREATE INDEX item_index ON transactions(item);
