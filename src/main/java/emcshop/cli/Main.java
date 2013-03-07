@@ -1,48 +1,27 @@
 package emcshop.cli;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.sql.SQLException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
 import emcshop.ShopTransaction;
-import emcshop.TransactionPage;
-import emcshop.db.DirbyDbDao;
+import emcshop.TransactionPuller;
+import emcshop.db.DbDao;
 import emcshop.db.DirbyEmbeddedDbDao;
+import emcshop.util.Settings;
 
 public class Main {
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
 
 	private static final PrintStream out = System.out;
-
-	private static int threadCount;
-	private static int stopAtPage;
-	private static DirbyDbDao dao;
-	private static int curPage;
-	private static int pagesProcessed = 0;
-	private static int transactionsSaved = 0;
-	private static Date page1TransactionDate = null;
-	private static ShopTransaction latestTransactionFromDb = null;
-	private static Map<String, String> cookies;
+	private static Throwable pullerError = null;
 
 	private static final Set<String> validArgs = new HashSet<String>();
 	static {
@@ -51,11 +30,15 @@ public class Main {
 		validArgs.add("stop-at-page");
 		validArgs.add("start-at-page");
 		validArgs.add("threads");
-		validArgs.add("cookies-file");
+		validArgs.add("settings");
 		validArgs.add("latest");
+		//TODO add "--version" argument
+		//TODO '--profile=NAME' argument
+		//TODO add '--update' argument
+		//TODO add '--query="2013-03-01 00:00:00 to today"' argument
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Throwable {
 		//create the config folder in the user's home directory
 		File config = new File(System.getProperty("user.home"), ".emc-shopkeeper");
 		if (!config.exists() && !config.mkdir()) {
@@ -63,7 +46,7 @@ public class Main {
 		}
 
 		File defaultDbFolder = new File(config, "db");
-		File defaultCookiesFile = new File(config, "cookies.properties");
+		File defaultSettingsFile = new File(config, "settings.properties");
 		int defaultThreads = 4;
 		int defaultStartPage = 1;
 
@@ -80,9 +63,10 @@ public class Main {
 			"--db=PATH\n" +
 			"  Specifies the location of the database.\n" +
 			"  Defaults to " + defaultDbFolder.getAbsolutePath() + "\n" +
-			"--cookies-file=PATH\n" +
-			"  Specifies the location of the file that has the login cookies.\n" +
-			"  Defaults to " + defaultCookiesFile.getAbsolutePath() + "\n" +
+			"--settings=PATH\n" +
+			"  Specifies the location of the application settings file, which contains the\n" +
+			"  cookie values.\n" +
+			"  Defaults to " + defaultSettingsFile.getAbsolutePath() + "\n" +
 			"--threads=NUM\n" +
 			"  Specifies the number of pages to parse at once.\n" +
 			"  Defaults to " + defaultThreads + "\n" +
@@ -108,30 +92,33 @@ public class Main {
 			System.exit(1);
 		}
 
-		String cookiesFilePath = arguments.value(null, "cookies-file");
-		File cookiesFile = (cookiesFilePath == null) ? defaultCookiesFile : new File(cookiesFilePath);
-		if (!cookiesFile.exists()) {
-			createEmptyCookiesFile(cookiesFile);
-			out.println("No cookies set.  Log into empireminecraft.com, and then copy all cookies to the following properties file: " + cookiesFile.getAbsolutePath());
+		String settingsPath = arguments.value(null, "settings");
+		File settingsFile = (settingsPath == null) ? defaultSettingsFile : new File(settingsPath);
+		if (!settingsFile.exists()) {
+			out.println("Error: No cookies set.  Log into empireminecraft.com, and then copy all cookies to the following properties file: " + settingsFile.getAbsolutePath());
 			System.exit(1);
-		} else {
-			cookies = readCookiesFromFile(cookiesFile);
 		}
+		Settings settings = new Settings(settingsFile);
 
 		String dbPath = arguments.value(null, "db");
 		File dbFolder = (dbPath == null) ? defaultDbFolder : new File(dbPath);
-		stopAtPage = arguments.valueInt(null, "stop-at-page", -1);
-		curPage = arguments.valueInt(null, "start-at-page", defaultStartPage);
-		threadCount = arguments.valueInt(null, "threads", defaultThreads);
+		Integer stopAtPage = arguments.valueInt(null, "stop-at-page");
+		if (stopAtPage != null && stopAtPage < 1) {
+			out.println("Error: \"stop-at-page\" must be greater than 0.");
+		}
+		int startAtPage = arguments.valueInt(null, "start-at-page", defaultStartPage);
+		if (startAtPage < 1) {
+			out.println("Error: \"start-at-page\" must be greater than 0.");
+		}
+		int threadCount = arguments.valueInt(null, "threads", defaultThreads);
 		boolean latest = arguments.exists(null, "latest");
 
-		dao = initDao(dbFolder);
-
-		latestTransactionFromDb = dao.getLatestTransaction();
+		final DbDao dao = initDao(dbFolder);
+		ShopTransaction latestTransactionFromDb = dao.getLatestTransaction();
 
 		if (latest) {
 			if (latestTransactionFromDb == null) {
-				out.println("Database is empty!");
+				out.println("No transactions in database.");
 			} else {
 				NumberFormat nf = NumberFormat.getNumberInstance();
 				int quantity = latestTransactionFromDb.getQuantity();
@@ -145,170 +132,48 @@ public class Main {
 			return;
 		}
 
-		if (latestTransactionFromDb == null) {
-			//database is empty
-			//keep scraping until there are no more pages
-			page1TransactionDate = getLatestTransactionDateOnPage1();
+		final TransactionPuller puller = new TransactionPuller(settings.getCookies());
+		puller.setThreadCount(threadCount);
+		if (latestTransactionFromDb != null) {
+			puller.setStopAtDate(latestTransactionFromDb.getTs());
 		}
-
-		long start = System.currentTimeMillis();
-
-		List<ScrapeThread> threads = new ArrayList<ScrapeThread>(threadCount);
-		for (int i = 0; i < threadCount; i++) {
-			ScrapeThread thread = new ScrapeThread();
-			thread.setName("EMC-Shopkeeper-" + i);
-			threads.add(thread);
-
-			logger.info("Starting thread \"" + thread.getName() + "\"");
-			thread.start();
+		if (stopAtPage != null) {
+			puller.setStopAtPage(stopAtPage);
 		}
+		puller.setStartAtPage(startAtPage);
 
-		//wait for threads to finish
-		for (ScrapeThread thread : threads) {
-			thread.join();
-		}
-
-		long end = System.currentTimeMillis();
-		double seconds = (end - start) / 1000.0;
-		logger.info(pagesProcessed + " pages processed and " + transactionsSaved + " transactions saved in " + seconds + " seconds.");
-	}
-
-	protected static void createEmptyCookiesFile(File cookiesFile) throws IOException {
-		Properties props = new Properties();
-		props.setProperty("__qca", "");
-		props.setProperty("__gads", "");
-		props.setProperty("emc_user", "");
-		props.setProperty("emc_session", "");
-		props.setProperty("__utma", "");
-		props.setProperty("__utmb", "");
-		props.setProperty("__utmc", "");
-		props.setProperty("__utmz", "");
-
-		Writer writer = null;
-		try {
-			writer = new FileWriter(cookiesFile);
-			props.store(writer, null);
-		} finally {
-			IOUtils.closeQuietly(writer);
-		}
-	}
-
-	protected static Map<String, String> readCookiesFromFile(File file) throws IOException {
-		Properties props = null;
-		Reader reader = null;
-		try {
-			reader = new FileReader(file);
-			props = new Properties();
-			props.load(reader);
-		} finally {
-			IOUtils.closeQuietly(reader);
-		}
-
-		Map<String, String> cookies = new HashMap<String, String>();
-		for (Map.Entry<Object, Object> entry : props.entrySet()) {
-			String name = (String) entry.getKey();
-			String value = (String) entry.getValue();
-			cookies.put(name, value);
-		}
-		return cookies;
-	}
-
-	private static class ScrapeThread extends Thread {
-		@Override
-		public void run() {
-			try {
-				while (true) {
-					int page = nextPage();
-					if (stopAtPage > 0 && page > stopAtPage) {
-						break;
+		TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
+			@Override
+			public void onPageScraped(int page, List<ShopTransaction> transactions) {
+				try {
+					for (ShopTransaction transaction : transactions) {
+						dao.insertTransaction(transaction);
 					}
-
-					logger.info("Getting page " + page + ".");
-					Document document = getPage(page);
-					TransactionPage transactionPage = new TransactionPage(document);
-					List<ShopTransaction> transactions = transactionPage.getShopTransactions();
-
-					boolean quitAfterInsert = false;
-					if (latestTransactionFromDb != null) {
-						int end = -1;
-						Date latestTransactionFromDbDate = latestTransactionFromDb.getTs();
-						for (int i = 0; i < transactions.size(); i++) {
-							ShopTransaction transaction = transactions.get(i);
-							if (transaction.getTs().getTime() <= latestTransactionFromDbDate.getTime()) {
-								end = i;
-								break;
-							}
-						}
-						if (end >= 0) {
-							transactions = transactions.subList(0, end);
-							quitAfterInsert = true;
-						}
-					} else if (page1TransactionDate != null && page > 1) {
-						int end = -1;
-						for (int i = 0; i < transactions.size(); i++) {
-							ShopTransaction transaction = transactions.get(i);
-							if (transaction.getTs().getTime() >= page1TransactionDate.getTime()) {
-								end = i;
-								break;
-							}
-						}
-						if (end >= 0) {
-							transactions = transactions.subList(0, end);
-							quitAfterInsert = true;
-						}
-					}
-
-					synchronized (dao) {
-						for (ShopTransaction transaction : transactions) {
-							dao.insertTransaction(transaction);
-						}
-						dao.commit();
-
-						transactionsSaved += transactions.size();
-						pagesProcessed++;
-					}
-
-					if (quitAfterInsert) {
-						break;
-					}
+				} catch (SQLException e) {
+					pullerError = e;
+					puller.cancel();
 				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
 			}
+		});
+
+		switch (result.getState()) {
+		case CANCELLED:
+			dao.rollback();
+			if (pullerError != null) {
+				throw pullerError;
+			}
+			break;
+		case FAILED:
+			dao.rollback();
+			throw result.getThrown();
+		case COMPLETED:
+			dao.commit();
+			logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
+			break;
 		}
 	}
 
-	private static Date getLatestTransactionDateOnPage1() throws IOException {
-		Document page = getPage(1);
-		TransactionPage transactionPage = new TransactionPage(page);
-		List<ShopTransaction> transactions = transactionPage.getShopTransactions();
-		//TODO what if there are no shop transactions on this page?
-		return transactions.get(0).getTs();
-	}
-
-	private static synchronized int nextPage() {
-		return curPage++;
-	}
-
-	private static DirbyDbDao initDao(File folder) throws SQLException {
+	private static DbDao initDao(File folder) throws SQLException {
 		return new DirbyEmbeddedDbDao(new File(folder, "data"));
-	}
-
-	private static Document getPage(int page) throws IOException {
-		String url = "http://empireminecraft.com/rupees/transactions/?page=" + page;
-		int tries = 0;
-		do {
-			try {
-				return Jsoup.connect(url).timeout(30000).cookies(cookies).get();
-			} catch (IOException e) {
-				if (tries >= 3) {
-					throw e;
-				}
-				logger.warning("IOException thrown when trying to load page, trying again.\n  URL: " + url + "\n  Message: " + e.getMessage());
-				tries++;
-			}
-		} while (true);
 	}
 }

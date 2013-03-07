@@ -22,7 +22,6 @@ import javax.swing.JRootPane;
 import net.miginfocom.swing.MigLayout;
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
-import emcshop.TransactionPullerListener;
 import emcshop.db.DbDao;
 import emcshop.util.TimeUtils;
 
@@ -37,7 +36,6 @@ public class UpdateDialog extends JDialog implements WindowListener {
 	private Thread pullerThread;
 
 	private long started;
-	private int transactionCount = 0;
 
 	public UpdateDialog(final MainFrame owner, final TransactionPuller puller, final DbDao dao) {
 		super(owner, "Updating Transactions", true);
@@ -78,15 +76,11 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 			@Override
 			public void run() {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e1) {
-					//nothing
-				}
-
 				started = System.currentTimeMillis();
 				try {
-					puller.start(new TransactionPullerListener() {
+					TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
+						int transactionCount = 0;
+
 						@Override
 						public synchronized void onPageScraped(int page, List<ShopTransaction> transactions) {
 							try {
@@ -101,40 +95,35 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								puller.cancel();
 							}
 						}
-
-						@Override
-						public void onCancel() {
-							dao.rollback();
-						}
-
-						@Override
-						public void onError(Throwable thrown) {
-							error = thrown;
-							errorDisplayMessage = "An error occurred while getting the transactions.";
-							dao.rollback();
-						}
-
-						@Override
-						public void onSuccess() {
-							try {
-								dao.commit();
-
-								UpdateDialog.this.dispose();
-								long time = System.currentTimeMillis() - started;
-								owner.updateSuccessful(new Date(started), time, transactionCount);
-							} catch (SQLException e) {
-								dao.rollback();
-								error = e;
-								errorDisplayMessage = "An error occurred completing the update.";
-							}
-						}
 					});
+
+					switch (result.getState()) {
+					case CANCELLED:
+						dao.rollback();
+						break;
+					case FAILED:
+						dao.rollback();
+						error = result.getThrown();
+						errorDisplayMessage = "An error occurred while getting the transactions.";
+						break;
+					case COMPLETED:
+						try {
+							dao.commit();
+							dispose();
+							owner.updateSuccessful(new Date(started), result.getTimeTaken(), result.getTransactionCount());
+						} catch (SQLException e) {
+							dao.rollback();
+							error = e;
+							errorDisplayMessage = "An error occurred completing the update.";
+						}
+						break;
+					}
 				} catch (IOException e) {
 					error = e;
 					errorDisplayMessage = "An error occurred starting the transaction update.";
 				}
 
-				UpdateDialog.this.dispose();
+				dispose();
 
 				if (error != null) {
 					ErrorDialog.show(null, errorDisplayMessage, error);
