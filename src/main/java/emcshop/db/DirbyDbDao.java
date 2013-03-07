@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -354,6 +355,63 @@ public abstract class DirbyDbDao implements DbDao {
 		} finally {
 			closeStatements(selectStmt);
 		}
+	}
+
+	@Override
+	public Map<String, ItemGroup> getItemGroups() throws SQLException {
+		PreparedStatement selectStmt = null;
+		Map<String, ItemGroup> itemGroups = new TreeMap<String, ItemGroup>();
+
+		try {
+			//@formatter:off
+			String sql =
+			"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
+			"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
+			"WHERE t.amount > 0 " + 
+			"GROUP BY i.name";
+			//@formatter:on
+
+			selectStmt = conn.prepareStatement(sql);
+			ResultSet rs = selectStmt.executeQuery();
+			while (rs.next()) {
+				ItemGroup itemGroup = new ItemGroup();
+				itemGroup.setItem(rs.getString("itemName"));
+				itemGroup.setSoldAmount(rs.getInt("amountSum"));
+				itemGroup.setSoldQuantity(rs.getInt("quantitySum"));
+
+				itemGroups.put(itemGroup.getItem(), itemGroup);
+			}
+		} finally {
+			closeStatements(selectStmt);
+		}
+
+		try {
+			//@formatter:off
+			String sql =
+			"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
+			"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
+			"WHERE t.amount < 0 " + 
+			"GROUP BY i.name";
+			//@formatter:on
+
+			selectStmt = conn.prepareStatement(sql);
+			ResultSet rs = selectStmt.executeQuery();
+			while (rs.next()) {
+				String itemName = rs.getString("itemName");
+				ItemGroup itemGroup = itemGroups.get(itemName);
+				if (itemGroup == null) {
+					itemGroup = new ItemGroup();
+					itemGroup.setItem(itemName);
+					itemGroups.put(itemGroup.getItem(), itemGroup);
+				}
+				itemGroup.setBoughtAmount(rs.getInt("amountSum"));
+				itemGroup.setBoughtQuantity(rs.getInt("quantitySum"));
+			}
+		} finally {
+			closeStatements(selectStmt);
+		}
+
+		return itemGroups;
 	}
 
 	@Override

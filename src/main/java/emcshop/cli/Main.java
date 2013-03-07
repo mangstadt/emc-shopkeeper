@@ -8,13 +8,17 @@ import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import org.apache.commons.lang3.StringUtils;
 
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
 import emcshop.db.DirbyEmbeddedDbDao;
+import emcshop.db.ItemGroup;
 import emcshop.util.Settings;
 
 public class Main {
@@ -32,10 +36,10 @@ public class Main {
 		validArgs.add("threads");
 		validArgs.add("settings");
 		validArgs.add("latest");
+		validArgs.add("update");
+		validArgs.add("query");
 		//TODO add "--version" argument
 		//TODO '--profile=NAME' argument
-		//TODO add '--update' argument
-		//TODO add '--query="2013-03-01 00:00:00 to today"' argument
 	}
 
 	public static void main(String[] args) throws Throwable {
@@ -60,6 +64,10 @@ public class Main {
 			"\n" +
 			"--latest\n" +
 			"  Prints out the latest transaction from the database.\n" +
+			"--update\n" +
+			"  Updates the database with the latest transactions.\n" +
+			"--query\n" +
+			"  Shows the net gains/losses of each item.\n" +
 			"--db=PATH\n" +
 			"  Specifies the location of the database.\n" +
 			"  Defaults to " + defaultDbFolder.getAbsolutePath() + "\n" +
@@ -112,6 +120,21 @@ public class Main {
 		}
 		int threadCount = arguments.valueInt(null, "threads", defaultThreads);
 		boolean latest = arguments.exists(null, "latest");
+		boolean update = arguments.exists(null, "update");
+		String query;
+		if (arguments.exists(null, "query")) {
+			query = arguments.value(null, "query");
+			if (query == null) {
+				query = "";
+			}
+		} else {
+			query = null;
+		}
+
+		if (!latest && !update && query == null) {
+			out.println("Nothing to do.  Use \"--update\" to update the database or \"--query\" to query it.");
+			System.exit(1);
+		}
 
 		final DbDao dao = initDao(dbFolder);
 		ShopTransaction latestTransactionFromDb = dao.getLatestTransaction();
@@ -130,48 +153,141 @@ public class Main {
 				out.println("Current balance: " + nf.format(latestTransactionFromDb.getBalance()) + "r");
 			}
 			return;
-		}
+		} else if (update) {
+			final TransactionPuller puller = new TransactionPuller(settings.getCookies());
+			puller.setThreadCount(threadCount);
+			if (latestTransactionFromDb != null) {
+				puller.setStopAtDate(latestTransactionFromDb.getTs());
+			}
+			if (stopAtPage != null) {
+				puller.setStopAtPage(stopAtPage);
+			}
+			puller.setStartAtPage(startAtPage);
 
-		final TransactionPuller puller = new TransactionPuller(settings.getCookies());
-		puller.setThreadCount(threadCount);
-		if (latestTransactionFromDb != null) {
-			puller.setStopAtDate(latestTransactionFromDb.getTs());
-		}
-		if (stopAtPage != null) {
-			puller.setStopAtPage(stopAtPage);
-		}
-		puller.setStartAtPage(startAtPage);
-
-		TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
-			@Override
-			public void onPageScraped(int page, List<ShopTransaction> transactions) {
-				try {
-					for (ShopTransaction transaction : transactions) {
-						dao.insertTransaction(transaction);
+			TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
+				@Override
+				public void onPageScraped(int page, List<ShopTransaction> transactions) {
+					try {
+						for (ShopTransaction transaction : transactions) {
+							dao.insertTransaction(transaction);
+						}
+					} catch (SQLException e) {
+						pullerError = e;
+						puller.cancel();
 					}
-				} catch (SQLException e) {
-					pullerError = e;
-					puller.cancel();
 				}
-			}
-		});
+			});
 
-		switch (result.getState()) {
-		case CANCELLED:
-			dao.rollback();
-			if (pullerError != null) {
-				throw pullerError;
+			switch (result.getState()) {
+			case CANCELLED:
+				dao.rollback();
+				if (pullerError != null) {
+					throw pullerError;
+				}
+				break;
+			case FAILED:
+				dao.rollback();
+				throw result.getThrown();
+			case COMPLETED:
+				dao.commit();
+				logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
+				break;
 			}
-			break;
-		case FAILED:
-			dao.rollback();
-			throw result.getThrown();
-		case COMPLETED:
-			dao.commit();
-			logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
-			break;
+		} else if (query != null) {
+			Map<String, ItemGroup> itemGroups = dao.getItemGroups();
+
+			out.println("Item                |Sold                |Bought              |Net");
+			out.println("--------------------------------------------------------------------------------");
+			NumberFormat nf = NumberFormat.getNumberInstance();
+			long totalAmount = 0;
+			for (Map.Entry<String, ItemGroup> entry : itemGroups.entrySet()) {
+				//TODO ANSI colors
+				ItemGroup itemGroup = entry.getValue();
+
+				out.print(itemGroup.getItem());
+				int spaces = 20 - itemGroup.getItem().length();
+				if (spaces > 0) {
+					out.print(StringUtils.repeat(' ', spaces));
+				}
+				out.print('|');
+
+				String s;
+				if (itemGroup.getSoldQuantity() == 0) {
+					s = " - ";
+				} else {
+					s = nf.format(itemGroup.getSoldQuantity()) + " / +" + nf.format(itemGroup.getSoldAmount()) + "r";
+				}
+				out.print(s);
+				spaces = 20 - s.length();
+				if (spaces > 0) {
+					out.print(StringUtils.repeat(' ', spaces));
+				}
+				out.print('|');
+
+				if (itemGroup.getBoughtQuantity() == 0) {
+					s = " - ";
+				} else {
+					s = "+" + nf.format(itemGroup.getBoughtQuantity()) + " / " + nf.format(itemGroup.getBoughtAmount()) + "r";
+				}
+				out.print(s);
+				spaces = 20 - s.length();
+				if (spaces > 0) {
+					out.print(StringUtils.repeat(' ', spaces));
+				}
+				out.print('|');
+
+				s = "";
+				if (itemGroup.getNetQuantity() > 0) {
+					s += "+";
+				}
+				s += nf.format(itemGroup.getNetQuantity()) + " / ";
+				if (itemGroup.getNetAmount() > 0) {
+					s += "+";
+				}
+				s += nf.format(itemGroup.getNetAmount()) + "r";
+				out.print(s);
+
+				out.println();
+
+				totalAmount += itemGroup.getNetAmount();
+			}
+
+			out.print(StringUtils.repeat(' ', 62));
+			out.print('|');
+			if (totalAmount > 0) {
+				out.print('+');
+			}
+			out.println(nf.format(totalAmount) + "r");
 		}
 	}
+
+	//	protected static Date[] parseDateRange(String string) {
+	//		string = string.trim().toLowerCase();
+	//
+	//		//today
+	//		//yyyy-mm-dd to today
+	//		//yyyy-mm-dd hh:mm to today
+	//		//yyyy-mm-dd to yyyy-mm-dd
+	//		//yyyy-mm-dd to yyyy-mm-dd hh:mm
+	//		//yyyy-mm-dd hh:mm to yyyy-mm-dd
+	//		//yyyy-mm-dd hh:mm to yyyy-mm-dd hh:mm
+	//
+	//		Date from, to;
+	//		if ("today".equalsIgnoreCase(string)) {
+	//			Calendar c = Calendar.getInstance();
+	//			c.set(Calendar.MILLISECOND, 0);
+	//			c.set(Calendar.SECOND, 0);
+	//			c.set(Calendar.HOUR_OF_DAY, 0);
+	//			from = c.getTime();
+	//
+	//			c.add(Calendar.DATE, 1);
+	//			to = c.getTime();
+	//		} else {
+	//			String split[] = string.split(" to ");
+	//		}
+	//
+	//		return new Date[] {};
+	//	}
 
 	private static DbDao initDao(File folder) throws SQLException {
 		return new DirbyEmbeddedDbDao(new File(folder, "data"));
