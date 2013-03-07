@@ -42,7 +42,7 @@ public class Main {
 			throw new IOException("Could not create config folder: " + config.getAbsolutePath());
 		}
 
-		File defaultDbFolder = new File(config, "db/data");
+		File defaultDbFolder = new File(config, "db");
 		File defaultSettingsFile = new File(config, "settings.properties");
 
 		Arguments arguments = new Arguments(args);
@@ -82,8 +82,6 @@ public class Main {
 		String dbPath = arguments.value(null, "db");
 		File dbFolder = (dbPath == null) ? defaultDbFolder : new File(dbPath);
 
-		// TODO uncaught exception handler
-
 		//==========================
 
 		final SplashScreenWrapper splash = new SplashScreenWrapper();
@@ -113,7 +111,7 @@ public class Main {
 			}
 		});
 
-		DbDao dao = new DirbyEmbeddedDbDao(dbFolder, listener);
+		DbDao dao = new DirbyEmbeddedDbDao(new File(dbFolder, "data"), listener);
 
 		MainFrame frame = new MainFrame(settings, dao);
 		splash.close();
