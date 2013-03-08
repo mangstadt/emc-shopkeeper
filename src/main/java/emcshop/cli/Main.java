@@ -160,8 +160,9 @@ public class Main {
 				}
 				out.println("Current balance: " + nf.format(latestTransactionFromDb.getBalance()) + "r");
 			}
-			return;
-		} else if (update) {
+		}
+
+		if (update) {
 			final TransactionPuller puller = new TransactionPuller(settings.getCookies());
 			puller.setThreadCount(threadCount);
 			if (latestTransactionFromDb != null) {
@@ -201,7 +202,9 @@ public class Main {
 				logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
 				break;
 			}
-		} else if (query != null) {
+		}
+
+		if (query != null) {
 			Map<String, ItemGroup> itemGroups;
 			if (query.isEmpty()) {
 				itemGroups = dao.getItemGroups();
