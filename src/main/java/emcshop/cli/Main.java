@@ -177,9 +177,7 @@ public class Main {
 				@Override
 				public void onPageScraped(int page, List<ShopTransaction> transactions) {
 					try {
-						for (ShopTransaction transaction : transactions) {
-							dao.insertTransaction(transaction);
-						}
+						dao.insertTransactions(transactions);
 					} catch (SQLException e) {
 						pullerError = e;
 						puller.cancel();

@@ -84,11 +84,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						@Override
 						public synchronized void onPageScraped(int page, List<ShopTransaction> transactions) {
 							try {
-								for (ShopTransaction transaction : transactions) {
-									dao.insertTransaction(transaction);
-									transactionCount++;
-									UpdateDialog.this.transactions.setText(transactionCount + "");
-								}
+								dao.insertTransactions(transactions);
+								transactionCount += transactions.size();
+								UpdateDialog.this.transactions.setText(transactionCount + "");
 							} catch (SQLException e) {
 								error = e;
 								errorDisplayMessage = "An error occurred while inserting transactions into the database.";
