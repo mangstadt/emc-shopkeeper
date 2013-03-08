@@ -359,7 +359,12 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Map<String, ItemGroup> getItemGroups() throws SQLException {
-		PreparedStatement selectStmt = null;
+		return getItemGroups(null, null);
+	}
+
+	@Override
+	public Map<String, ItemGroup> getItemGroups(Date from, Date to) throws SQLException {
+		PreparedStatement stmt = null;
 		Map<String, ItemGroup> itemGroups = new TreeMap<String, ItemGroup>();
 
 		try {
@@ -367,12 +372,25 @@ public abstract class DirbyDbDao implements DbDao {
 			String sql =
 			"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
 			"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
-			"WHERE t.amount > 0 " + 
-			"GROUP BY i.name";
+			"WHERE t.amount > 0 ";
+			if (from != null) {
+				sql += "AND ts >= ? ";
+			}
+			if (to != null) {
+				sql += "AND ts < ? ";
+			}
+			sql += "GROUP BY i.name";
 			//@formatter:on
 
-			selectStmt = conn.prepareStatement(sql);
-			ResultSet rs = selectStmt.executeQuery();
+			stmt = conn.prepareStatement(sql);
+			int index = 1;
+			if (from != null) {
+				stmt.setTimestamp(index++, new java.sql.Timestamp(from.getTime()));
+			}
+			if (to != null) {
+				stmt.setTimestamp(index++, new java.sql.Timestamp(to.getTime()));
+			}
+			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				ItemGroup itemGroup = new ItemGroup();
 				itemGroup.setItem(rs.getString("itemName"));
@@ -382,7 +400,7 @@ public abstract class DirbyDbDao implements DbDao {
 				itemGroups.put(itemGroup.getItem(), itemGroup);
 			}
 		} finally {
-			closeStatements(selectStmt);
+			closeStatements(stmt);
 		}
 
 		try {
@@ -390,12 +408,25 @@ public abstract class DirbyDbDao implements DbDao {
 			String sql =
 			"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
 			"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
-			"WHERE t.amount < 0 " + 
-			"GROUP BY i.name";
+			"WHERE t.amount < 0 ";
+			if (from != null) {
+				sql += "AND ts >= ? ";
+			}
+			if (to != null) {
+				sql += "AND ts < ? ";
+			}
+			sql += "GROUP BY i.name";
 			//@formatter:on
 
-			selectStmt = conn.prepareStatement(sql);
-			ResultSet rs = selectStmt.executeQuery();
+			stmt = conn.prepareStatement(sql);
+			int index = 1;
+			if (from != null) {
+				stmt.setTimestamp(index++, new java.sql.Timestamp(from.getTime()));
+			}
+			if (to != null) {
+				stmt.setTimestamp(index++, new java.sql.Timestamp(to.getTime()));
+			}
+			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				String itemName = rs.getString("itemName");
 				ItemGroup itemGroup = itemGroups.get(itemName);
@@ -408,7 +439,7 @@ public abstract class DirbyDbDao implements DbDao {
 				itemGroup.setBoughtQuantity(rs.getInt("quantitySum"));
 			}
 		} finally {
-			closeStatements(selectStmt);
+			closeStatements(stmt);
 		}
 
 		return itemGroups;

@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,8 +70,12 @@ public class Main {
 			"  Prints out the latest transaction from the database.\n" +
 			"--update\n" +
 			"  Updates the database with the latest transactions.\n" +
-			"--query\n" +
+			"--query=QUERY\n" +
 			"  Shows the net gains/losses of each item.\n" +
+			"  All data:           --query\n" +
+			"  Today's data:       --query=\"today\"\n" +
+			"  Three days of data: --query=\"2013-03-07 to 2013-03-09\"\n" +
+			"  Data up to today:   --query=\"2013-03-07 to today\"\n" +
 			"--db=PATH\n" +
 			"  Specifies the location of the database.\n" +
 			"  Defaults to " + defaultDbFolder.getAbsolutePath() + "\n" +
@@ -194,7 +202,13 @@ public class Main {
 				break;
 			}
 		} else if (query != null) {
-			Map<String, ItemGroup> itemGroups = dao.getItemGroups();
+			Map<String, ItemGroup> itemGroups;
+			if (query.isEmpty()) {
+				itemGroups = dao.getItemGroups();
+			} else {
+				Date range[] = parseDateRange(query);
+				itemGroups = dao.getItemGroups(range[0], range[1]);
+			}
 
 			out.println("Item                |Sold                |Bought              |Net");
 			out.println("--------------------------------------------------------------------------------");
@@ -261,33 +275,50 @@ public class Main {
 		}
 	}
 
-	//	protected static Date[] parseDateRange(String string) {
-	//		string = string.trim().toLowerCase();
-	//
-	//		//today
-	//		//yyyy-mm-dd to today
-	//		//yyyy-mm-dd hh:mm to today
-	//		//yyyy-mm-dd to yyyy-mm-dd
-	//		//yyyy-mm-dd to yyyy-mm-dd hh:mm
-	//		//yyyy-mm-dd hh:mm to yyyy-mm-dd
-	//		//yyyy-mm-dd hh:mm to yyyy-mm-dd hh:mm
-	//
-	//		Date from, to;
-	//		if ("today".equalsIgnoreCase(string)) {
-	//			Calendar c = Calendar.getInstance();
-	//			c.set(Calendar.MILLISECOND, 0);
-	//			c.set(Calendar.SECOND, 0);
-	//			c.set(Calendar.HOUR_OF_DAY, 0);
-	//			from = c.getTime();
-	//
-	//			c.add(Calendar.DATE, 1);
-	//			to = c.getTime();
-	//		} else {
-	//			String split[] = string.split(" to ");
-	//		}
-	//
-	//		return new Date[] {};
-	//	}
+	protected static Date[] parseDateRange(String dateRangeStr) throws ParseException {
+		dateRangeStr = dateRangeStr.trim().toLowerCase();
+
+		Date from, to;
+		if ("today".equals(dateRangeStr)) {
+			Calendar c = Calendar.getInstance();
+			c.set(Calendar.MILLISECOND, 0);
+			c.set(Calendar.SECOND, 0);
+			c.set(Calendar.MINUTE, 0);
+			c.set(Calendar.HOUR_OF_DAY, 0);
+			from = c.getTime();
+
+			to = new Date();
+		} else {
+			String split[] = dateRangeStr.split("\\s+to\\s+");
+			from = parseDate(split[0], false);
+
+			if (split.length == 1 || "today".equals(split[1])) {
+				to = new Date();
+			} else {
+				to = parseDate(split[1], true);
+			}
+		}
+
+		return new Date[] { from, to };
+	}
+
+	private static Date parseDate(String s, boolean to) throws ParseException {
+		int colonCount = StringUtils.countMatches(s, ":");
+		if (colonCount == 0) {
+			Date date = new SimpleDateFormat("yyyy-MM-dd").parse(s);
+			if (to) {
+				Calendar c = Calendar.getInstance();
+				c.setTime(date);
+				c.add(Calendar.DATE, 1);
+				date = c.getTime();
+			}
+			return date;
+		} else if (colonCount == 1) {
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(s);
+		} else {
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(s);
+		}
+	}
 
 	private static DbDao initDao(File folder) throws SQLException {
 		return new DirbyEmbeddedDbDao(new File(folder, "data"));

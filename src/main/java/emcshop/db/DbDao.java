@@ -1,6 +1,7 @@
 package emcshop.db;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -88,6 +89,15 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	Map<String, ItemGroup> getItemGroups() throws SQLException;
+
+	/**
+	 * Computes the net gains/losses for each item over a date range.
+	 * @param from the start date
+	 * @param to the end date
+	 * @return the net gains/losses for each item
+	 * @throws SQLException
+	 */
+	Map<String, ItemGroup> getItemGroups(Date from, Date to) throws SQLException;
 
 	/**
 	 * Commits the current database transaction.
