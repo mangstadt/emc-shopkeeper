@@ -276,6 +276,10 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void insertTransactions(Collection<ShopTransaction> transactions) throws SQLException {
+		if (transactions.isEmpty()) {
+			return;
+		}
+
 		InsertStatement stmt = new InsertStatement("transactions");
 		for (ShopTransaction transaction : transactions) {
 			Integer playerId = getPlayerId(transaction.getPlayer());
