@@ -1,6 +1,7 @@
 package emcshop.db;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,13 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	void insertTransaction(ShopTransaction transaction) throws SQLException;
+
+	/**
+	 * Inserts multiple transactions.
+	 * @param transactions
+	 * @throws SQLException
+	 */
+	void insertTransactions(Collection<ShopTransaction> transactions) throws SQLException;
 
 	/**
 	 * Gets all transactions in the database.

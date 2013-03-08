@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -198,14 +200,9 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void insertDbVersion(int version) throws SQLException {
-		PreparedStatement stmt = null;
-		try {
-			stmt = conn.prepareStatement("INSERT INTO meta (db_schema_version) VALUES (?)");
-			stmt.setInt(1, version);
-			stmt.execute();
-		} finally {
-			closeStatements(stmt);
-		}
+		InsertStatement stmt = new InsertStatement("meta");
+		stmt.setInt("db_schema_version", version);
+		stmt.execute(conn);
 	}
 
 	@Override
@@ -235,15 +232,9 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public int insertPlayer(String name) throws SQLException {
-		PreparedStatement stmt = null;
-		try {
-			stmt = conn.prepareStatement("INSERT INTO players (name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
-			stmt.setString(1, name);
-			stmt.execute();
-			return getGeneratedKey(stmt);
-		} finally {
-			closeStatements(stmt);
-		}
+		InsertStatement stmt = new InsertStatement("players");
+		stmt.setString("name", name);
+		return stmt.execute(conn);
 	}
 
 	@Override
@@ -273,42 +264,32 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public int insertItem(String name) throws SQLException {
-		PreparedStatement stmt = null;
-		try {
-			stmt = conn.prepareStatement("INSERT INTO items (name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
-			stmt.setString(1, name);
-			stmt.execute();
-			return getGeneratedKey(stmt);
-		} finally {
-			closeStatements(stmt);
-		}
+		InsertStatement stmt = new InsertStatement("items");
+		stmt.setString("name", name);
+		return stmt.execute(conn);
 	}
 
 	@Override
 	public void insertTransaction(ShopTransaction transaction) throws SQLException {
-		Integer playerId = getPlayerId(transaction.getPlayer());
-		Integer itemId = getItemId(transaction.getItem());
+		insertTransactions(Arrays.asList(transaction));
+	}
 
-		//@formatter:off
-		String sql = 
-		"INSERT INTO transactions" +
-		"(ts, player, item, quantity, amount, balance) VALUES " +
-		"(?,  ?,      ?,    ?,        ?,      ?)";
-		//@formatter:on
+	@Override
+	public void insertTransactions(Collection<ShopTransaction> transactions) throws SQLException {
+		InsertStatement stmt = new InsertStatement("transactions");
+		for (ShopTransaction transaction : transactions) {
+			Integer playerId = getPlayerId(transaction.getPlayer());
+			Integer itemId = getItemId(transaction.getItem());
 
-		PreparedStatement stmt = null;
-		try {
-			stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			stmt.setTimestamp(1, new java.sql.Timestamp(transaction.getTs().getTime()));
-			stmt.setInt(2, playerId);
-			stmt.setInt(3, itemId);
-			stmt.setInt(4, transaction.getQuantity());
-			stmt.setInt(5, transaction.getAmount());
-			stmt.setInt(6, transaction.getBalance());
-			stmt.execute();
-		} finally {
-			closeStatements(stmt);
+			stmt.setTimestamp("ts", transaction.getTs());
+			stmt.setInt("player", playerId);
+			stmt.setInt("item", itemId);
+			stmt.setInt("quantity", transaction.getQuantity());
+			stmt.setInt("amount", transaction.getAmount());
+			stmt.setInt("balance", transaction.getBalance());
+			stmt.nextRow();
 		}
+		stmt.execute(conn);
 	}
 
 	@Override
@@ -477,11 +458,6 @@ public abstract class DirbyDbDao implements DbDao {
 				throw se;
 			}
 		}
-	}
-
-	protected Integer getGeneratedKey(Statement statement) throws SQLException {
-		ResultSet rs = statement.getGeneratedKeys();
-		return rs.next() ? rs.getInt(1) : null;
 	}
 
 	/**
