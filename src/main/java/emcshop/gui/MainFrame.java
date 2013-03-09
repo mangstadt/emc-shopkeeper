@@ -177,20 +177,25 @@ public class MainFrame extends JFrame implements WindowListener {
 					@Override
 					public void run() {
 						try {
-							Date from = fromDatePicker.getDate();
-							Date to = toDatePicker.getDate();
-							Calendar c = Calendar.getInstance();
-							c.setTime(to);
-							c.add(Calendar.DATE, 1);
-							to = c.getTime();
-							Map<String, ItemGroup> itemGroups = dao.getItemGroups(from, to);
-							final List<ItemGroup> itemGroupsList = new ArrayList<ItemGroup>(itemGroups.values());
-							Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
-								@Override
-								public int compare(ItemGroup a, ItemGroup b) {
-									return a.getItem().compareToIgnoreCase(b.getItem());
+							final List<ItemGroup> itemGroupsList;
+							{
+								Date from = fromDatePicker.getDate();
+								Date to = toDatePicker.getDate();
+								if (to != null) {
+									Calendar c = Calendar.getInstance();
+									c.setTime(to);
+									c.add(Calendar.DATE, 1);
+									to = c.getTime();
 								}
-							});
+								Map<String, ItemGroup> itemGroups = dao.getItemGroups(from, to);
+								itemGroupsList = new ArrayList<ItemGroup>(itemGroups.values());
+								Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
+									@Override
+									public int compare(ItemGroup a, ItemGroup b) {
+										return a.getItem().compareToIgnoreCase(b.getItem());
+									}
+								});
+							}
 
 							JTable table = new JTable();
 							table.setColumnSelectionAllowed(false);
@@ -233,6 +238,26 @@ public class MainFrame extends JFrame implements WindowListener {
 
 							JScrollPane scrollPane = new JScrollPane(table);
 							table.setFillsViewportHeight(true);
+
+							String dateRangeStr;
+							{
+								DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+								Date from = fromDatePicker.getDate();
+								Date to = toDatePicker.getDate();
+								if (from == null && to == null) {
+									dateRangeStr = "entire history";
+								} else if (from == null) {
+									dateRangeStr = "up to <b><code>" + df.format(to) + "</b></code>";
+								} else if (to == null) {
+									dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to today";
+								} else if (from.equals(to)) {
+									dateRangeStr = "<b><code>" + df.format(from) + "</b></code>";
+								} else {
+									dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to <b><code>" + df.format(to) + "</b></code>";
+								}
+							}
+							tablePanel.add(new JLabel("<html><font size=5>" + dateRangeStr + "</font></html>"), "wrap");
+
 							tablePanel.add(scrollPane, "growx, growy, w 100%, h 100%");
 							tablePanel.validate();
 						} catch (SQLException e) {
