@@ -173,7 +173,6 @@ public class MainFrame extends JFrame implements WindowListener {
 				tablePanel.validate();
 
 				final LoadingDialog loading = new LoadingDialog(MainFrame.this, "Loading", "Querying . . .");
-				loading.setVisible(true);
 				Thread t = new Thread() {
 					@Override
 					public void run() {
@@ -244,6 +243,7 @@ public class MainFrame extends JFrame implements WindowListener {
 					}
 				};
 				t.start();
+				loading.setVisible(true);
 			}
 		});
 	}
