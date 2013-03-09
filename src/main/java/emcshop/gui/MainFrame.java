@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,10 +24,12 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
+
+import com.michaelbaranov.microba.calendar.DatePicker;
+
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
@@ -38,8 +41,8 @@ public class MainFrame extends JFrame implements WindowListener {
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
 	private JButton update;
 	private JLabel lastUpdateDate;
-	private JTextField startDate;
-	private JTextField endDate;
+	private DatePicker toDatePicker;
+	private DatePicker fromDatePicker;
 	private JComboBox groupBy;
 	private JButton show;
 
@@ -140,11 +143,20 @@ public class MainFrame extends JFrame implements WindowListener {
 		Date date = settings.getLastUpdated();
 		lastUpdateDate.setText((date == null) ? "-" : date.toString());
 
-		startDate = new JTextField();
-		endDate = new JTextField();
+		toDatePicker = new DatePicker();
+		toDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+		toDatePicker.setShowNoneButton(true);
+		toDatePicker.setShowTodayButton(true);
+
+		fromDatePicker = new DatePicker();
+		fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+		fromDatePicker.setShowNoneButton(true);
+		fromDatePicker.setShowTodayButton(true);
+
 		groupBy = new JComboBox();
 		groupBy.addItem("Item");
 		groupBy.addItem("Player");
+
 		show = new JButton("Show Transactions");
 	}
 
@@ -191,11 +203,11 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		JLabel l = new JLabel("Start:");
 		p2.add(l, "align right");
-		startDate.setSize(100, 10);
-		p2.add(startDate, "w 100!, wrap");
+		toDatePicker.setSize(100, 10);
+		p2.add(toDatePicker, "wrap");
 
 		p2.add(new JLabel("End:"), "align right");
-		p2.add(endDate, "w 100!, wrap");
+		p2.add(fromDatePicker, "wrap");
 
 		p2.add(new JLabel("Group By:"), "align right");
 		p2.add(groupBy, "wrap");
@@ -210,8 +222,8 @@ public class MainFrame extends JFrame implements WindowListener {
 		JPanel p = new JPanel();
 		p.setLayout(new MigLayout());
 
-		JLabel label = new JLabel("<html><h1>Feb 25 2013 to today</h1></html>");
-		p.add(label);
+		JLabel label = new JLabel("<html><i>no results</i></html>");
+		p.add(label, "align center");
 
 		return p;
 	}

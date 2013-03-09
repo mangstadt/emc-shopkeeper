@@ -32,6 +32,14 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.7.1</version>
 		</dependency>
+		<!-- http://microba.sourceforge.net/ -->
+		<dependency>
+			<groupId>microba</groupId>
+			<artifactId>microba</artifactId>
+			<version>0.4.4.3</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/microba-0.4.4.3.jar</systemPath>
+		</dependency>
 		<dependency>
 			<groupId>com.miglayout</groupId>
 			<artifactId>miglayout-swing</artifactId>
