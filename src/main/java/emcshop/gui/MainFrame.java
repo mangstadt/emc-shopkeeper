@@ -1,6 +1,7 @@
 package emcshop.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,12 +9,20 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -23,9 +32,15 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
+import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 
 import com.michaelbaranov.microba.calendar.DatePicker;
@@ -33,6 +48,7 @@ import com.michaelbaranov.microba.calendar.DatePicker;
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
+import emcshop.db.ItemGroup;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
@@ -45,6 +61,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private DatePicker fromDatePicker;
 	private JComboBox groupBy;
 	private JButton show;
+	private JPanel tablePanel;
 
 	private final DbDao dao;
 	private Settings settings;
@@ -158,6 +175,142 @@ public class MainFrame extends JFrame implements WindowListener {
 		groupBy.addItem("Player");
 
 		show = new JButton("Show Transactions");
+		show.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				tablePanel.removeAll();
+				tablePanel.validate();
+
+				final LoadingDialog loading = new LoadingDialog(MainFrame.this, "Loading", "Querying . . .");
+				loading.setVisible(true);
+				Thread t = new Thread() {
+					@Override
+					public void run() {
+						try {
+							Map<String, ItemGroup> itemGroups = dao.getItemGroups(fromDatePicker.getDate(), toDatePicker.getDate());
+							final List<ItemGroup> itemGroupsList = new ArrayList<ItemGroup>(itemGroups.values());
+							Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
+								@Override
+								public int compare(ItemGroup a, ItemGroup b) {
+									return a.getItem().compareToIgnoreCase(b.getItem());
+								}
+							});
+
+							JTable table = new JTable();
+							table.setColumnSelectionAllowed(false);
+							table.setRowSelectionAllowed(false);
+							table.setCellSelectionEnabled(false);
+							table.setRowHeight(24);
+							table.setModel(new AbstractTableModel() {
+								String[] columns = new String[] { "Item Name", "Sold", "Bought", "Net" };
+
+								@Override
+								public int getColumnCount() {
+									return columns.length;
+								}
+
+								@Override
+								public String getColumnName(int col) {
+									return columns[col];
+								}
+
+								@Override
+								public int getRowCount() {
+									return itemGroupsList.size();
+								}
+
+								@Override
+								public Object getValueAt(int row, int col) {
+									return itemGroupsList.get(row);
+								}
+
+								public Class<?> getColumnClass(int c) {
+									return ItemGroup.class;
+								}
+
+								@Override
+								public boolean isCellEditable(int row, int col) {
+									return false;
+								}
+							});
+							table.setDefaultRenderer(ItemGroup.class, new ItemGroupRenderer());
+
+							JScrollPane scrollPane = new JScrollPane(table);
+							table.setFillsViewportHeight(true);
+							tablePanel.add(scrollPane, "growx, growy, w 100%, h 100%");
+							tablePanel.validate();
+						} catch (SQLException e) {
+							ErrorDialog.show(MainFrame.this, "An error occurred querying the database.", e);
+						} finally {
+							loading.dispose();
+						}
+					}
+				};
+				t.start();
+			}
+		});
+	}
+
+	private static class ItemGroupRenderer implements TableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+			NumberFormat nf = NumberFormat.getNumberInstance();
+			JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+			ItemGroup group = (ItemGroup) value;
+			switch (col) {
+			case 0:
+				//TODO add the rest of the icons
+				ImageIcon img = getItemImage(group.getItem());
+				panel.add(new JLabel(group.getItem(), img, SwingConstants.LEFT));
+				break;
+			case 1:
+				if (group.getSoldQuantity() == 0) {
+					panel.add(new JLabel("-"));
+				} else {
+					panel.add(new JLabel(nf.format(group.getSoldQuantity()) + " / " + nf.format(group.getSoldAmount()) + "r"));
+				}
+				break;
+			case 2:
+				if (group.getBoughtQuantity() == 0) {
+					panel.add(new JLabel("-"));
+				} else {
+					panel.add(new JLabel(nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r"));
+				}
+				break;
+			case 3:
+				JLabel qtyLbl;
+				if (group.getNetQuantity() < 0) {
+					qtyLbl = new JLabel("<html><font color=red>" + nf.format(group.getNetQuantity()) + "</font></html>");
+				} else {
+					qtyLbl = new JLabel("<html><font color=green>+" + nf.format(group.getNetQuantity()) + "</font></html>");
+				}
+				panel.add(qtyLbl);
+
+				panel.add(new JLabel("/"));
+
+				JLabel amtLbl;
+				if (group.getNetAmount() < 0) {
+					amtLbl = new JLabel("<html><font color=red>" + nf.format(group.getNetAmount()) + "r</font></html>");
+				} else {
+					amtLbl = new JLabel("<html><font color=green>+" + nf.format(group.getNetAmount()) + "r</font></html>");
+				}
+				panel.add(amtLbl);
+				break;
+			}
+
+			return panel;
+		}
+
+		private ImageIcon getItemImage(String item) {
+			item = item.toLowerCase().replace(" ", "_");
+			URL url = getClass().getResource("items/" + item + ".png");
+			if (url == null) {
+				url = getClass().getResource("items/_empty.png");
+			}
+			ImageIcon img = new ImageIcon(url);
+			return new ImageIcon(img.getImage().getScaledInstance(16, 16, java.awt.Image.SCALE_SMOOTH));
+		}
 	}
 
 	void updateSuccessful(Date started, long time, int transactionCount) {
@@ -201,13 +354,11 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		p2 = new JPanel(new MigLayout());
 
-		JLabel l = new JLabel("Start:");
-		p2.add(l, "align right");
-		toDatePicker.setSize(100, 10);
-		p2.add(toDatePicker, "wrap");
+		p2.add(new JLabel("Start:"), "align right");
+		p2.add(fromDatePicker, "wrap");
 
 		p2.add(new JLabel("End:"), "align right");
-		p2.add(fromDatePicker, "wrap");
+		p2.add(toDatePicker, "wrap");
 
 		p2.add(new JLabel("Group By:"), "align right");
 		p2.add(groupBy, "wrap");
@@ -219,13 +370,13 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private JPanel createRightPanel() {
-		JPanel p = new JPanel();
-		p.setLayout(new MigLayout());
+		tablePanel = new JPanel();
+		tablePanel.setLayout(new MigLayout("width 100%, height 100%"));
 
 		JLabel label = new JLabel("<html><i>no results</i></html>");
-		p.add(label, "align center");
+		tablePanel.add(label, "align center");
 
-		return p;
+		return tablePanel;
 	}
 
 	///////////////////////////////////
