@@ -16,7 +16,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
@@ -83,8 +82,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 				try {
 					ShopTransaction latest = dao.getLatestTransaction();
 					if (latest == null) {
-						int answer = JOptionPane.showConfirmDialog(UpdateDialog.this, "This is the first time you're updating your transactions.  If you have a large transaction history, it is highly recommended that you disable move perms on your res before starting the update.  If any transactions occur during the update, it will skew the results.\n\n/res set move false\n\nIt could take up to 20 minutes to parse your entire transaction history.\n\nAre you ready to perform the update?", "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-						if (answer == JOptionPane.NO_OPTION) {
+						boolean yes = FirstUpdateDialog.show(UpdateDialog.this);
+						if (!yes) {
 							return;
 						}
 					} else {
