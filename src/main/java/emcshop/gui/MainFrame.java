@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -40,7 +41,6 @@ import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 
 import com.michaelbaranov.microba.calendar.DatePicker;
@@ -160,15 +160,17 @@ public class MainFrame extends JFrame implements WindowListener {
 		Date date = settings.getLastUpdated();
 		lastUpdateDate.setText((date == null) ? "-" : date.toString());
 
-		toDatePicker = new DatePicker();
-		toDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
-		toDatePicker.setShowNoneButton(true);
-		toDatePicker.setShowTodayButton(true);
-
 		fromDatePicker = new DatePicker();
 		fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 		fromDatePicker.setShowNoneButton(true);
 		fromDatePicker.setShowTodayButton(true);
+		fromDatePicker.setStripTime(true);
+
+		toDatePicker = new DatePicker();
+		toDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+		toDatePicker.setShowNoneButton(true);
+		toDatePicker.setShowTodayButton(true);
+		toDatePicker.setStripTime(true);
 
 		groupBy = new JComboBox();
 		groupBy.addItem("Item");
@@ -187,7 +189,13 @@ public class MainFrame extends JFrame implements WindowListener {
 					@Override
 					public void run() {
 						try {
-							Map<String, ItemGroup> itemGroups = dao.getItemGroups(fromDatePicker.getDate(), toDatePicker.getDate());
+							Date from = fromDatePicker.getDate();
+							Date to = toDatePicker.getDate();
+							Calendar c = Calendar.getInstance();
+							c.setTime(to);
+							c.add(Calendar.DATE, 1);
+							to = c.getTime();
+							Map<String, ItemGroup> itemGroups = dao.getItemGroups(from, to);
 							final List<ItemGroup> itemGroupsList = new ArrayList<ItemGroup>(itemGroups.values());
 							Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
 								@Override
