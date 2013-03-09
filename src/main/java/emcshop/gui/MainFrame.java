@@ -11,6 +11,7 @@ import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,6 +61,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private JComboBox groupBy;
 	private JButton show;
 	private JPanel tablePanel;
+	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private final DbDao dao;
 	private Settings settings;
@@ -145,7 +147,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		lastUpdateDate = new JLabel();
 		Date date = settings.getLastUpdated();
-		lastUpdateDate.setText((date == null) ? "-" : date.toString());
+		lastUpdateDate.setText((date == null) ? "-" : df.format(date));
 
 		fromDatePicker = new DatePicker();
 		fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
@@ -326,7 +328,12 @@ public class MainFrame extends JFrame implements WindowListener {
 		JOptionPane.showMessageDialog(this, message, "Update complete", JOptionPane.INFORMATION_MESSAGE);
 
 		settings.setLastUpdated(started);
-		lastUpdateDate.setText(started.toString());
+		try {
+			settings.save();
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Problem writing to settings file.", e);
+		}
+		lastUpdateDate.setText(df.format(started));
 	}
 
 	private void layoutWidgets() {
