@@ -16,6 +16,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
@@ -23,6 +24,7 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
+import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")
@@ -37,9 +39,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 	private long started;
 
-	public UpdateDialog(final MainFrame owner, final TransactionPuller puller, final DbDao dao) {
+	public UpdateDialog(final MainFrame owner, final DbDao dao, final Settings settings) throws SQLException {
 		super(owner, "Updating Transactions", true);
-		this.puller = puller;
 		setLocationRelativeTo(owner);
 
 		createWidgets();
@@ -49,7 +50,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		setUndecorated(true);
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 
-		setSize(200, 150);
+		pack();
+		setSize(getWidth() + 20, getHeight());
 		addWindowListener(this);
 
 		timeThread = new Thread() {
@@ -70,6 +72,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 			}
 		};
 
+		puller = new TransactionPuller(settings.getCookies());
 		pullerThread = new Thread() {
 			String errorDisplayMessage;
 			Throwable error;
@@ -78,6 +81,16 @@ public class UpdateDialog extends JDialog implements WindowListener {
 			public void run() {
 				started = System.currentTimeMillis();
 				try {
+					ShopTransaction latest = dao.getLatestTransaction();
+					if (latest == null) {
+						int answer = JOptionPane.showConfirmDialog(UpdateDialog.this, "This is the first time you're updating your transactions.  If you have a large transaction history, it is highly recommended that you disable move perms on your res before starting the update.  If any transactions occur during the update, it will skew the results.\n\n/res set move false\n\nIt could take up to 20 minutes to parse your entire transaction history.\n\nAre you ready to perform the update?", "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+						if (answer == JOptionPane.NO_OPTION) {
+							return;
+						}
+					} else {
+						puller.setStopAtDate(latest.getTs());
+					}
+
 					TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
 						int transactionCount = 0;
 
@@ -119,9 +132,12 @@ public class UpdateDialog extends JDialog implements WindowListener {
 				} catch (IOException e) {
 					error = e;
 					errorDisplayMessage = "An error occurred starting the transaction update.";
+				} catch (SQLException e) {
+					error = e;
+					errorDisplayMessage = "An error occurred connecting to the database.";
+				} finally {
+					dispose();
 				}
-
-				dispose();
 
 				if (error != null) {
 					ErrorDialog.show(null, errorDisplayMessage, error);
@@ -146,7 +162,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 	}
 
 	private void layoutWidgets() {
-		setLayout(new MigLayout("w 100%!"));
+		setLayout(new MigLayout());
 
 		JPanel p = new JPanel(new FlowLayout());
 		p.add(new JLabel(new ImageIcon(getClass().getResource("loading.gif"))));

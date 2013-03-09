@@ -45,8 +45,6 @@ import net.miginfocom.swing.MigLayout;
 
 import com.michaelbaranov.microba.calendar.DatePicker;
 
-import emcshop.ShopTransaction;
-import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.util.Settings;
@@ -137,18 +135,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					TransactionPuller puller = new TransactionPuller(settings.getCookies());
-					ShopTransaction latest = dao.getLatestTransaction();
-					if (latest == null) {
-						int answer = JOptionPane.showConfirmDialog(MainFrame.this, "This is the first time you're updating your transactions.  If you have a large transaction history, it is highly recommended that you disable move perms on your res before starting the update.  If any transactions occur during the update, it will skew the results.\n\n/res set move false\n\nIt could take up to 20 minutes to parse your entire transaction history.\n\nAre you ready to perform the update?", "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-						if (answer == JOptionPane.NO_OPTION) {
-							return;
-						}
-					} else {
-						puller.setStopAtDate(latest.getTs());
-					}
-
-					UpdateDialog w = new UpdateDialog(MainFrame.this, puller, dao);
+					UpdateDialog w = new UpdateDialog(MainFrame.this, dao, settings);
 					w.setVisible(true);
 				} catch (SQLException e) {
 					ErrorDialog.show(MainFrame.this, "An error occurred connecting to the database.", e);
