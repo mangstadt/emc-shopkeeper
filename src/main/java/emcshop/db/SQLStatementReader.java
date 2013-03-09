@@ -22,18 +22,21 @@ public class SQLStatementReader extends BufferedReader {
 	public String readStatement() throws IOException {
 		StringBuilder sb = new StringBuilder();
 
+		boolean allWhitespace = true;
 		int i;
 		while ((i = read()) != -1) {
 			if (i == ';') {
-				return sb.toString();
+				if (!allWhitespace) {
+					break;
+				}
+			} else {
+				if (allWhitespace && !Character.isWhitespace(i)) {
+					allWhitespace = false;
+				}
+				sb.append((char) i);
 			}
-			sb.append((char) i);
 		}
 
-		if (sb.length() == 0) {
-			return null;
-		}
-
-		return sb.toString();
+		return allWhitespace ? null : sb.toString().trim();
 	}
 }
