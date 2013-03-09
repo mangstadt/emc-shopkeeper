@@ -185,7 +185,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		p2.add(lastUpdateDate);
 		p.add(p2, "wrap");
 
-		p.add(new JSeparator(), "w 100%!, wrap");
+		p.add(new JSeparator(), "w 200!, align center, wrap");
 
 		p2 = new JPanel(new MigLayout());
 
