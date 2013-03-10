@@ -132,7 +132,8 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private void createWidgets() {
-		update = new JButton("Update Transactions");
+		ImageIcon img = new ImageIcon(getClass().getResource("update.png"));
+		update = new JButton("Update Transactions", img);
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -165,7 +166,8 @@ public class MainFrame extends JFrame implements WindowListener {
 		groupBy.addItem("Item");
 		groupBy.addItem("Player");
 
-		show = new JButton("Show Transactions");
+		img = new ImageIcon(getClass().getResource("search.png"));
+		show = new JButton("Show Transactions", img);
 		show.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
