@@ -74,15 +74,21 @@ public class TransactionPuller {
 	 * Starts the download.
 	 * @param listener for handling events
 	 * @throws IOException if there's a network error
+	 * @throws NotLoggedInException if the user is not logged in
 	 */
-	public Result start(Listener listener) throws IOException {
+	public Result start(Listener listener) throws IOException, NotLoggedInException {
 		started = System.currentTimeMillis();
+
+		TransactionPage page1 = new TransactionPage(getPage(1));
+		if (!page1.isLoggedIn()) {
+			throw new NotLoggedInException();
+		}
 
 		if (stopAtDate == null) {
 			//database is empty
 			//keep scraping until there are no more pages
 			//since EMC will just display the first page if we give it too large of a page number, we need to know when the first page has been loaded
-			latestTransactionDate = getLatestTransactionDate();
+			latestTransactionDate = page1.getFirstTransactionDate();
 		}
 
 		//start threads
@@ -117,11 +123,6 @@ public class TransactionPuller {
 	 */
 	public void cancel() {
 		cancel = true;
-	}
-
-	private Date getLatestTransactionDate() throws IOException {
-		TransactionPage page = new TransactionPage(getPage(1));
-		return page.getFirstTransactionDate();
 	}
 
 	private synchronized int nextPage() {

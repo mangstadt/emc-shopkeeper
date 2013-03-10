@@ -16,10 +16,12 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.NotLoggedInException;
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
@@ -131,6 +133,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						}
 						break;
 					}
+				} catch (NotLoggedInException e) {
+					dispose();
+					JOptionPane.showMessageDialog(owner, "Your login cookies are invalid.\nGo to Settings to set them.", "Not Logged In", JOptionPane.ERROR_MESSAGE);
 				} catch (IOException e) {
 					error = e;
 					errorDisplayMessage = "An error occurred starting the transaction update.";
