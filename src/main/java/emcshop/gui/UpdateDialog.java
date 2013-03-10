@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
 import net.miginfocom.swing.MigLayout;
-import emcshop.NotLoggedInException;
+import emcshop.EmcSession;
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
@@ -73,7 +73,11 @@ public class UpdateDialog extends JDialog implements WindowListener {
 			}
 		};
 
-		puller = new TransactionPuller(settings.getCookies());
+		EmcSession session = settings.getSession();
+		if (session == null) {
+			//TODO show login dialog
+		}
+		puller = new TransactionPuller(session);
 		pullerThread = new Thread() {
 			String errorDisplayMessage;
 			Throwable error;
@@ -116,6 +120,11 @@ public class UpdateDialog extends JDialog implements WindowListener {
 					case CANCELLED:
 						dao.rollback();
 						break;
+					case NOT_LOGGED_IN:
+						//TODO show login dialog
+						dispose();
+						JOptionPane.showMessageDialog(owner, "Your login cookies are invalid.\nGo to Settings to set them.", "Not Logged In", JOptionPane.ERROR_MESSAGE);
+						break;
 					case FAILED:
 						dao.rollback();
 						error = result.getThrown();
@@ -133,9 +142,6 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						}
 						break;
 					}
-				} catch (NotLoggedInException e) {
-					dispose();
-					JOptionPane.showMessageDialog(owner, "Your login cookies are invalid.\nGo to Settings to set them.", "Not Logged In", JOptionPane.ERROR_MESSAGE);
 				} catch (IOException e) {
 					error = e;
 					errorDisplayMessage = "An error occurred starting the transaction update.";

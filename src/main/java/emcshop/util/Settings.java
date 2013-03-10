@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import emcshop.EmcSession;
 
 public class Settings {
 	private static final Logger logger = Logger.getLogger(Settings.class.getName());
@@ -16,9 +16,9 @@ public class Settings {
 	private final File file;
 
 	private Integer version;
-	private Map<String, String> cookies = new HashMap<String, String>();
 	private Integer windowWidth, windowHeight;
 	private Date lastUpdated;
+	private EmcSession session;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -38,10 +38,6 @@ public class Settings {
 
 	public void setVersion(Integer version) {
 		this.version = version;
-	}
-
-	public Map<String, String> getCookies() {
-		return cookies;
 	}
 
 	public Integer getWindowWidth() {
@@ -68,19 +64,20 @@ public class Settings {
 		this.lastUpdated = lastUpdated;
 	}
 
+	public EmcSession getSession() {
+		return session;
+	}
+
+	public void setSession(EmcSession session) {
+		this.session = session;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
-		cookies.put("__qca", "");
-		cookies.put("__gads", "");
-		cookies.put("emc_user", "");
-		cookies.put("emc_session", "");
-		cookies.put("__utma", "");
-		cookies.put("__utmb", "");
-		cookies.put("__utmc", "");
-		cookies.put("__utmz", "");
-		windowWidth = 600;
-		windowHeight = 400;
+		windowWidth = 800;
+		windowHeight = 600;
 		lastUpdated = null;
+		session = null;
 	}
 
 	public void load() throws IOException {
@@ -91,14 +88,27 @@ public class Settings {
 			//migrate it
 		}
 
-		cookies = props.getMap("cookie.");
-		windowWidth = props.getInteger("window.width", 600);
-		windowHeight = props.getInteger("window.height", 400);
+		windowWidth = props.getInteger("window.width", 800);
+		windowHeight = props.getInteger("window.height", 600);
 		try {
 			lastUpdated = props.getDate("lastUpdated");
 		} catch (ParseException e) {
 			logger.log(Level.WARNING, "Problem parsing date in \"lastUpdate\" property.", e);
 			lastUpdated = null;
+		}
+
+		String sessionId = props.get("session.id");
+		if (sessionId != null) {
+			String username = props.get("session.username");
+			Date created;
+			try {
+				created = props.getDate("session.created");
+			} catch (ParseException e) {
+				created = null;
+			}
+			session = new EmcSession(username, sessionId, created);
+		} else {
+			session = null;
 		}
 	}
 
@@ -106,10 +116,14 @@ public class Settings {
 		PropertiesWrapper props = new PropertiesWrapper();
 
 		props.setInteger("version", version);
-		props.setMap("cookie.", cookies);
 		props.setInteger("window.width", windowWidth);
 		props.setInteger("window.height", windowHeight);
 		props.setDate("lastUpdated", lastUpdated);
+		if (session != null) {
+			props.set("session.username", session.getUsername());
+			props.set("session.id", session.getSessionId());
+			props.setDate("session.created", session.getCreated());
+		}
 
 		props.store(file, "EMC Shopkeeper settings");
 	}

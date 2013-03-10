@@ -17,7 +17,7 @@ import org.jsoup.nodes.Document;
  */
 public class TransactionPuller {
 	private static final Logger logger = Logger.getLogger(TransactionPuller.class.getName());
-	private final Map<String, String> cookies;
+	private final Map<String, String> loginCookies;
 	private Date stopAtDate;
 	private Integer stopAtPage;
 	private int threadCount = 4;
@@ -29,10 +29,10 @@ public class TransactionPuller {
 	private boolean cancel = false;
 
 	/**
-	 * @param cookies cookies for logging the user in
+	 * @param session the website login session
 	 */
-	public TransactionPuller(Map<String, String> cookies) {
-		this.cookies = cookies;
+	public TransactionPuller(EmcSession session) {
+		loginCookies = session.getCookiesMap();
 	}
 
 	/**
@@ -74,14 +74,13 @@ public class TransactionPuller {
 	 * Starts the download.
 	 * @param listener for handling events
 	 * @throws IOException if there's a network error
-	 * @throws NotLoggedInException if the user is not logged in
 	 */
-	public Result start(Listener listener) throws IOException, NotLoggedInException {
+	public Result start(Listener listener) throws IOException {
 		started = System.currentTimeMillis();
 
 		TransactionPage page1 = new TransactionPage(getPage(1));
 		if (!page1.isLoggedIn()) {
-			throw new NotLoggedInException();
+			return Result.notLoggedIn();
 		}
 
 		if (stopAtDate == null) {
@@ -131,7 +130,7 @@ public class TransactionPuller {
 
 	protected Document getPage(int page) throws IOException {
 		String url = "http://empireminecraft.com/rupees/transactions/?page=" + page;
-		return Jsoup.connect(url).timeout(30000).cookies(cookies).get();
+		return Jsoup.connect(url).timeout(30000).cookies(loginCookies).get();
 	}
 
 	private class ScrapeThread extends Thread {
@@ -243,6 +242,10 @@ public class TransactionPuller {
 			return new Result(State.CANCELLED);
 		}
 
+		public static Result notLoggedIn() {
+			return new Result(State.NOT_LOGGED_IN);
+		}
+
 		public static Result failed(Throwable thrown) {
 			Result result = new Result(State.FAILED);
 			result.thrown = thrown;
@@ -259,6 +262,6 @@ public class TransactionPuller {
 	}
 
 	public static enum State {
-		CANCELLED, FAILED, COMPLETED
+		CANCELLED, NOT_LOGGED_IN, FAILED, COMPLETED
 	}
 }

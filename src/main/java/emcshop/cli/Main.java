@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
+import emcshop.EmcSession;
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
@@ -110,10 +111,6 @@ public class Main {
 
 		String settingsPath = arguments.value(null, "settings");
 		File settingsFile = (settingsPath == null) ? defaultSettingsFile : new File(settingsPath);
-		if (!settingsFile.exists()) {
-			out.println("Error: No cookies set.  Log into empireminecraft.com, and then copy all cookies to the following properties file: " + settingsFile.getAbsolutePath());
-			System.exit(1);
-		}
 		Settings settings = new Settings(settingsFile);
 
 		String dbPath = arguments.value(null, "db");
@@ -163,43 +160,69 @@ public class Main {
 		}
 
 		if (update) {
-			final TransactionPuller puller = new TransactionPuller(settings.getCookies());
-			puller.setThreadCount(threadCount);
-			if (latestTransactionFromDb != null) {
-				puller.setStopAtDate(latestTransactionFromDb.getTs());
-			}
-			if (stopAtPage != null) {
-				puller.setStopAtPage(stopAtPage);
-			}
-			puller.setStartAtPage(startAtPage);
+			EmcSession session = settings.getSession();
+			boolean repeat;
+			do {
+				repeat = false;
+				if (session == null) {
+					out.println("Please enter your EMC login credentials.");
+					do {
+						//note: "System.console()" doesn't work from Eclipse
+						String username = System.console().readLine("Username: ");
+						String password = new String(System.console().readPassword("Password: "));
+						out.println("Logging in...");
+						session = EmcSession.login(username, password);
+						if (session == null) {
+							out.println("Login failed.  Please try again.");
+						}
+					} while (session == null);
+					settings.setSession(session);
+					settings.save();
+				}
 
-			TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
-				@Override
-				public void onPageScraped(int page, List<ShopTransaction> transactions) {
-					try {
-						dao.insertTransactions(transactions);
-					} catch (SQLException e) {
-						pullerError = e;
-						puller.cancel();
+				final TransactionPuller puller = new TransactionPuller(session);
+				puller.setThreadCount(threadCount);
+				if (latestTransactionFromDb != null) {
+					puller.setStopAtDate(latestTransactionFromDb.getTs());
+				}
+				if (stopAtPage != null) {
+					puller.setStopAtPage(stopAtPage);
+				}
+				puller.setStartAtPage(startAtPage);
+
+				TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
+					@Override
+					public void onPageScraped(int page, List<ShopTransaction> transactions) {
+						try {
+							dao.insertTransactions(transactions);
+						} catch (SQLException e) {
+							pullerError = e;
+							puller.cancel();
+						}
 					}
-				}
-			});
+				});
 
-			switch (result.getState()) {
-			case CANCELLED:
-				dao.rollback();
-				if (pullerError != null) {
-					throw pullerError;
+				switch (result.getState()) {
+				case CANCELLED:
+					dao.rollback();
+					if (pullerError != null) {
+						throw pullerError;
+					}
+					break;
+				case NOT_LOGGED_IN:
+					out.println("Your login session has expired.");
+					session = null;
+					repeat = true;
+					break;
+				case FAILED:
+					dao.rollback();
+					throw result.getThrown();
+				case COMPLETED:
+					dao.commit();
+					logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
+					break;
 				}
-				break;
-			case FAILED:
-				dao.rollback();
-				throw result.getThrown();
-			case COMPLETED:
-				dao.commit();
-				logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
-				break;
-			}
+			} while (repeat);
 		}
 
 		if (query != null) {
