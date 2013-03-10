@@ -7,10 +7,13 @@ import java.awt.SplashScreen;
 import java.io.File;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import javax.swing.JOptionPane;
 
 import emcshop.cli.Arguments;
 import emcshop.db.DbDao;
@@ -37,7 +40,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		//create the config folder in the user's home directory
 		//File config = new File(System.getProperty("user.home"), ".emc-shopkeeper");
-		File config = new File(".emc-shopkeeper");
+		File config = new File(".emc-shopkeeper2");
 		if (!config.exists() && !config.mkdir()) {
 			throw new IOException("Could not create config folder: " + config.getAbsolutePath());
 		}
@@ -111,7 +114,16 @@ public class Main {
 			}
 		});
 
-		DbDao dao = new DirbyEmbeddedDbDao(new File(dbFolder, "data"), listener);
+		DbDao dao;
+		try {
+			dao = new DirbyEmbeddedDbDao(new File(dbFolder, "data"), listener);
+		} catch (SQLException e) {
+			if ("XJ040".equals(e.getSQLState())) {
+				JOptionPane.showMessageDialog(null, "EMC Shopkeeper is already running.", "Already running", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			throw e;
+		}
 
 		MainFrame frame = new MainFrame(settings, dao);
 		splash.close();
