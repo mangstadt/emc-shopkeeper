@@ -150,7 +150,7 @@ public class Main {
 		public void setMessage(String message) {
 			if (gfx != null) {
 				gfx.setComposite(AlphaComposite.Clear);
-				gfx.fillRect(40, 80, 200, 40);
+				gfx.fillRect(40, 60, 200, 40);
 				gfx.setPaintMode();
 				gfx.setColor(Color.BLACK);
 				gfx.drawString(message, 40, 80);
