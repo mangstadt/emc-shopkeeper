@@ -80,7 +80,7 @@ public class LoginUtils {
 		BasicClientCookie cookie = new BasicClientCookie(SESSION_COOKIE_NAME, sessionId);
 		cookie.setDomain(".empireminecraft.com");
 		cookie.setPath("/");
-		client.getCookieStore().addCookie(new BasicClientCookie(SESSION_COOKIE_NAME, sessionId));
+		client.getCookieStore().addCookie(cookie);
 
 		try {
 			URIBuilder uri = new URIBuilder("http://empireminecraft.com/logout/");
@@ -91,7 +91,7 @@ public class LoginUtils {
 			HttpEntity entity = response.getEntity();
 			EntityUtils.consume(entity);
 		} catch (URISyntaxException e) {
-			//never thrown, hard-coded URL
+			//never thrown, URL is hard-coded
 		} finally {
 			client.getConnectionManager().shutdown();
 		}
