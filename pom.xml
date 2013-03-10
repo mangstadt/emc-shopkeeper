@@ -41,6 +41,11 @@
 			<systemPath>${basedir}/lib/microba-0.4.4.3.jar</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.2.3</version>
+		</dependency>
+		<dependency>
 			<groupId>com.miglayout</groupId>
 			<artifactId>miglayout-swing</artifactId>
 			<version>4.2</version>
