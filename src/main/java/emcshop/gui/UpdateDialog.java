@@ -30,9 +30,9 @@ import emcshop.util.TimeUtils;
 public class UpdateDialog extends JDialog implements WindowListener {
 	private JButton cancel;
 	private JLabel transactions;
-	private JLabel timeElapsed;
+	private JLabel timerLabel;
 
-	private Thread timeThread;
+	private Thread timerThread;
 	private TransactionPuller puller;
 	private Thread pullerThread;
 
@@ -53,14 +53,14 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		setSize(getWidth() + 20, getHeight());
 		addWindowListener(this);
 
-		timeThread = new Thread() {
+		timerThread = new Thread() {
 			@Override
 			public void run() {
 				long start = System.currentTimeMillis();
 				NumberFormat nf = new DecimalFormat("00");
 				while (isVisible()) {
 					long components[] = TimeUtils.parseTimeComponents((System.currentTimeMillis() - start));
-					timeElapsed.setText(nf.format(components[2]) + ":" + nf.format(components[1]));
+					timerLabel.setText(nf.format(components[2]) + ":" + nf.format(components[1]));
 
 					try {
 						Thread.sleep(1000);
@@ -78,7 +78,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 			@Override
 			public void run() {
-				started = System.currentTimeMillis();
+				timerLabel.setText("...");
 				try {
 					ShopTransaction latest = dao.getLatestTransaction();
 					if (latest == null) {
@@ -89,6 +89,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 					} else {
 						puller.setStopAtDate(latest.getTs());
 					}
+
+					started = System.currentTimeMillis();
+					timerThread.start();
 
 					TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
 						int transactionCount = 0;
@@ -157,7 +160,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		});
 
 		transactions = new JLabel("0");
-		timeElapsed = new JLabel();
+		timerLabel = new JLabel();
 	}
 
 	private void layoutWidgets() {
@@ -172,7 +175,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		add(transactions, "wrap");
 
 		add(new JLabel("Time elapsed:"));
-		add(timeElapsed, "wrap");
+		add(timerLabel, "wrap");
 
 		add(cancel, "span 2, align center");
 	}
@@ -211,7 +214,6 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 	@Override
 	public void windowOpened(WindowEvent arg0) {
-		timeThread.start();
 		pullerThread.start();
 	}
 }
