@@ -11,12 +11,13 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
@@ -30,11 +31,12 @@ import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")
 public class UpdateDialog extends JDialog implements WindowListener {
+	private static final Logger logger = Logger.getLogger(UpdateDialog.class.getName());
+
 	private JButton cancel;
 	private JLabel transactions;
 	private JLabel timerLabel;
 
-	private Thread timerThread;
 	private TransactionPuller puller;
 	private Thread pullerThread;
 
@@ -55,36 +57,13 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		setSize(getWidth() + 20, getHeight());
 		addWindowListener(this);
 
-		timerThread = new Thread() {
-			@Override
-			public void run() {
-				long start = System.currentTimeMillis();
-				NumberFormat nf = new DecimalFormat("00");
-				while (isVisible()) {
-					long components[] = TimeUtils.parseTimeComponents((System.currentTimeMillis() - start));
-					timerLabel.setText(nf.format(components[2]) + ":" + nf.format(components[1]));
-
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						break;
-					}
-				}
-			}
-		};
-
-		EmcSession session = settings.getSession();
-		if (session == null) {
-			//TODO show login dialog
-		}
-		puller = new TransactionPuller(session);
+		puller = new TransactionPuller(settings.getSession());
 		pullerThread = new Thread() {
 			String errorDisplayMessage;
 			Throwable error;
 
 			@Override
 			public void run() {
-				timerLabel.setText("...");
 				try {
 					ShopTransaction latest = dao.getLatestTransaction();
 					if (latest == null) {
@@ -96,52 +75,90 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						puller.setStopAtDate(latest.getTs());
 					}
 
-					started = System.currentTimeMillis();
-					timerThread.start();
+					boolean repeat;
+					do {
+						repeat = false;
 
-					TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
-						int transactionCount = 0;
+						Thread timerThread = new Thread() {
+							@Override
+							public void run() {
+								long start = System.currentTimeMillis();
+								NumberFormat nf = new DecimalFormat("00");
+								while (UpdateDialog.this.isVisible()) {
+									long components[] = TimeUtils.parseTimeComponents((System.currentTimeMillis() - start));
+									timerLabel.setText(nf.format(components[2]) + ":" + nf.format(components[1]));
 
-						@Override
-						public synchronized void onPageScraped(int page, List<ShopTransaction> transactions) {
-							try {
-								dao.insertTransactions(transactions);
-								transactionCount += transactions.size();
-								UpdateDialog.this.transactions.setText(transactionCount + "");
-							} catch (SQLException e) {
-								error = e;
-								errorDisplayMessage = "An error occurred while inserting transactions into the database.";
-								puller.cancel();
+									try {
+										Thread.sleep(1000);
+									} catch (InterruptedException e) {
+										break;
+									}
+								}
 							}
-						}
-					});
+						};
+						timerThread.start();
 
-					switch (result.getState()) {
-					case CANCELLED:
-						dao.rollback();
-						break;
-					case NOT_LOGGED_IN:
-						//TODO show login dialog
-						dispose();
-						JOptionPane.showMessageDialog(owner, "Your login cookies are invalid.\nGo to Settings to set them.", "Not Logged In", JOptionPane.ERROR_MESSAGE);
-						break;
-					case FAILED:
-						dao.rollback();
-						error = result.getThrown();
-						errorDisplayMessage = "An error occurred while getting the transactions.";
-						break;
-					case COMPLETED:
-						try {
-							dao.commit();
-							dispose();
-							owner.updateSuccessful(new Date(started), result.getTimeTaken(), result.getTransactionCount());
-						} catch (SQLException e) {
+						started = System.currentTimeMillis();
+
+						TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
+							int transactionCount = 0;
+
+							@Override
+							public synchronized void onPageScraped(int page, List<ShopTransaction> transactions) {
+								try {
+									dao.insertTransactions(transactions);
+									transactionCount += transactions.size();
+									UpdateDialog.this.transactions.setText(transactionCount + "");
+								} catch (SQLException e) {
+									error = e;
+									errorDisplayMessage = "An error occurred while inserting transactions into the database.";
+									puller.cancel();
+								}
+							}
+						});
+
+						switch (result.getState()) {
+						case CANCELLED:
 							dao.rollback();
-							error = e;
-							errorDisplayMessage = "An error occurred completing the update.";
+							break;
+						case NOT_LOGGED_IN:
+							timerThread.interrupt();
+
+							EmcSession session = LoginDialog.show(UpdateDialog.this);
+							if (session != null) {
+								settings.setSession(session);
+								try {
+									settings.save();
+								} catch (IOException e) {
+									logger.log(Level.SEVERE, "An error occurred saving the settings.", e);
+								}
+
+								puller = new TransactionPuller(session);
+								if (latest != null) {
+									puller.setStopAtDate(latest.getTs());
+								}
+
+								repeat = true;
+							}
+							break;
+						case FAILED:
+							dao.rollback();
+							error = result.getThrown();
+							errorDisplayMessage = "An error occurred while getting the transactions.";
+							break;
+						case COMPLETED:
+							try {
+								dao.commit();
+								dispose();
+								owner.updateSuccessful(new Date(started), result.getTimeTaken(), result.getTransactionCount());
+							} catch (SQLException e) {
+								dao.rollback();
+								error = e;
+								errorDisplayMessage = "An error occurred completing the update.";
+							}
+							break;
 						}
-						break;
-					}
+					} while (repeat);
 				} catch (IOException e) {
 					error = e;
 					errorDisplayMessage = "An error occurred starting the transaction update.";
@@ -171,7 +188,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		});
 
 		transactions = new JLabel("0");
-		timerLabel = new JLabel();
+		timerLabel = new JLabel("...");
 	}
 
 	private void layoutWidgets() {

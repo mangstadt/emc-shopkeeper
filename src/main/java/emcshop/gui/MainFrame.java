@@ -46,6 +46,7 @@ import net.miginfocom.swing.MigLayout;
 
 import com.michaelbaranov.microba.calendar.DatePicker;
 
+import emcshop.EmcSession;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.util.Settings;
@@ -137,6 +138,21 @@ public class MainFrame extends JFrame implements WindowListener {
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				//log the user in if he's not logged in
+				EmcSession session = settings.getSession();
+				if (session == null) {
+					session = LoginDialog.show(MainFrame.this);
+					if (session == null) {
+						return;
+					}
+					settings.setSession(session);
+					try {
+						settings.save();
+					} catch (IOException e) {
+						logger.log(Level.SEVERE, "Problem saving settings file.", e);
+					}
+				}
+
 				try {
 					UpdateDialog w = new UpdateDialog(MainFrame.this, dao, settings);
 					w.setVisible(true);
