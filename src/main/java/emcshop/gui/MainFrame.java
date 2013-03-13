@@ -277,7 +277,28 @@ public class MainFrame extends JFrame implements WindowListener {
 							}
 							tablePanel.add(new JLabel("<html><font size=5>" + dateRangeStr + "</font></html>"), "wrap");
 
-							tablePanel.add(scrollPane, "growx, growy, w 100%, h 100%");
+							tablePanel.add(scrollPane, "grow, w 100%, h 100%, wrap");
+
+							String netTotalLabel;
+							{
+								int netTotal = 0;
+								for (ItemGroup group : itemGroupsList) {
+									netTotal += group.getNetAmount();
+								}
+
+								NumberFormat nf = NumberFormat.getInstance();
+								StringBuilder sb = new StringBuilder();
+								sb.append("<html><font size=5>Net Total: <code>");
+								if (netTotal < 0) {
+									sb.append("<font color=red>" + nf.format(netTotal) + "r</font>");
+								} else {
+									sb.append("<font color=green>+" + nf.format(netTotal) + "r</font>");
+								}
+								sb.append("</code></font></html>");
+								netTotalLabel = sb.toString();
+							}
+							tablePanel.add(new JLabel(netTotalLabel), "align right");
+
 							tablePanel.validate();
 						} catch (SQLException e) {
 							ErrorDialog.show(MainFrame.this, "An error occurred querying the database.", e);
@@ -422,8 +443,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private JPanel createRightPanel() {
-		tablePanel = new JPanel();
-		tablePanel.setLayout(new MigLayout("width 100%, height 100%"));
+		tablePanel = new JPanel(new MigLayout("width 100%, height 100%"));
 
 		JLabel label = new JLabel("<html><i>no results</i></html>");
 		tablePanel.add(label, "align center");
