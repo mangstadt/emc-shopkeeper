@@ -1,7 +1,6 @@
 package emcshop.cli;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.sql.SQLException;
 import java.text.NumberFormat;
@@ -9,11 +8,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,30 +33,28 @@ public class Main {
 	private static final PrintStream out = System.out;
 	private static Throwable pullerError = null;
 
-	private static final Set<String> validArgs = new HashSet<String>();
+	private static final Set<String> validArgs;
 	static {
-		validArgs.add("help");
-		validArgs.add("db");
-		validArgs.add("stop-at-page");
-		validArgs.add("start-at-page");
-		validArgs.add("threads");
-		validArgs.add("settings");
-		validArgs.add("latest");
-		validArgs.add("update");
-		validArgs.add("query");
+		Set<String> set = new HashSet<String>();
+		set.add("help");
+		set.add("db");
+		set.add("stop-at-page");
+		set.add("start-at-page");
+		set.add("threads");
+		set.add("settings");
+		set.add("latest");
+		set.add("update");
+		set.add("query");
+		set.add("profile");
+		set.add("profile-dir");
 		//TODO add "--version" argument
-		//TODO '--profile=NAME' argument
+		validArgs = Collections.unmodifiableSet(set);
 	}
 
 	public static void main(String[] args) throws Throwable {
-		//create the config folder in the user's home directory
-		File config = new File(System.getProperty("user.home"), ".emc-shopkeeper");
-		if (!config.exists() && !config.mkdir()) {
-			throw new IOException("Could not create config folder: " + config.getAbsolutePath());
-		}
-
-		File defaultDbFolder = new File(config, "db");
-		File defaultSettingsFile = new File(config, "settings.properties");
+		LogManager.getLogManager().reset();
+		File defaultProfileRootDir = new File(System.getProperty("user.home"), ".emc-shopkeeper");
+		String defaultProfile = "default";
 		int defaultThreads = 4;
 		int defaultStartPage = 1;
 
@@ -72,27 +71,29 @@ public class Main {
 			"--update\n" +
 			"  Updates the database with the latest transactions.\n" +
 			"--query=QUERY\n" +
-			"  Shows the net gains/losses of each item.\n" +
+			"  Shows the net gains/losses of each item.  Examples:\n" +
 			"  All data:           --query\n" +
 			"  Today's data:       --query=\"today\"\n" +
 			"  Three days of data: --query=\"2013-03-07 to 2013-03-09\"\n" +
 			"  Data up to today:   --query=\"2013-03-07 to today\"\n" +
+			"--profile=PROFILE\n" +
+			"  The profile to use (defaults to \"" + defaultProfile + "\").\n" +
+			"--profile-dir=DIR\n" +
+			"  The path to the directory that contains all the profiles\n" +
+			"  (defaults to \"" + defaultProfileRootDir.getAbsolutePath() + "\").\n" +
 			"--db=PATH\n" +
-			"  Specifies the location of the database.\n" +
-			"  Defaults to " + defaultDbFolder.getAbsolutePath() + "\n" +
+			"  Overrides the database location (stored in the profile by default).\n" +
 			"--settings=PATH\n" +
-			"  Specifies the location of the application settings file, which contains the\n" +
-			"  cookie values.\n" +
-			"  Defaults to " + defaultSettingsFile.getAbsolutePath() + "\n" +
+			"  Overrides the settings file location (stored in the profile by default).\n" +
 			"--threads=NUM\n" +
-			"  Specifies the number of pages to parse at once.\n" +
-			"  Defaults to " + defaultThreads + "\n" +
+			"  Specifies the number of transaction history pages that will be parsed at\n" +
+			"  once during an update (defaults to " + defaultThreads + ").\n" +
 			"--start-at-page=PAGE\n" +
-			"  Specifies the page number to start at.\n" +
-			"  Defaults to " + defaultStartPage + "\n" +
+			"  Specifies the transaction history page number to start at during an update\n" +
+			"  (defaults to " + defaultStartPage + ").\n" +
 			"--stop-at-page=PAGE\n" +
-			"  Specifies the page number to stop parsing at.\n" +
-			"  Defaults to the last transaction page.\n" +
+			"  Specifies the transaction history page number to stop at during an update\n" +
+			"  (defaults to the last page).\n" +
 			"--help\n" +
 			"  Prints this help message.\n"
 			);
@@ -102,30 +103,64 @@ public class Main {
 
 		Collection<String> invalidArgs = arguments.invalidArgs(validArgs);
 		if (!invalidArgs.isEmpty()) {
-			out.println("The following arguments are invalid:");
+			out.println("Error: The following arguments are invalid:");
 			for (String invalidArg : invalidArgs) {
 				out.println("  " + invalidArg);
 			}
 			System.exit(1);
 		}
 
-		String settingsPath = arguments.value(null, "settings");
-		File settingsFile = (settingsPath == null) ? defaultSettingsFile : new File(settingsPath);
+		String profileRootDirStr = arguments.value(null, "profile-dir");
+		File profileRootDir = (profileRootDirStr == null) ? defaultProfileRootDir : new File(profileRootDirStr);
+
+		String profile = arguments.value(null, "profile");
+		if (profile == null) {
+			profile = defaultProfile;
+		}
+		File profileDir = new File(profileRootDir, profile);
+
+		if (profileDir.exists()) {
+			if (!profileDir.isDirectory()) {
+				out.println("Error: Profile directory is not a directory!  Path: " + profileDir.getAbsolutePath());
+				System.exit(1);
+			}
+		} else {
+			logger.info("Creating new profile: " + profileDir.getAbsolutePath());
+			if (!profileDir.mkdirs()) {
+				out.println("Error: Could not create profile folder!  Path: " + profileDir.getAbsolutePath());
+				System.exit(1);
+			}
+		}
+
+		String settingsFileStr = arguments.value(null, "settings");
+		File settingsFile = (settingsFileStr == null) ? new File(profileDir, "settings.properties") : new File(settingsFileStr);
 		Settings settings = new Settings(settingsFile);
 
-		String dbPath = arguments.value(null, "db");
-		File dbFolder = (dbPath == null) ? defaultDbFolder : new File(dbPath);
+		String dbDirStr = arguments.value(null, "db");
+		File dbDir = (dbDirStr == null) ? new File(profileDir, "db") : new File(dbDirStr);
+
 		Integer stopAtPage = arguments.valueInt(null, "stop-at-page");
 		if (stopAtPage != null && stopAtPage < 1) {
 			out.println("Error: \"stop-at-page\" must be greater than 0.");
+			System.exit(1);
 		}
+
 		int startAtPage = arguments.valueInt(null, "start-at-page", defaultStartPage);
 		if (startAtPage < 1) {
 			out.println("Error: \"start-at-page\" must be greater than 0.");
+			System.exit(1);
 		}
+
 		int threadCount = arguments.valueInt(null, "threads", defaultThreads);
+		if (threadCount < 1) {
+			out.println("Error: \"threads\" must be greater than 0.");
+			System.exit(1);
+		}
+
 		boolean latest = arguments.exists(null, "latest");
+
 		boolean update = arguments.exists(null, "update");
+
 		String query;
 		if (arguments.exists(null, "query")) {
 			query = arguments.value(null, "query");
@@ -137,11 +172,11 @@ public class Main {
 		}
 
 		if (!latest && !update && query == null) {
-			out.println("Nothing to do.  Use \"--update\" to update the database or \"--query\" to query it.");
+			out.println("Nothing to do.  Use \"--update\" to update the database or \"--query\" to query it.\nSee \"--help\" for a list of commands.");
 			System.exit(1);
 		}
 
-		final DbDao dao = initDao(dbFolder);
+		final DbDao dao = initDao(dbDir);
 		ShopTransaction latestTransactionFromDb = dao.getLatestTransaction();
 
 		if (latest) {
@@ -160,6 +195,24 @@ public class Main {
 		}
 
 		if (update) {
+			if (latestTransactionFromDb == null) {
+				//@formatter:off
+				out.println(
+				"================================================================================\n" +
+				"NOTE: This is the first time you are running an update.  To ensure accurate\n" +
+				"results, it is recommended that you set MOVE PERMS to FALSE on your res for this\n" +
+				"first update.\n" +
+				"                                /res set move false\n" +
+				"\n" +
+				"This could take up to 30 MINUTES depending on your transaction history size.\n" +
+				"--------------------------------------------------------------------------------");
+				//@formatter:on
+				String ready = System.console().readLine("Are you ready to start? (y/n) ");
+				if (!"y".equalsIgnoreCase(ready)) {
+					out.println("Goodbye.");
+					return;
+				}
+			}
 			EmcSession session = settings.getSession();
 			boolean repeat;
 			do {
@@ -191,10 +244,17 @@ public class Main {
 				puller.setStartAtPage(startAtPage);
 
 				TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
+					int transactionCount = 0;
+					int pageCount = 0;
+					NumberFormat nf = NumberFormat.getInstance();
+
 					@Override
-					public void onPageScraped(int page, List<ShopTransaction> transactions) {
+					public synchronized void onPageScraped(int page, List<ShopTransaction> transactions) {
 						try {
 							dao.insertTransactions(transactions);
+							pageCount++;
+							transactionCount += transactions.size();
+							out.print("\rPages: " + nf.format(pageCount) + " | Transactions: " + nf.format(transactionCount));
 						} catch (SQLException e) {
 							pullerError = e;
 							puller.cancel();

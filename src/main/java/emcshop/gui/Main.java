@@ -39,14 +39,14 @@ public class Main {
 	//-splash:src/main/resources/emcshop/gui/splash.png
 	public static void main(String[] args) throws Exception {
 		//create the config folder in the user's home directory
-		//File config = new File(System.getProperty("user.home"), ".emc-shopkeeper");
-		File config = new File(".emc-shopkeeper2");
-		if (!config.exists() && !config.mkdir()) {
-			throw new IOException("Could not create config folder: " + config.getAbsolutePath());
+		//File profileDir = new File(System.getProperty("user.home"), ".emc-shopkeeper/default");
+		File profileDir = new File(".emc-shopkeeper/default");
+		if (!profileDir.exists() && !profileDir.mkdirs()) {
+			throw new IOException("Could not create config folder: " + profileDir.getAbsolutePath());
 		}
 
-		File defaultDbFolder = new File(config, "db");
-		File defaultSettingsFile = new File(config, "settings.properties");
+		File defaultDbFolder = new File(profileDir, "db");
+		File defaultSettingsFile = new File(profileDir, "settings.properties");
 
 		Arguments arguments = new Arguments(args);
 
