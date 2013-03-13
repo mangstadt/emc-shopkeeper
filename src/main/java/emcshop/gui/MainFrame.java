@@ -1,6 +1,7 @@
 package emcshop.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -295,51 +296,57 @@ public class MainFrame extends JFrame implements WindowListener {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 			NumberFormat nf = NumberFormat.getNumberInstance();
-			JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			JLabel label = null;
 
 			ItemGroup group = (ItemGroup) value;
 			switch (col) {
 			case 0:
 				//TODO add the rest of the icons
 				ImageIcon img = getItemImage(group.getItem());
-				panel.add(new JLabel(group.getItem(), img, SwingConstants.LEFT));
+				label = new JLabel(group.getItem(), img, SwingConstants.LEFT);
 				break;
 			case 1:
 				if (group.getSoldQuantity() == 0) {
-					panel.add(new JLabel("-"));
+					label = new JLabel("-");
 				} else {
-					panel.add(new JLabel(nf.format(group.getSoldQuantity()) + " / " + nf.format(group.getSoldAmount()) + "r"));
+					label = new JLabel(nf.format(group.getSoldQuantity()) + " / " + nf.format(group.getSoldAmount()) + "r");
 				}
 				break;
 			case 2:
 				if (group.getBoughtQuantity() == 0) {
-					panel.add(new JLabel("-"));
+					label = new JLabel("-");
 				} else {
-					panel.add(new JLabel(nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r"));
+					label = new JLabel(nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r");
 				}
 				break;
 			case 3:
-				JLabel qtyLbl;
+				StringBuilder sb = new StringBuilder();
+				sb.append("<html>");
+
 				if (group.getNetQuantity() < 0) {
-					qtyLbl = new JLabel("<html><font color=red>" + nf.format(group.getNetQuantity()) + "</font></html>");
+					sb.append("<font color=red>" + nf.format(group.getNetQuantity()) + "</font>");
 				} else {
-					qtyLbl = new JLabel("<html><font color=green>+" + nf.format(group.getNetQuantity()) + "</font></html>");
+					sb.append("<font color=green>+" + nf.format(group.getNetQuantity()) + "</font>");
 				}
-				panel.add(qtyLbl);
 
-				panel.add(new JLabel("/"));
+				sb.append(" / ");
 
-				JLabel amtLbl;
 				if (group.getNetAmount() < 0) {
-					amtLbl = new JLabel("<html><font color=red>" + nf.format(group.getNetAmount()) + "r</font></html>");
+					sb.append("<font color=red>" + nf.format(group.getNetAmount()) + "r</font>");
 				} else {
-					amtLbl = new JLabel("<html><font color=green>+" + nf.format(group.getNetAmount()) + "r</font></html>");
+					sb.append("<font color=green>+" + nf.format(group.getNetAmount()) + "r</font>");
 				}
-				panel.add(amtLbl);
-				break;
+
+				sb.append("</html>");
+
+				label = new JLabel(sb.toString());
 			}
 
-			return panel;
+			Color color = (row % 2 == 0) ? new Color(255, 255, 255) : new Color(240, 240, 240);
+			label.setOpaque(true);
+			label.setBackground(color);
+
+			return label;
 		}
 
 		private ImageIcon getItemImage(String item) {
