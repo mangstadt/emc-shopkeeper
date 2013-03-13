@@ -279,6 +279,7 @@ public class Main {
 					throw result.getThrown();
 				case COMPLETED:
 					dao.commit();
+					out.println("\n" + result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
 					logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
 					break;
 				}
