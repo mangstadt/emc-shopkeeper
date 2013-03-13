@@ -151,7 +151,7 @@ public class TransactionPuller {
 						break;
 					}
 
-					logger.info("Getting page " + page + ".");
+					logger.fine("Getting page " + page + ".");
 					Document document = getPage(page);
 					TransactionPage transactionPage = new TransactionPage(document);
 					List<ShopTransaction> transactions = transactionPage.getShopTransactions();
