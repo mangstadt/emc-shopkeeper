@@ -116,7 +116,7 @@ public class Main {
 
 		DbDao dao;
 		try {
-			dao = new DirbyEmbeddedDbDao(new File(dbFolder, "data"), listener);
+			dao = new DirbyEmbeddedDbDao(dbFolder, listener);
 		} catch (SQLException e) {
 			if ("XJ040".equals(e.getSQLState())) {
 				JOptionPane.showMessageDialog(null, "EMC Shopkeeper is already running.", "Already running", JOptionPane.ERROR_MESSAGE);

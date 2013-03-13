@@ -176,7 +176,7 @@ public class Main {
 			System.exit(1);
 		}
 
-		final DbDao dao = initDao(dbDir);
+		final DbDao dao = new DirbyEmbeddedDbDao(dbDir);
 		ShopTransaction latestTransactionFromDb = dao.getLatestTransaction();
 
 		if (latest) {
@@ -403,9 +403,5 @@ public class Main {
 		} else {
 			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(s);
 		}
-	}
-
-	private static DbDao initDao(File folder) throws SQLException {
-		return new DirbyEmbeddedDbDao(new File(folder, "data"));
 	}
 }
