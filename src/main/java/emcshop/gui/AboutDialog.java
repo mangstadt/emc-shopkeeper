@@ -38,9 +38,9 @@ public class AboutDialog extends JDialog {
 		JLabel label = new JLabel(
 		"<html><center>" +
 		"<font size=4><b>EMC Shopkeeper</b></font><br>" +
-		"Version 0.1<br>" +
+		"Version " + emcshop.cli.Main.VERSION + "<br>" +
 		"Copyright 2013 Michael Angstadt<br>" +
-		"<u>http://github.com/mangstadt/emc-shopkeeper</u><br>" +
+		"<u>" + emcshop.cli.Main.URL + "</u><br>" +
 		"<br>" +
 		"<font size=2>This program is a fan creation and is not affiliated with<br>Minecraft (copyright Mojang) or Empire Minecraft (copyright Kalland Labs).</font><br>" +
 		"<br>" +

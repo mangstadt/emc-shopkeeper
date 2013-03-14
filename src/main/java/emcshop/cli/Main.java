@@ -1,6 +1,8 @@
 package emcshop.cli;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.sql.SQLException;
 import java.text.NumberFormat;
@@ -13,10 +15,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import emcshop.EmcSession;
@@ -33,6 +37,31 @@ public class Main {
 	private static final PrintStream out = System.out;
 	private static Throwable pullerError = null;
 
+	/**
+	 * The version of the app.
+	 */
+	public static final String VERSION;
+
+	/**
+	 * The project webpage.
+	 */
+	public static final String URL;
+
+	static {
+		InputStream in = null;
+		try {
+			in = Main.class.getResourceAsStream("/info.properties");
+			Properties props = new Properties();
+			props.load(in);
+			VERSION = props.getProperty("version");
+			URL = props.getProperty("url");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			IOUtils.closeQuietly(in);
+		}
+	}
+
 	private static final Set<String> validArgs;
 	static {
 		Set<String> set = new HashSet<String>();
@@ -47,7 +76,7 @@ public class Main {
 		set.add("query");
 		set.add("profile");
 		set.add("profile-dir");
-		//TODO add "--version" argument
+		set.add("version");
 		validArgs = Collections.unmodifiableSet(set);
 	}
 
@@ -94,6 +123,8 @@ public class Main {
 			"--stop-at-page=PAGE\n" +
 			"  Specifies the transaction history page number to stop at during an update\n" +
 			"  (defaults to the last page).\n" +
+			"--version\n" +
+			"  Prints the version of this program.\n" +
 			"--help\n" +
 			"  Prints this help message.\n"
 			);
@@ -108,6 +139,11 @@ public class Main {
 				out.println("  " + invalidArg);
 			}
 			System.exit(1);
+		}
+
+		if (arguments.exists(null, "version")) {
+			out.println(VERSION);
+			return;
 		}
 
 		String profileRootDirStr = arguments.value(null, "profile-dir");
