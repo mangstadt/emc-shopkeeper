@@ -326,7 +326,6 @@ public class MainFrame extends JFrame implements WindowListener {
 			ItemGroup group = (ItemGroup) value;
 			switch (col) {
 			case 0:
-				//TODO add the rest of the icons
 				ImageIcon img = ImageManager.getItemImage(group.getItem());
 				label = new JLabel(group.getItem(), img, SwingConstants.LEFT);
 				break;
