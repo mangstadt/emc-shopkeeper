@@ -13,9 +13,9 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.UIManager;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.gui.images.ImageManager;
 
 @SuppressWarnings("serial")
 public class FirstUpdateDialog extends JDialog implements WindowListener {
@@ -59,7 +59,7 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 			}
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		JLabel warningIcon = new JLabel(UIManager.getIcon("OptionPane.warningIcon"));
+		JLabel warningIcon = new JLabel(ImageManager.getWarningIcon());
 
 		//@formatter:off
 		JLabel text = new JLabel(
@@ -67,7 +67,7 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		"<b><center>This is the first time you are updating your transactions!!</center></b><br>" +
 		"If anyone buys/sells from your shop during the update, <font color=red><b>it will skew the results</b></font>.  Therefore, if you have a large transaction history, it is highly recommended that you <font color=red><b>disable move perms</b></font> on your res before starting the update.<br><br>" +
 		"<center><b><font size=5><code>/res set move false</code></font></b></center><br>" +
-		"It takes about 1 minute to process 200 pages of transactions. Click \"Continue\" when you are ready." +
+		"It takes approximately 1 minute to process 200 pages of transactions. Click \"Continue\" when you are ready." +
 		"</div></html>");
 		//@formatter:on
 

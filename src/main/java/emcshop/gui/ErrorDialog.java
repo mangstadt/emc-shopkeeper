@@ -15,11 +15,12 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.swing.UIManager;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import emcshop.gui.images.ImageManager;
 
 /**
  * Generic dialog for displaying uncaught exceptions.
@@ -50,7 +51,7 @@ public class ErrorDialog extends JDialog {
 		displayText.setWrapStyleWord(true);
 
 		//http://stackoverflow.com/questions/1196797/where-are-these-error-and-warning-icons-as-a-java-resource
-		JLabel errorIcon = new JLabel(UIManager.getIcon("OptionPane.errorIcon"));
+		JLabel errorIcon = new JLabel(ImageManager.getErrorIcon());
 
 		JTextArea stackTrace = new JTextArea(ExceptionUtils.getStackTrace(thrown));
 		stackTrace.setEditable(false);

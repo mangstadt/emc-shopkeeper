@@ -10,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
-import java.net.URL;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -50,6 +49,7 @@ import com.michaelbaranov.microba.calendar.DatePicker;
 import emcshop.EmcSession;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
+import emcshop.gui.images.ImageManager;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
@@ -140,8 +140,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private void createWidgets() {
-		ImageIcon img = new ImageIcon(getClass().getResource("update.png"));
-		update = new JButton("Update Transactions", img);
+		update = new JButton("Update Transactions", ImageManager.getUpdate());
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -189,8 +188,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		groupBy.addItem("Item");
 		groupBy.addItem("Player");
 
-		img = new ImageIcon(getClass().getResource("search.png"));
-		show = new JButton("Show Transactions", img);
+		show = new JButton("Show Transactions", ImageManager.getSearch());
 		show.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -329,7 +327,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			switch (col) {
 			case 0:
 				//TODO add the rest of the icons
-				ImageIcon img = getItemImage(group.getItem());
+				ImageIcon img = ImageManager.getItemImage(group.getItem());
 				label = new JLabel(group.getItem(), img, SwingConstants.LEFT);
 				break;
 			case 1:
@@ -374,16 +372,6 @@ public class MainFrame extends JFrame implements WindowListener {
 			label.setBackground(color);
 
 			return label;
-		}
-
-		private ImageIcon getItemImage(String item) {
-			item = item.toLowerCase().replace(" ", "_");
-			URL url = getClass().getResource("items/" + item + ".png");
-			if (url == null) {
-				url = getClass().getResource("items/_empty.png");
-			}
-			ImageIcon img = new ImageIcon(url);
-			return new ImageIcon(img.getImage().getScaledInstance(16, 16, java.awt.Image.SCALE_SMOOTH));
 		}
 	}
 

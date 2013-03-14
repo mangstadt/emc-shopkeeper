@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -22,6 +21,7 @@ import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.EmcSession;
+import emcshop.gui.images.ImageManager;
 
 /**
  * Dialog for logging the user into EMC.
@@ -100,7 +100,7 @@ public class LoginDialog extends JDialog {
 		messagePanel.add(new JLabel(" "));
 		username = new JTextField();
 		password = new JPasswordField();
-		loading = new JLabel("Logging in...", new ImageIcon(getClass().getResource("loading-sml.gif")), SwingConstants.CENTER);
+		loading = new JLabel("Logging in...", ImageManager.getLoadingSmall(), SwingConstants.CENTER);
 		error = new JLabel() {
 			@Override
 			public void setText(String text) {

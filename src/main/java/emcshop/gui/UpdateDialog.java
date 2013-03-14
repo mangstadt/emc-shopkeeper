@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -26,6 +25,7 @@ import emcshop.EmcSession;
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
+import emcshop.gui.images.ImageManager;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
@@ -195,7 +195,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		setLayout(new MigLayout());
 
 		JPanel p = new JPanel(new FlowLayout());
-		p.add(new JLabel(new ImageIcon(getClass().getResource("loading.gif"))));
+		p.add(new JLabel(ImageManager.getLoading()));
 		p.add(new JLabel("<html><b>Updating...</b></html>"));
 		add(p, "span 2, align center, wrap");
 
