@@ -64,10 +64,11 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		//@formatter:off
 		JLabel text = new JLabel(
 		"<html><div width=600>" +
-		"<b><center>This is the first time you are updating your transactions!!</center></b><br>" +
-		"If anyone buys/sells from your shop during the update, <font color=red><b>it will skew the results</b></font>.  Therefore, if you have a large transaction history, it is highly recommended that you <font color=red><b>disable move perms</b></font> on your res before starting the update.<br><br>" +
+		"<b><u><center>This is the first time you are running an update!!</center></u></b><br>" +
+		"To ensure accurate results, it is recommended that you <font color=red><b>set move perms to false</b></font> on your res.<br><br>" +
 		"<center><b><font size=5><code>/res set move false</code></font></b></center><br>" +
-		"It takes approximately 1 minute to process 200 pages of transactions. Click \"Continue\" when you are ready." +
+		"<center>This could take up to <font color=red><b>30 minutes</b></font> depending on your transaction history size.<br>" +
+		"Click \"Continue\" when you are ready.</center>" +
 		"</div></html>");
 		//@formatter:on
 
