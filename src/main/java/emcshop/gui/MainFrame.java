@@ -125,6 +125,12 @@ public class MainFrame extends JFrame implements WindowListener {
 			help.setMnemonic(KeyEvent.VK_H);
 
 			JMenuItem about = new JMenuItem("About");
+			about.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					AboutDialog.show(MainFrame.this);
+				}
+			});
 			help.add(about);
 
 			menuBar.add(help);
