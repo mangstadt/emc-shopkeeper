@@ -1,9 +1,14 @@
-package emcshop.cli;
+package emcshop;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.SplashScreen;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -20,15 +25,18 @@ import java.util.Set;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import emcshop.EmcSession;
-import emcshop.ShopTransaction;
-import emcshop.TransactionPuller;
+import emcshop.cli.Arguments;
 import emcshop.db.DbDao;
+import emcshop.db.DbListener;
 import emcshop.db.DirbyEmbeddedDbDao;
 import emcshop.db.ItemGroup;
+import emcshop.gui.ErrorDialog;
+import emcshop.gui.MainFrame;
 import emcshop.util.Settings;
 
 public class Main {
@@ -75,13 +83,21 @@ public class Main {
 		set.add("update");
 		set.add("query");
 		set.add("profile");
+		set.add("p");
 		set.add("profile-dir");
 		set.add("version");
 		validArgs = Collections.unmodifiableSet(set);
 	}
 
+	private static File profileRootDir, profileDir, dbDir;
+	private static String profile, query;
+	private static Settings settings;
+	private static Integer stopAtPage;
+	private static int startAtPage, threadCount;
+	private static boolean latest, update;
+
 	public static void main(String[] args) throws Throwable {
-		LogManager.getLogManager().reset();
+		setupLogger();
 		File defaultProfileRootDir = new File(System.getProperty("user.home"), ".emc-shopkeeper");
 		String defaultProfile = "default";
 		int defaultThreads = 4;
@@ -89,23 +105,25 @@ public class Main {
 
 		Arguments arguments = new Arguments(args);
 
+		//print help
 		if (arguments.exists(null, "help")) {
 			//@formatter:off
 			out.print(
-			"EMC Shopkeeper\n" +
-			"by shavingfoam\n" +
+			"EMC Shopkeeper v" + VERSION + "\n" +
+			"by Michael Angstadt\n" +
+			URL + "\n" +
 			"\n" +
 			"--latest\n" +
-			"  Prints out the latest transaction from the database.\n" +
+			"  (CLI only) Prints out the latest transaction from the database.\n" +
 			"--update\n" +
-			"  Updates the database with the latest transactions.\n" +
+			"  (CLI only) Updates the database with the latest transactions.\n" +
 			"--query=QUERY\n" +
-			"  Shows the net gains/losses of each item.  Examples:\n" +
+			"  (CLI only) Shows the net gains/losses of each item.  Examples:\n" +
 			"  All data:           --query\n" +
 			"  Today's data:       --query=\"today\"\n" +
 			"  Three days of data: --query=\"2013-03-07 to 2013-03-09\"\n" +
 			"  Data up to today:   --query=\"2013-03-07 to today\"\n" +
-			"--profile=PROFILE\n" +
+			"-p PROFILE, --profile=PROFILE\n" +
 			"  The profile to use (defaults to \"" + defaultProfile + "\").\n" +
 			"--profile-dir=DIR\n" +
 			"  The path to the directory that contains all the profiles\n" +
@@ -115,23 +133,24 @@ public class Main {
 			"--settings=PATH\n" +
 			"  Overrides the settings file location (stored in the profile by default).\n" +
 			"--threads=NUM\n" +
-			"  Specifies the number of transaction history pages that will be parsed at\n" +
-			"  once during an update (defaults to " + defaultThreads + ").\n" +
+			"  (CLI only) Specifies the number of transaction history pages that will be\n" +
+			"  parsed at once during an update (defaults to " + defaultThreads + ").\n" +
 			"--start-at-page=PAGE\n" +
-			"  Specifies the transaction history page number to start at during an update\n" +
-			"  (defaults to " + defaultStartPage + ").\n" +
+			"  (CLI only) Specifies the transaction history page number to start at during\n" +
+			"  an update (defaults to " + defaultStartPage + ").\n" +
 			"--stop-at-page=PAGE\n" +
-			"  Specifies the transaction history page number to stop at during an update\n" +
-			"  (defaults to the last page).\n" +
+			"  (CLI only) Specifies the transaction history page number to stop at during\n" +
+			"  an update (defaults to the last page).\n" +
 			"--version\n" +
-			"  Prints the version of this program.\n" +
+			"  (CLI only) Prints the version of this program.\n" +
 			"--help\n" +
-			"  Prints this help message.\n"
+			"  (CLI only) Prints this help message.\n"
 			);
 			//@formatter:on
 			return;
 		}
 
+		//check for invalid arguments
 		Collection<String> invalidArgs = arguments.invalidArgs(validArgs);
 		if (!invalidArgs.isEmpty()) {
 			out.println("Error: The following arguments are invalid:");
@@ -141,20 +160,24 @@ public class Main {
 			System.exit(1);
 		}
 
+		//print version
 		if (arguments.exists(null, "version")) {
 			out.println(VERSION);
 			return;
 		}
 
+		//get profile root dir
 		String profileRootDirStr = arguments.value(null, "profile-dir");
-		File profileRootDir = (profileRootDirStr == null) ? defaultProfileRootDir : new File(profileRootDirStr);
+		profileRootDir = (profileRootDirStr == null) ? defaultProfileRootDir : new File(profileRootDirStr);
 
-		String profile = arguments.value(null, "profile");
+		//get profile
+		profile = arguments.value(null, "profile");
 		if (profile == null) {
 			profile = defaultProfile;
 		}
-		File profileDir = new File(profileRootDir, profile);
 
+		//get profile dir
+		profileDir = new File(profileRootDir, profile);
 		if (profileDir.exists()) {
 			if (!profileDir.isDirectory()) {
 				out.println("Error: Profile directory is not a directory!  Path: " + profileDir.getAbsolutePath());
@@ -168,36 +191,43 @@ public class Main {
 			}
 		}
 
+		//load settings
 		String settingsFileStr = arguments.value(null, "settings");
 		File settingsFile = (settingsFileStr == null) ? new File(profileDir, "settings.properties") : new File(settingsFileStr);
-		Settings settings = new Settings(settingsFile);
+		settings = new Settings(settingsFile);
 
+		//get database dir
 		String dbDirStr = arguments.value(null, "db");
-		File dbDir = (dbDirStr == null) ? new File(profileDir, "db") : new File(dbDirStr);
+		dbDir = (dbDirStr == null) ? new File(profileDir, "db") : new File(dbDirStr);
 
-		Integer stopAtPage = arguments.valueInt(null, "stop-at-page");
+		//get stop at page
+		stopAtPage = arguments.valueInt(null, "stop-at-page");
 		if (stopAtPage != null && stopAtPage < 1) {
 			out.println("Error: \"stop-at-page\" must be greater than 0.");
 			System.exit(1);
 		}
 
-		int startAtPage = arguments.valueInt(null, "start-at-page", defaultStartPage);
+		//get start at page
+		startAtPage = arguments.valueInt(null, "start-at-page", defaultStartPage);
 		if (startAtPage < 1) {
 			out.println("Error: \"start-at-page\" must be greater than 0.");
 			System.exit(1);
 		}
 
-		int threadCount = arguments.valueInt(null, "threads", defaultThreads);
+		//get thread count
+		threadCount = arguments.valueInt(null, "threads", defaultThreads);
 		if (threadCount < 1) {
 			out.println("Error: \"threads\" must be greater than 0.");
 			System.exit(1);
 		}
 
-		boolean latest = arguments.exists(null, "latest");
+		//get latest flag
+		latest = arguments.exists(null, "latest");
 
-		boolean update = arguments.exists(null, "update");
+		//get update flag
+		update = arguments.exists(null, "update");
 
-		String query;
+		//get query
 		if (arguments.exists(null, "query")) {
 			query = arguments.value(null, "query");
 			if (query == null) {
@@ -208,10 +238,18 @@ public class Main {
 		}
 
 		if (!latest && !update && query == null) {
-			out.println("Nothing to do.  Use \"--update\" to update the database or \"--query\" to query it.\nSee \"--help\" for a list of commands.");
-			System.exit(1);
+			launchGui();
+		} else {
+			launchCli();
 		}
+	}
 
+	private static void setupLogger() {
+		//TODO write to file
+		LogManager.getLogManager().reset();
+	}
+
+	private static void launchCli() throws Throwable {
 		final DbDao dao = new DirbyEmbeddedDbDao(dbDir);
 		ShopTransaction latestTransactionFromDb = dao.getLatestTransaction();
 
@@ -233,16 +271,16 @@ public class Main {
 		if (update) {
 			if (latestTransactionFromDb == null) {
 				//@formatter:off
-				out.println(
-				"================================================================================\n" +
-				"NOTE: This is the first time you are running an update.  To ensure accurate\n" +
-				"results, it is recommended that you set MOVE PERMS to FALSE on your res for this\n" +
-				"first update.\n" +
-				"                                /res set move false\n" +
-				"\n" +
-				"This could take up to 30 MINUTES depending on your transaction history size.\n" +
-				"--------------------------------------------------------------------------------");
-				//@formatter:on
+			out.println(
+			"================================================================================\n" +
+			"NOTE: This is the first time you are running an update.  To ensure accurate\n" +
+			"results, it is recommended that you set MOVE PERMS to FALSE on your res for this\n" +
+			"first update.\n" +
+			"                                /res set move false\n" +
+			"\n" +
+			"This could take up to 30 MINUTES depending on your transaction history size.\n" +
+			"--------------------------------------------------------------------------------");
+			//@formatter:on
 				String ready = System.console().readLine("Are you ready to start? (y/n) ");
 				if (!"y".equalsIgnoreCase(ready)) {
 					out.println("Goodbye.");
@@ -438,6 +476,85 @@ public class Main {
 			return new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(s);
 		} else {
 			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(s);
+		}
+	}
+
+	private static void launchGui() throws SQLException {
+		final SplashScreenWrapper splash = new SplashScreenWrapper();
+		splash.setMessage("Starting database...");
+
+		DbListener listener = new DbListener() {
+			@Override
+			public void onCreate() {
+				splash.setMessage("Creating database...");
+			}
+
+			@Override
+			public void onBackup(int oldVersion, int newVersion) {
+				splash.setMessage("Preparing for database migration...");
+			}
+
+			@Override
+			public void onMigrate(int oldVersion, int newVersion) {
+				splash.setMessage("Migrating database...");
+			}
+		};
+
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread thread, Throwable thrown) {
+				ErrorDialog.show(null, "An error occurred.", thrown);
+			}
+		});
+
+		DbDao dao;
+		try {
+			dao = new DirbyEmbeddedDbDao(dbDir, listener);
+		} catch (SQLException e) {
+			if ("XJ040".equals(e.getSQLState())) {
+				JOptionPane.showMessageDialog(null, "EMC Shopkeeper is already running.", "Already running", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			throw e;
+		}
+
+		MainFrame frame = new MainFrame(settings, dao);
+		splash.close();
+		frame.setVisible(true);
+	}
+
+	private static class SplashScreenWrapper {
+		private final SplashScreen splash;
+		private final Graphics2D gfx;
+
+		public SplashScreenWrapper() {
+			splash = SplashScreen.getSplashScreen();
+			if (splash == null) {
+				logger.warning("Splash screen not configured to display.");
+				gfx = null;
+			} else {
+				gfx = splash.createGraphics();
+				if (gfx == null) {
+					logger.warning("Could not get Graphics2D object from splash screen.");
+				}
+			}
+		}
+
+		public void setMessage(String message) {
+			if (gfx != null) {
+				gfx.setComposite(AlphaComposite.Clear);
+				gfx.fillRect(40, 60, 200, 40);
+				gfx.setPaintMode();
+				gfx.setColor(Color.BLACK);
+				gfx.drawString(message, 40, 80);
+				splash.update();
+			}
+		}
+
+		public void close() {
+			if (splash != null) {
+				splash.close();
+			}
 		}
 	}
 }

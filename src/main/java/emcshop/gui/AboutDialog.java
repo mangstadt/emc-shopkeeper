@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.Main;
 
 /**
  * Displays an about dialog.
@@ -38,9 +39,9 @@ public class AboutDialog extends JDialog {
 		JLabel label = new JLabel(
 		"<html><center>" +
 		"<font size=4><b>EMC Shopkeeper</b></font><br>" +
-		"Version " + emcshop.cli.Main.VERSION + "<br>" +
+		"Version " + Main.VERSION + "<br>" +
 		"Copyright 2013 Michael Angstadt<br>" +
-		"<u>" + emcshop.cli.Main.URL + "</u><br>" +
+		"<u>" + Main.URL + "</u><br>" +
 		"<br>" +
 		"<font size=2>This program is a fan creation and is not affiliated with<br>Minecraft (copyright Mojang) or Empire Minecraft (copyright Kalland Labs).</font><br>" +
 		"<br>" +
