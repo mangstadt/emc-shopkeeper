@@ -118,9 +118,9 @@ public class LoginDialog extends JDialog {
 
 		JPanel p = new JPanel(new MigLayout("insets 0"));
 		p.add(new JLabel("Username:"), "align right");
-		p.add(username, "w 100, wrap");
+		p.add(username, "w 150, wrap");
 		p.add(new JLabel("Password:"), "align right");
-		p.add(password, "w 100, wrap");
+		p.add(password, "w 150, wrap");
 		add(p, "align center, wrap");
 
 		p = new JPanel(new FlowLayout());
