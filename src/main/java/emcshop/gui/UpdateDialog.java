@@ -35,6 +35,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 	private JButton cancel;
 	private JLabel transactions;
+	private JLabel pages;
 	private JLabel timerLabel;
 
 	private TransactionPuller puller;
@@ -101,14 +102,18 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						started = System.currentTimeMillis();
 
 						TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
+							NumberFormat nf = NumberFormat.getInstance();
 							int transactionCount = 0;
+							int pageCount = 0;
 
 							@Override
 							public synchronized void onPageScraped(int page, List<ShopTransaction> transactions) {
 								try {
 									dao.insertTransactions(transactions);
+									pageCount++;
 									transactionCount += transactions.size();
-									UpdateDialog.this.transactions.setText(transactionCount + "");
+									UpdateDialog.this.pages.setText(nf.format(pageCount));
+									UpdateDialog.this.transactions.setText(nf.format(transactionCount));
 								} catch (SQLException e) {
 									error = e;
 									errorDisplayMessage = "An error occurred while inserting transactions into the database.";
@@ -187,6 +192,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 			}
 		});
 
+		pages = new JLabel("0");
 		transactions = new JLabel("0");
 		timerLabel = new JLabel("...");
 	}
@@ -199,10 +205,13 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		p.add(new JLabel("<html><b>Updating...</b></html>"));
 		add(p, "span 2, align center, wrap");
 
-		add(new JLabel("Transactions found:"));
+		add(new JLabel("Pages:"));
+		add(pages, "wrap");
+
+		add(new JLabel("Transactions:"));
 		add(transactions, "wrap");
 
-		add(new JLabel("Time elapsed:"));
+		add(new JLabel("Time:"));
 		add(timerLabel, "wrap");
 
 		add(cancel, "span 2, align center");
