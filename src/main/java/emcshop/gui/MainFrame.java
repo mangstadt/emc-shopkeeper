@@ -30,7 +30,6 @@ import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -69,7 +68,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private JLabel lastUpdateDate;
 	private DatePicker toDatePicker;
 	private DatePicker fromDatePicker;
-	private JComboBox groupBy;
+	//private JComboBox groupBy;
 	private JButton show;
 	private JPanel tablePanel;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -111,22 +110,6 @@ public class MainFrame extends JFrame implements WindowListener {
 			file.add(exit);
 
 			menuBar.add(file);
-		}
-
-		{
-			JMenu tools = new JMenu("Tools");
-			tools.setMnemonic(KeyEvent.VK_T);
-
-			JMenuItem export = new JMenuItem("Export to CSV");
-			export.setEnabled(false);
-			tools.add(export);
-
-			tools.addSeparator();
-
-			JMenuItem settings = new JMenuItem("Settings");
-			tools.add(settings);
-
-			menuBar.add(tools);
 		}
 
 		{
@@ -193,9 +176,9 @@ public class MainFrame extends JFrame implements WindowListener {
 		toDatePicker.setShowTodayButton(true);
 		toDatePicker.setStripTime(true);
 
-		groupBy = new JComboBox();
-		groupBy.addItem("Item");
-		groupBy.addItem("Player");
+		//		groupBy = new JComboBox();
+		//		groupBy.addItem("Item");
+		//		groupBy.addItem("Player");
 
 		show = new JButton("Show Transactions", ImageManager.getSearch());
 		show.addActionListener(new ActionListener() {
@@ -466,8 +449,8 @@ public class MainFrame extends JFrame implements WindowListener {
 		p2.add(new JLabel("End:"), "align right");
 		p2.add(toDatePicker, "wrap");
 
-		p2.add(new JLabel("Group By:"), "align right");
-		p2.add(groupBy, "wrap");
+		//		p2.add(new JLabel("Group By:"), "align right");
+		//		p2.add(groupBy, "wrap");
 
 		p.add(p2, "wrap");
 		p.add(show, "align center");
