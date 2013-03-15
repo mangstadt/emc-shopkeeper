@@ -4,12 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -44,9 +48,14 @@ import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.apache.commons.lang3.StringUtils;
+
+import au.com.bytecode.opencsv.CSVWriter;
+
 import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.EmcSession;
+import emcshop.Main;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.gui.images.ImageManager;
@@ -200,17 +209,19 @@ public class MainFrame extends JFrame implements WindowListener {
 					@Override
 					public void run() {
 						try {
+							final Date from = fromDatePicker.getDate();
+							final Date to = toDatePicker.getDate();
+
 							final List<ItemGroup> itemGroupsList;
 							{
-								Date from = fromDatePicker.getDate();
-								Date to = toDatePicker.getDate();
+								Date toBumped = null;
 								if (to != null) {
 									Calendar c = Calendar.getInstance();
 									c.setTime(to);
 									c.add(Calendar.DATE, 1);
-									to = c.getTime();
+									toBumped = c.getTime();
 								}
-								Map<String, ItemGroup> itemGroups = dao.getItemGroups(from, to);
+								Map<String, ItemGroup> itemGroups = dao.getItemGroups(from, toBumped);
 								itemGroupsList = new ArrayList<ItemGroup>(itemGroups.values());
 								Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
 									@Override
@@ -259,14 +270,21 @@ public class MainFrame extends JFrame implements WindowListener {
 							});
 							table.setDefaultRenderer(ItemGroup.class, new ItemGroupRenderer());
 
+							final int netTotal;
+							{
+								int t = 0;
+								for (ItemGroup group : itemGroupsList) {
+									t += group.getNetAmount();
+								}
+								netTotal = t;
+							}
+
 							JScrollPane scrollPane = new JScrollPane(table);
 							table.setFillsViewportHeight(true);
 
 							String dateRangeStr;
 							{
 								DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-								Date from = fromDatePicker.getDate();
-								Date to = toDatePicker.getDate();
 								if (from == null && to == null) {
 									dateRangeStr = "entire history";
 								} else if (from == null) {
@@ -279,17 +297,34 @@ public class MainFrame extends JFrame implements WindowListener {
 									dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to <b><code>" + df.format(to) + "</b></code>";
 								}
 							}
-							tablePanel.add(new JLabel("<html><font size=5>" + dateRangeStr + "</font></html>"), "wrap");
+							tablePanel.add(new JLabel("<html><font size=5>" + dateRangeStr + "</font></html>"), "w 100%, growx");
 
-							tablePanel.add(scrollPane, "grow, w 100%, h 100%, wrap");
+							ExportComboBox export = new ExportComboBox() {
+								@Override
+								public String bbCode() {
+									return generateBBCode(itemGroupsList, netTotal, from, to);
+								}
+
+								@Override
+								public String csv() {
+									return generateCsv(itemGroupsList, netTotal, from, to);
+								}
+
+								@Override
+								public void handle(String text) {
+									Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+									StringSelection stringSelection = new StringSelection(text);
+									c.setContents(stringSelection, stringSelection);
+
+									JOptionPane.showMessageDialog(MainFrame.this, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
+								}
+							};
+							tablePanel.add(export, "align right, wrap");
+
+							tablePanel.add(scrollPane, "span 2, grow, w 100%, h 100%, wrap");
 
 							String netTotalLabel;
 							{
-								int netTotal = 0;
-								for (ItemGroup group : itemGroupsList) {
-									netTotal += group.getNetAmount();
-								}
-
 								NumberFormat nf = NumberFormat.getInstance();
 								StringBuilder sb = new StringBuilder();
 								sb.append("<html><font size=5>Net Total: <code>");
@@ -301,7 +336,7 @@ public class MainFrame extends JFrame implements WindowListener {
 								sb.append("</code></font></html>");
 								netTotalLabel = sb.toString();
 							}
-							tablePanel.add(new JLabel(netTotalLabel), "align right");
+							tablePanel.add(new JLabel(netTotalLabel), "span 2, align right");
 
 							tablePanel.validate();
 						} catch (SQLException e) {
@@ -487,5 +522,168 @@ public class MainFrame extends JFrame implements WindowListener {
 	@Override
 	public void windowOpened(WindowEvent arg0) {
 		//do nothing
+	}
+
+	private abstract class ExportComboBox extends DisabledItemsComboBox implements ActionListener {
+		private final String heading = "Copy to Clipboard";
+		private final String bbCode = "BB Code";
+		private final String csv = "CSV";
+
+		public ExportComboBox() {
+			addItem(heading);
+			addItem(bbCode);
+			addItem(csv);
+			addActionListener(this);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			String selected = (String) getSelectedItem();
+			String text = null;
+			if (selected == csv) {
+				text = csv();
+			} else if (selected == bbCode) {
+				text = bbCode();
+			}
+
+			//re-select the first element
+			setSelectedItem(heading);
+
+			if (text != null) {
+				handle(text);
+			}
+		}
+
+		public abstract String bbCode();
+
+		public abstract String csv();
+
+		public abstract void handle(String text);
+	}
+
+	protected static String generateCsv(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		StringWriter sw = new StringWriter();
+		CSVWriter writer = new CSVWriter(sw);
+
+		writer.writeNext(new String[] { (from == null) ? "" : df.format(from), (to == null) ? "" : df.format(to) });
+		writer.writeNext(new String[] { "Item", "Sold Quantity", "Sold Amount", "Bought Quantity", "Bought Amount", "Net Quantity", "Net Amount" });
+		for (ItemGroup group : itemGroups) {
+			//@formatter:off
+			writer.writeNext(new String[]{
+				group.getItem(),
+				group.getSoldQuantity() + "",
+				group.getSoldAmount() + "",
+				group.getBoughtQuantity() + "",
+				group.getBoughtAmount() + "",
+				group.getNetQuantity() + "",
+				group.getNetAmount() + ""
+			});
+			//@formatter:on
+		}
+		writer.writeNext(new String[] { "EMC Shopkeeper v" + Main.VERSION + " - " + Main.URL, "", "", "", "", "", netTotal + "" });
+
+		try {
+			writer.close();
+		} catch (IOException e) {
+			//writing to string
+		}
+		return sw.toString();
+	}
+
+	protected static String generateBBCode(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		NumberFormat nf = NumberFormat.getInstance();
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("[font=courier new]");
+
+		//date range
+		sb.append("[b]");
+		if (from == null && to == null) {
+			sb.append("entire history");
+		} else if (from == null) {
+			sb.append("up to ").append(df.format(to));
+		} else if (to == null) {
+			sb.append(df.format(from)).append(" to today");
+		} else if (from.equals(to)) {
+			sb.append(df.format(from));
+		} else {
+			sb.append(df.format(from)).append(" to ").append(df.format(to));
+		}
+		sb.append("[/b]\n");
+
+		//item table
+		sb.append("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -\n");
+		for (ItemGroup group : itemGroups) {
+			String item = group.getItem();
+			bbCodeColumn(item, 17, sb);
+			sb.append(" | ");
+
+			String sold;
+			if (group.getSoldQuantity() == 0) {
+				sold = StringUtils.repeat("- ", 8) + "-";
+			} else {
+				sold = nf.format(group.getSoldQuantity()) + " / +" + nf.format(group.getSoldAmount()) + "r";
+			}
+			bbCodeColumn(sold, 17, sb);
+			sb.append(" | ");
+
+			String bought;
+			if (group.getBoughtQuantity() == 0) {
+				bought = StringUtils.repeat("- ", 8) + "-";
+			} else {
+				bought = "+" + nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r";
+			}
+			bbCodeColumn(bought, 17, sb);
+			sb.append(" | ");
+
+			if (group.getNetQuantity() > 0) {
+				sb.append("[color=green]+");
+			} else {
+				sb.append("[color=red]");
+			}
+			sb.append(nf.format(group.getNetQuantity()));
+			sb.append("[/color] / ");
+			if (group.getNetAmount() > 0) {
+				sb.append("[color=green]+");
+			} else {
+				sb.append("[color=red]");
+			}
+			sb.append(nf.format(group.getNetAmount())).append("r");
+			sb.append("[/color]\n");
+		}
+
+		//footer and total
+		String footer = "EMC Shopkeeper v" + Main.VERSION;
+		sb.append("[url=http://github.com/mangstadt/emc-shopkeeper]").append(footer).append("[/url] ");
+		sb.append(StringUtils.repeat('_', 50 - footer.length()));
+		sb.append(" [b]Total[/b] | [b]");
+		if (netTotal > 0) {
+			sb.append("[color=green]+");
+		} else {
+			sb.append("[color=red]");
+		}
+		sb.append(nf.format(netTotal)).append("r");
+		sb.append("[/color][/b]");
+
+		sb.append("[/font]");
+
+		return sb.toString();
+	}
+
+	private static void bbCodeColumn(String text, int length, StringBuilder sb) {
+		sb.append(text);
+		if (length - text.length() == 1) {
+			sb.append('.');
+		} else {
+			for (int i = text.length(); i < length; i++) {
+				if (i == text.length()) {
+					sb.append(' ');
+				} else {
+					sb.append('.');
+				}
+			}
+		}
 	}
 }
