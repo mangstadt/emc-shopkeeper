@@ -201,155 +201,156 @@ public class MainFrame extends JFrame implements WindowListener {
 		show.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				tablePanel.removeAll();
-				tablePanel.validate();
-
-				final LoadingDialog loading = new LoadingDialog(MainFrame.this, "Loading", "Querying . . .");
-				Thread t = new Thread() {
-					@Override
-					public void run() {
-						try {
-							final Date from = fromDatePicker.getDate();
-							final Date to = toDatePicker.getDate();
-
-							final List<ItemGroup> itemGroupsList;
-							{
-								Date toBumped = null;
-								if (to != null) {
-									Calendar c = Calendar.getInstance();
-									c.setTime(to);
-									c.add(Calendar.DATE, 1);
-									toBumped = c.getTime();
-								}
-								Map<String, ItemGroup> itemGroups = dao.getItemGroups(from, toBumped);
-								itemGroupsList = new ArrayList<ItemGroup>(itemGroups.values());
-								Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
-									@Override
-									public int compare(ItemGroup a, ItemGroup b) {
-										return a.getItem().compareToIgnoreCase(b.getItem());
-									}
-								});
-							}
-
-							JTable table = new JTable();
-							table.setColumnSelectionAllowed(false);
-							table.setRowSelectionAllowed(false);
-							table.setCellSelectionEnabled(false);
-							table.setRowHeight(24);
-							table.setModel(new AbstractTableModel() {
-								String[] columns = new String[] { "Item Name", "Sold", "Bought", "Net" };
-
-								@Override
-								public int getColumnCount() {
-									return columns.length;
-								}
-
-								@Override
-								public String getColumnName(int col) {
-									return columns[col];
-								}
-
-								@Override
-								public int getRowCount() {
-									return itemGroupsList.size();
-								}
-
-								@Override
-								public Object getValueAt(int row, int col) {
-									return itemGroupsList.get(row);
-								}
-
-								public Class<?> getColumnClass(int c) {
-									return ItemGroup.class;
-								}
-
-								@Override
-								public boolean isCellEditable(int row, int col) {
-									return false;
-								}
-							});
-							table.setDefaultRenderer(ItemGroup.class, new ItemGroupRenderer());
-
-							final int netTotal;
-							{
-								int t = 0;
-								for (ItemGroup group : itemGroupsList) {
-									t += group.getNetAmount();
-								}
-								netTotal = t;
-							}
-
-							JScrollPane scrollPane = new JScrollPane(table);
-							table.setFillsViewportHeight(true);
-
-							String dateRangeStr;
-							{
-								DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-								if (from == null && to == null) {
-									dateRangeStr = "entire history";
-								} else if (from == null) {
-									dateRangeStr = "up to <b><code>" + df.format(to) + "</b></code>";
-								} else if (to == null) {
-									dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to today";
-								} else if (from.equals(to)) {
-									dateRangeStr = "<b><code>" + df.format(from) + "</b></code>";
-								} else {
-									dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to <b><code>" + df.format(to) + "</b></code>";
-								}
-							}
-							tablePanel.add(new JLabel("<html><font size=5>" + dateRangeStr + "</font></html>"), "w 100%, growx");
-
-							ExportComboBox export = new ExportComboBox() {
-								@Override
-								public String bbCode() {
-									return generateBBCode(itemGroupsList, netTotal, from, to);
-								}
-
-								@Override
-								public String csv() {
-									return generateCsv(itemGroupsList, netTotal, from, to);
-								}
-
-								@Override
-								public void handle(String text) {
-									Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-									StringSelection stringSelection = new StringSelection(text);
-									c.setContents(stringSelection, stringSelection);
-
-									JOptionPane.showMessageDialog(MainFrame.this, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
-								}
-							};
-							tablePanel.add(export, "align right, wrap");
-
-							tablePanel.add(scrollPane, "span 2, grow, w 100%, h 100%, wrap");
-
-							String netTotalLabel;
-							{
-								NumberFormat nf = NumberFormat.getInstance();
-								StringBuilder sb = new StringBuilder();
-								sb.append("<html><font size=5>Net Total: <code>");
-								if (netTotal < 0) {
-									sb.append("<font color=red>" + nf.format(netTotal) + "r</font>");
-								} else {
-									sb.append("<font color=green>+" + nf.format(netTotal) + "r</font>");
-								}
-								sb.append("</code></font></html>");
-								netTotalLabel = sb.toString();
-							}
-							tablePanel.add(new JLabel(netTotalLabel), "span 2, align right");
-
-							tablePanel.validate();
-						} catch (SQLException e) {
-							ErrorDialog.show(MainFrame.this, "An error occurred querying the database.", e);
-						} finally {
-							loading.dispose();
-						}
-					}
-				};
-				t.start();
-				loading.setVisible(true);
+				showTransactions(fromDatePicker.getDate(), toDatePicker.getDate(), false);
 			}
 		});
+	}
+
+	private void showTransactions(final Date from, final Date to, final boolean afterUpdate) {
+		tablePanel.removeAll();
+		tablePanel.validate();
+
+		final LoadingDialog loading = new LoadingDialog(MainFrame.this, "Loading", "Querying . . .");
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				try {
+					final List<ItemGroup> itemGroupsList;
+					{
+						Date toBumped = null;
+						if (to != null) {
+							Calendar c = Calendar.getInstance();
+							c.setTime(to);
+							c.add(Calendar.DATE, 1);
+							toBumped = c.getTime();
+						}
+						Map<String, ItemGroup> itemGroups = dao.getItemGroups(from, toBumped);
+						itemGroupsList = new ArrayList<ItemGroup>(itemGroups.values());
+						Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
+							@Override
+							public int compare(ItemGroup a, ItemGroup b) {
+								return a.getItem().compareToIgnoreCase(b.getItem());
+							}
+						});
+					}
+
+					JTable table = new JTable();
+					table.setColumnSelectionAllowed(false);
+					table.setRowSelectionAllowed(false);
+					table.setCellSelectionEnabled(false);
+					table.setRowHeight(24);
+					table.setModel(new AbstractTableModel() {
+						String[] columns = new String[] { "Item Name", "Sold", "Bought", "Net" };
+
+						@Override
+						public int getColumnCount() {
+							return columns.length;
+						}
+
+						@Override
+						public String getColumnName(int col) {
+							return columns[col];
+						}
+
+						@Override
+						public int getRowCount() {
+							return itemGroupsList.size();
+						}
+
+						@Override
+						public Object getValueAt(int row, int col) {
+							return itemGroupsList.get(row);
+						}
+
+						public Class<?> getColumnClass(int c) {
+							return ItemGroup.class;
+						}
+
+						@Override
+						public boolean isCellEditable(int row, int col) {
+							return false;
+						}
+					});
+					table.setDefaultRenderer(ItemGroup.class, new ItemGroupRenderer());
+
+					final int netTotal;
+					{
+						int t = 0;
+						for (ItemGroup group : itemGroupsList) {
+							t += group.getNetAmount();
+						}
+						netTotal = t;
+					}
+
+					JScrollPane scrollPane = new JScrollPane(table);
+					table.setFillsViewportHeight(true);
+
+					String dateRangeStr;
+					{
+						DateFormat df = new SimpleDateFormat("yyyy-MM-dd" + (afterUpdate ? " HH:mm:ss" : ""));
+						if (from == null && to == null) {
+							dateRangeStr = "entire history";
+						} else if (from == null) {
+							dateRangeStr = "up to <b><code>" + df.format(to) + "</b></code>";
+						} else if (to == null) {
+							dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to today";
+						} else if (from.equals(to)) {
+							dateRangeStr = "<b><code>" + df.format(from) + "</b></code>";
+						} else {
+							dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to <b><code>" + df.format(to) + "</b></code>";
+						}
+					}
+					tablePanel.add(new JLabel("<html><font size=5>" + dateRangeStr + "</font></html>"), "w 100%, growx");
+
+					ExportComboBox export = new ExportComboBox() {
+						@Override
+						public String bbCode() {
+							return generateBBCode(itemGroupsList, netTotal, from, to);
+						}
+
+						@Override
+						public String csv() {
+							return generateCsv(itemGroupsList, netTotal, from, to);
+						}
+
+						@Override
+						public void handle(String text) {
+							Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+							StringSelection stringSelection = new StringSelection(text);
+							c.setContents(stringSelection, stringSelection);
+
+							JOptionPane.showMessageDialog(MainFrame.this, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
+						}
+					};
+					tablePanel.add(export, "align right, wrap");
+
+					tablePanel.add(scrollPane, "span 2, grow, w 100%, h 100%, wrap");
+
+					String netTotalLabel;
+					{
+						NumberFormat nf = NumberFormat.getInstance();
+						StringBuilder sb = new StringBuilder();
+						sb.append("<html><font size=5>Net Total: <code>");
+						if (netTotal < 0) {
+							sb.append("<font color=red>" + nf.format(netTotal) + "r</font>");
+						} else {
+							sb.append("<font color=green>+" + nf.format(netTotal) + "r</font>");
+						}
+						sb.append("</code></font></html>");
+						netTotalLabel = sb.toString();
+					}
+					tablePanel.add(new JLabel(netTotalLabel), "span 2, align right");
+
+					tablePanel.validate();
+				} catch (SQLException e) {
+					ErrorDialog.show(MainFrame.this, "An error occurred querying the database.", e);
+				} finally {
+					loading.dispose();
+				}
+			}
+		};
+		t.start();
+		loading.setVisible(true);
 	}
 
 	private static class ItemGroupRenderer implements TableCellRenderer {
@@ -409,12 +410,16 @@ public class MainFrame extends JFrame implements WindowListener {
 		}
 	}
 
-	void updateSuccessful(Date started, long time, int transactionCount) {
+	void updateSuccessful(Date started, long time, int transactionCount, boolean showResults) {
 		long components[] = TimeUtils.parseTimeComponents(time);
 		String message;
 		if (transactionCount == 0) {
 			message = "No new transactions found.";
 		} else {
+			if (showResults) {
+				showTransactions(settings.getLastUpdated(), started, true);
+			}
+
 			StringBuilder sb = new StringBuilder();
 			sb.append("Update complete.\n");
 			sb.append(transactionCount).append(" transactions added in ");

@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,6 +38,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 	private JLabel transactions;
 	private JLabel pages;
 	private JLabel timerLabel;
+	private JCheckBox display;
 
 	private TransactionPuller puller;
 	private Thread pullerThread;
@@ -155,7 +157,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							try {
 								dao.commit();
 								dispose();
-								owner.updateSuccessful(new Date(started), result.getTimeTaken(), result.getTransactionCount());
+								owner.updateSuccessful(new Date(started), result.getTimeTaken(), result.getTransactionCount(), display.isSelected());
 							} catch (SQLException e) {
 								dao.rollback();
 								error = e;
@@ -195,6 +197,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		pages = new JLabel("0");
 		transactions = new JLabel("0");
 		timerLabel = new JLabel("...");
+		display = new JCheckBox("Display transactions when finished");
+		display.setSelected(true);
 	}
 
 	private void layoutWidgets() {
@@ -213,6 +217,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 		add(new JLabel("Time:"));
 		add(timerLabel, "wrap");
+
+		add(display, "span 2, align center, wrap");
 
 		add(cancel, "span 2, align center");
 	}
