@@ -647,7 +647,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		//footer and total
 		String footer = "EMC Shopkeeper v" + Main.VERSION;
-		sb.append("[url=http://github.com/mangstadt/emc-shopkeeper]").append(footer).append("[/url] ");
+		sb.append("[url=" + Main.URL + "]").append(footer).append("[/url] ");
 		sb.append(StringUtils.repeat('_', 50 - footer.length()));
 		sb.append(" [b]Total[/b] | [b]");
 		if (netTotal > 0) {
