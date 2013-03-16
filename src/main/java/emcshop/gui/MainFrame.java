@@ -139,10 +139,12 @@ public class MainFrame extends JFrame implements WindowListener {
 				//log the user in if he's not logged in
 				EmcSession session = settings.getSession();
 				if (session == null) {
-					session = LoginDialog.show(MainFrame.this);
+					LoginDialog.Result result = LoginDialog.show(MainFrame.this, settings.isPersistSession());
+					session = result.getSession();
 					if (session == null) {
 						return;
 					}
+					settings.setPersistSession(result.isRememberMe());
 					settings.setSession(session);
 					try {
 						settings.save();

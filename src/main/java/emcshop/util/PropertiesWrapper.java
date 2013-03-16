@@ -76,6 +76,18 @@ public class PropertiesWrapper {
 		set(key, (value == null) ? null : df.format(value));
 	}
 
+	public Boolean getBoolean(String key, Boolean defaultValue) {
+		String value = get(key);
+		if (value == null) {
+			return defaultValue;
+		}
+		return Boolean.valueOf(value);
+	}
+
+	public void setBoolean(String key, Boolean value) {
+		set(key, (value == null) ? null : value);
+	}
+
 	public Map<String, String> getMap(String keyStartsWith) {
 		Map<String, String> map = new HashMap<String, String>();
 		Pattern p = Pattern.compile("^" + Pattern.quote(keyStartsWith) + "(.*)");

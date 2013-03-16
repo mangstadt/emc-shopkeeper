@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -38,6 +39,7 @@ public class LoginDialog extends JDialog {
 	private JLabel error;
 	private JPanel messagePanel;
 	private EmcSession session;
+	private JCheckBox rememberMe;
 
 	public LoginDialog(final Window owner) {
 		super(owner);
@@ -71,12 +73,15 @@ public class LoginDialog extends JDialog {
 	/**
 	 * Shows the login dialog.
 	 * @param owner the owner window
-	 * @return the user's EMC session or null if the user didn't log in
+	 * @param rememberMe if the "remember me" checkbox should be checked
+	 * @return the user's EMC session and the state of the "remember me"
+	 * checkbox
 	 */
-	public static EmcSession show(Window owner) {
+	public static Result show(Window owner, boolean rememberMe) {
 		LoginDialog dialog = new LoginDialog(owner);
+		dialog.rememberMe.setSelected(rememberMe);
 		dialog.setVisible(true);
-		return dialog.session;
+		return new Result(dialog.session, dialog.rememberMe.isSelected());
 	}
 
 	private void createWidgets() {
@@ -107,6 +112,8 @@ public class LoginDialog extends JDialog {
 				super.setText("<html><font color=red>" + text + "</font></html>");
 			}
 		};
+
+		rememberMe = new JCheckBox("Remember me");
 	}
 
 	private void layoutWidgets() {
@@ -122,6 +129,8 @@ public class LoginDialog extends JDialog {
 		p.add(new JLabel("Password:"), "align right");
 		p.add(password, "w 150, wrap");
 		add(p, "align center, wrap");
+
+		add(rememberMe, "align center, wrap");
 
 		p = new JPanel(new FlowLayout());
 		p.add(login);
@@ -165,5 +174,31 @@ public class LoginDialog extends JDialog {
 			}
 		};
 		t.start();
+	}
+
+	public static class Result {
+		private final EmcSession session;
+		private final boolean rememberMe;
+
+		public Result(EmcSession session, boolean rememberMe) {
+			this.session = session;
+			this.rememberMe = rememberMe;
+		}
+
+		/**
+		 * Gets the session that was created.
+		 * @return the session or null if the use didn't login
+		 */
+		public EmcSession getSession() {
+			return session;
+		}
+
+		/**
+		 * Whether to persist the session or not.
+		 * @return true to persist the session, false not to
+		 */
+		public boolean isRememberMe() {
+			return rememberMe;
+		}
 	}
 }

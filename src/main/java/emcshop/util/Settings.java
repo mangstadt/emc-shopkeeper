@@ -19,6 +19,7 @@ public class Settings {
 	private Integer windowWidth, windowHeight;
 	private Date lastUpdated;
 	private EmcSession session;
+	private boolean persistSession;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -72,12 +73,21 @@ public class Settings {
 		this.session = session;
 	}
 
+	public boolean isPersistSession() {
+		return persistSession;
+	}
+
+	public void setPersistSession(boolean persistSession) {
+		this.persistSession = persistSession;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowWidth = 800;
 		windowHeight = 600;
 		lastUpdated = null;
 		session = null;
+		persistSession = true;
 	}
 
 	public void load() throws IOException {
@@ -110,6 +120,7 @@ public class Settings {
 		} else {
 			session = null;
 		}
+		persistSession = props.getBoolean("session.remember", true);
 	}
 
 	public void save() throws IOException {
@@ -119,11 +130,12 @@ public class Settings {
 		props.setInteger("window.width", windowWidth);
 		props.setInteger("window.height", windowHeight);
 		props.setDate("lastUpdated", lastUpdated);
-		if (session != null) {
+		if (session != null && persistSession) {
 			props.set("session.username", session.getUsername());
 			props.set("session.id", session.getSessionId());
 			props.setDate("session.created", session.getCreated());
 		}
+		props.setBoolean("session.remember", persistSession);
 
 		props.store(file, "EMC Shopkeeper settings");
 	}
