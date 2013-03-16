@@ -58,6 +58,7 @@ import emcshop.Main;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.gui.images.ImageManager;
+import emcshop.util.BBCodeBuilder;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
@@ -585,31 +586,31 @@ public class MainFrame extends JFrame implements WindowListener {
 	protected static String generateBBCode(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		NumberFormat nf = NumberFormat.getInstance();
-		StringBuilder sb = new StringBuilder();
+		BBCodeBuilder sb = new BBCodeBuilder();
 
-		sb.append("[font=courier new]");
+		sb.font("courier new");
 
 		//date range
-		sb.append("[b]");
+		sb.b();
 		if (from == null && to == null) {
-			sb.append("entire history");
+			sb.text("entire history");
 		} else if (from == null) {
-			sb.append("up to ").append(df.format(to));
+			sb.text("up to ").text(df.format(to));
 		} else if (to == null) {
-			sb.append(df.format(from)).append(" to today");
+			sb.text(df.format(from)).text(" to today");
 		} else if (from.equals(to)) {
-			sb.append(df.format(from));
+			sb.text(df.format(from));
 		} else {
-			sb.append(df.format(from)).append(" to ").append(df.format(to));
+			sb.text(df.format(from)).text(" to ").text(df.format(to));
 		}
-		sb.append("[/b]\n");
+		sb.close().nl();
 
 		//item table
-		sb.append("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -\n");
+		sb.text("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -").nl();
 		for (ItemGroup group : itemGroups) {
 			String item = group.getItem();
 			bbCodeColumn(item, 17, sb);
-			sb.append(" | ");
+			sb.text(" | ");
 
 			String sold;
 			if (group.getSoldQuantity() == 0) {
@@ -618,7 +619,7 @@ public class MainFrame extends JFrame implements WindowListener {
 				sold = nf.format(group.getSoldQuantity()) + " / +" + nf.format(group.getSoldAmount()) + "r";
 			}
 			bbCodeColumn(sold, 17, sb);
-			sb.append(" | ");
+			sb.text(" | ");
 
 			String bought;
 			if (group.getBoughtQuantity() == 0) {
@@ -627,52 +628,53 @@ public class MainFrame extends JFrame implements WindowListener {
 				bought = "+" + nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r";
 			}
 			bbCodeColumn(bought, 17, sb);
-			sb.append(" | ");
+			sb.text(" | ");
 
 			if (group.getNetQuantity() > 0) {
-				sb.append("[color=green]+");
+				sb.color("green").text('+');
 			} else {
-				sb.append("[color=red]");
+				sb.color("red");
 			}
-			sb.append(nf.format(group.getNetQuantity()));
-			sb.append("[/color] / ");
+			sb.text(nf.format(group.getNetQuantity()));
+			sb.close().text(" / ");
 			if (group.getNetAmount() > 0) {
-				sb.append("[color=green]+");
+				sb.color("green").text('+');
 			} else {
-				sb.append("[color=red]");
+				sb.color("red");
 			}
-			sb.append(nf.format(group.getNetAmount())).append("r");
-			sb.append("[/color]\n");
+			sb.text(nf.format(group.getNetAmount())).text('r');
+			sb.close().nl();
 		}
 
 		//footer and total
 		String footer = "EMC Shopkeeper v" + Main.VERSION;
-		sb.append("[url=" + Main.URL + "]").append(footer).append("[/url] ");
-		sb.append(StringUtils.repeat('_', 50 - footer.length()));
-		sb.append(" [b]Total[/b] | [b]");
+		sb.url(Main.URL, footer);
+		sb.text(StringUtils.repeat('_', 50 - footer.length()));
+		sb.b(" Total").text(" | ");
+		sb.b();
 		if (netTotal > 0) {
-			sb.append("[color=green]+");
+			sb.color("green").text('+');
 		} else {
-			sb.append("[color=red]");
+			sb.color("red");
 		}
-		sb.append(nf.format(netTotal)).append("r");
-		sb.append("[/color][/b]");
+		sb.text(nf.format(netTotal)).text('r');
+		sb.close(2);
 
-		sb.append("[/font]");
+		sb.close();
 
 		return sb.toString();
 	}
 
-	private static void bbCodeColumn(String text, int length, StringBuilder sb) {
-		sb.append(text);
+	private static void bbCodeColumn(String text, int length, BBCodeBuilder sb) {
+		sb.text(text);
 		if (length - text.length() == 1) {
-			sb.append('.');
+			sb.text('.');
 		} else {
 			for (int i = text.length(); i < length; i++) {
 				if (i == text.length()) {
-					sb.append(' ');
+					sb.text(' ');
 				} else {
-					sb.append('.');
+					sb.text('.');
 				}
 			}
 		}
