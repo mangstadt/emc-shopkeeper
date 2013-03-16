@@ -42,7 +42,7 @@ public class LoginDialog extends JDialog {
 	private JCheckBox rememberMe;
 
 	public LoginDialog(final Window owner) {
-		super(owner);
+		super(owner, "Login");
 		setModal(true);
 		setLocationRelativeTo(owner);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);

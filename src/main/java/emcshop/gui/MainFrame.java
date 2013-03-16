@@ -80,6 +80,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		this.dao = dao;
 		this.settings = settings;
 
+		setTitle("EMC Shopkeeper");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		createMenu();
