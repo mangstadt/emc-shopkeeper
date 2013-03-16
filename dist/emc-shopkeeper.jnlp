@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<jnlp spec="1.0+" codebase="https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/" href="emc-shopkeeper.jnlp">
+	<information>
+		<title>EMC Shopkeeper</title>
+		<vendor>Michael Angstadt</vendor>
+		<homepage href="https://github.com/mangstadt/emc-shopkeeper/" />
+		<description>Keeps track of your shop transactions in Empire Minecraft.</description>
+		<icon href="sign.png" />
+		<offline-allowed />
+	</information>
+	<security>
+		<all-permissions />
+	</security>
+	<resources>
+		<j2se version="1.6+" />
+		<jar href="emc-shopkeeper.jar" main="true" />
+		<jar href="deps/commons-codec-1.6.jar"/>
+		<jar href="deps/commons-io-2.1.jar"/>
+		<jar href="deps/commons-lang3-3.1.jar"/>
+		<jar href="deps/commons-logging-1.1.1.jar"/>
+		<jar href="deps/derby-10.8.2.2.jar"/>
+		<jar href="deps/httpclient-4.2.3.jar"/>
+		<jar href="deps/httpcore-4.2.2.jar"/>
+		<jar href="deps/jsoup-1.7.1.jar"/>
+		<jar href="deps/microba-0.4.4.3.jar"/>
+		<jar href="deps/miglayout-core-4.2.jar"/>
+		<jar href="deps/miglayout-swing-4.2.jar"/>
+		<jar href="deps/opencsv-2.3.jar"/>
+	</resources>
+	<application-desc main-class="emcshop.Main" />
+</jnlp>
