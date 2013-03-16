@@ -1,4 +1,14 @@
-A utility for viewing all your [EMC][1] shop transactions.
+#Overview
+
+EMC Shopkeeper is a program that allows you to download and view your [Empire Minecraft][1] shop transactions.
+
+#To Run
+
+*Requires:* Java 6
+
+[Click here][2] to run EMC Shopkeeper
+
+(or you can [download the full JAR file][3])
 
 #To Build
 
@@ -14,11 +24,7 @@ A utility for viewing all your [EMC][1] shop transactions.
 1. Build the project:  
 `mvn clean compile assembly:single`
 
-#To Run
-
-*Requires:* Java 6
-
-Execute the JAR in the "target" directory by double clicking on it or running this command:
+You can then execute the JAR in the "target" directory by double clicking on it or running this command:
 
 `java -jar target/emc-shopkeeper-0.1-SNAPSHOT-jar-with-dependencies.jar`.
 
@@ -62,3 +68,5 @@ Execute the JAR in the "target" directory by double clicking on it or running th
 *This program is a fan creation and is not affiliated with Minecraft (copyright Mojang) or Empire Minecraft (copyright Kalland Labs).*
 
 [1]: http://empireminecraft.com
+[2]: https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper.jnlp
+[3]: https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar
