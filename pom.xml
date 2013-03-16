@@ -32,14 +32,18 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.7.1</version>
 		</dependency>
-		<!-- http://microba.sourceforge.net/ -->
+
+		<!--
+		http://microba.sourceforge.net/
+		Must be installed to local repo or else "assembly:single" won't package it with the JAR
+		mvn install:install-file -Dfile=lib/microba-0.4.4.3.jar -DgroupId=microba -DartifactId=microba -Dversion=0.4.4.3 -Dpackaging=jar
+		-->
 		<dependency>
 			<groupId>microba</groupId>
 			<artifactId>microba</artifactId>
 			<version>0.4.4.3</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/microba-0.4.4.3.jar</systemPath>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -97,10 +101,55 @@
 						<manifest>
 							<mainClass>emcshop.Main</mainClass>
 						</manifest>
+						<manifestEntries>
+							<SplashScreen-Image>emcshop/gui/images/splash.png</SplashScreen-Image>
+						</manifestEntries>
 					</archive>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+				</configuration>
+			</plugin>
+			
+			<!-- Copy the project's dependencies into a folder -->
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<!-- do not copy unit test dependencies -->
+							<includeScope>compile</includeScope>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!--
+			FindBugs plugin
+			To run: mvn findbugs:findbugs
+			To view the results: mvn findbugs:gui
+			-->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>2.5.2</version>
+			</plugin>
+
+			<!--
+			PMD plugin
+			To run: mvn pmd:pmd
+			Code duplication report: mvn pmd:cpd
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>2.7.1</version>
+				<configuration>
+					<targetJdk>${java.version}</targetJdk>
 				</configuration>
 			</plugin>
 		</plugins>
