@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -41,9 +40,6 @@ public abstract class DirbyDbDao implements DbDao {
 	 * The database connection.
 	 */
 	protected Connection conn;
-
-	private final Map<String, Integer> playerCache = new HashMap<String, Integer>();
-	private final Map<String, Integer> itemCache = new HashMap<String, Integer>();
 
 	/**
 	 * Connects to the database and creates the database from scratch if it
@@ -210,24 +206,20 @@ public abstract class DirbyDbDao implements DbDao {
 		PreparedStatement stmt = null;
 		String nameLowerCase = name.toLowerCase();
 
-		Integer playerId = playerCache.get(nameLowerCase);
-		if (playerId == null) {
-			try {
-				stmt = conn.prepareStatement("SELECT id FROM players WHERE Lower(name) = ?");
-				stmt.setString(1, nameLowerCase);
-				ResultSet rs = stmt.executeQuery();
-				if (rs.next()) {
-					playerId = rs.getInt("id");
-				} else {
-					playerId = insertPlayer(name);
-				}
-				playerCache.put(nameLowerCase, playerId);
-			} finally {
-				closeStatements(stmt);
+		try {
+			stmt = conn.prepareStatement("SELECT id FROM players WHERE Lower(name) = ?");
+			stmt.setString(1, nameLowerCase);
+			ResultSet rs = stmt.executeQuery();
+			Integer playerId;
+			if (rs.next()) {
+				playerId = rs.getInt("id");
+			} else {
+				playerId = insertPlayer(name);
 			}
+			return playerId;
+		} finally {
+			closeStatements(stmt);
 		}
-
-		return playerId;
 	}
 
 	@Override
@@ -242,24 +234,20 @@ public abstract class DirbyDbDao implements DbDao {
 		PreparedStatement stmt = null;
 		String nameLowerCase = name.toLowerCase();
 
-		Integer itemId = itemCache.get(nameLowerCase);
-		if (itemId == null) {
-			try {
-				stmt = conn.prepareStatement("SELECT id FROM items WHERE Lower(name) = ?");
-				stmt.setString(1, nameLowerCase);
-				ResultSet rs = stmt.executeQuery();
-				if (rs.next()) {
-					itemId = rs.getInt("id");
-				} else {
-					itemId = insertItem(name);
-				}
-				itemCache.put(nameLowerCase, itemId);
-			} finally {
-				closeStatements(stmt);
+		try {
+			stmt = conn.prepareStatement("SELECT id FROM items WHERE Lower(name) = ?");
+			stmt.setString(1, nameLowerCase);
+			ResultSet rs = stmt.executeQuery();
+			Integer itemId;
+			if (rs.next()) {
+				itemId = rs.getInt("id");
+			} else {
+				itemId = insertItem(name);
 			}
+			return itemId;
+		} finally {
+			closeStatements(stmt);
 		}
-
-		return itemId;
 	}
 
 	@Override
