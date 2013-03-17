@@ -22,11 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.logging.LogManager;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -85,6 +86,7 @@ public class Main {
 		set.add("profile");
 		set.add("p");
 		set.add("profile-dir");
+		set.add("log-level");
 		set.add("version");
 		validArgs = Collections.unmodifiableSet(set);
 	}
@@ -92,13 +94,14 @@ public class Main {
 	private static File profileRootDir, profileDir, dbDir;
 	private static String profile, query;
 	private static Settings settings;
+	private static LogManager logManager;
 	private static Integer stopAtPage;
 	private static int startAtPage, threadCount;
 	private static boolean latest, update;
+	private static Level logLevel;
 
 	public static void main(String[] args) throws Throwable {
-		setupLogger();
-		File defaultProfileRootDir = new File(System.getProperty("user.home"), ".emc-shopkeeper");
+		File defaultProfileRootDir = new File(FileUtils.getUserDirectory(), ".emc-shopkeeper");
 		String defaultProfile = "default";
 		int defaultThreads = 4;
 		int defaultStartPage = 1;
@@ -141,6 +144,8 @@ public class Main {
 			"--stop-at-page=PAGE\n" +
 			"  (CLI only) Specifies the transaction history page number to stop at during\n" +
 			"  an update (defaults to the last page).\n" +
+			"--log-level=FINEST|FINER|FINE|CONFIG|INFO|WARNING|SEVERE\n" +
+			"  The log level to use (defaults to INFO).\n" +
 			"--version\n" +
 			"  (CLI only) Prints the version of this program.\n" +
 			"--help\n" +
@@ -237,16 +242,26 @@ public class Main {
 			query = null;
 		}
 
+		//get log level
+		String logLevelStr = arguments.value(null, "log-level");
+		if (logLevelStr == null) {
+			logLevel = Level.INFO;
+		} else {
+			try {
+				logLevel = Level.parse(logLevelStr.toUpperCase());
+			} catch (IllegalArgumentException e) {
+				out.println("Error: Invalid log level \"" + logLevelStr + "\".");
+				System.exit(1);
+			}
+		}
+
+		logManager = new LogManager(logLevel, new File(profileDir, ""));
+
 		if (!latest && !update && query == null) {
 			launchGui();
 		} else {
 			launchCli();
 		}
-	}
-
-	private static void setupLogger() {
-		//TODO write to file
-		LogManager.getLogManager().reset();
 	}
 
 	private static void launchCli() throws Throwable {
@@ -375,6 +390,7 @@ public class Main {
 			long totalAmount = 0;
 			for (Map.Entry<String, ItemGroup> entry : itemGroups.entrySet()) {
 				//TODO ANSI colors
+				//TODO String.format("%-20s | %-20s | %-20s | %-20s\n", group.getItem(), sold, bought, net);
 				ItemGroup itemGroup = entry.getValue();
 
 				out.print(itemGroup.getItem());
