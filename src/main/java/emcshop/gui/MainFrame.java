@@ -397,7 +397,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		}
 	}
 
-	void updateSuccessful(Date started, long time, int transactionCount, boolean showResults) {
+	void updateSuccessful(Date started, long time, int transactionCount, int pageCount, boolean showResults) {
 		long components[] = TimeUtils.parseTimeComponents(time);
 		String message;
 		if (transactionCount == 0) {
@@ -407,9 +407,11 @@ public class MainFrame extends JFrame implements WindowListener {
 				showTransactions(settings.getLastUpdated(), started, true);
 			}
 
+			NumberFormat nf = NumberFormat.getInstance();
 			StringBuilder sb = new StringBuilder();
 			sb.append("Update complete.\n");
-			sb.append(transactionCount).append(" transactions added in ");
+			sb.append(nf.format(pageCount)).append(" pages parsed and ");
+			sb.append(nf.format(transactionCount)).append(" transactions added in ");
 			if (components[2] > 0) {
 				sb.append(components[2]).append(" minutes and ");
 			}
