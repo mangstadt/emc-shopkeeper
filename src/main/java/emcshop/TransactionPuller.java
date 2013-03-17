@@ -78,16 +78,16 @@ public class TransactionPuller {
 	public Result start(Listener listener) throws IOException {
 		started = System.currentTimeMillis();
 
-		TransactionPage page1 = new TransactionPage(getPage(1));
-		if (!page1.isLoggedIn()) {
+		//is the user logged in?
+		TransactionPage firstPage = getPage(1);
+		if (!firstPage.isLoggedIn()) {
 			return Result.notLoggedIn();
 		}
 
-		if (stopAtDate == null) {
-			//database is empty
-			//keep scraping until there are no more pages
-			//since EMC will just display the first page if we give it too large of a page number, we need to know when the first page has been loaded
-			latestTransactionDate = page1.getFirstTransactionDate();
+		latestTransactionDate = firstPage.getFirstTransactionDate();
+
+		if (logger.isLoggable(Level.FINEST)) {
+			logger.finest("First page:\n" + firstPage.getDocument().toString());
 		}
 
 		//start threads
@@ -128,9 +128,10 @@ public class TransactionPuller {
 		return curPage++;
 	}
 
-	protected Document getPage(int page) throws IOException {
+	protected TransactionPage getPage(int page) throws IOException {
 		String url = "http://empireminecraft.com/rupees/transactions/?page=" + page;
-		return Jsoup.connect(url).timeout(30000).cookies(loginCookies).get();
+		Document document = Jsoup.connect(url).timeout(30000).cookies(loginCookies).get();
+		return new TransactionPage(document);
 	}
 
 	private class ScrapeThread extends Thread {
@@ -152,28 +153,21 @@ public class TransactionPuller {
 					}
 
 					logger.fine("Getting page " + page + ".");
-					Document document = getPage(page);
-					TransactionPage transactionPage = new TransactionPage(document);
-					List<ShopTransaction> transactions = transactionPage.getShopTransactions();
+					TransactionPage transactionPage = getPage(page);
 
+					//EMC will load the first page if an invalid page number is given (i.e. if we've reached the last page)
+					boolean lastPageReached = page > 1 && transactionPage.getFirstTransactionDate().getTime() >= latestTransactionDate.getTime();
+					if (lastPageReached) {
+						logger.fine("Page " + page + " doesn't exist (page " + (page - 1) + " is the last page).");
+						break;
+					}
+
+					List<ShopTransaction> transactions = transactionPage.getShopTransactions();
 					if (stopAtDate != null) {
 						int end = -1;
 						for (int i = 0; i < transactions.size(); i++) {
 							ShopTransaction transaction = transactions.get(i);
 							if (transaction.getTs().getTime() <= stopAtDate.getTime()) {
-								end = i;
-								break;
-							}
-						}
-						if (end >= 0) {
-							transactions = transactions.subList(0, end);
-							quit = true;
-						}
-					} else if (latestTransactionDate != null && page > 1) {
-						int end = -1;
-						for (int i = 0; i < transactions.size(); i++) {
-							ShopTransaction transaction = transactions.get(i);
-							if (transaction.getTs().getTime() >= latestTransactionDate.getTime()) {
 								end = i;
 								break;
 							}

@@ -36,6 +36,14 @@ public class TransactionPage {
 	}
 
 	/**
+	 * Gets the DOM of the transaction page.
+	 * @return the HTML DOM
+	 */
+	public Document getDocument() {
+		return document;
+	}
+
+	/**
 	 * Determines whether the user has been logged in.
 	 * @return true if the user has been logged in, false if not
 	 */
