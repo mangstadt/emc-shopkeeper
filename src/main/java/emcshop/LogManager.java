@@ -50,6 +50,10 @@ public class LogManager {
 		global.setLevel(level);
 	}
 
+	public File getFile() {
+		return logFile;
+	}
+
 	public String getEntireLog() throws IOException {
 		StringBuilder sb = new StringBuilder();
 

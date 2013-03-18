@@ -54,6 +54,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.EmcSession;
+import emcshop.LogManager;
 import emcshop.Main;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
@@ -75,11 +76,13 @@ public class MainFrame extends JFrame implements WindowListener {
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private final DbDao dao;
-	private Settings settings;
+	private final Settings settings;
+	private final LogManager logManager;
 
-	public MainFrame(Settings settings, DbDao dao) {
+	public MainFrame(Settings settings, DbDao dao, LogManager logManager) {
 		this.dao = dao;
 		this.settings = settings;
+		this.logManager = logManager;
 
 		setTitle("EMC Shopkeeper");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -112,6 +115,27 @@ public class MainFrame extends JFrame implements WindowListener {
 			file.add(exit);
 
 			menuBar.add(file);
+		}
+
+		{
+			JMenu tools = new JMenu("Tools");
+			tools.setMnemonic(KeyEvent.VK_T);
+
+			JMenuItem showLog = new JMenuItem("Show log...");
+			showLog.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					ShowLogDialog.show(MainFrame.this, logManager);
+				}
+			});
+			tools.add(showLog);
+
+			tools.addSeparator();
+
+			JMenuItem resetDb = new JMenuItem("Reset database...");
+			tools.add(resetDb);
+
+			menuBar.add(tools);
 		}
 
 		{

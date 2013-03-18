@@ -255,7 +255,7 @@ public class Main {
 			}
 		}
 
-		logManager = new LogManager(logLevel, new File(profileDir, ""));
+		logManager = new LogManager(logLevel, new File(profileDir, "app.log"));
 
 		if (!latest && !update && query == null) {
 			launchGui();
@@ -534,7 +534,7 @@ public class Main {
 			throw e;
 		}
 
-		MainFrame frame = new MainFrame(settings, dao);
+		MainFrame frame = new MainFrame(settings, dao, logManager);
 		splash.close();
 		frame.setVisible(true);
 	}
