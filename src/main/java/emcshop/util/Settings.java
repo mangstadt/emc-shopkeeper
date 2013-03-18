@@ -20,6 +20,7 @@ public class Settings {
 	private Date lastUpdated;
 	private EmcSession session;
 	private boolean persistSession;
+	private Level logLevel;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -81,6 +82,14 @@ public class Settings {
 		this.persistSession = persistSession;
 	}
 
+	public Level getLogLevel() {
+		return logLevel;
+	}
+
+	public void setLogLevel(Level logLevel) {
+		this.logLevel = logLevel;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowWidth = 800;
@@ -88,6 +97,7 @@ public class Settings {
 		lastUpdated = null;
 		session = null;
 		persistSession = true;
+		logLevel = Level.INFO;
 	}
 
 	public void load() throws IOException {
@@ -121,6 +131,18 @@ public class Settings {
 			session = null;
 		}
 		persistSession = props.getBoolean("session.remember", true);
+
+		String logLevelStr = props.get("log.level");
+		if (logLevelStr == null) {
+			logLevel = Level.INFO;
+		} else {
+			try {
+				logLevel = Level.parse(logLevelStr);
+			} catch (IllegalArgumentException e) {
+				logger.warning("Invalid log level \"" + logLevelStr + "\" defined in settings file.  Defaulting to INFO.");
+				logLevel = Level.INFO;
+			}
+		}
 	}
 
 	public void save() throws IOException {
@@ -136,6 +158,7 @@ public class Settings {
 			props.setDate("session.created", session.getCreated());
 		}
 		props.setBoolean("session.remember", persistSession);
+		props.set("log.level", logLevel.getName());
 
 		props.store(file, "EMC Shopkeeper settings");
 	}

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -37,6 +38,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
@@ -129,6 +131,34 @@ public class MainFrame extends JFrame implements WindowListener {
 				}
 			});
 			tools.add(showLog);
+
+			JMenu logLevel = new JMenu("Log level");
+			{
+				Level levels[] = new Level[] { Level.FINEST, Level.FINER, Level.FINE, Level.CONFIG, Level.INFO, Level.WARNING, Level.SEVERE, Level.OFF };
+				ButtonGroup group = new ButtonGroup();
+				for (final Level level : levels) {
+					JMenuItem levelItem = new JRadioButtonMenuItem(level.getName());
+					levelItem.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							logger.finest("Changing log level to " + level.getName() + ".");
+							logManager.setLevel(level);
+							settings.setLogLevel(level);
+							try {
+								settings.save();
+							} catch (IOException e) {
+								logger.log(Level.SEVERE, "Problem saving settings file.", e);
+							}
+						}
+					});
+					if (logManager.getLevel().equals(level)) {
+						levelItem.setSelected(true);
+					}
+					group.add(levelItem);
+					logLevel.add(levelItem);
+				}
+			}
+			tools.add(logLevel);
 
 			tools.addSeparator();
 

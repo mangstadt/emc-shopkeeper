@@ -245,7 +245,7 @@ public class Main {
 		//get log level
 		String logLevelStr = arguments.value(null, "log-level");
 		if (logLevelStr == null) {
-			logLevel = Level.INFO;
+			logLevel = settings.getLogLevel();
 		} else {
 			try {
 				logLevel = Level.parse(logLevelStr.toUpperCase());
