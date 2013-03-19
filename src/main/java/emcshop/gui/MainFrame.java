@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -134,10 +135,15 @@ public class MainFrame extends JFrame implements WindowListener {
 
 			JMenu logLevel = new JMenu("Log level");
 			{
-				Level levels[] = new Level[] { Level.FINEST, Level.FINER, Level.FINE, Level.CONFIG, Level.INFO, Level.WARNING, Level.SEVERE, Level.OFF };
+				Map<String, Level> levels = new LinkedHashMap<String, Level>();
+				levels.put("Detailed", Level.FINEST);
+				levels.put("Normal", Level.INFO);
+				levels.put("Off", Level.OFF);
 				ButtonGroup group = new ButtonGroup();
-				for (final Level level : levels) {
-					JMenuItem levelItem = new JRadioButtonMenuItem(level.getName());
+				for (Map.Entry<String, Level> entry : levels.entrySet()) {
+					String name = entry.getKey();
+					final Level level = entry.getValue();
+					JMenuItem levelItem = new JRadioButtonMenuItem(name);
 					levelItem.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent arg0) {
