@@ -180,6 +180,13 @@ public class MainFrame extends JFrame implements WindowListener {
 							public void run() {
 								try {
 									dao.wipe();
+									settings.setLastUpdated(null);
+									try {
+										settings.save();
+									} catch (IOException e) {
+										logger.log(Level.SEVERE, "Problem saving settings file.", e);
+									}
+									MainFrame.this.lastUpdateDate.setText("-");
 									loading.dispose();
 								} catch (Throwable e) {
 									loading.dispose();
