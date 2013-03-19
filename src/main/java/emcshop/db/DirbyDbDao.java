@@ -42,6 +42,11 @@ public abstract class DirbyDbDao implements DbDao {
 	protected Connection conn;
 
 	/**
+	 * The JDBC URL.
+	 */
+	protected String jdbcUrl;
+
+	/**
 	 * Connects to the database and creates the database from scratch if it
 	 * doesn't exist.
 	 * @param jdbcUrl the JDBC URL
@@ -50,6 +55,7 @@ public abstract class DirbyDbDao implements DbDao {
 	 * @throws SQLException
 	 */
 	protected void init(String jdbcUrl, boolean create, DbListener listener) throws SQLException {
+		this.jdbcUrl = jdbcUrl;
 		logger.info("Starting database...");
 
 		//shutdown Derby when the program terminates
@@ -66,19 +72,8 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 		});
 
-		//load the driver
-		try {
-			Class.forName(EmbeddedDriver.class.getName());
-		} catch (ClassNotFoundException e) {
-			throw new SQLException("Database driver not on classpath.", e);
-		}
-
 		//create the connection
-		if (create) {
-			jdbcUrl += ";create=true";
-		}
-		conn = DriverManager.getConnection(jdbcUrl);
-		conn.setAutoCommit(false); // default is true
+		createConnection(create);
 
 		//create tables if database doesn't exist
 		if (create) {
@@ -86,36 +81,7 @@ public abstract class DirbyDbDao implements DbDao {
 				listener.onCreate();
 			}
 			logger.info("Database not found.  Creating the database...");
-			String sql = null;
-			SQLStatementReader in = null;
-			String schemaFileName = "schema.sql";
-			Statement statement = null;
-			try {
-				in = new SQLStatementReader(new InputStreamReader(ClasspathUtils.getResourceAsStream(schemaFileName, getClass())));
-				statement = conn.createStatement();
-				while ((sql = in.readStatement()) != null) {
-					statement.execute(sql);
-				}
-				sql = null;
-				insertDbVersion(schemaVersion);
-			} catch (IOException e) {
-				throw new SQLException("Error creating database.", e);
-			} catch (SQLException e) {
-				if (sql == null) {
-					throw e;
-				}
-				throw new SQLException("Error executing SQL statement: " + sql, e);
-			} finally {
-				IOUtils.closeQuietly(in);
-				if (statement != null) {
-					try {
-						statement.close();
-					} catch (SQLException e) {
-						//ignore
-					}
-				}
-			}
-			commit();
+			createSchema();
 		} else {
 			//update the database schema if it's not up to date
 			int version = selectDbVersion();
@@ -419,6 +385,20 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public void wipe() throws SQLException, IOException {
+		logger.info("Resetting the database...");
+
+		close();
+
+		logger.info("Deleting the database...");
+		deleteDatabase();
+
+		logger.info("Re-creating the database...");
+		createConnection(true);
+		createSchema();
+	}
+
+	@Override
 	public void commit() throws SQLException {
 		conn.commit();
 	}
@@ -466,5 +446,51 @@ public abstract class DirbyDbDao implements DbDao {
 				}
 			}
 		}
+	}
+
+	protected abstract void deleteDatabase() throws IOException;
+
+	protected void createConnection(boolean createDb) throws SQLException {
+		//load the driver
+		try {
+			Class.forName(EmbeddedDriver.class.getName()).newInstance();
+		} catch (Exception e) {
+			throw new SQLException("Database driver not on classpath.", e);
+		}
+
+		//create the connection
+		String jdbcUrl = this.jdbcUrl;
+		if (createDb) {
+			jdbcUrl += ";create=true";
+		}
+		conn = DriverManager.getConnection(jdbcUrl);
+		conn.setAutoCommit(false); // default is true
+	}
+
+	protected void createSchema() throws SQLException {
+		String sql = null;
+		SQLStatementReader in = null;
+		String schemaFileName = "schema.sql";
+		Statement statement = null;
+		try {
+			in = new SQLStatementReader(new InputStreamReader(ClasspathUtils.getResourceAsStream(schemaFileName, getClass())));
+			statement = conn.createStatement();
+			while ((sql = in.readStatement()) != null) {
+				statement.execute(sql);
+			}
+			sql = null;
+			insertDbVersion(schemaVersion);
+		} catch (IOException e) {
+			throw new SQLException("Error creating database.", e);
+		} catch (SQLException e) {
+			if (sql == null) {
+				throw e;
+			}
+			throw new SQLException("Error executing SQL statement: " + sql, e);
+		} finally {
+			IOUtils.closeQuietly(in);
+			closeStatements(statement);
+		}
+		commit();
 	}
 }

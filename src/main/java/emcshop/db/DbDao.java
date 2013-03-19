@@ -1,5 +1,6 @@
 package emcshop.db;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
@@ -106,6 +107,13 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	Map<String, ItemGroup> getItemGroups(Date from, Date to) throws SQLException;
+
+	/**
+	 * Deletes all data in the database.
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	void wipe() throws IOException, SQLException;
 
 	/**
 	 * Commits the current database transaction.

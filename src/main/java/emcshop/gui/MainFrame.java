@@ -163,6 +163,29 @@ public class MainFrame extends JFrame implements WindowListener {
 			tools.addSeparator();
 
 			JMenuItem resetDb = new JMenuItem("Reset database...");
+			resetDb.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					boolean reset = ResetDatabaseDialog.show(MainFrame.this);
+					if (reset) {
+						final LoadingDialog loading = new LoadingDialog(MainFrame.this, "Resetting database", "Resetting database...");
+						Thread t = new Thread() {
+							@Override
+							public void run() {
+								try {
+									dao.wipe();
+									loading.dispose();
+								} catch (Throwable e) {
+									loading.dispose();
+									ErrorDialog.show(MainFrame.this, "Problem resetting database.", e);
+								}
+							}
+						};
+						t.start();
+						loading.setVisible(true);
+					}
+				}
+			});
 			tools.add(resetDb);
 
 			menuBar.add(tools);

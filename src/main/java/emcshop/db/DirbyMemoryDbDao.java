@@ -10,4 +10,9 @@ public class DirbyMemoryDbDao extends DirbyDbDao {
 	public DirbyMemoryDbDao() throws SQLException {
 		init("jdbc:derby:memory:emc-shopkeeper", true, null);
 	}
+
+	@Override
+	protected void deleteDatabase() {
+		//do nothing
+	}
 }
