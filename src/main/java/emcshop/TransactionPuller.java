@@ -152,13 +152,12 @@ public class TransactionPuller {
 						break;
 					}
 
-					logger.fine("Getting page " + page + ".");
 					TransactionPage transactionPage = getPage(page);
 
 					//EMC will load the first page if an invalid page number is given (i.e. if we've reached the last page)
 					boolean lastPageReached = page > 1 && transactionPage.getFirstTransactionDate().getTime() >= latestTransactionDate.getTime();
 					if (lastPageReached) {
-						logger.fine("Page " + page + " doesn't exist (page " + (page - 1) + " is the last page).");
+						logger.info("Page " + page + " doesn't exist (page " + (page - 1) + " is the last page).");
 						break;
 					}
 

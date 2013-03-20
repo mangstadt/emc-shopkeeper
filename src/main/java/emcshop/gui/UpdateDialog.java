@@ -69,13 +69,28 @@ public class UpdateDialog extends JDialog implements WindowListener {
 			public void run() {
 				try {
 					ShopTransaction latest = dao.getLatestTransaction();
+					final Integer stopAtPage;
+					final String estimatedTimeDisplay;
 					if (latest == null) {
-						boolean yes = FirstUpdateDialog.show(UpdateDialog.this);
-						if (!yes) {
+						FirstUpdateDialog.Result result = FirstUpdateDialog.show(UpdateDialog.this);
+						if (result.isCancelled()) {
 							return;
+						}
+
+						stopAtPage = result.getStopAtPage();
+						puller.setStopAtPage(stopAtPage);
+
+						if (result.getEstimatedTime() != null) {
+							long estimatedTimeComponents[] = TimeUtils.parseTimeComponents(result.getEstimatedTime());
+							NumberFormat nf = new DecimalFormat("00");
+							estimatedTimeDisplay = nf.format(estimatedTimeComponents[3]) + ":" + nf.format(estimatedTimeComponents[2]) + ":" + nf.format(estimatedTimeComponents[1]);
+						} else {
+							estimatedTimeDisplay = null;
 						}
 					} else {
 						puller.setStopAtDate(latest.getTs());
+						stopAtPage = null;
+						estimatedTimeDisplay = null;
 					}
 
 					boolean repeat;
@@ -89,7 +104,11 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								NumberFormat nf = new DecimalFormat("00");
 								while (UpdateDialog.this.isVisible()) {
 									long components[] = TimeUtils.parseTimeComponents((System.currentTimeMillis() - start));
-									timerLabel.setText(nf.format(components[2]) + ":" + nf.format(components[1]));
+									String timerText = nf.format(components[3]) + ":" + nf.format(components[2]) + ":" + nf.format(components[1]);
+									if (estimatedTimeDisplay != null) {
+										timerText += " / " + estimatedTimeDisplay;
+									}
+									timerLabel.setText(timerText);
 
 									try {
 										Thread.sleep(1000);
@@ -105,17 +124,42 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 						TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
 							NumberFormat nf = NumberFormat.getInstance();
+							NumberFormat timeNf = new DecimalFormat("00");
 							int transactionCount = 0;
 							int pageCount = 0;
+							long previousTime = 0;
 
 							@Override
 							public synchronized void onPageScraped(int page, List<ShopTransaction> transactions) {
 								try {
 									dao.insertTransactions(transactions);
+
 									pageCount++;
 									transactionCount += transactions.size();
-									UpdateDialog.this.pages.setText(nf.format(pageCount));
+
+									String pagesText = nf.format(pageCount);
+									if (stopAtPage != null) {
+										pagesText += " / " + stopAtPage;
+									}
+									UpdateDialog.this.pages.setText(pagesText);
+
 									UpdateDialog.this.transactions.setText(nf.format(transactionCount));
+
+									if (pageCount % 100 == 0 && logger.isLoggable(Level.FINEST)) {
+										long fromStart = System.currentTimeMillis() - started;
+										long fromPrevious = System.currentTimeMillis() - previousTime;
+										long fromStartComponents[] = TimeUtils.parseTimeComponents(fromStart);
+										long fromPreviousComponents[] = TimeUtils.parseTimeComponents(fromPrevious);
+										//@formatter:off
+										logger.finest(
+											"DOWNLOAD STATS | " + 
+											"Pages: " + pageCount + " | " +
+											"From start: " + timeNf.format(fromStartComponents[3]) + ":" + timeNf.format(fromStartComponents[2]) + ":" + timeNf.format(fromStartComponents[1]) + " | " +
+											"From previous: " + timeNf.format(fromPreviousComponents[3]) + ":" + timeNf.format(fromPreviousComponents[2]) + ":" + timeNf.format(fromPreviousComponents[1])
+										);
+										//@formatter:on
+										previousTime = System.currentTimeMillis();
+									}
 								} catch (SQLException e) {
 									error = e;
 									errorDisplayMessage = "An error occurred while inserting transactions into the database.";
@@ -145,6 +189,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								puller = new TransactionPuller(session);
 								if (latest != null) {
 									puller.setStopAtDate(latest.getTs());
+								}
+								if (stopAtPage != null) {
+									puller.setStopAtPage(stopAtPage);
 								}
 
 								repeat = true;

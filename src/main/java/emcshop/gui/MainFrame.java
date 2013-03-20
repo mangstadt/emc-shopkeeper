@@ -504,7 +504,10 @@ public class MainFrame extends JFrame implements WindowListener {
 			sb.append("Update complete.\n");
 			sb.append(nf.format(pageCount)).append(" pages parsed and ");
 			sb.append(nf.format(transactionCount)).append(" transactions added in ");
-			if (components[2] > 0) {
+			if (components[3] > 0) {
+				sb.append(components[3]).append(" hours, ");
+			}
+			if (components[3] > 0 || components[2] > 0) {
 				sb.append(components[2]).append(" minutes and ");
 			}
 			sb.append(components[1]).append(" seconds.");
