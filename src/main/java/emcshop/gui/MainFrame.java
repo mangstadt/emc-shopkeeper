@@ -187,6 +187,8 @@ public class MainFrame extends JFrame implements WindowListener {
 										logger.log(Level.SEVERE, "Problem saving settings file.", e);
 									}
 									MainFrame.this.lastUpdateDate.setText("-");
+									MainFrame.this.tablePanel.removeAll();
+									MainFrame.this.tablePanel.validate();
 									loading.dispose();
 								} catch (Throwable e) {
 									loading.dispose();
