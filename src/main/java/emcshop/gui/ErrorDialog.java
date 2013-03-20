@@ -67,11 +67,11 @@ public class ErrorDialog extends JDialog {
 
 		setLayout(new MigLayout());
 		add(errorIcon, "span 1 3");
-		add(displayText, "w 200, align left, wrap"); //TODO when this uses "growx", it won't shrink when the window width decreases
+		add(displayText, "w 100:100%:100%, align left, wrap");
 		JScrollPane scroll = new JScrollPane(stackTrace);
 		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		add(scroll, "grow, align center, wrap");
+		add(scroll, "grow, w 100%, h 100%, align center, wrap");
 		add(close, "align center");
 
 		setSize(500, 300);
