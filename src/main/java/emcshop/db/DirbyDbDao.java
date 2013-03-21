@@ -386,16 +386,12 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void wipe() throws SQLException, IOException {
-		logger.info("Resetting the database...");
-
-		close();
-
-		logger.info("Deleting the database...");
-		deleteDatabase();
-
-		logger.info("Re-creating the database...");
-		createConnection(true);
-		createSchema();
+		logger.info("Wiping transactions...");
+		conn.createStatement().execute("DELETE FROM transactions");
+		conn.createStatement().execute("DELETE FROM players");
+		conn.createStatement().execute("DELETE FROM items");
+		conn.createStatement().execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
+		commit();
 	}
 
 	@Override
@@ -447,8 +443,6 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 		}
 	}
-
-	protected abstract void deleteDatabase() throws IOException;
 
 	protected void createConnection(boolean createDb) throws SQLException {
 		//load the driver
