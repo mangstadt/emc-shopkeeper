@@ -126,7 +126,7 @@ public class Main {
 			"  Today's data:       --query=\"today\"\n" +
 			"  Three days of data: --query=\"2013-03-07 to 2013-03-09\"\n" +
 			"  Data up to today:   --query=\"2013-03-07 to today\"\n" +
-			"-p PROFILE, --profile=PROFILE\n" +
+			"--profile=PROFILE\n" +
 			"  The profile to use (defaults to \"" + defaultProfile + "\").\n" +
 			"--profile-dir=DIR\n" +
 			"  The path to the directory that contains all the profiles\n" +
