@@ -154,7 +154,7 @@ public class LoginDialog extends JDialog {
 			@Override
 			public void run() {
 				try {
-					session = EmcSession.login(username.getText(), new String(password.getPassword()));
+					session = EmcSession.login(username.getText(), new String(password.getPassword()), rememberMe.isSelected());
 					if (session == null) {
 						error.setText("Invalid login credentials.");
 						messagePanel.add(error);

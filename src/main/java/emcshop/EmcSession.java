@@ -21,8 +21,8 @@ public class EmcSession {
 		this.created = created;
 	}
 
-	public static EmcSession login(String username, String password) throws IOException {
-		String sessionId = LoginUtils.login(username, password);
+	public static EmcSession login(String username, String password, boolean rememberMe) throws IOException {
+		String sessionId = LoginUtils.login(username, password, rememberMe);
 		return (sessionId == null) ? null : new EmcSession(username, sessionId, new Date());
 	}
 

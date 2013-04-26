@@ -33,10 +33,11 @@ public class LoginUtils {
 	 * Logs the user in.
 	 * @param username the username
 	 * @param password the password
+	 * @param rememberMe true to set the "remember me" flag, false not to
 	 * @return the session ID or null if the credentials were invalid
 	 * @throws IOException if there's a problem connecting to the website
 	 */
-	public static String login(String username, String password) throws IOException {
+	public static String login(String username, String password, boolean rememberMe) throws IOException {
 		DefaultHttpClient client = new DefaultHttpClient();
 		client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 
@@ -45,7 +46,7 @@ public class LoginUtils {
 			loadHomePage(client);
 
 			//log the user in
-			if (!login(username, password, client)) {
+			if (!login(username, password, rememberMe, client)) {
 				return null;
 			}
 
@@ -115,12 +116,15 @@ public class LoginUtils {
 		EntityUtils.consume(entity);
 	}
 
-	private static boolean login(String username, String password, DefaultHttpClient client) throws IOException {
+	private static boolean login(String username, String password, boolean rememberMe, DefaultHttpClient client) throws IOException {
 		HttpPost request = new HttpPost("http://empireminecraft.com/login/login");
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("login", username));
 		params.add(new BasicNameValuePair("password", password));
+		if (rememberMe) {
+			params.add(new BasicNameValuePair("remember", "1"));
+		}
 		request.setEntity(new UrlEncodedFormEntity(params, Consts.UTF_8));
 
 		HttpResponse response = client.execute(request);

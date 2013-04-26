@@ -313,7 +313,7 @@ public class Main {
 						String username = System.console().readLine("Username: ");
 						String password = new String(System.console().readPassword("Password: "));
 						out.println("Logging in...");
-						session = EmcSession.login(username, password);
+						session = EmcSession.login(username, password, settings.isPersistSession());
 						if (session == null) {
 							out.println("Login failed.  Please try again.");
 						}
