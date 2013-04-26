@@ -148,6 +148,7 @@ public class LoginDialog extends JDialog {
 		login.setEnabled(false);
 		username.setEnabled(false);
 		password.setEnabled(false);
+		rememberMe.setEnabled(false);
 		validate();
 		Thread t = new Thread() {
 			@Override
@@ -169,6 +170,7 @@ public class LoginDialog extends JDialog {
 					messagePanel.remove(loading);
 					username.setEnabled(true);
 					password.setEnabled(true);
+					rememberMe.setEnabled(true);
 					validate();
 				}
 			}
