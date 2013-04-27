@@ -210,7 +210,7 @@ public class ItemsTable extends GroupableColumnsTable {
 		});
 
 		//set the width of "item name" column so the name isn't snipped
-		columnModel.getColumn(COL_ITEMNAME).setMinWidth(200);
+		columnModel.getColumn(COL_ITEMNAME).setMinWidth(175);
 
 		//set the column groupings
 		{
