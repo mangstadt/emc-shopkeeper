@@ -458,10 +458,6 @@ public class MainFrame extends JFrame implements WindowListener {
 
 	private JPanel createRightPanel() {
 		tablePanel = new JPanel(new MigLayout("width 100%, height 100%"));
-
-		JLabel label = new JLabel("<html><i>no results</i></html>");
-		tablePanel.add(label, "align center");
-
 		return tablePanel;
 	}
 
