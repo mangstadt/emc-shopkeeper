@@ -2,6 +2,7 @@ package emcshop.gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -87,6 +88,21 @@ public class MainFrame extends JFrame implements WindowListener {
 		createWidgets();
 		layoutWidgets();
 		setSize(settings.getWindowWidth(), settings.getWindowHeight());
+		Image appIcon = ImageManager.getAppIcon().getImage();
+		setIconImage(appIcon);
+
+		//set icon for Mac
+		try {
+			Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
+
+			//Application application = Application.getApplication();
+			Object application = applicationClass.getMethod("getApplication").invoke(null);
+
+			//application.setDockIconImage(appIcon);
+			applicationClass.getMethod("setDockIconImage", Image.class).invoke(application, appIcon);
+		} catch (Exception e) {
+			//not a mac
+		}
 
 		addWindowListener(this);
 	}

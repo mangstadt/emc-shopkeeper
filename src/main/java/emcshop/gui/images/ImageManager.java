@@ -40,6 +40,10 @@ public class ImageManager {
 		return getImageIcon("search.png");
 	}
 
+	public static ImageIcon getAppIcon() {
+		return getImageIcon("app-icon.png");
+	}
+
 	public static ImageIcon getItemImage(String item) {
 		ImageIcon image = itemImages.get(item);
 		if (image == null) {
