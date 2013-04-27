@@ -78,8 +78,24 @@ public class LoginDialog extends JDialog {
 	 * checkbox
 	 */
 	public static Result show(Window owner, boolean rememberMe) {
+		return show(owner, rememberMe, null);
+	}
+
+	/**
+	 * Shows the login dialog.
+	 * @param owner the owner window
+	 * @param rememberMe if the "remember me" checkbox should be checked
+	 * @param username the player's username or null if there isn't one
+	 * @return the user's EMC session and the state of the "remember me"
+	 * checkbox
+	 */
+	public static Result show(Window owner, boolean rememberMe, String username) {
 		LoginDialog dialog = new LoginDialog(owner);
 		dialog.rememberMe.setSelected(rememberMe);
+		if (username != null) {
+			dialog.username.setText(username);
+			dialog.password.requestFocusInWindow();
+		}
 		dialog.setVisible(true);
 		return new Result(dialog.session, dialog.rememberMe.isSelected());
 	}

@@ -175,7 +175,12 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						case NOT_LOGGED_IN:
 							timerThread.interrupt();
 
-							LoginDialog.Result loginResult = LoginDialog.show(UpdateDialog.this, settings.isPersistSession());
+							String username = null;
+							EmcSession oldSession = settings.getSession();
+							if (oldSession != null) {
+								username = oldSession.getUsername();
+							}
+							LoginDialog.Result loginResult = LoginDialog.show(UpdateDialog.this, settings.isPersistSession(), username);
 							EmcSession session = loginResult.getSession();
 							if (session != null) {
 								settings.setSession(session);
