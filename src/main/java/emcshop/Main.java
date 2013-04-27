@@ -3,6 +3,7 @@ package emcshop;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.SplashScreen;
 import java.io.File;
 import java.io.IOException;
@@ -36,8 +37,12 @@ import emcshop.db.DbDao;
 import emcshop.db.DbListener;
 import emcshop.db.DirbyEmbeddedDbDao;
 import emcshop.db.ItemGroup;
+import emcshop.gui.AboutDialog;
 import emcshop.gui.ErrorDialog;
+import emcshop.gui.MacHandler;
+import emcshop.gui.MacSupport;
 import emcshop.gui.MainFrame;
+import emcshop.gui.images.ImageManager;
 import emcshop.util.Settings;
 
 public class Main {
@@ -99,6 +104,8 @@ public class Main {
 	private static int startAtPage, threadCount;
 	private static boolean latest, update;
 	private static Level logLevel;
+
+	private static MainFrame frame;
 
 	public static void main(String[] args) throws Throwable {
 		File defaultProfileRootDir = new File(FileUtils.getUserDirectory(), ".emc-shopkeeper");
@@ -533,9 +540,24 @@ public class Main {
 			}
 			throw e;
 		}
-
-		MainFrame frame = new MainFrame(settings, dao, logManager);
 		splash.close();
+
+		//run Mac OS X customizations if user is on a Mac
+		//this code must run before *anything* else graphics-related
+		Image appIcon = ImageManager.getAppIcon().getImage();
+		MacSupport.initIfMac("EMC Shopkeeper", false, appIcon, new MacHandler() {
+			@Override
+			public void handleQuit(Object applicationEvent) {
+				frame.windowClosed(null);
+			}
+
+			@Override
+			public void handleAbout(Object applicationEvent) {
+				AboutDialog.show(frame);
+			}
+		});
+
+		frame = new MainFrame(settings, dao, logManager);
 		frame.setVisible(true);
 	}
 

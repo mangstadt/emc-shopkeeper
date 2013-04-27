@@ -8,7 +8,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
@@ -40,7 +39,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -91,19 +89,6 @@ public class MainFrame extends JFrame implements WindowListener {
 		Image appIcon = ImageManager.getAppIcon().getImage();
 		setIconImage(appIcon);
 
-		//set icon for Mac
-		try {
-			Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
-
-			//Application application = Application.getApplication();
-			Object application = applicationClass.getMethod("getApplication").invoke(null);
-
-			//application.setDockIconImage(appIcon);
-			applicationClass.getMethod("setDockIconImage", Image.class).invoke(application, appIcon);
-		} catch (Exception e) {
-			//not a mac
-		}
-
 		addWindowListener(this);
 	}
 
@@ -112,12 +97,10 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		JMenuBar menuBar = new JMenuBar();
 
-		{
+		if (!MacSupport.isMac()) {
 			JMenu file = new JMenu("File");
-			file.setMnemonic(KeyEvent.VK_F);
 
 			JMenuItem exit = new JMenuItem("Exit");
-			exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
 			exit.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
@@ -131,7 +114,6 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		{
 			JMenu tools = new JMenu("Tools");
-			tools.setMnemonic(KeyEvent.VK_T);
 
 			JMenuItem showLog = new JMenuItem("Show log...");
 			showLog.addActionListener(new ActionListener() {
@@ -217,7 +199,6 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		{
 			JMenu help = new JMenu("Help");
-			help.setMnemonic(KeyEvent.VK_H);
 
 			JMenuItem changelog = new JMenuItem("Changelog");
 			changelog.addActionListener(new ActionListener() {
@@ -228,14 +209,16 @@ public class MainFrame extends JFrame implements WindowListener {
 			});
 			help.add(changelog);
 
-			JMenuItem about = new JMenuItem("About");
-			about.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					AboutDialog.show(MainFrame.this);
-				}
-			});
-			help.add(about);
+			if (!MacSupport.isMac()) {
+				JMenuItem about = new JMenuItem("About");
+				about.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						AboutDialog.show(MainFrame.this);
+					}
+				});
+				help.add(about);
+			}
 
 			menuBar.add(help);
 		}
