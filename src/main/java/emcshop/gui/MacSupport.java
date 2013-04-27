@@ -10,7 +10,8 @@ import java.security.AccessControlException;
 /**
  * This class contains code which helps to better integrate the application into
  * the Mac OSX environment.
- * @see http://developer.apple.com/mac/library/documentation/Java/Reference/1.5.0/appledoc/api/index.html
+ * @see <a href="http://developer.apple.com/mac/library/documentation/Java/Reference/1.5.0/appledoc/api/index.html">http://developer.apple.com/mac/library/documentation/Java/Reference/1.5.0/appledoc/api/index.html</a>
+ * @see <a href="https://developer.apple.com/search/index.php?q=java">https://developer.apple.com/search/index.php?q=java</a>
  * @author Michael Angstadt
  */
 //@formatter:on
