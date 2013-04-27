@@ -8,6 +8,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -78,17 +83,18 @@ public class TransactionPuller {
 	public Result start(Listener listener) throws IOException {
 		started = System.currentTimeMillis();
 
-		//is the user logged in?
 		TransactionPage firstPage = getPage(1);
+		if (logger.isLoggable(Level.FINEST)) {
+			logger.finest("Cookies: " + loginCookies);
+			logger.finest("First page:\n" + firstPage.getDocument().toString());
+		}
+
+		//is the user logged in?		
 		if (!firstPage.isLoggedIn()) {
 			return Result.notLoggedIn();
 		}
 
 		latestTransactionDate = firstPage.getFirstTransactionDate();
-
-		if (logger.isLoggable(Level.FINEST)) {
-			logger.finest("First page:\n" + firstPage.getDocument().toString());
-		}
 
 		//start threads
 		List<ScrapeThread> threads = new ArrayList<ScrapeThread>(threadCount);
@@ -129,8 +135,39 @@ public class TransactionPuller {
 	}
 
 	protected TransactionPage getPage(int page) throws IOException {
-		String url = "http://empireminecraft.com/rupees/transactions/?page=" + page;
-		Document document = Jsoup.connect(url).timeout(30000).cookies(loginCookies).get();
+		/*
+		 * Note: The HttpClient library is used here because using
+		 * "Jsoup.connect()" doesn't always work when the application is run as
+		 * a Web Start app.
+		 * 
+		 * The login dialog was repeatedly appearing because, even though the
+		 * login was successful (a valid session cookie was generated), the
+		 * TransactionPuller would fail when it tried to get the first
+		 * transaction from the first page (i.e. when calling "isLoggedIn()").
+		 * It was failing because it was getting back the unauthenticated
+		 * version of the rupee page. It was as if jsoup wasn't sending the
+		 * session cookie with the request.
+		 * 
+		 * The issue appeared to only occur when running under Web Start. It
+		 * could not be reproduced when running via Eclipse.
+		 */
+
+		String base = "http://empireminecraft.com/rupees/transactions/";
+		String url = base + "?page=" + page;
+
+		DefaultHttpClient client = new DefaultHttpClient();
+		HttpGet request = new HttpGet(url);
+		for (Map.Entry<String, String> cookie : loginCookies.entrySet()) {
+			String name = cookie.getKey();
+			String value = cookie.getValue();
+			request.addHeader("Cookie", name + "=" + value);
+		}
+
+		HttpResponse response = client.execute(request);
+		HttpEntity entity = response.getEntity();
+		Document document = Jsoup.parse(entity.getContent(), "UTF-8", base);
+		EntityUtils.consume(entity);
+
 		return new TransactionPage(document);
 	}
 
