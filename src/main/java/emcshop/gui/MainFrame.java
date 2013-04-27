@@ -203,6 +203,15 @@ public class MainFrame extends JFrame implements WindowListener {
 			JMenu help = new JMenu("Help");
 			help.setMnemonic(KeyEvent.VK_H);
 
+			JMenuItem changelog = new JMenuItem("Changelog");
+			changelog.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					ChangelogDialog.show(MainFrame.this);
+				}
+			});
+			help.add(changelog);
+
 			JMenuItem about = new JMenuItem("About");
 			about.addActionListener(new ActionListener() {
 				@Override
