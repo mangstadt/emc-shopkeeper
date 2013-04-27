@@ -108,7 +108,7 @@ public class Settings {
 			//migrate it
 		}
 
-		windowWidth = props.getInteger("window.width", 800);
+		windowWidth = props.getInteger("window.width", 900);
 		windowHeight = props.getInteger("window.height", 600);
 		try {
 			lastUpdated = props.getDate("lastUpdated");
