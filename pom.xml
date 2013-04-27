@@ -3,7 +3,7 @@
 	<groupId>com.github.emc-shopkeeper</groupId>
 	<artifactId>emc-shopkeeper</artifactId>
 	<packaging>jar</packaging>
-	<version>0.1.3</version>
+	<version>0.1.4-SNAPSHOT</version>
 	<name>EMC Shopkeeper</name>
 	<url>http://github.com/mangstadt/emc-shopkeeper</url>
 	
