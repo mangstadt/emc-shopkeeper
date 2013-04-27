@@ -40,7 +40,7 @@ You can then execute the JAR in the "target" directory by double clicking on it 
       Today's data:       --query="today"
       Three days of data: --query="2013-03-07 to 2013-03-09"
       Data up to today:   --query="2013-03-07 to today"
-    -p PROFILE, --profile=PROFILE
+    --profile=PROFILE
       The profile to use (defaults to "default").
     --profile-dir=DIR
       The path to the directory that contains all the profiles
