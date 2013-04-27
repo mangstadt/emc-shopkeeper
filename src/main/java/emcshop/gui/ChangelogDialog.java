@@ -12,7 +12,6 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -38,8 +37,6 @@ public class ChangelogDialog extends JDialog {
 			}
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		JLabel header = new JLabel("<html><b>Changelog</b></html>", SwingConstants.CENTER);
-
 		String changelogText;
 		try {
 			changelogText = IOUtils.toString(getClass().getResourceAsStream("/emcshop/changelog.html"));
@@ -59,7 +56,6 @@ public class ChangelogDialog extends JDialog {
 		});
 
 		setLayout(new MigLayout());
-		add(header, "w 100:100%:100%, wrap");
 		JScrollPane scroll = new JScrollPane(changelog);
 		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
