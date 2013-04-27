@@ -1,8 +1,6 @@
 package emcshop.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -30,7 +28,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,11 +39,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JTable;
 import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -313,45 +306,6 @@ public class MainFrame extends JFrame implements WindowListener {
 						});
 					}
 
-					JTable table = new JTable();
-					table.setColumnSelectionAllowed(false);
-					table.setRowSelectionAllowed(false);
-					table.setCellSelectionEnabled(false);
-					table.setRowHeight(24);
-					table.setModel(new AbstractTableModel() {
-						String[] columns = new String[] { "Item Name", "Sold", "Bought", "Net" };
-
-						@Override
-						public int getColumnCount() {
-							return columns.length;
-						}
-
-						@Override
-						public String getColumnName(int col) {
-							return columns[col];
-						}
-
-						@Override
-						public int getRowCount() {
-							return itemGroupsList.size();
-						}
-
-						@Override
-						public Object getValueAt(int row, int col) {
-							return itemGroupsList.get(row);
-						}
-
-						public Class<?> getColumnClass(int c) {
-							return ItemGroup.class;
-						}
-
-						@Override
-						public boolean isCellEditable(int row, int col) {
-							return false;
-						}
-					});
-					table.setDefaultRenderer(ItemGroup.class, new ItemGroupRenderer());
-
 					final int netTotal;
 					{
 						int t = 0;
@@ -360,9 +314,6 @@ public class MainFrame extends JFrame implements WindowListener {
 						}
 						netTotal = t;
 					}
-
-					JScrollPane scrollPane = new JScrollPane(table);
-					table.setFillsViewportHeight(true);
 
 					String dateRangeStr;
 					{
@@ -403,7 +354,10 @@ public class MainFrame extends JFrame implements WindowListener {
 					};
 					tablePanel.add(export, "align right, wrap");
 
-					tablePanel.add(scrollPane, "span 2, grow, w 100%, h 100%, wrap");
+					ItemsTable table = new ItemsTable(itemGroupsList);
+					table.setFillsViewportHeight(true);
+					JScrollPane tableScrollPane = new JScrollPane(table);
+					tablePanel.add(tableScrollPane, "span 2, grow, w 100%, h 100%, wrap");
 
 					String netTotalLabel;
 					{
@@ -430,63 +384,6 @@ public class MainFrame extends JFrame implements WindowListener {
 		};
 		t.start();
 		loading.setVisible(true);
-	}
-
-	private static class ItemGroupRenderer implements TableCellRenderer {
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-			NumberFormat nf = NumberFormat.getNumberInstance();
-			JLabel label = null;
-
-			ItemGroup group = (ItemGroup) value;
-			switch (col) {
-			case 0:
-				ImageIcon img = ImageManager.getItemImage(group.getItem());
-				label = new JLabel(group.getItem(), img, SwingConstants.LEFT);
-				break;
-			case 1:
-				if (group.getSoldQuantity() == 0) {
-					label = new JLabel("-");
-				} else {
-					label = new JLabel(nf.format(group.getSoldQuantity()) + " / " + nf.format(group.getSoldAmount()) + "r");
-				}
-				break;
-			case 2:
-				if (group.getBoughtQuantity() == 0) {
-					label = new JLabel("-");
-				} else {
-					label = new JLabel(nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r");
-				}
-				break;
-			case 3:
-				StringBuilder sb = new StringBuilder();
-				sb.append("<html>");
-
-				if (group.getNetQuantity() < 0) {
-					sb.append("<font color=red>" + nf.format(group.getNetQuantity()) + "</font>");
-				} else {
-					sb.append("<font color=green>+" + nf.format(group.getNetQuantity()) + "</font>");
-				}
-
-				sb.append(" / ");
-
-				if (group.getNetAmount() < 0) {
-					sb.append("<font color=red>" + nf.format(group.getNetAmount()) + "r</font>");
-				} else {
-					sb.append("<font color=green>+" + nf.format(group.getNetAmount()) + "r</font>");
-				}
-
-				sb.append("</html>");
-
-				label = new JLabel(sb.toString());
-			}
-
-			Color color = (row % 2 == 0) ? new Color(255, 255, 255) : new Color(240, 240, 240);
-			label.setOpaque(true);
-			label.setBackground(color);
-
-			return label;
-		}
 	}
 
 	void updateSuccessful(Date started, long time, int transactionCount, int pageCount, boolean showResults) {
