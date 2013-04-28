@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -53,6 +54,7 @@ import emcshop.LogManager;
 import emcshop.Main;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
+import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
 import emcshop.util.BBCodeBuilder;
 import emcshop.util.Settings;
@@ -65,8 +67,8 @@ public class MainFrame extends JFrame implements WindowListener {
 	private JLabel lastUpdateDate;
 	private DatePicker toDatePicker;
 	private DatePicker fromDatePicker;
-	//private JComboBox groupBy;
-	private JButton show;
+	private JButton showItems;
+	private JButton showPlayers;
 	private JPanel tablePanel;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -273,15 +275,19 @@ public class MainFrame extends JFrame implements WindowListener {
 		toDatePicker.setShowTodayButton(true);
 		toDatePicker.setStripTime(true);
 
-		//		groupBy = new JComboBox();
-		//		groupBy.addItem("Item");
-		//		groupBy.addItem("Player");
-
-		show = new JButton("Show Transactions", ImageManager.getSearch());
-		show.addActionListener(new ActionListener() {
+		showItems = new JButton("Show Transactions", ImageManager.getSearch());
+		showItems.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				showTransactions(fromDatePicker.getDate(), toDatePicker.getDate(), false);
+			}
+		});
+
+		showPlayers = new JButton("Show Players", ImageManager.getSearch());
+		showPlayers.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				showPlayers(fromDatePicker.getDate(), toDatePicker.getDate());
 			}
 		});
 	}
@@ -394,6 +400,91 @@ public class MainFrame extends JFrame implements WindowListener {
 		loading.setVisible(true);
 	}
 
+	private void showPlayers(final Date from, final Date to) {
+		tablePanel.removeAll();
+		tablePanel.validate();
+
+		final LoadingDialog loading = new LoadingDialog(MainFrame.this, "Loading", "Querying . . .");
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				try {
+					final List<PlayerGroup> playerGroups;
+					{
+						Date toBumped = null;
+						if (to != null) {
+							Calendar c = Calendar.getInstance();
+							c.setTime(to);
+							c.add(Calendar.DATE, 1);
+							toBumped = c.getTime();
+						}
+						playerGroups = dao.getPlayerGroups(from, toBumped);
+					}
+
+					String dateRangeStr;
+					{
+						DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+						if (from == null && to == null) {
+							dateRangeStr = "entire history";
+						} else if (from == null) {
+							dateRangeStr = "up to <b><code>" + df.format(to) + "</b></code>";
+						} else if (to == null) {
+							dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to today";
+						} else if (from.equals(to)) {
+							dateRangeStr = "<b><code>" + df.format(from) + "</b></code>";
+						} else {
+							dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to <b><code>" + df.format(to) + "</b></code>";
+						}
+					}
+					tablePanel.add(new JLabel("<html><font size=5>" + dateRangeStr + "</font></html>"), "w 100%, growx");
+
+					ExportComboBox export = new ExportComboBox() {
+						@Override
+						public String bbCode() {
+							//return generateBBCode(playerGroup, from, to);
+							return ""; //TODO
+						}
+
+						@Override
+						public String csv() {
+							//return generateCsv(playerGroup, from, to);
+							return ""; //TODO
+						}
+
+						@Override
+						public void handle(String text) {
+							Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+							StringSelection stringSelection = new StringSelection(text);
+							c.setContents(stringSelection, stringSelection);
+
+							JOptionPane.showMessageDialog(MainFrame.this, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
+						}
+					};
+					tablePanel.add(export, "align right, wrap");
+
+					PlayersPanel panel = new PlayersPanel(playerGroups);
+					JScrollPane panelScrollPane = new JScrollPane(panel);
+					panelScrollPane.getVerticalScrollBar().setUnitIncrement(100);
+
+					tablePanel.add(new JLabel("Sort by:"), "align right");
+					SortComboBox sort = new SortComboBox(panel, panelScrollPane);
+					tablePanel.add(sort, "wrap");
+
+					tablePanel.add(panelScrollPane, "span 2, grow, w 100%, h 100%, wrap");
+
+					tablePanel.validate();
+				} catch (SQLException e) {
+					loading.dispose();
+					ErrorDialog.show(MainFrame.this, "An error occurred querying the database.", e);
+				} finally {
+					loading.dispose();
+				}
+			}
+		};
+		t.start();
+		loading.setVisible(true);
+	}
+
 	void updateSuccessful(Date started, long time, int transactionCount, int pageCount, boolean showResults) {
 		long components[] = TimeUtils.parseTimeComponents(time);
 		String message;
@@ -455,11 +546,9 @@ public class MainFrame extends JFrame implements WindowListener {
 		p2.add(new JLabel("End:"), "align right");
 		p2.add(toDatePicker, "wrap");
 
-		//		p2.add(new JLabel("Group By:"), "align right");
-		//		p2.add(groupBy, "wrap");
-
 		p.add(p2, "wrap");
-		p.add(show, "align center");
+		p.add(showItems, "align center, wrap");
+		p.add(showPlayers, "align center");
 
 		return p;
 	}
@@ -514,7 +603,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		//do nothing
 	}
 
-	private abstract class ExportComboBox extends DisabledItemsComboBox implements ActionListener {
+	private abstract class ExportComboBox extends JComboBox implements ActionListener {
 		private final String heading = "Copy to Clipboard";
 		private final String bbCode = "BB Code";
 		private final String csv = "CSV";
@@ -549,6 +638,45 @@ public class MainFrame extends JFrame implements WindowListener {
 		public abstract String csv();
 
 		public abstract void handle(String text);
+	}
+
+	private class SortComboBox extends JComboBox implements ActionListener {
+		private final String playerName = "Player name";
+		private final String bestCustomers = "Best Customers";
+		private final String bestSuppliers = "Best Suppliers";
+		private final PlayersPanel panel;
+		private final JScrollPane scrollPane;
+		private String currentSelection;
+
+		public SortComboBox(PlayersPanel panel, JScrollPane scrollPane) {
+			addItem(playerName);
+			addItem(bestCustomers);
+			addItem(bestSuppliers);
+			addActionListener(this);
+			this.panel = panel;
+			this.scrollPane = scrollPane;
+			currentSelection = playerName;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			String selected = (String) getSelectedItem();
+			if (selected == currentSelection) {
+				return;
+			}
+
+			if (selected == playerName) {
+				panel.sortByPlayerName();
+			} else if (selected == bestCustomers) {
+				panel.sortByCustomers();
+			} else if (selected == bestSuppliers) {
+				panel.sortBySuppliers();
+			}
+			currentSelection = selected;
+
+			scrollPane.getVerticalScrollBar().setValue(0); //scroll to top
+			panel.repaint(); //without this, it makes the panel's background white
+		}
 	}
 
 	protected static String generateCsv(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {

@@ -385,6 +385,124 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public List<PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException {
+		List<PlayerGroup> playerGroups = new ArrayList<PlayerGroup>();
+		PreparedStatement stmt = null;
+
+		//get the IDs of all the players
+		List<Integer> playerIds = new ArrayList<Integer>();
+		try {
+			//@formatter:off
+			String sql =
+			"SELECT DISTINCT player " + 
+			"FROM transactions ";
+			if (from != null) {
+				sql += "WHERE ts >= ? ";
+			}
+			if (to != null) {
+				sql += ((from == null) ? "WHERE" : "AND") + " ts < ? ";
+			}
+			//@formatter:on
+
+			stmt = conn.prepareStatement(sql);
+			int index = 1;
+			if (from != null) {
+				stmt.setTimestamp(index++, new java.sql.Timestamp(from.getTime()));
+			}
+			if (to != null) {
+				stmt.setTimestamp(index++, new java.sql.Timestamp(to.getTime()));
+			}
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				playerIds.add(rs.getInt("player"));
+			}
+		} finally {
+			closeStatements(stmt);
+		}
+
+		for (Integer playerId : playerIds) {
+			PlayerGroup playerGroup = new PlayerGroup();
+			playerGroup.setPlayerName(getPlayerName(playerId));
+
+			try {
+				//@formatter:off
+				String sql =
+				"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
+				"FROM transactions t INNER JOIN items i ON t.item = i.id " +
+				"WHERE t.player = ? ";
+				if (from != null) {
+					sql += "AND t.ts >= ? ";
+				}
+				if (to != null) {
+					sql += "AND t.ts < ? ";
+				}
+				sql += "GROUP BY i.name";
+				//@formatter:on
+
+				stmt = conn.prepareStatement(sql);
+				int index = 1;
+				stmt.setInt(index++, playerId);
+				if (from != null) {
+					stmt.setTimestamp(index++, new java.sql.Timestamp(from.getTime()));
+				}
+				if (to != null) {
+					stmt.setTimestamp(index++, new java.sql.Timestamp(to.getTime()));
+				}
+
+				ResultSet rs = stmt.executeQuery();
+				while (rs.next()) {
+					playerGroup.addItem(rs.getString("itemName"), rs.getInt("quantitySum"), rs.getInt("amountSum"));
+				}
+			} finally {
+				closeStatements(stmt);
+			}
+
+			//get the first and last times the player was seen
+			//TODO cache these
+			try {
+				//@formatter:off
+				String sql =
+				"SELECT Min(ts) AS firstSeen, Max(ts) AS lastSeen " + 
+				"FROM transactions " +
+				"WHERE player = ? ";
+				//@formatter:on
+
+				stmt = conn.prepareStatement(sql);
+				int index = 1;
+				stmt.setInt(index++, playerId);
+
+				ResultSet rs = stmt.executeQuery();
+				if (rs.next()) {
+					playerGroup.setFirstSeen(new Date(rs.getTimestamp("firstSeen").getTime()));
+					playerGroup.setLastSeen(new Date(rs.getTimestamp("lastSeen").getTime()));
+				}
+			} finally {
+				closeStatements(stmt);
+			}
+
+			playerGroups.add(playerGroup);
+		}
+
+		return playerGroups;
+	}
+
+	private String getPlayerName(Integer id) throws SQLException {
+		PreparedStatement stmt = null;
+
+		try {
+			stmt = conn.prepareStatement("SELECT name FROM players WHERE id = ?");
+			stmt.setInt(1, id);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				return rs.getString("name");
+			}
+			return null;
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
 	public void wipe() throws SQLException, IOException {
 		logger.info("Wiping transactions...");
 		conn.createStatement().execute("DELETE FROM transactions");

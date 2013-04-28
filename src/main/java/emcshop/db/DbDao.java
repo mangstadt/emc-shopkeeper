@@ -109,6 +109,15 @@ public interface DbDao {
 	Map<String, ItemGroup> getItemGroups(Date from, Date to) throws SQLException;
 
 	/**
+	 * Computes what each player bought/sold over a date range.
+	 * @param from the start date
+	 * @param to the end date
+	 * @return the player activity
+	 * @throws SQLException
+	 */
+	List<PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException;
+
+	/**
 	 * Deletes all data in the database.
 	 * @throws IOException
 	 * @throws SQLException
