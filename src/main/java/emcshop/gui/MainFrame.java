@@ -18,6 +18,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -409,7 +410,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			@Override
 			public void run() {
 				try {
-					final List<PlayerGroup> playerGroups;
+					final Collection<PlayerGroup> playerGroups;
 					{
 						Date toBumped = null;
 						if (to != null) {
@@ -418,7 +419,7 @@ public class MainFrame extends JFrame implements WindowListener {
 							c.add(Calendar.DATE, 1);
 							toBumped = c.getTime();
 						}
-						playerGroups = dao.getPlayerGroups(from, toBumped);
+						playerGroups = dao.getPlayerGroups(from, toBumped).values();
 					}
 
 					String dateRangeStr;

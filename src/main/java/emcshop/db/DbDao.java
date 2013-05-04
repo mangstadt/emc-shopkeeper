@@ -115,7 +115,15 @@ public interface DbDao {
 	 * @return the player activity
 	 * @throws SQLException
 	 */
-	List<PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException;
+	Map<String, PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException;
+
+	/**
+	 * Gets a player name.
+	 * @param id the ID
+	 * @return the player name or null if not found
+	 * @throws SQLException
+	 */
+	String getPlayerName(int id) throws SQLException;
 
 	/**
 	 * Deletes all data in the database.

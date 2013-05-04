@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -385,22 +386,22 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public List<PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException {
-		List<PlayerGroup> playerGroups = new ArrayList<PlayerGroup>();
+	public Map<String, PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException {
+		Map<String, PlayerGroup> playerGroups = new HashMap<String, PlayerGroup>();
 		PreparedStatement stmt = null;
 
-		//get the IDs of all the players
-		List<Integer> playerIds = new ArrayList<Integer>();
 		try {
 			//@formatter:off
 			String sql =
-			"SELECT DISTINCT player " + 
-			"FROM transactions ";
+			"SELECT t.amount, t.quantity, t.player, p.name AS playerName, i.name AS itemName " + 
+			"FROM transactions t " +
+			"INNER JOIN items i ON t.item = i.id " +
+			"INNER JOIN players p ON t.player = p.id ";
 			if (from != null) {
-				sql += "WHERE ts >= ? ";
+				sql += "WHERE t.ts >= ? ";
 			}
 			if (to != null) {
-				sql += ((from == null) ? "WHERE" : "AND") + " ts < ? ";
+				sql += ((from == null) ? "WHERE" : "AND") + " t.ts < ? ";
 			}
 			//@formatter:on
 
@@ -414,51 +415,44 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				playerIds.add(rs.getInt("player"));
+				String playerName = rs.getString("playerName");
+				PlayerGroup playerGroup = playerGroups.get(playerName);
+				if (playerGroup == null) {
+					playerGroup = new PlayerGroup();
+					playerGroup.setPlayerName(playerName);
+					playerGroup.setPlayerId(rs.getInt("player"));
+					playerGroups.put(playerName, playerGroup);
+				}
+
+				String itemName = rs.getString("itemName");
+				ItemGroup itemGroup = playerGroup.getItems().get(itemName);
+				if (itemGroup == null) {
+					itemGroup = new ItemGroup();
+					itemGroup.setItem(itemName);
+					playerGroup.getItems().put(itemName, itemGroup);
+				}
+
+				int amount = rs.getInt("amount");
+				if (amount < 0) {
+					itemGroup.setSoldAmount(itemGroup.getSoldAmount() + amount);
+				} else {
+					itemGroup.setBoughtAmount(itemGroup.getBoughtAmount() + amount);
+				}
+
+				int quantity = rs.getInt("quantity");
+				if (quantity < 0) {
+					itemGroup.setBoughtQuantity(itemGroup.getBoughtQuantity() + quantity);
+				} else {
+					itemGroup.setSoldQuantity(itemGroup.getSoldQuantity() + quantity);
+				}
 			}
 		} finally {
 			closeStatements(stmt);
 		}
 
-		for (Integer playerId : playerIds) {
-			PlayerGroup playerGroup = new PlayerGroup();
-			playerGroup.setPlayerName(getPlayerName(playerId));
-
-			try {
-				//@formatter:off
-				String sql =
-				"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
-				"FROM transactions t INNER JOIN items i ON t.item = i.id " +
-				"WHERE t.player = ? ";
-				if (from != null) {
-					sql += "AND t.ts >= ? ";
-				}
-				if (to != null) {
-					sql += "AND t.ts < ? ";
-				}
-				sql += "GROUP BY i.name";
-				//@formatter:on
-
-				stmt = conn.prepareStatement(sql);
-				int index = 1;
-				stmt.setInt(index++, playerId);
-				if (from != null) {
-					stmt.setTimestamp(index++, new java.sql.Timestamp(from.getTime()));
-				}
-				if (to != null) {
-					stmt.setTimestamp(index++, new java.sql.Timestamp(to.getTime()));
-				}
-
-				ResultSet rs = stmt.executeQuery();
-				while (rs.next()) {
-					playerGroup.addItem(rs.getString("itemName"), rs.getInt("quantitySum"), rs.getInt("amountSum"));
-				}
-			} finally {
-				closeStatements(stmt);
-			}
-
-			//get the first and last times the player was seen
-			//TODO cache these
+		//get the first and last times the player was seen
+		//TODO cache these
+		for (PlayerGroup playerGroup : playerGroups.values()) {
 			try {
 				//@formatter:off
 				String sql =
@@ -469,7 +463,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 				stmt = conn.prepareStatement(sql);
 				int index = 1;
-				stmt.setInt(index++, playerId);
+				stmt.setInt(index++, playerGroup.getPlayerId());
 
 				ResultSet rs = stmt.executeQuery();
 				if (rs.next()) {
@@ -479,24 +473,20 @@ public abstract class DirbyDbDao implements DbDao {
 			} finally {
 				closeStatements(stmt);
 			}
-
-			playerGroups.add(playerGroup);
 		}
 
 		return playerGroups;
 	}
 
-	private String getPlayerName(Integer id) throws SQLException {
+	@Override
+	public String getPlayerName(int id) throws SQLException {
 		PreparedStatement stmt = null;
 
 		try {
 			stmt = conn.prepareStatement("SELECT name FROM players WHERE id = ?");
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
-			if (rs.next()) {
-				return rs.getString("name");
-			}
-			return null;
+			return rs.next() ? rs.getString("name") : null;
 		} finally {
 			closeStatements(stmt);
 		}

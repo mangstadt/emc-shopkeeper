@@ -1,16 +1,26 @@
 package emcshop.db;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ * Represents the transactions of a particular shop customer.
  * @author Michael Angstadt
  */
 public class PlayerGroup {
+	private Integer playerId;
 	private String playerName;
 	private Date firstSeen, lastSeen;
-	private List<ItemInfo> items = new ArrayList<ItemInfo>();
+	private Map<String, ItemGroup> items = new HashMap<String, ItemGroup>();
+
+	public Integer getPlayerId() {
+		return playerId;
+	}
+
+	public void setPlayerId(Integer playerId) {
+		this.playerId = playerId;
+	}
 
 	public String getPlayerName() {
 		return playerName;
@@ -20,45 +30,46 @@ public class PlayerGroup {
 		this.playerName = playerName;
 	}
 
-	public void addItem(String name, int quantity, int amount) {
-		ItemInfo info = new ItemInfo();
-		info.setItem(name);
-		info.setQuantity(quantity);
-		info.setAmount(amount);
-		items.add(info);
-	}
-
+	/**
+	 * Gets the total amount of rupees lost/gained from all of this player's
+	 * transactions.
+	 * @return the net rupee amount
+	 */
 	public int getNetAmount() {
 		int total = 0;
-		for (ItemInfo info : items) {
-			total += info.getAmount();
+		for (ItemGroup info : items.values()) {
+			total += info.getNetAmount();
 		}
 		return total;
 	}
 
+	/**
+	 * Gets the total amount of rupees gained from what this player bought from
+	 * the shop.
+	 * @return the net bought amount
+	 */
 	public int getNetBoughtAmount() {
 		int total = 0;
-		for (ItemInfo info : items) {
-			int amount = info.getAmount();
-			if (amount > 0) {
-				total += amount;
-			}
+		for (ItemGroup info : items.values()) {
+			total += info.getBoughtAmount();
 		}
 		return total;
 	}
 
+	/**
+	 * Gets the total amount of rupees lost from what this player sold to the
+	 * shop.
+	 * @return the net sold amount
+	 */
 	public int getNetSoldAmount() {
 		int total = 0;
-		for (ItemInfo info : items) {
-			int amount = info.getAmount();
-			if (amount < 0) {
-				total += amount;
-			}
+		for (ItemGroup info : items.values()) {
+			total += info.getSoldAmount();
 		}
 		return total;
 	}
 
-	public List<ItemInfo> getItems() {
+	public Map<String, ItemGroup> getItems() {
 		return items;
 	}
 
@@ -76,35 +87,5 @@ public class PlayerGroup {
 
 	public void setLastSeen(Date lastSeen) {
 		this.lastSeen = lastSeen;
-	}
-
-	public static class ItemInfo {
-		private String item;
-		private int quantity;
-		private int amount;
-
-		public String getItem() {
-			return item;
-		}
-
-		public void setItem(String item) {
-			this.item = item;
-		}
-
-		public int getQuantity() {
-			return quantity;
-		}
-
-		public void setQuantity(int quantity) {
-			this.quantity = quantity;
-		}
-
-		public int getAmount() {
-			return amount;
-		}
-
-		public void setAmount(int amount) {
-			this.amount = amount;
-		}
 	}
 }
