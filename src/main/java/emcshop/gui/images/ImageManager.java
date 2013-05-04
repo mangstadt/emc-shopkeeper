@@ -48,6 +48,10 @@ public class ImageManager {
 		return getImageIcon("help.png");
 	}
 
+	public static ImageIcon getClearIcon() {
+		return getImageIcon("clear.png");
+	}
+
 	public static ImageIcon getItemImage(String item) {
 		ImageIcon image = itemImages.get(item);
 		if (image == null) {

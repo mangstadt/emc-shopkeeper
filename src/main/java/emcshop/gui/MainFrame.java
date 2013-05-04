@@ -39,7 +39,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -97,7 +96,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		setIconImage(appIcon);
 
 		ToolTipManager.sharedInstance().setInitialDelay(0);
-		ToolTipManager.sharedInstance().setDismissDelay(10000);
+		ToolTipManager.sharedInstance().setDismissDelay(30000);
 
 		addWindowListener(this);
 	}
@@ -376,25 +375,34 @@ public class MainFrame extends JFrame implements WindowListener {
 					};
 					tablePanel.add(export, "align right, wrap");
 
-					ItemsTable table = new ItemsTable(itemGroupsList);
-					table.setFillsViewportHeight(true);
-					JScrollPane tableScrollPane = new JScrollPane(table);
-					tablePanel.add(tableScrollPane, "span 2, grow, w 100%, h 100%, wrap");
+					final ItemsPanel panel = new ItemsPanel(itemGroupsList);
 
-					String netTotalLabel;
+					//add "sort by" combobox
+					tablePanel.add(new JLabel("Sort by:"), "align right");
+					ItemSortComboBox sort = new ItemSortComboBox(panel);
+					tablePanel.add(sort, "wrap");
+
+					//add "filter by item"
 					{
-						NumberFormat nf = NumberFormat.getInstance();
-						StringBuilder sb = new StringBuilder();
-						sb.append("<html><font size=5>Net Total: <code>");
-						if (netTotal < 0) {
-							sb.append("<font color=red>" + nf.format(netTotal) + "r</font>");
-						} else {
-							sb.append("<font color=green>+" + nf.format(netTotal) + "r</font>");
-						}
-						sb.append("</code></font></html>");
-						netTotalLabel = sb.toString();
+						JLabel label = new JLabel("Filter by item(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
+						label.setToolTipText(toolTipText("<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool, log</code>\n\nMultiple items can be entered, separated by commas.  Partial names can also be entered.  After entering the item name(s), press [<code>Enter</code>] to perform the filtering operation."));
+
+						final FilterTextField textField = new FilterTextField();
+						textField.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								List<String> filteredItems = textField.getNames();
+								panel.filterByItems(filteredItems);
+								panel.scrollToTop();
+							}
+						});
+
+						tablePanel.add(label, "align right");
+						tablePanel.add(textField, "split 2, w 150!");
+						tablePanel.add(textField.getClearButton(), "w 25!, h 20!, wrap");
 					}
-					tablePanel.add(new JLabel(netTotalLabel), "span 2, align right");
+
+					tablePanel.add(panel, "span 2, grow, w 100%, h 100%, wrap");
 
 					tablePanel.validate();
 				} catch (SQLException e) {
@@ -472,8 +480,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 					//add panel with player data
 					final PlayersPanel panel = new PlayersPanel(playerGroups);
-					final JScrollPane panelScrollPane = new JScrollPane(panel);
-					panelScrollPane.getVerticalScrollBar().setUnitIncrement(100);
+					final MyJScrollPane panelScrollPane = new MyJScrollPane(panel);
 
 					//add "sort by" combobox
 					tablePanel.add(new JLabel("Sort by:"), "align right");
@@ -483,89 +490,43 @@ public class MainFrame extends JFrame implements WindowListener {
 					//add "filter by player"
 					{
 						JLabel label = new JLabel("Filter by player(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-						label.setToolTipText("Filters the list by player name.  Multiple names can be entered, separated by commas.  Partial names can also be entered.");
+						label.setToolTipText(toolTipText("<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar, justin</code>\n\nMultiple players can be entered, separated by commas.  Partial names can also be entered.  After entering the player name(s), press [<code>Enter</code>] to perform the filtering operation."));
 
-						final JTextField textField = new JTextField();
+						final FilterTextField textField = new FilterTextField();
 						textField.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								String split[] = textField.getText().trim().split("\\s*,\\s*");
-								List<String> filteredPlayers = new ArrayList<String>(split.length);
-								for (String s : split) {
-									if (s.length() > 0) {
-										filteredPlayers.add(s);
-									}
-								}
+								List<String> filteredPlayers = textField.getNames();
 								panel.filterByPlayers(filteredPlayers);
 
-								panelScrollPane.getVerticalScrollBar().setValue(0); //scroll to top
-								panel.repaint(); //without this, it makes the panel's background white
-							}
-						});
-
-						JButton clear = new JButton("X");
-						clear.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent arg0) {
-								if (textField.getText().isEmpty()) {
-									return;
-								}
-								textField.setText("");
-
-								panel.filterByPlayers(new ArrayList<String>(0));
-
-								panelScrollPane.getVerticalScrollBar().setValue(0); //scroll to top
-								panel.repaint(); //without this, it makes the panel's background white
+								panelScrollPane.scrollToTop();
 							}
 						});
 
 						tablePanel.add(label, "align right");
 						tablePanel.add(textField, "split 2, w 150!");
-						tablePanel.add(clear, "w 20!, h 20!, wrap");
+						tablePanel.add(textField.getClearButton(), "w 25!, h 20!, wrap");
 					}
 
 					//add "filter by item"
 					{
 						JLabel label = new JLabel("Filter by item(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-						label.setToolTipText("Filters the items in each player table.  Multiple item names can be entered, separated by commas.  Partial names can also be entered.");
+						label.setToolTipText(toolTipText("<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool, log</code>\n\nMultiple items can be entered, separated by commas.  Partial names can also be entered.  After entering the item name(s), press [<code>Enter</code>] to perform the filtering operation."));
 
-						final JTextField textField = new JTextField();
+						final FilterTextField textField = new FilterTextField();
 						textField.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								String split[] = textField.getText().trim().split("\\s*,\\s*");
-								List<String> filteredItems = new ArrayList<String>(split.length);
-								for (String s : split) {
-									if (s.length() > 0) {
-										filteredItems.add(s);
-									}
-								}
+								List<String> filteredItems = textField.getNames();
 								panel.filterByItems(filteredItems);
 
-								panelScrollPane.getVerticalScrollBar().setValue(0); //scroll to top
-								panel.repaint(); //without this, it makes the panel's background white
-							}
-						});
-
-						JButton clear = new JButton("X");
-						clear.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent arg0) {
-								if (textField.getText().isEmpty()) {
-									return;
-								}
-								textField.setText("");
-
-								panel.filterByItems(new ArrayList<String>(0));
-
-								panelScrollPane.getVerticalScrollBar().setValue(0); //scroll to top
-								panel.repaint(); //without this, it makes the panel's background white
+								panelScrollPane.scrollToTop();
 							}
 						});
 
 						tablePanel.add(label, "align right");
 						tablePanel.add(textField, "split 2, w 150!");
-						tablePanel.add(clear, "w 20!, h 20!, wrap");
+						tablePanel.add(textField.getClearButton(), "w 25!, h 20!, wrap");
 					}
 
 					tablePanel.add(panelScrollPane, "span 2, grow, w 100%, h 100%, wrap");
@@ -701,6 +662,11 @@ public class MainFrame extends JFrame implements WindowListener {
 		//do nothing
 	}
 
+	private String toolTipText(String text) {
+		text = text.replace("\n", "<br>");
+		return "<html><div width=300>" + text + "</div></html>";
+	}
+
 	private abstract class ExportComboBox extends JComboBox implements ActionListener {
 		private final String heading = "Copy to Clipboard";
 		private final String bbCode = "BB Code";
@@ -743,10 +709,10 @@ public class MainFrame extends JFrame implements WindowListener {
 		private final String bestCustomers = "Best Customers";
 		private final String bestSuppliers = "Best Suppliers";
 		private final PlayersPanel panel;
-		private final JScrollPane scrollPane;
+		private final MyJScrollPane scrollPane;
 		private String currentSelection;
 
-		public SortComboBox(PlayersPanel panel, JScrollPane scrollPane) {
+		public SortComboBox(PlayersPanel panel, MyJScrollPane scrollPane) {
 			addItem(playerName);
 			addItem(bestCustomers);
 			addItem(bestSuppliers);
@@ -772,8 +738,86 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 			currentSelection = selected;
 
-			scrollPane.getVerticalScrollBar().setValue(0); //scroll to top
-			panel.repaint(); //without this, it makes the panel's background white
+			scrollPane.scrollToTop();
+		}
+	}
+
+	private class ItemSortComboBox extends JComboBox implements ActionListener {
+		private final String itemName = "Item name";
+		private final String mostProfitable = "Most Profitable";
+		private final String leastProfitable = "Least Profitable";
+		private final ItemsPanel panel;
+		private String currentSelection;
+
+		public ItemSortComboBox(ItemsPanel panel) {
+			addItem(itemName);
+			addItem(mostProfitable);
+			addItem(leastProfitable);
+			addActionListener(this);
+			this.panel = panel;
+			currentSelection = itemName;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			String selected = (String) getSelectedItem();
+			if (selected == currentSelection) {
+				return;
+			}
+
+			if (selected == itemName) {
+				panel.sortByItemName();
+			} else if (selected == mostProfitable) {
+				panel.sortByMostProfitable();
+			} else if (selected == leastProfitable) {
+				panel.sortByLeastProfitable();
+			}
+			currentSelection = selected;
+		}
+	}
+
+	/**
+	 * A textbox used for entering the item/player names to filter by.
+	 */
+	private static class FilterTextField extends JTextField {
+		private final JButton clearButton;
+		{
+			clearButton = new JButton(ImageManager.getClearIcon());
+			clearButton.setToolTipText("Clear");
+			clearButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if (getText().isEmpty()) {
+						return;
+					}
+					setText("");
+					fireActionEvent();
+				}
+			});
+		}
+
+		public List<String> getNames() {
+			String split[] = getText().trim().split("\\s*,\\s*");
+			List<String> filteredItems = new ArrayList<String>(split.length);
+			for (String s : split) {
+				if (s.length() > 0) {
+					filteredItems.add(s);
+				}
+			}
+			return filteredItems;
+		}
+
+		/**
+		 * Simulates pressing "enter" on the text field.
+		 */
+		public void fireActionEvent() {
+			for (ActionListener listener : listenerList.getListeners(ActionListener.class)) {
+				listener.actionPerformed(null);
+			}
+		}
+
+		public JButton getClearButton() {
+			return clearButton;
 		}
 	}
 
