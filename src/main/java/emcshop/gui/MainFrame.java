@@ -41,6 +41,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -89,8 +92,12 @@ public class MainFrame extends JFrame implements WindowListener {
 		createWidgets();
 		layoutWidgets();
 		setSize(settings.getWindowWidth(), settings.getWindowHeight());
+
 		Image appIcon = ImageManager.getAppIcon().getImage();
 		setIconImage(appIcon);
+
+		ToolTipManager.sharedInstance().setInitialDelay(0);
+		ToolTipManager.sharedInstance().setDismissDelay(10000);
 
 		addWindowListener(this);
 	}
@@ -463,13 +470,59 @@ public class MainFrame extends JFrame implements WindowListener {
 					};
 					tablePanel.add(export, "align right, wrap");
 
-					PlayersPanel panel = new PlayersPanel(playerGroups);
-					JScrollPane panelScrollPane = new JScrollPane(panel);
+					//add panel with player data
+					final PlayersPanel panel = new PlayersPanel(playerGroups);
+					final JScrollPane panelScrollPane = new JScrollPane(panel);
 					panelScrollPane.getVerticalScrollBar().setUnitIncrement(100);
 
+					//add "sort by" combobox
 					tablePanel.add(new JLabel("Sort by:"), "align right");
 					SortComboBox sort = new SortComboBox(panel, panelScrollPane);
 					tablePanel.add(sort, "wrap");
+
+					//add "filter by player"
+					{
+						JLabel filterByPlayersHelp = new JLabel("Filter by player(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
+						filterByPlayersHelp.setToolTipText("Filters the list by player name.  Multiple names can be entered, separated by commas.  Partial names can also be entered.");
+
+						final JTextField filterByPlayers = new JTextField();
+						filterByPlayers.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								String split[] = filterByPlayers.getText().trim().split("\\s*,\\s*");
+								List<String> filteredPlayers = new ArrayList<String>(split.length);
+								for (String s : split) {
+									if (s.length() > 0) {
+										filteredPlayers.add(s);
+									}
+								}
+								panel.filterByPlayers(filteredPlayers);
+
+								panelScrollPane.getVerticalScrollBar().setValue(0); //scroll to top
+								panel.repaint(); //without this, it makes the panel's background white
+							}
+						});
+
+						JButton clearFilterByPlayers = new JButton("X");
+						clearFilterByPlayers.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								if (filterByPlayers.getText().isEmpty()) {
+									return;
+								}
+								filterByPlayers.setText("");
+
+								panel.filterByPlayers(new ArrayList<String>(0));
+
+								panelScrollPane.getVerticalScrollBar().setValue(0); //scroll to top
+								panel.repaint(); //without this, it makes the panel's background white
+							}
+						});
+
+						tablePanel.add(filterByPlayersHelp, "align right");
+						tablePanel.add(filterByPlayers, "split 2, w 150!");
+						tablePanel.add(clearFilterByPlayers, "w 20!, h 20!, wrap");
+					}
 
 					tablePanel.add(panelScrollPane, "span 2, grow, w 100%, h 100%, wrap");
 

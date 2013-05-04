@@ -26,6 +26,8 @@ import emcshop.db.PlayerGroup;
 public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
 	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
+	private List<String> filteredPlayers = new ArrayList<String>(0);
+	private List<String> filteredItems = new ArrayList<String>(0);
 
 	/**
 	 * Creates the panel.
@@ -117,11 +119,36 @@ public class PlayersPanel extends JPanel {
 		refresh();
 	}
 
+	/**
+	 * Filters the data by player.
+	 */
+	public void filterByPlayers(List<String> players) {
+		filteredPlayers = players;
+		refresh();
+	}
+
 	private void refresh() {
 		removeAll();
 
 		DateFormat df = new SimpleDateFormat("MMMM dd yyyy, HH:mm");
 		for (PlayerGroup playerGroup : playerGroups) {
+			//is this player in the filter list?
+			boolean include = false;
+			if (filteredPlayers.isEmpty()) {
+				include = true;
+			} else {
+				String playerName = playerGroup.getPlayerName().toLowerCase();
+				for (String filteredPlayer : filteredPlayers) {
+					if (playerName.contains(filteredPlayer.toLowerCase())) {
+						include = true;
+						break;
+					}
+				}
+			}
+			if (!include) {
+				continue;
+			}
+
 			//TODO add player icon
 			add(new JLabel("<html><h3>" + playerGroup.getPlayerName() + "</h3></html>"), "span 2, wrap");
 

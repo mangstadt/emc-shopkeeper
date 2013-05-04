@@ -44,6 +44,10 @@ public class ImageManager {
 		return getImageIcon("app-icon.png");
 	}
 
+	public static ImageIcon getHelpIcon() {
+		return getImageIcon("help.png");
+	}
+
 	public static ImageIcon getItemImage(String item) {
 		ImageIcon image = itemImages.get(item);
 		if (image == null) {
