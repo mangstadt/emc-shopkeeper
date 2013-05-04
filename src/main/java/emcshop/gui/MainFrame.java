@@ -356,12 +356,12 @@ public class MainFrame extends JFrame implements WindowListener {
 					ExportComboBox export = new ExportComboBox() {
 						@Override
 						public String bbCode() {
-							return generateBBCode(itemGroupsList, netTotal, from, to);
+							return generateItemsBBCode(itemGroupsList, netTotal, from, to);
 						}
 
 						@Override
 						public String csv() {
-							return generateCsv(itemGroupsList, netTotal, from, to);
+							return generateItemsCsv(itemGroupsList, netTotal, from, to);
 						}
 
 						@Override
@@ -454,17 +454,20 @@ public class MainFrame extends JFrame implements WindowListener {
 					}
 					tablePanel.add(new JLabel("<html><font size=5>" + dateRangeStr + "</font></html>"), "w 100%, growx");
 
+					final PlayersPanel panel = new PlayersPanel(playerGroups);
+					final MyJScrollPane panelScrollPane = new MyJScrollPane(panel);
+
 					ExportComboBox export = new ExportComboBox() {
 						@Override
 						public String bbCode() {
-							//return generateBBCode(playerGroup, from, to);
 							return ""; //TODO
 						}
 
 						@Override
 						public String csv() {
-							//return generateCsv(playerGroup, from, to);
-							return ""; //TODO
+							List<PlayerGroup> players = panel.getDisplayedPlayers();
+							Map<PlayerGroup, List<ItemGroup>> items = panel.getDisplayedItems();
+							return generatePlayersCsv(players, items, from, to);
 						}
 
 						@Override
@@ -477,10 +480,6 @@ public class MainFrame extends JFrame implements WindowListener {
 						}
 					};
 					tablePanel.add(export, "align right, wrap");
-
-					//add panel with player data
-					final PlayersPanel panel = new PlayersPanel(playerGroups);
-					final MyJScrollPane panelScrollPane = new MyJScrollPane(panel);
 
 					//add "sort by" combobox
 					tablePanel.add(new JLabel("Sort by:"), "align right");
@@ -821,8 +820,8 @@ public class MainFrame extends JFrame implements WindowListener {
 		}
 	}
 
-	protected static String generateCsv(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+	protected static String generateItemsCsv(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
 		CSVWriter writer = new CSVWriter(sw);
 
@@ -851,8 +850,43 @@ public class MainFrame extends JFrame implements WindowListener {
 		return sw.toString();
 	}
 
-	protected static String generateBBCode(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+	protected static String generatePlayersCsv(List<PlayerGroup> players, Map<PlayerGroup, List<ItemGroup>> items, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		StringWriter sw = new StringWriter();
+		CSVWriter writer = new CSVWriter(sw);
+
+		writer.writeNext(new String[] { (from == null) ? "" : df.format(from), (to == null) ? "" : df.format(to) });
+		writer.writeNext(new String[] { "Player", "First Seen", "Last Seen", "Item", "Sold Quantity", "Sold Amount", "Bought Quantity", "Bought Amount", "Net Quantity", "Net Amount" });
+		for (PlayerGroup player : players) {
+			for (ItemGroup group : items.get(player)) {
+				//@formatter:off
+				writer.writeNext(new String[]{
+					player.getPlayerName(),
+					df.format(player.getFirstSeen()),
+					df.format(player.getLastSeen()),
+					group.getItem(),
+					group.getSoldQuantity() + "",
+					group.getSoldAmount() + "",
+					group.getBoughtQuantity() + "",
+					group.getBoughtAmount() + "",
+					group.getNetQuantity() + "",
+					group.getNetAmount() + ""
+				});
+				//@formatter:on
+			}
+		}
+		writer.writeNext(new String[] { "EMC Shopkeeper v" + Main.VERSION + " - " + Main.URL });
+
+		try {
+			writer.close();
+		} catch (IOException e) {
+			//writing to string
+		}
+		return sw.toString();
+	}
+
+	protected static String generateItemsBBCode(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		NumberFormat nf = NumberFormat.getInstance();
 		BBCodeBuilder sb = new BBCodeBuilder();
 

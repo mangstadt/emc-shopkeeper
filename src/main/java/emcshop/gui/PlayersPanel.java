@@ -27,6 +27,8 @@ import emcshop.db.PlayerGroup;
 public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
 	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
+	private List<PlayerGroup> displayedPlayers;
+	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
 	private List<String> filteredPlayerNames = new ArrayList<String>(0);
 	private List<String> filteredItemNames = new ArrayList<String>(0);
 	private Sort sort;
@@ -86,20 +88,28 @@ public class PlayersPanel extends JPanel {
 		refresh();
 	}
 
+	public List<PlayerGroup> getDisplayedPlayers() {
+		return displayedPlayers;
+	}
+
+	public Map<PlayerGroup, List<ItemGroup>> getDisplayedItems() {
+		return displayedItems;
+	}
+
 	private void refresh() {
 		//filter players
-		List<PlayerGroup> filteredPlayers = filterPlayers();
+		displayedPlayers = filterPlayers();
 
 		//filter items
-		Map<PlayerGroup, List<ItemGroup>> filteredItems = filterItems(filteredPlayers);
+		displayedItems = filterItems(displayedPlayers);
 
 		//sort data
-		sortData(filteredPlayers, filteredItems);
+		sortData(displayedPlayers, displayedItems);
 
 		//display data
 		removeAll();
 		DateFormat df = new SimpleDateFormat("MMMM dd yyyy, HH:mm");
-		for (PlayerGroup playerGroup : filteredPlayers) {
+		for (PlayerGroup playerGroup : displayedPlayers) {
 			//TODO add player icon
 			add(new JLabel("<html><h3>" + playerGroup.getPlayerName() + "</h3></html>"), "span 2, wrap");
 
@@ -109,7 +119,7 @@ public class PlayersPanel extends JPanel {
 			add(new JLabel("<html>Last seen:</html>"), "align right");
 			add(new JLabel("<html>" + df.format(playerGroup.getLastSeen()) + "</html>"), "wrap");
 
-			ItemsTable table = new ItemsTable(filteredItems.get(playerGroup));
+			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup));
 			table.getTableHeader().setReorderingAllowed(false);
 			add(table.getTableHeader(), "span 2, wrap");
 			add(table, "span 2, wrap");
@@ -117,7 +127,7 @@ public class PlayersPanel extends JPanel {
 			JLabel netAmount;
 			{
 				int amount = 0;
-				for (ItemGroup item : filteredItems.get(playerGroup)) {
+				for (ItemGroup item : displayedItems.get(playerGroup)) {
 					amount += item.getNetAmount();
 				}
 				String color = getNetColor(amount);
