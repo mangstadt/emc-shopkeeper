@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +27,9 @@ import emcshop.db.PlayerGroup;
 public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
 	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
-	private List<String> filteredPlayers = new ArrayList<String>(0);
-	private List<String> filteredItems = new ArrayList<String>(0);
+	private List<String> filteredPlayerNames = new ArrayList<String>(0);
+	private List<String> filteredItemNames = new ArrayList<String>(0);
+	private Sort sort;
 
 	/**
 	 * Creates the panel.
@@ -48,24 +50,7 @@ public class PlayersPanel extends JPanel {
 	 * Sorts the data by player name.
 	 */
 	public void sortByPlayerName() {
-		//sort by player name
-		Collections.sort(playerGroups, new Comparator<PlayerGroup>() {
-			@Override
-			public int compare(PlayerGroup a, PlayerGroup b) {
-				return a.getPlayerName().compareToIgnoreCase(b.getPlayerName());
-			}
-		});
-
-		//sort each player's item list by item name
-		for (PlayerGroup group : playerGroups) {
-			Collections.sort(itemGroups.get(group), new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					return a.getItem().compareToIgnoreCase(b.getItem());
-				}
-			});
-		}
-
+		sort = Sort.PLAYER;
 		refresh();
 	}
 
@@ -73,24 +58,7 @@ public class PlayersPanel extends JPanel {
 	 * Sorts the data by best supplier.
 	 */
 	public void sortBySuppliers() {
-		//sort by net sold amount ascending
-		Collections.sort(playerGroups, new Comparator<PlayerGroup>() {
-			@Override
-			public int compare(PlayerGroup a, PlayerGroup b) {
-				return a.getNetSoldAmount() - b.getNetSoldAmount();
-			}
-		});
-
-		//sort each player's item list by item amount ascending
-		for (PlayerGroup group : playerGroups) {
-			Collections.sort(itemGroups.get(group), new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					return a.getNetAmount() - b.getNetAmount();
-				}
-			});
-		}
-
+		sort = Sort.SUPPLIER;
 		refresh();
 	}
 
@@ -98,24 +66,7 @@ public class PlayersPanel extends JPanel {
 	 * Sorts the data by best customer.
 	 */
 	public void sortByCustomers() {
-		//sort by net bought amount descending
-		Collections.sort(playerGroups, new Comparator<PlayerGroup>() {
-			@Override
-			public int compare(PlayerGroup a, PlayerGroup b) {
-				return b.getNetBoughtAmount() - a.getNetBoughtAmount();
-			}
-		});
-
-		//sort each player's item list by item amount descending
-		for (PlayerGroup group : playerGroups) {
-			Collections.sort(itemGroups.get(group), new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					return b.getNetAmount() - a.getNetAmount();
-				}
-			});
-		}
-
+		sort = Sort.CUSTOMER;
 		refresh();
 	}
 
@@ -123,32 +74,32 @@ public class PlayersPanel extends JPanel {
 	 * Filters the data by player.
 	 */
 	public void filterByPlayers(List<String> players) {
-		filteredPlayers = players;
+		filteredPlayerNames = players;
+		refresh();
+	}
+
+	/**
+	 * Filters the data by item.
+	 */
+	public void filterByItems(List<String> items) {
+		filteredItemNames = items;
 		refresh();
 	}
 
 	private void refresh() {
+		//filter players
+		List<PlayerGroup> filteredPlayers = filterPlayers();
+
+		//filter items
+		Map<PlayerGroup, List<ItemGroup>> filteredItems = filterItems(filteredPlayers);
+
+		//sort data
+		sortData(filteredPlayers, filteredItems);
+
+		//display data
 		removeAll();
-
 		DateFormat df = new SimpleDateFormat("MMMM dd yyyy, HH:mm");
-		for (PlayerGroup playerGroup : playerGroups) {
-			//is this player in the filter list?
-			boolean include = false;
-			if (filteredPlayers.isEmpty()) {
-				include = true;
-			} else {
-				String playerName = playerGroup.getPlayerName().toLowerCase();
-				for (String filteredPlayer : filteredPlayers) {
-					if (playerName.contains(filteredPlayer.toLowerCase())) {
-						include = true;
-						break;
-					}
-				}
-			}
-			if (!include) {
-				continue;
-			}
-
+		for (PlayerGroup playerGroup : filteredPlayers) {
 			//TODO add player icon
 			add(new JLabel("<html><h3>" + playerGroup.getPlayerName() + "</h3></html>"), "span 2, wrap");
 
@@ -158,14 +109,17 @@ public class PlayersPanel extends JPanel {
 			add(new JLabel("<html>Last seen:</html>"), "align right");
 			add(new JLabel("<html>" + df.format(playerGroup.getLastSeen()) + "</html>"), "wrap");
 
-			ItemsTable table = new ItemsTable(itemGroups.get(playerGroup));
+			ItemsTable table = new ItemsTable(filteredItems.get(playerGroup));
 			table.getTableHeader().setReorderingAllowed(false);
 			add(table.getTableHeader(), "span 2, wrap");
 			add(table, "span 2, wrap");
 
 			JLabel netAmount;
 			{
-				int amount = playerGroup.getNetAmount();
+				int amount = 0;
+				for (ItemGroup item : filteredItems.get(playerGroup)) {
+					amount += item.getNetAmount();
+				}
 				String color = getNetColor(amount);
 
 				StringBuilder sb = new StringBuilder();
@@ -184,8 +138,145 @@ public class PlayersPanel extends JPanel {
 			}
 			add(netAmount, "align right, span 2, wrap");
 		}
-
 		validate();
+	}
+
+	private List<PlayerGroup> filterPlayers() {
+		List<PlayerGroup> filteredPlayers;
+		if (filteredPlayerNames.isEmpty()) {
+			filteredPlayers = new LinkedList<PlayerGroup>(playerGroups);
+		} else {
+			filteredPlayers = new LinkedList<PlayerGroup>();
+			for (PlayerGroup playerGroup : playerGroups) {
+				String playerName = playerGroup.getPlayerName().toLowerCase();
+				for (String filteredPlayer : filteredPlayerNames) {
+					if (playerName.contains(filteredPlayer.toLowerCase())) {
+						filteredPlayers.add(playerGroup);
+						break;
+					}
+				}
+			}
+		}
+		return filteredPlayers;
+	}
+
+	private Map<PlayerGroup, List<ItemGroup>> filterItems(List<PlayerGroup> filteredPlayers) {
+		Map<PlayerGroup, List<ItemGroup>> filteredItems;
+		if (filteredPlayerNames.isEmpty() && filteredItemNames.isEmpty()) {
+			filteredItems = itemGroups;
+		} else {
+			List<PlayerGroup> removePlayers = new ArrayList<PlayerGroup>();
+			filteredItems = new HashMap<PlayerGroup, List<ItemGroup>>();
+			for (PlayerGroup playerGroup : filteredPlayers) {
+				List<ItemGroup> itemGroups;
+				if (filteredItemNames.isEmpty()) {
+					itemGroups = this.itemGroups.get(playerGroup);
+					filteredItems.put(playerGroup, itemGroups);
+				} else {
+					itemGroups = new ArrayList<ItemGroup>();
+					for (ItemGroup itemGroup : this.itemGroups.get(playerGroup)) {
+						String itemName = itemGroup.getItem().toLowerCase();
+						for (String filteredItem : filteredItemNames) {
+							if (itemName.contains(filteredItem.toLowerCase())) {
+								itemGroups.add(itemGroup);
+								break;
+							}
+						}
+					}
+					if (itemGroups.isEmpty()) {
+						removePlayers.add(playerGroup);
+					} else {
+						filteredItems.put(playerGroup, itemGroups);
+					}
+				}
+			}
+			for (PlayerGroup playerGroup : removePlayers) {
+				filteredPlayers.remove(playerGroup);
+			}
+		}
+		return filteredItems;
+	}
+
+	private void sortData(List<PlayerGroup> players, final Map<PlayerGroup, List<ItemGroup>> items) {
+		switch (sort) {
+		case PLAYER:
+			//sort by player name
+			Collections.sort(players, new Comparator<PlayerGroup>() {
+				@Override
+				public int compare(PlayerGroup a, PlayerGroup b) {
+					return a.getPlayerName().compareToIgnoreCase(b.getPlayerName());
+				}
+			});
+
+			//sort each player's item list by item name
+			for (PlayerGroup group : players) {
+				Collections.sort(items.get(group), new Comparator<ItemGroup>() {
+					@Override
+					public int compare(ItemGroup a, ItemGroup b) {
+						return a.getItem().compareToIgnoreCase(b.getItem());
+					}
+				});
+			}
+			break;
+		case SUPPLIER:
+			//sort by net sold amount ascending
+			Collections.sort(players, new Comparator<PlayerGroup>() {
+				@Override
+				public int compare(PlayerGroup a, PlayerGroup b) {
+					int netA = 0;
+					for (ItemGroup item : items.get(a)) {
+						netA += item.getNetAmount();
+					}
+
+					int netB = 0;
+					for (ItemGroup item : items.get(b)) {
+						netB += item.getNetAmount();
+					}
+
+					return netA - netB;
+				}
+			});
+
+			//sort each player's item list by item amount ascending
+			for (PlayerGroup group : players) {
+				Collections.sort(items.get(group), new Comparator<ItemGroup>() {
+					@Override
+					public int compare(ItemGroup a, ItemGroup b) {
+						return a.getNetAmount() - b.getNetAmount();
+					}
+				});
+			}
+			break;
+		case CUSTOMER:
+			//sort by net bought amount descending
+			Collections.sort(players, new Comparator<PlayerGroup>() {
+				@Override
+				public int compare(PlayerGroup a, PlayerGroup b) {
+					int netA = 0;
+					for (ItemGroup item : items.get(a)) {
+						netA += item.getNetAmount();
+					}
+
+					int netB = 0;
+					for (ItemGroup item : items.get(b)) {
+						netB += item.getNetAmount();
+					}
+
+					return netB - netA;
+				}
+			});
+
+			//sort each player's item list by item amount descending
+			for (PlayerGroup group : players) {
+				Collections.sort(items.get(group), new Comparator<ItemGroup>() {
+					@Override
+					public int compare(ItemGroup a, ItemGroup b) {
+						return b.getNetAmount() - a.getNetAmount();
+					}
+				});
+			}
+			break;
+		}
 	}
 
 	/**
@@ -225,5 +316,9 @@ public class PlayersPanel extends JPanel {
 		}
 		sb.append(nf.format(quantity));
 		return sb.toString();
+	}
+
+	private enum Sort {
+		PLAYER, SUPPLIER, CUSTOMER
 	}
 }

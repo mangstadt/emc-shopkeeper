@@ -482,14 +482,14 @@ public class MainFrame extends JFrame implements WindowListener {
 
 					//add "filter by player"
 					{
-						JLabel filterByPlayersHelp = new JLabel("Filter by player(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-						filterByPlayersHelp.setToolTipText("Filters the list by player name.  Multiple names can be entered, separated by commas.  Partial names can also be entered.");
+						JLabel label = new JLabel("Filter by player(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
+						label.setToolTipText("Filters the list by player name.  Multiple names can be entered, separated by commas.  Partial names can also be entered.");
 
-						final JTextField filterByPlayers = new JTextField();
-						filterByPlayers.addActionListener(new ActionListener() {
+						final JTextField textField = new JTextField();
+						textField.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								String split[] = filterByPlayers.getText().trim().split("\\s*,\\s*");
+								String split[] = textField.getText().trim().split("\\s*,\\s*");
 								List<String> filteredPlayers = new ArrayList<String>(split.length);
 								for (String s : split) {
 									if (s.length() > 0) {
@@ -503,14 +503,14 @@ public class MainFrame extends JFrame implements WindowListener {
 							}
 						});
 
-						JButton clearFilterByPlayers = new JButton("X");
-						clearFilterByPlayers.addActionListener(new ActionListener() {
+						JButton clear = new JButton("X");
+						clear.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								if (filterByPlayers.getText().isEmpty()) {
+								if (textField.getText().isEmpty()) {
 									return;
 								}
-								filterByPlayers.setText("");
+								textField.setText("");
 
 								panel.filterByPlayers(new ArrayList<String>(0));
 
@@ -519,9 +519,53 @@ public class MainFrame extends JFrame implements WindowListener {
 							}
 						});
 
-						tablePanel.add(filterByPlayersHelp, "align right");
-						tablePanel.add(filterByPlayers, "split 2, w 150!");
-						tablePanel.add(clearFilterByPlayers, "w 20!, h 20!, wrap");
+						tablePanel.add(label, "align right");
+						tablePanel.add(textField, "split 2, w 150!");
+						tablePanel.add(clear, "w 20!, h 20!, wrap");
+					}
+
+					//add "filter by item"
+					{
+						JLabel label = new JLabel("Filter by item(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
+						label.setToolTipText("Filters the items in each player table.  Multiple item names can be entered, separated by commas.  Partial names can also be entered.");
+
+						final JTextField textField = new JTextField();
+						textField.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								String split[] = textField.getText().trim().split("\\s*,\\s*");
+								List<String> filteredItems = new ArrayList<String>(split.length);
+								for (String s : split) {
+									if (s.length() > 0) {
+										filteredItems.add(s);
+									}
+								}
+								panel.filterByItems(filteredItems);
+
+								panelScrollPane.getVerticalScrollBar().setValue(0); //scroll to top
+								panel.repaint(); //without this, it makes the panel's background white
+							}
+						});
+
+						JButton clear = new JButton("X");
+						clear.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								if (textField.getText().isEmpty()) {
+									return;
+								}
+								textField.setText("");
+
+								panel.filterByItems(new ArrayList<String>(0));
+
+								panelScrollPane.getVerticalScrollBar().setValue(0); //scroll to top
+								panel.repaint(); //without this, it makes the panel's background white
+							}
+						});
+
+						tablePanel.add(label, "align right");
+						tablePanel.add(textField, "split 2, w 150!");
+						tablePanel.add(clear, "w 20!, h 20!, wrap");
 					}
 
 					tablePanel.add(panelScrollPane, "span 2, grow, w 100%, h 100%, wrap");
