@@ -1,5 +1,8 @@
 package emcshop.gui;
 
+import static emcshop.util.NumberFormatter.formatQuantity;
+import static emcshop.util.NumberFormatter.formatRupees;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Image;
@@ -373,7 +376,7 @@ public class MainFrame extends JFrame implements WindowListener {
 							JOptionPane.showMessageDialog(MainFrame.this, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
 						}
 					};
-					tablePanel.add(export, "align right, wrap");
+					tablePanel.add(export, "align left, wrap");
 
 					final ItemsPanel panel = new ItemsPanel(itemGroupsList);
 
@@ -481,7 +484,7 @@ public class MainFrame extends JFrame implements WindowListener {
 							JOptionPane.showMessageDialog(MainFrame.this, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
 						}
 					};
-					tablePanel.add(export, "align right, wrap");
+					tablePanel.add(export, "align left, wrap");
 
 					//add "sort by" combobox
 					tablePanel.add(new JLabel("Sort by:"), "align right");
@@ -897,7 +900,6 @@ public class MainFrame extends JFrame implements WindowListener {
 
 	protected static String generateItemsBBCode(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		NumberFormat nf = NumberFormat.getInstance();
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
 		bbCode.font("courier new");
@@ -928,7 +930,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			if (group.getSoldQuantity() == 0) {
 				sold = StringUtils.repeat("- ", 8) + "-";
 			} else {
-				sold = nf.format(group.getSoldQuantity()) + " / +" + nf.format(group.getSoldAmount()) + "r";
+				sold = formatQuantity(group.getSoldQuantity()) + " / +" + formatRupees(group.getSoldAmount());
 			}
 			bbCodeColumn(sold, 17, bbCode);
 			bbCode.text(" | ");
@@ -937,25 +939,32 @@ public class MainFrame extends JFrame implements WindowListener {
 			if (group.getBoughtQuantity() == 0) {
 				bought = StringUtils.repeat("- ", 8) + "-";
 			} else {
-				bought = "+" + nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r";
+				bought = formatQuantity(group.getBoughtQuantity()) + " / " + formatRupees(group.getBoughtAmount());
 			}
 			bbCodeColumn(bought, 17, bbCode);
 			bbCode.text(" | ");
 
+			String netQuantityStr = formatQuantity(group.getNetQuantity());
 			if (group.getNetQuantity() > 0) {
-				bbCode.color("green").text('+');
+				bbCode.color("green", netQuantityStr);
+			} else if (group.getNetQuantity() < 0) {
+				bbCode.color("red", netQuantityStr);
 			} else {
-				bbCode.color("red");
+				bbCode.text(netQuantityStr);
 			}
-			bbCode.text(nf.format(group.getNetQuantity()));
-			bbCode.close().text(" / ");
+
+			bbCode.text(" / ");
+
+			String netAmountStr = formatRupees(group.getNetAmount());
 			if (group.getNetAmount() > 0) {
-				bbCode.color("green").text('+');
+				bbCode.color("green", netAmountStr);
+			} else if (group.getNetAmount() < 0) {
+				bbCode.color("red", netAmountStr);
 			} else {
-				bbCode.color("red");
+				bbCode.text(netAmountStr);
 			}
-			bbCode.text(nf.format(group.getNetAmount())).text('r');
-			bbCode.close().nl();
+
+			bbCode.nl();
 		}
 
 		//footer and total
@@ -964,22 +973,23 @@ public class MainFrame extends JFrame implements WindowListener {
 		bbCode.text(StringUtils.repeat('_', 50 - footer.length()));
 		bbCode.b(" Total").text(" | ");
 		bbCode.b();
+		String netTotalStr = formatRupees(netTotal);
 		if (netTotal > 0) {
-			bbCode.color("green").text('+');
+			bbCode.color("green", netTotalStr);
+		} else if (netTotal < 0) {
+			bbCode.color("red", netTotalStr);
 		} else {
-			bbCode.color("red");
+			bbCode.text(netTotalStr);
 		}
-		bbCode.text(nf.format(netTotal)).text('r');
-		bbCode.close(2);
+		bbCode.close(); //close "b"
 
-		bbCode.close();
+		bbCode.close(); //close "font"
 
 		return bbCode.toString();
 	}
 
 	protected static String generatePlayersBBCode(List<PlayerGroup> playerGroups, Map<PlayerGroup, List<ItemGroup>> itemGroups, Date from, Date to) {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		NumberFormat nf = NumberFormat.getInstance();
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
 		bbCode.font("courier new");
@@ -1013,7 +1023,7 @@ public class MainFrame extends JFrame implements WindowListener {
 				if (group.getSoldQuantity() == 0) {
 					sold = StringUtils.repeat("- ", 8) + "-";
 				} else {
-					sold = nf.format(group.getSoldQuantity()) + " / +" + nf.format(group.getSoldAmount()) + "r";
+					sold = formatQuantity(group.getSoldQuantity()) + " / " + formatRupees(group.getSoldAmount());
 				}
 				bbCodeColumn(sold, 17, bbCode);
 				bbCode.text(" | ");
@@ -1022,33 +1032,41 @@ public class MainFrame extends JFrame implements WindowListener {
 				if (group.getBoughtQuantity() == 0) {
 					bought = StringUtils.repeat("- ", 8) + "-";
 				} else {
-					bought = "+" + nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r";
+					bought = formatQuantity(group.getBoughtQuantity()) + " / " + formatRupees(group.getBoughtAmount());
 				}
 				bbCodeColumn(bought, 17, bbCode);
 				bbCode.text(" | ");
 
+				String netQuantityStr = formatQuantity(group.getNetQuantity());
 				if (group.getNetQuantity() > 0) {
-					bbCode.color("green").text('+');
+					bbCode.color("green", netQuantityStr);
+				} else if (group.getNetQuantity() < 0) {
+					bbCode.color("red", netQuantityStr);
 				} else {
-					bbCode.color("red");
+					bbCode.text(netQuantityStr);
 				}
-				bbCode.text(nf.format(group.getNetQuantity()));
-				bbCode.close().text(" / ");
+
+				bbCode.text(" / ");
+
+				String netAmountStr = formatRupees(group.getNetAmount());
 				if (group.getNetAmount() > 0) {
-					bbCode.color("green").text('+');
+					bbCode.color("green", netAmountStr);
+				} else if (group.getNetAmount() < 0) {
+					bbCode.color("red", netAmountStr);
 				} else {
-					bbCode.color("red");
+					bbCode.text(netAmountStr);
 				}
-				bbCode.text(nf.format(group.getNetAmount())).text('r');
-				bbCode.close().nl().nl();
+
+				bbCode.nl();
 			}
+			bbCode.nl();
 		}
 
 		//footer
 		String footer = "EMC Shopkeeper v" + Main.VERSION;
 		bbCode.url(Main.URL, footer);
 
-		bbCode.close();
+		bbCode.close(); //close "font"
 
 		return bbCode.toString();
 	}

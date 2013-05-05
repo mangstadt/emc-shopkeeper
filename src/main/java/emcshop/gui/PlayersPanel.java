@@ -1,7 +1,8 @@
 package emcshop.gui;
 
+import static emcshop.util.NumberFormatter.formatRupeesWithColor;
+
 import java.text.DateFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -130,19 +131,10 @@ public class PlayersPanel extends JPanel {
 				for (ItemGroup item : displayedItems.get(playerGroup)) {
 					amount += item.getNetAmount();
 				}
-				String color = getNetColor(amount);
 
 				StringBuilder sb = new StringBuilder();
 				sb.append("<html><code><b>");
-
-				if (color != null) {
-					sb.append("<font color=").append(color).append(">");
-					sb.append(formatRupees(amount));
-					sb.append("</font>");
-				} else {
-					sb.append(formatRupees(amount));
-				}
-
+				sb.append(formatRupeesWithColor(amount));
 				sb.append("</b></code></html>");
 				netAmount = new JLabel(sb.toString());
 			}
@@ -287,45 +279,6 @@ public class PlayersPanel extends JPanel {
 			}
 			break;
 		}
-	}
-
-	/**
-	 * Gets the font color to use for the "net" column.
-	 * @param number the number (e.g. rupees or quantity)
-	 * @return the color or null if the number is zero
-	 */
-	private static String getNetColor(int number) {
-		if (number < 0) {
-			return "red";
-		}
-		if (number > 0) {
-			return "green";
-		}
-		return null;
-	}
-
-	/**
-	 * Formats a rupee amount as a string.
-	 * @param rupees the amount of rupees
-	 * @return the rupee string
-	 */
-	private static String formatRupees(int rupees) {
-		return formatQuantity(rupees) + "r";
-	}
-
-	/**
-	 * Formats a quantity as a string
-	 * @param quantity the quantity
-	 * @return the quantity string
-	 */
-	private static String formatQuantity(int quantity) {
-		NumberFormat nf = NumberFormat.getNumberInstance();
-		StringBuilder sb = new StringBuilder();
-		if (quantity > 0) {
-			sb.append('+');
-		}
-		sb.append(nf.format(quantity));
-		return sb.toString();
 	}
 
 	private enum Sort {

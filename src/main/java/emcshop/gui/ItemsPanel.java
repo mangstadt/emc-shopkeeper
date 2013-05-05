@@ -1,6 +1,7 @@
 package emcshop.gui;
 
-import java.text.NumberFormat;
+import static emcshop.util.NumberFormatter.formatRupeesWithColor;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -94,18 +95,9 @@ public class ItemsPanel extends JPanel {
 
 		String netTotalLabel;
 		{
-			NumberFormat nf = NumberFormat.getInstance();
 			StringBuilder sb = new StringBuilder();
 			sb.append("<html><font size=5>Net Total: <code>");
-			if (netTotal < 0) {
-				sb.append("<font color=red>");
-				sb.append(nf.format(netTotal)).append('r');
-				sb.append("</font>");
-			} else {
-				sb.append("<font color=green>");
-				sb.append('+').append(nf.format(netTotal)).append('r');
-				sb.append("</font>");
-			}
+			sb.append(formatRupeesWithColor(netTotal));
 			sb.append("</code></font></html>");
 			netTotalLabel = sb.toString();
 		}

@@ -1,8 +1,12 @@
 package emcshop.gui;
 
+import static emcshop.util.NumberFormatter.formatQuantity;
+import static emcshop.util.NumberFormatter.formatQuantityWithColor;
+import static emcshop.util.NumberFormatter.formatRupees;
+import static emcshop.util.NumberFormatter.formatRupeesWithColor;
+
 import java.awt.Color;
 import java.awt.Component;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,7 +86,6 @@ public class ItemsTable extends GroupableColumnsTable {
 		});
 
 		setDefaultRenderer(ItemGroup.class, new TableCellRenderer() {
-			private final NumberFormat nf = NumberFormat.getNumberInstance();
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
 
@@ -91,7 +94,6 @@ public class ItemsTable extends GroupableColumnsTable {
 				JLabel label = null;
 
 				StringBuilder sb;
-				String netColor;
 				ItemGroup group = (ItemGroup) value;
 				switch (col) {
 				case COL_ITEMNAME:
@@ -129,16 +131,7 @@ public class ItemsTable extends GroupableColumnsTable {
 				case COL_NET_QTY:
 					sb = new StringBuilder();
 					sb.append("<html>");
-
-					netColor = getNetColor(group.getNetQuantity());
-					if (netColor != null) {
-						sb.append("<font color=").append(netColor).append(">");
-						sb.append(formatQuantity(group.getNetQuantity()));
-						sb.append("</font>");
-					} else {
-						sb.append(formatQuantity(group.getNetQuantity()));
-					}
-
+					sb.append(formatQuantityWithColor(group.getNetQuantity()));
 					sb.append("</html>");
 
 					label = new JLabel(sb.toString());
@@ -146,16 +139,7 @@ public class ItemsTable extends GroupableColumnsTable {
 				case COL_NET_AMT:
 					sb = new StringBuilder();
 					sb.append("<html>");
-
-					netColor = getNetColor(group.getNetAmount());
-					if (netColor != null) {
-						sb.append("<font color=").append(netColor).append(">");
-						sb.append(formatRupees(group.getNetAmount()));
-						sb.append("</font>");
-					} else {
-						sb.append(formatRupees(group.getNetAmount()));
-					}
-
+					sb.append(formatRupeesWithColor(group.getNetAmount()));
 					sb.append("</html>");
 
 					label = new JLabel(sb.toString());
@@ -168,44 +152,6 @@ public class ItemsTable extends GroupableColumnsTable {
 				label.setBackground(color);
 
 				return label;
-			}
-
-			/**
-			 * Gets the font color to use for the "net" column.
-			 * @param number the number (e.g. rupees or quantity)
-			 * @return the color or null if the number is zero
-			 */
-			private String getNetColor(int number) {
-				if (number < 0) {
-					return "red";
-				}
-				if (number > 0) {
-					return "green";
-				}
-				return null;
-			}
-
-			/**
-			 * Formats a rupee amount as a string.
-			 * @param rupees the amount of rupees
-			 * @return the rupee string
-			 */
-			private String formatRupees(int rupees) {
-				return formatQuantity(rupees) + "r";
-			}
-
-			/**
-			 * Formats a quantity as a string
-			 * @param quantity the quantity
-			 * @return the quantity string
-			 */
-			private String formatQuantity(int quantity) {
-				StringBuilder sb = new StringBuilder();
-				if (quantity > 0) {
-					sb.append('+');
-				}
-				sb.append(nf.format(quantity));
-				return sb.toString();
 			}
 		});
 
