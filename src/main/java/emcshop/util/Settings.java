@@ -92,7 +92,7 @@ public class Settings {
 
 	private void defaults() {
 		version = CURRENT_VERSION;
-		windowWidth = 800;
+		windowWidth = 1000;
 		windowHeight = 600;
 		lastUpdated = null;
 		session = null;
@@ -108,7 +108,7 @@ public class Settings {
 			//migrate it
 		}
 
-		windowWidth = props.getInteger("window.width", 900);
+		windowWidth = props.getInteger("window.width", 1000);
 		windowHeight = props.getInteger("window.height", 600);
 		try {
 			lastUpdated = props.getDate("lastUpdated");
