@@ -434,16 +434,16 @@ public abstract class DirbyDbDao implements DbDao {
 
 				int amount = rs.getInt("amount");
 				if (amount < 0) {
-					itemGroup.setSoldAmount(itemGroup.getSoldAmount() + amount);
-				} else {
 					itemGroup.setBoughtAmount(itemGroup.getBoughtAmount() + amount);
+				} else {
+					itemGroup.setSoldAmount(itemGroup.getSoldAmount() + amount);
 				}
 
 				int quantity = rs.getInt("quantity");
 				if (quantity < 0) {
-					itemGroup.setBoughtQuantity(itemGroup.getBoughtQuantity() + quantity);
-				} else {
 					itemGroup.setSoldQuantity(itemGroup.getSoldQuantity() + quantity);
+				} else {
+					itemGroup.setBoughtQuantity(itemGroup.getBoughtQuantity() + quantity);
 				}
 			}
 		} finally {
