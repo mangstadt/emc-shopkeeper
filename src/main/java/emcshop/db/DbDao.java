@@ -33,12 +33,12 @@ public interface DbDao {
 	void insertDbVersion(int version) throws SQLException;
 
 	/**
-	 * Gets the ID of a player, inserting the player if it doesn't exist.
+	 * Searches for a player, inserting the player if it doesn't exist.
 	 * @param name the player name, case in-sensitive (e.g. "notch")
-	 * @return the player ID
+	 * @return the player
 	 * @throws SQLException
 	 */
-	Integer getPlayerId(String name) throws SQLException;
+	Player selsertPlayer(String name) throws SQLException;
 
 	/**
 	 * Inserts a player.

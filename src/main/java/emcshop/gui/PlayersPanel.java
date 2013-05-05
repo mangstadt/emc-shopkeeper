@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.db.ItemGroup;
+import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 
 /**
@@ -111,14 +112,16 @@ public class PlayersPanel extends JPanel {
 		removeAll();
 		DateFormat df = new SimpleDateFormat("MMMM dd yyyy, HH:mm");
 		for (PlayerGroup playerGroup : displayedPlayers) {
+			Player player = playerGroup.getPlayer();
+
 			//TODO add player icon
-			add(new JLabel("<html><h3>" + playerGroup.getPlayerName() + "</h3></html>"), "span 2, wrap");
+			add(new JLabel("<html><h3>" + player.getName() + "</h3></html>"), "span 2, wrap");
 
 			add(new JLabel("<html>First seen:</html>"), "align right");
-			add(new JLabel("<html>" + df.format(playerGroup.getFirstSeen()) + "</html>"), "wrap");
+			add(new JLabel("<html>" + df.format(player.getFirstSeen()) + "</html>"), "wrap");
 
 			add(new JLabel("<html>Last seen:</html>"), "align right");
-			add(new JLabel("<html>" + df.format(playerGroup.getLastSeen()) + "</html>"), "wrap");
+			add(new JLabel("<html>" + df.format(player.getLastSeen()) + "</html>"), "wrap");
 
 			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup));
 			table.getTableHeader().setReorderingAllowed(false);
@@ -150,7 +153,7 @@ public class PlayersPanel extends JPanel {
 		} else {
 			filteredPlayers = new LinkedList<PlayerGroup>();
 			for (PlayerGroup playerGroup : playerGroups) {
-				String playerName = playerGroup.getPlayerName().toLowerCase();
+				String playerName = playerGroup.getPlayer().getName().toLowerCase();
 				for (String filteredPlayer : filteredPlayerNames) {
 					if (playerName.contains(filteredPlayer.toLowerCase())) {
 						filteredPlayers.add(playerGroup);
@@ -206,7 +209,7 @@ public class PlayersPanel extends JPanel {
 			Collections.sort(players, new Comparator<PlayerGroup>() {
 				@Override
 				public int compare(PlayerGroup a, PlayerGroup b) {
-					return a.getPlayerName().compareToIgnoreCase(b.getPlayerName());
+					return a.getPlayer().getName().compareToIgnoreCase(b.getPlayer().getName());
 				}
 			});
 

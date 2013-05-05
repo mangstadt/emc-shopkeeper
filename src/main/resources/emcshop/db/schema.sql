@@ -20,7 +20,13 @@ CREATE TABLE items(
 
 CREATE TABLE players(
 	id SMALLINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	name VARCHAR(64) NOT NULL
+	name VARCHAR(64) NOT NULL,
+	
+	--the date of the player's first transaction
+	first_seen TIMESTAMP,
+	
+	--the date of the player's latest transaction
+	last_seen TIMESTAMP
 );
 
 CREATE TABLE transactions(

@@ -60,6 +60,7 @@ import emcshop.LogManager;
 import emcshop.Main;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
+import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
 import emcshop.util.BBCodeBuilder;
@@ -871,12 +872,13 @@ public class MainFrame extends JFrame implements WindowListener {
 		writer.writeNext(new String[] { (from == null) ? "" : df.format(from), (to == null) ? "" : df.format(to) });
 		writer.writeNext(new String[] { "Player", "First Seen", "Last Seen", "Item", "Sold Quantity", "Sold Amount", "Bought Quantity", "Bought Amount", "Net Quantity", "Net Amount" });
 		for (PlayerGroup player : players) {
+			Player p = player.getPlayer();
 			for (ItemGroup group : items.get(player)) {
 				//@formatter:off
 				writer.writeNext(new String[]{
-					player.getPlayerName(),
-					df.format(player.getFirstSeen()),
-					df.format(player.getLastSeen()),
+					p.getName(),
+					df.format(p.getFirstSeen()),
+					df.format(p.getLastSeen()),
 					group.getItem(),
 					group.getSoldQuantity() + "",
 					group.getSoldAmount() + "",
@@ -1010,7 +1012,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		bbCode.close().nl();
 
 		for (PlayerGroup playerGroup : playerGroups) {
-			bbCode.b(playerGroup.getPlayerName()).nl();
+			bbCode.b(playerGroup.getPlayer().getName()).nl();
 
 			//item table
 			bbCode.text("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -").nl();

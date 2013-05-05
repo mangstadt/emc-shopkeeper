@@ -1,1 +1,2 @@
---SQL code for updating the database schema from version 1 to 2 would go here
+ALTER TABLE players ADD first_seen TIMESTAMP;
+ALTER TABLE players ADD last_seen TIMESTAMP;

@@ -1,6 +1,5 @@
 package emcshop.db;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,25 +8,15 @@ import java.util.Map;
  * @author Michael Angstadt
  */
 public class PlayerGroup {
-	private Integer playerId;
-	private String playerName;
-	private Date firstSeen, lastSeen;
+	private Player player;
 	private Map<String, ItemGroup> items = new HashMap<String, ItemGroup>();
 
-	public Integer getPlayerId() {
-		return playerId;
+	public Player getPlayer() {
+		return player;
 	}
 
-	public void setPlayerId(Integer playerId) {
-		this.playerId = playerId;
-	}
-
-	public String getPlayerName() {
-		return playerName;
-	}
-
-	public void setPlayerName(String playerName) {
-		this.playerName = playerName;
+	public void setPlayer(Player player) {
+		this.player = player;
 	}
 
 	/**
@@ -71,21 +60,5 @@ public class PlayerGroup {
 
 	public Map<String, ItemGroup> getItems() {
 		return items;
-	}
-
-	public Date getFirstSeen() {
-		return firstSeen;
-	}
-
-	public void setFirstSeen(Date firstSeen) {
-		this.firstSeen = firstSeen;
-	}
-
-	public Date getLastSeen() {
-		return lastSeen;
-	}
-
-	public void setLastSeen(Date lastSeen) {
-		this.lastSeen = lastSeen;
 	}
 }
