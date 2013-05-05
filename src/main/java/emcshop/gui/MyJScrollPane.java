@@ -24,5 +24,6 @@ public class MyJScrollPane extends JScrollPane {
 	public void scrollToTop() {
 		getVerticalScrollBar().setValue(0); //scroll to top
 		component.repaint(); //without this, the panel's background will turn white
+		validate(); //this is needed to ensure that the scrollbar renders appropriately, based on the height of the component
 	}
 }
