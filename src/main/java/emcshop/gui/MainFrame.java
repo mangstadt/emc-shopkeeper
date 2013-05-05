@@ -392,7 +392,7 @@ public class MainFrame extends JFrame implements WindowListener {
 					//add "filter by item"
 					{
 						JLabel label = new JLabel("Filter by item(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-						label.setToolTipText(toolTipText("<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool, log</code>\n\nMultiple items can be entered, separated by commas.\n\nIf a name is enclosed in double quotes, then it will perform an exact match.  Otherwise, it will perform a partial match.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation."));
+						label.setToolTipText(toolTipText("<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation."));
 
 						final FilterTextField textField = new FilterTextField();
 						textField.addActionListener(new ActionListener() {
@@ -499,7 +499,7 @@ public class MainFrame extends JFrame implements WindowListener {
 					//add "filter by player"
 					{
 						JLabel label = new JLabel("Filter by player(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-						label.setToolTipText(toolTipText("<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar, justin</code>\n\nMultiple players can be entered, separated by commas.\n\nIf a name is enclosed in double quotes, then it will perform an exact match.  Otherwise, it will perform a partial match.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation."));
+						label.setToolTipText(toolTipText("<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar,max</code>\n\nMultiple player names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation."));
 
 						final FilterTextField textField = new FilterTextField();
 						textField.addActionListener(new ActionListener() {
@@ -520,7 +520,7 @@ public class MainFrame extends JFrame implements WindowListener {
 					//add "filter by item"
 					{
 						JLabel label = new JLabel("Filter by item(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-						label.setToolTipText(toolTipText("<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool, log</code>\n\nMultiple items can be entered, separated by commas.\n\nIf a name is enclosed in double quotes, then it will perform an exact match.  Otherwise, it will perform a partial match.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation."));
+						label.setToolTipText(toolTipText("<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation."));
 
 						final FilterTextField textField = new FilterTextField();
 						textField.addActionListener(new ActionListener() {
