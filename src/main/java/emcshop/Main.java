@@ -42,6 +42,7 @@ import emcshop.gui.ErrorDialog;
 import emcshop.gui.MacHandler;
 import emcshop.gui.MacSupport;
 import emcshop.gui.MainFrame;
+import emcshop.gui.ProfileImageLoader;
 import emcshop.gui.images.ImageManager;
 import emcshop.util.Settings;
 
@@ -502,7 +503,7 @@ public class Main {
 		}
 	}
 
-	private static void launchGui() throws SQLException {
+	private static void launchGui() throws SQLException, IOException {
 		final SplashScreenWrapper splash = new SplashScreenWrapper();
 		splash.setMessage("Starting database...");
 
@@ -529,6 +530,12 @@ public class Main {
 				ErrorDialog.show(null, "An error occurred.", thrown);
 			}
 		});
+
+		File cacheDir = new File(profileDir, "cache");
+		if (!cacheDir.isDirectory() && !cacheDir.mkdir()) {
+			throw new IOException("Could not create directory: " + cacheDir.getAbsolutePath());
+		}
+		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir, 64);
 
 		DbDao dao;
 		try {
@@ -557,7 +564,7 @@ public class Main {
 			}
 		});
 
-		frame = new MainFrame(settings, dao, logManager);
+		frame = new MainFrame(settings, dao, logManager, profileImageLoader);
 		frame.setVisible(true);
 	}
 

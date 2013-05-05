@@ -29,6 +29,7 @@ import emcshop.db.PlayerGroup;
 public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
 	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
+	private final ProfileImageLoader profileImageLoader;
 	private List<PlayerGroup> displayedPlayers;
 	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
 	private List<String> filteredPlayerNames = new ArrayList<String>(0);
@@ -39,13 +40,16 @@ public class PlayersPanel extends JPanel {
 	 * Creates the panel.
 	 * @param playerGroups the players to display in the table
 	 */
-	public PlayersPanel(Collection<PlayerGroup> playerGroups) {
+	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileImageLoader profileImageLoader) {
 		//add all the data to Lists so they can be sorted
 		this.playerGroups = new ArrayList<PlayerGroup>(playerGroups);
 		for (PlayerGroup playerGroup : playerGroups) {
 			List<ItemGroup> itemGroups = new ArrayList<ItemGroup>(playerGroup.getItems().values());
 			this.itemGroups.put(playerGroup, itemGroups);
 		}
+
+		this.profileImageLoader = profileImageLoader;
+
 		setLayout(new MigLayout());
 		sortByPlayerName();
 	}
@@ -109,19 +113,27 @@ public class PlayersPanel extends JPanel {
 		sortData(displayedPlayers, displayedItems);
 
 		//display data
+		Map<String, JLabel> images = new HashMap<String, JLabel>();
 		removeAll();
 		DateFormat df = new SimpleDateFormat("MMMM dd yyyy, HH:mm");
 		for (PlayerGroup playerGroup : displayedPlayers) {
 			Player player = playerGroup.getPlayer();
 
-			//TODO add player icon
-			add(new JLabel("<html><h3>" + player.getName() + "</h3></html>"), "span 2, wrap");
+			JLabel profileImage = new JLabel();
+			images.put(player.getName(), profileImage);
+			add(profileImage, "w 64!, h 64!");
 
-			add(new JLabel("<html>First seen:</html>"), "align right");
-			add(new JLabel("<html>" + df.format(player.getFirstSeen()) + "</html>"), "wrap");
-
-			add(new JLabel("<html>Last seen:</html>"), "align right");
-			add(new JLabel("<html>" + df.format(player.getLastSeen()) + "</html>"), "wrap");
+			//@formatter:off
+			String header =
+			"<html>" +
+				"<h3>" + player.getName() + "</h3>" +
+				"<table>" +
+					"<tr><td align=right>First seen:</td><td>" + df.format(player.getFirstSeen()) + "</td></tr>" +
+					"<tr><td align=right>Last seen:</td><td>" + df.format(player.getLastSeen()) + "</td></tr>" +
+				"</table>" +
+			"</html>";
+			//@formatter:on
+			add(new JLabel(header), "wrap");
 
 			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup));
 			table.getTableHeader().setReorderingAllowed(false);
@@ -144,6 +156,8 @@ public class PlayersPanel extends JPanel {
 			add(netAmount, "align right, span 2, wrap");
 		}
 		validate();
+
+		profileImageLoader.load(images);
 	}
 
 	private List<PlayerGroup> filterPlayers() {

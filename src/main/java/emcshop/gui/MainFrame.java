@@ -82,11 +82,13 @@ public class MainFrame extends JFrame implements WindowListener {
 	private final DbDao dao;
 	private final Settings settings;
 	private final LogManager logManager;
+	private final ProfileImageLoader profileImageLoader;
 
-	public MainFrame(Settings settings, DbDao dao, LogManager logManager) {
+	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader) {
 		this.dao = dao;
 		this.settings = settings;
 		this.logManager = logManager;
+		this.profileImageLoader = profileImageLoader;
 
 		setTitle("EMC Shopkeeper");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -304,6 +306,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private void showTransactions(final Date from, final Date to, final boolean afterUpdate) {
+		profileImageLoader.cancel();
 		tablePanel.removeAll();
 		tablePanel.validate();
 
@@ -421,6 +424,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private void showPlayers(final Date from, final Date to) {
+		profileImageLoader.cancel();
 		tablePanel.removeAll();
 		tablePanel.validate();
 
@@ -458,7 +462,7 @@ public class MainFrame extends JFrame implements WindowListener {
 					}
 					tablePanel.add(new JLabel("<html><font size=5>" + dateRangeStr + "</font></html>"), "w 100%, growx");
 
-					final PlayersPanel panel = new PlayersPanel(playerGroups);
+					final PlayersPanel panel = new PlayersPanel(playerGroups, profileImageLoader);
 					final MyJScrollPane panelScrollPane = new MyJScrollPane(panel);
 
 					ExportComboBox export = new ExportComboBox() {
