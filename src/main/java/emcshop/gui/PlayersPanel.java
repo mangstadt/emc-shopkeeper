@@ -155,7 +155,18 @@ public class PlayersPanel extends JPanel {
 			for (PlayerGroup playerGroup : playerGroups) {
 				String playerName = playerGroup.getPlayer().getName().toLowerCase();
 				for (String filteredPlayer : filteredPlayerNames) {
-					if (playerName.contains(filteredPlayer.toLowerCase())) {
+					filteredPlayer = filteredPlayer.toLowerCase();
+					boolean add = false;
+					if (filteredPlayer.startsWith("\"") && filteredPlayer.endsWith("\"")) {
+						filteredPlayer = filteredPlayer.substring(1, filteredPlayer.length() - 1); //remove double quotes
+						if (playerName.equals(filteredPlayer)) {
+							add = true;
+						}
+					} else if (playerName.contains(filteredPlayer)) {
+						add = true;
+					}
+
+					if (add) {
 						filteredPlayers.add(playerGroup);
 						break;
 					}
@@ -182,7 +193,18 @@ public class PlayersPanel extends JPanel {
 					for (ItemGroup itemGroup : this.itemGroups.get(playerGroup)) {
 						String itemName = itemGroup.getItem().toLowerCase();
 						for (String filteredItem : filteredItemNames) {
-							if (itemName.contains(filteredItem.toLowerCase())) {
+							filteredItem = filteredItem.toLowerCase();
+							boolean add = false;
+							if (filteredItem.startsWith("\"") && filteredItem.endsWith("\"")) {
+								filteredItem = filteredItem.substring(1, filteredItem.length() - 1); //remove double quotes
+								if (itemName.equals(filteredItem)) {
+									add = true;
+								}
+							} else if (itemName.contains(filteredItem)) {
+								add = true;
+							}
+
+							if (add) {
 								itemGroups.add(itemGroup);
 								break;
 							}

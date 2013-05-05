@@ -115,7 +115,18 @@ public class ItemsPanel extends JPanel {
 			for (ItemGroup itemGroup : itemGroups) {
 				String itemName = itemGroup.getItem().toLowerCase();
 				for (String filteredItem : filteredItemNames) {
-					if (itemName.contains(filteredItem.toLowerCase())) {
+					filteredItem = filteredItem.toLowerCase();
+					boolean add = false;
+					if (filteredItem.startsWith("\"") && filteredItem.endsWith("\"")) {
+						filteredItem = filteredItem.substring(1, filteredItem.length() - 1); //remove double quotes
+						if (itemName.equals(filteredItem)) {
+							add = true;
+						}
+					} else if (itemName.contains(filteredItem)) {
+						add = true;
+					}
+
+					if (add) {
 						filteredItems.add(itemGroup);
 						break;
 					}
