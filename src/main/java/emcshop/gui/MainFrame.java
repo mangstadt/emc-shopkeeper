@@ -460,7 +460,9 @@ public class MainFrame extends JFrame implements WindowListener {
 					ExportComboBox export = new ExportComboBox() {
 						@Override
 						public String bbCode() {
-							return ""; //TODO
+							List<PlayerGroup> players = panel.getDisplayedPlayers();
+							Map<PlayerGroup, List<ItemGroup>> items = panel.getDisplayedItems();
+							return generatePlayersBBCode(players, items, from, to);
 						}
 
 						@Override
@@ -795,6 +797,10 @@ public class MainFrame extends JFrame implements WindowListener {
 			});
 		}
 
+		/**
+		 * Splits the player/item names that are comma-delimited.
+		 * @return the names
+		 */
 		public List<String> getNames() {
 			String split[] = getText().trim().split("\\s*,\\s*");
 			List<String> filteredItems = new ArrayList<String>(split.length);
@@ -815,6 +821,10 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 		}
 
+		/**
+		 * Gets the clear button associated with this text box.
+		 * @return
+		 */
 		public JButton getClearButton() {
 			return clearButton;
 		}
@@ -888,31 +898,31 @@ public class MainFrame extends JFrame implements WindowListener {
 	protected static String generateItemsBBCode(List<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		NumberFormat nf = NumberFormat.getInstance();
-		BBCodeBuilder sb = new BBCodeBuilder();
+		BBCodeBuilder bbCode = new BBCodeBuilder();
 
-		sb.font("courier new");
+		bbCode.font("courier new");
 
 		//date range
-		sb.b();
+		bbCode.b();
 		if (from == null && to == null) {
-			sb.text("entire history");
+			bbCode.text("entire history");
 		} else if (from == null) {
-			sb.text("up to ").text(df.format(to));
+			bbCode.text("up to ").text(df.format(to));
 		} else if (to == null) {
-			sb.text(df.format(from)).text(" to today");
+			bbCode.text(df.format(from)).text(" to today");
 		} else if (from.equals(to)) {
-			sb.text(df.format(from));
+			bbCode.text(df.format(from));
 		} else {
-			sb.text(df.format(from)).text(" to ").text(df.format(to));
+			bbCode.text(df.format(from)).text(" to ").text(df.format(to));
 		}
-		sb.close().nl();
+		bbCode.close().nl();
 
 		//item table
-		sb.text("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -").nl();
+		bbCode.text("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -").nl();
 		for (ItemGroup group : itemGroups) {
 			String item = group.getItem();
-			bbCodeColumn(item, 17, sb);
-			sb.text(" | ");
+			bbCodeColumn(item, 17, bbCode);
+			bbCode.text(" | ");
 
 			String sold;
 			if (group.getSoldQuantity() == 0) {
@@ -920,8 +930,8 @@ public class MainFrame extends JFrame implements WindowListener {
 			} else {
 				sold = nf.format(group.getSoldQuantity()) + " / +" + nf.format(group.getSoldAmount()) + "r";
 			}
-			bbCodeColumn(sold, 17, sb);
-			sb.text(" | ");
+			bbCodeColumn(sold, 17, bbCode);
+			bbCode.text(" | ");
 
 			String bought;
 			if (group.getBoughtQuantity() == 0) {
@@ -929,42 +939,118 @@ public class MainFrame extends JFrame implements WindowListener {
 			} else {
 				bought = "+" + nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r";
 			}
-			bbCodeColumn(bought, 17, sb);
-			sb.text(" | ");
+			bbCodeColumn(bought, 17, bbCode);
+			bbCode.text(" | ");
 
 			if (group.getNetQuantity() > 0) {
-				sb.color("green").text('+');
+				bbCode.color("green").text('+');
 			} else {
-				sb.color("red");
+				bbCode.color("red");
 			}
-			sb.text(nf.format(group.getNetQuantity()));
-			sb.close().text(" / ");
+			bbCode.text(nf.format(group.getNetQuantity()));
+			bbCode.close().text(" / ");
 			if (group.getNetAmount() > 0) {
-				sb.color("green").text('+');
+				bbCode.color("green").text('+');
 			} else {
-				sb.color("red");
+				bbCode.color("red");
 			}
-			sb.text(nf.format(group.getNetAmount())).text('r');
-			sb.close().nl();
+			bbCode.text(nf.format(group.getNetAmount())).text('r');
+			bbCode.close().nl();
 		}
 
 		//footer and total
 		String footer = "EMC Shopkeeper v" + Main.VERSION;
-		sb.url(Main.URL, footer);
-		sb.text(StringUtils.repeat('_', 50 - footer.length()));
-		sb.b(" Total").text(" | ");
-		sb.b();
+		bbCode.url(Main.URL, footer);
+		bbCode.text(StringUtils.repeat('_', 50 - footer.length()));
+		bbCode.b(" Total").text(" | ");
+		bbCode.b();
 		if (netTotal > 0) {
-			sb.color("green").text('+');
+			bbCode.color("green").text('+');
 		} else {
-			sb.color("red");
+			bbCode.color("red");
 		}
-		sb.text(nf.format(netTotal)).text('r');
-		sb.close(2);
+		bbCode.text(nf.format(netTotal)).text('r');
+		bbCode.close(2);
 
-		sb.close();
+		bbCode.close();
 
-		return sb.toString();
+		return bbCode.toString();
+	}
+
+	protected static String generatePlayersBBCode(List<PlayerGroup> playerGroups, Map<PlayerGroup, List<ItemGroup>> itemGroups, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		NumberFormat nf = NumberFormat.getInstance();
+		BBCodeBuilder bbCode = new BBCodeBuilder();
+
+		bbCode.font("courier new");
+
+		//date range
+		bbCode.b();
+		if (from == null && to == null) {
+			bbCode.text("entire history");
+		} else if (from == null) {
+			bbCode.text("up to ").text(df.format(to));
+		} else if (to == null) {
+			bbCode.text(df.format(from)).text(" to today");
+		} else if (from.equals(to)) {
+			bbCode.text(df.format(from));
+		} else {
+			bbCode.text(df.format(from)).text(" to ").text(df.format(to));
+		}
+		bbCode.close().nl();
+
+		for (PlayerGroup playerGroup : playerGroups) {
+			bbCode.b(playerGroup.getPlayerName()).nl();
+
+			//item table
+			bbCode.text("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -").nl();
+			for (ItemGroup group : itemGroups.get(playerGroup)) {
+				String item = group.getItem();
+				bbCodeColumn(item, 17, bbCode);
+				bbCode.text(" | ");
+
+				String sold;
+				if (group.getSoldQuantity() == 0) {
+					sold = StringUtils.repeat("- ", 8) + "-";
+				} else {
+					sold = nf.format(group.getSoldQuantity()) + " / +" + nf.format(group.getSoldAmount()) + "r";
+				}
+				bbCodeColumn(sold, 17, bbCode);
+				bbCode.text(" | ");
+
+				String bought;
+				if (group.getBoughtQuantity() == 0) {
+					bought = StringUtils.repeat("- ", 8) + "-";
+				} else {
+					bought = "+" + nf.format(group.getBoughtQuantity()) + " / " + nf.format(group.getBoughtAmount()) + "r";
+				}
+				bbCodeColumn(bought, 17, bbCode);
+				bbCode.text(" | ");
+
+				if (group.getNetQuantity() > 0) {
+					bbCode.color("green").text('+');
+				} else {
+					bbCode.color("red");
+				}
+				bbCode.text(nf.format(group.getNetQuantity()));
+				bbCode.close().text(" / ");
+				if (group.getNetAmount() > 0) {
+					bbCode.color("green").text('+');
+				} else {
+					bbCode.color("red");
+				}
+				bbCode.text(nf.format(group.getNetAmount())).text('r');
+				bbCode.close().nl().nl();
+			}
+		}
+
+		//footer
+		String footer = "EMC Shopkeeper v" + Main.VERSION;
+		bbCode.url(Main.URL, footer);
+
+		bbCode.close();
+
+		return bbCode.toString();
 	}
 
 	private static void bbCodeColumn(String text, int length, BBCodeBuilder sb) {
