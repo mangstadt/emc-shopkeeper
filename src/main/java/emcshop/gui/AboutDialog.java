@@ -23,7 +23,6 @@ public class AboutDialog extends JDialog {
 	protected AboutDialog(Window owner) {
 		super(owner, "About");
 		setModal(true);
-		setLocationRelativeTo(owner);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setResizable(false);
 
@@ -63,6 +62,8 @@ public class AboutDialog extends JDialog {
 		add(close, "align center");
 
 		pack();
+
+		setLocationRelativeTo(owner);
 	}
 
 	public static void show(Window owner) {

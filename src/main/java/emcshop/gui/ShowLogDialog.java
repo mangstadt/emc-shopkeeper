@@ -28,7 +28,6 @@ import emcshop.LogManager;
 public class ShowLogDialog extends JDialog {
 	private ShowLogDialog(Window owner, LogManager logManager) {
 		super(owner, "Log");
-		setLocationRelativeTo(owner);
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -76,6 +75,7 @@ public class ShowLogDialog extends JDialog {
 		add(close, "align center");
 
 		setSize(500, 400);
+		setLocationRelativeTo(owner);
 	}
 
 	public static void show(Window owner, LogManager logManager) {

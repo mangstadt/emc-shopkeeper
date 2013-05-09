@@ -39,7 +39,6 @@ public class ResetDatabaseDialog extends JDialog implements WindowListener {
 	private ResetDatabaseDialog(Window owner) {
 		super(owner, "Reset Database");
 		setModal(true);
-		setLocationRelativeTo(owner);
 		setResizable(false);
 
 		JButton resetButton = new JButton("Reset");
@@ -89,6 +88,7 @@ public class ResetDatabaseDialog extends JDialog implements WindowListener {
 		add(p, "align center");
 
 		pack();
+		setLocationRelativeTo(owner);
 	}
 
 	////////////////////////////////////////////////

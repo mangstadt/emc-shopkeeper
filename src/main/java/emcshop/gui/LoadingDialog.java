@@ -13,7 +13,6 @@ import emcshop.gui.images.ImageManager;
 public class LoadingDialog extends JDialog {
 	public LoadingDialog(final MainFrame owner, String title, String text) {
 		super(owner, title, true);
-		setLocationRelativeTo(owner);
 		setResizable(false);
 		setUndecorated(true);
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
@@ -26,5 +25,6 @@ public class LoadingDialog extends JDialog {
 		add(p, "align center");
 
 		pack();
+		setLocationRelativeTo(owner);
 	}
 }

@@ -44,7 +44,6 @@ public class LoginDialog extends JDialog {
 	public LoginDialog(final Window owner) {
 		super(owner, "Login");
 		setModal(true);
-		setLocationRelativeTo(owner);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		createWidgets();
@@ -68,6 +67,7 @@ public class LoginDialog extends JDialog {
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		pack();
+		setLocationRelativeTo(owner);
 	}
 
 	/**

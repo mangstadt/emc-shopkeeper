@@ -47,7 +47,6 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 	public UpdateDialog(final MainFrame owner, final DbDao dao, final Settings settings) throws SQLException {
 		super(owner, "Updating Transactions", true);
-		setLocationRelativeTo(owner);
 
 		createWidgets();
 		layoutWidgets();
@@ -58,6 +57,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 		pack();
 		setSize(getWidth() + 20, getHeight());
+		setLocationRelativeTo(owner);
 		addWindowListener(this);
 
 		puller = new TransactionPuller(settings.getSession());

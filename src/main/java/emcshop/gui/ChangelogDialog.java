@@ -25,7 +25,6 @@ import org.apache.commons.io.IOUtils;
 public class ChangelogDialog extends JDialog {
 	private ChangelogDialog(Window owner) {
 		super(owner, "Changelog");
-		setLocationRelativeTo(owner);
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -64,6 +63,8 @@ public class ChangelogDialog extends JDialog {
 
 		setSize(500, 400);
 		setResizable(false);
+
+		setLocationRelativeTo(owner);
 	}
 
 	public static void show(Window owner) {

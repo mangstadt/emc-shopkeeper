@@ -50,7 +50,6 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 
 	public FirstUpdateDialog(JDialog owner) {
 		super(owner, "First Update", true);
-		setLocationRelativeTo(owner);
 		setResizable(false);
 
 		continueButton = new JButton("Continue");
@@ -171,6 +170,7 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		add(p, "align center");
 
 		pack();
+		setLocationRelativeTo(owner);
 	}
 
 	private long calculateEstimate(int pages) {
