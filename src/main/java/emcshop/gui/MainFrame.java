@@ -172,6 +172,21 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 			tools.add(logLevel);
 
+			JMenuItem clearSession = new JMenuItem("Clear Saved Session");
+			clearSession.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					settings.setSession(null);
+					try {
+						settings.save();
+					} catch (IOException e) {
+						logger.log(Level.SEVERE, "Problem saving settings file.", e);
+					}
+					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
+				}
+			});
+			tools.add(clearSession);
+
 			tools.addSeparator();
 
 			JMenuItem resetDb = new JMenuItem("Reset database...");
