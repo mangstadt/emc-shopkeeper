@@ -28,33 +28,53 @@ public class TransactionPageTest {
 		assertTrue(page.isLoggedIn());
 		assertEquals(new Date(1354210000000L), page.getFirstTransactionDate());
 
-		Iterator<ShopTransaction> it = page.getShopTransactions().iterator();
+		{
+			Iterator<ShopTransaction> it = page.getShopTransactions().iterator();
 
-		ShopTransaction t = it.next();
-		assertEquals(10, t.getAmount());
-		assertEquals(213329, t.getBalance());
-		assertEquals("Leather", t.getItem());
-		assertEquals("jtc0999", t.getPlayer());
-		assertEquals(-1, t.getQuantity());
-		assertEquals(new Date(1354230649000L), t.getTs());
+			ShopTransaction t = it.next();
+			assertEquals(10, t.getAmount());
+			assertEquals(213329, t.getBalance());
+			assertEquals("Leather", t.getItem());
+			assertEquals("jtc0999", t.getPlayer());
+			assertEquals(-1, t.getQuantity());
+			assertEquals(new Date(1354230649000L), t.getTs());
 
-		t = it.next();
-		assertEquals(30000, t.getAmount());
-		assertEquals(213194, t.getBalance());
-		assertEquals("Brewing Stand", t.getItem());
-		assertEquals("SebaB2001", t.getPlayer());
-		assertEquals(-2, t.getQuantity());
-		assertEquals(new Date(1354227236000L), t.getTs());
+			t = it.next();
+			assertEquals(30000, t.getAmount());
+			assertEquals(213194, t.getBalance());
+			assertEquals("Brewing Stand", t.getItem());
+			assertEquals("SebaB2001", t.getPlayer());
+			assertEquals(-2, t.getQuantity());
+			assertEquals(new Date(1354227236000L), t.getTs());
 
-		t = it.next();
-		assertEquals(-8, t.getAmount());
-		assertEquals(200, t.getBalance());
-		assertEquals("Blue Wool", t.getItem());
-		assertEquals("longtimeshelf8", t.getPlayer());
-		assertEquals(8, t.getQuantity());
-		assertEquals(new Date(1354225000000L), t.getTs());
+			t = it.next();
+			assertEquals(-8, t.getAmount());
+			assertEquals(200, t.getBalance());
+			assertEquals("Blue Wool", t.getItem());
+			assertEquals("longtimeshelf8", t.getPlayer());
+			assertEquals(8, t.getQuantity());
+			assertEquals(new Date(1354225000000L), t.getTs());
 
-		assertFalse(it.hasNext());
+			assertFalse(it.hasNext());
+		}
+
+		{
+			Iterator<PaymentTransaction> it = page.getPaymentTransactions().iterator();
+
+			PaymentTransaction t = it.next();
+			assertEquals(-100, t.getAmount());
+			assertEquals(212994, t.getBalance());
+			assertEquals("WeirdManaico", t.getPlayer());
+			assertEquals(new Date(1354226347000L), t.getTs());
+
+			t = it.next();
+			assertEquals(6, t.getAmount());
+			assertEquals(212990, t.getBalance());
+			assertEquals("ColeWalser", t.getPlayer());
+			assertEquals(new Date(1354226247000L), t.getTs());
+
+			assertFalse(it.hasNext());
+		}
 	}
 
 	@Test

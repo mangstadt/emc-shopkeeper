@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 
 public interface DbDao {
@@ -79,11 +80,25 @@ public interface DbDao {
 	void insertTransactions(Collection<ShopTransaction> transactions) throws SQLException;
 
 	/**
+	 * Inserts multiple payment transactions.
+	 * @param transactions
+	 * @throws SQLException
+	 */
+	void insertPaymentTransactions(Collection<PaymentTransaction> transactions) throws SQLException;
+
+	/**
 	 * Gets all transactions in the database.
 	 * @return the transactions
 	 * @throws SQLException
 	 */
 	List<ShopTransaction> getTransactions() throws SQLException;
+
+	/**
+	 * Gets all unhandled payment transactions from the database.
+	 * @return the transactions
+	 * @throws SQLException
+	 */
+	List<PaymentTransaction> getUnhandledPaymentTransactions() throws SQLException;
 
 	/**
 	 * Gets the latest transaction from the database.

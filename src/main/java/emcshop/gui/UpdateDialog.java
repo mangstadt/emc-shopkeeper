@@ -23,6 +23,7 @@ import javax.swing.JRootPane;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.EmcSession;
+import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
@@ -130,12 +131,13 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							long previousTime = 0;
 
 							@Override
-							public synchronized void onPageScraped(int page, List<ShopTransaction> transactions) {
+							public synchronized void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions) {
 								try {
 									dao.insertTransactions(transactions);
+									dao.insertPaymentTransactions(paymentTransactions);
 
 									pageCount++;
-									transactionCount += transactions.size();
+									transactionCount += transactions.size() + paymentTransactions.size();
 
 									String pagesText = nf.format(pageCount);
 									if (stopAtPage != null) {

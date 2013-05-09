@@ -214,12 +214,28 @@ public class TransactionPuller {
 						}
 					}
 
+					List<PaymentTransaction> paymentTransactions = transactionPage.getPaymentTransactions();
+					if (stopAtDate != null) {
+						int end = -1;
+						for (int i = 0; i < paymentTransactions.size(); i++) {
+							PaymentTransaction transaction = paymentTransactions.get(i);
+							if (transaction.getTs().getTime() <= stopAtDate.getTime()) {
+								end = i;
+								break;
+							}
+						}
+						if (end >= 0) {
+							paymentTransactions = paymentTransactions.subList(0, end);
+							quit = true;
+						}
+					}
+
 					synchronized (this) {
 						pageCount++;
 						transactionCount += transactions.size();
 					}
 
-					listener.onPageScraped(page, transactions);
+					listener.onPageScraped(page, transactions, paymentTransactions);
 				}
 			} catch (Throwable e) {
 				thrown = e;
@@ -233,8 +249,10 @@ public class TransactionPuller {
 		 * Called when a page has been scraped.
 		 * @param page the page number
 		 * @param transactions the scraped shop transactions (may be empty)
+		 * @param paymentTransactions the scraped payment transactions (may be
+		 * empty)
 		 */
-		void onPageScraped(int page, List<ShopTransaction> transactions);
+		void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions);
 	}
 
 	public static class Result {

@@ -47,6 +47,26 @@ CREATE TABLE transactions(
 	balance INT NOT NULL
 );
 
+CREATE TABLE payment_transactions(
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	ts TIMESTAMP NOT NULL,
+	player SMALLINT NOT NULL REFERENCES players(id),
+	
+	--the amount you paid or were paid
+	--(negative=you paid the player, positive=the player paid you)
+	amount INT NOT NULL,
+	
+	--the player's rupee balance after the transaction occurred
+	balance INT NOT NULL,
+	
+	--the shop transaction that has been created as a result of this payment transaction
+	--"null" if the user has not decided whether to associate this with a shop transaction or not
+	"transaction" INT REFERENCES transactions(id),
+	
+	--"true" if the user has chosen to not associate this with a shop transaction
+	ignore BOOLEAN NOT NULL DEFAULT false
+);
+
 CREATE INDEX ts_index ON transactions(ts);
 CREATE INDEX player_index ON transactions(player);
 CREATE INDEX item_index ON transactions(item);

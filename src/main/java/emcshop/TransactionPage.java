@@ -25,6 +25,9 @@ public class TransactionPage {
 	private static final Pattern boughtRegex = Pattern.compile("^Your player shop bought ([\\d,]+) (.*?) from (.*)$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern amountRegex = Pattern.compile("^(-|\\+)\\s*([\\d,]+)$", Pattern.CASE_INSENSITIVE);
 
+	private static final Pattern paymentFromRegex = Pattern.compile("^Payment from (.*)$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern paymentToRegex = Pattern.compile("^Payment to (.*)$", Pattern.CASE_INSENSITIVE);
+
 	private final DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa");
 	private final Document document;
 
@@ -66,15 +69,14 @@ public class TransactionPage {
 	}
 
 	/**
-	 * Gets the shop transactions from the page.
-	 * @return the shop transactions or empty list if none were found
+	 * Gets the payment transactions from the page.
+	 * @return the payment transactions or empty list if none were found
 	 */
-	public List<ShopTransaction> getShopTransactions() {
-		List<ShopTransaction> transactions = new ArrayList<ShopTransaction>();
+	public List<PaymentTransaction> getPaymentTransactions() {
+		List<PaymentTransaction> transactions = new ArrayList<PaymentTransaction>();
 
-		Elements elements = document.select("li.sectionItem");
-		for (Element element : elements) {
-			ShopTransaction transaction = scrapeElement(element);
+		for (Element element : getTransactionElements()) {
+			PaymentTransaction transaction = scrapePaymentElement(element);
 			if (transaction != null) {
 				transactions.add(transaction);
 			}
@@ -83,7 +85,28 @@ public class TransactionPage {
 		return transactions;
 	}
 
-	private ShopTransaction scrapeElement(Element element) {
+	/**
+	 * Gets the shop transactions from the page.
+	 * @return the shop transactions or empty list if none were found
+	 */
+	public List<ShopTransaction> getShopTransactions() {
+		List<ShopTransaction> transactions = new ArrayList<ShopTransaction>();
+
+		for (Element element : getTransactionElements()) {
+			ShopTransaction transaction = scrapeShopElement(element);
+			if (transaction != null) {
+				transactions.add(transaction);
+			}
+		}
+
+		return transactions;
+	}
+
+	private Elements getTransactionElements() {
+		return document.select("li.sectionItem");
+	}
+
+	private ShopTransaction scrapeShopElement(Element element) {
 		ShopTransaction transaction = new ShopTransaction();
 
 		//description
@@ -106,6 +129,36 @@ public class TransactionPage {
 					return null;
 				}
 			}
+		}
+
+		//timestamp
+		transaction.setTs(parseTs(element));
+
+		//amount
+		transaction.setAmount(parseAmount(element));
+
+		//balance
+		transaction.setBalance(parseBalance(element));
+
+		return transaction;
+	}
+
+	private PaymentTransaction scrapePaymentElement(Element element) {
+		PaymentTransaction transaction = new PaymentTransaction();
+
+		//description
+		Element descriptionElement = element.select("div.description").first();
+		if (descriptionElement != null) {
+			String description = descriptionElement.text();
+			Matcher m = paymentFromRegex.matcher(description);
+			if (!m.find()) {
+				m = paymentToRegex.matcher(description);
+				if (!m.find()) {
+					return null;
+				}
+			}
+
+			transaction.setPlayer(m.group(1));
 		}
 
 		//timestamp

@@ -346,11 +346,12 @@ public class Main {
 					NumberFormat nf = NumberFormat.getInstance();
 
 					@Override
-					public synchronized void onPageScraped(int page, List<ShopTransaction> transactions) {
+					public synchronized void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions) {
 						try {
 							dao.insertTransactions(transactions);
+							dao.insertPaymentTransactions(paymentTransactions);
 							pageCount++;
-							transactionCount += transactions.size();
+							transactionCount += transactions.size() + paymentTransactions.size();
 							out.print("\rPages: " + nf.format(pageCount) + " | Transactions: " + nf.format(transactionCount));
 						} catch (SQLException e) {
 							pullerError = e;

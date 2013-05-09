@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
+import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.util.ClasspathUtils;
 
@@ -36,7 +37,7 @@ public abstract class DirbyDbDao implements DbDao {
 	/**
 	 * The current version of the database schema.
 	 */
-	private static final int schemaVersion = 2;
+	private static final int schemaVersion = 3;
 
 	/**
 	 * The database connection.
@@ -289,6 +290,26 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public void insertPaymentTransactions(Collection<PaymentTransaction> transactions) throws SQLException {
+		if (transactions.isEmpty()) {
+			return;
+		}
+
+		InsertStatement stmt = new InsertStatement("payment_transactions");
+		for (PaymentTransaction transaction : transactions) {
+			Player player = selsertPlayer(transaction.getPlayer());
+			Date ts = transaction.getTs();
+
+			stmt.setTimestamp("ts", ts);
+			stmt.setInt("player", player.getId());
+			stmt.setInt("amount", transaction.getAmount());
+			stmt.setInt("balance", transaction.getBalance());
+			stmt.nextRow();
+		}
+		stmt.execute(conn);
+	}
+
+	@Override
 	public List<ShopTransaction> getTransactions() throws SQLException {
 		return getTransactions(-1);
 	}
@@ -324,6 +345,37 @@ public abstract class DirbyDbDao implements DbDao {
 				transaction.setItem(rs.getString("itemName"));
 				transaction.setPlayer(rs.getString("playerName"));
 				transaction.setQuantity(rs.getInt("quantity"));
+				transaction.setTs(toDate(rs.getTimestamp("ts")));
+
+				transactions.add(transaction);
+			}
+			return transactions;
+		} finally {
+			closeStatements(selectStmt);
+		}
+	}
+
+	//@Override
+	public List<PaymentTransaction> getUnhandledPaymentTransactions() throws SQLException {
+		//@formatter:off
+		String sql =
+		"SELECT pt.ts, pt.amount, pt.balance, p.name AS playerName, " +
+		"FROM payment_transactions pt " +
+		"INNER JOIN players p ON pt.player = p.id " +
+		"WHERE pt.transaction IS NULL " +
+		"ORDER BY pt.ts DESC ";
+		//@formatter:on
+
+		PreparedStatement selectStmt = null;
+		try {
+			selectStmt = conn.prepareStatement(sql);
+			ResultSet rs = selectStmt.executeQuery();
+			List<PaymentTransaction> transactions = new ArrayList<PaymentTransaction>();
+			while (rs.next()) {
+				PaymentTransaction transaction = new PaymentTransaction();
+				transaction.setAmount(rs.getInt("amount"));
+				transaction.setBalance(rs.getInt("balance"));
+				transaction.setPlayer(rs.getString("playerName"));
 				transaction.setTs(toDate(rs.getTimestamp("ts")));
 
 				transactions.add(transaction);
