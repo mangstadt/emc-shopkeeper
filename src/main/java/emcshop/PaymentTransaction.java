@@ -7,10 +7,19 @@ import java.util.Date;
  * @author Michael Angstadt
  */
 public class PaymentTransaction {
+	private Integer id;
 	private Date ts;
 	private String player;
 	private int amount;
 	private int balance;
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
 	public Date getTs() {
 		return ts;

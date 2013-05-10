@@ -7,12 +7,21 @@ import java.util.Date;
  * @author Michael Angstadt
  */
 public class ShopTransaction {
+	private Integer id;
 	private Date ts;
 	private String player;
 	private String item;
 	private int quantity;
 	private int amount;
 	private int balance;
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
 	public Date getTs() {
 		return ts;
@@ -97,7 +106,7 @@ public class ShopTransaction {
 		if (amount != that.amount) {
 			return false;
 		}
-		
+
 		if (quantity != that.quantity) {
 			return false;
 		}

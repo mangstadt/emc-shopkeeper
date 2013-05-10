@@ -77,6 +77,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private JButton showItems;
 	private JButton showPlayers;
 	private JPanel tablePanel;
+	private PaymentsPanel paymentsPanel;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private final DbDao dao;
@@ -84,7 +85,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private final LogManager logManager;
 	private final ProfileImageLoader profileImageLoader;
 
-	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader) {
+	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader) throws SQLException {
 		this.dao = dao;
 		this.settings = settings;
 		this.logManager = logManager;
@@ -98,11 +99,13 @@ public class MainFrame extends JFrame implements WindowListener {
 		layoutWidgets();
 		setSize(settings.getWindowWidth(), settings.getWindowHeight());
 
+		//TODO move outside of class
 		Image appIcon = ImageManager.getAppIcon().getImage();
 		setIconImage(appIcon);
-
 		ToolTipManager.sharedInstance().setInitialDelay(0);
 		ToolTipManager.sharedInstance().setDismissDelay(30000);
+
+		paymentsPanel.refresh();
 
 		addWindowListener(this);
 	}
@@ -318,6 +321,8 @@ public class MainFrame extends JFrame implements WindowListener {
 				showPlayers(fromDatePicker.getDate(), toDatePicker.getDate());
 			}
 		});
+
+		paymentsPanel = new PaymentsPanel();
 	}
 
 	private void showTransactions(final Date from, final Date to, final boolean afterUpdate) {
@@ -578,6 +583,8 @@ public class MainFrame extends JFrame implements WindowListener {
 				showTransactions(settings.getLastUpdated(), started, true);
 			}
 
+			paymentsPanel.refresh();
+
 			NumberFormat nf = NumberFormat.getInstance();
 			StringBuilder sb = new StringBuilder();
 			sb.append("Update complete.\n");
@@ -631,7 +638,11 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		p.add(p2, "wrap");
 		p.add(showItems, "align center, wrap");
-		p.add(showPlayers, "align center");
+		p.add(showPlayers, "align center, wrap");
+
+		p.add(new JSeparator(), "w 200!, align center, wrap");
+
+		p.add(paymentsPanel);
 
 		return p;
 	}
@@ -850,6 +861,53 @@ public class MainFrame extends JFrame implements WindowListener {
 		 */
 		public JButton getClearButton() {
 			return clearButton;
+		}
+	}
+
+	private class PaymentsPanel extends JPanel {
+		public PaymentsPanel() {
+			setLayout(new MigLayout());
+		}
+
+		public void refresh() {
+			removeAll();
+
+			try {
+				int count = dao.countPendingPaymentTransactions();
+				if (count == 0) {
+					setVisible(false);
+					return;
+				}
+
+				//@formatter:off
+				add(new JLabel(
+				"<html>" +
+					"<font size=2><b>" + count + "</b> payment transaction(s) are awaiting your review.</font>" +
+				"</html>"
+				), "align center, wrap");
+				//@formatter:on
+
+				JButton review = new JButton("Review");
+				review.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						//						try {
+						//							PaymentTransactionsDialog.show(MainFrame.this, dao);
+						//						} catch (SQLException e) {
+						//							ErrorDialog.show(MainFrame.this, "Problem querying database.", e);
+						//						}
+					}
+				});
+				add(review, "align center");
+
+				validate();
+				setVisible(true);
+			} catch (SQLException e) {
+				logger.log(Level.SEVERE, "Problem getting pending payment transaction count.", e);
+				add(new JLabel("<html><font color=red size=2>Problem getting pending payment transaction count.</font></html>"), "align center");
+			} finally {
+				validate();
+			}
 		}
 	}
 

@@ -243,8 +243,9 @@ public abstract class DirbyDbDao implements DbDao {
 			return;
 		}
 
-		InsertStatement stmt = new InsertStatement("transactions");
 		for (ShopTransaction transaction : transactions) {
+			InsertStatement stmt = new InsertStatement("transactions");
+
 			Player player = selsertPlayer(transaction.getPlayer());
 			Integer itemId = getItemId(transaction.getItem());
 			Date ts = transaction.getTs();
@@ -284,9 +285,9 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.setInt("quantity", transaction.getQuantity());
 			stmt.setInt("amount", transaction.getAmount());
 			stmt.setInt("balance", transaction.getBalance());
-			stmt.nextRow();
+			int id = stmt.execute(conn);
+			transaction.setId(id);
 		}
-		stmt.execute(conn);
 	}
 
 	@Override
@@ -323,7 +324,7 @@ public abstract class DirbyDbDao implements DbDao {
 	public List<ShopTransaction> getTransactions(int limit) throws SQLException {
 		//@formatter:off
 		String sql =
-		"SELECT t.ts, t.amount, t.balance, t.quantity, p.name AS playerName, i.name AS itemName " +
+		"SELECT t.id, t.ts, t.amount, t.balance, t.quantity, p.name AS playerName, i.name AS itemName " +
 		"FROM transactions t " +
 		"INNER JOIN players p ON t.player = p.id " +
 		"INNER JOIN items i ON t.item = i.id " +
@@ -340,6 +341,7 @@ public abstract class DirbyDbDao implements DbDao {
 			List<ShopTransaction> transactions = new ArrayList<ShopTransaction>();
 			while (rs.next()) {
 				ShopTransaction transaction = new ShopTransaction();
+				transaction.setId(rs.getInt("id"));
 				transaction.setAmount(rs.getInt("amount"));
 				transaction.setBalance(rs.getInt("balance"));
 				transaction.setItem(rs.getString("itemName"));
@@ -355,14 +357,15 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
-	//@Override
-	public List<PaymentTransaction> getUnhandledPaymentTransactions() throws SQLException {
+	@Override
+	public List<PaymentTransaction> getPendingPaymentTransactions() throws SQLException {
 		//@formatter:off
 		String sql =
-		"SELECT pt.ts, pt.amount, pt.balance, p.name AS playerName, " +
+		"SELECT pt.id, pt.ts, pt.amount, pt.balance, p.name AS playerName " +
 		"FROM payment_transactions pt " +
 		"INNER JOIN players p ON pt.player = p.id " +
-		"WHERE pt.transaction IS NULL " +
+		"WHERE pt.\"transaction\" IS NULL " +
+		"AND pt.ignore = false " +
 		"ORDER BY pt.ts DESC ";
 		//@formatter:on
 
@@ -373,6 +376,7 @@ public abstract class DirbyDbDao implements DbDao {
 			List<PaymentTransaction> transactions = new ArrayList<PaymentTransaction>();
 			while (rs.next()) {
 				PaymentTransaction transaction = new PaymentTransaction();
+				transaction.setId(rs.getInt("id"));
 				transaction.setAmount(rs.getInt("amount"));
 				transaction.setBalance(rs.getInt("balance"));
 				transaction.setPlayer(rs.getString("playerName"));
@@ -383,6 +387,52 @@ public abstract class DirbyDbDao implements DbDao {
 			return transactions;
 		} finally {
 			closeStatements(selectStmt);
+		}
+	}
+
+	@Override
+	public int countPendingPaymentTransactions() throws SQLException {
+		//@formatter:off
+		String sql =
+		"SELECT Count(*) " +
+		"FROM payment_transactions " +
+		"WHERE \"transaction\" IS NULL " +
+		"AND ignore = false";
+		//@formatter:on
+
+		PreparedStatement selectStmt = null;
+		try {
+			selectStmt = conn.prepareStatement(sql);
+			ResultSet rs = selectStmt.executeQuery();
+			return rs.next() ? rs.getInt(1) : 0;
+		} finally {
+			closeStatements(selectStmt);
+		}
+	}
+
+	@Override
+	public void ignorePaymentTransaction(Integer id) throws SQLException {
+		PreparedStatement stmt = null;
+		try {
+			stmt = conn.prepareStatement("UPDATE payment_transactions SET ignore = ? WHERE id = ?");
+			stmt.setBoolean(1, true);
+			stmt.setInt(2, id);
+			stmt.execute();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void assignPaymentTransaction(Integer paymentId, Integer transactionId) throws SQLException {
+		PreparedStatement stmt = null;
+		try {
+			stmt = conn.prepareStatement("UPDATE payment_transactions SET \"transaction\" = ? WHERE id = ?");
+			stmt.setInt(1, transactionId);
+			stmt.setInt(2, paymentId);
+			stmt.execute();
+		} finally {
+			closeStatements(stmt);
 		}
 	}
 

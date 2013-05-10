@@ -98,7 +98,29 @@ public interface DbDao {
 	 * @return the transactions
 	 * @throws SQLException
 	 */
-	List<PaymentTransaction> getUnhandledPaymentTransactions() throws SQLException;
+	List<PaymentTransaction> getPendingPaymentTransactions() throws SQLException;
+
+	/**
+	 * Ignores a pending payment transaction.
+	 * @param id the payment transaction ID
+	 * @throws SQLException
+	 */
+	void ignorePaymentTransaction(Integer id) throws SQLException;
+
+	/**
+	 * Assigns a pending payment transaction to a shop transaction.
+	 * @param paymentId the payment transaction ID
+	 * @param transactionId the shop transaction ID
+	 * @throws SQLException
+	 */
+	void assignPaymentTransaction(Integer paymentId, Integer transactionId) throws SQLException;
+
+	/**
+	 * Counts the number of pending payment transactions.
+	 * @return the count
+	 * @throws SQLException
+	 */
+	int countPendingPaymentTransactions() throws SQLException;
 
 	/**
 	 * Gets the latest transaction from the database.
