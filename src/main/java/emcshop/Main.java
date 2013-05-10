@@ -274,9 +274,9 @@ public class Main {
 
 	private static void launchCli() throws Throwable {
 		final DbDao dao = new DirbyEmbeddedDbDao(dbDir);
-		ShopTransaction latestTransactionFromDb = dao.getLatestTransaction();
 
 		if (latest) {
+			ShopTransaction latestTransactionFromDb = dao.getLatestTransaction();
 			if (latestTransactionFromDb == null) {
 				out.println("No transactions in database.");
 			} else {
@@ -292,7 +292,8 @@ public class Main {
 		}
 
 		if (update) {
-			if (latestTransactionFromDb == null) {
+			Date latestTransactionDateFromDb = dao.getLatestTransactionDate();
+			if (latestTransactionDateFromDb == null) {
 				//@formatter:off
 			out.println(
 			"================================================================================\n" +
@@ -332,8 +333,8 @@ public class Main {
 
 				final TransactionPuller puller = new TransactionPuller(session);
 				puller.setThreadCount(threadCount);
-				if (latestTransactionFromDb != null) {
-					puller.setStopAtDate(latestTransactionFromDb.getTs());
+				if (latestTransactionDateFromDb != null) {
+					puller.setStopAtDate(latestTransactionDateFromDb);
 				}
 				if (stopAtPage != null) {
 					puller.setStopAtPage(stopAtPage);

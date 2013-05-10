@@ -321,6 +321,41 @@ public abstract class DirbyDbDao implements DbDao {
 		return transactions.isEmpty() ? null : transactions.get(0);
 	}
 
+	@Override
+	public Date getLatestTransactionDate() throws SQLException {
+		Date shopTs;
+		String sql = "SELECT Max(ts) FROM transactions";
+		PreparedStatement selectStmt = null;
+		try {
+			selectStmt = conn.prepareStatement(sql);
+			ResultSet rs = selectStmt.executeQuery();
+			shopTs = rs.next() ? toDate(rs.getTimestamp(1)) : null;
+		} finally {
+			closeStatements(selectStmt);
+		}
+
+		Date paymentTs;
+		sql = "SELECT Max(ts) FROM payment_transactions";
+		try {
+			selectStmt = conn.prepareStatement(sql);
+			ResultSet rs = selectStmt.executeQuery();
+			paymentTs = rs.next() ? toDate(rs.getTimestamp(1)) : null;
+		} finally {
+			closeStatements(selectStmt);
+		}
+
+		if (shopTs == null && paymentTs == null) {
+			return null;
+		}
+		if (shopTs != null && paymentTs == null) {
+			return shopTs;
+		}
+		if (shopTs == null && paymentTs != null) {
+			return paymentTs;
+		}
+		return (shopTs.compareTo(paymentTs) > 0) ? shopTs : paymentTs;
+	}
+
 	public List<ShopTransaction> getTransactions(int limit) throws SQLException {
 		//@formatter:off
 		String sql =

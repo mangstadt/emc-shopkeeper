@@ -69,10 +69,10 @@ public class UpdateDialog extends JDialog implements WindowListener {
 			@Override
 			public void run() {
 				try {
-					ShopTransaction latest = dao.getLatestTransaction();
+					Date latestTransactionDate = dao.getLatestTransactionDate();
 					final Integer stopAtPage;
 					final String estimatedTimeDisplay;
-					if (latest == null) {
+					if (latestTransactionDate == null) {
 						FirstUpdateDialog.Result result = FirstUpdateDialog.show(UpdateDialog.this);
 						if (result.isCancelled()) {
 							return;
@@ -89,7 +89,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							estimatedTimeDisplay = null;
 						}
 					} else {
-						puller.setStopAtDate(latest.getTs());
+						puller.setStopAtDate(latestTransactionDate);
 						stopAtPage = null;
 						estimatedTimeDisplay = null;
 					}
@@ -194,8 +194,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								}
 
 								puller = new TransactionPuller(session);
-								if (latest != null) {
-									puller.setStopAtDate(latest.getTs());
+								if (latestTransactionDate != null) {
+									puller.setStopAtDate(latestTransactionDate);
 								}
 								if (stopAtPage != null) {
 									puller.setStopAtPage(stopAtPage);

@@ -130,6 +130,14 @@ public interface DbDao {
 	ShopTransaction getLatestTransaction() throws SQLException;
 
 	/**
+	 * Gets the date of the latest transaction from the database.
+	 * @return the date of the latest transaction or null if there are no
+	 * transactions
+	 * @throws SQLException
+	 */
+	Date getLatestTransactionDate() throws SQLException;
+
+	/**
 	 * Computes the net gains/losses for each item.
 	 * @return the net gains/losses for each item
 	 * @throws SQLException
