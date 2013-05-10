@@ -232,7 +232,7 @@ public class TransactionPuller {
 
 					synchronized (this) {
 						pageCount++;
-						transactionCount += transactions.size();
+						transactionCount += transactions.size() + paymentTransactions.size();
 					}
 
 					listener.onPageScraped(page, transactions, paymentTransactions);
