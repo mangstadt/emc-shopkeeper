@@ -642,7 +642,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		p.add(new JSeparator(), "w 200!, align center, wrap");
 
-		p.add(paymentsPanel);
+		p.add(paymentsPanel, "align center");
 
 		return p;
 	}
@@ -882,7 +882,7 @@ public class MainFrame extends JFrame implements WindowListener {
 				//@formatter:off
 				add(new JLabel(
 				"<html>" +
-					"<font size=2><b>" + count + "</b> payment transaction(s) are awaiting your review.</font>" +
+					"<font size=2><b>" + count + "</b> payment transaction(s)<br>are awaiting your review.</font>" +
 				"</html>"
 				), "align center, wrap");
 				//@formatter:on
@@ -891,11 +891,12 @@ public class MainFrame extends JFrame implements WindowListener {
 				review.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
-						//						try {
-						//							PaymentTransactionsDialog.show(MainFrame.this, dao);
-						//						} catch (SQLException e) {
-						//							ErrorDialog.show(MainFrame.this, "Problem querying database.", e);
-						//						}
+						try {
+							PaymentTransactionsDialog.show(MainFrame.this, dao);
+							refresh();
+						} catch (SQLException e) {
+							ErrorDialog.show(MainFrame.this, "Problem querying database.", e);
+						}
 					}
 				});
 				add(review, "align center");
