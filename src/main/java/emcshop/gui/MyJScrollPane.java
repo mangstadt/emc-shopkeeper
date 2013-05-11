@@ -15,7 +15,7 @@ public class MyJScrollPane extends JScrollPane {
 	public MyJScrollPane(Component component) {
 		super(component);
 		this.component = component;
-		getVerticalScrollBar().setUnitIncrement(100);
+		getVerticalScrollBar().setUnitIncrement(75);
 	}
 
 	/**
