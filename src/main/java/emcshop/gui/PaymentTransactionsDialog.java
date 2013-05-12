@@ -22,7 +22,6 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 
@@ -144,7 +143,7 @@ public class PaymentTransactionsDialog extends JDialog {
 					continue;
 				}
 
-				int quantity = Integer.parseInt(rowGroup.quantity.getText());
+				int quantity = rowGroup.quantity.getInt();
 
 				ShopTransaction shop = new ShopTransaction();
 				shop.setTs(rowGroup.transaction.getTs());
@@ -183,7 +182,7 @@ public class PaymentTransactionsDialog extends JDialog {
 		JLabel description;
 		JButton ignore, assign;
 		JPanel assignPanel, innerAssignPanel;
-		JTextField quantity;
+		JNumberTextField quantity;
 		ItemSuggestField item;
 		DateFormat df = new SimpleDateFormat("MMM dd yyyy @ HH:mm");
 		boolean ignoreTransaction = false;
@@ -221,8 +220,10 @@ public class PaymentTransactionsDialog extends JDialog {
 			});
 
 			item = new ItemSuggestField(itemNames);
-			item.setSuggestMatcher(new StartsWithMatcher());
-			quantity = new JTextField(); //TODO validate
+
+			quantity = new JNumberTextField();
+			quantity.setFormat(JNumberTextField.NUMERIC);
+			quantity.setAllowNegative(false);
 
 			assignPanel = new JPanel(new MigLayout("insets 0"));
 
@@ -271,6 +272,7 @@ public class PaymentTransactionsDialog extends JDialog {
 
 		public ItemSuggestField(Vector<String> data) {
 			super(PaymentTransactionsDialog.this, data);
+			setSuggestMatcher(new StartsWithMatcher());
 			setListCellRenderer(new ListCellRenderer() {
 				@Override
 				public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
