@@ -41,18 +41,18 @@ import org.jsoup.select.Elements;
 public class ProfileImageLoader {
 	private static final Logger logger = Logger.getLogger(ProfileImageLoader.class.getName());
 	private final File cacheDir;
-	private final int maxSize;
+	private final int defaultMaxSize;
 	private final Set<String> downloaded = new HashSet<String>();
 	private final List<LoadThread> threads = new ArrayList<LoadThread>();
 
 	/**
 	 * @param cacheDir the directory where the images are cached
-	 * @param maxSize the size that the images should be scaled to when
+	 * @param defaultMaxSize the size that the images should be scaled to when
 	 * displayed
 	 */
-	public ProfileImageLoader(File cacheDir, int maxSize) {
+	public ProfileImageLoader(File cacheDir, int defaultMaxSize) {
 		this.cacheDir = cacheDir;
-		this.maxSize = maxSize;
+		this.defaultMaxSize = defaultMaxSize;
 	}
 
 	/**
@@ -61,11 +61,22 @@ public class ProfileImageLoader {
 	 * label to insert the image into)
 	 */
 	public void load(Map<String, JLabel> imageLabels) {
+		load(imageLabels, defaultMaxSize);
+	}
+
+	/**
+	 * Loads a collection of profile images.
+	 * @param imageLabels the images to load (key = player name, value = the
+	 * label to insert the image into)
+	 * @param maxSize the size that the images should be scaled to when
+	 * displayed
+	 */
+	public void load(Map<String, JLabel> imageLabels, int maxSize) {
 		int numThreads = 4;
 		Iterator<Map.Entry<String, JLabel>> it = imageLabels.entrySet().iterator();
 		threads.clear();
 		for (int i = 0; i < numThreads; i++) {
-			LoadThread t = new LoadThread(it);
+			LoadThread t = new LoadThread(it, maxSize);
 			threads.add(t);
 			t.start();
 		}
@@ -82,9 +93,11 @@ public class ProfileImageLoader {
 
 	private class LoadThread extends Thread {
 		private final Iterator<Map.Entry<String, JLabel>> imageLabels;
+		private final int maxSize;
 
-		public LoadThread(Iterator<Map.Entry<String, JLabel>> imageLabels) {
+		public LoadThread(Iterator<Map.Entry<String, JLabel>> imageLabels, int maxSize) {
 			this.imageLabels = imageLabels;
+			this.maxSize = maxSize;
 		}
 
 		private Map.Entry<String, JLabel> nextImage() {
@@ -103,7 +116,7 @@ public class ProfileImageLoader {
 				try {
 					ImageIcon image = getProfileImage(playerName);
 					if (image != null) {
-						image = scale(image);
+						image = scale(image, maxSize);
 						if (!Thread.interrupted()) {
 							label.setIcon(image);
 							label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -206,9 +219,10 @@ public class ProfileImageLoader {
 	/**
 	 * Scales an image.
 	 * @param image the image to scale
+	 * @param maxSize the max size in pixels
 	 * @return the scaled image
 	 */
-	private ImageIcon scale(ImageIcon image) {
+	private static ImageIcon scale(ImageIcon image, int maxSize) {
 		int height = image.getIconHeight();
 		int width = image.getIconWidth();
 
