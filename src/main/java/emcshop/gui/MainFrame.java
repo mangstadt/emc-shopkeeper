@@ -213,6 +213,7 @@ public class MainFrame extends JFrame implements WindowListener {
 									MainFrame.this.lastUpdateDate.setText("-");
 									MainFrame.this.tablePanel.removeAll();
 									MainFrame.this.tablePanel.validate();
+									MainFrame.this.paymentsPanel.refresh();
 									loading.dispose();
 								} catch (Throwable e) {
 									loading.dispose();
