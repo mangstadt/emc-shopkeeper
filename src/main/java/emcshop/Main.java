@@ -62,6 +62,11 @@ public class Main {
 	 */
 	public static final String URL;
 
+	/**
+	 * The version of the cache;
+	 */
+	public static final String CACHE_VERSION = "1";
+
 	static {
 		InputStream in = null;
 		try {
@@ -533,10 +538,11 @@ public class Main {
 			}
 		});
 
+		//init the cache
 		File cacheDir = new File(profileDir, "cache");
-		if (!cacheDir.isDirectory() && !cacheDir.mkdir()) {
-			throw new IOException("Could not create directory: " + cacheDir.getAbsolutePath());
-		}
+		initCacheDir(cacheDir);
+
+		//start the profile image loader
 		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir);
 
 		DbDao dao;
@@ -602,6 +608,35 @@ public class Main {
 			if (splash != null) {
 				splash.close();
 			}
+		}
+	}
+
+	/**
+	 * Initializes the cache directory.
+	 * @param cacheDir the path to the cache directory
+	 * @throws IOException
+	 */
+	private static void initCacheDir(File cacheDir) throws IOException {
+		File versionFile = new File(cacheDir, "_cache-version");
+		boolean clearCache = false;
+		if (!cacheDir.isDirectory()) {
+			//create the cache dir if it doesn't exist
+			clearCache = true;
+		} else {
+			//clear the cache dir on update
+			String version = versionFile.exists() ? FileUtils.readFileToString(versionFile) : null;
+			clearCache = (version == null || !version.equals(CACHE_VERSION));
+		}
+
+		//clear the cache if it's out of date
+		if (clearCache) {
+			logger.info("Clearing the cache.");
+			if (!cacheDir.isDirectory() || FileUtils.deleteQuietly(cacheDir)) {
+				if (!cacheDir.mkdir()) {
+					throw new IOException("Could not create cache directory: " + cacheDir.getAbsolutePath());
+				}
+			}
+			FileUtils.writeStringToFile(versionFile, CACHE_VERSION);
 		}
 	}
 }
