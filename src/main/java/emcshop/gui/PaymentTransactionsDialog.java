@@ -1,5 +1,6 @@
 package emcshop.gui;
 
+import static emcshop.util.MiscUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
@@ -48,13 +49,21 @@ public class PaymentTransactionsDialog extends JDialog {
 		JLabel description = new JLabel(
 		"<html>" +
 			"<div width=100%>" +
-				"The following direct payment transactions are awaiting your review. " +
-				"These kinds of transactions occur when you manually give or receive rupees to/from a player (with the \"/r pay\" command).<br>" +
-				"<br>" +
-				"This screen allows you to specify whether any of these transactions were purchases/sales that you made for your shop (for example, selling someone items in bulk).  Transactions that you don't ignore or assign will remain here so you can review them later." +
+				"The following payment transactions are awaiting your review." +
 			"</div>" +
 		"</html>"
 		);
+		//@formatter:on
+
+		JLabel help = new JLabel(ImageManager.getHelpIcon());
+		//@formatter:off
+		help.setToolTipText(toolTipText(
+			"<b>Payment Transactions</b><br>" +
+			"<br>" +
+			"This screen allows you to specify whether any payment transactions were shop-related (for example, selling someone items in bulk).<br>" +
+			"<br>" +
+			"A <b>payment transaction</b> occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."
+		));
 		//@formatter:on
 
 		List<PaymentTransaction> pendingPayments = dao.getPendingPaymentTransactions();
@@ -98,6 +107,7 @@ public class PaymentTransactionsDialog extends JDialog {
 		});
 
 		setLayout(new MigLayout());
+		add(help, "split 2");
 		add(description, "wrap");
 
 		MyJScrollPane scrollPane = new MyJScrollPane(panel);

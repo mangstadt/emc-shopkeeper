@@ -1,5 +1,6 @@
 package emcshop.gui;
 
+import static emcshop.util.MiscUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatQuantity;
 import static emcshop.util.NumberFormatter.formatRupees;
 
@@ -696,11 +697,6 @@ public class MainFrame extends JFrame implements WindowListener {
 	@Override
 	public void windowOpened(WindowEvent arg0) {
 		//do nothing
-	}
-
-	private String toolTipText(String text) {
-		text = text.replace("\n", "<br>");
-		return "<html><div width=300>" + text + "</div></html>";
 	}
 
 	private abstract class ExportComboBox extends JComboBox implements ActionListener {
