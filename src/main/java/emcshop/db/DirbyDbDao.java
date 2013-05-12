@@ -37,7 +37,7 @@ public abstract class DirbyDbDao implements DbDao {
 	/**
 	 * The current version of the database schema.
 	 */
-	private static final int schemaVersion = 3;
+	private static final int schemaVersion = 4;
 
 	/**
 	 * The database connection.
@@ -267,7 +267,8 @@ public abstract class DirbyDbDao implements DbDao {
 			Date ts = transaction.getTs();
 
 			//keep track of the first/last seen dates so they can be updated
-			{
+			//if the player doesn't have a first seen or last seen date, then calculate it later (see "getPlayerGroups()")
+			if (player.getFirstSeen() != null && player.getLastSeen() != null) {
 				Date earliest, latest;
 				Date dates[] = firstLastSeenDates.get(player.getId());
 				if (dates == null) {
