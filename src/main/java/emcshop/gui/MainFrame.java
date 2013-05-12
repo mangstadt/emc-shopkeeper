@@ -328,7 +328,6 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private void showTransactions(final Date from, final Date to, final boolean afterUpdate) {
-		profileImageLoader.cancel();
 		tablePanel.removeAll();
 		tablePanel.validate();
 
@@ -446,7 +445,6 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private void showPlayers(final Date from, final Date to) {
-		profileImageLoader.cancel();
 		tablePanel.removeAll();
 		tablePanel.validate();
 

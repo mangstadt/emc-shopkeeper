@@ -537,7 +537,7 @@ public class Main {
 		if (!cacheDir.isDirectory() && !cacheDir.mkdir()) {
 			throw new IOException("Could not create directory: " + cacheDir.getAbsolutePath());
 		}
-		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir, 64);
+		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir);
 
 		DbDao dao;
 		try {

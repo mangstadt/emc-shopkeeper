@@ -4,21 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.SwingConstants;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -34,6 +32,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+import emcshop.gui.images.ImageManager;
+
 /**
  * Used for downloading player profile pictures for the "players" view.
  * @author Michael Angstadt
@@ -41,128 +41,156 @@ import org.jsoup.select.Elements;
 public class ProfileImageLoader {
 	private static final Logger logger = Logger.getLogger(ProfileImageLoader.class.getName());
 	private final File cacheDir;
-	private final int defaultMaxSize;
-	private final Set<String> downloaded = new HashSet<String>();
-	private final List<LoadThread> threads = new ArrayList<LoadThread>();
+	private final Set<String> downloaded = Collections.synchronizedSet(new HashSet<String>());
+	private final LinkedBlockingQueue<Job> queue = new LinkedBlockingQueue<Job>();
 
 	/**
+	 * Creates a profile image loader with 4 threads.
 	 * @param cacheDir the directory where the images are cached
-	 * @param defaultMaxSize the size that the images should be scaled to when
-	 * displayed
 	 */
-	public ProfileImageLoader(File cacheDir, int defaultMaxSize) {
+	public ProfileImageLoader(File cacheDir) {
+		this(cacheDir, 4);
+	}
+
+	/**
+	 * Creates a profile image loader.
+	 * @param cacheDir the directory where the images are cached
+	 * @param numThreads the number of threads to add to the thread pool
+	 */
+	public ProfileImageLoader(File cacheDir, int numThreads) {
 		this.cacheDir = cacheDir;
-		this.defaultMaxSize = defaultMaxSize;
-	}
 
-	/**
-	 * Loads a collection of profile images.
-	 * @param imageLabels the images to load (key = player name, value = the
-	 * label to insert the image into)
-	 */
-	public void load(Map<String, JLabel> imageLabels) {
-		load(imageLabels, defaultMaxSize);
-	}
-
-	/**
-	 * Loads a collection of profile images.
-	 * @param imageLabels the images to load (key = player name, value = the
-	 * label to insert the image into)
-	 * @param maxSize the size that the images should be scaled to when
-	 * displayed
-	 */
-	public void load(Map<String, JLabel> imageLabels, int maxSize) {
-		int numThreads = 4;
-		Iterator<Map.Entry<String, JLabel>> it = imageLabels.entrySet().iterator();
-		threads.clear();
+		//initialize the thread pool
 		for (int i = 0; i < numThreads; i++) {
-			LoadThread t = new LoadThread(it, maxSize);
-			threads.add(t);
+			LoadThread t = new LoadThread();
+			t.setDaemon(true); //terminate the thread if the program is exited
 			t.start();
 		}
 	}
 
 	/**
-	 * Cancels the current download operation.
-	 */
-	public void cancel() {
-		for (LoadThread t : threads) {
-			t.interrupt();
-		}
-	}
-
-	private class LoadThread extends Thread {
-		private final Iterator<Map.Entry<String, JLabel>> imageLabels;
-		private final int maxSize;
-
-		public LoadThread(Iterator<Map.Entry<String, JLabel>> imageLabels, int maxSize) {
-			this.imageLabels = imageLabels;
-			this.maxSize = maxSize;
-		}
-
-		private Map.Entry<String, JLabel> nextImage() {
-			synchronized (imageLabels) {
-				return imageLabels.hasNext() ? imageLabels.next() : null;
-			}
-		}
-
-		@Override
-		public void run() {
-			Map.Entry<String, JLabel> entry;
-			while (!Thread.interrupted() && (entry = nextImage()) != null) {
-				String playerName = entry.getKey();
-				JLabel label = entry.getValue();
-
-				try {
-					ImageIcon image = getProfileImage(playerName);
-					if (image != null) {
-						image = scale(image, maxSize);
-						if (!Thread.interrupted()) {
-							label.setIcon(image);
-							label.setHorizontalAlignment(SwingConstants.CENTER);
-							label.setVerticalAlignment(SwingConstants.TOP);
-							label.validate();
-						}
-					}
-				} catch (IOException e) {
-					logger.log(Level.SEVERE, "Problem loading profile image.", e);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Gets the profile image for a player.
-	 * @param playerName the player
-	 * @return the profile image or null if it couldn't be found (i.e. the
-	 * player's profile is not public)
-	 * @throws IOException
-	 */
-	public ImageIcon getProfileImage(String playerName) throws IOException {
-		File cacheLocaton = new File(cacheDir, playerName);
-		byte data[];
-		if (downloaded.contains(playerName.toLowerCase())) {
-			//we already checked for an updated version of the image, so read from cache and don't check again
-			data = cacheLocaton.exists() ? FileUtils.readFileToByteArray(cacheLocaton) : null;
-		} else {
-			//download/update the image
-			data = download(playerName, cacheLocaton);
-			downloaded.add(playerName.toLowerCase());
-		}
-		return (data == null) ? null : new ImageIcon(data);
-	}
-
-	/**
-	 * Downloads the profile image of a player.
+	 * Loads a profile image, queuing it for download if necessary.
 	 * @param playerName the player name
-	 * @param cachedFile the location of the cached image
-	 * @return the image data
+	 * @param label the label to insert the image into
+	 * @param maxSize the size to scale the image to
+	 */
+	public void load(String playerName, JLabel label, int maxSize) {
+		if (downloaded.contains(playerName.toLowerCase())) {
+			//it was already downloaded, so read the image from the cache
+			try {
+				byte[] data = loadFromCache(playerName);
+				ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
+				image = scale(image, maxSize);
+				label.setIcon(image);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
+			}
+		} else {
+			//queue the image for download
+			Job job = new Job(playerName, label, maxSize);
+			try {
+				queue.put(job);
+			} catch (InterruptedException e) {
+				//should never be thrown because the queue doesn't have a max size
+				logger.log(Level.SEVERE, "Queue's \"put\" operation was interrupted.", e);
+			}
+		}
+	}
+
+	/**
+	 * Downloads the image and saves it to the cache.
+	 * @param playerName the player name
+	 * @return the image data or null the image could not be fetched (either
+	 * from the Web or from the cache)
 	 * @throws IOException
 	 */
-	private byte[] download(String playerName, File cachedFile) throws IOException {
+	private byte[] fetchImage(String playerName) throws IOException {
 		DefaultHttpClient client = new DefaultHttpClient();
+
+		//get the URL of the user's profile image
+		String imageUrl = scrapeProfileImageUrl(client, playerName);
+
+		//return the cached image if the profile image URL can't be found
+		if (imageUrl == null) {
+			return loadFromCache(playerName);
+		}
+
+		//download image and save to cache
 		HttpEntity entity = null;
+		try {
+			File cachedFile = getCacheFile(playerName);
+
+			HttpGet request = new HttpGet(imageUrl);
+			if (cachedFile.exists()) {
+				DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
+				df.setTimeZone(TimeZone.getTimeZone("GMT"));
+				request.addHeader("If-Modified-Since", df.format(new Date(cachedFile.lastModified())) + " GMT");
+			}
+
+			HttpResponse response = client.execute(request);
+			if (response.getStatusLine().getStatusCode() == 304) {
+				//"not modified" response
+				return loadFromCache(cachedFile);
+			}
+
+			entity = response.getEntity();
+			byte data[] = IOUtils.toByteArray(entity.getContent());
+
+			//save to cache
+			//synchronize in-case two threads download the same profile image and try to save it at the same time 
+			synchronized (this) {
+				FileUtils.writeByteArrayToFile(cachedFile, data);
+			}
+
+			return data;
+		} finally {
+			if (entity != null) {
+				EntityUtils.consume(entity);
+			}
+		}
+	}
+
+	/**
+	 * Loads a profile image from the cache.
+	 * @param playerName the player name
+	 * @return the image data or null if not found
+	 * @throws IOException
+	 */
+	private byte[] loadFromCache(String playerName) throws IOException {
+		File cacheLocation = getCacheFile(playerName);
+		return loadFromCache(cacheLocation);
+	}
+
+	/**
+	 * Loads a profile image from the cache.
+	 * @param file the cached image
+	 * @return the image data or null if the file doesn't exist
+	 * @throws IOException
+	 */
+	private byte[] loadFromCache(File file) throws IOException {
+		return file.exists() ? FileUtils.readFileToByteArray(file) : null;
+	}
+
+	/**
+	 * Gets the path to a player's cached profile image.
+	 * @param playerName the player name
+	 * @return the path to the cached file (the file may or may not exist)
+	 */
+	private File getCacheFile(String playerName) {
+		return new File(cacheDir, playerName.toLowerCase());
+	}
+
+	/**
+	 * Scrapes a player's profile image URL from their profile page.
+	 * @param client the HTTP client
+	 * @param playerName the player name
+	 * @return the URL or null if not found
+	 * @throws IOException
+	 */
+	private String scrapeProfileImageUrl(DefaultHttpClient client, String playerName) throws IOException {
+		//load the user's profile page
 		Document profilePage;
+		HttpEntity entity = null;
 		try {
 			HttpPost request = new HttpPost("http://empireminecraft.com/members/");
 			List<BasicNameValuePair> parameters = Arrays.asList(new BasicNameValuePair("username", playerName));
@@ -176,44 +204,20 @@ public class ProfileImageLoader {
 				EntityUtils.consume(entity);
 			}
 		}
-		entity = null;
 
-		String imageUrl = null;
+		//get the image URL
 		Elements elements = profilePage.select(".avatarScaler img");
 		if (!elements.isEmpty()) { //players can choose to make their profile private
 			String src = elements.first().attr("src");
 			if (!src.isEmpty()) {
-				imageUrl = "http://empireminecraft.com/" + src;
+				if (src.startsWith("http")) {
+					return src;
+				} else {
+					return "http://empireminecraft.com/" + src;
+				}
 			}
 		}
-		if (imageUrl == null) {
-			return cachedFile.exists() ? FileUtils.readFileToByteArray(cachedFile) : null;
-		}
-
-		try {
-			HttpGet request = new HttpGet(imageUrl);
-			if (cachedFile.exists()) {
-				DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
-				df.setTimeZone(TimeZone.getTimeZone("GMT"));
-				request.addHeader("If-Modified-Since", df.format(new Date(cachedFile.lastModified())) + " GMT");
-			}
-
-			HttpResponse response = client.execute(request);
-			if (response.getStatusLine().getStatusCode() == 304) {
-				//"not modified" response
-				return FileUtils.readFileToByteArray(cachedFile);
-			}
-			byte data[] = IOUtils.toByteArray(response.getEntity().getContent());
-
-			//save to cache
-			FileUtils.writeByteArrayToFile(cachedFile, data);
-
-			return data;
-		} finally {
-			if (entity != null) {
-				EntityUtils.consume(entity);
-			}
-		}
+		return null;
 	}
 
 	/**
@@ -242,5 +246,51 @@ public class ProfileImageLoader {
 		}
 
 		return new ImageIcon(image.getImage().getScaledInstance(scaledWidth, scaledHeight, java.awt.Image.SCALE_SMOOTH));
+	}
+
+	/**
+	 * Monitors the job queue for new images to download
+	 */
+	private class LoadThread extends Thread {
+		@Override
+		public void run() {
+			while (true) {
+				//get the next job
+				Job job;
+				try {
+					job = queue.take();
+				} catch (InterruptedException e1) {
+					break;
+				}
+
+				try {
+					byte[] data = fetchImage(job.playerName);
+					if (job.label.isDisplayable()) { //check to see if the JLabel no longer exists (not sure if this is what the method does)
+						ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
+						image = scale(image, job.maxSize);
+						job.label.setIcon(image);
+					}
+				} catch (IOException e) {
+					logger.log(Level.SEVERE, "Problem downloading profile image.", e);
+				} finally {
+					downloaded.add(job.playerName.toLowerCase());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Represents a queued download request for a profile image.
+	 */
+	private class Job {
+		final String playerName;
+		final JLabel label;
+		final int maxSize;
+
+		Job(String playerName, JLabel label, int maxSize) {
+			this.playerName = playerName;
+			this.label = label;
+			this.maxSize = maxSize;
+		}
 	}
 }

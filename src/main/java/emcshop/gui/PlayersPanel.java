@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.db.ItemGroup;
@@ -113,15 +114,17 @@ public class PlayersPanel extends JPanel {
 		sortData(displayedPlayers, displayedItems);
 
 		//display data
-		Map<String, JLabel> images = new HashMap<String, JLabel>();
 		removeAll();
 		DateFormat df = new SimpleDateFormat("MMMM dd yyyy, HH:mm");
+		final int profileImageSize = 64;
 		for (PlayerGroup playerGroup : displayedPlayers) {
 			Player player = playerGroup.getPlayer();
 
 			JLabel profileImage = new JLabel();
-			images.put(player.getName(), profileImage);
-			add(profileImage, "w 64!, h 64!");
+			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
+			profileImage.setVerticalAlignment(SwingConstants.TOP);
+			add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!");
+			profileImageLoader.load(player.getName(), profileImage, profileImageSize);
 
 			//@formatter:off
 			String header =
@@ -156,8 +159,6 @@ public class PlayersPanel extends JPanel {
 			add(netAmount, "align right, span 2, wrap");
 		}
 		validate();
-
-		profileImageLoader.load(images);
 	}
 
 	private List<PlayerGroup> filterPlayers() {

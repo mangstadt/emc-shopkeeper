@@ -52,6 +52,10 @@ public class ImageManager {
 		return getImageIcon("clear.png");
 	}
 
+	public static ImageIcon getUnknown() {
+		return getImageIcon("unknown.png");
+	}
+
 	public static ImageIcon getItemImage(String item) {
 		ImageIcon image = itemImages.get(item);
 		if (image == null) {
