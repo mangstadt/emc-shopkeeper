@@ -192,6 +192,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								} catch (IOException e) {
 									logger.log(Level.SEVERE, "An error occurred saving the settings.", e);
 								}
+								if (settings.isPersistSession()) {
+									owner.clearSession.setEnabled(true);
+								}
 
 								puller = new TransactionPuller(session);
 								if (latestTransactionDate != null) {

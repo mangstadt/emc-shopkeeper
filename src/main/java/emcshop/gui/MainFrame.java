@@ -77,6 +77,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private JButton showItems;
 	private JButton showPlayers;
 	private JPanel tablePanel;
+	JMenuItem clearSession;
 	private PaymentsPanel paymentsPanel;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -172,7 +173,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 			tools.add(logLevel);
 
-			JMenuItem clearSession = new JMenuItem("Clear Saved Session");
+			clearSession = new JMenuItem("Clear Saved Session");
 			clearSession.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
@@ -182,9 +183,11 @@ public class MainFrame extends JFrame implements WindowListener {
 					} catch (IOException e) {
 						logger.log(Level.SEVERE, "Problem saving settings file.", e);
 					}
+					clearSession.setEnabled(false);
 					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
 				}
 			});
+			clearSession.setEnabled(settings.getSession() != null);
 			tools.add(clearSession);
 
 			tools.addSeparator();
@@ -276,6 +279,10 @@ public class MainFrame extends JFrame implements WindowListener {
 						settings.save();
 					} catch (IOException e) {
 						logger.log(Level.SEVERE, "Problem saving settings file.", e);
+					}
+
+					if (settings.isPersistSession()) {
+						clearSession.setEnabled(true);
 					}
 				}
 
