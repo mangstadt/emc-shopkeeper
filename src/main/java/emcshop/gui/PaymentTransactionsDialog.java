@@ -2,10 +2,11 @@ package emcshop.gui;
 
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,19 +14,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
+import ch.rakudave.suggest.JSuggestField;
+import ch.rakudave.suggest.matcher.StartsWithMatcher;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.db.DbDao;
+import emcshop.gui.images.ImageManager;
 
 /**
  * Displays the pending payment transactions.
@@ -36,16 +43,7 @@ public class PaymentTransactionsDialog extends JDialog {
 	private PaymentTransactionsDialog(Window owner, final DbDao dao) throws SQLException {
 		super(owner, "Payment Transactions");
 		setModalityType(ModalityType.DOCUMENT_MODAL); //go on top of all windows
-
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-		//close when escape is pressed
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		//@formatter:off
 		JLabel description = new JLabel(
@@ -61,7 +59,8 @@ public class PaymentTransactionsDialog extends JDialog {
 		//@formatter:on
 
 		List<PaymentTransaction> pendingPayments = dao.getPendingPaymentTransactions();
-		final PaymentsPanel panel = new PaymentsPanel(pendingPayments);
+		List<String> itemNames = dao.getItemNames();
+		final PaymentsPanel panel = new PaymentsPanel(pendingPayments, new Vector<String>(itemNames));
 
 		JButton save = new JButton("Save");
 		save.addActionListener(new ActionListener() {
@@ -114,12 +113,12 @@ public class PaymentTransactionsDialog extends JDialog {
 	private class PaymentsPanel extends JPanel {
 		final List<RowGroup> rowGroups;
 
-		PaymentsPanel(List<PaymentTransaction> transactions) {
+		PaymentsPanel(List<PaymentTransaction> transactions, Vector<String> itemNames) {
 			setLayout(new MigLayout("insets 0"));
 
 			rowGroups = new ArrayList<RowGroup>(transactions.size());
 			for (PaymentTransaction transaction : transactions) {
-				rowGroups.add(new RowGroup(transaction));
+				rowGroups.add(new RowGroup(transaction, itemNames));
 			}
 
 			for (RowGroup group : rowGroups) {
@@ -184,12 +183,13 @@ public class PaymentTransactionsDialog extends JDialog {
 		JLabel description;
 		JButton ignore, assign;
 		JPanel assignPanel, innerAssignPanel;
-		JTextField item, quantity;
+		JTextField quantity;
+		ItemSuggestField item;
 		DateFormat df = new SimpleDateFormat("MMM dd yyyy @ HH:mm");
 		boolean ignoreTransaction = false;
 		boolean assignTransaction = false;
 
-		RowGroup(PaymentTransaction transaction) {
+		RowGroup(PaymentTransaction transaction, Vector<String> itemNames) {
 			this.transaction = transaction;
 
 			description = new JLabel();
@@ -220,7 +220,8 @@ public class PaymentTransactionsDialog extends JDialog {
 				}
 			});
 
-			item = new JTextField(); //TODO auto-complete
+			item = new ItemSuggestField(itemNames);
+			item.setSuggestMatcher(new StartsWithMatcher());
 			quantity = new JTextField(); //TODO validate
 
 			assignPanel = new JPanel(new MigLayout("insets 0"));
@@ -254,12 +255,35 @@ public class PaymentTransactionsDialog extends JDialog {
 		void assign(boolean assign) {
 			if (assign) {
 				this.assign.setText("Cancel");
+				item.setText("");
+				quantity.setText("");
 				assignPanel.add(innerAssignPanel);
 			} else {
 				this.assign.setText("Assign");
 				assignPanel.remove(innerAssignPanel);
 			}
 			assignPanel.validate();
+		}
+	}
+
+	private class ItemSuggestField extends JSuggestField {
+		private Color selectedColor = new Color(192, 192, 192);
+
+		public ItemSuggestField(Vector<String> data) {
+			super(PaymentTransactionsDialog.this, data);
+			setListCellRenderer(new ListCellRenderer() {
+				@Override
+				public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+					String item = (String) value;
+					ImageIcon image = ImageManager.getItemImage(item);
+					JLabel label = new JLabel(item, image, SwingConstants.LEFT);
+					if (isSelected) {
+						label.setOpaque(true);
+						label.setBackground(selectedColor);
+					}
+					return label;
+				}
+			});
 		}
 	}
 

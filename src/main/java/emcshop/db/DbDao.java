@@ -58,6 +58,13 @@ public interface DbDao {
 	Integer getItemId(String name) throws SQLException;
 
 	/**
+	 * Gets the names of all items in the database sorted alphabetically.
+	 * @return all item names
+	 * @throws SQLException
+	 */
+	List<String> getItemNames() throws SQLException;
+
+	/**
 	 * Inserts an item.
 	 * @param name the item name
 	 * @return the ID of the inserted item

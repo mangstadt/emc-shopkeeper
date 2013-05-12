@@ -225,6 +225,22 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
+	public List<String> getItemNames() throws SQLException {
+		PreparedStatement stmt = null;
+
+		try {
+			stmt = conn.prepareStatement("SELECT name FROM items ORDER BY Lower(name)");
+			ResultSet rs = stmt.executeQuery();
+			List<String> names = new ArrayList<String>();
+			while (rs.next()) {
+				names.add(rs.getString("name"));
+			}
+			return names;
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
 	@Override
 	public int insertItem(String name) throws SQLException {
 		InsertStatement stmt = new InsertStatement("items");
