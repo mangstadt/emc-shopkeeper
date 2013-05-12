@@ -260,7 +260,7 @@ public class PaymentTransactionsDialog extends JDialog {
 
 			int amount = transaction.getAmount();
 			String fromTo = (amount < 0) ? "to" : "from";
-			description.setText("<html>" + strikeStart + df.format(transaction.getTs()) + " | Payment " + fromTo + " " + transaction.getPlayer() + ": " + formatRupeesWithColor(amount) + strikeEnd + "</html>");
+			description.setText("<html>" + strikeStart + df.format(transaction.getTs()) + " | Payment " + fromTo + " <b>" + transaction.getPlayer() + "</b>: " + formatRupeesWithColor(amount) + strikeEnd + "</html>");
 		}
 
 		void assign(boolean assign) {
