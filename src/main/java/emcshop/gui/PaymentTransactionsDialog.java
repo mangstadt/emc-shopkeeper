@@ -8,6 +8,8 @@ import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -74,6 +76,15 @@ public class PaymentTransactionsDialog extends JDialog {
 		save.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				boolean error = false;
+				for (RowGroup group : panel.rowGroups) {
+					if (!group.validate()) {
+						error = true;
+					}
+				}
+				if (error) {
+					return;
+				}
 
 				try {
 					Map<PaymentTransaction, ShopTransaction> toAdd = panel.getShopTransactionsToAdd();
@@ -115,7 +126,7 @@ public class PaymentTransactionsDialog extends JDialog {
 		add(save, "split 2, align center");
 		add(cancel);
 
-		setSize(625, 500);
+		setSize(625, 300);
 		setLocationRelativeTo(owner);
 	}
 
@@ -197,6 +208,7 @@ public class PaymentTransactionsDialog extends JDialog {
 		DateFormat df = new SimpleDateFormat("MMM dd yyyy @ HH:mm");
 		boolean ignoreTransaction = false;
 		boolean assignTransaction = false;
+		Color errorColor = new Color(255, 192, 192);
 
 		RowGroup(PaymentTransaction transaction, Vector<String> itemNames) {
 			this.transaction = transaction;
@@ -230,10 +242,33 @@ public class PaymentTransactionsDialog extends JDialog {
 			});
 
 			item = new ItemSuggestField(itemNames);
+			final Color origTextFieldBg = item.getBackground();
+			item.addFocusListener(new FocusListener() {
+				@Override
+				public void focusGained(FocusEvent arg0) {
+					//empty
+				}
+
+				@Override
+				public void focusLost(FocusEvent arg0) {
+					item.setBackground(origTextFieldBg);
+				}
+			});
 
 			quantity = new JNumberTextField();
 			quantity.setFormat(JNumberTextField.NUMERIC);
 			quantity.setAllowNegative(false);
+			quantity.addFocusListener(new FocusListener() {
+				@Override
+				public void focusGained(FocusEvent arg0) {
+					//empty
+				}
+
+				@Override
+				public void focusLost(FocusEvent arg0) {
+					quantity.setBackground(origTextFieldBg);
+				}
+			});
 
 			assignPanel = new JPanel(new MigLayout("insets 0"));
 
@@ -274,6 +309,25 @@ public class PaymentTransactionsDialog extends JDialog {
 				assignPanel.remove(innerAssignPanel);
 			}
 			assignPanel.validate();
+		}
+
+		/**
+		 * Validates the data.
+		 * @return true if the data is valid, false if not
+		 */
+		boolean validate() {
+			boolean valid = true;
+			if (assignTransaction) {
+				if (item.getText().isEmpty()) {
+					item.setBackground(errorColor);
+					valid = false;
+				}
+				if (quantity.getText().isEmpty()) {
+					quantity.setBackground(errorColor);
+					valid = false;
+				}
+			}
+			return valid;
 		}
 	}
 
