@@ -46,7 +46,6 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -100,11 +99,8 @@ public class MainFrame extends JFrame implements WindowListener {
 		layoutWidgets();
 		setSize(settings.getWindowWidth(), settings.getWindowHeight());
 
-		//TODO move outside of class
 		Image appIcon = ImageManager.getAppIcon().getImage();
 		setIconImage(appIcon);
-		ToolTipManager.sharedInstance().setInitialDelay(0);
-		ToolTipManager.sharedInstance().setDismissDelay(30000);
 
 		paymentsPanel.refresh();
 

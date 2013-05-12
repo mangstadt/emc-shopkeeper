@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
+import javax.swing.ToolTipManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -571,6 +572,10 @@ public class Main {
 				AboutDialog.show(frame);
 			}
 		});
+
+		//tweak tooltip settings
+		ToolTipManager.sharedInstance().setInitialDelay(0);
+		ToolTipManager.sharedInstance().setDismissDelay(30000);
 
 		frame = new MainFrame(settings, dao, logManager, profileImageLoader);
 		frame.setVisible(true);
