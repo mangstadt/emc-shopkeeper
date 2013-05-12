@@ -183,7 +183,7 @@ public class PaymentTransactionsDialog extends JDialog {
 		PaymentTransaction transaction;
 		JLabel description;
 		JButton ignore, assign;
-		JPanel assignPanel;
+		JPanel assignPanel, innerAssignPanel;
 		JTextField item, quantity;
 		DateFormat df = new SimpleDateFormat("MMM dd yyyy @ HH:mm");
 		boolean ignoreTransaction = false;
@@ -224,11 +224,12 @@ public class PaymentTransactionsDialog extends JDialog {
 			quantity = new JTextField(); //TODO validate
 
 			assignPanel = new JPanel(new MigLayout("insets 0"));
-			assignPanel.setVisible(false);
-			assignPanel.add(new JLabel("Item"));
-			assignPanel.add(item, "w 150!, wrap");
-			assignPanel.add(new JLabel("Qty"));
-			assignPanel.add(quantity, "w 50!");
+
+			innerAssignPanel = new JPanel(new MigLayout("insets 0"));
+			innerAssignPanel.add(new JLabel("Item"));
+			innerAssignPanel.add(item, "w 150!, wrap");
+			innerAssignPanel.add(new JLabel("Qty"));
+			innerAssignPanel.add(quantity, "w 50!");
 
 			ignore(false);
 			assign(false);
@@ -253,11 +254,12 @@ public class PaymentTransactionsDialog extends JDialog {
 		void assign(boolean assign) {
 			if (assign) {
 				this.assign.setText("Cancel");
-				assignPanel.setVisible(true);
+				assignPanel.add(innerAssignPanel);
 			} else {
 				this.assign.setText("Assign");
-				assignPanel.setVisible(false);
+				assignPanel.remove(innerAssignPanel);
 			}
+			assignPanel.validate();
 		}
 	}
 
