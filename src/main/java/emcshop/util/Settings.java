@@ -21,6 +21,7 @@ public class Settings {
 	private EmcSession session;
 	private boolean persistSession;
 	private Level logLevel;
+	private Integer rupeeBalance;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -90,6 +91,14 @@ public class Settings {
 		this.logLevel = logLevel;
 	}
 
+	public Integer getRupeeBalance() {
+		return rupeeBalance;
+	}
+
+	public void setRupeeBalance(Integer rupeeBalance) {
+		this.rupeeBalance = rupeeBalance;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowWidth = 1000;
@@ -98,6 +107,7 @@ public class Settings {
 		session = null;
 		persistSession = true;
 		logLevel = Level.INFO;
+		rupeeBalance = null;
 	}
 
 	public void load() throws IOException {
@@ -108,8 +118,19 @@ public class Settings {
 			//migrate it
 		}
 
-		windowWidth = props.getInteger("window.width", 1000);
-		windowHeight = props.getInteger("window.height", 600);
+		try {
+			windowWidth = props.getInteger("window.width", 1000);
+		} catch (NumberFormatException e) {
+			logger.log(Level.WARNING, "Problem parsing window.width: ", e);
+			windowWidth = 1000;
+		}
+
+		try {
+			windowHeight = props.getInteger("window.height", 600);
+		} catch (NumberFormatException e) {
+			logger.log(Level.WARNING, "Problem parsing window.height: ", e);
+			windowHeight = 600;
+		}
 		try {
 			lastUpdated = props.getDate("lastUpdated");
 		} catch (ParseException e) {
@@ -143,6 +164,13 @@ public class Settings {
 				logLevel = Level.INFO;
 			}
 		}
+
+		try {
+			rupeeBalance = props.getInteger("rupeeBalance");
+		} catch (NumberFormatException e) {
+			logger.log(Level.WARNING, "Problem parsing rupeeBalance: ", e);
+			rupeeBalance = null;
+		}
 	}
 
 	public void save() throws IOException {
@@ -159,6 +187,7 @@ public class Settings {
 		}
 		props.setBoolean("session.remember", persistSession);
 		props.set("log.level", logLevel.getName());
+		props.setInteger("rupeeBalance", rupeeBalance);
 
 		props.store(file, "EMC Shopkeeper settings");
 	}

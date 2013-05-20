@@ -216,7 +216,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							try {
 								dao.commit();
 								dispose();
-								owner.updateSuccessful(new Date(started), result.getTimeTaken(), result.getTransactionCount(), result.getPageCount(), display.isSelected());
+								owner.updateSuccessful(new Date(started), result.getRupeeBalance(), result.getTimeTaken(), result.getTransactionCount(), result.getPageCount(), display.isSelected());
 							} catch (SQLException e) {
 								dao.rollback();
 								error = e;

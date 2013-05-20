@@ -27,6 +27,7 @@ public class TransactionPuller {
 	private Integer stopAtPage;
 	private int threadCount = 4;
 	private Date latestTransactionDate;
+	private Integer rupeeBalance;
 	private int curPage = 1;
 	private int pageCount, transactionCount;
 	private long started;
@@ -94,6 +95,10 @@ public class TransactionPuller {
 			return Result.notLoggedIn();
 		}
 
+		//get the rupee balance
+		rupeeBalance = firstPage.getRupeeBalance();
+
+		//get the date of the latest transaction
 		latestTransactionDate = firstPage.getFirstTransactionDate();
 
 		//start threads
@@ -119,7 +124,7 @@ public class TransactionPuller {
 			return Result.cancelled();
 		} else {
 			long timeTaken = System.currentTimeMillis() - started;
-			return Result.completed(pageCount, transactionCount, timeTaken);
+			return Result.completed(rupeeBalance, pageCount, transactionCount, timeTaken);
 		}
 	}
 
@@ -261,6 +266,7 @@ public class TransactionPuller {
 		private int pageCount;
 		private int transactionCount;
 		private long timeTaken;
+		private Integer rupeeBalance;
 
 		private Result(State state) {
 			this.state = state;
@@ -286,6 +292,10 @@ public class TransactionPuller {
 			return timeTaken;
 		}
 
+		public Integer getRupeeBalance() {
+			return rupeeBalance;
+		}
+
 		public static Result cancelled() {
 			return new Result(State.CANCELLED);
 		}
@@ -300,8 +310,9 @@ public class TransactionPuller {
 			return result;
 		}
 
-		public static Result completed(int pageCount, int transactionCount, long timeTaken) {
+		public static Result completed(Integer rupeeBalance, int pageCount, int transactionCount, long timeTaken) {
 			Result result = new Result(State.COMPLETED);
+			result.rupeeBalance = rupeeBalance;
 			result.pageCount = pageCount;
 			result.transactionCount = transactionCount;
 			result.timeTaken = timeTaken;

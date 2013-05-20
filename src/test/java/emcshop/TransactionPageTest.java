@@ -27,6 +27,7 @@ public class TransactionPageTest {
 
 		assertTrue(page.isLoggedIn());
 		assertEquals(new Date(1354210000000L), page.getFirstTransactionDate());
+		assertEquals(Integer.valueOf(214308), page.getRupeeBalance());
 
 		{
 			Iterator<ShopTransaction> it = page.getShopTransactions().iterator();
@@ -85,6 +86,7 @@ public class TransactionPageTest {
 
 		assertFalse(page.isLoggedIn());
 		assertNull(page.getFirstTransactionDate());
+		assertNull(page.getRupeeBalance());
 		assertTrue(page.getShopTransactions().isEmpty());
 	}
 }

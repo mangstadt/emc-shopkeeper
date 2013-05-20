@@ -28,6 +28,8 @@ public class TransactionPage {
 	private static final Pattern paymentFromRegex = Pattern.compile("^Payment from (.*)$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern paymentToRegex = Pattern.compile("^Payment to (.*)$", Pattern.CASE_INSENSITIVE);
 
+	private static final Pattern balanceRegex = Pattern.compile("^Your balance: ([\\d,]+)$", Pattern.CASE_INSENSITIVE);
+
 	private final DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa");
 	private final Document document;
 
@@ -66,6 +68,24 @@ public class TransactionPage {
 			return null;
 		}
 		return parseTs(element);
+	}
+
+	/**
+	 * Gets the player's total rupee balance.
+	 * @return the total rupee balance or null if not found
+	 */
+	public Integer getRupeeBalance() {
+		Element element = document.getElementById("rupeesBalance");
+		if (element == null) {
+			return null;
+		}
+
+		Matcher m = balanceRegex.matcher(element.text());
+		if (!m.find()) {
+			return null;
+		}
+
+		return Integer.valueOf(m.group(1).replace(",", ""));
 	}
 
 	/**

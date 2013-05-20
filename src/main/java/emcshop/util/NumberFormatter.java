@@ -15,8 +15,19 @@ public class NumberFormatter {
 	 * @return the quantity string (e.g. "+1,210")
 	 */
 	public static String formatQuantity(int quantity) {
+		return formatQuantity(quantity, true);
+	}
+
+	/**
+	 * Formats a quantity as a string.
+	 * @param quantity the quantity
+	 * @param addPlus true to prepend a "+" character to positive values, false
+	 * not to
+	 * @return the quantity string (e.g. "+1,210")
+	 */
+	public static String formatQuantity(int quantity, boolean addPlus) {
 		String quantityStr = nf.format(quantity);
-		if (quantity > 0) {
+		if (quantity > 0 && addPlus) {
 			quantityStr = "+" + quantityStr;
 		}
 		return quantityStr;
@@ -28,7 +39,18 @@ public class NumberFormatter {
 	 * @return the rupee string (e.g. "+1,210r")
 	 */
 	public static String formatRupees(int rupees) {
-		return formatQuantity(rupees) + "r";
+		return formatRupees(rupees, true);
+	}
+
+	/**
+	 * Formats a rupee amount as a string.
+	 * @param rupees the amount of rupees
+	 * @param addPlus true to prepend a "+" character to positive values, false
+	 * not to
+	 * @return the rupee string (e.g. "+1,210r")
+	 */
+	public static String formatRupees(int rupees, boolean addPlus) {
+		return formatQuantity(rupees, addPlus) + "r";
 	}
 
 	/**

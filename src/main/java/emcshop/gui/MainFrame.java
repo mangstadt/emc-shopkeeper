@@ -5,7 +5,6 @@ import static emcshop.util.NumberFormatter.formatQuantity;
 import static emcshop.util.NumberFormatter.formatRupees;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -64,6 +63,7 @@ import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
 import emcshop.util.BBCodeBuilder;
+import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
@@ -72,6 +72,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
 	private JButton update;
 	private JLabel lastUpdateDate;
+	private JLabel rupeeBalance;
 	private DatePicker toDatePicker;
 	private DatePicker fromDatePicker;
 	private JButton showItems;
@@ -207,12 +208,14 @@ public class MainFrame extends JFrame implements WindowListener {
 								try {
 									dao.wipe();
 									settings.setLastUpdated(null);
+									settings.setRupeeBalance(null);
 									try {
 										settings.save();
 									} catch (IOException e) {
 										logger.log(Level.SEVERE, "Problem saving settings file.", e);
 									}
 									MainFrame.this.lastUpdateDate.setText("-");
+									MainFrame.this.rupeeBalance.setText("-");
 									MainFrame.this.tablePanel.removeAll();
 									MainFrame.this.tablePanel.validate();
 									MainFrame.this.paymentsPanel.refresh();
@@ -300,6 +303,10 @@ public class MainFrame extends JFrame implements WindowListener {
 		lastUpdateDate = new JLabel();
 		Date date = settings.getLastUpdated();
 		lastUpdateDate.setText((date == null) ? "-" : df.format(date));
+
+		rupeeBalance = new JLabel();
+		Integer balance = settings.getRupeeBalance();
+		rupeeBalance.setText((balance == null) ? "-" : NumberFormatter.formatRupees(balance, false));
 
 		fromDatePicker = new DatePicker();
 		fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
@@ -578,7 +585,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		loading.setVisible(true);
 	}
 
-	void updateSuccessful(Date started, long time, int transactionCount, int pageCount, boolean showResults) {
+	void updateSuccessful(Date started, Integer rupeeTotal, long time, int transactionCount, int pageCount, boolean showResults) {
 		long components[] = TimeUtils.parseTimeComponents(time);
 		String message;
 		if (transactionCount == 0) {
@@ -607,12 +614,15 @@ public class MainFrame extends JFrame implements WindowListener {
 		JOptionPane.showMessageDialog(this, message, "Update complete", JOptionPane.INFORMATION_MESSAGE);
 
 		settings.setLastUpdated(started);
+		settings.setRupeeBalance(rupeeTotal);
 		try {
 			settings.save();
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Problem writing to settings file.", e);
 		}
+
 		lastUpdateDate.setText(df.format(started));
+		rupeeBalance.setText((rupeeTotal == null) ? "-" : NumberFormatter.formatRupees(rupeeTotal, false));
 	}
 
 	private void layoutWidgets() {
@@ -626,9 +636,11 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		p.add(update, "align center, wrap");
 
-		JPanel p2 = new JPanel(new FlowLayout());
-		p2.add(new JLabel("Last updated:"));
-		p2.add(lastUpdateDate);
+		JPanel p2 = new JPanel(new MigLayout());
+		p2.add(new JLabel("Last updated:"), "align right");
+		p2.add(lastUpdateDate, "wrap");
+		p2.add(new JLabel("Rupee balance:"), "align right");
+		p2.add(rupeeBalance);
 		p.add(p2, "wrap");
 
 		p.add(new JSeparator(), "w 200!, align center, wrap");

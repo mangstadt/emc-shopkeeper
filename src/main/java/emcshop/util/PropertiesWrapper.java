@@ -52,6 +52,10 @@ public class PropertiesWrapper {
 		properties.remove(key);
 	}
 
+	public Integer getInteger(String key) {
+		return getInteger(key, null);
+	}
+
 	public Integer getInteger(String key, Integer defaultValue) {
 		String value = get(key);
 		if (value == null) {
