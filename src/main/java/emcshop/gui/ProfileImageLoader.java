@@ -107,18 +107,17 @@ public class ProfileImageLoader {
 	private byte[] fetchImage(String playerName) throws IOException {
 		DefaultHttpClient client = new DefaultHttpClient();
 
-		//get the URL of the user's profile image
-		String imageUrl = scrapeProfileImageUrl(client, playerName);
-
-		//return the cached image if the profile image URL can't be found
-		if (imageUrl == null) {
-			return loadFromCache(playerName);
-		}
-
 		//download image and save to cache
 		HttpEntity entity = null;
+		File cachedFile = getCacheFile(playerName);
 		try {
-			File cachedFile = getCacheFile(playerName);
+			//get the URL of the user's profile image
+			String imageUrl = scrapeProfileImageUrl(client, playerName);
+
+			//return the cached image if the profile image URL can't be found
+			if (imageUrl == null) {
+				return loadFromCache(playerName);
+			}
 
 			HttpGet request = new HttpGet(imageUrl);
 			if (cachedFile.exists()) {
@@ -143,6 +142,9 @@ public class ProfileImageLoader {
 			}
 
 			return data;
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Problem downloading profile image.  Attempting to retrieve from cache.", e);
+			return loadFromCache(cachedFile);
 		} finally {
 			if (entity != null) {
 				EntityUtils.consume(entity);
@@ -263,18 +265,18 @@ public class ProfileImageLoader {
 					break;
 				}
 
+				byte[] data = null;
 				try {
-					byte[] data = fetchImage(job.playerName);
-					if (job.label.isDisplayable()) { //check to see if the JLabel no longer exists (not sure if this is what the method does)
-						ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
-						image = scale(image, job.maxSize);
-						job.label.setIcon(image);
-					}
+					data = fetchImage(job.playerName);
 				} catch (IOException e) {
-					logger.log(Level.SEVERE, "Problem downloading profile image.", e);
-				} finally {
-					downloaded.add(job.playerName.toLowerCase());
+					//image could not be fetched, either from the Internet or from cache
 				}
+
+				downloaded.add(job.playerName.toLowerCase());
+
+				ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
+				image = scale(image, job.maxSize);
+				job.label.setIcon(image);
 			}
 		}
 	}
