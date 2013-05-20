@@ -111,9 +111,11 @@ public class MainFrame extends JFrame implements WindowListener {
 	private void createMenu() {
 		//http://docs.oracle.com/javase/tutorial/uiswing/components/menu.html
 
+		boolean mac = MacSupport.isMac();
+
 		JMenuBar menuBar = new JMenuBar();
 
-		if (!MacSupport.isMac()) {
+		if (!mac) {
 			JMenu file = new JMenu("File");
 
 			JMenuItem exit = new JMenuItem("Exit");
@@ -243,7 +245,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			});
 			help.add(changelog);
 
-			if (!MacSupport.isMac()) {
+			if (!mac) {
 				JMenuItem about = new JMenuItem("About");
 				about.addActionListener(new ActionListener() {
 					@Override
