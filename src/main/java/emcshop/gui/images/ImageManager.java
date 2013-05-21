@@ -56,6 +56,10 @@ public class ImageManager {
 		return getImageIcon("unknown.png");
 	}
 
+	public static ImageIcon getEmcLogo() {
+		return getImageIcon("emc-logo.png");
+	}
+
 	public static ImageIcon getItemImage(String item) {
 		ImageIcon image = itemImages.get(item);
 		if (image == null) {

@@ -659,7 +659,10 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		p.add(new JSeparator(), "w 200!, align center, wrap");
 
-		p.add(paymentsPanel, "align center");
+		p.add(paymentsPanel, "align center, wrap");
+
+		ClickableLabel emcLogo = new ClickableLabel(ImageManager.getEmcLogo(), "http://empire.us");
+		p.add(emcLogo, "align center");
 
 		return p;
 	}
@@ -911,7 +914,9 @@ public class MainFrame extends JFrame implements WindowListener {
 						}
 					}
 				});
-				add(review, "align center");
+				add(review, "align center, wrap");
+
+				add(new JSeparator(), "w 200!, align center");
 
 				validate();
 				setVisible(true);
