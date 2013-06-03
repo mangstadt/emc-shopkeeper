@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,7 +29,7 @@ public class TransactionPuller {
 	private int threadCount = 4;
 	private Date latestTransactionDate;
 	private Integer rupeeBalance;
-	private int curPage = 1;
+	private AtomicInteger curPage;
 	private int pageCount, transactionCount;
 	private long started;
 	private Throwable thrown = null;
@@ -39,6 +40,7 @@ public class TransactionPuller {
 	 */
 	public TransactionPuller(EmcSession session) {
 		loginCookies = session.getCookiesMap();
+		setStartAtPage(1);
 	}
 
 	/**
@@ -64,7 +66,7 @@ public class TransactionPuller {
 	 * @param page the page number to start on
 	 */
 	public void setStartAtPage(int page) {
-		this.curPage = page;
+		curPage = new AtomicInteger(page);
 	}
 
 	/**
@@ -135,10 +137,6 @@ public class TransactionPuller {
 		cancel = true;
 	}
 
-	private synchronized int nextPage() {
-		return curPage++;
-	}
-
 	protected TransactionPage getPage(int page) throws IOException {
 		/*
 		 * Note: The HttpClient library is used here because using
@@ -188,7 +186,7 @@ public class TransactionPuller {
 			try {
 				boolean quit = false;
 				while (!cancel && !quit) {
-					int page = nextPage();
+					int page = curPage.getAndIncrement();
 
 					if (stopAtPage != null && page > stopAtPage) {
 						break;
