@@ -324,6 +324,9 @@ public class MainFrame extends JFrame implements WindowListener {
 		showItems.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				if (!checkDateRange()) {
+					return;
+				}
 				showTransactions(fromDatePicker.getDate(), toDatePicker.getDate(), false);
 			}
 		});
@@ -332,11 +335,24 @@ public class MainFrame extends JFrame implements WindowListener {
 		showPlayers.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				if (!checkDateRange()) {
+					return;
+				}
 				showPlayers(fromDatePicker.getDate(), toDatePicker.getDate());
 			}
 		});
 
 		paymentsPanel = new PaymentsPanel();
+	}
+
+	private boolean checkDateRange() {
+		Date from = fromDatePicker.getDate();
+		Date to = toDatePicker.getDate();
+		if (from.compareTo(to) > 0) {
+			JOptionPane.showMessageDialog(MainFrame.this, "Invalid date range: \"Start\" date must come before \"End\" date.", "Invalid date range", JOptionPane.INFORMATION_MESSAGE);
+			return false;
+		}
+		return true;
 	}
 
 	private void showTransactions(final Date from, final Date to, final boolean afterUpdate) {
