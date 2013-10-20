@@ -110,6 +110,26 @@
 					</descriptorRefs>
 				</configuration>
 			</plugin>
+	
+			<!--
+			Add Web Start attributes to the manifest
+			see: http://docs.oracle.com/javase/tutorial/deployment/jar/secman.html
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Permissions>all-permissions</Permissions> <!-- required -->
+							<Codebase>*.github.com/mangstadt/emc-shopkeeper</Codebase>
+							<Application-Library-Allowable-Codebase>*.github.com/mangstadt/emc-shopkeeper</Application-Library-Allowable-Codebase>
+							<Application-Name>${project.name}</Application-Name>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
 			
 			<!-- Copy the project's dependencies into a folder -->
 			<plugin>
