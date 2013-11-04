@@ -123,8 +123,6 @@
 					<archive>
 						<manifestEntries>
 							<Permissions>all-permissions</Permissions> <!-- required -->
-							<Codebase>*.github.com/mangstadt/emc-shopkeeper</Codebase>
-							<Application-Library-Allowable-Codebase>*.github.com/mangstadt/emc-shopkeeper</Application-Library-Allowable-Codebase>
 							<Application-Name>${project.name}</Application-Name>
 						</manifestEntries>
 					</archive>
