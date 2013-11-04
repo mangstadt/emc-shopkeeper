@@ -128,13 +128,7 @@ public abstract class DirbyDbDao implements DbDao {
 					}
 					throw new SQLException("Error executing SQL statement during schema update: " + sql, e);
 				} finally {
-					if (statement != null) {
-						try {
-							statement.close();
-						} catch (SQLException e) {
-							//ignore
-						}
-					}
+					closeStatements(statement);
 				}
 				commit();
 			}
