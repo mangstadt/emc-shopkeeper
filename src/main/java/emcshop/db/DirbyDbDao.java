@@ -674,6 +674,7 @@ public abstract class DirbyDbDao implements DbDao {
 		conn.createStatement().execute("DELETE FROM transactions");
 		conn.createStatement().execute("DELETE FROM players");
 		conn.createStatement().execute("DELETE FROM items");
+		conn.createStatement().execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
 		conn.createStatement().execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
 		conn.createStatement().execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");
 		conn.createStatement().execute("ALTER TABLE items ALTER COLUMN id RESTART WITH 1");
