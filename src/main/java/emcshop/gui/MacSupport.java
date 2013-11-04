@@ -101,8 +101,12 @@ public class MacSupport {
 	 * @return true if the application is running on a Mac, false if not
 	 */
 	public static boolean isMac() {
-		String osName = System.getProperty("os.name").toLowerCase();
-		return osName.startsWith("mac os x");
+		try {
+			Class.forName("com.apple.eawt.Application");
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 
 	/**
