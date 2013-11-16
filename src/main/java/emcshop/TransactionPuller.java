@@ -233,7 +233,7 @@ public class TransactionPuller {
 						}
 					}
 
-					synchronized (this) {
+					synchronized (TransactionPuller.this) {
 						pageCount++;
 						transactionCount += transactions.size() + paymentTransactions.size();
 					}
