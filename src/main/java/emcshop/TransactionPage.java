@@ -31,6 +31,8 @@ public class TransactionPage {
 
 	private static final Pattern balanceRegex = Pattern.compile("^Your balance: ([\\d,]+)$", Pattern.CASE_INSENSITIVE);
 
+	private static final PotionDirectory potions = PotionDirectory.create();
+
 	private final DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
 	private final Document document;
 
@@ -137,13 +139,13 @@ public class TransactionPage {
 			Matcher m = soldRegex.matcher(description);
 			if (m.find()) {
 				transaction.setQuantity(-Integer.parseInt(m.group(1).replace(",", "")));
-				transaction.setItem(m.group(2));
+				transaction.setItem(sanitizeItemName(m.group(2)));
 				transaction.setPlayer(m.group(3));
 			} else {
 				m = boughtRegex.matcher(description);
 				if (m.find()) {
 					transaction.setQuantity(Integer.parseInt(m.group(1).replace(",", "")));
-					transaction.setItem(m.group(2));
+					transaction.setItem(sanitizeItemName(m.group(2)));
 					transaction.setPlayer(m.group(3));
 				} else {
 					//not a shop transaction
@@ -162,6 +164,20 @@ public class TransactionPage {
 		transaction.setBalance(parseBalance(element));
 
 		return transaction;
+	}
+
+	private String sanitizeItemName(String name) {
+		//apply human-readable potion names
+		//e.g. converts "Potion:8193" to "Potion of Regeneration"
+		if (name.startsWith("Potion:")) {
+			String id = name.split(":", 2)[1];
+			String potionName = potions.getName(id);
+			if (potionName != null) {
+				return potionName;
+			}
+		}
+
+		return name;
 	}
 
 	private PaymentTransaction scrapePaymentElement(Element element) {

@@ -3,6 +3,8 @@ package emcshop.gui.images;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -14,6 +16,7 @@ import javax.swing.UIManager;
  */
 public class ImageManager {
 	private static final Map<String, ImageIcon> itemIconCache = new HashMap<String, ImageIcon>();
+	private static final Pattern potionName = Pattern.compile("^(Splash )?Potion of (.*?)( Extended| II|$)");
 
 	public static Icon getErrorIcon() {
 		//http://stackoverflow.com/questions/1196797/where-are-these-error-and-warning-icons-as-a-java-resource
@@ -66,6 +69,8 @@ public class ImageManager {
 	 * @return the item image or an empty image if none can be found
 	 */
 	public static ImageIcon getItemImage(String item) {
+		item = filterPotionName(item);
+
 		ImageIcon image = itemIconCache.get(item);
 		if (image == null) {
 			String fixedItem = item.toLowerCase().replace(" ", "_");
@@ -78,6 +83,30 @@ public class ImageManager {
 			itemIconCache.put(item, image);
 		}
 		return image;
+	}
+
+	/**
+	 * Re-maps potion names (e.g. changes
+	 * "Splash Potion of Water Breathing Extended" to
+	 * "potion water breathing splash").
+	 * @param item the item name
+	 * @return the appropriate potion name or the original item name if it's not
+	 * a potion name
+	 */
+	static String filterPotionName(String item) {
+		Matcher m = potionName.matcher(item);
+		if (!m.find()) {
+			//not a potion name
+			return item;
+		}
+
+		boolean splash = (m.group(1) != null);
+		String potionName = m.group(2);
+		if (splash) {
+			return "potion " + potionName + " splash";
+		} else {
+			return "potion " + potionName;
+		}
 	}
 
 	/**
