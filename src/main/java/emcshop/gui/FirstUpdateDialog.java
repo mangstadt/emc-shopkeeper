@@ -27,7 +27,7 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 	private static final int DEFAULT_STOP_PAGE = 5000;
 	private static final int DEFAULT_PAYMENT_TRANS_AGE = 7;
 
-	private JButton continueButton, cancel;
+	private JButton beginButton, cancel;
 
 	private JNumberTextField stopAt;
 	private JLabel estimate;
@@ -64,8 +64,8 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		super(owner, "First Update", true);
 		setResizable(false);
 
-		continueButton = new JButton("Continue");
-		continueButton.addActionListener(new ActionListener() {
+		beginButton = new JButton("Begin");
+		beginButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				cancelled = false;
@@ -173,15 +173,15 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		JLabel text = new JLabel(
 		"<html><div width=600>" +
 		"<b><u><center>This is the first time you are running an update!!</center></u></b><br>" +
-		"To ensure accurate results, it is recommended that you <font color=red><b>set move perms to false</b></font> on your res.<br><br>" +
+		"<center>To ensure accurate results, it is recommended that you <u><b>set move perms to false</b></u> on your res for the duration of this update:</center><br><br>" +
 		"<center><b><font size=5><code>/res set move false</code></font></b></center><br>" +
-		"<center>Also, the higher the transaction history page number, the longer it takes for the page to load.  You may enter a max number of pages to load.  Pages beyond this one will not be parsed." +
+		"<center>Also note, that the higher a transaction page number is, the longer it takes to load (for example, page 2000 takes much longer to load than page 20).  The updater is configured to stop at a certain page so that this first update doesn't take too long, but you may change this value if you wish (below)." +
 		"</div></html>");
 		//@formatter:on
 
 		setLayout(new MigLayout());
 
-		add(warningIcon, "span 1 5");
+		add(warningIcon, "span 1 4");
 		add(text, "align center, wrap");
 
 		JPanel p = new JPanel(new MigLayout());
@@ -196,10 +196,8 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		p.add(paymentTransactionAgeLabel);
 		add(p, "align center, wrap");
 
-		add(new JLabel("Press \"Continue\" when you are ready."), "align center, wrap");
-
 		p = new JPanel(new FlowLayout());
-		p.add(continueButton);
+		p.add(beginButton);
 		p.add(cancel);
 		add(p, "align center");
 
