@@ -16,7 +16,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
@@ -25,10 +24,19 @@ import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")
 public class FirstUpdateDialog extends JDialog implements WindowListener {
+	private static final int DEFAULT_STOP_PAGE = 5000;
+	private static final int DEFAULT_PAYMENT_TRANS_AGE = 7;
+
 	private JButton continueButton, cancel;
-	private JTextField stopAt;
+
+	private JNumberTextField stopAt;
 	private JLabel estimate;
 	private JCheckBox stopAtCheckBox;
+
+	private JNumberTextField paymentTransactionAge;
+	private JCheckBox paymentTransactionAgeCheckbox;
+	private JLabel paymentTransactionAgeLabel;
+
 	private boolean cancelled;
 
 	public static Result show(JDialog owner) {
@@ -38,14 +46,18 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		Integer stopAtPage = null;
 		Long estimatedTime = null;
 		if (dialog.stopAtCheckBox.isSelected()) {
-			String stopAtStr = dialog.stopAt.getText().trim();
-			if (!stopAtStr.isEmpty()) {
-				stopAtPage = Integer.parseInt(stopAtStr);
+			stopAtPage = dialog.stopAt.getInteger();
+			if (stopAtPage != null) {
 				estimatedTime = dialog.calculateEstimate(stopAtPage);
 			}
 		}
 
-		return new Result(dialog.cancelled, stopAtPage, estimatedTime);
+		Integer oldestPaymentTransactionDays = null;
+		if (dialog.paymentTransactionAgeCheckbox.isSelected()) {
+			oldestPaymentTransactionDays = dialog.paymentTransactionAge.getInteger();
+		}
+
+		return new Result(dialog.cancelled, stopAtPage, estimatedTime, oldestPaymentTransactionDays);
 	}
 
 	public FirstUpdateDialog(JDialog owner) {
@@ -96,9 +108,10 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 				setText(text);
 			}
 		};
-		estimate.setText(calculateEstimateDisplay(5000));
+		estimate.setText(calculateEstimateDisplay(DEFAULT_STOP_PAGE));
 
-		stopAt = new JTextField("5000");
+		stopAt = new JNumberTextField();
+		stopAt.setNumber(DEFAULT_STOP_PAGE);
 		stopAt.addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
 				char c = e.getKeyChar();
@@ -109,11 +122,10 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 
 			@Override
 			public void keyReleased(KeyEvent arg0) {
-				String stopAtStr = stopAt.getText().trim();
-				if (stopAtStr.isEmpty()) {
+				Integer stopAtInt = stopAt.getInteger();
+				if (stopAtInt == null) {
 					estimate.setText("-");
 				} else {
-					int stopAtInt = Integer.parseInt(stopAt.getText().trim());
 					estimate.setText(calculateEstimateDisplay(stopAtInt));
 				}
 			}
@@ -129,6 +141,22 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 				estimate.setEnabled(selected);
 			}
 		});
+
+		paymentTransactionAgeCheckbox = new JCheckBox("Ignore payment transactions older than:");
+		paymentTransactionAgeCheckbox.setSelected(true);
+		paymentTransactionAgeCheckbox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				boolean selected = paymentTransactionAgeCheckbox.isSelected();
+				paymentTransactionAge.setEnabled(selected);
+				paymentTransactionAgeLabel.setEnabled(selected);
+			}
+		});
+
+		paymentTransactionAge = new JNumberTextField();
+		paymentTransactionAge.setNumber(DEFAULT_PAYMENT_TRANS_AGE);
+
+		paymentTransactionAgeLabel = new JLabel("days");
 
 		//cancel when escape is pressed
 		getRootPane().registerKeyboardAction(new ActionListener() {
@@ -153,13 +181,19 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 
 		setLayout(new MigLayout());
 
-		add(warningIcon, "span 1 4");
+		add(warningIcon, "span 1 5");
 		add(text, "align center, wrap");
 
 		JPanel p = new JPanel(new MigLayout());
 		p.add(stopAtCheckBox);
 		p.add(stopAt, "w 75");
 		p.add(estimate);
+		add(p, "align center, wrap");
+
+		p = new JPanel(new MigLayout());
+		p.add(paymentTransactionAgeCheckbox);
+		p.add(paymentTransactionAge, "w 50");
+		p.add(paymentTransactionAgeLabel);
 		add(p, "align center, wrap");
 
 		add(new JLabel("Press \"Continue\" when you are ready."), "align center, wrap");
@@ -233,11 +267,13 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		private final boolean cancelled;
 		private final Integer stopAtPage;
 		private final Long estimatedTime;
+		private final Integer oldestPaymentTransactionDays;
 
-		public Result(boolean cancelled, Integer stopAtPage, Long estimatedTime) {
+		public Result(boolean cancelled, Integer stopAtPage, Long estimatedTime, Integer oldestPaymentTransactionDays) {
 			this.cancelled = cancelled;
 			this.stopAtPage = stopAtPage;
 			this.estimatedTime = estimatedTime;
+			this.oldestPaymentTransactionDays = oldestPaymentTransactionDays;
 		}
 
 		public boolean isCancelled() {
@@ -250,6 +286,10 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 
 		public Long getEstimatedTime() {
 			return estimatedTime;
+		}
+
+		public Integer getOldestPaymentTransactionDays() {
+			return oldestPaymentTransactionDays;
 		}
 	}
 }

@@ -72,6 +72,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 					Date latestTransactionDate = dao.getLatestTransactionDate();
 					final Integer stopAtPage;
 					final String estimatedTimeDisplay;
+					final Integer oldestPaymentTransactionDays;
 					if (latestTransactionDate == null) {
 						FirstUpdateDialog.Result result = FirstUpdateDialog.show(UpdateDialog.this);
 						if (result.isCancelled()) {
@@ -80,6 +81,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 						stopAtPage = result.getStopAtPage();
 						puller.setStopAtPage(stopAtPage);
+
+						oldestPaymentTransactionDays = result.getOldestPaymentTransactionDays();
+						puller.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
 
 						if (result.getEstimatedTime() != null) {
 							long estimatedTimeComponents[] = TimeUtils.parseTimeComponents(result.getEstimatedTime());
@@ -92,6 +96,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						puller.setStopAtDate(latestTransactionDate);
 						stopAtPage = null;
 						estimatedTimeDisplay = null;
+						oldestPaymentTransactionDays = null;
 					}
 
 					boolean repeat;
@@ -202,6 +207,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								}
 								if (stopAtPage != null) {
 									puller.setStopAtPage(stopAtPage);
+								}
+								if (oldestPaymentTransactionDays != null) {
+									puller.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
 								}
 
 								repeat = true;

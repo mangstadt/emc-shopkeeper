@@ -164,7 +164,7 @@ public class PaymentTransactionsDialog extends JDialog {
 					continue;
 				}
 
-				int quantity = rowGroup.quantity.getInt();
+				Integer quantity = rowGroup.quantity.getInteger();
 
 				ShopTransaction shop = new ShopTransaction();
 				shop.setTs(rowGroup.transaction.getTs());

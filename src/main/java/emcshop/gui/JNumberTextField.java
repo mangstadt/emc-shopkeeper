@@ -14,7 +14,6 @@ import javax.swing.text.PlainDocument;
 public class JNumberTextField extends JTextField {
 	private static final char DOT = '.';
 	private static final char NEGATIVE = '-';
-	private static final String BLANK = "";
 	private static final int DEF_PRECISION = 2;
 
 	public static final int NUMERIC = 2;
@@ -25,7 +24,7 @@ public class JNumberTextField extends JTextField {
 
 	private int maxLength = 0;
 	private int format = NUMERIC;
-	private String negativeChars = BLANK;
+	private String negativeChars = "";
 	private String allowedChars = null;
 	private boolean allowNegative = false;
 	private int precision = 0;
@@ -50,10 +49,7 @@ public class JNumberTextField extends JTextField {
 	}
 
 	public void setMaxLength(int maxLen) {
-		if (maxLen > 0)
-			maxLength = maxLen;
-		else
-			maxLength = 0;
+		maxLength = (maxLen > 0) ? maxLen : 0;
 	}
 
 	public int getMaxLength() {
@@ -61,13 +57,11 @@ public class JNumberTextField extends JTextField {
 	}
 
 	public void setPrecision(int precision) {
-		if (format == NUMERIC)
+		if (format == NUMERIC) {
 			return;
+		}
 
-		if (precision >= 0)
-			this.precision = precision;
-		else
-			this.precision = DEF_PRECISION;
+		this.precision = (precision >= 0) ? precision : DEF_PRECISION;
 	}
 
 	public int getPrecision() {
@@ -75,38 +69,39 @@ public class JNumberTextField extends JTextField {
 	}
 
 	public Number getNumber() {
-		Number number = null;
+		String text = getText();
+		if (text.isEmpty()) {
+			return null;
+		}
 
-		if (format == NUMERIC)
-			number = new Integer(getText());
-		else
-			number = new Double(getText());
-
-		return number;
+		return (format == NUMERIC) ? new Integer(text) : new Double(text);
 	}
 
 	public void setNumber(Number value) {
 		setText(String.valueOf(value));
 	}
 
-	public int getInt() {
-		return Integer.parseInt(getText());
+	public Integer getInteger() {
+		String text = getText();
+		return text.isEmpty() ? null : Integer.valueOf(text);
 	}
 
 	public void setInt(int value) {
 		setText(String.valueOf(value));
 	}
 
-	public float getFloat() {
-		return (new Float(getText())).floatValue();
+	public Float getFloat() {
+		String text = getText();
+		return text.isEmpty() ? null : Float.valueOf(text);
 	}
 
 	public void setFloat(float value) {
 		setText(String.valueOf(value));
 	}
 
-	public double getDouble() {
-		return (new Double(getText())).doubleValue();
+	public Double getDouble() {
+		String text = getText();
+		return text.isEmpty() ? null : Double.valueOf(text);
 	}
 
 	public void setDouble(double value) {
@@ -136,11 +131,7 @@ public class JNumberTextField extends JTextField {
 
 	public void setAllowNegative(boolean value) {
 		allowNegative = value;
-
-		if (value)
-			negativeChars = "" + NEGATIVE;
-		else
-			negativeChars = BLANK;
+		negativeChars = value ? NEGATIVE + "" : "";
 	}
 
 	public boolean isAllowNegative() {
@@ -150,7 +141,7 @@ public class JNumberTextField extends JTextField {
 	public void setDocument(Document document) {
 	}
 
-	class JNumberFieldFilter extends PlainDocument {
+	private class JNumberFieldFilter extends PlainDocument {
 		public JNumberFieldFilter() {
 			super();
 		}
@@ -158,12 +149,14 @@ public class JNumberTextField extends JTextField {
 		public void insertString(int offset, String str, AttributeSet attr) throws BadLocationException {
 			String text = getText(0, offset) + str + getText(offset, (getLength() - offset));
 
-			if (str == null || text == null)
+			if (str == null || text == null) {
 				return;
+			}
 
 			for (int i = 0; i < str.length(); i++) {
-				if ((allowedChars + negativeChars).indexOf(str.charAt(i)) == -1)
+				if ((allowedChars + negativeChars).indexOf(str.charAt(i)) == -1) {
 					return;
+				}
 			}
 
 			int precisionLength = 0, dotLength = 0, minusLength = 0;
@@ -171,19 +164,22 @@ public class JNumberTextField extends JTextField {
 
 			try {
 				if (format == NUMERIC) {
-					if (!((text.equals(negativeChars)) && (text.length() == 1)))
+					if (!((text.equals(negativeChars)) && (text.length() == 1))) {
 						new Long(text);
+					}
 				} else if (format == DECIMAL) {
-					if (!((text.equals(negativeChars)) && (text.length() == 1)))
+					if (!((text.equals(negativeChars)) && (text.length() == 1))) {
 						new Double(text);
+					}
 
 					int dotIndex = text.indexOf(DOT);
 					if (dotIndex != -1) {
 						dotLength = 1;
 						precisionLength = textLength - dotIndex - dotLength;
 
-						if (precisionLength > precision)
+						if (precisionLength > precision) {
 							return;
+						}
 					}
 				}
 			} catch (Exception ex) {
@@ -191,14 +187,15 @@ public class JNumberTextField extends JTextField {
 			}
 
 			if (text.startsWith("" + NEGATIVE)) {
-				if (!allowNegative)
+				if (!allowNegative) {
 					return;
-				else
-					minusLength = 1;
+				}
+				minusLength = 1;
 			}
 
-			if (maxLength < (textLength - dotLength - precisionLength - minusLength))
+			if (maxLength < (textLength - dotLength - precisionLength - minusLength)) {
 				return;
+			}
 
 			super.insertString(offset, str, attr);
 		}

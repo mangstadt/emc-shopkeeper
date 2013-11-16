@@ -2,6 +2,7 @@ package emcshop;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,8 @@ public class TransactionPuller {
 	private final Map<String, String> loginCookies;
 	private Date stopAtDate;
 	private Integer stopAtPage;
+	private Integer maxPaymentTransactionAge;
+	private Date oldestPaymentTransactionDate;
 	private int threadCount = 4;
 	private Date latestTransactionDate;
 	private Integer rupeeBalance;
@@ -62,6 +65,15 @@ public class TransactionPuller {
 	}
 
 	/**
+	 * Sets the number of days old a payment transaction can be in order for it
+	 * to be parsed.
+	 * @param days the number of days
+	 */
+	public void setMaxPaymentTransactionAge(Integer days) {
+		this.maxPaymentTransactionAge = days;
+	}
+
+	/**
 	 * Sets the page to start on (defaults to "1").
 	 * @param page the page number to start on
 	 */
@@ -85,6 +97,13 @@ public class TransactionPuller {
 	 */
 	public Result start(Listener listener) throws IOException {
 		started = System.currentTimeMillis();
+
+		//calculate how old a payment transaction can be before it is ignored
+		if (maxPaymentTransactionAge != null) {
+			Calendar c = Calendar.getInstance();
+			c.add(Calendar.DATE, -maxPaymentTransactionAge);
+			oldestPaymentTransactionDate = c.getTime();
+		}
 
 		TransactionPage firstPage = getPage(1);
 		if (logger.isLoggable(Level.FINEST)) {
@@ -218,18 +237,28 @@ public class TransactionPuller {
 					}
 
 					List<PaymentTransaction> paymentTransactions = transactionPage.getPaymentTransactions();
-					if (stopAtDate != null) {
+					if (stopAtDate != null || oldestPaymentTransactionDate != null) {
+						boolean stopAtDateReached = false;
 						int end = -1;
 						for (int i = 0; i < paymentTransactions.size(); i++) {
 							PaymentTransaction transaction = paymentTransactions.get(i);
-							if (transaction.getTs().getTime() <= stopAtDate.getTime()) {
+							long ts = transaction.getTs().getTime();
+
+							if (stopAtDate != null && ts <= stopAtDate.getTime()) {
+								end = i;
+								stopAtDateReached = true;
+								break;
+							}
+							if (oldestPaymentTransactionDate != null && ts < oldestPaymentTransactionDate.getTime()) {
 								end = i;
 								break;
 							}
 						}
 						if (end >= 0) {
 							paymentTransactions = paymentTransactions.subList(0, end);
-							quit = true;
+							if (stopAtDateReached) {
+								quit = true;
+							}
 						}
 					}
 
