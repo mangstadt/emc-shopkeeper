@@ -13,7 +13,7 @@ import javax.swing.UIManager;
  * @author Michael Angstadt
  */
 public class ImageManager {
-	private static final Map<String, ImageIcon> itemImages = new HashMap<String, ImageIcon>();
+	private static final Map<String, ImageIcon> itemIconCache = new HashMap<String, ImageIcon>();
 
 	public static Icon getErrorIcon() {
 		//http://stackoverflow.com/questions/1196797/where-are-these-error-and-warning-icons-as-a-java-resource
@@ -60,31 +60,79 @@ public class ImageManager {
 		return getImageIcon("emc-logo.png");
 	}
 
+	/**
+	 * Gets an item image.
+	 * @param item the item name
+	 * @return the item image or an empty image if none can be found
+	 */
 	public static ImageIcon getItemImage(String item) {
-		ImageIcon image = itemImages.get(item);
+		ImageIcon image = itemIconCache.get(item);
 		if (image == null) {
 			String fixedItem = item.toLowerCase().replace(" ", "_");
 			image = getImageIcon("items/" + fixedItem + ".png");
 			if (image == null) {
 				image = getItemImage("_empty");
 			} else {
-				image = scale(image, 16, 16);
+				image = scale(image, 16);
 			}
-			itemImages.put(item, image);
+			itemIconCache.put(item, image);
 		}
 		return image;
 	}
 
-	public static ImageIcon scale(String path, int width, int height) {
-		return scale(getImageIcon(path), width, height);
+	/**
+	 * Scales an image.
+	 * @param path the classpath to the image
+	 * @param maxSize the max height/width of the image
+	 * @return the scaled image or the original image if it is smaller than the
+	 * max size
+	 */
+	public static ImageIcon scale(String path, int maxSize) {
+		return scale(getImageIcon(path), maxSize);
 	}
 
-	public static ImageIcon scale(ImageIcon image, int width, int height) {
-		return new ImageIcon(image.getImage().getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH));
+	/**
+	 * Scales an image.
+	 * @param image the image to scale
+	 * @param maxSize the max height/width of the image
+	 * @return the scaled image or the original image if it is smaller than the
+	 * max size
+	 */
+	public static ImageIcon scale(ImageIcon image, int maxSize) {
+		int width = image.getIconWidth();
+		int height = image.getIconHeight();
+
+		if (height <= maxSize && width <= maxSize) {
+			return image;
+		}
+
+		int scaledWidth, scaledHeight;
+		if (width > height) {
+			double ratio = (double) height / width;
+			scaledWidth = maxSize;
+			scaledHeight = (int) (scaledWidth * ratio);
+		} else if (height > width) {
+			double ratio = (double) width / height;
+			scaledHeight = maxSize;
+			scaledWidth = (int) (scaledHeight * ratio);
+		} else {
+			scaledWidth = scaledHeight = maxSize;
+		}
+
+		return new ImageIcon(image.getImage().getScaledInstance(scaledWidth, scaledHeight, java.awt.Image.SCALE_SMOOTH));
 	}
 
+	/**
+	 * Gets an image.
+	 * @param path the classpath to the image
+	 * @return the image or null if not found
+	 */
 	public static ImageIcon getImageIcon(String path) {
 		URL url = ImageManager.class.getResource(path);
 		return (url == null) ? null : new ImageIcon(url);
+	}
+
+	private ImageManager() {
+		//hide
 	}
 }

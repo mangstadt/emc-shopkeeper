@@ -80,7 +80,7 @@ public class ProfileImageLoader {
 			try {
 				byte[] data = loadFromCache(playerName);
 				ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
-				image = scale(image, maxSize);
+				image = ImageManager.scale(image, maxSize);
 				label.setIcon(image);
 			} catch (IOException e) {
 				logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
@@ -223,34 +223,6 @@ public class ProfileImageLoader {
 	}
 
 	/**
-	 * Scales an image.
-	 * @param image the image to scale
-	 * @param maxSize the max size in pixels
-	 * @return the scaled image
-	 */
-	private static ImageIcon scale(ImageIcon image, int maxSize) {
-		int height = image.getIconHeight();
-		int width = image.getIconWidth();
-
-		if (height <= maxSize && width <= maxSize) {
-			return image;
-		}
-
-		int scaledHeight, scaledWidth;
-		if (height > width) {
-			double ratio = (double) maxSize / height;
-			scaledHeight = maxSize;
-			scaledWidth = (int) (width * ratio);
-		} else {
-			double ratio = (double) maxSize / width;
-			scaledWidth = maxSize;
-			scaledHeight = (int) (height * ratio);
-		}
-
-		return new ImageIcon(image.getImage().getScaledInstance(scaledWidth, scaledHeight, java.awt.Image.SCALE_SMOOTH));
-	}
-
-	/**
 	 * Monitors the job queue for new images to download
 	 */
 	private class LoadThread extends Thread {
@@ -275,7 +247,7 @@ public class ProfileImageLoader {
 				downloaded.add(job.playerName.toLowerCase());
 
 				ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
-				image = scale(image, job.maxSize);
+				image = ImageManager.scale(image, job.maxSize);
 				job.label.setIcon(image);
 			}
 		}
