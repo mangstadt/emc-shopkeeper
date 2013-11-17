@@ -1,8 +1,13 @@
 package emcshop.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URI;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -40,5 +45,20 @@ public class ClasspathUtilsTest {
 	@Test(expected = FileNotFoundException.class)
 	public void getResourceAsStream_non_existent_absolute_path() throws Exception {
 		ClasspathUtils.getResourceAsStream("/sleet/db/does-not-exist");
+	}
+
+	@Test
+	public void listFilesInPackage() throws Throwable {
+		List<URI> actual = ClasspathUtils.listFilesInPackage("emcshop.util.cp");
+		assertEquals(2, actual.size());
+		assertTrue(actual.toString(), actual.contains(new File("target/test-classes/emcshop/util/cp/test1").toURI()));
+		assertTrue(actual.toString(), actual.contains(new File("target/test-classes/emcshop/util/cp/test2").toURI()));
+	}
+
+	@Test
+	public void listFilesInPackageFromJar() throws Throwable {
+		List<URI> actual = ClasspathUtils.listFilesInPackageFromJar(new File("src/test/resources/emcshop/util/test.jar"), "emcshop/util/cp");
+		assertEquals(1, actual.size());
+		assertTrue(actual.toString(), actual.contains(URI.create("jar:src/test/resources/emcshop/util/test.jar!/emcshop/util/cp/test3")));
 	}
 }
