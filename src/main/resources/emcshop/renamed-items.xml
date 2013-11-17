@@ -1,6 +1,6 @@
 <!-- 
 This file renames certain items so they have friendlier names.
-Potions are renamed using the "potions.xml" file. 
+The items are renamed after they are parsed from the HTML page.
 -->
 
 <Mappings>
@@ -30,8 +30,92 @@ Potions are renamed using the "potions.xml" file.
 	<Mapping from="Red Stclay" to="Red Clay" />
 	<Mapping from="White Stclay" to="White Clay" />
 	<Mapping from="Yellow Stclay" to="Yellow Clay" />
-	
-	<Mapping from="Record 12" to="Wait Disc" />
+
 	<Mapping from="Smooth Sandston" to="Smooth Sandstone" />
 	<Mapping from="Creeper Sandsto" to="Creeper Sandstone" />
+	
+	<!-- Potion information: Source: http://minecraft.gamepedia.com/Potion -->
+	<Mapping from="Potion:8193" to="Potion of Regeneration" />
+	<Mapping from="Potion:8225" to="Potion of Regeneration II" />
+	<Mapping from="Potion:8257" to="Potion of Regeneration Extended" />
+	<Mapping from="Potion:16385" to="Splash Potion of Regeneration" />
+	<Mapping from="Potion:16417" to="Splash Potion of Regenerati on II" />
+	<Mapping from="Potion:16449" to="Splash Potion of Regeneration Extended" />
+
+	<Mapping from="Potion:8194" to="Potion of Swiftness" />
+	<Mapping from="Potion:8226" to="Potion of Swiftness II" />
+	<Mapping from="Potion:8258" to="Potion of Swiftness Extended" />
+	<Mapping from="Potion:16386" to="Splash Potion of Swiftness" />
+	<Mapping from="Potion:16418" to="Splash Potion of Swiftness II"/>
+	<Mapping from="Potion:16450" to="Splash Potion of Swiftness Extended" />
+
+	<Mapping from="Potion:8195" to="Potion of Fire Resistance" />
+	<Mapping from="Potion:8227" to="Potion of Fire Resistance" /> <!-- reverted -->
+	<Mapping from="Potion:8259" to="Potion of Fire Resistance Extended" />
+	<Mapping from="Potion:16387" to="Splash Potion of Fire Resistance" />
+	<Mapping from="Potion:16419" to="Splash Potion of Fire Resistance" /> <!-- reverted -->
+	<Mapping from="Potion:16451" to="Splash Potion of Fire Resistance Extended" />
+
+	<Mapping from="Potion:8196" to="Potion of Poison" />
+	<Mapping from="Potion:8228" to="Potion of Poison II" />
+	<Mapping from="Potion:8260" to="Potion of Poison Extended" />
+	<Mapping from="Potion:16388" to="Splash Potion of Poison" />
+	<Mapping from="Potion:16420" to="Splash Potion of Poison II" />
+	<Mapping from="Potion:16452" to="Splash Potion of Poison Extended" />
+
+	<Mapping from="Potion:8197" to="Potion of Health" />
+	<Mapping from="Potion:8229" to="Potion of Health II" />
+	<Mapping from="Potion:8261" to="Potion of Health II" /> <!-- reverted -->
+	<Mapping from="Potion:16389" to="Splash Potion of Health" />
+	<Mapping from="Potion:16421" to="Splash Potion of Health II" />
+	<Mapping from="Potion:16453" to="Splash Potion of Health II" /> <!-- reverted -->
+
+	<Mapping from="Potion:8198" to="Potion of Night Vision" />
+	<Mapping from="Potion:8230" to="Potion of Night Vision" /> <!-- reverted -->
+	<Mapping from="Potion:8262" to="Potion of Night Vision Extended" />
+	<Mapping from="Potion:16390" to="Splash Potion of Night Vision" />
+	<Mapping from="Potion:16422" to="Splash Potion of Night Vision" /> <!-- reverted -->
+	<Mapping from="Potion:16454" to="Splash Potion of Night Vision Extended" />
+
+	<Mapping from="Potion:8200" to="Potion of Weakness" />
+	<Mapping from="Potion:8232" to="Potion of Weakness" /> <!-- reverted -->
+	<Mapping from="Potion:8264" to="Potion of Weakness Extended" />
+	<Mapping from="Potion:16392" to="Splash Potion of Weakness" />
+	<Mapping from="Potion:16424" to="Splash Potion of Weakness" /> <!-- reverted -->
+	<Mapping from="Potion:16456" to="Splash Potion of Weakness Extended" />
+
+	<Mapping from="Potion:8201" to="Potion of Strength" />
+	<Mapping from="Potion:8233" to="Potion of Strength II" />
+	<Mapping from="Potion:8265" to="Potion of Strength Extended" />
+	<Mapping from="Potion:16393" to="Splash Potion of Strength" />
+	<Mapping from="Potion:16425" to="Splash Potion of Strength II" />
+	<Mapping from="Potion:16457" to="Splash Potion of Strength Extended" />
+	
+	<Mapping from="Potion:8202" to="Potion of Slowness" />
+	<Mapping from="Potion:8234" to="Potion of Slowness" /> <!-- reverted -->
+	<Mapping from="Potion:8266" to="Potion of Slowness Extended" />
+	<Mapping from="Potion:16394" to="Splash Potion of Slowness" />
+	<Mapping from="Potion:16426" to="Splash Potion of Slowness" /> <!-- reverted -->
+	<Mapping from="Potion:16458" to="Splash Potion of Slowness Extended" />
+	
+	<Mapping from="Potion:8204" to="Potion of Harming" />
+	<Mapping from="Potion:8236" to="Potion of Harming II" />
+	<Mapping from="Potion:8268" to="Potion of Harming II" /> <!-- reverted -->
+	<Mapping from="Potion:16396" to="Splash Potion of Harming" />
+	<Mapping from="Potion:16428" to="Splash Potion of Harming II" />
+	<Mapping from="Potion:16460" to="Splash Potion of Harming II" /> <!-- reverted -->
+
+	<Mapping from="Potion:8206" to="Potion of Invisibility" />
+	<Mapping from="Potion:8238" to="Potion of Invisibility" /> <!-- reverted -->
+	<Mapping from="Potion:8270" to="Potion of Invisibility Extended" />
+	<Mapping from="Potion:16398" to="Splash Potion of Invisibility" />
+	<Mapping from="Potion:16430" to="Splash Potion of Invisibility" /> <!-- reverted -->
+	<Mapping from="Potion:16462" to="Splash Potion of Invisibility Extended" />
+	
+	<Mapping from="Potion:8205" to="Potion of Water Breathing" />
+	<Mapping from="Potion:8237" to="Potion of Water Breathing" /> <!-- reverted -->
+	<Mapping from="Potion:8269" to="Potion of Water Breathing Extended" />
+	<Mapping from="Potion:16397" to="Splash Potion of Water Breathing" />
+	<Mapping from="Potion:16429" to="Splash Potion of Water Breathing" /> <!-- reverted -->
+	<Mapping from="Potion:16461" to="Splash Potion of Water Breathing Extended" />
 </Mappings>

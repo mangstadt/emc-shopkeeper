@@ -2,6 +2,7 @@ package emcshop;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,37 +20,45 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Contains new names for certain items. For example,
- * "Water Bottle - ¤aZombie Virus" from the transaction history is converted to
+ * Contains new names for certain items, which are more human-readable. For
+ * example, the Zombie Virus potion has the name "Water Bottle - ï¿½aZombie Virus"
+ * on the transaction history page. This class gives this item the new name of
  * "Zombie Virus".
  * @author Michael Angstadt
  */
 public class RenamedItems {
-	private final Map<String, String> mappings = new HashMap<String, String>();
+	private static RenamedItems INSTANCE;
+
+	private final Map<String, String> mappings;
 
 	/**
-	 * Reads the item names from the application's default location.
-	 * @return the item names object
+	 * Gets the singleton instance of this class.
+	 * @return the singleton object
 	 */
-	public static RenamedItems create() {
-		InputStream in = RenamedItems.class.getResourceAsStream("renamed-items.xml");
-		try {
-			return new RenamedItems(in);
-		} catch (Exception e) {
-			//nothing should be thrown
-			throw new RuntimeException(e);
-		} finally {
-			IOUtils.closeQuietly(in);
+	public static synchronized RenamedItems instance() {
+		if (INSTANCE == null) {
+			InputStream in = RenamedItems.class.getResourceAsStream("renamed-items.xml");
+			try {
+				INSTANCE = new RenamedItems(in);
+			} catch (Exception e) {
+				//nothing should be thrown
+				throw new RuntimeException(e);
+			} finally {
+				IOUtils.closeQuietly(in);
+			}
 		}
+
+		return INSTANCE;
 	}
 
 	/**
-	 * Creates a new item names DAO.
+	 * Creates a new renamed items object.
 	 * @param in the input stream to the XML document
 	 * @throws SAXException if there was a problem parse the XML
 	 * @throws IOException if there was a problem reading from the stream
 	 */
 	RenamedItems(InputStream in) throws SAXException, IOException {
+		//parse XML document
 		Document xml;
 		try {
 			DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
@@ -62,6 +71,7 @@ public class RenamedItems {
 			throw new RuntimeException(e);
 		}
 
+		//get XML elements
 		NodeList mappingNodes;
 		try {
 			XPath xpath = XPathFactory.newInstance().newXPath();
@@ -71,18 +81,22 @@ public class RenamedItems {
 			throw new RuntimeException(e);
 		}
 
+		//add mappings to map
+		Map<String, String> map = new HashMap<String, String>();
 		for (int i = 0; i < mappingNodes.getLength(); i++) {
 			Element mapping = (Element) mappingNodes.item(i);
 			String from = mapping.getAttribute("from");
 			String to = mapping.getAttribute("to");
-			mappings.put(from, to);
+			map.put(from, to);
 		}
+
+		mappings = Collections.unmodifiableMap(map);
 	}
 
 	/**
 	 * Gets the new name of an item.
 	 * @param origName the original item name (e.g.
-	 * "Water Bottle - ¤aZombie Virus")
+	 * "Water Bottle - ï¿½aZombie Virus")
 	 * @return the new name (e.g. "Zombie Virus") or the original name if no
 	 * mapping exists
 	 */

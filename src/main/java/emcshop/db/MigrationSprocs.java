@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import emcshop.RenamedItems;
-import emcshop.PotionDirectory;
 
 /**
  * Contains stored procedure code which is used to migrate the database to
@@ -31,45 +30,8 @@ public class MigrationSprocs {
 		PreparedStatement insertItem = conn.prepareStatement("INSERT INTO items (name) VALUES (?)");
 		PreparedStatement updateItemName = conn.prepareStatement("UPDATE items SET name = ? WHERE id = ?");
 
-		//update potion names
-		PotionDirectory potions = PotionDirectory.create();
-		for (Map.Entry<String, String> entry : potions.getAllNames().entrySet()) {
-			String potionId = entry.getKey();
-			String newPotionName = entry.getValue();
-			String oldPotionName = "Potion:" + potionId;
-
-			getItemId.setString(1, oldPotionName);
-			ResultSet rs = getItemId.executeQuery();
-			Integer oldNameId = rs.next() ? rs.getInt("id") : null;
-
-			getItemId.setString(1, newPotionName);
-			rs = getItemId.executeQuery();
-			Integer newNameId = rs.next() ? rs.getInt("id") : null;
-
-			if (oldNameId == null && newNameId == null) {
-				insertItem.setString(1, newPotionName);
-				insertItem.executeUpdate();
-			} else if (oldNameId == null && newNameId != null) {
-				//nothing needs to be changed
-			} else if (oldNameId != null && newNameId == null) {
-				updateItemName.setString(1, newPotionName);
-				updateItemName.setInt(2, oldNameId);
-				updateItemName.executeUpdate();
-			} else if (oldNameId != null && newNameId != null) {
-				//in the unlikely event that both the old and new names exist,
-				//make all transactions that use the old name use the new one
-
-				updateTransactionsToUseNewName.setInt(1, newNameId);
-				updateTransactionsToUseNewName.setInt(2, oldNameId);
-				updateTransactionsToUseNewName.executeUpdate();
-
-				deleteItem.setInt(1, oldNameId);
-				deleteItem.executeUpdate();
-			}
-		}
-
-		//update other item names
-		RenamedItems itemNames = RenamedItems.create();
+		//update item names
+		RenamedItems itemNames = RenamedItems.instance();
 		for (Map.Entry<String, String> entry : itemNames.getMappings().entrySet()) {
 			String oldName = entry.getKey();
 			String newName = entry.getValue();
