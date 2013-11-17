@@ -30,7 +30,7 @@ import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 import ch.rakudave.suggest.JSuggestField;
-import ch.rakudave.suggest.matcher.StartsWithMatcher;
+import ch.rakudave.suggest.matcher.ContainsMatcher;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.db.DbDao;
@@ -336,7 +336,7 @@ public class PaymentTransactionsDialog extends JDialog {
 
 		public ItemSuggestField(Vector<String> data) {
 			super(PaymentTransactionsDialog.this, data);
-			setSuggestMatcher(new StartsWithMatcher());
+			setSuggestMatcher(new ContainsMatcher());
 			setListCellRenderer(new ListCellRenderer() {
 				@Override
 				public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
