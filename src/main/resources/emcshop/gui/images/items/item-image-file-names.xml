@@ -1,0 +1,127 @@
+<!--
+Manually maps certain items to their image. If an item is not found 
+in this list, then an algorithm is used to determine the file name of the 
+image.
+-->
+
+<Images>
+	<Image name="water_bottle.png">
+		<Item name="Zombie Potion" />
+	</Image>
+
+	<Image name="potion_regeneration.png">
+		<Item name="Potion of Regeneration" />
+		<Item name="Potion of Regeneration II" />
+		<Item name="Potion of Regeneration Extended" />
+	</Image>
+	<Image name="potion_regeneration_splash.png">
+		<Item name="Splash Potion of Regeneration" />
+		<Item name="Splash Potion of Regeneration II" />
+		<Item name="Splash Potion of Regeneration Extended" />
+	</Image>
+
+	<Image name="potion_swiftness.png">
+		<Item name="Potion of Swiftness" />
+		<Item name="Potion of Swiftness II" />
+		<Item name="Potion of Swiftness Extended" />
+	</Image>
+	<Image name="potion_swiftness_splash.png">
+		<Item name="Splash Potion of Swiftness" />
+		<Item name="Splash Potion of Swiftness II" />
+		<Item name="Splash Potion of Swiftness Extended" />
+	</Image>
+
+	<Image name="potion_fire_resistance.png">
+		<Item name="Potion of Fire Resistance" />
+		<Item name="Potion of Fire Resistance Extended" />
+	</Image>
+	<Image name="potion_fire_resistance_splash.png">
+		<Item name="Splash Potion of Fire Resistance" />
+		<Item name="Splash Potion of Fire Resistance Extended" />
+	</Image>
+
+	<Image name="potion_poison.png">
+		<Item name="Potion of Poison" />
+		<Item name="Potion of Poison II" />
+		<Item name="Potion of Poison Extended" />
+	</Image>
+	<Image name="potion_poison_splash.png">
+		<Item name="Splash Potion of Poison" />
+		<Item name="Splash Potion of Poison II" />
+		<Item name="Splash Potion of Poison Extended" />
+	</Image>
+
+	<Image name="potion_health.png">
+		<Item name="Potion of Health" />
+		<Item name="Potion of Health II" />
+	</Image>
+	<Image name="potion_health_splash.png">
+		<Item name="Splash Potion of Health" />
+		<Item name="Splash Potion of Health II" />
+	</Image>
+
+	<Image name="potion_night_vision.png">
+		<Item name="Potion of Night Vision" />
+		<Item name="Potion of Night Vision Extended" />
+	</Image>
+	<Image name="potion_night_vision_splash.png">
+		<Item name="Splash Potion of Night Vision" />
+		<Item name="Splash Potion of Night Vision Extended" />
+	</Image>
+
+	<Image name="potion_weakness.png">
+		<Item name="Potion of Weakness" />
+		<Item name="Potion of Weakness Extended" />
+	</Image>
+	<Image name="potion_weakness_splash.png">
+		<Item name="Splash Potion of Weakness" />
+		<Item name="Splash Potion of Weakness Extended" />
+	</Image>
+
+	<Image name="potion_strength.png">
+		<Item name="Potion of Strength" />
+		<Item name="Potion of Strength II" />
+		<Item name="Potion of Strength Extended" />
+	</Image>
+	<Image name="potion_strength_splash.png">
+		<Item name="Splash Potion of Strength" />
+		<Item name="Splash Potion of Strength II" />
+		<Item name="Splash Potion of Strength Extended" />
+	</Image>
+
+	<Image name="potion_slowness.png">
+		<Item name="Potion of Slowness" />
+		<Item name="Potion of Slowness Extended" />
+	</Image>
+	<Image name="potion_slowness_splash.png">
+		<Item name="Splash Potion of Slowness" />
+		<Item name="Splash Potion of Slowness Extended" />
+	</Image>
+
+	<Image name="potion_harming.png">
+		<Item name="Potion of Harming" />
+		<Item name="Potion of Harming II" />
+	</Image>
+	<Image name="potion_harming_splash.png">
+		<Item name="Splash Potion of Harming" />
+		<Item name="Splash Potion of Harming II" />
+	</Image>
+
+	<Image name="potion_invisibility.png">
+		<Item name="Potion of Invisibility" />
+		<Item name="Potion of Invisibility Extended" />
+	</Image>
+	<Image name="potion_invisibility_splash.png">
+		<Item name="Splash Potion of Invisibility" />
+		<Item name="Splash Potion of Invisibility Extended" />
+	</Image>
+
+	<Image name="potion_water_breathing.png">
+		<Item name="Potion of Water Breathing" />
+		<Item name="Potion of Water Breathing Extended" />
+	</Image>
+	<Image name="potion_water_breathing_splash.png">
+		<Item name="Splash Potion of Water Breathing" />
+		<Item name="Splash Potion of Water Breathing Extended" />
+	</Image>
+</Images>
