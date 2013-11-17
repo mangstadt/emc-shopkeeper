@@ -59,7 +59,7 @@ public class ClasspathUtils {
 	 */
 	public static List<URI> listFilesInPackage(String packageName) throws IOException {
 		List<URI> filesInPackage = new ArrayList<URI>();
-		String packagePath = packageName.replace(".", File.separator) + "/";
+		String packagePath = packageName.replace(".", File.separator) + File.separator;
 
 		String cp = System.getProperty("java.class.path");
 		String paths[] = cp.split(File.pathSeparator);
@@ -81,7 +81,7 @@ public class ClasspathUtils {
 			}
 
 			if (file.getName().endsWith(".jar")) {
-				filesInPackage.addAll(listFilesInPackageFromJar(file, packagePath));
+				filesInPackage.addAll(listFilesInPackageFromJar(file, packageName));
 				continue;
 			}
 		}
@@ -90,7 +90,9 @@ public class ClasspathUtils {
 	}
 
 	//this is in its own method so it can be unit tested (I can't add a JAR to the classpath when the unit tests are run)
-	static List<URI> listFilesInPackageFromJar(File jar, String packagePath) throws IOException {
+	static List<URI> listFilesInPackageFromJar(File jar, String packageName) throws IOException {
+		packageName = packageName.replace(".", "/");
+
 		List<URI> filesInPackage = new ArrayList<URI>();
 
 		JarFile jarFile = new JarFile(jar);
@@ -101,8 +103,9 @@ public class ClasspathUtils {
 			//an entry's name looks like: "emcshop/gui/images/items/diamond.png"
 			String entryName = entry.getName();
 
-			if (!entry.isDirectory() && entryName.startsWith(packagePath)) {
-				URI uri = URI.create("jar:" + jar.getPath() + "!/" + entryName);
+			if (!entry.isDirectory() && entryName.startsWith(packageName)) {
+				URI uri = jar.toURI();
+				uri = URI.create("jar:" + uri.getPath() + "!/" + entryName);
 				filesInPackage.add(uri);
 			}
 		}

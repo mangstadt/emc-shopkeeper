@@ -57,8 +57,11 @@ public class ClasspathUtilsTest {
 
 	@Test
 	public void listFilesInPackageFromJar() throws Throwable {
-		List<URI> actual = ClasspathUtils.listFilesInPackageFromJar(new File("src/test/resources/emcshop/util/test.jar"), "emcshop/util/cp");
+		File jarFile = new File("src/test/resources/emcshop/util/test.jar");
+		List<URI> actual = ClasspathUtils.listFilesInPackageFromJar(jarFile, "emcshop.util.cp");
 		assertEquals(1, actual.size());
-		assertTrue(actual.toString(), actual.contains(URI.create("jar:src/test/resources/emcshop/util/test.jar!/emcshop/util/cp/test3")));
+
+		URI jarFileUri = jarFile.toURI();
+		assertTrue(actual.toString(), actual.contains(URI.create("jar:" + jarFileUri.getPath() + "!/emcshop/util/cp/test3")));
 	}
 }
