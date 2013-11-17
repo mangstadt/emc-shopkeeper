@@ -32,6 +32,7 @@ public class TransactionPage {
 	private static final Pattern balanceRegex = Pattern.compile("^Your balance: ([\\d,]+)$", Pattern.CASE_INSENSITIVE);
 
 	private static final PotionDirectory potions = PotionDirectory.create();
+	private static final RenamedItems nameMappings = RenamedItems.create();
 
 	private final DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
 	private final Document document;
@@ -172,12 +173,10 @@ public class TransactionPage {
 		if (name.startsWith("Potion:")) {
 			String id = name.split(":", 2)[1];
 			String potionName = potions.getName(id);
-			if (potionName != null) {
-				return potionName;
-			}
+			return (potionName == null) ? name : potionName;
 		}
 
-		return name;
+		return nameMappings.getSanitizedName(name);
 	}
 
 	private PaymentTransaction scrapePaymentElement(Element element) {

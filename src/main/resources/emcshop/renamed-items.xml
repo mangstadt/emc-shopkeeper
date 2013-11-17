@@ -1,0 +1,37 @@
+<!-- 
+This file renames certain items so they have friendlier names.
+Potions are renamed using the "potions.xml" file. 
+-->
+
+<Mappings>
+	<Mapping from="Water Bottle - §aZombie Virus" to="Zombie Virus" />
+	<Mapping from="Rotten Flesh - §6Shiny Flesh" to="Shiny Flesh" />
+	<Mapping from="Arrow - §bShiny Arrow" to="Shiny Arrow" />
+	
+	<Mapping from="Gunpowder - §eHaunted Candy" to="Haunted Candy - Gunpowder" />
+	<Mapping from="Bone - §eHaunted Candy" to="Haunted Candy - Bone" />
+	<Mapping from="Spider Eye - §eHaunted Candy" to="Haunted Candy - Spider Eye" />
+	<Mapping from="Rotten Flesh - §eHaunted Candy" to="Haunted Candy - Rotten Flesh" />
+	<Mapping from="Ender Pearl - §eHaunted Candy" to="Haunted Candy - Ender Pearl " />
+
+	<Mapping from="Black Stclay" to="Black Clay" />
+	<Mapping from="Blue Stclay" to="Blue Clay" />
+	<Mapping from="Brown Stclay" to="Brown Clay" />
+	<Mapping from="Cyan Stclay" to="Cyan Clay" />
+	<Mapping from="Gray Stclay" to="Gray Clay" />
+	<Mapping from="Green Stclay" to="Green Clay" />
+	<Mapping from="Lghtblue Stclay" to="Light Blue Clay" />
+	<Mapping from="Lghtgray Stclay" to="Light Gray Clay" />
+	<Mapping from="Lime Stclay" to="Lime Clay" />
+	<Mapping from="Magenta Stclay" to="Magenta Clay" />
+	<Mapping from="Orange Stclay" to="Orange Clay" />
+	<Mapping from="Pink Stclay" to="Pink Clay" />
+	<Mapping from="Purple Stclay" to="Purple Clay" />
+	<Mapping from="Red Stclay" to="Red Clay" />
+	<Mapping from="White Stclay" to="White Clay" />
+	<Mapping from="Yellow Stclay" to="Yellow Clay" />
+	
+	<Mapping from="Record 12" to="Wait Disc" />
+	<Mapping from="Smooth Sandston" to="Smooth Sandstone" />
+	<Mapping from="Creeper Sandsto" to="Creeper Sandstone" />
+</Mappings>
