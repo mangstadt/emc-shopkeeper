@@ -8,7 +8,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 
-import emcshop.gui.images.items.ItemImageFileNames;
+import emcshop.ItemIndex;
 
 /**
  * Manages the images of the application.
@@ -16,7 +16,7 @@ import emcshop.gui.images.items.ItemImageFileNames;
  */
 public class ImageManager {
 	private static final Map<String, ImageIcon> itemIconCache = new HashMap<String, ImageIcon>();
-	private static final ItemImageFileNames itemIconFileNames = ItemImageFileNames.instance();
+	private static final ItemIndex itemIndex = ItemIndex.instance();
 
 	public static Icon getErrorIcon() {
 		//http://stackoverflow.com/questions/1196797/where-are-these-error-and-warning-icons-as-a-java-resource
@@ -69,7 +69,7 @@ public class ImageManager {
 	 * @return the item image or an empty image if none can be found
 	 */
 	public static ImageIcon getItemImage(String item) {
-		String imageFileName = itemIconFileNames.getFileName(item);
+		String imageFileName = itemIndex.getImageFileName(item);
 		ImageIcon image = itemIconCache.get(imageFileName);
 		if (image == null) {
 			image = getImageIcon("items/" + imageFileName);

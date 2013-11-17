@@ -70,3 +70,10 @@ CREATE TABLE payment_transactions(
 CREATE INDEX ts_index ON transactions(ts);
 CREATE INDEX player_index ON transactions(player);
 CREATE INDEX item_index ON transactions(item);
+
+CREATE PROCEDURE UPDATE_ITEMS()
+LANGUAGE JAVA PARAMETER STYLE JAVA
+MODIFIES SQL DATA
+EXTERNAL NAME 'emcshop.db.MigrationSprocs.updateItemsTable';
+
+CALL UPDATE_ITEMS();

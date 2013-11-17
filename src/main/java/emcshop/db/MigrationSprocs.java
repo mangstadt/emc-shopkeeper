@@ -5,9 +5,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import emcshop.RenamedItems;
+import emcshop.ItemIndex;
 
 /**
  * Contains stored procedure code which is used to migrate the database to
@@ -27,12 +29,11 @@ public class MigrationSprocs {
 		PreparedStatement getItemId = conn.prepareStatement("SELECT id FROM items WHERE Lower(name) = Lower(?)");
 		PreparedStatement updateTransactionsToUseNewName = conn.prepareStatement("UPDATE transactions SET item = ? WHERE item = ?");
 		PreparedStatement deleteItem = conn.prepareStatement("DELETE FROM items WHERE id = ?");
-		PreparedStatement insertItem = conn.prepareStatement("INSERT INTO items (name) VALUES (?)");
 		PreparedStatement updateItemName = conn.prepareStatement("UPDATE items SET name = ? WHERE id = ?");
 
 		//update item names
-		RenamedItems itemNames = RenamedItems.instance();
-		for (Map.Entry<String, String> entry : itemNames.getMappings().entrySet()) {
+		ItemIndex itemIndex = ItemIndex.instance();
+		for (Map.Entry<String, String> entry : itemIndex.getEmcNameToDisplayNameMapping().entrySet()) {
 			String oldName = entry.getKey();
 			String newName = entry.getValue();
 
@@ -45,8 +46,7 @@ public class MigrationSprocs {
 			Integer newNameId = rs.next() ? rs.getInt("id") : null;
 
 			if (oldNameId == null && newNameId == null) {
-				insertItem.setString(1, newName);
-				insertItem.executeUpdate();
+				//do nothing
 			} else if (oldNameId == null && newNameId != null) {
 				//nothing needs to be changed
 			} else if (oldNameId != null && newNameId == null) {
@@ -64,6 +64,45 @@ public class MigrationSprocs {
 				deleteItem.setInt(1, oldNameId);
 				deleteItem.executeUpdate();
 			}
+		}
+
+		updateItemsTable();
+
+		conn.close();
+	}
+
+	/**
+	 * Updates the "items" table with all the item names.
+	 * @throws SQLException
+	 */
+	public static void updateItemsTable() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+
+		//get all existing item names
+		Set<String> existingItemNames = new HashSet<String>();
+		PreparedStatement getItemNames = conn.prepareStatement("SELECT name FROM items");
+		ResultSet rs = getItemNames.executeQuery();
+		while (rs.next()) {
+			existingItemNames.add(rs.getString(1).toLowerCase());
+		}
+
+		//insert all items that aren't in the database
+		InsertStatement insertItem = null;
+		ItemIndex itemIndex = ItemIndex.instance();
+		for (String itemName : itemIndex.getItemNames()) {
+			if (existingItemNames.contains(itemName.toLowerCase())) {
+				continue;
+			}
+
+			if (insertItem == null) {
+				insertItem = new InsertStatement("items");
+			} else {
+				insertItem.nextRow();
+			}
+			insertItem.setString("name", itemName);
+		}
+		if (insertItem != null) {
+			insertItem.execute(conn);
 		}
 
 		conn.close();

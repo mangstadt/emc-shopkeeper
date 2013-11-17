@@ -31,7 +31,7 @@ public class TransactionPage {
 
 	private static final Pattern balanceRegex = Pattern.compile("^Your balance: ([\\d,]+)$", Pattern.CASE_INSENSITIVE);
 
-	private static final RenamedItems renamedItems = RenamedItems.instance();
+	private static final ItemIndex itemIndex = ItemIndex.instance();
 
 	private final DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
 	private final Document document;
@@ -139,13 +139,13 @@ public class TransactionPage {
 			Matcher m = soldRegex.matcher(description);
 			if (m.find()) {
 				transaction.setQuantity(-Integer.parseInt(m.group(1).replace(",", "")));
-				transaction.setItem(renamedItems.getSanitizedName(m.group(2)));
+				transaction.setItem(itemIndex.getDisplayName(m.group(2)));
 				transaction.setPlayer(m.group(3));
 			} else {
 				m = boughtRegex.matcher(description);
 				if (m.find()) {
 					transaction.setQuantity(Integer.parseInt(m.group(1).replace(",", "")));
-					transaction.setItem(renamedItems.getSanitizedName(m.group(2)));
+					transaction.setItem(itemIndex.getDisplayName(m.group(2)));
 					transaction.setPlayer(m.group(3));
 				} else {
 					//not a shop transaction
