@@ -1,5 +1,8 @@
 package emcshop;
 
+import static emcshop.util.NumberFormatter.formatQuantity;
+import static emcshop.util.NumberFormatter.formatRupees;
+
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -14,9 +17,11 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +37,7 @@ import javax.swing.ToolTipManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import emcshop.cli.Arguments;
 import emcshop.db.DbDao;
@@ -49,6 +55,7 @@ import emcshop.util.Settings;
 
 public class Main {
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
+	private static final String NEWLINE = System.getProperty("line.separator");
 
 	private static final PrintStream out = System.out;
 	private static Throwable pullerError = null;
@@ -86,92 +93,53 @@ public class Main {
 	private static final Set<String> validArgs;
 	static {
 		Set<String> set = new HashSet<String>();
-		set.add("help");
-		set.add("db");
-		set.add("stop-at-page");
-		set.add("start-at-page");
-		set.add("threads");
-		set.add("settings");
-		set.add("latest");
-		set.add("update");
-		set.add("query");
 		set.add("profile");
-		set.add("p");
 		set.add("profile-dir");
+		set.add("db");
+		set.add("settings");
 		set.add("log-level");
+
+		set.add("update");
+		set.add("stop-page");
+		set.add("start-page");
+		set.add("query");
+		set.add("format");
 		set.add("version");
+		set.add("help");
 		validArgs = Collections.unmodifiableSet(set);
 	}
 
+	private static final File defaultProfileRootDir = new File(FileUtils.getUserDirectory(), ".emc-shopkeeper");
+	private static final String defaultProfile = "default";
+	private static final int defaultStartPage = 1;
+	private static final String defaultFormat = "TABLE";
+
 	private static File profileRootDir, profileDir, dbDir;
-	private static String profile, query;
+	private static String profile, query, format;
 	private static Settings settings;
 	private static LogManager logManager;
 	private static Integer stopAtPage;
-	private static int startAtPage, threadCount;
-	private static boolean latest, update;
+	private static int startAtPage;
+	private static boolean update;
 	private static Level logLevel;
 
 	private static MainFrame frame;
 
 	public static void main(String[] args) throws Throwable {
-		File defaultProfileRootDir = new File(FileUtils.getUserDirectory(), ".emc-shopkeeper");
-		String defaultProfile = "default";
-		int defaultThreads = 4;
-		int defaultStartPage = 1;
-
 		Arguments arguments = new Arguments(args);
 
 		//print help
 		if (arguments.exists(null, "help")) {
-			//@formatter:off
-			out.print(
-			"EMC Shopkeeper v" + VERSION + "\n" +
-			"by Michael Angstadt\n" +
-			URL + "\n" +
-			"\n" +
-			"--latest\n" +
-			"  (CLI only) Prints out the latest transaction from the database.\n" +
-			"--update\n" +
-			"  (CLI only) Updates the database with the latest transactions.\n" +
-			"--query=QUERY\n" +
-			"  (CLI only) Shows the net gains/losses of each item.  Examples:\n" +
-			"  All data:           --query\n" +
-			"  Today's data:       --query=\"today\"\n" +
-			"  Three days of data: --query=\"2013-03-07 to 2013-03-09\"\n" +
-			"  Data up to today:   --query=\"2013-03-07 to today\"\n" +
-			"--profile=PROFILE\n" +
-			"  The profile to use (defaults to \"" + defaultProfile + "\").\n" +
-			"--profile-dir=DIR\n" +
-			"  The path to the directory that contains all the profiles\n" +
-			"  (defaults to \"" + defaultProfileRootDir.getAbsolutePath() + "\").\n" +
-			"--db=PATH\n" +
-			"  Overrides the database location (stored in the profile by default).\n" +
-			"--settings=PATH\n" +
-			"  Overrides the settings file location (stored in the profile by default).\n" +
-			"--threads=NUM\n" +
-			"  (CLI only) Specifies the number of transaction history pages that will be\n" +
-			"  parsed at once during an update (defaults to " + defaultThreads + ").\n" +
-			"--start-at-page=PAGE\n" +
-			"  (CLI only) Specifies the transaction history page number to start at during\n" +
-			"  an update (defaults to " + defaultStartPage + ").\n" +
-			"--stop-at-page=PAGE\n" +
-			"  (CLI only) Specifies the transaction history page number to stop at during\n" +
-			"  an update (defaults to the last page).\n" +
-			"--log-level=FINEST|FINER|FINE|CONFIG|INFO|WARNING|SEVERE\n" +
-			"  The log level to use (defaults to INFO).\n" +
-			"--version\n" +
-			"  (CLI only) Prints the version of this program.\n" +
-			"--help\n" +
-			"  (CLI only) Prints this help message.\n"
-			);
-			//@formatter:on
+			printHelp();
 			return;
 		}
 
 		//check for invalid arguments
 		Collection<String> invalidArgs = arguments.invalidArgs(validArgs);
 		if (!invalidArgs.isEmpty()) {
+			printHelp();
+			out.println();
+
 			out.println("Error: The following arguments are invalid:");
 			for (String invalidArg : invalidArgs) {
 				out.println("  " + invalidArg);
@@ -219,38 +187,33 @@ public class Main {
 		String dbDirStr = arguments.value(null, "db");
 		dbDir = (dbDirStr == null) ? new File(profileDir, "db") : new File(dbDirStr);
 
-		//get stop at page
-		stopAtPage = arguments.valueInt(null, "stop-at-page");
-		if (stopAtPage != null && stopAtPage < 1) {
-			out.println("Error: \"stop-at-page\" must be greater than 0.");
-			System.exit(1);
-		}
-
-		//get start at page
-		startAtPage = arguments.valueInt(null, "start-at-page", defaultStartPage);
-		if (startAtPage < 1) {
-			out.println("Error: \"start-at-page\" must be greater than 0.");
-			System.exit(1);
-		}
-
-		//get thread count
-		threadCount = arguments.valueInt(null, "threads", defaultThreads);
-		if (threadCount < 1) {
-			out.println("Error: \"threads\" must be greater than 0.");
-			System.exit(1);
-		}
-
-		//get latest flag
-		latest = arguments.exists(null, "latest");
-
 		//get update flag
 		update = arguments.exists(null, "update");
+		if (update) {
+			//get stop at page
+			stopAtPage = arguments.valueInt(null, "stop-page");
+			if (stopAtPage != null && stopAtPage < 1) {
+				out.println("Error: \"stop-page\" must be greater than 0.");
+				System.exit(1);
+			}
+
+			//get start at page
+			startAtPage = arguments.valueInt(null, "start-page", defaultStartPage);
+			if (startAtPage < 1) {
+				out.println("Error: \"start-page\" must be greater than 0.");
+				System.exit(1);
+			}
+		}
 
 		//get query
 		if (arguments.exists(null, "query")) {
 			query = arguments.value(null, "query");
 			if (query == null) {
 				query = "";
+			}
+			format = arguments.value(null, "format");
+			if (format == null) {
+				format = defaultFormat;
 			}
 		} else {
 			query = null;
@@ -271,53 +234,113 @@ public class Main {
 
 		logManager = new LogManager(logLevel, new File(profileDir, "app.log"));
 
-		if (!latest && !update && query == null) {
+		if (!update && query == null) {
 			launchGui();
 		} else {
 			launchCli();
 		}
 	}
 
+	private static void printHelp() {
+		//@formatter:off
+		out.println(
+		"EMC Shopkeeper v" + VERSION + NEWLINE +
+		"by Michael Angstadt (shavingfoam)" + NEWLINE +
+		URL + NEWLINE +
+		NEWLINE +
+		"General arguments" + NEWLINE +
+		"These arguments can be used for the GUI and CLI." + NEWLINE +
+		"================================================" + NEWLINE +
+		"--profile=PROFILE" + NEWLINE +
+		"  The profile to use (defaults to \"" + defaultProfile + "\")." + NEWLINE +
+		NEWLINE +
+		"--profile-dir=DIR" + NEWLINE +
+		"  The path to the directory that contains all the profiles" + NEWLINE +
+		"  (defaults to \"" + defaultProfileRootDir.getAbsolutePath() + "\")." + NEWLINE +
+		NEWLINE +
+		"--db=PATH" + NEWLINE +
+		"  Overrides the database location (stored in the profile by default)." + NEWLINE +
+		NEWLINE +
+		"--settings=PATH" + NEWLINE +
+		"  Overrides the settings file location (stored in the profile by default)." + NEWLINE +
+		NEWLINE +
+		"--log-level=FINEST|FINER|FINE|CONFIG|INFO|WARNING|SEVERE" + NEWLINE +
+		"  The log level to use (defaults to INFO)." + NEWLINE +
+		NEWLINE +
+		"CLI arguments" + NEWLINE +
+		"Using one of these arguments will launch EMC Shopkeeper in CLI mode." + NEWLINE +
+		"================================================" + NEWLINE +
+		"--update" + NEWLINE +
+		"  Updates the database with the latest transactions." + NEWLINE +
+		"--start-page=PAGE" + NEWLINE +
+		"  Specifies the transaction history page number to start at during" + NEWLINE +
+		"  the first update (defaults to " + defaultStartPage + ")." + NEWLINE +
+		"--stop-page=PAGE" + NEWLINE +
+		"  Specifies the transaction history page number to stop at during" + NEWLINE +
+		"  the first update (defaults to the last page)." + NEWLINE +
+		NEWLINE +
+		"--query=QUERY" + NEWLINE +
+		"  Shows the net gains/losses of each item.  Examples:" + NEWLINE +
+		"  All data:           --query" + NEWLINE +
+		"  Today's data:       --query=\"today\"" + NEWLINE +
+		"  Three days of data: --query=\"2013-03-07 to 2013-03-09\"" + NEWLINE +
+		"  Data up to today:   --query=\"2013-03-07 to today\"" + NEWLINE +
+		"--format=TABLE|CSV|BBCODE" + NEWLINE +
+		"  Specifies how to render the queried transaction data (defaults to " + defaultFormat + ")." + NEWLINE +
+		NEWLINE +
+		"--version" + NEWLINE +
+		"  Prints the version of this program." + NEWLINE +
+		NEWLINE +
+		"--help" + NEWLINE +
+		"  Prints this help message."
+		);
+		//@formatter:on
+	}
+
 	private static void launchCli() throws Throwable {
 		final DbDao dao = new DirbyEmbeddedDbDao(dbDir);
 
-		if (latest) {
-			ShopTransaction latestTransactionFromDb = dao.getLatestTransaction();
-			if (latestTransactionFromDb == null) {
-				out.println("No transactions in database.");
-			} else {
-				NumberFormat nf = NumberFormat.getNumberInstance();
-				int quantity = latestTransactionFromDb.getQuantity();
-				if (quantity < 0) {
-					out.println("Sold " + -quantity + " " + latestTransactionFromDb.getItem() + " to " + latestTransactionFromDb.getPlayer() + " for " + nf.format(latestTransactionFromDb.getAmount()) + "r.");
-				} else {
-					out.println("Bought " + quantity + " " + latestTransactionFromDb.getItem() + " from " + latestTransactionFromDb.getPlayer() + " for " + nf.format(-latestTransactionFromDb.getAmount()) + "r.");
-				}
-				out.println("Current balance: " + nf.format(latestTransactionFromDb.getBalance()) + "r");
-			}
-		}
-
 		if (update) {
 			Date latestTransactionDateFromDb = dao.getLatestTransactionDate();
-			if (latestTransactionDateFromDb == null) {
+			boolean firstUpdate = (latestTransactionDateFromDb == null);
+
+			if (firstUpdate) {
 				//@formatter:off
-			out.println(
-			"================================================================================\n" +
-			"NOTE: This is the first time you are running an update.  To ensure accurate\n" +
-			"results, it is recommended that you set MOVE PERMS to FALSE on your res for this\n" +
-			"first update.\n" +
-			"                                /res set move false\n" +
-			"\n" +
-			"This could take up to 30 MINUTES depending on your transaction history size.\n" +
-			"--------------------------------------------------------------------------------");
-			//@formatter:on
+				out.println(
+				"================================================================================" + NEWLINE +
+				"NOTE: This is the first time you are running an update.  To ensure accurate" + NEWLINE +
+				"results, it is recommended that you set MOVE PERMS to FALSE on your res for this" + NEWLINE +
+				"first update." + NEWLINE +
+				"                                /res set move false" + NEWLINE);
+				//@formatter:on
+
+				if (stopAtPage == null) {
+					//@formatter:off
+					out.println(
+					"Your entire transaction history will be parsed." + NEWLINE +
+					"This could take up to 60 MINUTES depending on its size.");
+					//@formatter:on
+				} else {
+					long time = estimateUpdateTime(stopAtPage);
+					int pages = stopAtPage - startAtPage + 1;
+
+					//@formatter:off
+					out.println(
+					pages + " pages will be parsed." + NEWLINE +
+					"Estimated time: " + DurationFormatUtils.formatDuration(time, "HH:mm:ss", true));
+					//@formatter:on
+				}
+
+				out.println("--------------------------------------------------------------------------------");
 				String ready = System.console().readLine("Are you ready to start? (y/n) ");
 				if (!"y".equalsIgnoreCase(ready)) {
 					out.println("Goodbye.");
 					return;
 				}
 			}
+
 			EmcSession session = settings.getSession();
+			String sessionUsername = (session == null) ? null : session.getUsername();
 			boolean repeat;
 			do {
 				repeat = false;
@@ -325,7 +348,15 @@ public class Main {
 					out.println("Please enter your EMC login credentials.");
 					do {
 						//note: "System.console()" doesn't work from Eclipse
-						String username = System.console().readLine("Username: ");
+						String username;
+						if (sessionUsername == null) {
+							username = System.console().readLine("Username: ");
+						} else {
+							username = System.console().readLine("Username [" + sessionUsername + "]: ");
+							if (username.isEmpty()) {
+								username = sessionUsername;
+							}
+						}
 						String password = new String(System.console().readPassword("Password: "));
 						out.println("Logging in...");
 						session = EmcSession.login(username, password, settings.isPersistSession());
@@ -338,14 +369,15 @@ public class Main {
 				}
 
 				final TransactionPuller puller = new TransactionPuller(session);
-				puller.setThreadCount(threadCount);
-				if (latestTransactionDateFromDb != null) {
+				if (firstUpdate) {
+					puller.setMaxPaymentTransactionAge(7);
+					if (stopAtPage != null) {
+						puller.setStopAtPage(stopAtPage);
+					}
+					puller.setStartAtPage(startAtPage);
+				} else {
 					puller.setStopAtDate(latestTransactionDateFromDb);
 				}
-				if (stopAtPage != null) {
-					puller.setStopAtPage(stopAtPage);
-				}
-				puller.setStartAtPage(startAtPage);
 
 				TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
 					int transactionCount = 0;
@@ -393,76 +425,100 @@ public class Main {
 
 		if (query != null) {
 			Map<String, ItemGroup> itemGroups;
+			Date from, to;
 			if (query.isEmpty()) {
 				itemGroups = dao.getItemGroups();
+				from = to = null;
 			} else {
 				Date range[] = parseDateRange(query);
-				itemGroups = dao.getItemGroups(range[0], range[1]);
+				from = range[0];
+				to = range[1];
+				itemGroups = dao.getItemGroups(from, to);
 			}
 
-			out.println("Item                |Sold                |Bought              |Net");
-			out.println("--------------------------------------------------------------------------------");
-			NumberFormat nf = NumberFormat.getNumberInstance();
-			long totalAmount = 0;
-			for (Map.Entry<String, ItemGroup> entry : itemGroups.entrySet()) {
-				//TODO ANSI colors
-				//TODO String.format("%-20s | %-20s | %-20s | %-20s\n", group.getItem(), sold, bought, net);
-				ItemGroup itemGroup = entry.getValue();
-
-				out.print(itemGroup.getItem());
-				int spaces = 20 - itemGroup.getItem().length();
-				if (spaces > 0) {
-					out.print(StringUtils.repeat(' ', spaces));
+			//sort items
+			List<ItemGroup> sortedItemGroups = new ArrayList<ItemGroup>(itemGroups.values());
+			Collections.sort(sortedItemGroups, new Comparator<ItemGroup>() {
+				@Override
+				public int compare(ItemGroup left, ItemGroup right) {
+					return left.getItem().compareTo(right.getItem());
 				}
+			});
+
+			if ("CSV".equalsIgnoreCase(format)) {
+				//calculate net total
+				int netTotal = 0;
+				for (Map.Entry<String, ItemGroup> entry : itemGroups.entrySet()) {
+					ItemGroup itemGroup = entry.getValue();
+					netTotal += itemGroup.getNetAmount();
+				}
+
+				//generate CSV
+				out.println(QueryExporter.generateItemsCsv(sortedItemGroups, netTotal, from, to));
+			} else if ("BBCODE".equalsIgnoreCase(format)) {
+				//calculate net total
+				int netTotal = 0;
+				for (Map.Entry<String, ItemGroup> entry : itemGroups.entrySet()) {
+					ItemGroup itemGroup = entry.getValue();
+					netTotal += itemGroup.getNetAmount();
+				}
+
+				//generate BBCode
+				out.println(QueryExporter.generateItemsBBCode(sortedItemGroups, netTotal, from, to));
+			} else {
+				out.println("Item                |Sold                |Bought              |Net");
+				out.println("--------------------------------------------------------------------------------");
+				int totalAmount = 0;
+				for (ItemGroup itemGroup : sortedItemGroups) {
+					//TODO ANSI colors
+					//TODO String.format("%-20s | %-20s | %-20s | %-20s\n", group.getItem(), sold, bought, net);
+
+					out.print(itemGroup.getItem());
+					int spaces = 20 - itemGroup.getItem().length();
+					if (spaces > 0) {
+						out.print(StringUtils.repeat(' ', spaces));
+					}
+					out.print('|');
+
+					String s;
+
+					if (itemGroup.getSoldQuantity() == 0) {
+						s = " - ";
+					} else {
+						s = formatQuantity(itemGroup.getSoldQuantity(), false) + " / " + formatRupees(itemGroup.getSoldAmount(), false);
+					}
+					out.print(s);
+					spaces = 20 - s.length();
+					if (spaces > 0) {
+						out.print(StringUtils.repeat(' ', spaces));
+					}
+					out.print('|');
+
+					if (itemGroup.getBoughtQuantity() == 0) {
+						s = " - ";
+					} else {
+						s = formatQuantity(itemGroup.getBoughtQuantity(), false) + " / " + formatRupees(itemGroup.getBoughtAmount(), false);
+					}
+					out.print(s);
+					spaces = 20 - s.length();
+					if (spaces > 0) {
+						out.print(StringUtils.repeat(' ', spaces));
+					}
+					out.print('|');
+
+					out.print(formatQuantity(itemGroup.getNetQuantity(), false));
+					out.print(" / ");
+					out.print(formatRupees(itemGroup.getNetAmount(), false));
+
+					out.println();
+
+					totalAmount += itemGroup.getNetAmount();
+				}
+
+				out.print(StringUtils.repeat(' ', 62));
 				out.print('|');
-
-				String s;
-				if (itemGroup.getSoldQuantity() == 0) {
-					s = " - ";
-				} else {
-					s = nf.format(itemGroup.getSoldQuantity()) + " / +" + nf.format(itemGroup.getSoldAmount()) + "r";
-				}
-				out.print(s);
-				spaces = 20 - s.length();
-				if (spaces > 0) {
-					out.print(StringUtils.repeat(' ', spaces));
-				}
-				out.print('|');
-
-				if (itemGroup.getBoughtQuantity() == 0) {
-					s = " - ";
-				} else {
-					s = "+" + nf.format(itemGroup.getBoughtQuantity()) + " / " + nf.format(itemGroup.getBoughtAmount()) + "r";
-				}
-				out.print(s);
-				spaces = 20 - s.length();
-				if (spaces > 0) {
-					out.print(StringUtils.repeat(' ', spaces));
-				}
-				out.print('|');
-
-				s = "";
-				if (itemGroup.getNetQuantity() > 0) {
-					s += "+";
-				}
-				s += nf.format(itemGroup.getNetQuantity()) + " / ";
-				if (itemGroup.getNetAmount() > 0) {
-					s += "+";
-				}
-				s += nf.format(itemGroup.getNetAmount()) + "r";
-				out.print(s);
-
-				out.println();
-
-				totalAmount += itemGroup.getNetAmount();
+				out.println(formatRupees(totalAmount));
 			}
-
-			out.print(StringUtils.repeat(' ', 62));
-			out.print('|');
-			if (totalAmount > 0) {
-				out.print('+');
-			}
-			out.println(nf.format(totalAmount) + "r");
 		}
 	}
 
@@ -581,6 +637,22 @@ public class Main {
 		frame.setVisible(true);
 	}
 
+	/**
+	 * Estimates the time it will take to process all the transactions.
+	 * @param stopPage the page to stop at
+	 * @return the estimated processing time (in milliseconds)
+	 */
+	public static long estimateUpdateTime(Integer stopPage) {
+		int totalMs = 10000;
+		int last = 10000;
+		for (int i = 100; i < stopPage; i += 100) {
+			int cur = last + 1550;
+			totalMs += cur;
+			last = cur;
+		}
+		return totalMs;
+	}
+
 	private static class SplashScreenWrapper {
 		private final SplashScreen splash;
 		private final Graphics2D gfx;
@@ -599,20 +671,24 @@ public class Main {
 		}
 
 		public void setMessage(String message) {
-			if (gfx != null) {
-				gfx.setComposite(AlphaComposite.Clear);
-				gfx.fillRect(40, 60, 200, 40);
-				gfx.setPaintMode();
-				gfx.setColor(Color.BLACK);
-				gfx.drawString(message, 40, 80);
-				splash.update();
+			if (gfx == null) {
+				return;
 			}
+
+			gfx.setComposite(AlphaComposite.Clear);
+			gfx.fillRect(40, 60, 200, 40);
+			gfx.setPaintMode();
+			gfx.setColor(Color.BLACK);
+			gfx.drawString(message, 40, 80);
+			splash.update();
 		}
 
 		public void close() {
-			if (splash != null) {
-				splash.close();
+			if (splash == null) {
+				return;
 			}
+
+			splash.close();
 		}
 	}
 

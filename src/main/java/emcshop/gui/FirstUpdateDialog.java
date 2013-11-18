@@ -20,6 +20,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import emcshop.Main;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
 
@@ -49,7 +50,7 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		if (dialog.stopAtCheckBox.isSelected()) {
 			stopAtPage = dialog.stopAt.getInteger();
 			if (stopAtPage != null) {
-				estimatedTime = dialog.calculateEstimate(stopAtPage);
+				estimatedTime = Main.estimateUpdateTime(stopAtPage);
 			}
 		}
 
@@ -206,19 +207,8 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		setLocationRelativeTo(owner);
 	}
 
-	private long calculateEstimate(int pages) {
-		int totalMs = 10000;
-		int last = 10000;
-		for (int i = 100; i < pages; i += 100) {
-			int cur = last + 1550;
-			totalMs += cur;
-			last = cur;
-		}
-		return totalMs;
-	}
-
 	private String calculateEstimateDisplay(int pages) {
-		long totalMs = calculateEstimate(pages);
+		long totalMs = Main.estimateUpdateTime(pages);
 		return DurationFormatUtils.formatDuration(totalMs, "HH:mm:ss", true);
 	}
 
