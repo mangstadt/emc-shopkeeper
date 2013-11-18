@@ -273,75 +273,6 @@
 	<Item name="Pork" />
 	<Item name="Pork Chop" />
 	<Item name="Potato" emcNames="Potato Item" />
-	
-	<Item name="Potion of Regeneration" emcNames="Potion:8193" image="potion_regeneration.png" />
-	<Item name="Potion of Regeneration II" emcNames="Potion:8225" image="potion_regeneration.png" />
-	<Item name="Potion of Regeneration Extended" emcNames="Potion:8257" image="potion_regeneration.png" />
-	<Item name="Splash Potion of Regeneration" emcNames="Potion:16385" image="potion_regeneration_splash.png" />
-	<Item name="Splash Potion of Regeneration II" emcNames="Potion:16417" image="potion_regeneration_splash.png" />
-	<Item name="Splash Potion of Regeneration Extended" emcNames="Potion:16449" image="potion_regeneration_splash.png" />
-
-	<Item name="Potion of Swiftness" emcNames="Potion:8194" image="potion_swiftness.png" />
-	<Item name="Potion of Swiftness II" emcNames="Potion:8226" image="potion_swiftness.png" />
-	<Item name="Potion of Swiftness Extended" emcNames="Potion:8258" image="potion_swiftness.png" />
-	<Item name="Splash Potion of Swiftness" emcNames="Potion:16386" image="potion_swiftness_splash.png" />
-	<Item name="Splash Potion of Swiftness II" emcNames="Potion:16418" image="potion_swiftness_splash.png" />
-	<Item name="Splash Potion of Swiftness Extended" emcNames="Potion:16450" image="potion_swiftness_splash.png" />
-
-	<Item name="Potion of Fire Resistance" emcNames="Potion:8195,Potion:8227" image="potion_fire_resistance.png" />
-	<Item name="Potion of Fire Resistance Extended" emcNames="Potion:8259" image="potion_fire_resistance.png" />
-	<Item name="Splash Potion of Fire Resistance" emcNames="Potion:16387,Potion:16419" image="potion_fire_resistance_splash.png" />
-	<Item name="Splash Potion of Fire Resistance Extended" emcNames="Potion:16451" image="potion_fire_resistance_splash.png" />
-
-	<Item name="Potion of Poison" emcNames="Potion:8196" image="potion_poison.png" />
-	<Item name="Potion of Poison II" emcNames="Potion:8228" image="potion_poison.png" />
-	<Item name="Potion of Poison Extended" emcNames="Potion:8260" image="potion_poison.png" />
-	<Item name="Splash Potion of Poison" emcNames="Potion:16388" image="potion_poison_splash.png" />
-	<Item name="Splash Potion of Poison II" emcNames="Potion:16420" image="potion_poison_splash.png" />
-	<Item name="Splash Potion of Poison Extended" emcNames="Potion:16452" image="potion_poison_splash.png" />
-
-	<Item name="Potion of Health" emcNames="Potion:8197" image="potion_health.png" />
-	<Item name="Potion of Health II" emcNames="Potion:8229,Potion:8261" image="potion_health.png" />
-	<Item name="Splash Potion of Health" emcNames="Potion:16389" image="potion_health_splash.png" />
-	<Item name="Splash Potion of Health II" emcNames="Potion:16421,Potion:16453" image="potion_health_splash.png" />
-
-	<Item name="Potion of Night Vision" emcNames="Potion:8198,Potion:8230" image="potion_night_vision.png" />
-	<Item name="Potion of Night Vision Extended" emcNames="Potion:8262" image="potion_night_vision.png" />
-	<Item name="Splash Potion of Night Vision" emcNames="Potion:16390,Potion:16422" image="potion_night_vision_splash.png" />
-	<Item name="Splash Potion of Night Vision Extended" emcNames="Potion:16454" image="potion_night_vision_splash.png" />
-
-	<Item name="Potion of Weakness" emcNames="Potion:8200,Potion:8232" image="potion_weakness.png" />
-	<Item name="Potion of Weakness Extended" emcNames="Potion:8264" image="potion_weakness.png" />
-	<Item name="Splash Potion of Weakness" emcNames="Potion:16392,Potion:16424" image="potion_weakness_splash.png" />
-	<Item name="Splash Potion of Weakness Extended" emcNames="Potion:16456" image="potion_weakness_splash.png" />
-
-	<Item name="Potion of Strength" emcNames="Potion:8201" image="potion_strength.png" />
-	<Item name="Potion of Strength II" emcNames="Potion:8233" image="potion_strength.png" />
-	<Item name="Potion of Strength Extended" emcNames="Potion:8265" image="potion_strength.png" />
-	<Item name="Splash Potion of Strength" emcNames="Potion:16393" image="potion_strength_splash.png" />
-	<Item name="Splash Potion of Strength II" emcNames="Potion:16425" image="potion_strength_splash.png" />
-	<Item name="Splash Potion of Strength Extended" emcNames="Potion:16457" image="potion_strength_splash.png" />
-	
-	<Item name="Potion of Slowness" emcNames="Potion:8202,Potion:8234" image="potion_slowness.png" />
-	<Item name="Potion of Slowness Extended" emcNames="Potion:8266" image="potion_slowness.png" />
-	<Item name="Splash Potion of Slowness" emcNames="Potion:16394,Potion:16426" image="potion_slowness_splash.png" />
-	<Item name="Splash Potion of Slowness Extended" emcNames="Potion:16458" image="potion_slowness_splash.png" />
-	
-	<Item name="Potion of Harming" emcNames="Potion:8204" image="potion_harming.png" />
-	<Item name="Potion of Harming II" emcNames="Potion:8236,Potion:8268" image="potion_harming.png" />
-	<Item name="Splash Potion of Harming" emcNames="Potion:16396" image="potion_harming_splash.png" />
-	<Item name="Splash Potion of Harming II" emcNames="Potion:16428,Potion:16460" image="potion_harming_splash.png" />
-
-	<Item name="Potion of Invisibility" emcNames="Potion:8206,Potion:8238" image="potion_invisibility.png" />
-	<Item name="Potion of Invisibility Extended" emcNames="Potion:8270" image="potion_invisibility.png" />
-	<Item name="Splash Potion of Invisibility" emcNames="Potion:16398,Potion:16430" image="potion_invisibility_splash.png" />
-	<Item name="Splash Potion of Invisibility Extended" emcNames="Potion:16462" image="potion_invisibility_splash.png" />
-	
-	<Item name="Potion of Water Breathing" emcNames="Potion:8205,Potion:8237" image="potion_water_breathing.png" />
-	<Item name="Potion of Water Breathing Extended" emcNames="Potion:8269" image="potion_water_breathing.png" />
-	<Item name="Splash Potion of Water Breathing" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" />
-	<Item name="Splash Potion of Water Breathing Extended" emcNames="Potion:16461" image="potion_water_breathing_splash.png" />
-	
 	<Item name="Powered Minecart" />
 	<Item name="Powered Rail" />
 	<Item name="Pufferfish" />
@@ -449,4 +380,80 @@
 	<Item name="Yellow Wool" />
 	<Item name="Zombie Head" />
 	<Item name="Zombie Virus" emcNames="Water Bottle - §aZombie Virus" image="water_bottle.png" />
+	
+	<!-- Potions -->
+	
+	<Item name="Awkward Potion" emcNames="Potion:16" image="water_bottle.png" />
+	<Item name="Thick Potion" emcNames="Potion:32" image="water_bottle.png" />
+	<Item name="Mundane Potion Ext" emcNames="Potion:64" image="water_bottle.png" />
+	<Item name="Mundane Potion" emcNames="Potion:8192" image="water_bottle.png" />
+	<Item name="Splash Mundane Potion" emcNames="Potion:16384" image="potion_splash.png" />
+	
+	<Item name="Potion of Regeneration" emcNames="Potion:8193" image="potion_regeneration.png" />
+	<Item name="Potion of Regeneration II" emcNames="Potion:8225" image="potion_regeneration.png" />
+	<Item name="Potion of Regeneration Ext" emcNames="Potion:8257" image="potion_regeneration.png" />
+	<Item name="Splash Potion of Regeneration" emcNames="Potion:16385" image="potion_regeneration_splash.png" />
+	<Item name="Splash Potion of Regeneration II" emcNames="Potion:16417" image="potion_regeneration_splash.png" />
+	<Item name="Splash Potion of Regeneration Ext" emcNames="Potion:16449" image="potion_regeneration_splash.png" />
+
+	<Item name="Potion of Swiftness" emcNames="Potion:8194" image="potion_swiftness.png" />
+	<Item name="Potion of Swiftness II" emcNames="Potion:8226" image="potion_swiftness.png" />
+	<Item name="Potion of Swiftness Ext" emcNames="Potion:8258" image="potion_swiftness.png" />
+	<Item name="Splash Potion of Swiftness" emcNames="Potion:16386" image="potion_swiftness_splash.png" />
+	<Item name="Splash Potion of Swiftness II" emcNames="Potion:16418" image="potion_swiftness_splash.png" />
+	<Item name="Splash Potion of Swiftness Ext" emcNames="Potion:16450" image="potion_swiftness_splash.png" />
+
+	<Item name="Potion of Fire Resistance" emcNames="Potion:8195,Potion:8227" image="potion_fire_resistance.png" />
+	<Item name="Potion of Fire Resistance Ext" emcNames="Potion:8259" image="potion_fire_resistance.png" />
+	<Item name="Splash Potion of Fire Resistance" emcNames="Potion:16387,Potion:16419" image="potion_fire_resistance_splash.png" />
+	<Item name="Splash Potion of Fire Resistance Ext" emcNames="Potion:16451" image="potion_fire_resistance_splash.png" />
+
+	<Item name="Potion of Poison" emcNames="Potion:8196" image="potion_poison.png" />
+	<Item name="Potion of Poison II" emcNames="Potion:8228" image="potion_poison.png" />
+	<Item name="Potion of Poison Ext" emcNames="Potion:8260" image="potion_poison.png" />
+	<Item name="Splash Potion of Poison" emcNames="Potion:16388" image="potion_poison_splash.png" />
+	<Item name="Splash Potion of Poison II" emcNames="Potion:16420" image="potion_poison_splash.png" />
+	<Item name="Splash Potion of Poison Ext" emcNames="Potion:16452" image="potion_poison_splash.png" />
+
+	<Item name="Potion of Health" emcNames="Potion:8197" image="potion_health.png" />
+	<Item name="Potion of Health II" emcNames="Potion:8229,Potion:8261" image="potion_health.png" />
+	<Item name="Splash Potion of Health" emcNames="Potion:16389" image="potion_health_splash.png" />
+	<Item name="Splash Potion of Health II" emcNames="Potion:16421,Potion:16453" image="potion_health_splash.png" />
+
+	<Item name="Potion of Night Vision" emcNames="Potion:8198,Potion:8230" image="potion_night_vision.png" />
+	<Item name="Potion of Night Vision Ext" emcNames="Potion:8262" image="potion_night_vision.png" />
+	<Item name="Splash Potion of Night Vision" emcNames="Potion:16390,Potion:16422" image="potion_night_vision_splash.png" />
+	<Item name="Splash Potion of Night Vision Ext" emcNames="Potion:16454" image="potion_night_vision_splash.png" />
+
+	<Item name="Potion of Weakness" emcNames="Potion:8200,Potion:8232" image="potion_weakness.png" />
+	<Item name="Potion of Weakness Ext" emcNames="Potion:8264" image="potion_weakness.png" />
+	<Item name="Splash Potion of Weakness" emcNames="Potion:16392,Potion:16424" image="potion_weakness_splash.png" />
+	<Item name="Splash Potion of Weakness Ext" emcNames="Potion:16456" image="potion_weakness_splash.png" />
+
+	<Item name="Potion of Strength" emcNames="Potion:8201" image="potion_strength.png" />
+	<Item name="Potion of Strength II" emcNames="Potion:8233" image="potion_strength.png" />
+	<Item name="Potion of Strength Ext" emcNames="Potion:8265" image="potion_strength.png" />
+	<Item name="Splash Potion of Strength" emcNames="Potion:16393" image="potion_strength_splash.png" />
+	<Item name="Splash Potion of Strength II" emcNames="Potion:16425" image="potion_strength_splash.png" />
+	<Item name="Splash Potion of Strength Ext" emcNames="Potion:16457" image="potion_strength_splash.png" />
+	
+	<Item name="Potion of Slowness" emcNames="Potion:8202,Potion:8234" image="potion_slowness.png" />
+	<Item name="Potion of Slowness Ext" emcNames="Potion:8266" image="potion_slowness.png" />
+	<Item name="Splash Potion of Slowness" emcNames="Potion:16394,Potion:16426" image="potion_slowness_splash.png" />
+	<Item name="Splash Potion of Slowness Ext" emcNames="Potion:16458" image="potion_slowness_splash.png" />
+	
+	<Item name="Potion of Harming" emcNames="Potion:8204" image="potion_harming.png" />
+	<Item name="Potion of Harming II" emcNames="Potion:8236,Potion:8268" image="potion_harming.png" />
+	<Item name="Splash Potion of Harming" emcNames="Potion:16396" image="potion_harming_splash.png" />
+	<Item name="Splash Potion of Harming II" emcNames="Potion:16428,Potion:16460" image="potion_harming_splash.png" />
+
+	<Item name="Potion of Invisibility" emcNames="Potion:8206,Potion:8238" image="potion_invisibility.png" />
+	<Item name="Potion of Invisibility Ext" emcNames="Potion:8270" image="potion_invisibility.png" />
+	<Item name="Splash Potion of Invisibility" emcNames="Potion:16398,Potion:16430" image="potion_invisibility_splash.png" />
+	<Item name="Splash Potion of Invisibility Ext" emcNames="Potion:16462" image="potion_invisibility_splash.png" />
+	
+	<Item name="Potion of Water Breathing" emcNames="Potion:8205,Potion:8237" image="potion_water_breathing.png" />
+	<Item name="Potion of Water Breathing Ext" emcNames="Potion:8269" image="potion_water_breathing.png" />
+	<Item name="Splash Potion of Water Breathing" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" />
+	<Item name="Splash Potion of Water Breathing Ext" emcNames="Potion:16461" image="potion_water_breathing_splash.png" />
 </Items>
