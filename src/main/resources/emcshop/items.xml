@@ -18,13 +18,13 @@
 	<Item name="Birch Log" />
 	<Item name="Birch Plank" />
 	<Item name="Birch Sapling" />
-	<Item name="Black Clay" emcNames="Black Stclay" />
+	<Item name="Black Stclay" />
 	<Item name="Black Dye" />
 	<Item name="Black Wool" />
 	<Item name="Blaze Powder" />
 	<Item name="Blaze Rod" />
 	<Item name="Blocks Disc" />
-	<Item name="Blue Clay" emcNames="Blue Stclay" />
+	<Item name="Blue Stclay" />
 	<Item name="Blue Dye" />
 	<Item name="Blue Orchid" />
 	<Item name="Blue Wool" />
@@ -42,7 +42,7 @@
 	<Item name="Brick Block" />
 	<Item name="Brick Slab" />
 	<Item name="Brick Stairs" />
-	<Item name="Brown Clay" emcNames="Brown Stclay" />
+	<Item name="Brown Stclay" />
 	<Item name="Brown Dye" />
 	<Item name="Brown Mushroom" />
 	<Item name="Brown Wool" />
@@ -79,7 +79,7 @@
 	<Item name="Cracked Stone" />
 	<Item name="Creeper Head" />
 	<Item name="Creeper Sandstone" emcNames="Creeper Sandsto" />
-	<Item name="Cyan Clay" emcNames="Cyan Stclay" />
+	<Item name="Cyan Stclay" />
 	<Item name="Cyan Dye" />
 	<Item name="Cyan Wool" />
 	<Item name="Dandelion" />
@@ -155,10 +155,10 @@
 	<Item name="Golden Carrot" />
 	<Item name="Grass" />
 	<Item name="Gravel" />
-	<Item name="Gray Clay" emcNames="Gray Stclay" />
+	<Item name="Gray Stclay" />
 	<Item name="Gray Dye" />
 	<Item name="Gray Wool" />
-	<Item name="Green Clay" emcNames="Green Stclay" />
+	<Item name="Green Stclay" />
 	<Item name="Green Dye" />
 	<Item name="Green Wool" />
 	<Item name="Gunpowder" />
@@ -206,16 +206,16 @@
 	<Item name="Leather Leggings" />
 	<Item name="Leaves" />
 	<Item name="Lever" />
-	<Item name="Light Blue Clay" emcNames="Lghtblue Stclay" />
+	<Item name="Lghtblue Stclay" />
 	<Item name="Light Blue Dye" />
 	<Item name="Light Blue Wool" />
-	<Item name="Light Gray Clay" emcNames="Lghtgray Stclay" />
+	<Item name="Lghtgray Stclay" />
 	<Item name="Lilac" />
-	<Item name="Lime Clay" emcNames="Lime Stclay" />
+	<Item name="Lime Stclay" />
 	<Item name="Lime Dye" />
 	<Item name="Lime Wool" />
 	<Item name="Long Grass" />
-	<Item name="Magenta Clay" emcNames="Magenta Stclay" />
+	<Item name="Magenta Stclay" />
 	<Item name="Magenta Dye" />
 	<Item name="Magenta Wool" />
 	<Item name="Magma Cream" />
@@ -248,7 +248,7 @@
 	<Item name="Oak Stairs" />
 	<Item name="Obsidian" />
 	<Item name="Ocelot Egg" />
-	<Item name="Orange Clay" emcNames="Orange Stclay" />
+	<Item name="Orange Stclay" />
 	<Item name="Orange Dye" />
 	<Item name="Orange Tulip" />
 	<Item name="Orange Wool" />
@@ -262,7 +262,7 @@
 	<Item name="Pine Log" />
 	<Item name="Pine Plank" />
 	<Item name="Pine Sapling" />
-	<Item name="Pink Clay" emcNames="Pink Stclay" />
+	<Item name="Pink Stclay" />
 	<Item name="Pink Dye" />
 	<Item name="Pink Tulip" />
 	<Item name="Pink Wool" />
@@ -279,7 +279,7 @@
 	<Item name="Pumpkin" />
 	<Item name="Pumpkin Pie" />
 	<Item name="Pumpkin Seeds" />
-	<Item name="Purple Clay" emcNames="Purple Stclay" />
+	<Item name="Purple Stclay" />
 	<Item name="Purple Dye" />
 	<Item name="Purple Wool" />
 	<Item name="Quartz" />
@@ -291,7 +291,7 @@
 	<Item name="Raw Fish" />
 	<Item name="Raw Salmon" />
 	<Item name="Record 12" />
-	<Item name="Red Clay" emcNames="Red Stclay" />
+	<Item name="Red Stclay" />
 	<Item name="Red Dye" />
 	<Item name="Red Mushroom" />
 	<Item name="Red Sand" />
@@ -362,7 +362,7 @@
 	<Item name="Water Lily" />
 	<Item name="Web" />
 	<Item name="Wheat" />
-	<Item name="White Clay" emcNames="White Stclay" />
+	<Item name="White Stclay" />
 	<Item name="White Tulip" />
 	<Item name="White Wool" />
 	<Item name="Wither Head" />
@@ -375,7 +375,7 @@
 	<Item name="Wooden Shovel" />
 	<Item name="Wooden Sword" />
 	<Item name="Workbench" />
-	<Item name="Yellow Clay" emcNames="Yellow Stclay" />
+	<Item name="Yellow Stclay" />
 	<Item name="Yellow Dye" />
 	<Item name="Yellow Wool" />
 	<Item name="Zombie Head" />
