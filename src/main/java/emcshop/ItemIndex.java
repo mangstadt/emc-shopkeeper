@@ -22,10 +22,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Contains new names for certain items, which are more human-readable. For
- * example, the Zombie Virus potion has the name
- * "Water Bottle - ï¿½aZombie Virus" on the transaction history page. This class
- * gives this item the new name of "Zombie Virus".
+ * DAO for accessing the display names, transaction page names, and image file
+ * names of all Minecraft items.
  * @author Michael Angstadt
  */
 public class ItemIndex {
@@ -113,10 +111,9 @@ public class ItemIndex {
 
 	/**
 	 * Gets the display name of an item.
-	 * @param emcName the name from the transaction history (e.g.
-	 * "Water Bottle - ¤aZombie Virus")
-	 * @return the display name (e.g. "Zombie Virus") or the transaction history
-	 * name if no mapping exists
+	 * @param emcName the name from the transaction history (e.g. "Potion:8193")
+	 * @return the display name (e.g. "Potion of Regeneration") or the
+	 * transaction history name if no mapping exists
 	 */
 	public String getDisplayName(String emcName) {
 		String displayName = emcNameToDisplayName.get(emcName);
