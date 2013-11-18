@@ -379,6 +379,7 @@ public class Main {
 					puller.setStopAtDate(latestTransactionDateFromDb);
 				}
 
+				Date started = new Date();
 				TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
 					int transactionCount = 0;
 					int pageCount = 0;
@@ -416,6 +417,11 @@ public class Main {
 					throw result.getThrown();
 				case COMPLETED:
 					dao.commit();
+
+					settings.setLastUpdated(started);
+					settings.setRupeeBalance(result.getRupeeBalance());
+					settings.save();
+
 					out.println("\n" + result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
 					logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
 					break;
