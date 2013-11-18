@@ -21,8 +21,8 @@ public class DirbyEmbeddedDbDao extends DirbyDbDao {
 	 * @param listener
 	 * @throws SQLException
 	 */
-	public DirbyEmbeddedDbDao(File dir, DbListener listener) throws SQLException {
-		File databaseDir = new File(dir.getAbsolutePath());
+	public DirbyEmbeddedDbDao(File databaseDir, DbListener listener) throws SQLException {
+		databaseDir = new File(databaseDir.getAbsolutePath());
 		System.setProperty("derby.system.home", databaseDir.getParentFile().getAbsolutePath());
 		init("jdbc:derby:" + databaseDir.getName(), !databaseDir.isDirectory(), listener);
 	}
