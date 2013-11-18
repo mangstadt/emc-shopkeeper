@@ -62,6 +62,8 @@ import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.ClickableLabel;
+import emcshop.gui.lib.MacSupport;
 import emcshop.util.BBCodeBuilder;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;

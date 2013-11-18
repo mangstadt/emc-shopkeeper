@@ -1,4 +1,4 @@
-package emcshop.gui;
+package emcshop.gui.lib;
 
 import javax.swing.JTextField;
 import javax.swing.text.AttributeSet;

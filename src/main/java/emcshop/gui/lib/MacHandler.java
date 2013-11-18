@@ -1,4 +1,4 @@
-package emcshop.gui;
+package emcshop.gui.lib;
 
 /**
  * Handles various events specific to the Mac OSX environment.

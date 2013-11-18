@@ -29,12 +29,13 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
-import ch.rakudave.suggest.JSuggestField;
-import ch.rakudave.suggest.matcher.ContainsMatcher;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.JNumberTextField;
+import emcshop.gui.lib.suggest.ContainsMatcher;
+import emcshop.gui.lib.suggest.JSuggestField;
 
 /**
  * Displays the pending payment transactions.

@@ -1,4 +1,4 @@
-package emcshop.gui;
+package emcshop.gui.lib;
 
 import java.awt.Image;
 import java.lang.reflect.InvocationHandler;

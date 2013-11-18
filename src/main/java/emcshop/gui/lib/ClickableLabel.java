@@ -1,4 +1,4 @@
-package emcshop.gui;
+package emcshop.gui.lib;
 
 import java.awt.Cursor;
 import java.awt.Desktop;

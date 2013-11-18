@@ -1,4 +1,4 @@
-package ch.rakudave.suggest;
+package emcshop.gui.lib.suggest;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -28,9 +28,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
-
-import ch.rakudave.suggest.matcher.ContainsMatcher;
-import ch.rakudave.suggest.matcher.SuggestMatcher;
 
 /**
  * Provides a text-field that makes suggestions using a provided data-vector.

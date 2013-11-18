@@ -19,6 +19,7 @@ import javax.swing.table.TableCellRenderer;
 
 import emcshop.db.ItemGroup;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.GroupableColumnsTable;
 
 /**
  * A table that displays transactions grouped by item.

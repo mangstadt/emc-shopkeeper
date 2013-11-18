@@ -20,6 +20,7 @@ import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")

@@ -1,4 +1,4 @@
-package ch.rakudave.suggest.matcher;
+package emcshop.gui.lib.suggest;
 
 
 public class StartsWithMatcher implements SuggestMatcher {

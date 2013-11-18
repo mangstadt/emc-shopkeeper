@@ -40,11 +40,11 @@ import emcshop.db.DirbyEmbeddedDbDao;
 import emcshop.db.ItemGroup;
 import emcshop.gui.AboutDialog;
 import emcshop.gui.ErrorDialog;
-import emcshop.gui.MacHandler;
-import emcshop.gui.MacSupport;
 import emcshop.gui.MainFrame;
 import emcshop.gui.ProfileImageLoader;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.MacHandler;
+import emcshop.gui.lib.MacSupport;
 import emcshop.util.Settings;
 
 public class Main {
