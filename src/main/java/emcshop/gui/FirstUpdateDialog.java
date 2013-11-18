@@ -7,8 +7,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -19,9 +17,11 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
+
+import org.apache.commons.lang3.time.DurationFormatUtils;
+
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
-import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")
 public class FirstUpdateDialog extends JDialog implements WindowListener {
@@ -219,9 +219,7 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 
 	private String calculateEstimateDisplay(int pages) {
 		long totalMs = calculateEstimate(pages);
-		long components[] = TimeUtils.parseTimeComponents(totalMs);
-		NumberFormat nf = new DecimalFormat("00");
-		return nf.format(components[3]) + ":" + nf.format(components[2]) + ":" + nf.format(components[1]);
+		return DurationFormatUtils.formatDuration(totalMs, "HH:mm:ss", true);
 	}
 
 	////////////////////////////////////////////////

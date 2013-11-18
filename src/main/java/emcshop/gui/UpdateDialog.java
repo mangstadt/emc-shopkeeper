@@ -22,6 +22,9 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
 import net.miginfocom.swing.MigLayout;
+
+import org.apache.commons.lang3.time.DurationFormatUtils;
+
 import emcshop.EmcSession;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
@@ -86,9 +89,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						puller.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
 
 						if (result.getEstimatedTime() != null) {
-							long estimatedTimeComponents[] = TimeUtils.parseTimeComponents(result.getEstimatedTime());
-							NumberFormat nf = new DecimalFormat("00");
-							estimatedTimeDisplay = nf.format(estimatedTimeComponents[3]) + ":" + nf.format(estimatedTimeComponents[2]) + ":" + nf.format(estimatedTimeComponents[1]);
+							estimatedTimeDisplay = DurationFormatUtils.formatDuration(result.getEstimatedTime(), "HH:mm:ss", true);
 						} else {
 							estimatedTimeDisplay = null;
 						}
