@@ -68,6 +68,7 @@
 	<Item name="Coal" />
 	<Item name="Coal Block" />
 	<Item name="Coal Ore" />
+	<Item name="Cobble Wall" />
 	<Item name="Cobblestone" />
 	<Item name="Cobblestone Slab" />
 	<Item name="Cobblestone Stairs" />
@@ -230,6 +231,7 @@
 	<Item name="Mooshroom Egg" />
 	<Item name="Mossy Cobble" />
 	<Item name="Mossy Stone" />
+	<Item name="Mossy Wall" />
 	<Item name="Mundane Potion" />
 	<Item name="Mushroom Stew" />
 	<Item name="Mycel" />
