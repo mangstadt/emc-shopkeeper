@@ -71,9 +71,14 @@ CREATE INDEX ts_index ON transactions(ts);
 CREATE INDEX player_index ON transactions(player);
 CREATE INDEX item_index ON transactions(item);
 
-CREATE PROCEDURE UPDATE_ITEMS()
+CREATE PROCEDURE UPDATE_ITEM_NAMES()
 LANGUAGE JAVA PARAMETER STYLE JAVA
 MODIFIES SQL DATA
-EXTERNAL NAME 'emcshop.db.MigrationSprocs.updateItemsTable';
+EXTERNAL NAME 'emcshop.db.MigrationSprocs.updateItemNames';
 
-CALL UPDATE_ITEMS();
+CREATE PROCEDURE POPULATE_ITEMS_TABLE()
+LANGUAGE JAVA PARAMETER STYLE JAVA
+MODIFIES SQL DATA
+EXTERNAL NAME 'emcshop.db.MigrationSprocs.populateItemsTable';
+
+CALL POPULATE_ITEMS_TABLE();
