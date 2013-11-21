@@ -97,16 +97,14 @@ public abstract class DirbyDbDao implements DbDao {
 
 				logger.info("Database schema out of date.  Upgrading from version " + version + " to " + schemaVersion + ".");
 				String sql = null;
-				Statement statement = null;
+				Statement statement = conn.createStatement();
 				try {
-					statement = conn.createStatement();
 					while (version < schemaVersion) {
 						logger.info("Performing schema update from version " + version + " to " + (version + 1) + ".");
 
 						String script = "migrate-" + version + "-" + (version + 1) + ".sql";
-						SQLStatementReader in = null;
+						SQLStatementReader in = new SQLStatementReader(new InputStreamReader(ClasspathUtils.getResourceAsStream(script, getClass())));
 						try {
-							in = new SQLStatementReader(new InputStreamReader(ClasspathUtils.getResourceAsStream(script, getClass())));
 							while ((sql = in.readStatement()) != null) {
 								statement.execute(sql);
 							}
@@ -137,9 +135,8 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public int selectDbVersion() throws SQLException {
-		PreparedStatement stmt = null;
+		PreparedStatement stmt = stmt("SELECT db_schema_version FROM meta");
 		try {
-			stmt = conn.prepareStatement("SELECT db_schema_version FROM meta");
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() ? rs.getInt("db_schema_version") : 0;
 		} finally {
@@ -149,9 +146,8 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void updateDbVersion(int version) throws SQLException {
-		PreparedStatement stmt = null;
+		PreparedStatement stmt = stmt("UPDATE meta SET db_schema_version = ?");
 		try {
-			stmt = conn.prepareStatement("UPDATE meta SET db_schema_version = ?");
 			stmt.setInt(1, version);
 			stmt.execute();
 		} finally {
@@ -168,12 +164,9 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Player selsertPlayer(String name) throws SQLException {
-		PreparedStatement stmt = null;
-		String nameLowerCase = name.toLowerCase();
-
+		PreparedStatement stmt = stmt("SELECT * FROM players WHERE Lower(name) = Lower(?)");
 		try {
-			stmt = conn.prepareStatement("SELECT * FROM players WHERE Lower(name) = ?");
-			stmt.setString(1, nameLowerCase);
+			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
 			Player player = new Player();
 			if (rs.next()) {
@@ -200,12 +193,10 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Integer getItemId(String name) throws SQLException {
-		PreparedStatement stmt = null;
-		String nameLowerCase = name.toLowerCase();
+		PreparedStatement stmt = stmt("SELECT id FROM items WHERE Lower(name) = Lower(?)");
 
 		try {
-			stmt = conn.prepareStatement("SELECT id FROM items WHERE Lower(name) = ?");
-			stmt.setString(1, nameLowerCase);
+			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
 			Integer itemId;
 			if (rs.next()) {
@@ -223,7 +214,7 @@ public abstract class DirbyDbDao implements DbDao {
 		PreparedStatement stmt = null;
 
 		try {
-			stmt = conn.prepareStatement("SELECT name FROM items ORDER BY Lower(name)");
+			stmt = stmt("SELECT name FROM items ORDER BY Lower(name)");
 			ResultSet rs = stmt.executeQuery();
 			List<String> names = new ArrayList<String>();
 			while (rs.next()) {
@@ -334,7 +325,7 @@ public abstract class DirbyDbDao implements DbDao {
 			Integer id = stmt.execute(conn);
 			transaction.setId(id);
 		} else {
-			PreparedStatement stmt = conn.prepareStatement("UPDATE payment_transactions SET amount = ?, balance = ? WHERE id = ?");
+			PreparedStatement stmt = stmt("UPDATE payment_transactions SET amount = ?, balance = ? WHERE id = ?");
 			try {
 				stmt.setInt(1, transaction.getAmount());
 				stmt.setInt(2, transaction.getBalance());
@@ -360,10 +351,8 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public Date getLatestTransactionDate() throws SQLException {
 		Date shopTs;
-		String sql = "SELECT Max(ts) FROM transactions";
-		PreparedStatement selectStmt = null;
+		PreparedStatement selectStmt = stmt("SELECT Max(ts) FROM transactions");
 		try {
-			selectStmt = conn.prepareStatement(sql);
 			ResultSet rs = selectStmt.executeQuery();
 			shopTs = rs.next() ? toDate(rs.getTimestamp(1)) : null;
 		} finally {
@@ -371,9 +360,8 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 
 		Date paymentTs;
-		sql = "SELECT Max(ts) FROM payment_transactions";
+		selectStmt = stmt("SELECT Max(ts) FROM payment_transactions");
 		try {
-			selectStmt = conn.prepareStatement(sql);
 			ResultSet rs = selectStmt.executeQuery();
 			paymentTs = rs.next() ? toDate(rs.getTimestamp(1)) : null;
 		} finally {
@@ -402,9 +390,8 @@ public abstract class DirbyDbDao implements DbDao {
 		"ORDER BY t.ts DESC";
 		//@formatter:on
 
-		PreparedStatement selectStmt = null;
+		PreparedStatement selectStmt = stmt(sql);
 		try {
-			selectStmt = conn.prepareStatement(sql);
 			if (limit > 0) {
 				selectStmt.setMaxRows(limit);
 			}
@@ -440,9 +427,8 @@ public abstract class DirbyDbDao implements DbDao {
 		"ORDER BY pt.ts DESC ";
 		//@formatter:on
 
-		PreparedStatement selectStmt = null;
+		PreparedStatement selectStmt = stmt(sql);
 		try {
-			selectStmt = conn.prepareStatement(sql);
 			ResultSet rs = selectStmt.executeQuery();
 			List<PaymentTransaction> transactions = new ArrayList<PaymentTransaction>();
 			while (rs.next()) {
@@ -471,9 +457,8 @@ public abstract class DirbyDbDao implements DbDao {
 		"AND ignore = false";
 		//@formatter:on
 
-		PreparedStatement selectStmt = null;
+		PreparedStatement selectStmt = stmt(sql);
 		try {
-			selectStmt = conn.prepareStatement(sql);
 			ResultSet rs = selectStmt.executeQuery();
 			return rs.next() ? rs.getInt(1) : 0;
 		} finally {
@@ -483,9 +468,8 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void ignorePaymentTransaction(Integer id) throws SQLException {
-		PreparedStatement stmt = null;
+		PreparedStatement stmt = stmt("UPDATE payment_transactions SET ignore = ? WHERE id = ?");
 		try {
-			stmt = conn.prepareStatement("UPDATE payment_transactions SET ignore = ? WHERE id = ?");
 			stmt.setBoolean(1, true);
 			stmt.setInt(2, id);
 			stmt.execute();
@@ -496,9 +480,8 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void assignPaymentTransaction(Integer paymentId, Integer transactionId) throws SQLException {
-		PreparedStatement stmt = null;
+		PreparedStatement stmt = stmt("UPDATE payment_transactions SET \"transaction\" = ? WHERE id = ?");
 		try {
-			stmt = conn.prepareStatement("UPDATE payment_transactions SET \"transaction\" = ? WHERE id = ?");
 			stmt.setInt(1, transactionId);
 			stmt.setInt(2, paymentId);
 			stmt.execute();
@@ -514,25 +497,24 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Map<String, ItemGroup> getItemGroups(Date from, Date to) throws SQLException {
-		PreparedStatement stmt = null;
 		Map<String, ItemGroup> itemGroups = new TreeMap<String, ItemGroup>();
 
-		try {
-			//@formatter:off
-			String sql =
-			"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
-			"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
-			"WHERE t.amount > 0 ";
-			if (from != null) {
-				sql += "AND ts >= ? ";
-			}
-			if (to != null) {
-				sql += "AND ts < ? ";
-			}
-			sql += "GROUP BY i.name";
-			//@formatter:on
+		//@formatter:off
+		String sql =
+		"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
+		"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
+		"WHERE t.amount > 0 ";
+		if (from != null) {
+			sql += "AND ts >= ? ";
+		}
+		if (to != null) {
+			sql += "AND ts < ? ";
+		}
+		sql += "GROUP BY i.name";
+		//@formatter:on
 
-			stmt = conn.prepareStatement(sql);
+		PreparedStatement stmt = stmt(sql);
+		try {
 			int index = 1;
 			if (from != null) {
 				stmt.setTimestamp(index++, toTimestamp(from));
@@ -553,22 +535,22 @@ public abstract class DirbyDbDao implements DbDao {
 			closeStatements(stmt);
 		}
 
-		try {
-			//@formatter:off
-			String sql =
-			"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
-			"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
-			"WHERE t.amount < 0 ";
-			if (from != null) {
-				sql += "AND ts >= ? ";
-			}
-			if (to != null) {
-				sql += "AND ts < ? ";
-			}
-			sql += "GROUP BY i.name";
-			//@formatter:on
+		//@formatter:off
+		sql =
+		"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
+		"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
+		"WHERE t.amount < 0 ";
+		if (from != null) {
+			sql += "AND ts >= ? ";
+		}
+		if (to != null) {
+			sql += "AND ts < ? ";
+		}
+		sql += "GROUP BY i.name";
+		//@formatter:on
 
-			stmt = conn.prepareStatement(sql);
+		stmt = stmt(sql);
+		try {
 			int index = 1;
 			if (from != null) {
 				stmt.setTimestamp(index++, toTimestamp(from));
@@ -598,24 +580,23 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public Map<String, PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException {
 		Map<String, PlayerGroup> playerGroups = new HashMap<String, PlayerGroup>();
-		PreparedStatement stmt = null;
 
+		//@formatter:off
+		String sql =
+		"SELECT t.amount, t.quantity, t.player, p.name AS playerName, p.first_seen, p.last_seen, i.name AS itemName " + 
+		"FROM transactions t " +
+		"INNER JOIN items i ON t.item = i.id " +
+		"INNER JOIN players p ON t.player = p.id ";
+		if (from != null) {
+			sql += "WHERE t.ts >= ? ";
+		}
+		if (to != null) {
+			sql += ((from == null) ? "WHERE" : "AND") + " t.ts < ? ";
+		}
+		//@formatter:on
+
+		PreparedStatement stmt = stmt(sql);
 		try {
-			//@formatter:off
-			String sql =
-			"SELECT t.amount, t.quantity, t.player, p.name AS playerName, p.first_seen, p.last_seen, i.name AS itemName " + 
-			"FROM transactions t " +
-			"INNER JOIN items i ON t.item = i.id " +
-			"INNER JOIN players p ON t.player = p.id ";
-			if (from != null) {
-				sql += "WHERE t.ts >= ? ";
-			}
-			if (to != null) {
-				sql += ((from == null) ? "WHERE" : "AND") + " t.ts < ? ";
-			}
-			//@formatter:on
-
-			stmt = conn.prepareStatement(sql);
 			int index = 1;
 			if (from != null) {
 				stmt.setTimestamp(index++, toTimestamp(from));
@@ -680,10 +661,9 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public String getPlayerName(int id) throws SQLException {
-		PreparedStatement stmt = null;
+		PreparedStatement stmt = stmt("SELECT name FROM players WHERE id = ?");
 
 		try {
-			stmt = conn.prepareStatement("SELECT name FROM players WHERE id = ?");
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() ? rs.getString("name") : null;
@@ -695,15 +675,20 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void wipe() throws SQLException, IOException {
 		logger.info("Wiping transactions...");
-		conn.createStatement().execute("DELETE FROM payment_transactions");
-		conn.createStatement().execute("DELETE FROM transactions");
-		conn.createStatement().execute("DELETE FROM players");
-		conn.createStatement().execute("DELETE FROM items");
-		conn.createStatement().execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
-		conn.createStatement().execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
-		conn.createStatement().execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");
-		conn.createStatement().execute("ALTER TABLE items ALTER COLUMN id RESTART WITH 1");
-		commit();
+		Statement stmt = conn.createStatement();
+		try {
+			stmt.execute("DELETE FROM payment_transactions");
+			stmt.execute("DELETE FROM transactions");
+			stmt.execute("DELETE FROM players");
+			stmt.execute("DELETE FROM items");
+			stmt.execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
+			stmt.execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
+			stmt.execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");
+			stmt.execute("ALTER TABLE items ALTER COLUMN id RESTART WITH 1");
+			commit();
+		} finally {
+			closeStatements(stmt);
+		}
 	}
 
 	@Override
@@ -759,16 +744,15 @@ public abstract class DirbyDbDao implements DbDao {
 	 * @throws SQLException
 	 */
 	private void calculateFirstLastSeen(Player player) throws SQLException {
-		PreparedStatement stmt = null;
-		try {
-			//@formatter:off
-			String sql =
-			"SELECT Min(ts) AS firstSeen, Max(ts) AS lastSeen " + 
-			"FROM transactions " +
-			"WHERE player = ? ";
-			//@formatter:on
-			stmt = conn.prepareStatement(sql);
+		//@formatter:off
+		String sql =
+		"SELECT Min(ts) AS firstSeen, Max(ts) AS lastSeen " + 
+		"FROM transactions " +
+		"WHERE player = ? ";
+		//@formatter:on
 
+		PreparedStatement stmt = stmt(sql);
+		try {
 			stmt.setInt(1, player.getId());
 
 			ResultSet rs = stmt.executeQuery();
@@ -793,21 +777,20 @@ public abstract class DirbyDbDao implements DbDao {
 	 * @throws SQLException
 	 */
 	private void updateFirstLastSeen(Integer playerId, Date firstSeen, Date lastSeen) throws SQLException {
-		PreparedStatement stmt = null;
-		try {
-			String sql = "UPDATE players SET ";
+		String sql = "UPDATE players SET ";
+		if (firstSeen != null) {
+			sql += "first_seen = ? ";
+		}
+		if (lastSeen != null) {
 			if (firstSeen != null) {
-				sql += "first_seen = ? ";
+				sql += ", ";
 			}
-			if (lastSeen != null) {
-				if (firstSeen != null) {
-					sql += ", ";
-				}
-				sql += "last_seen = ? ";
-			}
-			sql += "WHERE id = ?";
-			stmt = conn.prepareStatement(sql);
+			sql += "last_seen = ? ";
+		}
+		sql += "WHERE id = ?";
 
+		PreparedStatement stmt = stmt(sql);
+		try {
 			int index = 1;
 			if (firstSeen != null) {
 				stmt.setTimestamp(index++, toTimestamp(firstSeen));
@@ -909,5 +892,15 @@ public abstract class DirbyDbDao implements DbDao {
 			closeStatements(statement);
 		}
 		commit();
+	}
+
+	/**
+	 * Shorthand for creating a {@link PreparedStatement}.
+	 * @param sql the SQL
+	 * @return the {@link PreparedStatement} object
+	 * @throws SQLException
+	 */
+	protected PreparedStatement stmt(String sql) throws SQLException {
+		return conn.prepareStatement(sql);
 	}
 }
