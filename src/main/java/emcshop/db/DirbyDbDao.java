@@ -310,15 +310,40 @@ public abstract class DirbyDbDao implements DbDao {
 		InsertStatement stmt = new InsertStatement("payment_transactions");
 		for (PaymentTransaction transaction : transactions) {
 			Player player = selsertPlayer(transaction.getPlayer());
-			Date ts = transaction.getTs();
 
-			stmt.setTimestamp("ts", ts);
+			stmt.setTimestamp("ts", transaction.getTs());
 			stmt.setInt("player", player.getId());
 			stmt.setInt("amount", transaction.getAmount());
 			stmt.setInt("balance", transaction.getBalance());
 			stmt.nextRow();
 		}
 		stmt.execute(conn);
+	}
+
+	@Override
+	public void upsertPaymentTransaction(PaymentTransaction transaction) throws SQLException {
+		if (transaction.getId() == null) {
+			Player player = selsertPlayer(transaction.getPlayer());
+
+			InsertStatement stmt = new InsertStatement("payment_transactions");
+			stmt.setTimestamp("ts", transaction.getTs());
+			stmt.setInt("player", player.getId());
+			stmt.setInt("amount", transaction.getAmount());
+			stmt.setInt("balance", transaction.getBalance());
+
+			Integer id = stmt.execute(conn);
+			transaction.setId(id);
+		} else {
+			PreparedStatement stmt = conn.prepareStatement("UPDATE payment_transactions SET amount = ?, balance = ? WHERE id = ?");
+			try {
+				stmt.setInt(1, transaction.getAmount());
+				stmt.setInt(2, transaction.getBalance());
+				stmt.setInt(3, transaction.getId());
+				stmt.executeUpdate();
+			} finally {
+				closeStatements(stmt);
+			}
+		}
 	}
 
 	@Override

@@ -94,6 +94,13 @@ public interface DbDao {
 	void insertPaymentTransactions(Collection<PaymentTransaction> transactions) throws SQLException;
 
 	/**
+	 * Updates or inserts a payment transaction.
+	 * @param transaction the payment transaction
+	 * @throws SQLException
+	 */
+	void upsertPaymentTransaction(PaymentTransaction transaction) throws SQLException;
+
+	/**
 	 * Gets all transactions in the database.
 	 * @return the transactions
 	 * @throws SQLException
