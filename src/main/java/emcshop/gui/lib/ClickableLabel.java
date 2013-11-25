@@ -6,7 +6,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +31,7 @@ public class ClickableLabel extends JLabel implements MouseListener {
 		desktop = d;
 	}
 
-	private final URI uri;
+	private URI uri;
 
 	/**
 	 * @param image the label image
@@ -40,12 +39,20 @@ public class ClickableLabel extends JLabel implements MouseListener {
 	 */
 	public ClickableLabel(Icon image, String url) {
 		super(image);
+		init(url);
+	}
 
-		try {
-			uri = new URI(url);
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+	/**
+	 * @param text the label text
+	 * @param url the webpage URL
+	 */
+	public ClickableLabel(String text, String url) {
+		super(text);
+		init(url);
+	}
+
+	private void init(String url) {
+		uri = URI.create(url);
 
 		if (desktop != null) {
 			//only set these things if the user's computer supports opening a browser window
