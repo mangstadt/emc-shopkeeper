@@ -159,20 +159,29 @@ public class PaymentTransactionsDialog extends JDialog {
 
 			rowGroups = new ArrayList<RowGroup>();
 			for (PaymentTransaction transaction : transactions) {
-				addRowGroup(new RowGroup(transaction, this));
+				rowGroups.add(new RowGroup(transaction, this));
 			}
+			refresh();
 		}
 
-		void addRowGroup(RowGroup group) {
-			rowGroups.add(group);
+		void insertRowGroup(RowGroup origGroup, RowGroup newGroup) {
+			int index = rowGroups.indexOf(origGroup);
+			rowGroups.add(index + 1, newGroup);
+			refresh();
+		}
 
-			add(group.description);
+		void refresh() {
+			removeAll();
+			for (RowGroup group : rowGroups) {
+				add(group.description);
 
-			add(group.ignore, "split 3");
-			add(group.assign);
-			add(group.split, "wrap");
-			add(new JLabel(""));
-			add(group.assignPanel, "wrap");
+				add(group.ignore, "split 3");
+				add(group.assign);
+				add(group.split, "wrap");
+				add(new JLabel(""));
+				add(group.assignPanel, "wrap");
+			}
+			validate();
 		}
 
 		Map<PaymentTransaction, ShopTransaction> getShopTransactionsToAdd() {
@@ -308,14 +317,14 @@ public class PaymentTransactionsDialog extends JDialog {
 
 					RowGroup splitGroup = new RowGroup(splitTransaction, parent);
 					splitGroup.upsertPaymentTransaction = true;
-					parent.addRowGroup(splitGroup);
+					parent.insertRowGroup(RowGroup.this, splitGroup);
 				}
 
 				private Integer getSplitAmount() {
 					int origAmount = transaction.getAmount();
 					int origAmountAbs = Math.abs(origAmount);
 					do {
-						String amountStr = JOptionPane.showInputDialog(PaymentTransactionsDialog.this, "Enter the number of rupees you'd like to subtract\nfrom this payment transaction.  A new payment transaction\nwill then be created with the value you enter below.\n\nEnter a value between 1 and " + (origAmountAbs - 1) + ":", "Split Payment Transaction", JOptionPane.QUESTION_MESSAGE);
+						String amountStr = JOptionPane.showInputDialog(PaymentTransactionsDialog.this, "Enter the number of rupees you'd like to subtract\nfrom this payment transaction.  A new payment transaction\nwill then be created with the value you enter.\n\nEnter a value between 1 and " + (origAmountAbs - 1) + ":", "Split Payment Transaction", JOptionPane.QUESTION_MESSAGE);
 						if (amountStr == null) {
 							//user canceled dialog
 							return null;
