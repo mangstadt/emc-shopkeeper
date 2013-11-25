@@ -123,7 +123,7 @@ public class MigrationSprocs {
 
 		try {
 			//get the ID(s) of each item
-			PreparedStatement getItems = conn.prepareStatement("SELECT id, name FROM items ORDER BY name");
+			PreparedStatement getItems = conn.prepareStatement("SELECT id, name FROM items");
 			Map<String, List<Integer>> itemIds = new HashMap<String, List<Integer>>();
 			ResultSet rs = getItems.executeQuery();
 			while (rs.next()) {
