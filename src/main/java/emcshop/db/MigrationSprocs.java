@@ -5,7 +5,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -103,6 +106,54 @@ public class MigrationSprocs {
 					updateTransactionsWithNewName.executeUpdate();
 
 					deleteItem.setInt(1, oldNameId);
+					deleteItem.executeUpdate();
+				}
+			}
+		} finally {
+			conn.close();
+		}
+	}
+
+	/**
+	 * Removes duplicate item names in the "items" table.
+	 * @throws SQLException
+	 */
+	public static void removeDuplicateItemNames() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+
+		try {
+			//get the ID(s) of each item
+			PreparedStatement getItems = conn.prepareStatement("SELECT id, name FROM items ORDER BY name");
+			Map<String, List<Integer>> itemIds = new HashMap<String, List<Integer>>();
+			ResultSet rs = getItems.executeQuery();
+			while (rs.next()) {
+				Integer id = rs.getInt("id");
+				String name = rs.getString("name").toLowerCase();
+
+				List<Integer> ids = itemIds.get(name);
+				if (ids == null) {
+					ids = new ArrayList<Integer>();
+					itemIds.put(name, ids);
+				}
+				ids.add(id);
+			}
+
+			//update the transactions to use just one of the item rows, and delete the rest
+			PreparedStatement updateTransactions = conn.prepareStatement("UPDATE transactions SET item = ? WHERE item = ?");
+			PreparedStatement deleteItem = conn.prepareStatement("DELETE FROM items WHERE id = ?");
+			for (List<Integer> ids : itemIds.values()) {
+				if (ids.size() <= 1) {
+					//there are no duplicates
+					continue;
+				}
+
+				Integer newId = ids.get(0);
+				for (Integer oldId : ids.subList(1, ids.size())) {
+					updateTransactions.setInt(1, newId);
+					updateTransactions.setInt(2, oldId);
+					updateTransactions.executeUpdate();
+
+					deleteItem.setInt(1, oldId);
 					deleteItem.executeUpdate();
 				}
 			}

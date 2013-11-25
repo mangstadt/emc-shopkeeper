@@ -232,7 +232,6 @@
 	<Item name="Mossy Cobble" />
 	<Item name="Mossy Stone" />
 	<Item name="Mossy Wall" />
-	<Item name="Mundane Potion" />
 	<Item name="Mushroom Stew" />
 	<Item name="Mycel" />
 	<Item name="Nether Brick" />
@@ -351,7 +350,6 @@
 	<Item name="Sulphur" />
 	<Item name="Sunflower" />
 	<Item name="Tall Grass" />
-	<Item name="Thick Potion" />
 	<Item name="Tnt" />
 	<Item name="Torch" />
 	<Item name="Trapdoor" />
