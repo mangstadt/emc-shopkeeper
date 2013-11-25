@@ -4,23 +4,21 @@ import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import emcshop.gui.images.ImageManager;
+import emcshop.util.MiscUtils;
 
 /**
  * Generic dialog for displaying uncaught exceptions.
@@ -33,16 +31,8 @@ public class ErrorDialog extends JDialog {
 	private ErrorDialog(Window owner, String displayMessage, Throwable thrown, String buttonText) {
 		super(owner, "Error");
 		setModalityType(ModalityType.DOCUMENT_MODAL); //go on top of all windows
-
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-		//close when escape is pressed
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		MiscUtils.closeOnEscapeKeyPress(this);
 
 		JTextArea displayText = new JTextArea(displayMessage);
 		displayText.setEditable(false);

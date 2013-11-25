@@ -10,11 +10,9 @@ import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -23,6 +21,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import emcshop.Main;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
+import emcshop.util.MiscUtils;
 
 @SuppressWarnings("serial")
 public class FirstUpdateDialog extends JDialog implements WindowListener {
@@ -65,6 +64,13 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 	public FirstUpdateDialog(JDialog owner) {
 		super(owner, "First Update", true);
 		setResizable(false);
+		MiscUtils.onEscapeKeyPress(this, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				cancelled = true;
+				dispose();
+			}
+		});
 
 		beginButton = new JButton("Begin");
 		beginButton.addActionListener(new ActionListener() {
@@ -159,15 +165,6 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		paymentTransactionAge.setNumber(DEFAULT_PAYMENT_TRANS_AGE);
 
 		paymentTransactionAgeLabel = new JLabel("days");
-
-		//cancel when escape is pressed
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				cancelled = true;
-				dispose();
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		JLabel warningIcon = new JLabel(ImageManager.getWarningIcon());
 

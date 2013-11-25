@@ -11,18 +11,17 @@ import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.EmcSession;
 import emcshop.gui.images.ImageManager;
+import emcshop.util.MiscUtils;
 
 /**
  * Dialog for logging the user into EMC.
@@ -45,26 +44,19 @@ public class LoginDialog extends JDialog {
 		super(owner, "Login");
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		MiscUtils.closeOnEscapeKeyPress(this);
 
 		createWidgets();
 		layoutWidgets();
 		setResizable(false);
 
-		//cancel when escape is pressed
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onClickCancel();
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-
 		//login when enter is pressed
-		getRootPane().registerKeyboardAction(new ActionListener() {
+		MiscUtils.onKeyPress(this, KeyEvent.VK_ENTER, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				onClickLogin();
 			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		});
 
 		pack();
 		setLocationRelativeTo(owner);
@@ -113,7 +105,7 @@ public class LoginDialog extends JDialog {
 		cancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				onClickCancel();
+				dispose();
 			}
 		});
 
@@ -152,10 +144,6 @@ public class LoginDialog extends JDialog {
 		p.add(login);
 		p.add(cancel);
 		add(p, "align center");
-	}
-
-	private void onClickCancel() {
-		dispose();
 	}
 
 	private void onClickLogin() {

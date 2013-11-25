@@ -4,21 +4,19 @@ import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import emcshop.LogManager;
+import emcshop.util.MiscUtils;
 
 /**
  * Displays the contents of the log files.
@@ -30,14 +28,7 @@ public class ShowLogDialog extends JDialog {
 		super(owner, "Log");
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-		//close when escape is pressed
-		getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		MiscUtils.closeOnEscapeKeyPress(this);
 
 		JTextArea location = new JTextArea("Location: " + logManager.getFile().getAbsolutePath());
 		location.setLineWrap(true);
