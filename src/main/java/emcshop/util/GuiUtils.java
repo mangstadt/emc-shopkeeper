@@ -9,7 +9,7 @@ import javax.swing.JDialog;
 import javax.swing.KeyStroke;
 
 /**
- * Just miscellaneous methods.
+ * Contains GUI utility methods.
  * @author Michael Angstadt
  */
 public class GuiUtils {
