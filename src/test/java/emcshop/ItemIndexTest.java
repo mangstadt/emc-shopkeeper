@@ -20,6 +20,7 @@ public class ItemIndexTest {
 		"<Items>" +
 			"<Item name=\"Diamond\" />" +
 			"<Item name=\"Orange Clay\" emcNames=\"Orange Stclay\" />" +
+			"<Item name=\"Potion of Fire Resistance\" emcNames=\"Potion:8195,Potion:8227\" />" +
 			"<Item name=\"Zombie Potion\" image=\"water_bottle.png\" />" +
 		"</Items>";
 		//@formatter:on
@@ -36,6 +37,8 @@ public class ItemIndexTest {
 		assertEquals("Diamond", index.getDisplayName("Diamond"));
 		assertEquals("Orange Clay", index.getDisplayName("Orange Clay"));
 		assertEquals("Orange Clay", index.getDisplayName("Orange Stclay"));
+		assertEquals("Potion of Fire Resistance", index.getDisplayName("Potion:8195"));
+		assertEquals("Potion of Fire Resistance", index.getDisplayName("Potion:8227"));
 		assertEquals("Zombie Potion", index.getDisplayName("Zombie Potion"));
 		assertEquals("Iron Ingot", index.getDisplayName("Iron Ingot"));
 	}
@@ -50,7 +53,7 @@ public class ItemIndexTest {
 	@Test
 	public void getItemNames() {
 		Set<String> actual = new HashSet<String>(index.getItemNames());
-		Set<String> expected = new HashSet<String>(Arrays.asList("Diamond", "Orange Clay", "Zombie Potion"));
+		Set<String> expected = new HashSet<String>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion"));
 		assertEquals(expected, actual);
 	}
 }
