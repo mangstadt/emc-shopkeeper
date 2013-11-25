@@ -18,7 +18,7 @@ import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import emcshop.gui.images.ImageManager;
-import emcshop.util.MiscUtils;
+import emcshop.util.GuiUtils;
 
 /**
  * Generic dialog for displaying uncaught exceptions.
@@ -32,7 +32,7 @@ public class ErrorDialog extends JDialog {
 		super(owner, "Error");
 		setModalityType(ModalityType.DOCUMENT_MODAL); //go on top of all windows
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		MiscUtils.closeOnEscapeKeyPress(this);
+		GuiUtils.closeOnEscapeKeyPress(this);
 
 		JTextArea displayText = new JTextArea(displayMessage);
 		displayText.setEditable(false);

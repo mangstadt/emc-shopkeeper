@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.gui.images.ImageManager;
-import emcshop.util.MiscUtils;
+import emcshop.util.GuiUtils;
 
 /**
  * Confirmation dialog for when the user chooses to wipe the database.
@@ -58,7 +58,7 @@ public class ResetDatabaseDialog extends JDialog implements WindowListener {
 		});
 
 		//cancel when escape is pressed
-		MiscUtils.onEscapeKeyPress(this, new ActionListener() {
+		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				result = false;

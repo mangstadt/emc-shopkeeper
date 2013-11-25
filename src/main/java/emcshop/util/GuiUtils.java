@@ -12,7 +12,7 @@ import javax.swing.KeyStroke;
  * Just miscellaneous methods.
  * @author Michael Angstadt
  */
-public class MiscUtils {
+public class GuiUtils {
 	/**
 	 * Builds a standardized tooltip string.
 	 * @param text the tooltip text

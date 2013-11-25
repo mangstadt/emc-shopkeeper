@@ -14,7 +14,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.io.IOUtils;
 
-import emcshop.util.MiscUtils;
+import emcshop.util.GuiUtils;
 
 /**
  * Displays the changelog.
@@ -26,7 +26,7 @@ public class ChangelogDialog extends JDialog {
 		super(owner, "Changelog");
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		MiscUtils.closeOnEscapeKeyPress(this);
+		GuiUtils.closeOnEscapeKeyPress(this);
 
 		String changelogText;
 		try {

@@ -1,6 +1,6 @@
 package emcshop.gui;
 
-import static emcshop.util.MiscUtils.toolTipText;
+import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatQuantity;
 import static emcshop.util.NumberFormatter.formatRupees;
 

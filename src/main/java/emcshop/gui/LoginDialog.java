@@ -21,7 +21,7 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 import emcshop.EmcSession;
 import emcshop.gui.images.ImageManager;
-import emcshop.util.MiscUtils;
+import emcshop.util.GuiUtils;
 
 /**
  * Dialog for logging the user into EMC.
@@ -44,14 +44,14 @@ public class LoginDialog extends JDialog {
 		super(owner, "Login");
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		MiscUtils.closeOnEscapeKeyPress(this);
+		GuiUtils.closeOnEscapeKeyPress(this);
 
 		createWidgets();
 		layoutWidgets();
 		setResizable(false);
 
 		//login when enter is pressed
-		MiscUtils.onKeyPress(this, KeyEvent.VK_ENTER, new ActionListener() {
+		GuiUtils.onKeyPress(this, KeyEvent.VK_ENTER, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				onClickLogin();

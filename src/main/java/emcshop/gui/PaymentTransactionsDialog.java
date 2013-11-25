@@ -1,6 +1,6 @@
 package emcshop.gui;
 
-import static emcshop.util.MiscUtils.toolTipText;
+import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
@@ -37,7 +37,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.gui.lib.suggest.ContainsMatcher;
 import emcshop.gui.lib.suggest.JSuggestField;
-import emcshop.util.MiscUtils;
+import emcshop.util.GuiUtils;
 
 /**
  * Displays the pending payment transactions.
@@ -55,7 +55,7 @@ public class PaymentTransactionsDialog extends JDialog {
 		super(owner, "Payment Transactions");
 		setModalityType(ModalityType.DOCUMENT_MODAL); //go on top of all windows
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		MiscUtils.closeOnEscapeKeyPress(this);
+		GuiUtils.closeOnEscapeKeyPress(this);
 
 		//@formatter:off
 		JLabel description = new JLabel(

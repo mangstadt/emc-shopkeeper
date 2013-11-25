@@ -16,7 +16,7 @@ import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import emcshop.LogManager;
-import emcshop.util.MiscUtils;
+import emcshop.util.GuiUtils;
 
 /**
  * Displays the contents of the log files.
@@ -28,7 +28,7 @@ public class ShowLogDialog extends JDialog {
 		super(owner, "Log");
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		MiscUtils.closeOnEscapeKeyPress(this);
+		GuiUtils.closeOnEscapeKeyPress(this);
 
 		JTextArea location = new JTextArea("Location: " + logManager.getFile().getAbsolutePath());
 		location.setLineWrap(true);

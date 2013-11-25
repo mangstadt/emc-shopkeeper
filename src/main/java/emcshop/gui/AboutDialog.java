@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.Main;
-import emcshop.util.MiscUtils;
+import emcshop.util.GuiUtils;
 
 /**
  * Displays an about dialog.
@@ -23,7 +23,7 @@ public class AboutDialog extends JDialog {
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setResizable(false);
-		MiscUtils.closeOnEscapeKeyPress(this);
+		GuiUtils.closeOnEscapeKeyPress(this);
 
 		//@formatter:off
 		JLabel label = new JLabel(

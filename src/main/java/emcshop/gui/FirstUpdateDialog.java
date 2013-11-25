@@ -21,7 +21,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import emcshop.Main;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
-import emcshop.util.MiscUtils;
+import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class FirstUpdateDialog extends JDialog implements WindowListener {
@@ -64,7 +64,7 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 	public FirstUpdateDialog(JDialog owner) {
 		super(owner, "First Update", true);
 		setResizable(false);
-		MiscUtils.onEscapeKeyPress(this, new ActionListener() {
+		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				cancelled = true;
