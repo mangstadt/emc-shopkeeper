@@ -205,6 +205,7 @@ public class ItemsTable extends GroupableColumnsTable {
 	public void filter(List<String> filteredItemNames) {
 		if (filteredItemNames.isEmpty()) {
 			itemGroupsToDisplay = itemGroups;
+			sortData();
 		} else {
 			itemGroupsToDisplay = new ArrayList<ItemGroup>();
 			for (ItemGroup itemGroup : itemGroups) {
@@ -319,6 +320,10 @@ public class ItemsTable extends GroupableColumnsTable {
 
 		Collections.sort(itemGroupsToDisplay, comparator);
 		refresh();
+	}
+
+	public List<ItemGroup> getDisplayedItemGroups() {
+		return itemGroupsToDisplay;
 	}
 
 	private void refresh() {

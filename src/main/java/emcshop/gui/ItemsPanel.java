@@ -19,26 +19,43 @@ import emcshop.db.ItemGroup;
 @SuppressWarnings("serial")
 public class ItemsPanel extends JPanel {
 	private final List<ItemGroup> itemGroups;
-	private List<String> filteredItemNames = new ArrayList<String>(0);
-	private MyJScrollPane scrollPane;
+	private final MyJScrollPane scrollPane;
+	private final ItemsTable itemsTable;
+	private final JLabel netTotal;
 
 	/**
 	 * Creates the panel.
 	 * @param itemGroups the items to display in the table
 	 */
 	public ItemsPanel(Collection<ItemGroup> itemGroups) {
-		//add all the data to Lists so they can be sorted
 		this.itemGroups = new ArrayList<ItemGroup>(itemGroups);
+
 		setLayout(new MigLayout());
-		refresh();
+
+		itemsTable = new ItemsTable(this.itemGroups);
+		itemsTable.setFillsViewportHeight(true);
+		scrollPane = new MyJScrollPane(itemsTable);
+		add(scrollPane, "grow, w 100%, h 100%, wrap");
+
+		netTotal = new JLabel();
+		add(netTotal, "align right");
 	}
 
 	/**
 	 * Filters the data by item.
 	 */
 	public void filterByItems(List<String> items) {
-		filteredItemNames = items;
-		refresh();
+		//filter the table
+		itemsTable.filter(items);
+
+		//update the net total label
+		List<ItemGroup> displayedItemGroups = itemsTable.getDisplayedItemGroups();
+		int total = calculateNetTotal(displayedItemGroups);
+		StringBuilder sb = new StringBuilder();
+		sb.append("<html><font size=5>Net Total: <code>");
+		sb.append(formatRupeesWithColor(total));
+		sb.append("</code></font></html>");
+		netTotal.setText(sb.toString());
 	}
 
 	/**
@@ -46,64 +63,6 @@ public class ItemsPanel extends JPanel {
 	 */
 	public void scrollToTop() {
 		scrollPane.scrollToTop();
-	}
-
-	private void refresh() {
-		//filter items
-		List<ItemGroup> filteredItems = filterItems();
-
-		//calculate net total
-		int netTotal = calculateNetTotal(filteredItems);
-
-		//display data
-		removeAll();
-
-		final ItemsTable table = new ItemsTable(filteredItems);
-		table.setFillsViewportHeight(true);
-		scrollPane = new MyJScrollPane(table);
-		add(scrollPane, "grow, w 100%, h 100%, wrap");
-
-		String netTotalLabel;
-		{
-			StringBuilder sb = new StringBuilder();
-			sb.append("<html><font size=5>Net Total: <code>");
-			sb.append(formatRupeesWithColor(netTotal));
-			sb.append("</code></font></html>");
-			netTotalLabel = sb.toString();
-		}
-		add(new JLabel(netTotalLabel), "align right");
-
-		validate();
-	}
-
-	private List<ItemGroup> filterItems() {
-		List<ItemGroup> filteredItems;
-		if (filteredItemNames.isEmpty()) {
-			filteredItems = itemGroups;
-		} else {
-			filteredItems = new ArrayList<ItemGroup>();
-			for (ItemGroup itemGroup : itemGroups) {
-				String itemName = itemGroup.getItem().toLowerCase();
-				for (String filteredItem : filteredItemNames) {
-					filteredItem = filteredItem.toLowerCase();
-					boolean add = false;
-					if (filteredItem.startsWith("\"") && filteredItem.endsWith("\"")) {
-						filteredItem = filteredItem.substring(1, filteredItem.length() - 1); //remove double quotes
-						if (itemName.equals(filteredItem)) {
-							add = true;
-						}
-					} else if (itemName.contains(filteredItem)) {
-						add = true;
-					}
-
-					if (add) {
-						filteredItems.add(itemGroup);
-						break;
-					}
-				}
-			}
-		}
-		return filteredItems;
 	}
 
 	private int calculateNetTotal(List<ItemGroup> items) {
