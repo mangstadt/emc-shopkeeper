@@ -10,6 +10,8 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -47,40 +49,48 @@ public class ItemsTable extends GroupableColumnsTable {
 		}
 	}
 
-	/**
-	 * Creates the table.
-	 * @param itemGroupsList the items to display in the table
-	 */
-	public ItemsTable(final List<ItemGroup> itemGroupsList) {
-		this(itemGroupsList, null);
-	}
+	private final List<ItemGroup> itemGroups;
+	private List<ItemGroup> itemGroupsToDisplay;
+
+	private Column prevColumnClicked;
+	private boolean ascending;
 
 	/**
 	 * Creates the table.
-	 * @param itemGroupsList the items to display in the table
+	 * @param itemGroups the items to display in the table
 	 */
-	public ItemsTable(final List<ItemGroup> itemGroupsList, final ColumnClickHandler handler) {
+	public ItemsTable(List<ItemGroup> itemGroups) {
+		this.itemGroups = itemGroups;
+		this.itemGroupsToDisplay = itemGroups;
+		prevColumnClicked = Column.ITEM_NAME;
+		ascending = true;
+
 		setColumnSelectionAllowed(false);
 		setRowSelectionAllowed(false);
 		setCellSelectionEnabled(false);
 		setRowHeight(24);
 
-		if (handler != null) {
-			getTableHeader().addMouseListener(new MouseAdapter() {
-				private final Column columns[] = Column.values();
+		getTableHeader().addMouseListener(new MouseAdapter() {
+			private final Column columns[] = Column.values();
 
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
-					if (index < 0) {
-						return;
-					}
-
-					Column column = columns[index];
-					handler.onClick(column);
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
+				if (index < 0) {
+					return;
 				}
-			});
-		}
+
+				Column column = columns[index];
+				if (column == prevColumnClicked) {
+					ascending = !ascending;
+				} else {
+					prevColumnClicked = column;
+					ascending = true;
+				}
+
+				sortData();
+			}
+		});
 
 		setModel(new AbstractTableModel() {
 			private final Column columns[] = Column.values();
@@ -97,12 +107,12 @@ public class ItemsTable extends GroupableColumnsTable {
 
 			@Override
 			public int getRowCount() {
-				return itemGroupsList.size();
+				return itemGroupsToDisplay.size();
 			}
 
 			@Override
 			public Object getValueAt(int row, int col) {
-				return itemGroupsList.get(row);
+				return itemGroupsToDisplay.get(row);
 			}
 
 			public Class<?> getColumnClass(int c) {
@@ -123,7 +133,6 @@ public class ItemsTable extends GroupableColumnsTable {
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 				JLabel label = null;
 
-				StringBuilder sb;
 				ItemGroup group = (ItemGroup) value;
 				if (col == Column.ITEM_NAME.ordinal()) {
 					ImageIcon img = ImageManager.getItemImage(group.getItem());
@@ -153,19 +162,9 @@ public class ItemsTable extends GroupableColumnsTable {
 						label = new JLabel(formatRupees(group.getBoughtAmount()));
 					}
 				} else if (col == Column.NET_QTY.ordinal()) {
-					sb = new StringBuilder();
-					sb.append("<html>");
-					sb.append(formatQuantityWithColor(group.getNetQuantity()));
-					sb.append("</html>");
-
-					label = new JLabel(sb.toString());
+					label = new JLabel("<html>" + formatQuantityWithColor(group.getNetQuantity()) + "</html>");
 				} else if (col == Column.NET_AMT.ordinal()) {
-					sb = new StringBuilder();
-					sb.append("<html>");
-					sb.append(formatRupeesWithColor(group.getNetAmount()));
-					sb.append("</html>");
-
-					label = new JLabel(sb.toString());
+					label = new JLabel("<html>" + formatRupeesWithColor(group.getNetAmount()) + "</html>");
 				}
 
 				//set the background color of the row
@@ -203,11 +202,126 @@ public class ItemsTable extends GroupableColumnsTable {
 		}
 	}
 
-	public static interface ColumnClickHandler {
-		/**
-		 * Called when a column's header is clicked.
-		 * @param column the column that was clicked
-		 */
-		void onClick(Column column);
+	public void filter(List<String> filteredItemNames) {
+		if (filteredItemNames.isEmpty()) {
+			itemGroupsToDisplay = itemGroups;
+		} else {
+			itemGroupsToDisplay = new ArrayList<ItemGroup>();
+			for (ItemGroup itemGroup : itemGroups) {
+				String itemName = itemGroup.getItem().toLowerCase();
+				for (String filteredItem : filteredItemNames) {
+					filteredItem = filteredItem.toLowerCase();
+					boolean add = false;
+					if (filteredItem.startsWith("\"") && filteredItem.endsWith("\"")) {
+						filteredItem = filteredItem.substring(1, filteredItem.length() - 1); //remove double quotes
+						if (itemName.equals(filteredItem)) {
+							add = true;
+						}
+					} else if (itemName.contains(filteredItem)) {
+						add = true;
+					}
+
+					if (add) {
+						itemGroupsToDisplay.add(itemGroup);
+						break;
+					}
+				}
+			}
+		}
+
+		refresh();
+	}
+
+	private void sortData() {
+		Comparator<ItemGroup> comparator = null;
+
+		switch (prevColumnClicked) {
+		case ITEM_NAME:
+			//sort by item name
+			comparator = new Comparator<ItemGroup>() {
+				@Override
+				public int compare(ItemGroup a, ItemGroup b) {
+					if (ascending) {
+						return a.getItem().compareToIgnoreCase(b.getItem());
+					}
+					return b.getItem().compareToIgnoreCase(a.getItem());
+				}
+			};
+			break;
+		case BOUGHT_AMT:
+			comparator = new Comparator<ItemGroup>() {
+				@Override
+				public int compare(ItemGroup a, ItemGroup b) {
+					if (ascending) {
+						return a.getBoughtAmount() - b.getBoughtAmount();
+					}
+					return b.getBoughtAmount() - a.getBoughtAmount();
+				}
+			};
+			break;
+		case BOUGHT_QTY:
+			comparator = new Comparator<ItemGroup>() {
+				@Override
+				public int compare(ItemGroup a, ItemGroup b) {
+					if (ascending) {
+						return a.getBoughtQuantity() - b.getBoughtQuantity();
+					}
+					return b.getBoughtQuantity() - a.getBoughtQuantity();
+				}
+			};
+			break;
+
+		case SOLD_AMT:
+			comparator = new Comparator<ItemGroup>() {
+				@Override
+				public int compare(ItemGroup a, ItemGroup b) {
+					if (ascending) {
+						return a.getSoldAmount() - b.getSoldAmount();
+					}
+					return b.getSoldAmount() - a.getSoldAmount();
+				}
+			};
+			break;
+		case SOLD_QTY:
+			comparator = new Comparator<ItemGroup>() {
+				@Override
+				public int compare(ItemGroup a, ItemGroup b) {
+					if (ascending) {
+						return a.getSoldQuantity() - b.getSoldQuantity();
+					}
+					return b.getSoldQuantity() - a.getSoldQuantity();
+				}
+			};
+			break;
+		case NET_AMT:
+			comparator = new Comparator<ItemGroup>() {
+				@Override
+				public int compare(ItemGroup a, ItemGroup b) {
+					if (ascending) {
+						return a.getNetAmount() - b.getNetAmount();
+					}
+					return b.getNetAmount() - a.getNetAmount();
+				}
+			};
+			break;
+		case NET_QTY:
+			comparator = new Comparator<ItemGroup>() {
+				@Override
+				public int compare(ItemGroup a, ItemGroup b) {
+					if (ascending) {
+						return a.getNetQuantity() - b.getNetQuantity();
+					}
+					return b.getNetQuantity() - a.getNetQuantity();
+				}
+			};
+			break;
+		}
+
+		Collections.sort(itemGroupsToDisplay, comparator);
+		refresh();
+	}
+
+	private void refresh() {
+		((AbstractTableModel) getModel()).fireTableDataChanged();
 	}
 }
