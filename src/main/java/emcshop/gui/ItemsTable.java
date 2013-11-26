@@ -85,7 +85,11 @@ public class ItemsTable extends GroupableColumnsTable {
 					ascending = !ascending;
 				} else {
 					prevColumnClicked = column;
-					ascending = true;
+					if (column == Column.NET_AMT || column == Column.BOUGHT_QTY || column == Column.SOLD_AMT) {
+						ascending = false;
+					} else {
+						ascending = true;
+					}
 				}
 
 				sortData();
