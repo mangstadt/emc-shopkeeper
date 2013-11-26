@@ -18,7 +18,6 @@ import emcshop.db.ItemGroup;
  */
 @SuppressWarnings("serial")
 public class ItemsPanel extends JPanel {
-	private final List<ItemGroup> itemGroups;
 	private final MyJScrollPane scrollPane;
 	private final ItemsTable itemsTable;
 	private final JLabel netTotal;
@@ -28,11 +27,9 @@ public class ItemsPanel extends JPanel {
 	 * @param itemGroups the items to display in the table
 	 */
 	public ItemsPanel(Collection<ItemGroup> itemGroups) {
-		this.itemGroups = new ArrayList<ItemGroup>(itemGroups);
-
 		setLayout(new MigLayout());
 
-		itemsTable = new ItemsTable(this.itemGroups);
+		itemsTable = new ItemsTable(new ArrayList<ItemGroup>(itemGroups));
 		itemsTable.setFillsViewportHeight(true);
 		scrollPane = new MyJScrollPane(itemsTable);
 		add(scrollPane, "grow, w 100%, h 100%, wrap");
