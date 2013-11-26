@@ -96,38 +96,7 @@ public class ItemsTable extends GroupableColumnsTable {
 			}
 		});
 
-		setModel(new AbstractTableModel() {
-			private final Column columns[] = Column.values();
-
-			@Override
-			public int getColumnCount() {
-				return columns.length;
-			}
-
-			@Override
-			public String getColumnName(int col) {
-				return columns[col].getName();
-			}
-
-			@Override
-			public int getRowCount() {
-				return itemGroupsToDisplay.size();
-			}
-
-			@Override
-			public Object getValueAt(int row, int col) {
-				return itemGroupsToDisplay.get(row);
-			}
-
-			public Class<?> getColumnClass(int c) {
-				return ItemGroup.class;
-			}
-
-			@Override
-			public boolean isCellEditable(int row, int col) {
-				return false;
-			}
-		});
+		setModel();
 
 		setDefaultRenderer(ItemGroup.class, new TableCellRenderer() {
 			private final Color evenRowColor = new Color(255, 255, 255);
@@ -180,30 +149,7 @@ public class ItemsTable extends GroupableColumnsTable {
 			}
 		});
 
-		//set the width of "item name" column so the name isn't snipped
-		columnModel.getColumn(Column.ITEM_NAME.ordinal()).setMinWidth(150);
-
-		//set the column groupings
-		{
-			List<ColumnGroup> columnGroups = new ArrayList<ColumnGroup>();
-
-			ColumnGroup columnGroup = new ColumnGroup("Sold");
-			columnGroup.add(columnModel.getColumn(Column.SOLD_QTY.ordinal()));
-			columnGroup.add(columnModel.getColumn(Column.SOLD_AMT.ordinal()));
-			columnGroups.add(columnGroup);
-
-			columnGroup = new ColumnGroup("Bought");
-			columnGroup.add(columnModel.getColumn(Column.BOUGHT_QTY.ordinal()));
-			columnGroup.add(columnModel.getColumn(Column.BOUGHT_AMT.ordinal()));
-			columnGroups.add(columnGroup);
-
-			columnGroup = new ColumnGroup("Net");
-			columnGroup.add(columnModel.getColumn(Column.NET_QTY.ordinal()));
-			columnGroup.add(columnModel.getColumn(Column.NET_AMT.ordinal()));
-			columnGroups.add(columnGroup);
-
-			setColumnGroups(columnGroups);
-		}
+		setColumns();
 	}
 
 	public void filter(List<String> filteredItemNames) {
@@ -235,6 +181,10 @@ public class ItemsTable extends GroupableColumnsTable {
 		}
 
 		refresh();
+	}
+
+	public List<ItemGroup> getDisplayedItemGroups() {
+		return itemGroupsToDisplay;
 	}
 
 	private void sortData() {
@@ -326,11 +276,80 @@ public class ItemsTable extends GroupableColumnsTable {
 		refresh();
 	}
 
-	public List<ItemGroup> getDisplayedItemGroups() {
-		return itemGroupsToDisplay;
+	private void refresh() {
+		//updates the table's data
+		//AbstractTableModel model = (AbstractTableModel) getModel();
+		//model.fireTableDataChanged();
+
+		//doing these things will update the table data and update the column header text
+		setModel();
+		setColumns();
 	}
 
-	private void refresh() {
-		((AbstractTableModel) getModel()).fireTableDataChanged();
+	private void setColumns() {
+		//set the width of "item name" column so the name isn't snipped
+		columnModel.getColumn(Column.ITEM_NAME.ordinal()).setMinWidth(150);
+
+		//define column groups
+		List<ColumnGroup> columnGroups = new ArrayList<ColumnGroup>();
+
+		ColumnGroup columnGroup = new ColumnGroup("Sold");
+		columnGroup.add(columnModel.getColumn(Column.SOLD_QTY.ordinal()));
+		columnGroup.add(columnModel.getColumn(Column.SOLD_AMT.ordinal()));
+		columnGroups.add(columnGroup);
+
+		columnGroup = new ColumnGroup("Bought");
+		columnGroup.add(columnModel.getColumn(Column.BOUGHT_QTY.ordinal()));
+		columnGroup.add(columnModel.getColumn(Column.BOUGHT_AMT.ordinal()));
+		columnGroups.add(columnGroup);
+
+		columnGroup = new ColumnGroup("Net");
+		columnGroup.add(columnModel.getColumn(Column.NET_QTY.ordinal()));
+		columnGroup.add(columnModel.getColumn(Column.NET_AMT.ordinal()));
+		columnGroups.add(columnGroup);
+
+		setColumnGroups(columnGroups);
+	}
+
+	private void setModel() {
+		setModel(new AbstractTableModel() {
+			private final Column columns[] = Column.values();
+
+			@Override
+			public int getColumnCount() {
+				return columns.length;
+			}
+
+			@Override
+			public String getColumnName(int index) {
+				Column column = columns[index];
+
+				String text = column.getName();
+				if (prevColumnClicked == column) {
+					String arrow = (ascending) ? "\u25bc" : "\u25b2";
+					text = arrow + text;
+				}
+				return text;
+			}
+
+			@Override
+			public int getRowCount() {
+				return itemGroupsToDisplay.size();
+			}
+
+			@Override
+			public Object getValueAt(int row, int col) {
+				return itemGroupsToDisplay.get(row);
+			}
+
+			public Class<?> getColumnClass(int c) {
+				return ItemGroup.class;
+			}
+
+			@Override
+			public boolean isCellEditable(int row, int col) {
+				return false;
+			}
+		});
 	}
 }
