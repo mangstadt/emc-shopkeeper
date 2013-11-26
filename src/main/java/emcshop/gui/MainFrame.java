@@ -436,11 +436,6 @@ public class MainFrame extends JFrame implements WindowListener {
 
 					final ItemsPanel panel = new ItemsPanel(itemGroupsList);
 
-					//add "sort by" combobox
-					tablePanel.add(new JLabel("Sort by:"), "align right");
-					ItemSortComboBox sort = new ItemSortComboBox(panel);
-					tablePanel.add(sort, "wrap");
-
 					//add "filter by item"
 					{
 						JLabel label = new JLabel("Filter by item(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
@@ -808,40 +803,6 @@ public class MainFrame extends JFrame implements WindowListener {
 			currentSelection = selected;
 
 			scrollPane.scrollToTop();
-		}
-	}
-
-	private class ItemSortComboBox extends JComboBox implements ActionListener {
-		private final String itemName = "Item name";
-		private final String mostProfitable = "Most Profitable";
-		private final String leastProfitable = "Least Profitable";
-		private final ItemsPanel panel;
-		private String currentSelection;
-
-		public ItemSortComboBox(ItemsPanel panel) {
-			addItem(itemName);
-			addItem(mostProfitable);
-			addItem(leastProfitable);
-			addActionListener(this);
-			this.panel = panel;
-			currentSelection = itemName;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			String selected = (String) getSelectedItem();
-			if (selected == currentSelection) {
-				return;
-			}
-
-			if (selected == itemName) {
-				panel.sortByItemName();
-			} else if (selected == mostProfitable) {
-				panel.sortByMostProfitable();
-			} else if (selected == leastProfitable) {
-				panel.sortByLeastProfitable();
-			}
-			currentSelection = selected;
 		}
 	}
 

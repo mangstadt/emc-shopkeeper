@@ -7,6 +7,8 @@ import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,22 +29,22 @@ import emcshop.gui.lib.GroupableColumnsTable;
  */
 @SuppressWarnings("serial")
 public class ItemsTable extends GroupableColumnsTable {
-	private static final int COL_ITEMNAME = 0;
-	private static final int COL_SOLD_QTY = 1;
-	private static final int COL_SOLD_AMT = 2;
-	private static final int COL_BOUGHT_QTY = 3;
-	private static final int COL_BOUGHT_AMT = 4;
-	private static final int COL_NET_QTY = 5;
-	private static final int COL_NET_AMT = 6;
-	private static final String[] columnNames = new String[7];
-	{
-		columnNames[COL_ITEMNAME] = "Item Name";
-		columnNames[COL_SOLD_QTY] = "Qty";
-		columnNames[COL_SOLD_AMT] = "Rupees";
-		columnNames[COL_BOUGHT_QTY] = "Qty";
-		columnNames[COL_BOUGHT_AMT] = "Rupees";
-		columnNames[COL_NET_QTY] = "Qty";
-		columnNames[COL_NET_AMT] = "Rupees";
+	/**
+	 * Defines all of the columns in this table. The order in which the enums
+	 * are defined is the order that they will appear in the table.
+	 */
+	public static enum Column {
+		ITEM_NAME("Item Name"), SOLD_QTY("Qty"), SOLD_AMT("Rupees"), BOUGHT_QTY("Qty"), BOUGHT_AMT("Rupees"), NET_QTY("Qty"), NET_AMT("Rupees");
+
+		private final String name;
+
+		private Column(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
 	}
 
 	/**
@@ -50,20 +52,47 @@ public class ItemsTable extends GroupableColumnsTable {
 	 * @param itemGroupsList the items to display in the table
 	 */
 	public ItemsTable(final List<ItemGroup> itemGroupsList) {
+		this(itemGroupsList, null);
+	}
+
+	/**
+	 * Creates the table.
+	 * @param itemGroupsList the items to display in the table
+	 */
+	public ItemsTable(final List<ItemGroup> itemGroupsList, final ColumnClickHandler handler) {
 		setColumnSelectionAllowed(false);
 		setRowSelectionAllowed(false);
 		setCellSelectionEnabled(false);
 		setRowHeight(24);
 
+		if (handler != null) {
+			getTableHeader().addMouseListener(new MouseAdapter() {
+				private final Column columns[] = Column.values();
+
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
+					if (index < 0) {
+						return;
+					}
+
+					Column column = columns[index];
+					handler.onClick(column);
+				}
+			});
+		}
+
 		setModel(new AbstractTableModel() {
+			private final Column columns[] = Column.values();
+
 			@Override
 			public int getColumnCount() {
-				return columnNames.length;
+				return columns.length;
 			}
 
 			@Override
 			public String getColumnName(int col) {
-				return columnNames[col];
+				return columns[col].getName();
 			}
 
 			@Override
@@ -96,55 +125,47 @@ public class ItemsTable extends GroupableColumnsTable {
 
 				StringBuilder sb;
 				ItemGroup group = (ItemGroup) value;
-				switch (col) {
-				case COL_ITEMNAME:
+				if (col == Column.ITEM_NAME.ordinal()) {
 					ImageIcon img = ImageManager.getItemImage(group.getItem());
 					label = new JLabel(group.getItem(), img, SwingConstants.LEFT);
-					break;
-				case COL_SOLD_QTY:
+				} else if (col == Column.SOLD_QTY.ordinal()) {
 					if (group.getSoldQuantity() == 0) {
 						label = new JLabel("-", SwingConstants.CENTER);
 					} else {
 						label = new JLabel(formatQuantity(group.getSoldQuantity()));
 					}
-					break;
-				case COL_SOLD_AMT:
+				} else if (col == Column.SOLD_AMT.ordinal()) {
 					if (group.getSoldQuantity() == 0) {
 						label = new JLabel("-", SwingConstants.CENTER);
 					} else {
 						label = new JLabel(formatRupees(group.getSoldAmount()));
 					}
-					break;
-				case COL_BOUGHT_QTY:
+				} else if (col == Column.BOUGHT_QTY.ordinal()) {
 					if (group.getBoughtQuantity() == 0) {
 						label = new JLabel("-", SwingConstants.CENTER);
 					} else {
 						label = new JLabel(formatQuantity(group.getBoughtQuantity()));
 					}
-					break;
-				case COL_BOUGHT_AMT:
+				} else if (col == Column.BOUGHT_AMT.ordinal()) {
 					if (group.getBoughtQuantity() == 0) {
 						label = new JLabel("-", SwingConstants.CENTER);
 					} else {
 						label = new JLabel(formatRupees(group.getBoughtAmount()));
 					}
-					break;
-				case COL_NET_QTY:
+				} else if (col == Column.NET_QTY.ordinal()) {
 					sb = new StringBuilder();
 					sb.append("<html>");
 					sb.append(formatQuantityWithColor(group.getNetQuantity()));
 					sb.append("</html>");
 
 					label = new JLabel(sb.toString());
-					break;
-				case COL_NET_AMT:
+				} else if (col == Column.NET_AMT.ordinal()) {
 					sb = new StringBuilder();
 					sb.append("<html>");
 					sb.append(formatRupeesWithColor(group.getNetAmount()));
 					sb.append("</html>");
 
 					label = new JLabel(sb.toString());
-					break;
 				}
 
 				//set the background color of the row
@@ -157,28 +178,36 @@ public class ItemsTable extends GroupableColumnsTable {
 		});
 
 		//set the width of "item name" column so the name isn't snipped
-		columnModel.getColumn(COL_ITEMNAME).setMinWidth(150);
+		columnModel.getColumn(Column.ITEM_NAME.ordinal()).setMinWidth(150);
 
 		//set the column groupings
 		{
 			List<ColumnGroup> columnGroups = new ArrayList<ColumnGroup>();
 
 			ColumnGroup columnGroup = new ColumnGroup("Sold");
-			columnGroup.add(columnModel.getColumn(COL_SOLD_QTY));
-			columnGroup.add(columnModel.getColumn(COL_SOLD_AMT));
+			columnGroup.add(columnModel.getColumn(Column.SOLD_QTY.ordinal()));
+			columnGroup.add(columnModel.getColumn(Column.SOLD_AMT.ordinal()));
 			columnGroups.add(columnGroup);
 
 			columnGroup = new ColumnGroup("Bought");
-			columnGroup.add(columnModel.getColumn(COL_BOUGHT_QTY));
-			columnGroup.add(columnModel.getColumn(COL_BOUGHT_AMT));
+			columnGroup.add(columnModel.getColumn(Column.BOUGHT_QTY.ordinal()));
+			columnGroup.add(columnModel.getColumn(Column.BOUGHT_AMT.ordinal()));
 			columnGroups.add(columnGroup);
 
 			columnGroup = new ColumnGroup("Net");
-			columnGroup.add(columnModel.getColumn(COL_NET_QTY));
-			columnGroup.add(columnModel.getColumn(COL_NET_AMT));
+			columnGroup.add(columnModel.getColumn(Column.NET_QTY.ordinal()));
+			columnGroup.add(columnModel.getColumn(Column.NET_AMT.ordinal()));
 			columnGroups.add(columnGroup);
 
 			setColumnGroups(columnGroups);
 		}
+	}
+
+	public static interface ColumnClickHandler {
+		/**
+		 * Called when a column's header is clicked.
+		 * @param column the column that was clicked
+		 */
+		void onClick(Column column);
 	}
 }
