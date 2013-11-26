@@ -21,41 +21,50 @@ import emcshop.ItemIndex;
  */
 public class MigrationSprocs {
 	/**
-	 * Ensures that the "items" table contains the names of all items.
+	 * Ensures that the "items" table contains the names of all items. This
+	 * method is meant to be called as a stored procedure.
 	 * @throws SQLException
 	 */
 	public static void populateItemsTable() throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
-
 		try {
-			//get all existing item names
-			Set<String> existingItemNames = new HashSet<String>();
-			PreparedStatement getItemNames = conn.prepareStatement("SELECT name FROM items");
-			ResultSet rs = getItemNames.executeQuery();
-			while (rs.next()) {
-				existingItemNames.add(rs.getString(1).toLowerCase());
-			}
-
-			//insert all items names that aren't in the database
-			InsertStatement insertItems = null;
-			ItemIndex itemIndex = ItemIndex.instance();
-			for (String itemName : itemIndex.getItemNames()) {
-				if (existingItemNames.contains(itemName.toLowerCase())) {
-					continue;
-				}
-
-				if (insertItems == null) {
-					insertItems = new InsertStatement("items");
-				} else {
-					insertItems.nextRow();
-				}
-				insertItems.setString("name", itemName);
-			}
-			if (insertItems != null) {
-				insertItems.execute(conn);
-			}
+			populateItemsTableConn(conn);
 		} finally {
 			conn.close();
+		}
+	}
+
+	/**
+	 * Ensures that the "items" table contains the names of all items. This
+	 * method is meant to be called from Java code.
+	 * @throws SQLException
+	 */
+	public static void populateItemsTableConn(Connection conn) throws SQLException {
+		//get all existing item names
+		Set<String> existingItemNames = new HashSet<String>();
+		PreparedStatement getItemNames = conn.prepareStatement("SELECT name FROM items");
+		ResultSet rs = getItemNames.executeQuery();
+		while (rs.next()) {
+			existingItemNames.add(rs.getString(1).toLowerCase());
+		}
+
+		//insert all items names that aren't in the database
+		InsertStatement insertItems = null;
+		ItemIndex itemIndex = ItemIndex.instance();
+		for (String itemName : itemIndex.getItemNames()) {
+			if (existingItemNames.contains(itemName.toLowerCase())) {
+				continue;
+			}
+
+			if (insertItems == null) {
+				insertItems = new InsertStatement("items");
+			} else {
+				insertItems.nextRow();
+			}
+			insertItems.setString("name", itemName);
+		}
+		if (insertItems != null) {
+			insertItems.execute(conn);
 		}
 	}
 

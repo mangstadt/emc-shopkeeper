@@ -37,7 +37,7 @@ public abstract class DirbyDbDao implements DbDao {
 	/**
 	 * The current version of the database schema.
 	 */
-	private static final int schemaVersion = 6;
+	private static final int schemaVersion = 7;
 
 	/**
 	 * The database connection.
@@ -685,6 +685,7 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE items ALTER COLUMN id RESTART WITH 1");
+			MigrationSprocs.populateItemsTableConn(conn);
 			commit();
 		} finally {
 			closeStatements(stmt);
