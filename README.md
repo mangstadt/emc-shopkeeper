@@ -40,7 +40,7 @@ You can then execute the JAR in the "target" directory by double clicking on it 
 
     --profile-dir=DIR
       The path to the directory that contains all the profiles
-      (defaults to "/Users/mangst/.emc-shopkeeper").
+      (defaults to "USER_HOME/.emc-shopkeeper").
 
     --db=PATH
       Overrides the database location (stored in the profile by default).
