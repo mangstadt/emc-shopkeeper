@@ -2,6 +2,8 @@
 
 EMC Shopkeeper is a program that allows you to download and view your [Empire Minecraft][1] shop transactions.
 
+See [screenshots][4].
+
 #To Run
 
 *Requires:* Java 6
@@ -30,43 +32,55 @@ You can then execute the JAR in the "target" directory by double clicking on it 
 
 #Command-line arguments
 
-    --latest
-      (CLI only) Prints out the latest transaction from the database.
+    General arguments
+    These arguments can be used for the GUI and CLI.
+    ================================================
+    --profile=PROFILE
+      The profile to use (defaults to "default").
+
+    --profile-dir=DIR
+      The path to the directory that contains all the profiles
+      (defaults to "/Users/mangst/.emc-shopkeeper").
+
+    --db=PATH
+      Overrides the database location (stored in the profile by default).
+
+    --settings=PATH
+      Overrides the settings file location (stored in the profile by default).
+
+    --log-level=FINEST|FINER|FINE|CONFIG|INFO|WARNING|SEVERE
+      The log level to use (defaults to INFO).
+
+    CLI arguments
+    Using one of these arguments will launch EMC Shopkeeper in CLI mode.
+    ================================================
     --update
-      (CLI only) Updates the database with the latest transactions.
+      Updates the database with the latest transactions.
+    --start-page=PAGE
+      Specifies the transaction history page number to start at during
+      the first update (defaults to 1).
+    --stop-page=PAGE
+      Specifies the transaction history page number to stop at during
+      the first update (defaults to the last page).
+
     --query=QUERY
-      (CLI only) Shows the net gains/losses of each item.  Examples:
+      Shows the net gains/losses of each item.  Examples:
       All data:           --query
       Today's data:       --query="today"
       Three days of data: --query="2013-03-07 to 2013-03-09"
       Data up to today:   --query="2013-03-07 to today"
-    --profile=PROFILE
-      The profile to use (defaults to "default").
-    --profile-dir=DIR
-      The path to the directory that contains all the profiles
-      (defaults to "USERHOME/.emc-shopkeeper").
-    --db=PATH
-      Overrides the database location (stored in the profile by default).
-    --settings=PATH
-      Overrides the settings file location (stored in the profile by default).
-    --threads=NUM
-      (CLI only) Specifies the number of transaction history pages that will be
-      parsed at once during an update (defaults to 4).
-    --start-at-page=PAGE
-      (CLI only) Specifies the transaction history page number to start at during
-      an update (defaults to 1).
-    --stop-at-page=PAGE
-      (CLI only) Specifies the transaction history page number to stop at during
-      an update (defaults to the last page).
-    --log-level=FINEST|FINER|FINE|CONFIG|INFO|WARNING|SEVERE
-      The log level to use (defaults to INFO).
+    --format=TABLE|CSV|BBCODE
+      Specifies how to render the queried transaction data (defaults to TABLE).
+
     --version
-      (CLI only) Prints the version of this program.
+      Prints the version of this program.
+
     --help
-      (CLI only) Prints this help message.
+      Prints this help message.
 
 *This program is a fan creation and is not affiliated with Minecraft (copyright Mojang) or Empire Minecraft (copyright Kalland Labs).*
 
 [1]: http://empireminecraft.com
 [2]: https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper.jnlp
 [3]: https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar
+[4]: https://github.com/mangstadt/emc-shopkeeper/tree/master/screenshots
