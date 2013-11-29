@@ -56,14 +56,23 @@ public class ItemsTable extends GroupableColumnsTable {
 	private boolean ascending;
 
 	/**
-	 * Creates the table.
-	 * @param itemGroups the items to display in the table
+	 * @param itemGroups the items to display
 	 */
 	public ItemsTable(List<ItemGroup> itemGroups) {
+		this(itemGroups, Column.ITEM_NAME, true);
+	}
+
+	/**
+	 * @param itemGroups the items to display
+	 * @param sortedBy the column that the items list is already sorted by
+	 * @param sortedByAscending true if the items list is sorted ascending,
+	 * false if descending
+	 */
+	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending) {
 		this.itemGroups = itemGroups;
 		this.itemGroupsToDisplay = itemGroups;
-		prevColumnClicked = Column.ITEM_NAME;
-		ascending = true;
+		prevColumnClicked = sortedBy;
+		ascending = sortedByAscending;
 
 		setColumnSelectionAllowed(false);
 		setRowSelectionAllowed(false);

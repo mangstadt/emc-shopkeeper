@@ -9,11 +9,15 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import emcshop.db.ItemGroup;
+import emcshop.db.Player;
+import emcshop.db.PlayerGroup;
 import emcshop.util.BBCodeBuilder;
 
 /**
@@ -151,6 +155,125 @@ public class QueryExporter {
 			bbCode.text(netTotalStr);
 		}
 		bbCode.close(); //close "b"
+
+		bbCode.close(); //close "font"
+
+		return bbCode.toString();
+	}
+
+	public static String generatePlayersCsv(List<PlayerGroup> players, Map<PlayerGroup, List<ItemGroup>> items, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		StringWriter sw = new StringWriter();
+		CSVWriter writer = new CSVWriter(sw);
+
+		writer.writeNext(new String[] { (from == null) ? "" : df.format(from), (to == null) ? "" : df.format(to) });
+		writer.writeNext(new String[] { "Player", "First Seen", "Last Seen", "Item", "Sold Quantity", "Sold Amount", "Bought Quantity", "Bought Amount", "Net Quantity", "Net Amount" });
+		for (PlayerGroup player : players) {
+			Player p = player.getPlayer();
+			for (ItemGroup group : items.get(player)) {
+				//@formatter:off
+				writer.writeNext(new String[]{
+					p.getName(),
+					df.format(p.getFirstSeen()),
+					df.format(p.getLastSeen()),
+					group.getItem(),
+					group.getSoldQuantity() + "",
+					group.getSoldAmount() + "",
+					group.getBoughtQuantity() + "",
+					group.getBoughtAmount() + "",
+					group.getNetQuantity() + "",
+					group.getNetAmount() + ""
+				});
+				//@formatter:on
+			}
+		}
+		writer.writeNext(new String[] { "EMC Shopkeeper v" + Main.VERSION + " - " + Main.URL });
+
+		try {
+			writer.close();
+		} catch (IOException e) {
+			//writing to string
+		}
+		return sw.toString();
+	}
+
+	public static String generatePlayersBBCode(List<PlayerGroup> playerGroups, Map<PlayerGroup, List<ItemGroup>> itemGroups, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		BBCodeBuilder bbCode = new BBCodeBuilder();
+
+		bbCode.font("courier new");
+
+		//date range
+		bbCode.b();
+		if (from == null && to == null) {
+			bbCode.text("entire history");
+		} else if (from == null) {
+			bbCode.text("up to ").text(df.format(to));
+		} else if (to == null) {
+			bbCode.text(df.format(from)).text(" to today");
+		} else if (from.equals(to)) {
+			bbCode.text(df.format(from));
+		} else {
+			bbCode.text(df.format(from)).text(" to ").text(df.format(to));
+		}
+		bbCode.close().nl();
+
+		for (PlayerGroup playerGroup : playerGroups) {
+			bbCode.b(playerGroup.getPlayer().getName()).nl();
+
+			//item table
+			bbCode.text("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -").nl();
+			for (ItemGroup group : itemGroups.get(playerGroup)) {
+				String item = group.getItem();
+				bbCodeColumn(item, 17, bbCode);
+				bbCode.text(" | ");
+
+				String sold;
+				if (group.getSoldQuantity() == 0) {
+					sold = StringUtils.repeat("- ", 8) + "-";
+				} else {
+					sold = formatQuantity(group.getSoldQuantity()) + " / " + formatRupees(group.getSoldAmount());
+				}
+				bbCodeColumn(sold, 17, bbCode);
+				bbCode.text(" | ");
+
+				String bought;
+				if (group.getBoughtQuantity() == 0) {
+					bought = StringUtils.repeat("- ", 8) + "-";
+				} else {
+					bought = formatQuantity(group.getBoughtQuantity()) + " / " + formatRupees(group.getBoughtAmount());
+				}
+				bbCodeColumn(bought, 17, bbCode);
+				bbCode.text(" | ");
+
+				String netQuantityStr = formatQuantity(group.getNetQuantity());
+				if (group.getNetQuantity() > 0) {
+					bbCode.color("green", netQuantityStr);
+				} else if (group.getNetQuantity() < 0) {
+					bbCode.color("red", netQuantityStr);
+				} else {
+					bbCode.text(netQuantityStr);
+				}
+
+				bbCode.text(" / ");
+
+				String netAmountStr = formatRupees(group.getNetAmount());
+				if (group.getNetAmount() > 0) {
+					bbCode.color("green", netAmountStr);
+				} else if (group.getNetAmount() < 0) {
+					bbCode.color("red", netAmountStr);
+				} else {
+					bbCode.text(netAmountStr);
+				}
+
+				bbCode.nl();
+			}
+			bbCode.nl();
+		}
+
+		//footer
+		String footer = "EMC Shopkeeper v" + Main.VERSION;
+		bbCode.url(Main.URL, footer);
 
 		bbCode.close(); //close "font"
 

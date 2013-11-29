@@ -21,6 +21,7 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
+import emcshop.gui.ItemsTable.Column;
 
 /**
  * A panel that displays transactions grouped by player.
@@ -51,7 +52,7 @@ public class PlayersPanel extends JPanel {
 
 		this.profileImageLoader = profileImageLoader;
 
-		setLayout(new MigLayout());
+		setLayout(new MigLayout("fillx"));
 		sortByPlayerName();
 	}
 
@@ -126,6 +127,7 @@ public class PlayersPanel extends JPanel {
 			add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!");
 			profileImageLoader.load(player.getName(), profileImage, profileImageSize);
 
+			//TODO make the username clickable
 			//@formatter:off
 			String header =
 			"<html>" +
@@ -138,10 +140,27 @@ public class PlayersPanel extends JPanel {
 			//@formatter:on
 			add(new JLabel(header), "wrap");
 
-			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup));
+			Column column = null;
+			boolean ascending = true;
+			switch (sort) {
+			case PLAYER:
+				column = Column.ITEM_NAME;
+				ascending = true;
+				break;
+			case SUPPLIER:
+				column = Column.NET_AMT;
+				ascending = true;
+				break;
+			case CUSTOMER:
+				column = Column.NET_AMT;
+				ascending = false;
+				break;
+			}
+
+			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup), column, ascending);
 			table.getTableHeader().setReorderingAllowed(false);
-			add(table.getTableHeader(), "span 2, wrap");
-			add(table, "span 2, wrap");
+			add(table.getTableHeader(), "span 2, growx, wrap");
+			add(table, "span 2, growx, wrap");
 
 			JLabel netAmount;
 			{
