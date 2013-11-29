@@ -36,16 +36,18 @@ public class ItemsPanel extends JPanel {
 
 		netTotal = new JLabel();
 		add(netTotal, "align right");
+		updateNetTotal();
 	}
 
 	/**
 	 * Filters the data by item.
 	 */
 	public void filterByItems(List<String> items) {
-		//filter the table
 		itemsTable.filter(items);
+		updateNetTotal();
+	}
 
-		//update the net total label
+	private void updateNetTotal() {
 		List<ItemGroup> displayedItemGroups = itemsTable.getDisplayedItemGroups();
 		int total = calculateNetTotal(displayedItemGroups);
 		StringBuilder sb = new StringBuilder();
