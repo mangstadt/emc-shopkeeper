@@ -101,8 +101,8 @@ public class Settings {
 
 	private void defaults() {
 		version = CURRENT_VERSION;
-		windowWidth = 1000;
-		windowHeight = 600;
+		windowWidth = 900;
+		windowHeight = 800;
 		lastUpdated = null;
 		session = null;
 		persistSession = true;
@@ -119,17 +119,17 @@ public class Settings {
 		}
 
 		try {
-			windowWidth = props.getInteger("window.width", 1000);
+			windowWidth = props.getInteger("window.width", 900);
 		} catch (NumberFormatException e) {
 			logger.log(Level.WARNING, "Problem parsing window.width: ", e);
-			windowWidth = 1000;
+			windowWidth = 900;
 		}
 
 		try {
-			windowHeight = props.getInteger("window.height", 600);
+			windowHeight = props.getInteger("window.height", 800);
 		} catch (NumberFormatException e) {
 			logger.log(Level.WARNING, "Problem parsing window.height: ", e);
-			windowHeight = 600;
+			windowHeight = 800;
 		}
 		try {
 			lastUpdated = props.getDate("lastUpdated");
