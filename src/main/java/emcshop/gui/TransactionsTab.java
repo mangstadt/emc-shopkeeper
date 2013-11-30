@@ -94,6 +94,7 @@ public class TransactionsTab extends JPanel {
 		showItems.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				//TODO add wait cursors
 				if (!checkDateRange()) {
 					return;
 				}
@@ -212,6 +213,9 @@ public class TransactionsTab extends JPanel {
 		filterByPlayer.setEnabled(false);
 		sortByLabel.setEnabled(false);
 		sortBy.setEnabled(false);
+
+		updateNetTotal();
+		updateCustomers();
 	}
 
 	public void clear() {
@@ -221,6 +225,12 @@ public class TransactionsTab extends JPanel {
 		} catch (PropertyVetoException e) {
 			throw new RuntimeException(e);
 		}
+
+		itemsTable = null;
+		itemsTableScrollPane = null;
+		playersPanel = null;
+		playersPanelScrollPane = null;
+		netTotal = 0;
 
 		export.setEnabled(false);
 		filterByItemLabel.setEnabled(false);
@@ -233,6 +243,9 @@ public class TransactionsTab extends JPanel {
 		sortBy.setEnabled(false);
 
 		tablePanel.removeAll();
+
+		updateNetTotal();
+		updateCustomers();
 
 		validate();
 	}
@@ -404,6 +417,8 @@ public class TransactionsTab extends JPanel {
 			customers = "?";
 		} else if (playersPanel != null) {
 			customers = playersPanel.getDisplayedPlayers().size() + "";
+		} else {
+			customers = "0";
 		}
 
 		StringBuilder sb = new StringBuilder();
