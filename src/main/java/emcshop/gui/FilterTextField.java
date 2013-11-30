@@ -13,6 +13,7 @@ import emcshop.gui.images.ImageManager;
 /**
  * A textbox used for entering the item/player names to filter by.
  */
+@SuppressWarnings("serial")
 public class FilterTextField extends JTextField {
 	private final JButton clearButton;
 	{

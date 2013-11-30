@@ -35,7 +35,6 @@ import emcshop.gui.images.ImageManager;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {
-	private final MainFrame owner;
 	private final DbDao dao;
 
 	private List<Inventory> inventory = new ArrayList<Inventory>();
@@ -73,7 +72,6 @@ public class InventoryTab extends JPanel {
 	}
 
 	public InventoryTab(MainFrame owner, final DbDao dao) {
-		this.owner = owner;
 		this.dao = dao;
 
 		addEdit = new JButton("Add/Edit");
