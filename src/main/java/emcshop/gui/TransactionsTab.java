@@ -4,9 +4,6 @@ import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
@@ -27,7 +24,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
@@ -116,7 +112,7 @@ public class TransactionsTab extends JPanel {
 
 		tablePanel = new JPanel(new MigLayout("width 100%, height 100%, fillx, insets 0"));
 
-		export = new ExportComboBox();
+		export = new ExportComboBoxImpl();
 
 		filterByItemLabel = new JLabel("Filter by item(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
 		filterByItemLabel.setToolTipText(toolTipText("<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation."));
@@ -460,36 +456,8 @@ public class TransactionsTab extends JPanel {
 		return new Date[] { from, to };
 	}
 
-	private class ExportComboBox extends JComboBox implements ActionListener {
-		private final String heading = "Copy to Clipboard";
-		private final String bbCode = "BB Code";
-		private final String csv = "CSV";
-
-		public ExportComboBox() {
-			addItem(heading);
-			addItem(bbCode);
-			addItem(csv);
-			addActionListener(this);
-		}
-
+	private class ExportComboBoxImpl extends ExportComboBox implements ActionListener {
 		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			String selected = (String) getSelectedItem();
-			String text = null;
-			if (selected == csv) {
-				text = csv();
-			} else if (selected == bbCode) {
-				text = bbCode();
-			}
-
-			//re-select the first element
-			setSelectedItem(heading);
-
-			if (text != null) {
-				handle(text);
-			}
-		}
-
 		public String bbCode() {
 			Date from = fromDatePicker.getDate();
 			Date to = toDatePicker.getDate();
@@ -507,6 +475,7 @@ public class TransactionsTab extends JPanel {
 			return null;
 		}
 
+		@Override
 		public String csv() {
 			Date from = fromDatePicker.getDate();
 			Date to = toDatePicker.getDate();
@@ -522,77 +491,6 @@ public class TransactionsTab extends JPanel {
 			}
 
 			return null;
-		}
-
-		public void handle(String text) {
-			if (text == null) {
-				return;
-			}
-
-			Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-			StringSelection stringSelection = new StringSelection(text);
-			c.setContents(stringSelection, stringSelection);
-
-			JOptionPane.showMessageDialog(owner, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
-		}
-	}
-
-	/**
-	 * A textbox used for entering the item/player names to filter by.
-	 */
-	private static class FilterTextField extends JTextField {
-		private final JButton clearButton;
-		{
-			clearButton = new JButton(ImageManager.getClearIcon());
-			clearButton.setToolTipText("Clear");
-			clearButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					if (getText().isEmpty()) {
-						return;
-					}
-					setText("");
-					fireActionEvent();
-				}
-			});
-		}
-
-		/**
-		 * Splits the player/item names that are comma-delimited.
-		 * @return the names
-		 */
-		public List<String> getNames() {
-			String split[] = getText().trim().split("\\s*,\\s*");
-			List<String> filteredItems = new ArrayList<String>(split.length);
-			for (String s : split) {
-				if (s.length() > 0) {
-					filteredItems.add(s);
-				}
-			}
-			return filteredItems;
-		}
-
-		/**
-		 * Simulates pressing "enter" on the text field.
-		 */
-		public void fireActionEvent() {
-			for (ActionListener listener : listenerList.getListeners(ActionListener.class)) {
-				listener.actionPerformed(null);
-			}
-		}
-
-		/**
-		 * Gets the clear button associated with this text box.
-		 * @return
-		 */
-		public JButton getClearButton() {
-			return clearButton;
-		}
-
-		@Override
-		public void setEnabled(boolean enabled) {
-			super.setEnabled(enabled);
-			clearButton.setEnabled(enabled);
 		}
 	}
 

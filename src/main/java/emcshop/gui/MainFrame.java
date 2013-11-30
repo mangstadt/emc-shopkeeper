@@ -53,6 +53,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private JTabbedPane tabs;
 	private TransactionsTab transactionsTab;
 	private PaymentsTab paymentsTab;
+	private InventoryTab inventoryTab;
 
 	JMenuItem clearSession;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -298,6 +299,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		});
 		transactionsTab = new TransactionsTab(this, dao, profileImageLoader);
 		paymentsTab = new PaymentsTab(this, dao);
+		inventoryTab = new InventoryTab(this, dao);
 	}
 
 	private void layoutWidgets() {
@@ -311,6 +313,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		tabs.addTab("Transactions", transactionsTab);
 		tabs.addTab("Payments", paymentsTab);
+		tabs.addTab("Inventory", inventoryTab);
 		add(tabs, "span 2, h 100%, w 100%");
 	}
 

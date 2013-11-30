@@ -1,0 +1,7 @@
+CREATE TABLE inventory(
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	item SMALLINT NOT NULL REFERENCES items(id),
+	quantity INT NOT NULL
+);
+
+CREATE INDEX item_index2 ON inventory(item);

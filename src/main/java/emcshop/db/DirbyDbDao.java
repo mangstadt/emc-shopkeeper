@@ -37,7 +37,7 @@ public abstract class DirbyDbDao implements DbDao {
 	/**
 	 * The current version of the database schema.
 	 */
-	private static final int schemaVersion = 7;
+	private static final int schemaVersion = 8;
 
 	/**
 	 * The database connection.
@@ -289,6 +289,8 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.setInt("balance", transaction.getBalance());
 			int id = stmt.execute(conn);
 			transaction.setId(id);
+
+			addToInventory(itemId, transaction.getQuantity());
 		}
 	}
 
@@ -673,14 +675,110 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public List<Inventory> getInventory() throws SQLException {
+		List<Inventory> inventory = new ArrayList<Inventory>();
+		PreparedStatement stmt = stmt("SELECT inventory.*, items.name AS item_name FROM inventory INNER JOIN items ON inventory.item = items.id");
+
+		try {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				Inventory inv = new Inventory();
+				inv.setId(rs.getInt("id"));
+				inv.setItemId(rs.getInt("item"));
+				inv.setItem(rs.getString("item_name"));
+				inv.setQuantity(rs.getInt("quantity"));
+				inventory.add(inv);
+			}
+			return inventory;
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	private void addToInventory(Integer itemId, Integer quantityToAdd) throws SQLException {
+		PreparedStatement stmt = stmt("UPDATE inventory SET quantity = quantity + ? WHERE item = ?");
+
+		try {
+			stmt.setInt(1, quantityToAdd);
+			stmt.setInt(2, itemId);
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void upsertInventory(String item, Integer quantity) throws SQLException {
+		int itemId = getItemId(item);
+		
+		PreparedStatement stmt = stmt("SELECT id FROM inventory WHERE item = ?");
+		Integer invId;
+		try {
+			stmt.setInt(1, itemId);
+			ResultSet rs = stmt.executeQuery();
+			invId= rs.next() ? rs.getInt("id") : null;
+		} finally {
+			closeStatements(stmt);
+		}
+
+		if (invId == null) {
+			InsertStatement stmt2 = new InsertStatement("inventory");
+			stmt2.setInt("item", itemId);
+			stmt2.setInt("quantity", quantity);
+			stmt2.execute(conn);
+		} else {
+			PreparedStatement stmt2 = stmt("UPDATE inventory SET quantity = ? WHERE id = ?");
+			try {
+				stmt2.setInt(1, quantity);
+				stmt2.setInt(2, invId);
+				stmt2.executeUpdate();
+			} finally {
+				closeStatements(stmt2);
+			}
+		}
+	}
+	
+	@Override
+	public void deleteInventory(Collection<Integer> ids) throws SQLException{
+		if (ids.isEmpty()){
+			return;
+		}
+		
+		//build SQL
+		boolean first = true;
+		StringBuilder sb = new StringBuilder("DELETE FROM inventory WHERE");
+		for (int i = 0; i < ids.size(); i++){
+			if (!first){
+				sb.append(" OR");
+			}
+			sb.append(" id = ?");
+			first = false;
+		}
+		
+		//execute statement
+		PreparedStatement stmt = stmt(sb.toString());
+		try {
+			int i = 1;
+			for (Integer id : ids){
+				stmt.setInt(i++, id);
+			}
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
 	public void wipe() throws SQLException, IOException {
 		logger.info("Wiping transactions...");
 		Statement stmt = conn.createStatement();
 		try {
+			stmt.execute("DELETE FROM inventory");
 			stmt.execute("DELETE FROM payment_transactions");
 			stmt.execute("DELETE FROM transactions");
 			stmt.execute("DELETE FROM players");
 			stmt.execute("DELETE FROM items");
+			stmt.execute("ALTER TABLE inventory ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");

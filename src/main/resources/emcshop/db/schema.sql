@@ -67,9 +67,16 @@ CREATE TABLE payment_transactions(
 	ignore BOOLEAN NOT NULL DEFAULT false
 );
 
+CREATE TABLE inventory(
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	item SMALLINT NOT NULL REFERENCES items(id),
+	quantity INT NOT NULL
+);
+
 CREATE INDEX ts_index ON transactions(ts);
 CREATE INDEX player_index ON transactions(player);
 CREATE INDEX item_index ON transactions(item);
+CREATE INDEX item_index2 ON inventory(item);
 
 CREATE PROCEDURE UPDATE_ITEM_NAMES()
 LANGUAGE JAVA PARAMETER STYLE JAVA

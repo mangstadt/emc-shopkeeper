@@ -185,6 +185,27 @@ public interface DbDao {
 	String getPlayerName(int id) throws SQLException;
 
 	/**
+	 * Gets the player's shop inventory.
+	 * @return the inventory
+	 * @throws SQLException
+	 */
+	List<Inventory> getInventory() throws SQLException;
+
+	/**
+	 * Updates or inserts an inventory item.
+	 * @param item the item name
+	 * @param quantity the new quantity
+	 * @throws SQLException
+	 */
+	void upsertInventory(String item, Integer quantity) throws SQLException;
+	
+	/**
+	 * Deletes one or more inventory items.
+	 * @param ids the inventory IDs to delete
+	 */
+	void deleteInventory(Collection<Integer> ids) throws SQLException;
+
+	/**
 	 * Deletes all data in the database.
 	 * @throws IOException
 	 * @throws SQLException
