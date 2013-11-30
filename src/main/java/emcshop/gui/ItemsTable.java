@@ -297,7 +297,7 @@ public class ItemsTable extends GroupableColumnsTable {
 
 	private void setColumns() {
 		//set the width of "item name" column so the name isn't snipped
-		columnModel.getColumn(Column.ITEM_NAME.ordinal()).setMinWidth(150);
+		columnModel.getColumn(Column.ITEM_NAME.ordinal()).setMinWidth(200);
 
 		//define column groups
 		List<ColumnGroup> columnGroups = new ArrayList<ColumnGroup>();
@@ -336,7 +336,7 @@ public class ItemsTable extends GroupableColumnsTable {
 				String text = column.getName();
 				if (prevColumnClicked == column) {
 					String arrow = (ascending) ? "\u25bc" : "\u25b2";
-					text = arrow + text;
+					text = arrow + " " + text;
 				}
 				return text;
 			}
