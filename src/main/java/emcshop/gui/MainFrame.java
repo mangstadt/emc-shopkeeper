@@ -198,6 +198,7 @@ public class MainFrame extends JFrame implements WindowListener {
 									transactionsTab.clear();
 									updatePaymentsCount();
 									paymentsTab.reset();
+									inventoryTab.refresh();
 									loading.dispose();
 								} catch (Throwable e) {
 									loading.dispose();
@@ -247,6 +248,12 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private void createWidgets() {
+		try {
+			ItemSuggestField.init(dao);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+
 		update = new JButton("Update Transactions", ImageManager.getUpdate());
 		update.setToolTipText(toolTipText("<font size=4><b>Update Transactions</b></font><br><br>Downloads your latest transactions from the EMC website."));
 		update.addActionListener(new ActionListener() {
@@ -299,6 +306,7 @@ public class MainFrame extends JFrame implements WindowListener {
 				}
 			}
 		});
+
 		transactionsTab = new TransactionsTab(this, dao, profileImageLoader);
 		paymentsTab = new PaymentsTab(this, dao);
 		inventoryTab = new InventoryTab(this, dao);
@@ -337,6 +345,10 @@ public class MainFrame extends JFrame implements WindowListener {
 		}
 	}
 
+	public void updateInventoryTab() {
+		inventoryTab.refresh();
+	}
+
 	/**
 	 * Called after an update has completed.
 	 */
@@ -357,6 +369,8 @@ public class MainFrame extends JFrame implements WindowListener {
 			} else {
 				paymentsTab.setStale(true);
 			}
+
+			inventoryTab.refresh();
 
 			NumberFormat nf = NumberFormat.getInstance();
 			StringBuilder sb = new StringBuilder();

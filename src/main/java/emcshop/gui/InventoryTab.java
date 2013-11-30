@@ -110,11 +110,6 @@ public class InventoryTab extends JPanel {
 			}
 		});
 
-		try {
-			ItemSuggestField.init(dao);
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
 		item = new ItemSuggestField(owner);
 
 		quantityLabel = new HelpLabel("Qty:", "You can specify the quantity in the number of items and/or the number of stacks.\n\n<b>Examples</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)");
@@ -237,6 +232,7 @@ public class InventoryTab extends JPanel {
 		}
 		inventoryDisplayed = inventory;
 		table.sortData();
+		filterByItem.setText("");
 	}
 
 	private class InventoryTable extends JTable {
@@ -285,6 +281,8 @@ public class InventoryTab extends JPanel {
 					}
 
 					Column column = columns[index];
+
+					//select all checkboxes
 					if (column == Column.CHECKBOX) {
 						for (JCheckBox checkbox : checkboxes) {
 							checkbox.setSelected(true);
@@ -311,6 +309,7 @@ public class InventoryTab extends JPanel {
 				private final NumberFormat nf = NumberFormat.getInstance();
 				{
 					nf.setMaximumFractionDigits(2);
+					nf.setMinimumFractionDigits(1);
 				}
 
 				@Override

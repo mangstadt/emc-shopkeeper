@@ -4,8 +4,6 @@ import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -17,36 +15,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.ListCellRenderer;
-import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.db.DbDao;
-import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
-import emcshop.gui.lib.suggest.ContainsMatcher;
-import emcshop.gui.lib.suggest.JSuggestField;
 
 @SuppressWarnings("serial")
 public class PaymentsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
-	private Vector<String> itemNames;
-	private Map<String, JLabel> itemIconLabels = new HashMap<String, JLabel>();
 	private final DateFormat df = new SimpleDateFormat("MMM dd yyyy @ HH:mm");
 	private boolean stale = true;
-
-	private final Color selectedItemBgColor = new Color(192, 192, 192);
 	private final Color erroredFieldBgColor = new Color(255, 192, 192);
 
 	private final JButton save, reset;
@@ -93,6 +79,7 @@ public class PaymentsTab extends JPanel {
 
 					reset();
 					owner.updatePaymentsCount(); //update the tab title
+					owner.updateInventoryTab(); //update the inventory tab
 				} catch (SQLException e) {
 					dao.rollback();
 					ErrorDialog.show(owner, "Problem updating payment transactions in the database.", e);
@@ -402,30 +389,6 @@ public class PaymentsTab extends JPanel {
 		}
 	}
 
-	private class ItemSuggestField extends JSuggestField {
-		public ItemSuggestField(Window parent) {
-			super(parent, itemNames);
-			setSuggestMatcher(new ContainsMatcher());
-			setListCellRenderer(new ListCellRenderer() {
-				@Override
-				public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-					String itemName = (String) value;
-					JLabel label = itemIconLabels.get(itemName);
-					if (label == null) {
-						ImageIcon image = ImageManager.getItemImage("_empty");
-						label = new JLabel(itemName, image, SwingConstants.LEFT);
-					}
-
-					label.setOpaque(isSelected);
-					if (isSelected) {
-						label.setBackground(selectedItemBgColor);
-					}
-					return label;
-				}
-			});
-		}
-	}
-
 	public void reset() {
 		busyCursor(owner, true);
 		try {
@@ -436,15 +399,6 @@ public class PaymentsTab extends JPanel {
 			if (pendingPayments.isEmpty()) {
 				add(new JLabel("No payment transactions found."), "align center");
 			} else {
-				//build labels for item icons
-				List<String> itemNames = dao.getItemNames();
-				this.itemNames = new Vector<String>(itemNames);
-				for (String itemName : itemNames) {
-					ImageIcon image = ImageManager.getItemImage(itemName);
-					JLabel label = new JLabel(itemName, image, SwingConstants.LEFT);
-					itemIconLabels.put(itemName, label);
-				}
-
 				paymentsPanel = new PaymentsPanel(pendingPayments);
 
 				add(save, "split 2");
