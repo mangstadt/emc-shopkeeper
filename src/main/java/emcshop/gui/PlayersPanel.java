@@ -22,6 +22,7 @@ import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.ItemsTable.Column;
+import emcshop.gui.lib.ClickableLabel;
 
 /**
  * A panel that displays transactions grouped by player.
@@ -124,21 +125,22 @@ public class PlayersPanel extends JPanel {
 			JLabel profileImage = new JLabel();
 			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 			profileImage.setVerticalAlignment(SwingConstants.TOP);
-			add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!");
+			add(profileImage, "span 1 2, w " + profileImageSize + "!, h " + profileImageSize + "!");
 			profileImageLoader.load(player.getName(), profileImage, profileImageSize);
 
-			//TODO make the username clickable
+			JLabel playerName = new ClickableLabel("<html><h3><u>" + player.getName() + "</u></h3></html>", "http://u.emc.gs/" + player.getName());
+			add(playerName, "wrap");
+
 			//@formatter:off
-			String header =
+			String seen =
 			"<html>" +
-				"<h3>" + player.getName() + "</h3>" +
 				"<table>" +
-					"<tr><td align=right>First seen:</td><td>" + df.format(player.getFirstSeen()) + "</td></tr>" +
-					"<tr><td align=right>Last seen:</td><td>" + df.format(player.getLastSeen()) + "</td></tr>" +
+					"<tr><td>First seen:</td><td>" + df.format(player.getFirstSeen()) + "</td></tr>" +
+					"<tr><td>Last seen:</td><td>" + df.format(player.getLastSeen()) + "</td></tr>" +
 				"</table>" +
 			"</html>";
 			//@formatter:on
-			add(new JLabel(header), "wrap");
+			add(new JLabel(seen), "wrap");
 
 			Column column = null;
 			boolean ascending = true;
