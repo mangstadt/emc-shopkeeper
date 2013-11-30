@@ -122,14 +122,16 @@ public class PlayersPanel extends JPanel {
 		for (PlayerGroup playerGroup : displayedPlayers) {
 			Player player = playerGroup.getPlayer();
 
+			JPanel header = new JPanel(new MigLayout("insets 0"));
+
 			JLabel profileImage = new JLabel();
 			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 			profileImage.setVerticalAlignment(SwingConstants.TOP);
-			add(profileImage, "span 1 2, w " + profileImageSize + "!, h " + profileImageSize + "!");
+			header.add(profileImage, "span 1 2, w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
 			profileImageLoader.load(player.getName(), profileImage, profileImageSize);
 
 			JLabel playerName = new ClickableLabel("<html><h3><u>" + player.getName() + "</u></h3></html>", "http://u.emc.gs/" + player.getName());
-			add(playerName, "wrap");
+			header.add(playerName, "wrap");
 
 			//@formatter:off
 			String seen =
@@ -140,7 +142,9 @@ public class PlayersPanel extends JPanel {
 				"</table>" +
 			"</html>";
 			//@formatter:on
-			add(new JLabel(seen), "wrap");
+			header.add(new JLabel(seen), "wrap");
+
+			add(header, "growx, wrap");
 
 			Column column = null;
 			boolean ascending = true;
@@ -160,8 +164,8 @@ public class PlayersPanel extends JPanel {
 			}
 
 			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup), column, ascending);
-			add(table.getTableHeader(), "span 2, growx, wrap");
-			add(table, "span 2, growx, wrap");
+			add(table.getTableHeader(), "growx, wrap");
+			add(table, "growx, wrap");
 
 			JLabel netAmount;
 			{
