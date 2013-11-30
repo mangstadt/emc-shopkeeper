@@ -1,10 +1,10 @@
 package emcshop.gui;
 
-import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +21,6 @@ import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -37,79 +36,46 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.gui.lib.suggest.ContainsMatcher;
 import emcshop.gui.lib.suggest.JSuggestField;
-import emcshop.util.GuiUtils;
 
-/**
- * Displays the pending payment transactions.
- * @author Michael Angstadt
- */
 @SuppressWarnings("serial")
-public class PaymentTransactionsDialog extends JDialog {
-	private final Vector<String> itemNames;
-	private final Map<String, JLabel> itemIconLabels = new HashMap<String, JLabel>();
+public class PaymentsTab extends JPanel {
+	private final MainFrame owner;
+	private final DbDao dao;
+	private Vector<String> itemNames;
+	private Map<String, JLabel> itemIconLabels = new HashMap<String, JLabel>();
 	private final DateFormat df = new SimpleDateFormat("MMM dd yyyy @ HH:mm");
+	private boolean stale = true;
+
 	private final Color selectedItemBgColor = new Color(192, 192, 192);
 	private final Color erroredFieldBgColor = new Color(255, 192, 192);
 
-	private PaymentTransactionsDialog(Window owner, final DbDao dao) throws SQLException {
-		super(owner, "Payment Transactions");
-		setModalityType(ModalityType.DOCUMENT_MODAL); //go on top of all windows
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		GuiUtils.closeOnEscapeKeyPress(this);
+	private final JButton save, reset;
+	private PaymentsPanel paymentsPanel;
 
-		//@formatter:off
-		JLabel description = new JLabel(
-		"<html>" +
-			"<div width=100%>" +
-				"The following payment transactions are awaiting your review." +
-			"</div>" +
-		"</html>"
-		);
-		//@formatter:on
+	public PaymentsTab(final MainFrame owner, final DbDao dao) {
+		this.owner = owner;
+		this.dao = dao;
 
-		JLabel help = new JLabel(ImageManager.getHelpIcon());
-		//@formatter:off
-		help.setToolTipText(toolTipText(
-		"<b>Payment Transactions</b><br>" +
-		"<br>" +
-		"This screen allows you to specify whether any payment transactions were shop-related (for example, selling someone items in bulk).<br>" +
-		"<br>" +
-		"A <b>payment transaction</b> occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."
-		));
-		//@formatter:on
-
-		//build labels for item icons
-		List<String> itemNames = dao.getItemNames();
-		this.itemNames = new Vector<String>(itemNames);
-		for (String itemName : itemNames) {
-			ImageIcon image = ImageManager.getItemImage(itemName);
-			JLabel label = new JLabel(itemName, image, SwingConstants.LEFT);
-			itemIconLabels.put(itemName, label);
-		}
-
-		List<PaymentTransaction> pendingPayments = dao.getPendingPaymentTransactions();
-		final PaymentsPanel panel = new PaymentsPanel(pendingPayments);
-
-		JButton save = new JButton("Save");
+		save = new JButton("Save");
 		save.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				for (RowGroup group : panel.rowGroups) {
+				for (RowGroup group : paymentsPanel.rowGroups) {
 					if (!group.validate()) {
-						JOptionPane.showMessageDialog(PaymentTransactionsDialog.this, "One or more input fields are empty.", "Error", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(owner, "One or more input fields are empty.", "Error", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 				}
 
 				try {
 					//upsert any split payment transactions
-					List<PaymentTransaction> toUpsert = panel.getPaymentTransactionsToUpsert();
+					List<PaymentTransaction> toUpsert = paymentsPanel.getPaymentTransactionsToUpsert();
 					for (PaymentTransaction t : toUpsert) {
 						dao.upsertPaymentTransaction(t);
 					}
 
 					//create new shop transactions
-					Map<PaymentTransaction, ShopTransaction> toAdd = panel.getShopTransactionsToAdd();
+					Map<PaymentTransaction, ShopTransaction> toAdd = paymentsPanel.getShopTransactionsToAdd();
 					for (Map.Entry<PaymentTransaction, ShopTransaction> entry : toAdd.entrySet()) {
 						PaymentTransaction payment = entry.getKey();
 						ShopTransaction shop = entry.getValue();
@@ -118,46 +84,38 @@ public class PaymentTransactionsDialog extends JDialog {
 					}
 
 					//ignore payment transactions
-					List<PaymentTransaction> toIgnore = panel.getPaymentTransactionsToIgnore();
+					List<PaymentTransaction> toIgnore = paymentsPanel.getPaymentTransactionsToIgnore();
 					for (PaymentTransaction t : toIgnore) {
 						dao.ignorePaymentTransaction(t.getId());
 					}
 
 					dao.commit();
-					dispose();
+
+					reset();
+					owner.updatePaymentsCount(); //update the tab title
 				} catch (SQLException e) {
 					dao.rollback();
-					ErrorDialog.show(PaymentTransactionsDialog.this, "Problem updating payment transactions in the database.", e);
+					ErrorDialog.show(owner, "Problem updating payment transactions in the database.", e);
 				}
 			}
 		});
 
-		JButton cancel = new JButton("Cancel");
-		cancel.addActionListener(new ActionListener() {
+		reset = new JButton("Reset");
+		reset.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				dispose();
+				reset();
 			}
 		});
 
-		setLayout(new MigLayout());
-		add(help, "split 2");
-		add(description, "wrap");
-
-		MyJScrollPane scrollPane = new MyJScrollPane(panel);
-		add(scrollPane, "grow, w 100%, h 100%, wrap");
-		add(save, "split 2, align center");
-		add(cancel);
-
-		setSize(750, 500);
-		setLocationRelativeTo(owner);
+		setLayout(new MigLayout("fillx, insets 5"));
 	}
 
 	private class PaymentsPanel extends JPanel {
-		final List<RowGroup> rowGroups;
+		private final List<RowGroup> rowGroups;
 
-		PaymentsPanel(List<PaymentTransaction> transactions) {
-			setLayout(new MigLayout("insets 0"));
+		public PaymentsPanel(List<PaymentTransaction> transactions) {
+			setLayout(new MigLayout("fillx, insets 0"));
 
 			rowGroups = new ArrayList<RowGroup>();
 			for (PaymentTransaction transaction : transactions) {
@@ -166,13 +124,13 @@ public class PaymentTransactionsDialog extends JDialog {
 			refresh();
 		}
 
-		void insertRowGroup(RowGroup origGroup, RowGroup newGroup) {
+		private void insertRowGroup(RowGroup origGroup, RowGroup newGroup) {
 			int index = rowGroups.indexOf(origGroup);
 			rowGroups.add(index + 1, newGroup);
 			refresh();
 		}
 
-		void refresh() {
+		private void refresh() {
 			removeAll();
 			for (RowGroup group : rowGroups) {
 				add(group.description);
@@ -186,7 +144,7 @@ public class PaymentTransactionsDialog extends JDialog {
 			validate();
 		}
 
-		Map<PaymentTransaction, ShopTransaction> getShopTransactionsToAdd() {
+		private Map<PaymentTransaction, ShopTransaction> getShopTransactionsToAdd() {
 			Map<PaymentTransaction, ShopTransaction> toAdd = new HashMap<PaymentTransaction, ShopTransaction>();
 
 			for (RowGroup rowGroup : rowGroups) {
@@ -223,7 +181,7 @@ public class PaymentTransactionsDialog extends JDialog {
 			return toAdd;
 		}
 
-		List<PaymentTransaction> getPaymentTransactionsToIgnore() {
+		private List<PaymentTransaction> getPaymentTransactionsToIgnore() {
 			List<PaymentTransaction> toIgnore = new ArrayList<PaymentTransaction>();
 
 			for (RowGroup rowGroup : rowGroups) {
@@ -235,7 +193,7 @@ public class PaymentTransactionsDialog extends JDialog {
 			return toIgnore;
 		}
 
-		List<PaymentTransaction> getPaymentTransactionsToUpsert() {
+		private List<PaymentTransaction> getPaymentTransactionsToUpsert() {
 			List<PaymentTransaction> toUpsert = new ArrayList<PaymentTransaction>();
 
 			for (RowGroup rowGroup : rowGroups) {
@@ -249,18 +207,18 @@ public class PaymentTransactionsDialog extends JDialog {
 	}
 
 	private class RowGroup {
-		final PaymentTransaction transaction;
-		boolean ignorePaymentTransaction = false;
-		boolean assignToShopTransaction = false;
-		boolean upsertPaymentTransaction = false;
+		private final PaymentTransaction transaction;
+		private boolean ignorePaymentTransaction = false;
+		private boolean assignToShopTransaction = false;
+		private boolean upsertPaymentTransaction = false;
 
-		final JLabel description;
-		final JButton ignore, assign, split;
-		final JPanel assignPanel, innerAssignPanel;
-		final JNumberTextField quantity;
-		final ItemSuggestField item;
+		private final JLabel description;
+		private final JButton ignore, assign, split;
+		private final JPanel assignPanel, innerAssignPanel;
+		private final JNumberTextField quantity;
+		private final ItemSuggestField item;
 
-		RowGroup(final PaymentTransaction transaction, final PaymentsPanel parent) {
+		public RowGroup(final PaymentTransaction transaction, final PaymentsPanel parent) {
 			this.transaction = transaction;
 
 			description = new JLabel();
@@ -326,7 +284,7 @@ public class PaymentTransactionsDialog extends JDialog {
 					int origAmount = transaction.getAmount();
 					int origAmountAbs = Math.abs(origAmount);
 					do {
-						String amountStr = JOptionPane.showInputDialog(PaymentTransactionsDialog.this, "Enter the number of rupees you'd like to subtract\nfrom this payment transaction.  A new payment transaction\nwill then be created with the value you enter.\n\nEnter a value between 1 and " + (origAmountAbs - 1) + ":", "Split Payment Transaction", JOptionPane.QUESTION_MESSAGE);
+						String amountStr = JOptionPane.showInputDialog(owner, "Enter the number of rupees you'd like to subtract\nfrom this payment transaction.  A new payment transaction\nwill then be created with the value you enter.\n\nEnter a value between 1 and " + (origAmountAbs - 1) + ":", "Split Payment Transaction", JOptionPane.QUESTION_MESSAGE);
 						if (amountStr == null) {
 							//user canceled dialog
 							return null;
@@ -346,12 +304,12 @@ public class PaymentTransactionsDialog extends JDialog {
 						} catch (NumberFormatException e) {
 							error = "Invalid number.";
 						}
-						JOptionPane.showMessageDialog(PaymentTransactionsDialog.this, error, "Error", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(owner, error, "Error", JOptionPane.ERROR_MESSAGE);
 					} while (true);
 				}
 			});
 
-			item = new ItemSuggestField(PaymentTransactionsDialog.this);
+			item = new ItemSuggestField(owner);
 			final Color origTextFieldBg = item.getBackground();
 			item.addFocusListener(new FocusListener() {
 				@Override
@@ -392,12 +350,12 @@ public class PaymentTransactionsDialog extends JDialog {
 			assign(false);
 		}
 
-		void ignore(boolean ignore) {
+		private void ignore(boolean ignore) {
 			this.ignore.setText(ignore ? "Unignore" : "Ignore");
 			updateDescription(ignore);
 		}
 
-		void assign(boolean assign) {
+		private void assign(boolean assign) {
 			if (assign) {
 				this.assign.setText("Cancel");
 				item.setText("");
@@ -414,7 +372,7 @@ public class PaymentTransactionsDialog extends JDialog {
 		 * Validates the data.
 		 * @return true if the data is valid, false if not
 		 */
-		boolean validate() {
+		private boolean validate() {
 			boolean valid = true;
 			if (assignToShopTransaction) {
 				if (item.getText().isEmpty()) {
@@ -429,7 +387,7 @@ public class PaymentTransactionsDialog extends JDialog {
 			return valid;
 		}
 
-		void updateDescription(boolean ignore) {
+		private void updateDescription(boolean ignore) {
 			String strikeStart, strikeEnd;
 			if (ignore) {
 				strikeStart = "<strike>";
@@ -453,6 +411,11 @@ public class PaymentTransactionsDialog extends JDialog {
 				public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 					String itemName = (String) value;
 					JLabel label = itemIconLabels.get(itemName);
+					if (label == null) {
+						ImageIcon image = ImageManager.getItemImage("_empty");
+						label = new JLabel(itemName, image, SwingConstants.LEFT);
+					}
+
 					label.setOpaque(isSelected);
 					if (isSelected) {
 						label.setBackground(selectedItemBgColor);
@@ -463,7 +426,48 @@ public class PaymentTransactionsDialog extends JDialog {
 		}
 	}
 
-	public static void show(Window owner, DbDao dao) throws SQLException {
-		new PaymentTransactionsDialog(owner, dao).setVisible(true);
+	public void reset() {
+		owner.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		try {
+			removeAll();
+			validate();
+
+			List<PaymentTransaction> pendingPayments = dao.getPendingPaymentTransactions();
+			if (pendingPayments.isEmpty()) {
+				add(new JLabel("No payment transactions found."), "align center");
+			} else {
+				//build labels for item icons
+				List<String> itemNames = dao.getItemNames();
+				this.itemNames = new Vector<String>(itemNames);
+				for (String itemName : itemNames) {
+					ImageIcon image = ImageManager.getItemImage(itemName);
+					JLabel label = new JLabel(itemName, image, SwingConstants.LEFT);
+					itemIconLabels.put(itemName, label);
+				}
+
+				paymentsPanel = new PaymentsPanel(pendingPayments);
+
+				add(save, "split 2");
+				add(reset, "wrap");
+				MyJScrollPane scrollPane = new MyJScrollPane(paymentsPanel);
+				add(scrollPane, "grow, w 100%, h 100%, wrap");
+			}
+
+			validate();
+
+			stale = false;
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		} finally {
+			owner.setCursor(Cursor.getDefaultCursor());
+		}
+	}
+
+	public boolean isStale() {
+		return stale;
+	}
+
+	public void setStale(boolean stale) {
+		this.stale = stale;
 	}
 }

@@ -24,10 +24,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.EmcSession;
@@ -50,9 +50,9 @@ public class MainFrame extends JFrame implements WindowListener {
 
 	private JTabbedPane tabs;
 	private TransactionsTab transactionsTab;
+	private PaymentsTab paymentsTab;
 
 	JMenuItem clearSession;
-	private PaymentsPanel paymentsPanel;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private final DbDao dao;
@@ -77,7 +77,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		Image appIcon = ImageManager.getAppIcon().getImage();
 		setIconImage(appIcon);
 
-		paymentsPanel.refresh();
+		updatePaymentsCount();
 
 		addWindowListener(this);
 	}
@@ -182,6 +182,7 @@ public class MainFrame extends JFrame implements WindowListener {
 									dao.wipe();
 									settings.setLastUpdated(null);
 									settings.setRupeeBalance(null);
+									settings.setSession(null);
 									try {
 										settings.save();
 									} catch (IOException e) {
@@ -190,7 +191,8 @@ public class MainFrame extends JFrame implements WindowListener {
 									lastUpdateDate.setText("-");
 									rupeeBalance.setText("-");
 									transactionsTab.clear();
-									paymentsPanel.refresh();
+									updatePaymentsCount();
+									paymentsTab.reset();
 									loading.dispose();
 								} catch (Throwable e) {
 									loading.dispose();
@@ -280,12 +282,49 @@ public class MainFrame extends JFrame implements WindowListener {
 		Integer balance = settings.getRupeeBalance();
 		rupeeBalance.setText((balance == null) ? "-" : NumberFormatter.formatRupees(balance, false));
 
-		paymentsPanel = new PaymentsPanel();
-
 		tabs = new JTabbedPane();
+		tabs.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (tabs.getSelectedComponent() == paymentsTab && paymentsTab.isStale()) {
+					paymentsTab.reset();
+				}
+			}
+		});
 		transactionsTab = new TransactionsTab(this, dao, profileImageLoader);
+		paymentsTab = new PaymentsTab(this, dao);
 	}
 
+	private void layoutWidgets() {
+		setLayout(new MigLayout("width 100%, height 100%"));
+
+		add(update);
+		add(new JLabel("Rupees:"), "split 2, align right");
+		add(rupeeBalance, "wrap");
+		add(new JLabel("Last updated:"), "split 2");
+		add(lastUpdateDate, "wrap");
+
+		tabs.addTab("Transactions", transactionsTab);
+		tabs.addTab("Payments", paymentsTab);
+		add(tabs, "span 2, h 100%, w 100%");
+	}
+
+	public void updatePaymentsCount() {
+		try {
+			String title = "Payments";
+			int count = dao.countPendingPaymentTransactions();
+			if (count > 0) {
+				title += " (" + count + ")";
+			}
+			tabs.setTitleAt(1, title);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Called after an update has completed.
+	 */
 	public void updateSuccessful(Date started, Integer rupeeTotal, long time, int transactionCount, int pageCount, boolean showResults) {
 		long components[] = TimeUtils.parseTimeComponents(time);
 		String message;
@@ -297,7 +336,12 @@ public class MainFrame extends JFrame implements WindowListener {
 				transactionsTab.showTransactions(settings.getLastUpdated(), started);
 			}
 
-			paymentsPanel.refresh();
+			updatePaymentsCount();
+			if (tabs.getSelectedComponent() == paymentsTab) {
+				paymentsTab.reset();
+			} else {
+				paymentsTab.setStale(true);
+			}
 
 			NumberFormat nf = NumberFormat.getInstance();
 			StringBuilder sb = new StringBuilder();
@@ -325,19 +369,6 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		lastUpdateDate.setText(df.format(started));
 		rupeeBalance.setText((rupeeTotal == null) ? "-" : NumberFormatter.formatRupees(rupeeTotal, false));
-	}
-
-	private void layoutWidgets() {
-		setLayout(new MigLayout("width 100%, height 100%"));
-
-		add(update);
-		add(new JLabel("Rupees:"), "split 2, align right");
-		add(rupeeBalance, "wrap");
-		add(new JLabel("Last updated:"), "split 2");
-		add(lastUpdateDate, "wrap");
-
-		tabs.addTab("Transactions", transactionsTab);
-		add(tabs, "span 2, h 100%, w 100%");
 	}
 
 	///////////////////////////////////
@@ -383,55 +414,5 @@ public class MainFrame extends JFrame implements WindowListener {
 	@Override
 	public void windowOpened(WindowEvent arg0) {
 		//do nothing
-	}
-
-	private class PaymentsPanel extends JPanel {
-		public PaymentsPanel() {
-			setLayout(new MigLayout());
-		}
-
-		public void refresh() {
-			removeAll();
-
-			try {
-				int count = dao.countPendingPaymentTransactions();
-				if (count == 0) {
-					setVisible(false);
-					return;
-				}
-
-				//@formatter:off
-				add(new JLabel(
-				"<html>" +
-					"<font size=2><b>" + count + "</b> payment transaction(s)<br>are awaiting your review.</font>" +
-				"</html>"
-				), "align center, wrap");
-				//@formatter:on
-
-				JButton review = new JButton("Review");
-				review.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						try {
-							PaymentTransactionsDialog.show(MainFrame.this, dao);
-							refresh();
-						} catch (SQLException e) {
-							ErrorDialog.show(MainFrame.this, "Problem querying database.", e);
-						}
-					}
-				});
-				add(review, "align center, wrap");
-
-				add(new JSeparator(), "w 200!, align center");
-
-				validate();
-				setVisible(true);
-			} catch (SQLException e) {
-				logger.log(Level.SEVERE, "Problem getting pending payment transaction count.", e);
-				add(new JLabel("<html><font color=red size=2>Problem getting pending payment transaction count.</font></html>"), "align center");
-			} finally {
-				validate();
-			}
-		}
 	}
 }
