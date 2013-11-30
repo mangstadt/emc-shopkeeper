@@ -194,7 +194,7 @@ public class MainFrame extends JFrame implements WindowListener {
 										logger.log(Level.SEVERE, "Problem saving settings file.", e);
 									}
 									lastUpdateDate.setText("-");
-									rupeeBalance.setText("-");
+									updateRupeeBalance();
 									transactionsTab.clear();
 									updatePaymentsCount();
 									paymentsTab.reset();
@@ -294,8 +294,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		lastUpdateDate.setText((date == null) ? "-" : df.format(date));
 
 		rupeeBalance = new JLabel();
-		Integer balance = settings.getRupeeBalance();
-		rupeeBalance.setText((balance == null) ? "-" : NumberFormatter.formatRupees(balance, false));
+		updateRupeeBalance();
 
 		tabs = new JTabbedPane();
 		tabs.addChangeListener(new ChangeListener() {
@@ -313,10 +312,10 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private void layoutWidgets() {
-		setLayout(new MigLayout("width 100%, height 100%"));
+		setLayout(new MigLayout("insets 5 10 10 10, fill"));
 
 		add(update);
-		add(new JLabel("Rupees:"), "split 2, align right");
+		add(new JLabel("<html><h2>Rupees:</h2></html>"), "split 2, align right");
 		add(rupeeBalance, "wrap");
 		add(new JLabel("Last updated:"), "split 2");
 		add(lastUpdateDate, "wrap");
@@ -397,7 +396,14 @@ public class MainFrame extends JFrame implements WindowListener {
 		}
 
 		lastUpdateDate.setText(df.format(started));
-		rupeeBalance.setText((rupeeTotal == null) ? "-" : NumberFormatter.formatRupees(rupeeTotal, false));
+
+		updateRupeeBalance();
+	}
+
+	private void updateRupeeBalance() {
+		Integer balance = settings.getRupeeBalance();
+		String balanceStr = (balance == null) ? "-" : NumberFormatter.formatRupees(balance, false);
+		rupeeBalance.setText("<html><h2><b>" + balanceStr + "</b></h2></html>");
 	}
 
 	///////////////////////////////////
