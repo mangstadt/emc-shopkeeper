@@ -1,5 +1,7 @@
 package emcshop.gui;
 
+import static emcshop.util.GuiUtils.busyCursor;
+
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -178,6 +180,7 @@ public class MainFrame extends JFrame implements WindowListener {
 						Thread t = new Thread() {
 							@Override
 							public void run() {
+								busyCursor(MainFrame.this, true);
 								try {
 									dao.wipe();
 									settings.setLastUpdated(null);
@@ -197,6 +200,8 @@ public class MainFrame extends JFrame implements WindowListener {
 								} catch (Throwable e) {
 									loading.dispose();
 									ErrorDialog.show(MainFrame.this, "Problem resetting database.", e);
+								} finally {
+									busyCursor(MainFrame.this, false);
 								}
 							}
 						};

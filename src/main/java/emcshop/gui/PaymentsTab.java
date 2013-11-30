@@ -1,10 +1,10 @@
 package emcshop.gui;
 
+import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -427,7 +427,7 @@ public class PaymentsTab extends JPanel {
 	}
 
 	public void reset() {
-		owner.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		busyCursor(owner, true);
 		try {
 			removeAll();
 			validate();
@@ -459,7 +459,7 @@ public class PaymentsTab extends JPanel {
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		} finally {
-			owner.setCursor(Cursor.getDefaultCursor());
+			busyCursor(owner, false);
 		}
 	}
 

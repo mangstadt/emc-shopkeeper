@@ -1,5 +1,6 @@
 package emcshop.gui;
 
+import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
@@ -38,6 +39,7 @@ import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
+import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel {
@@ -94,7 +96,6 @@ public class TransactionsTab extends JPanel {
 		showItems.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				//TODO add wait cursors
 				if (!checkDateRange()) {
 					return;
 				}
@@ -258,6 +259,8 @@ public class TransactionsTab extends JPanel {
 	}
 
 	public void showTransactions(final Date from, final Date to) {
+		GuiUtils.busyCursor(owner, true);
+
 		tablePanel.removeAll();
 		tablePanel.validate();
 
@@ -309,6 +312,7 @@ public class TransactionsTab extends JPanel {
 					ErrorDialog.show(owner, "An error occurred querying the database.", e);
 				} finally {
 					loading.dispose();
+					busyCursor(owner, false);
 				}
 			}
 		};
@@ -324,6 +328,8 @@ public class TransactionsTab extends JPanel {
 	}
 
 	public void showPlayers(final Date from, final Date to) {
+		busyCursor(owner, true);
+
 		tablePanel.removeAll();
 		tablePanel.validate();
 
@@ -363,6 +369,7 @@ public class TransactionsTab extends JPanel {
 					ErrorDialog.show(owner, "An error occurred querying the database.", e);
 				} finally {
 					loading.dispose();
+					busyCursor(owner, false);
 				}
 			}
 		};

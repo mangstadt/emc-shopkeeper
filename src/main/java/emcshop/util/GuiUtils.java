@@ -1,5 +1,7 @@
 package emcshop.util;
 
+import java.awt.Cursor;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -54,5 +56,15 @@ public class GuiUtils {
 	 */
 	public static void onKeyPress(JDialog dialog, int key, ActionListener listener) {
 		dialog.getRootPane().registerKeyboardAction(listener, KeyStroke.getKeyStroke(key, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+	}
+
+	/**
+	 * Used for changing the cursor to a busy cursor.
+	 * @param window the window
+	 * @param busy true for a busy cursor, false for the default cursor
+	 */
+	public static void busyCursor(Window window, boolean busy) {
+		Cursor cursor = busy ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) : Cursor.getDefaultCursor();
+		window.setCursor(cursor);
 	}
 }
