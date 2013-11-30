@@ -408,7 +408,11 @@ public class MainFrame extends JFrame implements WindowListener {
 
 	private void updateRupeeBalance() {
 		Integer balance = settings.getRupeeBalance();
-		String balanceStr = (balance == null) ? "-" : NumberFormatter.formatRupees(balance, false);
+		if (balance == null) {
+			balance = 0;
+		}
+
+		String balanceStr = NumberFormatter.formatRupees(balance, false);
 		rupeeBalance.setText("<html><h2><b>" + balanceStr + "</b></h2></html>");
 	}
 
