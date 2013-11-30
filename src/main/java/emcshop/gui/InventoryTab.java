@@ -80,10 +80,11 @@ public class InventoryTab extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				addItem();
+				filterByItem.setText("");
 			}
 		});
 
-		delete = new JButton("Delete");
+		delete = new JButton("Delete Selected");
 		delete.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -100,6 +101,7 @@ public class InventoryTab extends JPanel {
 					dao.deleteInventory(toDelete);
 					dao.commit();
 					refresh();
+					filterByItem.setText("");
 				} catch (SQLException e) {
 					dao.rollback();
 					throw new RuntimeException(e);
@@ -233,23 +235,23 @@ public class InventoryTab extends JPanel {
 			setCellSelectionEnabled(false);
 			setRowHeight(24);
 
-			//			addMouseListener(new MouseAdapter(){
-			//				@Override
-			//				public void mouseClicked(MouseEvent event) {
-			//					int col = columnAtPoint(event.getPoint());
-			//					int row = rowAtPoint(event.getPoint());
-			//					System.out.println(row + ", " + col);
-			//					if (row < 0 || col != Column.CHECKBOX.ordinal()){
-			//						return;
-			//					}
-			//
-			//				    JCheckBox checkbox = checkboxes.get(row);
-			//				    checkbox.setSelected(!checkbox.isSelected());
-			//				    validate();
-			//				    checkbox.validate();
-			//				}
-			//			});
+			//change the state of the checkboxes when they are clicked
+			addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent event) {
+					int row = rowAtPoint(event.getPoint());
+					if (row < 0) {
+						return;
+					}
 
+					JCheckBox checkbox = checkboxes.get(row);
+					checkbox.setSelected(!checkbox.isSelected());
+					AbstractTableModel model = (AbstractTableModel) getModel();
+					model.fireTableDataChanged();
+				}
+			});
+
+			//allow columns to be sorted by clicking on the headers
 			getTableHeader().addMouseListener(new MouseAdapter() {
 				private final Column columns[] = Column.values();
 
@@ -265,6 +267,8 @@ public class InventoryTab extends JPanel {
 						for (JCheckBox checkbox : checkboxes) {
 							checkbox.setSelected(true);
 						}
+						AbstractTableModel model = (AbstractTableModel) getModel();
+						model.fireTableDataChanged();
 						return;
 					}
 
@@ -293,19 +297,6 @@ public class InventoryTab extends JPanel {
 
 					if (col == Column.CHECKBOX.ordinal()) {
 						return checkboxes.get(row);
-						//						final JCheckBox checkbox = new JCheckBox();
-						//						checkbox.addActionListener(new ActionListener(){
-						//							@Override
-						//							public void actionPerformed(ActionEvent arg0) {
-						//								if (checkbox.isSelected()){
-						//									selected.add(inv.getId());
-						//								} else {
-						//									selected.remove(inv.getId());
-						//								}
-						//							}
-						//						});
-						//						checkboxes.put(row, checkbox);
-						//						return checkbox;
 					}
 
 					JLabel label = null;
@@ -396,21 +387,17 @@ public class InventoryTab extends JPanel {
 		}
 
 		private void refresh() {
+			//rebuild the checkboxes
 			checkboxes = new ArrayList<JCheckBox>();
 			for (int i = 0; i < inventoryDisplayed.size(); i++) {
-				checkboxes.add(new JCheckBox());
+				JCheckBox checkbox = new JCheckBox();
+				checkboxes.add(checkbox);
 			}
 
-			//updates the table's data
 			AbstractTableModel model = (AbstractTableModel) getModel();
-			model.fireTableDataChanged();
 			model.fireTableStructureChanged();
 
 			setColumns();
-
-			//doing these things will update the table data and update the column header text
-			//setModel();
-			//setColumns();
 		}
 
 		private void setColumns() {
