@@ -515,16 +515,21 @@ public class TransactionsTab extends JPanel {
 				return;
 			}
 
-			if (selected == playerName) {
-				playersPanel.sortByPlayerName();
-			} else if (selected == bestCustomers) {
-				playersPanel.sortByCustomers();
-			} else if (selected == bestSuppliers) {
-				playersPanel.sortBySuppliers();
-			}
-			currentSelection = selected;
+			busyCursor(owner, true);
+			try {
+				if (selected == playerName) {
+					playersPanel.sortByPlayerName();
+				} else if (selected == bestCustomers) {
+					playersPanel.sortByCustomers();
+				} else if (selected == bestSuppliers) {
+					playersPanel.sortBySuppliers();
+				}
+				currentSelection = selected;
 
-			playersPanelScrollPane.scrollToTop();
+				playersPanelScrollPane.scrollToTop();
+			} finally {
+				busyCursor(owner, false);
+			}
 		}
 	}
 }
