@@ -110,7 +110,7 @@ public class InventoryTab extends JPanel {
 
 		item = new ItemSuggestField(owner);
 
-		quantityLabel = new HelpLabel("Qty:", "You can specify the quantity in the number of items and/or the number of stacks.\n\n<b>Examples</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)");
+		quantityLabel = new HelpLabel("Qty:", "Tip: You can specify the quantity in \"stacks\" (groups of 64) instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)");
 
 		quantity = new JTextField();
 		quantity.addActionListener(new ActionListener() {
