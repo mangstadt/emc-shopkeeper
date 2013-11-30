@@ -1,7 +1,6 @@
 package emcshop.gui;
 
 import static emcshop.util.GuiUtils.busyCursor;
-import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.event.ActionEvent;
@@ -24,7 +23,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -114,8 +112,7 @@ public class TransactionsTab extends JPanel {
 
 		export = new ExportComboBoxImpl();
 
-		filterByItemLabel = new JLabel("Filter by item(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-		filterByItemLabel.setToolTipText(toolTipText("<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation."));
+		filterByItemLabel = new HelpLabel("Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
 
 		filterByItem = new FilterTextField();
 		filterByItem.addActionListener(new ActionListener() {
@@ -137,8 +134,7 @@ public class TransactionsTab extends JPanel {
 			}
 		});
 
-		filterByPlayerLabel = new JLabel("Filter by player(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-		filterByPlayerLabel.setToolTipText(toolTipText("<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar,max</code>\n\nMultiple player names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation."));
+		filterByPlayerLabel = new HelpLabel("Filter by player(s):", "<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar,max</code>\n\nMultiple player names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation.");
 
 		filterByPlayer = new FilterTextField();
 		filterByPlayer.addActionListener(new ActionListener() {

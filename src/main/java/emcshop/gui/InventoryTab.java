@@ -1,6 +1,5 @@
 package emcshop.gui;
 
-import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatQuantity;
 
 import java.awt.Color;
@@ -118,8 +117,7 @@ public class InventoryTab extends JPanel {
 		}
 		item = new ItemSuggestField(owner);
 
-		quantityLabel = new JLabel("Qty:", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-		quantityLabel.setToolTipText(toolTipText("You can specify the quantity in the number of items and/or the number of stacks.\n\n<b>Examples</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)"));
+		quantityLabel = new HelpLabel("Qty:", "You can specify the quantity in the number of items and/or the number of stacks.\n\n<b>Examples</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)");
 
 		quantity = new JTextField();
 		quantity.addActionListener(new ActionListener() {
@@ -131,8 +129,7 @@ public class InventoryTab extends JPanel {
 
 		export = new ExportComboBoxImpl();
 
-		filterByItemLabel = new JLabel("Filter by item(s):", ImageManager.getHelpIcon(), SwingConstants.LEFT);
-		filterByItemLabel.setToolTipText(toolTipText("<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation."));
+		filterByItemLabel = new HelpLabel("Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
 
 		filterByItem = new FilterTextField();
 		filterByItem.addActionListener(new ActionListener() {
