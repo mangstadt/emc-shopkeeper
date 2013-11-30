@@ -82,25 +82,25 @@ public class InventoryTab extends JPanel {
 				addItem();
 			}
 		});
-		
+
 		delete = new JButton("Delete");
-		delete.addActionListener(new ActionListener(){
+		delete.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				List<Integer> toDelete = new ArrayList<Integer>();
-				for (int i = 0; i < table.checkboxes.size(); i++){
+				for (int i = 0; i < table.checkboxes.size(); i++) {
 					JCheckBox checkbox = table.checkboxes.get(i);
-					if (checkbox.isSelected()){
+					if (checkbox.isSelected()) {
 						Integer id = inventoryDisplayed.get(i).getId();
 						toDelete.add(id);
 					}
 				}
-				
+
 				try {
 					dao.deleteInventory(toDelete);
 					dao.commit();
 					refresh();
-				} catch (SQLException e){
+				} catch (SQLException e) {
 					dao.rollback();
 					throw new RuntimeException(e);
 				}
@@ -136,14 +136,14 @@ public class InventoryTab extends JPanel {
 				tableScrollPane.scrollToTop();
 			}
 		});
-		
+
 		try {
 			inventory = dao.getInventory();
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
 		inventoryDisplayed = inventory;
-		
+
 		Collections.sort(inventoryDisplayed, new Comparator<Inventory>() {
 			@Override
 			public int compare(Inventory a, Inventory b) {
@@ -156,7 +156,7 @@ public class InventoryTab extends JPanel {
 		///////////////////////
 
 		setLayout(new MigLayout("fillx, insets 5"));
-		
+
 		JPanel leftTop = new JPanel(new MigLayout());
 
 		leftTop.add(new JLabel("Item Name:"));
@@ -165,33 +165,33 @@ public class InventoryTab extends JPanel {
 		leftTop.add(quantity, "w 75, wrap");
 		leftTop.add(addEdit, "span 2, wrap");
 		leftTop.add(delete, "span 2");
-		
+
 		add(leftTop);
-		
+
 		tableScrollPane = new MyJScrollPane(table);
 		add(tableScrollPane, "span 1 3, grow, w 100%, h 100%, wrap");
 		table.setColumns();
-		
+
 		add(new JSeparator(), "w 200!, align center, wrap");
 
 		JPanel leftBottom = new JPanel(new MigLayout());
-		
+
 		leftBottom.add(new JLabel("Export:"));
 		leftBottom.add(filterByItemLabel, "wrap");
 		leftBottom.add(export);
 		leftBottom.add(filterByItem, "split 2, w 150!");
 		leftBottom.add(filterByItem.getClearButton(), "w 25!, h 20!, wrap");
-		
+
 		add(leftBottom, "growy");
 	}
-	
-	private void addItem(){
+
+	private void addItem() {
 		String itemValue = item.getText();
 		Integer quantityValue = quantity.getInteger();
 		if (itemValue.isEmpty() || quantityValue == null) {
 			return;
 		}
-		
+
 		try {
 			dao.upsertInventory(itemValue, quantityValue);
 			dao.commit();
@@ -200,7 +200,7 @@ public class InventoryTab extends JPanel {
 			throw new RuntimeException(e);
 		}
 		refresh();
-		
+
 		item.setText("");
 		quantity.setText("");
 	}
@@ -223,32 +223,33 @@ public class InventoryTab extends JPanel {
 		public InventoryTable() {
 			prevColumnClicked = Column.REMAINING;
 			ascending = true;
-			
+
 			setModel();
 			setColumns();
 
+			getTableHeader().setReorderingAllowed(false);
 			setColumnSelectionAllowed(false);
 			setRowSelectionAllowed(false);
 			setCellSelectionEnabled(false);
 			setRowHeight(24);
-			
-//			addMouseListener(new MouseAdapter(){
-//				@Override
-//				public void mouseClicked(MouseEvent event) {
-//					int col = columnAtPoint(event.getPoint());
-//					int row = rowAtPoint(event.getPoint());
-//					System.out.println(row + ", " + col);
-//					if (row < 0 || col != Column.CHECKBOX.ordinal()){
-//						return;
-//					}
-//
-//				    JCheckBox checkbox = checkboxes.get(row);
-//				    checkbox.setSelected(!checkbox.isSelected());
-//				    validate();
-//				    checkbox.validate();
-//				}
-//			});
-			
+
+			//			addMouseListener(new MouseAdapter(){
+			//				@Override
+			//				public void mouseClicked(MouseEvent event) {
+			//					int col = columnAtPoint(event.getPoint());
+			//					int row = rowAtPoint(event.getPoint());
+			//					System.out.println(row + ", " + col);
+			//					if (row < 0 || col != Column.CHECKBOX.ordinal()){
+			//						return;
+			//					}
+			//
+			//				    JCheckBox checkbox = checkboxes.get(row);
+			//				    checkbox.setSelected(!checkbox.isSelected());
+			//				    validate();
+			//				    checkbox.validate();
+			//				}
+			//			});
+
 			getTableHeader().addMouseListener(new MouseAdapter() {
 				private final Column columns[] = Column.values();
 
@@ -260,13 +261,13 @@ public class InventoryTab extends JPanel {
 					}
 
 					Column column = columns[index];
-					if (column == Column.CHECKBOX){
-						for (JCheckBox checkbox : checkboxes){
+					if (column == Column.CHECKBOX) {
+						for (JCheckBox checkbox : checkboxes) {
 							checkbox.setSelected(true);
 						}
 						return;
 					}
-					
+
 					if (column == prevColumnClicked) {
 						ascending = !ascending;
 					} else {
@@ -289,26 +290,26 @@ public class InventoryTab extends JPanel {
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 					final Inventory inv = (Inventory) value;
-					
-					if (col == Column.CHECKBOX.ordinal()){
+
+					if (col == Column.CHECKBOX.ordinal()) {
 						return checkboxes.get(row);
-//						final JCheckBox checkbox = new JCheckBox();
-//						checkbox.addActionListener(new ActionListener(){
-//							@Override
-//							public void actionPerformed(ActionEvent arg0) {
-//								if (checkbox.isSelected()){
-//									selected.add(inv.getId());
-//								} else {
-//									selected.remove(inv.getId());
-//								}
-//							}
-//						});
-//						checkboxes.put(row, checkbox);
-//						return checkbox;
+						//						final JCheckBox checkbox = new JCheckBox();
+						//						checkbox.addActionListener(new ActionListener(){
+						//							@Override
+						//							public void actionPerformed(ActionEvent arg0) {
+						//								if (checkbox.isSelected()){
+						//									selected.add(inv.getId());
+						//								} else {
+						//									selected.remove(inv.getId());
+						//								}
+						//							}
+						//						});
+						//						checkboxes.put(row, checkbox);
+						//						return checkbox;
 					}
-					
+
 					JLabel label = null;
-					
+
 					if (col == Column.ITEM_NAME.ordinal()) {
 						ImageIcon img = ImageManager.getItemImage(inv.getItem());
 						label = new JLabel(inv.getItem(), img, SwingConstants.LEFT);
@@ -396,15 +397,15 @@ public class InventoryTab extends JPanel {
 
 		private void refresh() {
 			checkboxes = new ArrayList<JCheckBox>();
-			for (int i = 0; i < inventoryDisplayed.size(); i++){
+			for (int i = 0; i < inventoryDisplayed.size(); i++) {
 				checkboxes.add(new JCheckBox());
 			}
-			
+
 			//updates the table's data
 			AbstractTableModel model = (AbstractTableModel) getModel();
 			model.fireTableDataChanged();
 			model.fireTableStructureChanged();
-			
+
 			setColumns();
 
 			//doing these things will update the table data and update the column header text
@@ -454,7 +455,7 @@ public class InventoryTab extends JPanel {
 
 				@Override
 				public boolean isCellEditable(int row, int col) {
-					if (col == Column.CHECKBOX.ordinal()){
+					if (col == Column.CHECKBOX.ordinal()) {
 						return true;
 					}
 					return false;

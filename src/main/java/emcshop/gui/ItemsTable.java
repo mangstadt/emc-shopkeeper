@@ -74,6 +74,7 @@ public class ItemsTable extends GroupableColumnsTable {
 		prevColumnClicked = sortedBy;
 		ascending = sortedByAscending;
 
+		getTableHeader().setReorderingAllowed(false);
 		setColumnSelectionAllowed(false);
 		setRowSelectionAllowed(false);
 		setCellSelectionEnabled(false);

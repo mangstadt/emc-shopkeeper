@@ -158,7 +158,6 @@ public class PlayersPanel extends JPanel {
 			}
 
 			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup), column, ascending);
-			table.getTableHeader().setReorderingAllowed(false);
 			add(table.getTableHeader(), "span 2, growx, wrap");
 			add(table, "span 2, growx, wrap");
 
