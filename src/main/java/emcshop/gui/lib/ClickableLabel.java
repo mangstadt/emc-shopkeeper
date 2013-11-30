@@ -52,7 +52,12 @@ public class ClickableLabel extends JLabel implements MouseListener {
 	}
 
 	private void init(String url) {
-		uri = URI.create(url);
+		try {
+			uri = URI.create(url);
+		} catch (IllegalArgumentException e) {
+			logger.log(Level.SEVERE, "Bad URI, cannot make label clickable.", e);
+			return;
+		}
 
 		if (desktop != null) {
 			//only set these things if the user's computer supports opening a browser window
