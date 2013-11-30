@@ -1,6 +1,7 @@
 package emcshop.gui;
 
 import static emcshop.util.GuiUtils.busyCursor;
+import static emcshop.util.GuiUtils.toolTipText;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -311,9 +312,14 @@ public class MainFrame extends JFrame implements WindowListener {
 		add(new JLabel("Last updated:"), "split 2");
 		add(lastUpdateDate, "wrap");
 
+		int index = 0;
 		tabs.addTab("Transactions", transactionsTab);
+		tabs.setToolTipTextAt(index++, toolTipText("Displays your shop transactions over a specified date range."));
 		tabs.addTab("Payments", paymentsTab);
+		tabs.setToolTipTextAt(index++, toolTipText("Displays pending payment transactions that are awaiting your review.\n\nA payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."));
 		tabs.addTab("Inventory", inventoryTab);
+		tabs.setToolTipTextAt(index++, toolTipText("Allows you to define how much of each item you have in stock, and shows you what items are low in stock."));
+
 		add(tabs, "span 2, h 100%, w 100%");
 	}
 
