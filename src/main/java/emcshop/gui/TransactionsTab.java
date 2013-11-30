@@ -193,7 +193,7 @@ public class TransactionsTab extends JPanel {
 		add(tablePanel, "span 2, grow, h 100%, wrap");
 
 		add(customersLabel, "span 2, split 4, align right");
-		add(customers);
+		add(customers, "gapright 20");
 		add(netTotalLabelLabel);
 		add(netTotalLabel);
 
@@ -206,6 +206,9 @@ public class TransactionsTab extends JPanel {
 		filterByPlayer.setEnabled(false);
 		sortByLabel.setEnabled(false);
 		sortBy.setEnabled(false);
+
+		customersLabel.setVisible(false);
+		customers.setVisible(false);
 
 		updateNetTotal();
 		updateCustomers();
@@ -410,21 +413,20 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private void updateCustomers() {
-		String customers = null;
+		boolean visible = false;
 
-		if (itemsTable != null) {
-			customers = "?";
-		} else if (playersPanel != null) {
-			customers = playersPanel.getDisplayedPlayers().size() + "";
-		} else {
-			customers = "0";
+		if (playersPanel != null) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("<html><font size=5><code>");
+			sb.append(playersPanel.getDisplayedPlayers().size());
+			sb.append("</code></font></html>");
+
+			customers.setText(sb.toString());
+			visible = true;
 		}
 
-		StringBuilder sb = new StringBuilder();
-		sb.append("<html><font size=5><code>");
-		sb.append(customers).append("   ");
-		sb.append("</code></font></html>");
-		this.customers.setText(sb.toString());
+		customersLabel.setVisible(visible);
+		customers.setVisible(visible);
 	}
 
 	private boolean checkDateRange() {
