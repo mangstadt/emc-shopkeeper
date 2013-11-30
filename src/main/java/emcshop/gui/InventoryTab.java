@@ -20,9 +20,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -31,7 +33,6 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.db.DbDao;
 import emcshop.db.Inventory;
 import emcshop.gui.images.ImageManager;
-import emcshop.gui.lib.JNumberTextField;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {
@@ -44,7 +45,8 @@ public class InventoryTab extends JPanel {
 	private final JButton addEdit;
 	private final JButton delete;
 	private final ItemSuggestField item;
-	private final JNumberTextField quantity; //TODO add "s" onto the end for "stacks"
+	private final JLabel quantityLabel;
+	private final JTextField quantity;
 
 	private final ExportComboBox export;
 	private final JLabel filterByItemLabel;
@@ -116,7 +118,10 @@ public class InventoryTab extends JPanel {
 		}
 		item = new ItemSuggestField(owner);
 
-		quantity = new JNumberTextField();
+		quantityLabel = new JLabel("Qty:", ImageManager.getHelpIcon(), SwingConstants.LEFT);
+		quantityLabel.setToolTipText(toolTipText("You can specify the quantity in the number of items and/or the number of stacks.\n\n<b>Examples</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)"));
+
+		quantity = new JTextField();
 		quantity.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -162,7 +167,7 @@ public class InventoryTab extends JPanel {
 		JPanel leftTop = new JPanel(new MigLayout());
 
 		leftTop.add(new JLabel("Item Name:"));
-		leftTop.add(new JLabel("Qty:"), "wrap");
+		leftTop.add(quantityLabel, "wrap");
 		leftTop.add(item, "w 200");
 		leftTop.add(quantity, "w 75, wrap");
 		leftTop.add(addEdit, "span 2, wrap");
@@ -188,14 +193,33 @@ public class InventoryTab extends JPanel {
 	}
 
 	private void addItem() {
-		String itemValue = item.getText();
-		Integer quantityValue = quantity.getInteger();
-		if (itemValue.isEmpty() || quantityValue == null) {
+		String itemStr = item.getText();
+		String quantityStr = quantity.getText();
+		if (itemStr.isEmpty() || quantityStr.isEmpty()) {
+			return;
+		}
+
+		//parse the quantity
+		//e.g. "5/23" means "5 stacks plus 23 more"
+		//e.g. "5/" means "5 stacks"
+		//e.g. "5" means "5 items"
+		Integer quantityValue;
+		try {
+			String split[] = quantityStr.split("/", 2);
+			if (split.length == 1) {
+				quantityValue = Integer.valueOf(split[0]);
+			} else {
+				int remainder = split[1].isEmpty() ? 0 : Integer.valueOf(split[1]);
+				quantityValue = Integer.valueOf(split[0]) * 64 + remainder;
+			}
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
+			quantity.requestFocusInWindow();
 			return;
 		}
 
 		try {
-			dao.upsertInventory(itemValue, quantityValue);
+			dao.upsertInventory(itemStr, quantityValue);
 			dao.commit();
 		} catch (SQLException e) {
 			dao.rollback();
@@ -205,6 +229,7 @@ public class InventoryTab extends JPanel {
 
 		item.setText("");
 		quantity.setText("");
+		item.requestFocusInWindow();
 	}
 
 	public void refresh() {
