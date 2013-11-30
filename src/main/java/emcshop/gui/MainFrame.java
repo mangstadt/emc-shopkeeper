@@ -27,6 +27,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
@@ -314,11 +315,16 @@ public class MainFrame extends JFrame implements WindowListener {
 	private void layoutWidgets() {
 		setLayout(new MigLayout("insets 5 10 10 10, fill"));
 
-		add(update);
-		add(new JLabel("<html><h2>Rupees:</h2></html>"), "split 2, align right");
+		JPanel updatePanel = new JPanel(new MigLayout());
+		updatePanel.add(update, "wrap");
+		updatePanel.add(new JLabel("Last updated:"), "split 2");
+		updatePanel.add(lastUpdateDate);
+		add(updatePanel);
+
+		add(new JLabel(ImageManager.getImageIcon("header.png")), "w 100%, align center");
+
+		add(new JLabel("<html><h2>Rupees:</h2></html>"), "split 2, gapright 10, align right");
 		add(rupeeBalance, "wrap");
-		add(new JLabel("Last updated:"), "split 2");
-		add(lastUpdateDate, "wrap");
 
 		int index = 0;
 		tabs.addTab("Transactions", transactionsTab);
@@ -328,7 +334,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		tabs.addTab("Inventory", inventoryTab);
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Inventory Tab</b></font><br><br>Allows you to define how much of each item you have in stock, and also shows you what items are low in stock.  Your inventory is updated every time you download new transactions from EMC."));
 
-		add(tabs, "span 2, h 100%, w 100%");
+		add(tabs, "span 3, h 100%, w 100%");
 	}
 
 	public void updatePaymentsCount() {
