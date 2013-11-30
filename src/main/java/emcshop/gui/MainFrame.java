@@ -248,6 +248,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 	private void createWidgets() {
 		update = new JButton("Update Transactions", ImageManager.getUpdate());
+		update.setToolTipText(toolTipText("<font size=4><b>Update Transactions</b></font><br><br>Downloads your latest transactions from the EMC website."));
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -316,9 +317,9 @@ public class MainFrame extends JFrame implements WindowListener {
 		tabs.addTab("Transactions", transactionsTab);
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Transactions Tab</b></font><br><br>Displays your shop transactions over a specified date range.  Transactions can be grouped by item or player."));
 		tabs.addTab("Payments", paymentsTab);
-		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Payments Tab</b></font><br><br>Displays payment transactions that are awaiting your review.  Payment transactions can be either be converted to a shop transaction or ignored, depending on whether the payment transaction was shop-related (such as buying an item in bulk).\n\nA payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."));
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Payments Tab</b></font><br><br>Displays payment transactions that are awaiting your review.  Payment transactions that are shop-related (such as buying an item in bulk) can be added to your shop transaction history.\n\nA payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."));
 		tabs.addTab("Inventory", inventoryTab);
-		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Inventory Tab</b></font><br><br>Allows you to define how much of each item you have in stock, and shows you what items are low in stock.  Your inventory is updated every time you download new transactions from EMC."));
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Inventory Tab</b></font><br><br>Allows you to define how much of each item you have in stock, and also shows you what items are low in stock.  Your inventory is updated every time you download new transactions from EMC."));
 
 		add(tabs, "span 2, h 100%, w 100%");
 	}
