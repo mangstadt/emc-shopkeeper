@@ -4,27 +4,40 @@ import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.db.DbDao;
+import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.ButtonColumn;
+import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.gui.lib.JNumberTextField;
+import emcshop.util.NumberFormatter;
 
 @SuppressWarnings("serial")
 public class PaymentsTab extends JPanel {
@@ -36,6 +49,7 @@ public class PaymentsTab extends JPanel {
 
 	private final JButton save, reset;
 	private PaymentsPanel paymentsPanel;
+	private PaymentsTable paymentsTable;
 
 	public PaymentsTab(final MainFrame owner, final DbDao dao) {
 		this.owner = owner;
@@ -398,12 +412,22 @@ public class PaymentsTab extends JPanel {
 			if (pendingPayments.isEmpty()) {
 				add(new JLabel("No payment transactions found."), "align center");
 			} else {
-				paymentsPanel = new PaymentsPanel(pendingPayments);
+				List<Row> rows = new ArrayList<Row>();
+				for (PaymentTransaction payment : pendingPayments) {
+					rows.add(new Row(payment));
+				}
 
+				paymentsTable = new PaymentsTable(rows);
 				add(save, "split 2");
 				add(reset, "wrap");
-				MyJScrollPane scrollPane = new MyJScrollPane(paymentsPanel);
+				MyJScrollPane scrollPane = new MyJScrollPane(paymentsTable);
 				add(scrollPane, "grow, w 100%, h 100%, wrap");
+
+				//				paymentsPanel = new PaymentsPanel(pendingPayments);
+				//				add(save, "split 2");
+				//				add(reset, "wrap");
+				//				MyJScrollPane scrollPane = new MyJScrollPane(paymentsPanel);
+				//				add(scrollPane, "grow, w 100%, h 100%, wrap");
 			}
 
 			validate();
@@ -422,5 +446,262 @@ public class PaymentsTab extends JPanel {
 
 	public void setStale(boolean stale) {
 		this.stale = stale;
+	}
+
+	/**
+	 * Defines all of the columns in this table. The order in which the enums
+	 * are defined is the order that they will appear in the table.
+	 */
+	private enum Column {
+		IGNORE("Ignore"), ASSIGN("Assign"), SPLIT("Split"), TS("Time"), PLAYER("Player"), AMOUNT("Amount"), ITEM("Item");
+
+		private final String name;
+
+		private Column(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+
+	private class Row {
+		private final PaymentTransaction transaction;
+		private boolean ignore = false;
+		private boolean upsert = false;
+		private String item;
+		private Integer quantity;
+
+		public Row(PaymentTransaction transaction) {
+			this.transaction = transaction;
+		}
+	}
+
+	private class PaymentsTable extends JTable {
+		private Column prevColumnClicked;
+		private boolean ascending;
+		private List<Row> rows;
+
+		public PaymentsTable(final List<Row> rows) {
+			this.rows = rows;
+
+			setModel();
+			setColumns();
+
+			getTableHeader().setReorderingAllowed(false);
+			setColumnSelectionAllowed(false);
+			setRowSelectionAllowed(false);
+			setCellSelectionEnabled(false);
+			setRowHeight(24);
+
+			//allow columns to be sorted by clicking on the headers
+			getTableHeader().addMouseListener(new MouseAdapter() {
+				private final Column columns[] = Column.values();
+
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
+					if (index < 0) {
+						return;
+					}
+
+					Column column = columns[index];
+					if (column == Column.IGNORE || column == Column.ASSIGN || column == Column.SPLIT) {
+						return;
+					}
+
+					if (column == prevColumnClicked) {
+						ascending = !ascending;
+					} else {
+						prevColumnClicked = column;
+						ascending = true;
+					}
+
+					sortData();
+				}
+			});
+
+			setDefaultRenderer(Row.class, new TableCellRenderer() {
+				private final Color evenRowColor = new Color(255, 255, 255);
+				private final Color oddRowColor = new Color(240, 240, 240);
+
+				@Override
+				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, int col) {
+					final Row rowObj = (Row) value;
+
+					JLabel label = null;
+					if (col == Column.TS.ordinal()) {
+						label = new JLabel("<html>" + df.format(rowObj.transaction.getTs()) + "</html>");
+					} else if (col == Column.PLAYER.ordinal()) {
+						label = new JLabel("<html>" + rowObj.transaction.getPlayer() + "</html>");
+					} else if (col == Column.AMOUNT.ordinal()) {
+						label = new JLabel("<html>" + NumberFormatter.formatRupeesWithColor(rowObj.transaction.getAmount()) + "</html>");
+					} else if (col == Column.ITEM.ordinal()) {
+						if (rowObj.item == null) {
+							label = new JLabel("?");
+						} else {
+							label = new JLabel("<html>" + rowObj.item + " (" + NumberFormatter.formatQuantity(rowObj.quantity, false) + ")</html>", ImageManager.getItemImage(rowObj.item), SwingConstants.LEFT);
+						}
+					}
+
+					//set the background color of the row
+					Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
+					label.setOpaque(true);
+					label.setBackground(color);
+
+					return label;
+				}
+			});
+		}
+
+		private void sortData() {
+			//TODO
+			//						Comparator<Inventory> comparator = null;
+			//			
+			//						switch (prevColumnClicked) {
+			//						case TS:
+			//							break;
+			//						case ITEM_NAME:
+			//							//sort by item name
+			//							comparator = new Comparator<Inventory>() {
+			//								@Override
+			//								public int compare(Inventory a, Inventory b) {
+			//									if (ascending) {
+			//										return a.getItem().compareToIgnoreCase(b.getItem());
+			//									}
+			//									return b.getItem().compareToIgnoreCase(a.getItem());
+			//								}
+			//							};
+			//							break;
+			//						case REMAINING:
+			//							comparator = new Comparator<Inventory>() {
+			//								@Override
+			//								public int compare(Inventory a, Inventory b) {
+			//									if (ascending) {
+			//										return a.getQuantity() - b.getQuantity();
+			//									}
+			//									return b.getQuantity() - a.getQuantity();
+			//								}
+			//							};
+			//							break;
+			//						}
+			//			
+			//						Collections.sort(inventoryDisplayed, comparator);
+			Collections.shuffle(rows);
+			refresh();
+		}
+
+		private void refresh() {
+			AbstractTableModel model = (AbstractTableModel) getModel();
+			model.fireTableStructureChanged();
+
+			setModel();
+			setColumns();
+		}
+
+		private void setModel() {
+			setModel(new AbstractTableModel() {
+				private final Column columns[] = Column.values();
+
+				@Override
+				public int getColumnCount() {
+					return columns.length;
+				}
+
+				@Override
+				public String getColumnName(int index) {
+					Column column = columns[index];
+
+					String text = column.getName();
+					if (prevColumnClicked == column) {
+						String arrow = (ascending) ? "\u25bc" : "\u25b2";
+						text = arrow + " " + text;
+					}
+					return text;
+				}
+
+				@Override
+				public int getRowCount() {
+					return rows.size();
+				}
+
+				@Override
+				public Object getValueAt(int row, int col) {
+					if (col == Column.IGNORE.ordinal()) {
+						return "";
+					}
+					if (col == Column.ASSIGN.ordinal()) {
+						return "A"; //TODO replace with image
+					}
+					if (col == Column.SPLIT.ordinal()) {
+						return "S"; //TODO replace with image
+					}
+					return rows.get(row);
+				}
+
+				public Class<?> getColumnClass(int col) {
+					if (col == Column.IGNORE.ordinal()) {
+						return String.class;
+					}
+					if (col == Column.IGNORE.ordinal() || col == Column.ASSIGN.ordinal() || col == Column.SPLIT.ordinal()) {
+						return String.class; //TODO replace with image
+					}
+					return Row.class;
+				}
+
+				@Override
+				public boolean isCellEditable(int row, int col) {
+					if (col == Column.IGNORE.ordinal() || col == Column.ASSIGN.ordinal() || col == Column.SPLIT.ordinal()) {
+						//allows the buttons to be clicked
+						return true;
+					}
+					return false;
+				}
+			});
+		}
+
+		private void setColumns() {
+			CheckBoxColumn ccc = new CheckBoxColumn(this, new AbstractAction() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					String cmd = e.getActionCommand(); //returns a message like "2 true"
+					String split[] = cmd.split(" ");
+					int row = Integer.valueOf(split[0]);
+					boolean selected = Boolean.valueOf(split[1]);
+
+					Row rowObj = rows.get(row);
+					rowObj.ignore = selected;
+				}
+			}, Column.IGNORE.ordinal());
+
+			//new checkboxes were created, so reset their values
+			int i = 0;
+			for (Row row : rows) {
+				ccc.setCheckboxSelected(i++, row.ignore);
+			}
+
+			new ButtonColumn(this, new AbstractAction() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					int modelRow = Integer.valueOf(e.getActionCommand());
+					JOptionPane.showMessageDialog(owner, "Assign " + modelRow);
+					//TODO
+				}
+			}, Column.ASSIGN.ordinal());
+
+			new ButtonColumn(this, new AbstractAction() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					int modelRow = Integer.valueOf(e.getActionCommand());
+					JOptionPane.showMessageDialog(owner, "Split " + modelRow);
+					//TODO
+				}
+			}, Column.SPLIT.ordinal());
+
+			columnModel.getColumn(Column.IGNORE.ordinal()).setMaxWidth(50);
+			columnModel.getColumn(Column.ASSIGN.ordinal()).setMaxWidth(50);
+			columnModel.getColumn(Column.SPLIT.ordinal()).setMaxWidth(50);
+		}
 	}
 }
