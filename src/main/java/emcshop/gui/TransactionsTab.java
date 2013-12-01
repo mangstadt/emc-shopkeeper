@@ -46,6 +46,7 @@ public class TransactionsTab extends JPanel {
 	private final JButton showItems;
 	private final JButton showPlayers;
 
+	private final JLabel exportLabel;
 	private final ExportComboBox export;
 	private final JLabel filterByItemLabel;
 	private final FilterTextField filterByItem;
@@ -110,6 +111,7 @@ public class TransactionsTab extends JPanel {
 
 		tablePanel = new JPanel(new MigLayout("width 100%, height 100%, fillx, insets 0"));
 
+		exportLabel = new JLabel("Export:");
 		export = new ExportComboBoxImpl();
 
 		filterByItemLabel = new HelpLabel("Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
@@ -167,28 +169,37 @@ public class TransactionsTab extends JPanel {
 
 		setLayout(new MigLayout("fillx, insets 5"));
 
-		add(new JLabel("Start:"), "split 4");
-		add(fromDatePicker);
-		add(new JLabel("End:"));
-		add(toDatePicker);
+		JPanel left = new JPanel(new MigLayout("insets 0"));
 
-		add(export, "align right, wrap");
+		left.add(new JLabel("Start:"), "split 4");
+		left.add(fromDatePicker);
+		left.add(new JLabel("End:"));
+		left.add(toDatePicker, "wrap");
 
-		add(showItems, "split 2");
-		add(showPlayers);
+		left.add(showItems, "split 2");
+		left.add(showPlayers);
 
-		add(filterByItemLabel, "split 3, align right");
-		add(filterByItem, "w 150!");
-		add(filterByItem.getClearButton(), "w 25!, h 20!, wrap");
+		add(left, "w 100%"); //width of 100% forces the right panel to be compact
 
-		add(filterByPlayerLabel, "span 2, split 3, align right");
-		add(filterByPlayer, "w 150!");
-		add(filterByPlayer.getClearButton(), "w 25!, h 20!, wrap");
+		JPanel right = new JPanel(new MigLayout("fillx, insets 0"));
 
-		add(sortByLabel, "span 2, split 2, align right");
-		add(sortBy, "wrap");
+		right.add(exportLabel, "align right");
+		right.add(export, "w 185!, wrap");
 
-		add(dateRangeQueried, "span 2, wrap");
+		right.add(filterByItemLabel, "align right");
+		right.add(filterByItem, "split 2, w 150!");
+		right.add(filterByItem.getClearButton(), "w 25!, h 20!, wrap");
+
+		right.add(filterByPlayerLabel, "align right");
+		right.add(filterByPlayer, "split 2, w 150!");
+		right.add(filterByPlayer.getClearButton(), "w 25!, h 20!, wrap");
+
+		right.add(sortByLabel, "align right");
+		right.add(sortBy, "w 185!");
+
+		add(right, "span 1 2, align right, wrap");
+
+		add(dateRangeQueried, "gaptop 30, wrap"); //putting this label here allows the left panel to be vertically aligned to the top of the tab
 
 		add(tablePanel, "span 2, grow, h 100%, wrap");
 
@@ -199,6 +210,7 @@ public class TransactionsTab extends JPanel {
 
 		///////////////////////////////////////
 
+		exportLabel.setEnabled(false);
 		export.setEnabled(false);
 		filterByItemLabel.setEnabled(false);
 		filterByItem.setEnabled(false);
@@ -228,6 +240,7 @@ public class TransactionsTab extends JPanel {
 		playersPanelScrollPane = null;
 		netTotal = 0;
 
+		exportLabel.setEnabled(false);
 		export.setEnabled(false);
 		filterByItemLabel.setEnabled(false);
 		filterByItem.setEnabled(false);
@@ -262,6 +275,7 @@ public class TransactionsTab extends JPanel {
 		playersPanel = null;
 		playersPanelScrollPane = null;
 
+		exportLabel.setEnabled(true);
 		export.setEnabled(true);
 		filterByItemLabel.setEnabled(true);
 		filterByItem.setEnabled(true);
@@ -331,6 +345,7 @@ public class TransactionsTab extends JPanel {
 		itemsTable = null;
 		itemsTableScrollPane = null;
 
+		exportLabel.setEnabled(true);
 		export.setEnabled(true);
 		filterByItemLabel.setEnabled(true);
 		filterByItem.setEnabled(true);

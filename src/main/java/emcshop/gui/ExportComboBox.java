@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 public abstract class ExportComboBox extends JComboBox implements ActionListener {
 	private final MainFrame owner;
 
-	private final String heading = "Copy to Clipboard";
+	private final String heading = "<select format>";
 	private final String bbCode = "BB Code";
 	private final String csv = "CSV";
 
