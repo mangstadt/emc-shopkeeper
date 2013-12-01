@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -33,15 +34,19 @@ import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
-import emcshop.util.GuiUtils;
+import emcshop.util.Settings;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
 	private final ProfileImageLoader profileImageLoader;
+	private final Settings settings;
 
+	private final JCheckBox showSinceLastUpdate;
+	private final JLabel toDatePickerLabel;
 	private final DatePicker toDatePicker;
+	private final JLabel fromDatePickerLabel;
 	private final DatePicker fromDatePicker;
 	private final JButton showItems;
 	private final JButton showPlayers;
@@ -70,17 +75,32 @@ public class TransactionsTab extends JPanel {
 
 	private int netTotal;
 
-	public TransactionsTab(MainFrame owner, DbDao dao, ProfileImageLoader profileImageLoader) {
+	public TransactionsTab(MainFrame owner, DbDao dao, ProfileImageLoader profileImageLoader, Settings settings) {
 		this.owner = owner;
 		this.dao = dao;
 		this.profileImageLoader = profileImageLoader;
+		this.settings = settings;
 
+		showSinceLastUpdate = new JCheckBox();
+		showSinceLastUpdate.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				boolean enableDatePickers = !showSinceLastUpdate.isSelected();
+				fromDatePickerLabel.setEnabled(enableDatePickers);
+				fromDatePicker.setEnabled(enableDatePickers);
+				toDatePickerLabel.setEnabled(enableDatePickers);
+				toDatePicker.setEnabled(enableDatePickers);
+			}
+		});
+
+		fromDatePickerLabel = new JLabel("Start:");
 		fromDatePicker = new DatePicker();
 		fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 		fromDatePicker.setShowNoneButton(true);
 		fromDatePicker.setShowTodayButton(true);
 		fromDatePicker.setStripTime(true);
 
+		toDatePickerLabel = new JLabel("End:");
 		toDatePicker = new DatePicker();
 		toDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 		toDatePicker.setShowNoneButton(true);
@@ -171,9 +191,10 @@ public class TransactionsTab extends JPanel {
 
 		JPanel left = new JPanel(new MigLayout("insets 0"));
 
-		left.add(new JLabel("Start:"), "split 4");
+		left.add(showSinceLastUpdate, "wrap");
+		left.add(fromDatePickerLabel, "split 4");
 		left.add(fromDatePicker);
-		left.add(new JLabel("End:"));
+		left.add(toDatePickerLabel);
 		left.add(toDatePicker, "wrap");
 
 		left.add(showItems, "split 2");
@@ -199,7 +220,7 @@ public class TransactionsTab extends JPanel {
 
 		add(right, "span 1 2, align right, wrap");
 
-		add(dateRangeQueried, "gaptop 30, wrap"); //putting this label here allows the left panel to be vertically aligned to the top of the tab
+		add(dateRangeQueried, "gaptop 20, w 100%, wrap"); //putting this label here allows the left panel to be vertically aligned to the top of the tab
 
 		add(tablePanel, "span 2, grow, h 100%, wrap");
 
@@ -209,6 +230,11 @@ public class TransactionsTab extends JPanel {
 		add(netTotalLabel);
 
 		///////////////////////////////////////
+
+		if (settings.getLastUpdated() == null) {
+			//user has to perform an update first for this option to work
+			showSinceLastUpdate.setVisible(false);
+		}
 
 		exportLabel.setEnabled(false);
 		export.setEnabled(false);
@@ -224,6 +250,7 @@ public class TransactionsTab extends JPanel {
 
 		updateNetTotal();
 		updateCustomers();
+		updateSinceLastUpdateCheckbox();
 	}
 
 	public void clear() {
@@ -240,6 +267,11 @@ public class TransactionsTab extends JPanel {
 		playersPanelScrollPane = null;
 		netTotal = 0;
 
+		if (settings.getPreviousUpdate() == null) {
+			//user has to perform an update first for this option to work
+			showSinceLastUpdate.setVisible(false);
+		}
+
 		exportLabel.setEnabled(false);
 		export.setEnabled(false);
 		filterByItemLabel.setEnabled(false);
@@ -255,19 +287,47 @@ public class TransactionsTab extends JPanel {
 
 		updateNetTotal();
 		updateCustomers();
+		updateSinceLastUpdateCheckbox();
 
 		validate();
 	}
 
+	public void updateComplete(boolean showResults) {
+		//this search option is now available to the user, so make the checkbox visible
+		showSinceLastUpdate.setVisible(true);
+
+		updateSinceLastUpdateCheckbox();
+		if (showResults) {
+			showSinceLastUpdate.setSelected(true);
+
+			//these must be manually disabled here because ticking the checkbox in code does not fire a click event
+			fromDatePicker.setEnabled(false);
+			fromDatePickerLabel.setEnabled(false);
+			toDatePicker.setEnabled(false);
+			toDatePickerLabel.setEnabled(false);
+
+			showTransactions();
+		}
+	}
+
+	private void updateSinceLastUpdateCheckbox() {
+		String text = "since previous update";
+		Date date = settings.getPreviousUpdate();
+		if (date != null) {
+			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+			text += " (" + df.format(date) + ")";
+		}
+
+		showSinceLastUpdate.setText(text);
+	}
+
 	private void showTransactions() {
-		Date range[] = getDbDateRange();
-		Date from = range[0];
-		Date to = range[1];
-		showTransactions(from, to);
+		Date range[] = getQueryDateRange();
+		showTransactions(range[0], range[1]);
 	}
 
 	public void showTransactions(final Date from, final Date to) {
-		GuiUtils.busyCursor(owner, true);
+		busyCursor(owner, true);
 
 		tablePanel.removeAll();
 		tablePanel.validate();
@@ -330,10 +390,8 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private void showPlayers() {
-		Date range[] = getDbDateRange();
-		Date from = range[0];
-		Date to = range[1];
-		showPlayers(from, to);
+		Date range[] = getQueryDateRange();
+		showPlayers(range[0], range[1]);
 	}
 
 	public void showPlayers(final Date from, final Date to) {
@@ -388,18 +446,20 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private void updateDateRangeLabel(Date from, Date to) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 		String dateRangeStr;
+		final String startFont = "<b><i><font color=navy>";
+		final String endFont = "</font></i></b>";
 		if (from == null && to == null) {
-			dateRangeStr = "entire history";
+			dateRangeStr = startFont + "entire history" + endFont;
 		} else if (from == null) {
-			dateRangeStr = "up to <b><code>" + df.format(to) + "</b></code>";
+			dateRangeStr = "up to " + startFont + df.format(to) + endFont;
 		} else if (to == null) {
-			dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to today";
+			dateRangeStr = startFont + df.format(from) + endFont + " to " + startFont + "now" + endFont;
 		} else if (from.equals(to)) {
-			dateRangeStr = "<b><code>" + df.format(from) + "</b></code>";
+			dateRangeStr = startFont + df.format(from) + endFont;
 		} else {
-			dateRangeStr = "<b><code>" + df.format(from) + "</b></code> to <b><code>" + df.format(to) + "</b></code>";
+			dateRangeStr = startFont + df.format(from) + endFont + " to " + startFont + df.format(to) + endFont;
 		}
 
 		dateRangeQueried.setText("<html>" + dateRangeStr + "</html>");
@@ -445,25 +505,40 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private boolean checkDateRange() {
+		if (showSinceLastUpdate.isSelected()) {
+			return true;
+		}
+
 		Date from = fromDatePicker.getDate();
 		Date to = toDatePicker.getDate();
 		if (from.compareTo(to) > 0) {
 			JOptionPane.showMessageDialog(this, "Invalid date range: \"Start\" date must come before \"End\" date.", "Invalid date range", JOptionPane.INFORMATION_MESSAGE);
 			return false;
 		}
+
 		return true;
 	}
 
-	private Date[] getDbDateRange() {
-		Date from = fromDatePicker.getDate();
+	/**
+	 * Calculates the date range that the query should search over from the
+	 * various input elements on the panel.
+	 * @return the date range
+	 */
+	private Date[] getQueryDateRange() {
+		Date from, to;
+		if (showSinceLastUpdate.isSelected()) {
+			from = settings.getPreviousUpdate();
+			to = null;
+		} else {
+			from = fromDatePicker.getDate();
 
-		Date to = toDatePicker.getDate();
-		if (to != null) {
-
-			Calendar c = Calendar.getInstance();
-			c.setTime(to);
-			c.add(Calendar.DATE, 1);
-			to = c.getTime();
+			to = toDatePicker.getDate();
+			if (to != null) {
+				Calendar c = Calendar.getInstance();
+				c.setTime(to);
+				c.add(Calendar.DATE, 1);
+				to = c.getTime();
+			}
 		}
 
 		return new Date[] { from, to };

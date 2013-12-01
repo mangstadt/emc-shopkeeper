@@ -17,6 +17,7 @@ public class Settings {
 
 	private Integer version;
 	private Integer windowWidth, windowHeight;
+	private Date previousUpdate;
 	private Date lastUpdated;
 	private EmcSession session;
 	private boolean persistSession;
@@ -67,6 +68,14 @@ public class Settings {
 		this.lastUpdated = lastUpdated;
 	}
 
+	public Date getPreviousUpdate() {
+		return previousUpdate;
+	}
+
+	public void setPreviousUpdate(Date lastLastUpdated) {
+		this.previousUpdate = lastLastUpdated;
+	}
+
 	public EmcSession getSession() {
 		return session;
 	}
@@ -104,6 +113,7 @@ public class Settings {
 		windowWidth = 900;
 		windowHeight = 800;
 		lastUpdated = null;
+		previousUpdate = null;
 		session = null;
 		persistSession = true;
 		logLevel = Level.INFO;
@@ -131,11 +141,19 @@ public class Settings {
 			logger.log(Level.WARNING, "Problem parsing window.height: ", e);
 			windowHeight = 800;
 		}
+
 		try {
 			lastUpdated = props.getDate("lastUpdated");
 		} catch (ParseException e) {
-			logger.log(Level.WARNING, "Problem parsing date in \"lastUpdate\" property.", e);
+			logger.log(Level.WARNING, "Problem parsing date in \"lastUpdated\" property.", e);
 			lastUpdated = null;
+		}
+
+		try {
+			previousUpdate = props.getDate("previousUpdate");
+		} catch (ParseException e) {
+			logger.log(Level.WARNING, "Problem parsing date in \"previousUpdate\" property.", e);
+			previousUpdate = null;
 		}
 
 		String sessionId = props.get("session.id");
@@ -180,6 +198,7 @@ public class Settings {
 		props.setInteger("window.width", windowWidth);
 		props.setInteger("window.height", windowHeight);
 		props.setDate("lastUpdated", lastUpdated);
+		props.setDate("previousUpdate", previousUpdate);
 		if (session != null && persistSession) {
 			props.set("session.username", session.getUsername());
 			props.set("session.id", session.getSessionId());

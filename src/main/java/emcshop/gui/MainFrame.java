@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -58,7 +57,6 @@ public class MainFrame extends JFrame implements WindowListener {
 	private InventoryTab inventoryTab;
 
 	JMenuItem clearSession;
-	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private final DbDao dao;
 	private final Settings settings;
@@ -292,7 +290,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		lastUpdateDate = new JLabel();
 		Date date = settings.getLastUpdated();
-		lastUpdateDate.setText((date == null) ? "-" : df.format(date));
+		updateLastUpdateDate(date);
 
 		rupeeBalance = new JLabel();
 		updateRupeeBalance();
@@ -307,7 +305,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 		});
 
-		transactionsTab = new TransactionsTab(this, dao, profileImageLoader);
+		transactionsTab = new TransactionsTab(this, dao, profileImageLoader, settings);
 		paymentsTab = new PaymentsTab(this, dao);
 		inventoryTab = new InventoryTab(this, dao);
 	}
@@ -332,7 +330,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		tabs.addTab("Payments", paymentsTab);
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Payments Tab</b></font><br><br>Displays payment transactions that are awaiting your review.  Payment transactions that are shop-related (such as buying an item in bulk) can be added to your shop transaction history.\n\nA payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."));
 		tabs.addTab("Inventory", inventoryTab);
-		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Inventory Tab</b></font><br><br>Allows you to define how much of each item you have in stock, and also shows you what items are low in stock.  Your inventory is updated every time you download new transactions from EMC."));
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Inventory Tab</b></font><br><br>Allows you to define how much of each item you have in stock.  Your inventory is updated every time you download new transactions from EMC, so this tab will show you the items in your shop that are low in stock."));
 
 		add(tabs, "span 3, h 100%, w 100%");
 	}
@@ -358,14 +356,17 @@ public class MainFrame extends JFrame implements WindowListener {
 	 * Called after an update has completed.
 	 */
 	public void updateSuccessful(Date started, Integer rupeeTotal, long time, int transactionCount, int pageCount, boolean showResults) {
-		long components[] = TimeUtils.parseTimeComponents(time);
 		String message;
 		if (transactionCount == 0) {
 			message = "No new transactions found.";
 		} else {
+			//only set the previous update date if this update returned transactions
+			//this line of code must run before the Transactions tab is updated
+			settings.setPreviousUpdate(settings.getLastUpdated());
+
+			transactionsTab.updateComplete(showResults);
 			if (showResults) {
 				tabs.setSelectedComponent(transactionsTab);
-				transactionsTab.showTransactions(settings.getLastUpdated(), started);
 			}
 
 			updatePaymentsCount();
@@ -377,6 +378,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 			inventoryTab.refresh();
 
+			long components[] = TimeUtils.parseTimeComponents(time);
 			NumberFormat nf = NumberFormat.getInstance();
 			StringBuilder sb = new StringBuilder();
 			sb.append("Update complete.\n");
@@ -391,6 +393,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			sb.append(components[1]).append(" seconds.");
 			message = sb.toString();
 		}
+
 		JOptionPane.showMessageDialog(this, message, "Update complete", JOptionPane.INFORMATION_MESSAGE);
 
 		settings.setLastUpdated(started);
@@ -401,9 +404,20 @@ public class MainFrame extends JFrame implements WindowListener {
 			logger.log(Level.SEVERE, "Problem writing to settings file.", e);
 		}
 
-		lastUpdateDate.setText(df.format(started));
-
+		updateLastUpdateDate(started);
 		updateRupeeBalance();
+	}
+
+	private void updateLastUpdateDate(Date date) {
+		String text;
+		if (date == null) {
+			text = "-";
+		} else {
+			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+			text = df.format(date);
+		}
+
+		lastUpdateDate.setText(text);
 	}
 
 	private void updateRupeeBalance() {
