@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -62,12 +63,14 @@ public class MainFrame extends JFrame implements WindowListener {
 	private final Settings settings;
 	private final LogManager logManager;
 	private final ProfileImageLoader profileImageLoader;
+	private final String profile;
 
-	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader) throws SQLException {
+	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader, String profile) throws SQLException {
 		this.dao = dao;
 		this.settings = settings;
 		this.logManager = logManager;
 		this.profileImageLoader = profileImageLoader;
+		this.profile = profile;
 
 		setTitle("EMC Shopkeeper");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -168,6 +171,22 @@ public class MainFrame extends JFrame implements WindowListener {
 			});
 			clearSession.setEnabled(settings.getSession() != null);
 			tools.add(clearSession);
+
+			if (profile.equals("default")) {
+				final JCheckBoxMenuItem showProfilesOnStartup = new JCheckBoxMenuItem("Show Profiles On Startup", settings.isShowProfilesOnStartup());
+				showProfilesOnStartup.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						settings.setShowProfilesOnStartup(showProfilesOnStartup.isSelected());
+						try {
+							settings.save();
+						} catch (IOException e) {
+							logger.log(Level.SEVERE, "Problem saving settings file.", e);
+						}
+					}
+				});
+				tools.add(showProfilesOnStartup);
+			}
 
 			tools.addSeparator();
 
@@ -313,7 +332,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private void layoutWidgets() {
 		setLayout(new MigLayout("insets 5 10 10 10, fill"));
 
-		JPanel updatePanel = new JPanel(new MigLayout());
+		JPanel updatePanel = new JPanel(new MigLayout("insets 0"));
 		updatePanel.add(update, "wrap");
 		updatePanel.add(new JLabel("Last updated:"), "split 2");
 		updatePanel.add(lastUpdateDate);
@@ -321,8 +340,14 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		add(new JLabel(ImageManager.getImageIcon("header.png")), "w 100%, align center");
 
-		add(new JLabel("<html><h2>Rupees:</h2></html>"), "split 2, gapright 10, align right");
-		add(rupeeBalance, "wrap");
+		JPanel right = new JPanel(new MigLayout("insets 0"));
+
+		if (!profile.equals("default")) {
+			right.add(new JLabel("Profile: " + profile), "align right, wrap");
+		}
+		right.add(new JLabel("<html><h2>Rupees:</h2></html>"), "split 2, gapright 10, align right");
+		right.add(rupeeBalance);
+		add(right, "wrap");
 
 		int index = 0;
 		tabs.addTab("Transactions", transactionsTab);

@@ -23,6 +23,7 @@ public class Settings {
 	private boolean persistSession;
 	private Level logLevel;
 	private Integer rupeeBalance;
+	private boolean showProfilesOnStartup;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -108,6 +109,14 @@ public class Settings {
 		this.rupeeBalance = rupeeBalance;
 	}
 
+	public boolean isShowProfilesOnStartup() {
+		return showProfilesOnStartup;
+	}
+
+	public void setShowProfilesOnStartup(boolean showProfilesOnStartup) {
+		this.showProfilesOnStartup = showProfilesOnStartup;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowWidth = 900;
@@ -118,6 +127,7 @@ public class Settings {
 		persistSession = true;
 		logLevel = Level.INFO;
 		rupeeBalance = null;
+		showProfilesOnStartup = false;
 	}
 
 	public void load() throws IOException {
@@ -189,6 +199,8 @@ public class Settings {
 			logger.log(Level.WARNING, "Problem parsing rupeeBalance: ", e);
 			rupeeBalance = null;
 		}
+
+		showProfilesOnStartup = props.getBoolean("showProfilesOnStartup", false);
 	}
 
 	public void save() throws IOException {
@@ -207,6 +219,7 @@ public class Settings {
 		props.setBoolean("session.remember", persistSession);
 		props.set("log.level", logLevel.getName());
 		props.setInteger("rupeeBalance", rupeeBalance);
+		props.setBoolean("showProfilesOnStartup", showProfilesOnStartup);
 
 		props.store(file, "EMC Shopkeeper settings");
 	}

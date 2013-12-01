@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.SplashScreen;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,11 +30,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.ToolTipManager;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -158,12 +167,14 @@ public class Main {
 		profileRootDir = (profileRootDirStr == null) ? defaultProfileRootDir : new File(profileRootDirStr);
 
 		//get profile
+		boolean profileSpecified = true;
 		profile = arguments.value(null, "profile");
 		if (profile == null) {
+			profileSpecified = false;
 			profile = defaultProfile;
 		}
 
-		//get profile dir
+		//create profile dir
 		profileDir = new File(profileRootDir, profile);
 		if (profileDir.exists()) {
 			if (!profileDir.isDirectory()) {
@@ -182,6 +193,23 @@ public class Main {
 		String settingsFileStr = arguments.value(null, "settings");
 		File settingsFile = (settingsFileStr == null) ? new File(profileDir, "settings.properties") : new File(settingsFileStr);
 		settings = new Settings(settingsFile);
+
+		//show the "choose profile" dialog
+		boolean cliMode = arguments.exists(null, "query") || arguments.exists(null, "update");
+		if (!cliMode && !profileSpecified && settings.isShowProfilesOnStartup()) {
+			ProfileDialog dialog = new ProfileDialog();
+			dialog.setVisible(true);
+			if (dialog.selectedProfileDir == null) {
+				//user canceled the dialog
+				//quit the application
+				return;
+			}
+
+			//reset the profile dir
+			profileDir = dialog.selectedProfileDir;
+			profile = profileDir.getName();
+			settings = new Settings(new File(profileDir, "settings.properties"));
+		}
 
 		//get database dir
 		String dbDirStr = arguments.value(null, "db");
@@ -640,7 +668,7 @@ public class Main {
 		ToolTipManager.sharedInstance().setInitialDelay(0);
 		ToolTipManager.sharedInstance().setDismissDelay(30000);
 
-		frame = new MainFrame(settings, dao, logManager, profileImageLoader);
+		frame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName());
 		frame.setVisible(true);
 	}
 
@@ -725,6 +753,86 @@ public class Main {
 				}
 			}
 			FileUtils.writeStringToFile(versionFile, CACHE_VERSION);
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class ProfileDialog extends JDialog {
+		private final JComboBox profiles;
+		private final JButton ok, quit;
+		private File selectedProfileDir = null;
+
+		public ProfileDialog() {
+			setTitle("Choose Profile");
+			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			setResizable(false);
+			setModal(true);
+
+			//get list of existing profiles
+			Vector<String> profileNames = new Vector<String>();
+			File files[] = profileRootDir.listFiles();
+			for (File file : files) {
+				if (!file.isDirectory()) {
+					continue;
+				}
+
+				profileNames.add(file.getName());
+			}
+
+			profiles = new JComboBox(profileNames);
+			profiles.setEditable(true);
+			if (profileNames.contains(defaultProfile)) {
+				profiles.setSelectedItem(defaultProfile);
+			}
+			profiles.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					ok.doClick();
+				}
+			});
+
+			ok = new JButton("OK");
+			ok.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					String profile = (String) profiles.getSelectedItem();
+					if (profile.isEmpty()) {
+						JOptionPane.showMessageDialog(ProfileDialog.this, "Profile name cannot be blank.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+
+					File profileDir = new File(profileRootDir, profile);
+					if (!profileDir.exists() && !profileDir.mkdir()) {
+						//if it couldn't create the directory
+						JOptionPane.showMessageDialog(ProfileDialog.this, "Invalid profile name.  Please choose another.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+
+					selectedProfileDir = profileDir;
+					dispose();
+				}
+			});
+
+			quit = new JButton("Quit");
+			quit.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					dispose();
+				}
+			});
+
+			///////////////////////
+
+			setLayout(new MigLayout());
+
+			add(new JLabel(ImageManager.getImageIcon("header.png")), "align center, wrap");
+			add(new JLabel("<html><div width=250><center>Select a profile:</center></div>"), "align center, wrap");
+			add(profiles, "w 200, align center, wrap");
+			add(ok, "split 2, align center");
+			add(quit);
+
+			pack();
+			setLocationRelativeTo(null); //center on screen
 		}
 	}
 }
