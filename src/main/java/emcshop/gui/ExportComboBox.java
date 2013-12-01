@@ -1,6 +1,5 @@
 package emcshop.gui;
 
-import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -12,11 +11,15 @@ import javax.swing.JOptionPane;
 
 @SuppressWarnings("serial")
 public abstract class ExportComboBox extends JComboBox implements ActionListener {
+	private final MainFrame owner;
+
 	private final String heading = "Copy to Clipboard";
 	private final String bbCode = "BB Code";
 	private final String csv = "CSV";
 
-	public ExportComboBox() {
+	public ExportComboBox(MainFrame owner) {
+		this.owner = owner;
+
 		addItem(heading);
 		addItem(bbCode);
 		addItem(csv);
@@ -41,7 +44,7 @@ public abstract class ExportComboBox extends JComboBox implements ActionListener
 			StringSelection stringSelection = new StringSelection(text);
 			c.setContents(stringSelection, stringSelection);
 
-			JOptionPane.showMessageDialog((Component) getParent(), "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(owner, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 

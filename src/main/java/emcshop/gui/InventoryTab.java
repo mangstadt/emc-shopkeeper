@@ -29,12 +29,14 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.QueryExporter;
 import emcshop.db.DbDao;
 import emcshop.db.Inventory;
 import emcshop.gui.images.ImageManager;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {
+	private final MainFrame owner;
 	private final DbDao dao;
 
 	private List<Inventory> inventory = new ArrayList<Inventory>();
@@ -72,6 +74,7 @@ public class InventoryTab extends JPanel {
 	}
 
 	public InventoryTab(MainFrame owner, final DbDao dao) {
+		this.owner = owner;
 		this.dao = dao;
 
 		addEdit = new JButton("Add/Edit");
@@ -470,17 +473,19 @@ public class InventoryTab extends JPanel {
 		}
 	}
 
-	private class ExportComboBoxImpl extends ExportComboBox implements ActionListener {
+	private class ExportComboBoxImpl extends ExportComboBox {
+		public ExportComboBoxImpl() {
+			super(owner);
+		}
+
 		@Override
 		public String bbCode() {
-			//TODO
-			return "";
+			return QueryExporter.generateInventoryBBCode(inventoryDisplayed);
 		}
 
 		@Override
 		public String csv() {
-			//TODO
-			return "";
+			return QueryExporter.generateInventoryCsv(inventoryDisplayed);
 		}
 	}
 }

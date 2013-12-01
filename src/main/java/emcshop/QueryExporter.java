@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import emcshop.db.Inventory;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
@@ -276,6 +277,56 @@ public class QueryExporter {
 		bbCode.url(Main.URL, footer);
 
 		bbCode.close(); //close "font"
+
+		return bbCode.toString();
+	}
+
+	public static String generateInventoryCsv(Collection<Inventory> inventory) {
+		StringWriter sw = new StringWriter();
+		CSVWriter writer = new CSVWriter(sw);
+
+		writer.writeNext(new String[] { "Item", "Remaining" });
+		for (Inventory inv : inventory) {
+			//@formatter:off
+			writer.writeNext(new String[]{
+				inv.getItem(),
+				inv.getQuantity() + ""
+			});
+			//@formatter:on
+		}
+		writer.writeNext(new String[] { "EMC Shopkeeper v" + Main.VERSION + " - " + Main.URL });
+
+		try {
+			writer.close();
+		} catch (IOException e) {
+			//writing to string
+		}
+		return sw.toString();
+	}
+
+	public static String generateInventoryBBCode(Collection<Inventory> inventory) {
+		BBCodeBuilder bbCode = new BBCodeBuilder();
+
+		bbCode.font("courier new");
+
+		bbCode.text("- - - - - - - - Item - - - - - - | - - - - - -Remaining- - - - - -").nl();
+		for (Inventory inv : inventory) {
+			String item = inv.getItem();
+			bbCodeColumn(item, 32, bbCode);
+			bbCode.text(" | ");
+
+			String qty = formatQuantity(inv.getQuantity(), false);
+			bbCodeColumn(qty, 32, bbCode);
+
+			bbCode.nl();
+		}
+
+		//footer and total
+		String footer = "EMC Shopkeeper v" + Main.VERSION;
+		bbCode.url(Main.URL, footer);
+
+		//close "font"
+		bbCode.close();
 
 		return bbCode.toString();
 	}

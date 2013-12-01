@@ -454,7 +454,11 @@ public class TransactionsTab extends JPanel {
 		return new Date[] { from, to };
 	}
 
-	private class ExportComboBoxImpl extends ExportComboBox implements ActionListener {
+	private class ExportComboBoxImpl extends ExportComboBox {
+		public ExportComboBoxImpl() {
+			super(owner);
+		}
+
 		@Override
 		public String bbCode() {
 			Date from = fromDatePicker.getDate();
