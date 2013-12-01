@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -80,23 +81,39 @@ public class Main {
 	public static final String URL;
 
 	/**
+	 * The date the application was built.
+	 */
+	public static final Date BUILT;
+
+	/**
 	 * The version of the cache;
 	 */
 	public static final String CACHE_VERSION = "1";
 
 	static {
-		InputStream in = null;
+		InputStream in = Main.class.getResourceAsStream("/info.properties");
+		Properties props = new Properties();
 		try {
-			in = Main.class.getResourceAsStream("/info.properties");
-			Properties props = new Properties();
 			props.load(in);
-			VERSION = props.getProperty("version");
-			URL = props.getProperty("url");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
 			IOUtils.closeQuietly(in);
 		}
+
+		VERSION = props.getProperty("version");
+		URL = props.getProperty("url");
+
+		Date built;
+		try {
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+			built = df.parse(props.getProperty("built"));
+		} catch (ParseException e) {
+			//this could happen during development if the properties file is not filtered by Maven
+			logger.log(Level.SEVERE, "Could not parse built date.", e);
+			built = new Date();
+		}
+		BUILT = built;
 	}
 
 	private static final Set<String> validArgs;

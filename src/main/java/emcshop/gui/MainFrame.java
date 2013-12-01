@@ -9,14 +9,21 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -34,11 +41,21 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
 import emcshop.EmcSession;
 import emcshop.LogManager;
+import emcshop.Main;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.MacSupport;
+import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
@@ -51,6 +68,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private JButton update;
 	private JLabel lastUpdateDate;
 	private JLabel rupeeBalance;
+	private JPanel updateAvailablePanel;
 
 	private JTabbedPane tabs;
 	private TransactionsTab transactionsTab;
@@ -72,7 +90,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		this.profileImageLoader = profileImageLoader;
 		this.profile = profile;
 
-		setTitle("EMC Shopkeeper");
+		setTitle("EMC Shopkeeper v" + Main.VERSION);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		createMenu();
@@ -86,6 +104,8 @@ public class MainFrame extends JFrame implements WindowListener {
 		updatePaymentsCount();
 
 		addWindowListener(this);
+
+		checkForNewVersion();
 	}
 
 	private void createMenu() {
@@ -307,6 +327,8 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 		});
 
+		updateAvailablePanel = new JPanel(new MigLayout("insets 0"));
+
 		lastUpdateDate = new JLabel();
 		Date date = settings.getLastUpdated();
 		updateLastUpdateDate(date);
@@ -333,9 +355,11 @@ public class MainFrame extends JFrame implements WindowListener {
 		setLayout(new MigLayout("insets 5 10 10 10, fill"));
 
 		JPanel updatePanel = new JPanel(new MigLayout("insets 0"));
-		updatePanel.add(update, "wrap");
+		updatePanel.add(update);
+		updatePanel.add(updateAvailablePanel, "span 1 2, wrap");
 		updatePanel.add(new JLabel("Last updated:"), "split 2");
 		updatePanel.add(lastUpdateDate);
+
 		add(updatePanel);
 
 		add(new JLabel(ImageManager.getImageIcon("header.png")), "w 100%, align center");
@@ -455,6 +479,103 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		String balanceStr = NumberFormatter.formatRupees(balance, false);
 		rupeeBalance.setText("<html><h2><b>" + balanceStr + "</b></h2></html>");
+	}
+
+	private void checkForNewVersion() {
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				String json;
+				try {
+					json = downloadCommitInfo();
+				} catch (IOException e) {
+					//problem downloading file
+					return;
+				}
+
+				Date latestRelease = parseLatestReleaseDate(json);
+				if (latestRelease == null) {
+					//couldn't find the release date
+					return;
+				}
+
+				long diff = latestRelease.getTime() - Main.BUILT.getTime();
+				if (diff < 1000 * 60 * 10) { //give a buffer of 10 minutes because there will be a few minutes difference between the build timestamp and the commit timestamp
+					//already running the latest version
+					return;
+				}
+
+				JButton downloadUpdate = new JButton("Download");
+				downloadUpdate.setIcon(ImageManager.getImageIcon("download.png"));
+				downloadUpdate.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						try {
+							GuiUtils.openWebPage(URI.create("https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar"));
+						} catch (IOException e) {
+							throw new RuntimeException("Error opening webpage.", e);
+						}
+					}
+				});
+
+				updateAvailablePanel.add(new JLabel("<html><center><b>New Version Available!</b></center></html>"), "gapleft 10, align center, wrap");
+				updateAvailablePanel.add(downloadUpdate, "gapleft 10, align center");
+				validate();
+			}
+
+			private String downloadCommitInfo() throws IOException {
+				String url = "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits?path=" + URLEncoder.encode("dist/emc-shopkeeper-full.jar", "UTF-8");
+
+				DefaultHttpClient client = new DefaultHttpClient();
+				HttpGet request = new HttpGet(url);
+
+				HttpResponse response = client.execute(request);
+				HttpEntity entity = response.getEntity();
+				String json = IOUtils.toString(entity.getContent());
+				EntityUtils.consume(entity);
+				return json;
+			}
+
+			private Date parseLatestReleaseDate(String json) {
+				Pattern p = Pattern.compile("\"date\":\"(.*?)\"");
+				Matcher m = p.matcher(json);
+				if (!m.find()) {
+					return null;
+				}
+
+				DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+				df.setTimeZone(TimeZone.getTimeZone("GMT"));
+				try {
+					return df.parse(m.group(1));
+				} catch (ParseException e) {
+					return null;
+				}
+			}
+		};
+		t.start();
+	}
+
+	public static void main(String args[]) throws Exception {
+		String url = "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits?path=" + URLEncoder.encode("dist/emc-shopkeeper-full.jar", "UTF-8");
+		System.out.println(url);
+
+		DefaultHttpClient client = new DefaultHttpClient();
+		HttpGet request = new HttpGet(url);
+
+		HttpResponse response = client.execute(request);
+		HttpEntity entity = response.getEntity();
+		String json = IOUtils.toString(entity.getContent());
+
+		Pattern p = Pattern.compile("\"date\":\"(.*?)\"");
+		Matcher m = p.matcher(json);
+		if (m.find()) {
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			df.setTimeZone(TimeZone.getTimeZone("GMT"));
+			Date lastRelease = df.parse(m.group(1));
+			System.out.println(lastRelease);
+		}
+
+		EntityUtils.consume(entity);
 	}
 
 	///////////////////////////////////

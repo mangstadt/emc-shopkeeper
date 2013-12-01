@@ -1,7 +1,6 @@
 package emcshop.gui.lib;
 
 import java.awt.Cursor;
-import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
@@ -12,6 +11,8 @@ import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 
+import emcshop.util.GuiUtils;
+
 /**
  * A label that, when clicked, will open a browser window and load a webpage.
  * @author Michael Angstadt
@@ -19,18 +20,6 @@ import javax.swing.JLabel;
 @SuppressWarnings("serial")
 public class ClickableLabel extends JLabel implements MouseListener {
 	private static final Logger logger = Logger.getLogger(ClickableLabel.class.getName());
-	private static final Desktop desktop;
-	static {
-		Desktop d = null;
-		if (Desktop.isDesktopSupported()) {
-			d = Desktop.getDesktop();
-			if (d != null && !d.isSupported(Desktop.Action.BROWSE)) {
-				d = null;
-			}
-		}
-		desktop = d;
-	}
-
 	private URI uri;
 
 	/**
@@ -52,6 +41,10 @@ public class ClickableLabel extends JLabel implements MouseListener {
 	}
 
 	private void init(String url) {
+		if (GuiUtils.desktop == null) {
+			return;
+		}
+
 		try {
 			uri = URI.create(url);
 		} catch (IllegalArgumentException e) {
@@ -59,17 +52,15 @@ public class ClickableLabel extends JLabel implements MouseListener {
 			return;
 		}
 
-		if (desktop != null) {
-			//only set these things if the user's computer supports opening a browser window
-			setCursor(new Cursor(Cursor.HAND_CURSOR));
-			addMouseListener(this);
-		}
+		//only set these things if the user's computer supports opening a browser window
+		setCursor(new Cursor(Cursor.HAND_CURSOR));
+		addMouseListener(this);
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
 		try {
-			desktop.browse(uri);
+			GuiUtils.openWebPage(uri);
 		} catch (IOException e) {
 			logger.log(Level.WARNING, "Problem opening webpage.", e);
 		}

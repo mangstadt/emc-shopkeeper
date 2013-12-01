@@ -1,10 +1,13 @@
 package emcshop.util;
 
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.net.URI;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -19,6 +22,30 @@ public class GuiUtils {
 	 * True if the local operating system is Linux, false if not.
 	 */
 	public static final boolean linux = System.getProperty("os.name").toLowerCase().contains("linux");
+
+	public static final Desktop desktop;
+	static {
+		Desktop d = null;
+		if (Desktop.isDesktopSupported()) {
+			d = Desktop.getDesktop();
+			if (d != null && !d.isSupported(Desktop.Action.BROWSE)) {
+				d = null;
+			}
+		}
+		desktop = d;
+	}
+
+	/**
+	 * Opens a webpage in the user's browser.
+	 * @param uri the URI
+	 */
+	public static void openWebPage(URI uri) throws IOException {
+		if (desktop == null) {
+			return;
+		}
+
+		desktop.browse(uri);
+	}
 
 	/**
 	 * Builds a standardized tooltip string.
