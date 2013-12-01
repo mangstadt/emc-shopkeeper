@@ -418,6 +418,7 @@ public class Main {
 				case COMPLETED:
 					dao.commit();
 
+					settings.setPreviousUpdate(settings.getLastUpdated());
 					settings.setLastUpdated(started);
 					settings.setRupeeBalance(result.getRupeeBalance());
 					settings.save();
