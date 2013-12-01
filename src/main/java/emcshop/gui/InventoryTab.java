@@ -283,21 +283,21 @@ public class InventoryTab extends JPanel {
 
 					Column column = columns[index];
 
-					//select all checkboxes
-					if (column == Column.CHECKBOX) {
-						for (JCheckBox checkbox : checkboxes) {
-							checkbox.setSelected(true);
-						}
-						AbstractTableModel model = (AbstractTableModel) getModel();
-						model.fireTableDataChanged();
-						return;
-					}
-
 					if (column == prevColumnClicked) {
 						ascending = !ascending;
 					} else {
 						prevColumnClicked = column;
 						ascending = true;
+					}
+
+					//select all checkboxes
+					if (column == Column.CHECKBOX) {
+						for (JCheckBox checkbox : checkboxes) {
+							checkbox.setSelected(ascending);
+						}
+						AbstractTableModel model = (AbstractTableModel) getModel();
+						model.fireTableDataChanged();
+						return;
 					}
 
 					sortData();
