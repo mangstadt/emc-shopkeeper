@@ -7,6 +7,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import emcshop.gui.images.ImageManager;
+import emcshop.util.GuiUtils;
 
 /**
  * Represents a JLabel with a help icon.
@@ -20,7 +21,11 @@ public class HelpLabel extends JLabel {
 	 * @param tooltip the tooltip text
 	 */
 	public HelpLabel(String text, String tooltip) {
-		super(text, helpIcon, SwingConstants.LEFT);
-		setToolTipText(toolTipText(tooltip));
+		super(text);
+		if (!GuiUtils.linux) {
+			setIcon(helpIcon);
+			setHorizontalAlignment(SwingConstants.LEFT);
+			setToolTipText(toolTipText(tooltip));
+		}
 	}
 }

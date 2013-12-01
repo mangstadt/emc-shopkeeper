@@ -15,7 +15,10 @@ import javax.swing.KeyStroke;
  * @author Michael Angstadt
  */
 public class GuiUtils {
-	private static final boolean linux = System.getProperty("os.name").toLowerCase().contains("linux");
+	/**
+	 * True if the local operating system is Linux, false if not.
+	 */
+	public static final boolean linux = System.getProperty("os.name").toLowerCase().contains("linux");
 
 	/**
 	 * Builds a standardized tooltip string.
