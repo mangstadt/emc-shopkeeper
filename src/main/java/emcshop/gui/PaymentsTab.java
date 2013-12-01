@@ -10,7 +10,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.sql.SQLException;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,7 @@ import emcshop.gui.lib.JNumberTextField;
 public class PaymentsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
-	private final DateFormat df = new SimpleDateFormat("MMM dd yyyy @ HH:mm");
+	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private boolean stale = true;
 	private final Color erroredFieldBgColor = new Color(255, 192, 192);
 
