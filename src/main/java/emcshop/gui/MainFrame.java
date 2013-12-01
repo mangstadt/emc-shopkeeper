@@ -306,7 +306,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		});
 
 		transactionsTab = new TransactionsTab(this, dao, profileImageLoader, settings);
-		paymentsTab = new PaymentsTab(this, dao);
+		paymentsTab = new PaymentsTab(this, dao, profileImageLoader);
 		inventoryTab = new InventoryTab(this, dao);
 	}
 

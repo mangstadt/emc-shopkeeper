@@ -30,6 +30,7 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.db.DbDao;
+import emcshop.gui.ProfileImageLoader.ImageAssignedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ButtonColumn;
 import emcshop.gui.lib.JNumberTextField;
@@ -39,6 +40,7 @@ import emcshop.util.GuiUtils;
 public class PaymentsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
+	private final ProfileImageLoader profileImageLoader;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private boolean stale = true;
 
@@ -48,9 +50,10 @@ public class PaymentsTab extends JPanel {
 
 	private PaymentsTable paymentsTable;
 
-	public PaymentsTab(final MainFrame owner, final DbDao dao) {
+	public PaymentsTab(final MainFrame owner, final DbDao dao, final ProfileImageLoader profileImageLoader) {
 		this.owner = owner;
 		this.dao = dao;
+		this.profileImageLoader = profileImageLoader;
 
 		setLayout(new MigLayout("fillx, insets 5"));
 	}
@@ -157,7 +160,7 @@ public class PaymentsTab extends JPanel {
 
 			setDefaultRenderer(PaymentTransaction.class, new TableCellRenderer() {
 				@Override
-				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, int col) {
+				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
 					final PaymentTransaction transaction = (PaymentTransaction) value;
 
 					JLabel label = null;
@@ -165,6 +168,13 @@ public class PaymentsTab extends JPanel {
 						label = new JLabel("<html>" + df.format(transaction.getTs()) + "</html>");
 					} else if (col == Column.PLAYER.ordinal()) {
 						label = new JLabel("<html>" + transaction.getPlayer() + "</html>"); //add player's profile image
+						profileImageLoader.load(transaction.getPlayer(), label, 16, new ImageAssignedListener() {
+							@Override
+							public void onImageAssigned(JLabel label) {
+								AbstractTableModel model = (AbstractTableModel) getModel();
+								model.fireTableCellUpdated(row, col);
+							}
+						});
 					} else if (col == Column.AMOUNT.ordinal()) {
 						label = new JLabel("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
 					}

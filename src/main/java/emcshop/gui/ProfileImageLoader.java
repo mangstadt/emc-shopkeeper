@@ -75,6 +75,17 @@ public class ProfileImageLoader {
 	 * @param maxSize the size to scale the image to
 	 */
 	public void load(String playerName, JLabel label, int maxSize) {
+		load(playerName, label, maxSize, null);
+	}
+
+	/**
+	 * Loads a profile image, queuing it for download if necessary.
+	 * @param playerName the player name
+	 * @param label the label to insert the image into
+	 * @param maxSize the size to scale the image to
+	 * @param listener invoked when the image has been assigned to the label
+	 */
+	public void load(String playerName, JLabel label, int maxSize, ImageAssignedListener listener) {
 		if (downloaded.contains(playerName.toLowerCase())) {
 			//it was already downloaded, so read the image from the cache
 			try {
@@ -87,7 +98,7 @@ public class ProfileImageLoader {
 			}
 		} else {
 			//queue the image for download
-			Job job = new Job(playerName, label, maxSize);
+			Job job = new Job(playerName, label, maxSize, listener);
 			try {
 				queue.put(job);
 			} catch (InterruptedException e) {
@@ -249,6 +260,9 @@ public class ProfileImageLoader {
 				ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
 				image = ImageManager.scale(image, job.maxSize);
 				job.label.setIcon(image);
+				if (job.listener != null) {
+					job.listener.onImageAssigned(job.label);
+				}
 			}
 		}
 	}
@@ -260,11 +274,21 @@ public class ProfileImageLoader {
 		final String playerName;
 		final JLabel label;
 		final int maxSize;
+		final ImageAssignedListener listener;
 
-		Job(String playerName, JLabel label, int maxSize) {
+		Job(String playerName, JLabel label, int maxSize, ImageAssignedListener listener) {
 			this.playerName = playerName;
 			this.label = label;
 			this.maxSize = maxSize;
+			this.listener = listener;
 		}
+	}
+
+	public static interface ImageAssignedListener {
+		/**
+		 * Called when the image is assigned to the label.
+		 * @param label the label
+		 */
+		void onImageAssigned(JLabel label);
 	}
 }
