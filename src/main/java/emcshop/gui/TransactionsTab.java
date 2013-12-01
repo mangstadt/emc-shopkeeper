@@ -231,7 +231,7 @@ public class TransactionsTab extends JPanel {
 
 		///////////////////////////////////////
 
-		if (settings.getLastUpdated() == null) {
+		if (settings.getPreviousUpdate() == null) {
 			//user has to perform an update first for this option to work
 			showSinceLastUpdate.setVisible(false);
 		}
@@ -292,19 +292,23 @@ public class TransactionsTab extends JPanel {
 		validate();
 	}
 
-	public void updateComplete(boolean showResults) {
-		//this search option is now available to the user, so make the checkbox visible
-		showSinceLastUpdate.setVisible(true);
-
+	public void updateComplete(boolean showResults, boolean firstUpdate) {
+		if (firstUpdate || settings.getPreviousUpdate() != null) {
+			//user has to perform an update first for this option to work
+			showSinceLastUpdate.setVisible(true);
+		}
 		updateSinceLastUpdateCheckbox();
-		if (showResults) {
-			showSinceLastUpdate.setSelected(true);
 
-			//these must be manually disabled here because ticking the checkbox in code does not fire a click event
-			fromDatePicker.setEnabled(false);
-			fromDatePickerLabel.setEnabled(false);
-			toDatePicker.setEnabled(false);
-			toDatePickerLabel.setEnabled(false);
+		if (showResults) {
+			if (showSinceLastUpdate.isVisible()) {
+				showSinceLastUpdate.setSelected(true);
+
+				//these must be manually disabled here because ticking the checkbox in code does not fire a click event
+				fromDatePicker.setEnabled(false);
+				fromDatePickerLabel.setEnabled(false);
+				toDatePicker.setEnabled(false);
+				toDatePickerLabel.setEnabled(false);
+			}
 
 			showTransactions();
 		}

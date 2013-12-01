@@ -360,11 +360,13 @@ public class MainFrame extends JFrame implements WindowListener {
 		if (transactionCount == 0) {
 			message = "No new transactions found.";
 		} else {
+			boolean firstUpdate = (settings.getLastUpdated() == null && settings.getPreviousUpdate() == null);
+
 			//only set the previous update date if this update returned transactions
 			//this line of code must run before the Transactions tab is updated
 			settings.setPreviousUpdate(settings.getLastUpdated());
 
-			transactionsTab.updateComplete(showResults);
+			transactionsTab.updateComplete(showResults, firstUpdate);
 			if (showResults) {
 				tabs.setSelectedComponent(transactionsTab);
 			}
