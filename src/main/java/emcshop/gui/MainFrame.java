@@ -485,42 +485,48 @@ public class MainFrame extends JFrame implements WindowListener {
 		Thread t = new Thread() {
 			@Override
 			public void run() {
-				String json;
 				try {
-					json = downloadCommitInfo();
-				} catch (IOException e) {
-					//problem downloading file
-					return;
-				}
-
-				Date latestRelease = parseLatestReleaseDate(json);
-				if (latestRelease == null) {
-					//couldn't find the release date
-					return;
-				}
-
-				long diff = latestRelease.getTime() - Main.BUILT.getTime();
-				if (diff < 1000 * 60 * 10) { //give a buffer of 10 minutes because there will be a few minutes difference between the build timestamp and the commit timestamp
-					//already running the latest version
-					return;
-				}
-
-				JButton downloadUpdate = new JButton("Download");
-				downloadUpdate.setIcon(ImageManager.getImageIcon("download.png"));
-				downloadUpdate.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent event) {
-						try {
-							GuiUtils.openWebPage(URI.create("https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar"));
-						} catch (IOException e) {
-							throw new RuntimeException("Error opening webpage.", e);
-						}
+					logger.log(Level.FINEST, "Checking for updates.");
+					String json;
+					try {
+						json = downloadCommitInfo();
+					} catch (IOException e) {
+						//problem downloading file
+						return;
 					}
-				});
 
-				updateAvailablePanel.add(new JLabel("<html><center><b>New Version Available!</b></center></html>"), "gapleft 10, align center, wrap");
-				updateAvailablePanel.add(downloadUpdate, "gapleft 10, align center");
-				validate();
+					Date latestRelease = parseLatestReleaseDate(json);
+					if (latestRelease == null) {
+						//couldn't find the release date
+						return;
+					}
+
+					long diff = latestRelease.getTime() - Main.BUILT.getTime();
+					if (diff < 1000 * 60 * 10) { //give a buffer of 10 minutes because there will be a few minutes difference between the build timestamp and the commit timestamp
+						//already running the latest version
+						logger.log(Level.FINEST, "Running latest version.");
+						return;
+					}
+
+					JButton downloadUpdate = new JButton("Download");
+					downloadUpdate.setIcon(ImageManager.getImageIcon("download.png"));
+					downloadUpdate.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent event) {
+							try {
+								GuiUtils.openWebPage(URI.create("https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar"));
+							} catch (IOException e) {
+								throw new RuntimeException("Error opening webpage.", e);
+							}
+						}
+					});
+
+					updateAvailablePanel.add(new JLabel("<html><center><b>New Version Available!</b></center></html>"), "gapleft 10, align center, wrap");
+					updateAvailablePanel.add(downloadUpdate, "gapleft 10, align center");
+					validate();
+				} catch (Throwable e) {
+					logger.log(Level.WARNING, "Problem checking for updates.", e);
+				}
 			}
 
 			private String downloadCommitInfo() throws IOException {
@@ -540,6 +546,7 @@ public class MainFrame extends JFrame implements WindowListener {
 				Pattern p = Pattern.compile("\"date\":\"(.*?)\"");
 				Matcher m = p.matcher(json);
 				if (!m.find()) {
+					logger.log(Level.WARNING, "Could not find release date in Github commit log: " + json);
 					return null;
 				}
 
@@ -548,34 +555,13 @@ public class MainFrame extends JFrame implements WindowListener {
 				try {
 					return df.parse(m.group(1));
 				} catch (ParseException e) {
+					logger.log(Level.WARNING, "Could not parse release date from Github commit log.", e);
 					return null;
 				}
 			}
 		};
+		t.setDaemon(true);
 		t.start();
-	}
-
-	public static void main(String args[]) throws Exception {
-		String url = "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits?path=" + URLEncoder.encode("dist/emc-shopkeeper-full.jar", "UTF-8");
-		System.out.println(url);
-
-		DefaultHttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet(url);
-
-		HttpResponse response = client.execute(request);
-		HttpEntity entity = response.getEntity();
-		String json = IOUtils.toString(entity.getContent());
-
-		Pattern p = Pattern.compile("\"date\":\"(.*?)\"");
-		Matcher m = p.matcher(json);
-		if (m.find()) {
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-			df.setTimeZone(TimeZone.getTimeZone("GMT"));
-			Date lastRelease = df.parse(m.group(1));
-			System.out.println(lastRelease);
-		}
-
-		EntityUtils.consume(entity);
 	}
 
 	///////////////////////////////////
