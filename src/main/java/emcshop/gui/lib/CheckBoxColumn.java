@@ -6,7 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractCellEditor;
@@ -22,7 +24,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 /**
- * Adapted from {@link ButtonColumn}
+ * Adapted from {@link ButtonColumn}.
  */
 @SuppressWarnings("serial")
 public class CheckBoxColumn extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener, MouseListener {
@@ -58,11 +60,50 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 		table.addMouseListener(this);
 	}
 
-	public void setCheckboxSelected(int index, boolean selected) {
-		JCheckBox edit = getEditCheckbox(index);
+	/**
+	 * Gets the states of all of the checkboxes in this column.
+	 * @return the checkbox states
+	 */
+	public Map<Integer, Boolean> getStates() {
+		Map<Integer, Boolean> states = new HashMap<Integer, Boolean>();
+		for (Map.Entry<Integer, JCheckBox> entry : editCheckboxes.entrySet()) {
+			Integer row = entry.getKey();
+			JCheckBox checkbox = entry.getValue();
+
+			states.put(row, checkbox.isSelected());
+		}
+
+		return states;
+	}
+
+	/**
+	 * Get the indexes of the rows whose checkboxes are selected.
+	 * @return the selected rows
+	 */
+	public List<Integer> getSelectedRows() {
+		List<Integer> selectedRows = new ArrayList<Integer>();
+
+		for (Map.Entry<Integer, JCheckBox> entry : editCheckboxes.entrySet()) {
+			JCheckBox checkbox = entry.getValue();
+			if (checkbox.isSelected()) {
+				Integer row = entry.getKey();
+				selectedRows.add(row);
+			}
+		}
+
+		return selectedRows;
+	}
+
+	/**
+	 * Sets the selected state of a checkbox
+	 * @param row the row the checkbox is on
+	 * @param selected true to selected, false to deselected it
+	 */
+	public void setCheckboxSelected(int row, boolean selected) {
+		JCheckBox edit = getEditCheckbox(row);
 		edit.setSelected(selected);
 
-		JCheckBox render = getRenderCheckbox(index);
+		JCheckBox render = getRenderCheckbox(row);
 		render.setSelected(selected);
 	}
 
@@ -146,7 +187,7 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 	//  Implement ActionListener interface
 	//
 	/*
-	 *	The button has been pressed. Stop editing and invoke the custom Action
+	 * The button has been pressed. Stop editing and invoke the custom Action
 	 */
 	public void actionPerformed(ActionEvent e) {
 		int row = table.convertRowIndexToModel(table.getEditingRow());
@@ -171,16 +212,18 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 	//  Implement MouseListener interface
 	//
 	/*
-	 *  When the mouse is pressed the editor is invoked. If you then then drag
-	 *  the mouse to another cell before releasing it, the editor is still
-	 *  active. Make sure editing is stopped when the mouse is released.
+	 * When the mouse is pressed the editor is invoked. If you then then drag
+	 * the mouse to another cell before releasing it, the editor is still
+	 * active. Make sure editing is stopped when the mouse is released.
 	 */
 	public void mousePressed(MouseEvent e) {
-		if (table.isEditing() && table.getCellEditor() == this) isButtonColumnEditor = true;
+		if (table.isEditing() && table.getCellEditor() == this)
+			isButtonColumnEditor = true;
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		if (isButtonColumnEditor && table.isEditing()) table.getCellEditor().stopCellEditing();
+		if (isButtonColumnEditor && table.isEditing())
+			table.getCellEditor().stopCellEditing();
 
 		isButtonColumnEditor = false;
 	}
