@@ -92,7 +92,7 @@ public class TransactionsTab extends JPanel {
 
 		String text = "entire history";
 		if (earliestTransactionDate != null) {
-			text += " (" + df.format(earliestTransactionDate) + " to present)";
+			text += " (since " + df.format(earliestTransactionDate) + ")";
 		}
 		entireHistory = new JCheckBox(text);
 		entireHistory.addActionListener(new ActionListener() {
