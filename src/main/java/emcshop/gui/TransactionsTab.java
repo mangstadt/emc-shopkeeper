@@ -42,8 +42,10 @@ public class TransactionsTab extends JPanel {
 	private final DbDao dao;
 	private final ProfileImageLoader profileImageLoader;
 	private final Settings settings;
+	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 
 	private final JCheckBox showSinceLastUpdate;
+	private final JCheckBox entireHistory;
 	private final JLabel toDatePickerLabel;
 	private final DatePicker toDatePicker;
 	private final JLabel fromDatePickerLabel;
@@ -81,10 +83,41 @@ public class TransactionsTab extends JPanel {
 		this.profileImageLoader = profileImageLoader;
 		this.settings = settings;
 
+		Date earliestTransactionDate = null;
+		try {
+			earliestTransactionDate = dao.getEarliestTransactionDate();
+		} catch (SQLException e) {
+			//ignore
+		}
+
+		String text = "entire history";
+		if (earliestTransactionDate != null) {
+			text += " (" + df.format(earliestTransactionDate) + " to present)";
+		}
+		entireHistory = new JCheckBox(text);
+		entireHistory.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (entireHistory.isSelected()) {
+					showSinceLastUpdate.setSelected(false);
+				}
+
+				boolean enableDatePickers = !entireHistory.isSelected();
+				fromDatePickerLabel.setEnabled(enableDatePickers);
+				fromDatePicker.setEnabled(enableDatePickers);
+				toDatePickerLabel.setEnabled(enableDatePickers);
+				toDatePicker.setEnabled(enableDatePickers);
+			}
+		});
+
 		showSinceLastUpdate = new JCheckBox();
 		showSinceLastUpdate.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				if (showSinceLastUpdate.isSelected()) {
+					entireHistory.setSelected(false);
+				}
+
 				boolean enableDatePickers = !showSinceLastUpdate.isSelected();
 				fromDatePickerLabel.setEnabled(enableDatePickers);
 				fromDatePicker.setEnabled(enableDatePickers);
@@ -191,6 +224,7 @@ public class TransactionsTab extends JPanel {
 
 		JPanel left = new JPanel(new MigLayout("insets 0"));
 
+		left.add(entireHistory, "wrap");
 		left.add(showSinceLastUpdate, "wrap");
 		left.add(fromDatePickerLabel, "split 4");
 		left.add(fromDatePicker);
@@ -301,13 +335,10 @@ public class TransactionsTab extends JPanel {
 
 		if (showResults) {
 			if (showSinceLastUpdate.isVisible()) {
-				showSinceLastUpdate.setSelected(true);
-
-				//these must be manually disabled here because ticking the checkbox in code does not fire a click event
-				fromDatePicker.setEnabled(false);
-				fromDatePickerLabel.setEnabled(false);
-				toDatePicker.setEnabled(false);
-				toDatePickerLabel.setEnabled(false);
+				showSinceLastUpdate.doClick();
+				if (!showSinceLastUpdate.isSelected()) {
+					showSinceLastUpdate.setSelected(true);
+				}
 			}
 
 			showTransactions();
@@ -318,7 +349,6 @@ public class TransactionsTab extends JPanel {
 		String text = "since previous update";
 		Date date = settings.getPreviousUpdate();
 		if (date != null) {
-			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 			text += " (" + df.format(date) + ")";
 		}
 
@@ -509,7 +539,7 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private boolean checkDateRange() {
-		if (showSinceLastUpdate.isSelected()) {
+		if (showSinceLastUpdate.isSelected() || entireHistory.isSelected()) {
 			return true;
 		}
 
@@ -533,6 +563,8 @@ public class TransactionsTab extends JPanel {
 		if (showSinceLastUpdate.isSelected()) {
 			from = settings.getPreviousUpdate();
 			to = null;
+		} else if (entireHistory.isSelected()) {
+			from = to = null;
 		} else {
 			from = fromDatePicker.getDate();
 

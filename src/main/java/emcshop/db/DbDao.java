@@ -42,6 +42,13 @@ public interface DbDao {
 	Player selsertPlayer(String name) throws SQLException;
 
 	/**
+	 * Gets the date of the earliest transaction.
+	 * @return the date
+	 * @throws SQLException
+	 */
+	Date getEarliestTransactionDate() throws SQLException;
+
+	/**
 	 * Inserts a player.
 	 * @param name the player name
 	 * @return the ID of the inserted player
@@ -198,7 +205,7 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	void upsertInventory(String item, Integer quantity) throws SQLException;
-	
+
 	/**
 	 * Deletes one or more inventory items.
 	 * @param ids the inventory IDs to delete

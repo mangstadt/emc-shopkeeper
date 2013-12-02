@@ -234,6 +234,17 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public Date getEarliestTransactionDate() throws SQLException {
+		PreparedStatement stmt = stmt("SELECT Min(ts) FROM transactions");
+		try {
+			ResultSet rs = stmt.executeQuery();
+			return rs.next() ? toDate(rs.getTimestamp(1)) : null;
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
 	public void insertTransaction(ShopTransaction transaction) throws SQLException {
 		insertTransactions(Arrays.asList(transaction));
 	}
@@ -710,13 +721,13 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void upsertInventory(String item, Integer quantity) throws SQLException {
 		int itemId = getItemId(item);
-		
+
 		PreparedStatement stmt = stmt("SELECT id FROM inventory WHERE item = ?");
 		Integer invId;
 		try {
 			stmt.setInt(1, itemId);
 			ResultSet rs = stmt.executeQuery();
-			invId= rs.next() ? rs.getInt("id") : null;
+			invId = rs.next() ? rs.getInt("id") : null;
 		} finally {
 			closeStatements(stmt);
 		}
@@ -737,29 +748,29 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 		}
 	}
-	
+
 	@Override
-	public void deleteInventory(Collection<Integer> ids) throws SQLException{
-		if (ids.isEmpty()){
+	public void deleteInventory(Collection<Integer> ids) throws SQLException {
+		if (ids.isEmpty()) {
 			return;
 		}
-		
+
 		//build SQL
 		boolean first = true;
 		StringBuilder sb = new StringBuilder("DELETE FROM inventory WHERE");
-		for (int i = 0; i < ids.size(); i++){
-			if (!first){
+		for (int i = 0; i < ids.size(); i++) {
+			if (!first) {
 				sb.append(" OR");
 			}
 			sb.append(" id = ?");
 			first = false;
 		}
-		
+
 		//execute statement
 		PreparedStatement stmt = stmt(sb.toString());
 		try {
 			int i = 1;
-			for (Integer id : ids){
+			for (Integer id : ids) {
 				stmt.setInt(i++, id);
 			}
 			stmt.executeUpdate();
