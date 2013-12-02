@@ -38,7 +38,10 @@ import emcshop.util.TimeUtils;
 public class UpdateDialog extends JDialog implements WindowListener {
 	private static final Logger logger = Logger.getLogger(UpdateDialog.class.getName());
 
+	private final DbDao dao;
+
 	private JButton cancel;
+	private volatile boolean cancelClicked = false;
 	private JLabel transactions;
 	private JLabel pages;
 	private JLabel timerLabel;
@@ -51,6 +54,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 	public UpdateDialog(final MainFrame owner, final DbDao dao, final Settings settings) throws SQLException {
 		super(owner, "Updating Transactions", true);
+
+		this.dao = dao;
 
 		createWidgets();
 		layoutWidgets();
@@ -125,6 +130,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								}
 							}
 						};
+						timerThread.setDaemon(true);
 						timerThread.start();
 
 						started = System.currentTimeMillis();
@@ -137,48 +143,56 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							long previousTime = 0;
 
 							@Override
-							public synchronized void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions) {
-								try {
-									dao.insertTransactions(transactions);
-									dao.insertPaymentTransactions(paymentTransactions);
-
-									pageCount++;
-									transactionCount += transactions.size() + paymentTransactions.size();
-
-									String pagesText = nf.format(pageCount);
-									if (stopAtPage != null) {
-										pagesText += " / " + stopAtPage;
+							public void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions) {
+								synchronized (puller) { //the method itself cannot have a "synchronized" flag because there is a synchronized block in the cancel button's click handler
+									if (puller.isCanceled()) {
+										return;
 									}
-									UpdateDialog.this.pages.setText(pagesText);
 
-									UpdateDialog.this.transactions.setText(nf.format(transactionCount));
+									try {
+										dao.insertTransactions(transactions);
+										dao.insertPaymentTransactions(paymentTransactions);
 
-									if (pageCount % 100 == 0 && logger.isLoggable(Level.FINEST)) {
-										long fromStart = System.currentTimeMillis() - started;
-										long fromPrevious = System.currentTimeMillis() - previousTime;
-										long fromStartComponents[] = TimeUtils.parseTimeComponents(fromStart);
-										long fromPreviousComponents[] = TimeUtils.parseTimeComponents(fromPrevious);
-										//@formatter:off
-										logger.finest(
-											"DOWNLOAD STATS | " + 
-											"Pages: " + pageCount + " | " +
-											"From start: " + timeNf.format(fromStartComponents[3]) + ":" + timeNf.format(fromStartComponents[2]) + ":" + timeNf.format(fromStartComponents[1]) + " | " +
-											"From previous: " + timeNf.format(fromPreviousComponents[3]) + ":" + timeNf.format(fromPreviousComponents[2]) + ":" + timeNf.format(fromPreviousComponents[1])
-										);
-										//@formatter:on
-										previousTime = System.currentTimeMillis();
+										pageCount++;
+										transactionCount += transactions.size() + paymentTransactions.size();
+
+										String pagesText = nf.format(pageCount);
+										if (stopAtPage != null) {
+											pagesText += " / " + stopAtPage;
+										}
+										UpdateDialog.this.pages.setText(pagesText);
+
+										UpdateDialog.this.transactions.setText(nf.format(transactionCount));
+
+										if (pageCount % 100 == 0 && logger.isLoggable(Level.FINEST)) {
+											long fromStart = System.currentTimeMillis() - started;
+											long fromPrevious = System.currentTimeMillis() - previousTime;
+											long fromStartComponents[] = TimeUtils.parseTimeComponents(fromStart);
+											long fromPreviousComponents[] = TimeUtils.parseTimeComponents(fromPrevious);
+											//@formatter:off
+											logger.finest(
+												"DOWNLOAD STATS | " + 
+												"Pages: " + pageCount + " | " +
+												"From start: " + timeNf.format(fromStartComponents[3]) + ":" + timeNf.format(fromStartComponents[2]) + ":" + timeNf.format(fromStartComponents[1]) + " | " +
+												"From previous: " + timeNf.format(fromPreviousComponents[3]) + ":" + timeNf.format(fromPreviousComponents[2]) + ":" + timeNf.format(fromPreviousComponents[1])
+											);
+											//@formatter:on
+											previousTime = System.currentTimeMillis();
+										}
+									} catch (SQLException e) {
+										error = e;
+										errorDisplayMessage = "An error occurred while inserting transactions into the database.";
+										puller.cancel();
 									}
-								} catch (SQLException e) {
-									error = e;
-									errorDisplayMessage = "An error occurred while inserting transactions into the database.";
-									puller.cancel();
 								}
 							}
 						});
 
 						switch (result.getState()) {
 						case CANCELLED:
-							dao.rollback();
+							if (!cancelClicked) {
+								dao.rollback();
+							}
 							break;
 						case NOT_LOGGED_IN:
 							timerThread.interrupt();
@@ -249,6 +263,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 				}
 			}
 		};
+		pullerThread.setDaemon(true);
 	}
 
 	private void createWidgets() {
@@ -256,9 +271,13 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		cancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				cancel.setText("Canceling...");
-				cancel.setEnabled(false);
-				puller.cancel();
+				synchronized (puller) {
+					//synchronized so the code in the listener is not executed at the same time as this code
+					cancelClicked = true;
+					puller.cancel();
+					dao.rollback();
+				}
+				dispose();
 			}
 		});
 

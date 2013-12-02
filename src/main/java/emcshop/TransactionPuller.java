@@ -126,6 +126,7 @@ public class TransactionPuller {
 		List<ScrapeThread> threads = new ArrayList<ScrapeThread>(threadCount);
 		for (int i = 0; i < threadCount; i++) {
 			ScrapeThread thread = new ScrapeThread(listener);
+			thread.setDaemon(true);
 			threads.add(thread);
 			thread.start();
 		}
@@ -154,6 +155,10 @@ public class TransactionPuller {
 	 */
 	public void cancel() {
 		cancel = true;
+	}
+
+	public boolean isCanceled() {
+		return cancel;
 	}
 
 	protected TransactionPage getPage(int page) throws IOException {
@@ -194,7 +199,7 @@ public class TransactionPuller {
 	}
 
 	private class ScrapeThread extends Thread {
-		private Listener listener;
+		private final Listener listener;
 
 		public ScrapeThread(Listener listener) {
 			this.listener = listener;
@@ -267,7 +272,9 @@ public class TransactionPuller {
 						transactionCount += transactions.size() + paymentTransactions.size();
 					}
 
-					listener.onPageScraped(page, transactions, paymentTransactions);
+					if (!cancel) {
+						listener.onPageScraped(page, transactions, paymentTransactions);
+					}
 				}
 			} catch (Throwable e) {
 				thrown = e;
