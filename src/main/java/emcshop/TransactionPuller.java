@@ -106,10 +106,6 @@ public class TransactionPuller {
 		}
 
 		TransactionPage firstPage = getPage(1);
-		if (logger.isLoggable(Level.FINEST)) {
-			logger.finest("Cookies: " + loginCookies);
-			logger.finest("First page:\n" + firstPage.getDocument().toString());
-		}
 
 		//is the user logged in?		
 		if (!firstPage.isLoggedIn()) {

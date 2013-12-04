@@ -33,22 +33,52 @@ public class TransactionPage {
 
 	private static final ItemIndex itemIndex = ItemIndex.instance();
 
-	private final DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
-	private final Document document;
+	/**
+	 * Transactions that are older than one week have a different timestamp
+	 * format.
+	 */
+	private final DateFormat weekOldTimestampFormat = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
+
+	private boolean loggedIn;
+	private Integer rupeeBalance;
+	private Date firstTransactionDate;
+	private List<ShopTransaction> shopTransactions = new ArrayList<ShopTransaction>();
+	private List<PaymentTransaction> paymentTransactions = new ArrayList<PaymentTransaction>();
+	private List<RawTransaction> miscTransactions = new ArrayList<RawTransaction>();
 
 	/**
-	 * @param document the webpage
+	 * @param document the webpage to parse
 	 */
 	public TransactionPage(Document document) {
-		this.document = document;
-	}
+		rupeeBalance = parseRupeeBalance(document);
 
-	/**
-	 * Gets the DOM of the transaction page.
-	 * @return the HTML DOM
-	 */
-	public Document getDocument() {
-		return document;
+		Elements elements = document.select("li.sectionItem");
+		if (elements.isEmpty()) {
+			loggedIn = false;
+			return;
+		}
+
+		loggedIn = true;
+
+		firstTransactionDate = parseTs(elements.first());
+
+		for (Element element : elements) {
+			RawTransaction rawTransaction = scrapeTransaction(element);
+
+			ShopTransaction shopTransaction = toShopTransaction(rawTransaction);
+			if (shopTransaction != null) {
+				shopTransactions.add(shopTransaction);
+				continue;
+			}
+
+			PaymentTransaction paymentTransaction = toPaymentTransaction(rawTransaction);
+			if (paymentTransaction != null) {
+				paymentTransactions.add(paymentTransaction);
+				continue;
+			}
+
+			miscTransactions.add(rawTransaction);
+		}
 	}
 
 	/**
@@ -56,8 +86,7 @@ public class TransactionPage {
 	 * @return true if the user has been logged in, false if not
 	 */
 	public boolean isLoggedIn() {
-		Elements elements = document.select("li.sectionItem");
-		return !elements.isEmpty();
+		return loggedIn;
 	}
 
 	/**
@@ -66,11 +95,7 @@ public class TransactionPage {
 	 * @return the date or null if no transactions were found
 	 */
 	public Date getFirstTransactionDate() {
-		Element element = document.select("li.sectionItem").first();
-		if (element == null) {
-			return null;
-		}
-		return parseTs(element);
+		return firstTransactionDate;
 	}
 
 	/**
@@ -78,6 +103,79 @@ public class TransactionPage {
 	 * @return the total rupee balance or null if not found
 	 */
 	public Integer getRupeeBalance() {
+		return rupeeBalance;
+	}
+
+	/**
+	 * Gets the payment transactions from the page.
+	 * @return the payment transactions or empty list if none were found
+	 */
+	public List<PaymentTransaction> getPaymentTransactions() {
+		return paymentTransactions;
+	}
+
+	/**
+	 * Gets the shop transactions from the page.
+	 * @return the shop transactions or empty list if none were found
+	 */
+	public List<ShopTransaction> getShopTransactions() {
+		return shopTransactions;
+	}
+
+	/**
+	 * Gets the transactions that weren't parsed as a payment or shop
+	 * transaction.
+	 * @return the miscellaneous transactions
+	 */
+	public List<RawTransaction> getMiscTransactions() {
+		return miscTransactions;
+	}
+
+	private ShopTransaction toShopTransaction(RawTransaction raw) {
+		int negate = -1;
+		Matcher m = soldRegex.matcher(raw.getDescription());
+		if (!m.find()) {
+			negate = 1;
+			m = boughtRegex.matcher(raw.getDescription());
+			if (!m.find()) {
+				//not a shop transaction
+				return null;
+			}
+		}
+
+		ShopTransaction transaction = new ShopTransaction();
+
+		transaction.setQuantity(Integer.parseInt(m.group(1).replace(",", "")) * negate);
+		transaction.setItem(itemIndex.getDisplayName(m.group(2)));
+		transaction.setPlayer(m.group(3));
+		transaction.setTs(raw.getTs());
+		transaction.setAmount(raw.getAmount());
+		transaction.setBalance(raw.getBalance());
+
+		return transaction;
+	}
+
+	private PaymentTransaction toPaymentTransaction(RawTransaction raw) {
+		Matcher m = paymentFromRegex.matcher(raw.getDescription());
+		if (!m.find()) {
+			m = paymentToRegex.matcher(raw.getDescription());
+			if (!m.find()) {
+				//not a payment transaction
+				return null;
+			}
+		}
+
+		PaymentTransaction transaction = new PaymentTransaction();
+
+		transaction.setPlayer(m.group(1));
+		transaction.setTs(raw.getTs());
+		transaction.setAmount(raw.getAmount());
+		transaction.setBalance(raw.getBalance());
+
+		return transaction;
+	}
+
+	private Integer parseRupeeBalance(Document document) {
 		Element element = document.getElementById("rupeesBalance");
 		if (element == null) {
 			return null;
@@ -91,109 +189,20 @@ public class TransactionPage {
 		return Integer.valueOf(m.group(1).replace(",", ""));
 	}
 
-	/**
-	 * Gets the payment transactions from the page.
-	 * @return the payment transactions or empty list if none were found
-	 */
-	public List<PaymentTransaction> getPaymentTransactions() {
-		List<PaymentTransaction> transactions = new ArrayList<PaymentTransaction>();
+	private RawTransaction scrapeTransaction(Element element) {
+		RawTransaction transaction = new RawTransaction();
 
-		for (Element element : getTransactionElements()) {
-			PaymentTransaction transaction = scrapePaymentElement(element);
-			if (transaction != null) {
-				transactions.add(transaction);
-			}
-		}
-
-		return transactions;
-	}
-
-	/**
-	 * Gets the shop transactions from the page.
-	 * @return the shop transactions or empty list if none were found
-	 */
-	public List<ShopTransaction> getShopTransactions() {
-		List<ShopTransaction> transactions = new ArrayList<ShopTransaction>();
-
-		for (Element element : getTransactionElements()) {
-			ShopTransaction transaction = scrapeShopElement(element);
-			if (transaction != null) {
-				transactions.add(transaction);
-			}
-		}
-
-		return transactions;
-	}
-
-	private Elements getTransactionElements() {
-		return document.select("li.sectionItem");
-	}
-
-	private ShopTransaction scrapeShopElement(Element element) {
-		ShopTransaction transaction = new ShopTransaction();
-
-		//description
-		Element descriptionElement = element.select("div.description").first();
-		if (descriptionElement != null) {
-			String description = descriptionElement.text();
-			Matcher m = soldRegex.matcher(description);
-			if (m.find()) {
-				transaction.setQuantity(-Integer.parseInt(m.group(1).replace(",", "")));
-				transaction.setItem(itemIndex.getDisplayName(m.group(2)));
-				transaction.setPlayer(m.group(3));
-			} else {
-				m = boughtRegex.matcher(description);
-				if (m.find()) {
-					transaction.setQuantity(Integer.parseInt(m.group(1).replace(",", "")));
-					transaction.setItem(itemIndex.getDisplayName(m.group(2)));
-					transaction.setPlayer(m.group(3));
-				} else {
-					//not a shop transaction
-					return null;
-				}
-			}
-		}
-
-		//timestamp
+		transaction.setDescription(parseDescription(element));
 		transaction.setTs(parseTs(element));
-
-		//amount
 		transaction.setAmount(parseAmount(element));
-
-		//balance
 		transaction.setBalance(parseBalance(element));
 
 		return transaction;
 	}
 
-	private PaymentTransaction scrapePaymentElement(Element element) {
-		PaymentTransaction transaction = new PaymentTransaction();
-
-		//description
-		Element descriptionElement = element.select("div.description").first();
-		if (descriptionElement != null) {
-			String description = descriptionElement.text();
-			Matcher m = paymentFromRegex.matcher(description);
-			if (!m.find()) {
-				m = paymentToRegex.matcher(description);
-				if (!m.find()) {
-					return null;
-				}
-			}
-
-			transaction.setPlayer(m.group(1));
-		}
-
-		//timestamp
-		transaction.setTs(parseTs(element));
-
-		//amount
-		transaction.setAmount(parseAmount(element));
-
-		//balance
-		transaction.setBalance(parseBalance(element));
-
-		return transaction;
+	private String parseDescription(Element transactionElement) {
+		Element descriptionElement = transactionElement.select("div.description").first();
+		return (descriptionElement == null) ? null : descriptionElement.text();
 	}
 
 	private Date parseTs(Element transactionElement) {
@@ -210,7 +219,7 @@ public class TransactionPage {
 			tsElement = transactionElement.select("div.time span[title]").first();
 			String tsText = tsElement.attr("title");
 			try {
-				return df.parse(tsText);
+				return weekOldTimestampFormat.parse(tsText);
 			} catch (ParseException e) {
 				logger.log(Level.WARNING, "Transaction time could not be parsed from webpage: " + tsText, e);
 			}
