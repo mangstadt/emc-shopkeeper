@@ -9,6 +9,7 @@ import javax.swing.JButton;
 import javax.swing.JTextField;
 
 import emcshop.gui.images.ImageManager;
+import emcshop.util.GuiUtils;
 
 /**
  * A textbox used for entering the item/player names to filter by.
@@ -18,7 +19,9 @@ public class FilterTextField extends JTextField {
 	private final JButton clearButton;
 	{
 		clearButton = new JButton(ImageManager.getClearIcon());
-		clearButton.setToolTipText("Clear");
+		if (!GuiUtils.linux) {
+			clearButton.setToolTipText("Clear");
+		}
 		clearButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
