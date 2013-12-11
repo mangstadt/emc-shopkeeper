@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -60,7 +59,7 @@ public class InventoryTab extends JPanel {
 	 * are defined is the order that they will appear in the table.
 	 */
 	private enum Column {
-		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Remaining (stacks)");
+		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Total (stacks/remainder)");
 
 		private final String name;
 
@@ -315,11 +314,6 @@ public class InventoryTab extends JPanel {
 			setDefaultRenderer(Row.class, new TableCellRenderer() {
 				private final Color evenRowColor = new Color(255, 255, 255);
 				private final Color oddRowColor = new Color(240, 240, 240);
-				private final NumberFormat nf = NumberFormat.getInstance();
-				{
-					nf.setMaximumFractionDigits(2);
-					nf.setMinimumFractionDigits(1);
-				}
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -333,9 +327,10 @@ public class InventoryTab extends JPanel {
 						label = new JLabel(inv.getItem(), img, SwingConstants.LEFT);
 					} else if (col == Column.REMAINING.ordinal()) {
 						int quantity = inv.getQuantity();
-						double stacks = quantity / 64.0;
+						int stacks = quantity / 64;
+						int remainder = quantity % 64;
 
-						label = new JLabel(formatQuantity(quantity, false) + " (" + nf.format(stacks) + ")");
+						label = new JLabel(formatQuantity(quantity, false) + " (" + stacks + "/" + remainder + ")");
 					}
 
 					//set the background color of the row
