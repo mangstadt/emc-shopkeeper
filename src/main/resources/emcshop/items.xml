@@ -456,4 +456,21 @@
 	<Item name="Potion of Water Breathing Ext" emcNames="Potion:8269" image="potion_water_breathing.png" />
 	<Item name="Splash Potion of Water Breathing" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" />
 	<Item name="Splash Potion of Water Breathing Ext" emcNames="Potion:16461" image="potion_water_breathing_splash.png" />
+	
+	<Item name="Magenta Glass" emcNames="Magentastnglass" />
+	<Item name="Pink Glass" emcNames="Pink Stn Glass" />
+	<Item name="Purple Glass" emcNames="Purplestn Glass" />
+	<Item name="Cyan Glass" emcNames="Cyan Stn Glass" />
+	<Item name="Blue Glass" emcNames="Blue Stn Glass" />
+	<Item name="Light Blue Glass" emcNames="Ltbluestn Glass" />
+	<Item name="Green Glass" emcNames="Green Stn Glass" />
+	<Item name="Lime Glass" emcNames="Lime Stn Glass" />
+	<Item name="Brown Glass" emcNames="Brown Stn Glass" />
+	<Item name="Red Glass" emcNames="Red Stn Glass" />
+	<Item name="Orange Glass" emcNames="Orangestn Glass" />
+	<Item name="Yellow Glass" emcNames="Yellowstn Glass" />
+	<Item name="Black Glass" emcNames="Black Stn Glass" />
+	<Item name="Gray Glass" emcNames="Gray Stn Glass" />
+	<Item name="Light Gray Glass" emcNames="Ltgraystn Glass" />
+	<Item name="White Glass" emcNames="White Stn Glass" />
 </Items>
