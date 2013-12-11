@@ -719,7 +719,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void upsertInventory(String item, Integer quantity) throws SQLException {
+	public void upsertInventory(String item, Integer quantity, boolean add) throws SQLException {
 		int itemId = getItemId(item);
 
 		PreparedStatement stmt = stmt("SELECT id FROM inventory WHERE item = ?");
@@ -738,7 +738,14 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt2.setInt("quantity", quantity);
 			stmt2.execute(conn);
 		} else {
-			PreparedStatement stmt2 = stmt("UPDATE inventory SET quantity = ? WHERE id = ?");
+			String sql;
+			if (add) {
+				sql = "UPDATE inventory SET quantity = quantity + ? WHERE id = ?";
+			} else {
+				sql = "UPDATE inventory SET quantity = ? WHERE id = ?";
+			}
+
+			PreparedStatement stmt2 = stmt(sql);
 			try {
 				stmt2.setInt(1, quantity);
 				stmt2.setInt(2, invId);

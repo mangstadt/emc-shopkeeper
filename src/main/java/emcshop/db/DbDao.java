@@ -202,9 +202,11 @@ public interface DbDao {
 	 * Updates or inserts an inventory item.
 	 * @param item the item name
 	 * @param quantity the new quantity
+	 * @param add true to add the given quantity to the existing total, false to
+	 * overwrite it
 	 * @throws SQLException
 	 */
-	void upsertInventory(String item, Integer quantity) throws SQLException;
+	void upsertInventory(String item, Integer quantity, boolean add) throws SQLException;
 
 	/**
 	 * Deletes one or more inventory items.

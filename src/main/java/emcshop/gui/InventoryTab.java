@@ -112,7 +112,7 @@ public class InventoryTab extends JPanel {
 
 		item = new ItemSuggestField(owner);
 
-		quantityLabel = new HelpLabel("Qty:", "Tip: You can specify the quantity in \"stacks\" (groups of 64) instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)");
+		quantityLabel = new HelpLabel("Qty:", "Tip: You can specify the quantity in \"stacks\" (groups of 64) instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)\n\nPrepending a \"+\" will add the quantity to the existing total.\n\n<b>Example inputs</b>:\n\"+1/\" (add 1 stack to the existing amount)");
 
 		quantity = new JTextField();
 		quantity.addActionListener(new ActionListener() {
@@ -188,8 +188,17 @@ public class InventoryTab extends JPanel {
 		//e.g. "5/23" means "5 stacks plus 23 more"
 		//e.g. "5/" means "5 stacks"
 		//e.g. "5" means "5 items"
+		//e.g. "+1/" means "add 1 stack to the existing quantity"
 		Integer quantityValue;
+		boolean add;
 		try {
+			if (quantityStr.startsWith("+")) {
+				add = true;
+				quantityStr = quantityStr.substring(1);
+			} else {
+				add = false;
+			}
+
 			String split[] = quantityStr.split("/", 2);
 			if (split.length == 1) {
 				quantityValue = Integer.valueOf(split[0]);
@@ -204,7 +213,7 @@ public class InventoryTab extends JPanel {
 		}
 
 		try {
-			dao.upsertInventory(itemStr, quantityValue);
+			dao.upsertInventory(itemStr, quantityValue, add);
 			dao.commit();
 		} catch (SQLException e) {
 			dao.rollback();
