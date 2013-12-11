@@ -87,7 +87,7 @@
 	<Item name="Dark Oak Leaves" />
 	<Item name="Dark Oak Log" />
 	<Item name="Dark Oak Plank" />
-	<Item name="Dark Oak Sapling" />
+	<Item name="Dark Oak Sapling" emcNames="Darkoak Sapling" />
 	<Item name="Daylight Detector" />
 	<Item name="Dead Bush" />
 	<Item name="Detector Rail" />
