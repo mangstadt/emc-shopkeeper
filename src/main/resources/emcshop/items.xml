@@ -30,7 +30,7 @@
 	<Item name="Blue Wool" />
 	<Item name="Boat" />
 	<Item name="Bone" />
-	<Item name="Bone Meal" />
+	<Item name="Bone Meal" emcNames="Bonemeal" />
 	<Item name="Book" />
 	<Item name="Book And Quill" />
 	<Item name="Bookshelf" />
