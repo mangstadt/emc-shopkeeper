@@ -2,7 +2,7 @@
 	<Item name="11 Disc" />
 	<Item name="13 Disc" />
 	<Item name="Acacia Leaves" />
-	<Item name="Acacia Log" />
+	<Item name="Acacia Log" emcNames="Acacia Wood" />
 	<Item name="Acacia Plank" />
 	<Item name="Acacia Sapling" />
 	<Item name="Allium" />
@@ -30,7 +30,7 @@
 	<Item name="Blue Wool" />
 	<Item name="Boat" />
 	<Item name="Bone" />
-	<Item name="Bone Meal" emcNames="Bonemeal" />
+	<Item name="Bone Meal" />
 	<Item name="Book" />
 	<Item name="Book And Quill" />
 	<Item name="Bookshelf" />
@@ -85,9 +85,9 @@
 	<Item name="Cyan Wool" />
 	<Item name="Dandelion" />
 	<Item name="Dark Oak Leaves" />
-	<Item name="Dark Oak Log" />
+	<Item name="Dark Oak Log" emcNames="Dark Oak Wood" />
 	<Item name="Dark Oak Plank" />
-	<Item name="Dark Oak Sapling" emcNames="Darkoak Sapling" />
+	<Item name="Dark Oak Sapling" />
 	<Item name="Daylight Detector" />
 	<Item name="Dead Bush" />
 	<Item name="Detector Rail" />
@@ -456,21 +456,4 @@
 	<Item name="Potion of Water Breathing Ext" emcNames="Potion:8269" image="potion_water_breathing.png" />
 	<Item name="Splash Potion of Water Breathing" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" />
 	<Item name="Splash Potion of Water Breathing Ext" emcNames="Potion:16461" image="potion_water_breathing_splash.png" />
-	
-	<Item name="Magenta Glass" emcNames="Magentastnglass" />
-	<Item name="Pink Glass" emcNames="Pink Stn Glass" />
-	<Item name="Purple Glass" emcNames="Purplestn Glass" />
-	<Item name="Cyan Glass" emcNames="Cyan Stn Glass" />
-	<Item name="Blue Glass" emcNames="Blue Stn Glass" />
-	<Item name="Light Blue Glass" emcNames="Ltbluestn Glass" />
-	<Item name="Green Glass" emcNames="Green Stn Glass" />
-	<Item name="Lime Glass" emcNames="Lime Stn Glass" />
-	<Item name="Brown Glass" emcNames="Brown Stn Glass" />
-	<Item name="Red Glass" emcNames="Red Stn Glass" />
-	<Item name="Orange Glass" emcNames="Orangestn Glass" />
-	<Item name="Yellow Glass" emcNames="Yellowstn Glass" />
-	<Item name="Black Glass" emcNames="Black Stn Glass" />
-	<Item name="Gray Glass" emcNames="Gray Stn Glass" />
-	<Item name="Light Gray Glass" emcNames="Ltgraystn Glass" />
-	<Item name="White Glass" emcNames="White Stn Glass" />
 </Items>
