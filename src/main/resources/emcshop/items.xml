@@ -43,7 +43,6 @@
 	<Item name="Brick Slab" />
 	<Item name="Brick Stairs" />
 	<Item name="Brown Stclay" />
-	<Item name="Brown Dye" />
 	<Item name="Brown Mushroom" />
 	<Item name="Brown Wool" />
 	<Item name="Button" />
@@ -72,6 +71,7 @@
 	<Item name="Cobblestone" />
 	<Item name="Cobblestone Slab" />
 	<Item name="Cobblestone Stairs" />
+	<Item name="Cocoa Beans" emcNames="Brown Dye" />
 	<Item name="Compass" />
 	<Item name="Cooked Fish" />
 	<Item name="Cooked Salmon" />
