@@ -259,7 +259,7 @@
 	<Item name="Paper" />
 	<Item name="Peony" />
 	<Item name="Pig Egg" />
-	<Item name="Pine Leaves" />
+	<Item name="Pine Leaves" emcNames="Spruce Leaves" />
 	<Item name="Pine Log" />
 	<Item name="Pine Plank" />
 	<Item name="Pine Sapling" />
