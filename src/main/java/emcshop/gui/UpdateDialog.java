@@ -27,6 +27,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import emcshop.EmcSession;
 import emcshop.PaymentTransaction;
+import emcshop.RawTransaction;
 import emcshop.ShopTransaction;
 import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
@@ -143,7 +144,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							long previousTime = 0;
 
 							@Override
-							public void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions) {
+							public void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions, List<RawTransaction> otherTransactions) {
 								synchronized (puller) { //the method itself cannot have a "synchronized" flag because there is a synchronized block in the cancel button's click handler
 									if (puller.isCanceled()) {
 										return;

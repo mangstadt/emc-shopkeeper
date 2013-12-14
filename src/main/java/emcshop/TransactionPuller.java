@@ -269,7 +269,7 @@ public class TransactionPuller {
 					}
 
 					if (!cancel) {
-						listener.onPageScraped(page, transactions, paymentTransactions);
+						listener.onPageScraped(page, transactions, paymentTransactions, transactionPage.getMiscTransactions());
 					}
 				}
 			} catch (Throwable e) {
@@ -286,8 +286,9 @@ public class TransactionPuller {
 		 * @param transactions the scraped shop transactions (may be empty)
 		 * @param paymentTransactions the scraped payment transactions (may be
 		 * empty)
+		 * @param otherTransactions all other rupee transactions
 		 */
-		void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions);
+		void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions, List<RawTransaction> otherTransactions);
 	}
 
 	public static class Result {
