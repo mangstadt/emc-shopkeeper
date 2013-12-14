@@ -76,6 +76,25 @@ public class TransactionPageTest {
 
 			assertFalse(it.hasNext());
 		}
+
+		{
+			Iterator<RawTransaction> it = page.getMiscTransactions().iterator();
+
+			RawTransaction t = it.next();
+			assertEquals(500, t.getAmount());
+			assertEquals(212994, t.getBalance());
+			assertEquals("Blah", t.getDescription());
+			assertEquals(new Date(1354210000000L), t.getTs());
+
+			assertFalse(it.hasNext());
+		}
+
+		assertEquals(400, page.getSignInBonuses());
+		assertEquals(100, page.getVoteBonuses());
+		assertEquals(-100, page.getHorseFees());
+		assertEquals(500, page.getLockFees());
+		assertEquals(-10, page.getVaultFees());
+		assertEquals(-100, page.getEggifyFees());
 	}
 
 	@Test

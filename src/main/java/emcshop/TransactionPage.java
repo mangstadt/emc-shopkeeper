@@ -22,14 +22,22 @@ import org.jsoup.select.Elements;
  */
 public class TransactionPage {
 	private static final Logger logger = Logger.getLogger(TransactionPage.class.getName());
+
+	private static final Pattern balanceRegex = Pattern.compile("^Your balance: ([\\d,]+)$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern amountRegex = Pattern.compile("^(-|\\+)\\s*([\\d,]+)$", Pattern.CASE_INSENSITIVE);
+
 	private static final Pattern soldRegex = Pattern.compile("^Player shop sold ([\\d,]+) (.*?) to (.*)$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern boughtRegex = Pattern.compile("^Your player shop bought ([\\d,]+) (.*?) from (.*)$", Pattern.CASE_INSENSITIVE);
-	private static final Pattern amountRegex = Pattern.compile("^(-|\\+)\\s*([\\d,]+)$", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern paymentFromRegex = Pattern.compile("^Payment from (.*)$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern paymentToRegex = Pattern.compile("^Payment to (.*)$", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern balanceRegex = Pattern.compile("^Your balance: ([\\d,]+)$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern horseFeeRegex = Pattern.compile("^Summoned stabled horse in the wild.*", Pattern.CASE_INSENSITIVE);
+	private static final Pattern lockFeeRegex = Pattern.compile("^(Locked an item wilderness|(Full|Partial) refund for unlocking item wilderness).*", Pattern.CASE_INSENSITIVE);
+	private static final Pattern eggifyFeeRegex = Pattern.compile("^Eggified a .*$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern vaultFeeRegex = Pattern.compile("^Opened cross-server vault$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern signInBonusRegex = Pattern.compile("^Daily sign-in bonus$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern voteBonusRegex = Pattern.compile("^Voted for Empire Minecraft on .*$", Pattern.CASE_INSENSITIVE);
 
 	private static final ItemIndex itemIndex = ItemIndex.instance();
 
@@ -45,6 +53,9 @@ public class TransactionPage {
 	private List<ShopTransaction> shopTransactions = new ArrayList<ShopTransaction>();
 	private List<PaymentTransaction> paymentTransactions = new ArrayList<PaymentTransaction>();
 	private List<RawTransaction> miscTransactions = new ArrayList<RawTransaction>();
+
+	private int horseFees, lockFees, eggifyFees, vaultFees;
+	private int signInBonuses, voteBonuses;
 
 	/**
 	 * @param document the webpage to parse
@@ -74,6 +85,11 @@ public class TransactionPage {
 			PaymentTransaction paymentTransaction = toPaymentTransaction(rawTransaction);
 			if (paymentTransaction != null) {
 				paymentTransactions.add(paymentTransaction);
+				continue;
+			}
+
+			boolean isBonusOrFee = toBonusOrFeeTransaction(rawTransaction);
+			if (isBonusOrFee) {
 				continue;
 			}
 
@@ -131,6 +147,30 @@ public class TransactionPage {
 		return miscTransactions;
 	}
 
+	public int getHorseFees() {
+		return horseFees;
+	}
+
+	public int getLockFees() {
+		return lockFees;
+	}
+
+	public int getEggifyFees() {
+		return eggifyFees;
+	}
+
+	public int getVaultFees() {
+		return vaultFees;
+	}
+
+	public int getSignInBonuses() {
+		return signInBonuses;
+	}
+
+	public int getVoteBonuses() {
+		return voteBonuses;
+	}
+
 	private ShopTransaction toShopTransaction(RawTransaction raw) {
 		int negate = -1;
 		Matcher m = soldRegex.matcher(raw.getDescription());
@@ -173,6 +213,49 @@ public class TransactionPage {
 		transaction.setBalance(raw.getBalance());
 
 		return transaction;
+	}
+
+	private boolean toBonusOrFeeTransaction(RawTransaction raw) {
+		String description = raw.getDescription();
+		int amount = raw.getAmount();
+
+		Matcher m = signInBonusRegex.matcher(description);
+		if (m.find()) {
+			signInBonuses += amount;
+			return true;
+		}
+
+		m = voteBonusRegex.matcher(description);
+		if (m.find()) {
+			voteBonuses += amount;
+			return true;
+		}
+
+		m = lockFeeRegex.matcher(description);
+		if (m.find()) {
+			lockFees += amount;
+			return true;
+		}
+
+		m = vaultFeeRegex.matcher(description);
+		if (m.find()) {
+			vaultFees += amount;
+			return true;
+		}
+
+		m = horseFeeRegex.matcher(description);
+		if (m.find()) {
+			horseFees += amount;
+			return true;
+		}
+
+		m = eggifyFeeRegex.matcher(description);
+		if (m.find()) {
+			eggifyFees += amount;
+			return true;
+		}
+
+		return false;
 	}
 
 	private Integer parseRupeeBalance(Document document) {
