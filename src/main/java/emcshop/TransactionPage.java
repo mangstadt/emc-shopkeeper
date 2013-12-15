@@ -228,17 +228,6 @@ public class TransactionPage {
 		return Integer.valueOf(m.group(1).replace(",", ""));
 	}
 
-	private RawTransaction scrapeTransaction(Element element) {
-		RawTransaction transaction = new RawTransaction();
-
-		transaction.setDescription(parseDescription(element));
-		transaction.setTs(parseTs(element));
-		transaction.setAmount(parseAmount(element));
-		transaction.setBalance(parseBalance(element));
-
-		return transaction;
-	}
-
 	private String parseDescription(Element transactionElement) {
 		Element descriptionElement = transactionElement.select("div.description").first();
 		return (descriptionElement == null) ? null : descriptionElement.text();
