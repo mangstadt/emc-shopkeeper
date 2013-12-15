@@ -78,6 +78,60 @@ public class TransactionPageTest {
 		}
 
 		{
+			Iterator<BonusFeeTransaction> it = page.getBonusFeeTransactions().iterator();
+
+			BonusFeeTransaction t = it.next();
+			assertEquals(400, t.getAmount());
+			assertEquals(212990, t.getBalance());
+			assertEquals(new Date(1354226247000L), t.getTs());
+			assertTrue(t.isSignInBonus());
+
+			t = it.next();
+			assertEquals(100, t.getAmount());
+			assertEquals(212990, t.getBalance());
+			assertEquals(new Date(1354226247000L), t.getTs());
+			assertTrue(t.isVoteBonus());
+
+			t = it.next();
+			assertEquals(-100, t.getAmount());
+			assertEquals(212990, t.getBalance());
+			assertEquals(new Date(1354226247000L), t.getTs());
+			assertTrue(t.isHorseFee());
+
+			t = it.next();
+			assertEquals(-1000, t.getAmount());
+			assertEquals(212990, t.getBalance());
+			assertEquals(new Date(1354226247000L), t.getTs());
+			assertTrue(t.isLockFee());
+
+			t = it.next();
+			assertEquals(1000, t.getAmount());
+			assertEquals(212990, t.getBalance());
+			assertEquals(new Date(1354226247000L), t.getTs());
+			assertTrue(t.isLockFee());
+
+			t = it.next();
+			assertEquals(500, t.getAmount());
+			assertEquals(212990, t.getBalance());
+			assertEquals(new Date(1354226247000L), t.getTs());
+			assertTrue(t.isLockFee());
+
+			t = it.next();
+			assertEquals(-10, t.getAmount());
+			assertEquals(212990, t.getBalance());
+			assertEquals(new Date(1354226247000L), t.getTs());
+			assertTrue(t.isVaultFee());
+
+			t = it.next();
+			assertEquals(-100, t.getAmount());
+			assertEquals(212990, t.getBalance());
+			assertEquals(new Date(1354226247000L), t.getTs());
+			assertTrue(t.isEggifyFee());
+
+			assertFalse(it.hasNext());
+		}
+
+		{
 			Iterator<RawTransaction> it = page.getMiscTransactions().iterator();
 
 			RawTransaction t = it.next();
@@ -88,13 +142,6 @@ public class TransactionPageTest {
 
 			assertFalse(it.hasNext());
 		}
-
-		assertEquals(400, page.getSignInBonuses());
-		assertEquals(100, page.getVoteBonuses());
-		assertEquals(-100, page.getHorseFees());
-		assertEquals(500, page.getLockFees());
-		assertEquals(-10, page.getVaultFees());
-		assertEquals(-100, page.getEggifyFees());
 	}
 
 	@Test

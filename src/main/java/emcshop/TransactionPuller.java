@@ -269,7 +269,8 @@ public class TransactionPuller {
 					}
 
 					if (!cancel) {
-						listener.onPageScraped(page, transactions, paymentTransactions, transactionPage.getMiscTransactions());
+						//TODO check for end dates for other transactions
+						listener.onPageScraped(page, transactions, paymentTransactions, transactionPage.getBonusFeeTransactions(), transactionPage.getMiscTransactions());
 					}
 				}
 			} catch (Throwable e) {
@@ -288,7 +289,7 @@ public class TransactionPuller {
 		 * empty)
 		 * @param otherTransactions all other rupee transactions
 		 */
-		void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions, List<RawTransaction> otherTransactions);
+		void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions, List<BonusFeeTransaction> bonusFeeTransactions, List<RawTransaction> otherTransactions);
 	}
 
 	public static class Result {

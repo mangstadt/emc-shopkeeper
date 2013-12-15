@@ -7,9 +7,20 @@ import java.util.Date;
  * @author Michael Angstadt
  */
 public class RawTransaction {
-	private Date ts;
-	private String description;
-	private int amount, balance;
+	protected Date ts;
+	protected String description;
+	protected int amount, balance;
+
+	public RawTransaction() {
+		//empty
+	}
+
+	public RawTransaction(RawTransaction source) {
+		ts = source.ts;
+		description = source.description;
+		amount = source.amount;
+		balance = source.balance;
+	}
 
 	public Date getTs() {
 		return ts;
