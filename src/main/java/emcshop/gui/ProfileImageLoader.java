@@ -4,11 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -19,14 +17,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -35,11 +29,12 @@ import org.jsoup.select.Elements;
 import emcshop.gui.images.ImageManager;
 
 /**
- * Used for downloading player profile pictures for the "players" view.
+ * Used for downloading player profile pictures.
  * @author Michael Angstadt
  */
 public class ProfileImageLoader {
 	private static final Logger logger = Logger.getLogger(ProfileImageLoader.class.getName());
+
 	private final File cacheDir;
 	private final Set<String> downloaded = Collections.synchronizedSet(new HashSet<String>());
 	private final LinkedBlockingQueue<Job> queue = new LinkedBlockingQueue<Job>();
@@ -63,7 +58,7 @@ public class ProfileImageLoader {
 		//initialize the thread pool
 		for (int i = 0; i < numThreads; i++) {
 			LoadThread t = new LoadThread();
-			t.setDaemon(true); //terminate the thread if the program is exited
+			t.setDaemon(true); //terminate the thread when the program exits
 			t.start();
 		}
 	}
@@ -132,9 +127,11 @@ public class ProfileImageLoader {
 
 			HttpGet request = new HttpGet(imageUrl);
 			if (cachedFile.exists()) {
-				DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
+				DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
 				df.setTimeZone(TimeZone.getTimeZone("GMT"));
-				request.addHeader("If-Modified-Since", df.format(new Date(cachedFile.lastModified())) + " GMT");
+				Date date = new Date(cachedFile.lastModified());
+
+				request.addHeader("If-Modified-Since", df.format(date));
 			}
 
 			HttpResponse response = client.execute(request);
@@ -144,7 +141,7 @@ public class ProfileImageLoader {
 			}
 
 			entity = response.getEntity();
-			byte data[] = IOUtils.toByteArray(entity.getContent());
+			byte data[] = EntityUtils.toByteArray(entity);
 
 			//save to cache
 			//synchronize in-case two threads download the same profile image and try to save it at the same time 
@@ -205,11 +202,9 @@ public class ProfileImageLoader {
 		Document profilePage;
 		HttpEntity entity = null;
 		try {
-			HttpPost request = new HttpPost("http://empireminecraft.com/members/");
-			List<BasicNameValuePair> parameters = Arrays.asList(new BasicNameValuePair("username", playerName));
-			request.setEntity(new UrlEncodedFormEntity(parameters));
-
+			HttpGet request = new HttpGet("http://u.emc.gs/" + playerName);
 			HttpResponse response = client.execute(request);
+
 			entity = response.getEntity();
 			profilePage = Jsoup.parse(entity.getContent(), "UTF-8", "");
 		} finally {
@@ -218,19 +213,20 @@ public class ProfileImageLoader {
 			}
 		}
 
-		//get the image URL
 		Elements elements = profilePage.select(".avatarScaler img");
-		if (!elements.isEmpty()) { //players can choose to make their profile private
-			String src = elements.first().attr("src");
-			if (!src.isEmpty()) {
-				if (src.startsWith("http")) {
-					return src;
-				} else {
-					return "http://empireminecraft.com/" + src;
-				}
-			}
+		if (elements.isEmpty()) { //players can choose to make their profile private
+			return null;
 		}
-		return null;
+
+		String src = elements.first().attr("src");
+		if (src.isEmpty()) {
+			return null;
+		}
+
+		if (!src.startsWith("http")) {
+			src = "http://empireminecraft.com/" + src;
+		}
+		return src;
 	}
 
 	/**
@@ -244,7 +240,7 @@ public class ProfileImageLoader {
 				Job job;
 				try {
 					job = queue.take();
-				} catch (InterruptedException e1) {
+				} catch (InterruptedException e) {
 					break;
 				}
 
@@ -276,7 +272,7 @@ public class ProfileImageLoader {
 		final int maxSize;
 		final ImageAssignedListener listener;
 
-		Job(String playerName, JLabel label, int maxSize, ImageAssignedListener listener) {
+		private Job(String playerName, JLabel label, int maxSize, ImageAssignedListener listener) {
 			this.playerName = playerName;
 			this.label = label;
 			this.maxSize = maxSize;
