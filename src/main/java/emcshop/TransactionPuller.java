@@ -2,6 +2,7 @@ package emcshop;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -235,7 +236,6 @@ public class TransactionPuller {
 							if (ts < oldestPaymentTransactionDate.getTime()) {
 								transactions.remove(i);
 								i--;
-								break;
 							}
 						}
 					}
