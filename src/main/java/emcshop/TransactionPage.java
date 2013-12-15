@@ -49,24 +49,20 @@ public class TransactionPage {
 
 	private boolean loggedIn;
 	private Integer rupeeBalance;
-	private Date firstTransactionDate;
 	private List<RupeeTransaction> transactions = new ArrayList<RupeeTransaction>();
 
 	/**
 	 * @param document the webpage to parse
 	 */
 	public TransactionPage(Document document) {
-		rupeeBalance = parseRupeeBalance(document);
-
 		Elements elements = document.select("li.sectionItem");
 		if (elements.isEmpty()) {
 			loggedIn = false;
 			return;
 		}
-
 		loggedIn = true;
 
-		firstTransactionDate = parseTs(elements.first());
+		rupeeBalance = parseRupeeBalance(document);
 
 		for (Element element : elements) {
 			String description = parseDescription(element);
@@ -112,7 +108,7 @@ public class TransactionPage {
 	 * @return the date or null if no transactions were found
 	 */
 	public Date getFirstTransactionDate() {
-		return firstTransactionDate;
+		return transactions.isEmpty() ? null : transactions.get(0).getTs();
 	}
 
 	/**
