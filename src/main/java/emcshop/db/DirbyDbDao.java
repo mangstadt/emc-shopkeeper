@@ -793,9 +793,9 @@ public abstract class DirbyDbDao implements DbDao {
 			return;
 		}
 
+		//tally up totals
 		int horse, lock, eggify, vault, signIn, vote;
 		horse = lock = eggify = vault = signIn = vote = 0;
-
 		for (BonusFeeTransaction transaction : transactions) {
 			int amount = transaction.getAmount();
 
@@ -848,7 +848,6 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public BonusFee getBonusesFees() throws SQLException {
 		PreparedStatement stmt = stmt("SELECT * FROM bonuses_fees");
-
 		try {
 			ResultSet rs = stmt.executeQuery();
 			if (!rs.next()) {
@@ -890,6 +889,7 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.execute("DELETE FROM players");
 			stmt.execute("DELETE FROM items");
 			stmt.execute("DELETE FROM bonuses_fees");
+
 			stmt.execute("ALTER TABLE inventory ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
@@ -897,6 +897,7 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.execute("ALTER TABLE items ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("INSERT INTO bonuses_fees (horse) VALUES (0)");
 			MigrationSprocs.populateItemsTableConn(conn);
+
 			commit();
 		} finally {
 			closeStatements(stmt);
@@ -960,7 +961,7 @@ public abstract class DirbyDbDao implements DbDao {
 		String sql =
 		"SELECT Min(ts) AS firstSeen, Max(ts) AS lastSeen " + 
 		"FROM transactions " +
-		"WHERE player = ? ";
+		"WHERE player = ?";
 		//@formatter:on
 
 		PreparedStatement stmt = stmt(sql);
@@ -968,14 +969,16 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.setInt(1, player.getId());
 
 			ResultSet rs = stmt.executeQuery();
-			if (rs.next()) {
-				Date firstSeen = toDate(rs.getTimestamp("firstSeen"));
-				Date lastSeen = toDate(rs.getTimestamp("lastSeen"));
-
-				player.setFirstSeen(firstSeen);
-				player.setLastSeen(lastSeen);
-				updateFirstLastSeen(player.getId(), firstSeen, lastSeen);
+			if (!rs.next()) {
+				return;
 			}
+
+			Date firstSeen = toDate(rs.getTimestamp("firstSeen"));
+			Date lastSeen = toDate(rs.getTimestamp("lastSeen"));
+
+			player.setFirstSeen(firstSeen);
+			player.setLastSeen(lastSeen);
+			updateFirstLastSeen(player.getId(), firstSeen, lastSeen);
 		} finally {
 			closeStatements(stmt);
 		}
@@ -1042,12 +1045,14 @@ public abstract class DirbyDbDao implements DbDao {
 	 */
 	protected void closeStatements(Statement... statements) {
 		for (Statement statement : statements) {
-			if (statement != null) {
-				try {
-					statement.close();
-				} catch (SQLException e) {
-					//ignore
-				}
+			if (statement == null) {
+				continue;
+			}
+
+			try {
+				statement.close();
+			} catch (SQLException e) {
+				//ignore
 			}
 		}
 	}
