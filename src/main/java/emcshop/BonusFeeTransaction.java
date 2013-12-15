@@ -4,7 +4,7 @@ package emcshop;
  * Represents a bonus/fee transaction on the transaction history page.
  * @author Michael Angstadt
  */
-public class BonusFeeTransaction extends RawTransaction {
+public class BonusFeeTransaction extends RupeeTransaction {
 	private boolean horseFee, lockFee, eggifyFee, vaultFee, signInBonus, voteBonus;
 
 	public boolean isHorseFee() {
@@ -70,16 +70,25 @@ public class BonusFeeTransaction extends RawTransaction {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (!super.equals(obj)) return false;
-		if (getClass() != obj.getClass()) return false;
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
 		BonusFeeTransaction other = (BonusFeeTransaction) obj;
-		if (eggifyFee != other.eggifyFee) return false;
-		if (horseFee != other.horseFee) return false;
-		if (lockFee != other.lockFee) return false;
-		if (signInBonus != other.signInBonus) return false;
-		if (vaultFee != other.vaultFee) return false;
-		if (voteBonus != other.voteBonus) return false;
+		if (eggifyFee != other.eggifyFee)
+			return false;
+		if (horseFee != other.horseFee)
+			return false;
+		if (lockFee != other.lockFee)
+			return false;
+		if (signInBonus != other.signInBonus)
+			return false;
+		if (vaultFee != other.vaultFee)
+			return false;
+		if (voteBonus != other.voteBonus)
+			return false;
 		return true;
 	}
 }

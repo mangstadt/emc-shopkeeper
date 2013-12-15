@@ -30,7 +30,7 @@ public class TransactionPageTest {
 		assertEquals(new Date(1354210000000L), page.getFirstTransactionDate());
 		assertEquals(Integer.valueOf(214308), page.getRupeeBalance());
 
-		List<RawTransaction> expected = new ArrayList<RawTransaction>();
+		List<RupeeTransaction> expected = new ArrayList<RupeeTransaction>();
 
 		RawTransaction t = new RawTransaction();
 		t.setTs(new Date(1354210000000L));
@@ -41,7 +41,6 @@ public class TransactionPageTest {
 
 		ShopTransaction st = new ShopTransaction();
 		st.setTs(new Date(1354230649000L));
-		st.setDescription("Player shop sold 1 Leather to jtc0999");
 		st.setAmount(10);
 		st.setBalance(213329);
 		st.setItem("Leather");
@@ -51,7 +50,6 @@ public class TransactionPageTest {
 
 		st = new ShopTransaction();
 		st.setTs(new Date(1354227236000L));
-		st.setDescription("Player shop sold 2 Brewing Stand to SebaB2001");
 		st.setAmount(30000);
 		st.setBalance(213194);
 		st.setItem("Brewing Stand");
@@ -61,7 +59,6 @@ public class TransactionPageTest {
 
 		PaymentTransaction pt = new PaymentTransaction();
 		pt.setTs(new Date(1354226347000L));
-		pt.setDescription("Payment to WeirdManaico");
 		pt.setAmount(-100);
 		pt.setBalance(212994);
 		pt.setPlayer("WeirdManaico");
@@ -69,7 +66,6 @@ public class TransactionPageTest {
 
 		pt = new PaymentTransaction();
 		pt.setTs(new Date(1354226247000L));
-		pt.setDescription("Payment from ColeWalser");
 		pt.setAmount(6);
 		pt.setBalance(212990);
 		pt.setPlayer("ColeWalser");
@@ -77,7 +73,6 @@ public class TransactionPageTest {
 
 		st = new ShopTransaction();
 		st.setTs(new Date(1354225000000L));
-		st.setDescription("Your player shop bought 8 Blue Wool from longtimeshelf8");
 		st.setAmount(-8);
 		st.setBalance(200);
 		st.setItem("Blue Wool");
@@ -87,7 +82,6 @@ public class TransactionPageTest {
 
 		BonusFeeTransaction bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
-		bft.setDescription("Daily sign-in bonus");
 		bft.setAmount(400);
 		bft.setBalance(212990);
 		bft.setSignInBonus(true);
@@ -95,7 +89,6 @@ public class TransactionPageTest {
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
-		bft.setDescription("Voted for Empire Minecraft on TopG.org - day bonus: 0");
 		bft.setAmount(100);
 		bft.setBalance(212990);
 		bft.setVoteBonus(true);
@@ -103,7 +96,6 @@ public class TransactionPageTest {
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
-		bft.setDescription("Summoned stabled horse in the wild @ wastelands:-31:64:-3126:11.914186:205.0087");
 		bft.setAmount(-100);
 		bft.setBalance(212990);
 		bft.setHorseFee(true);
@@ -111,7 +103,6 @@ public class TransactionPageTest {
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
-		bft.setDescription("Locked an item wilderness:1291,65,37");
 		bft.setAmount(-1000);
 		bft.setBalance(212990);
 		bft.setLockFee(true);
@@ -119,7 +110,6 @@ public class TransactionPageTest {
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
-		bft.setDescription("Full refund for unlocking item wilderness:1291,65,37");
 		bft.setAmount(1000);
 		bft.setBalance(212990);
 		bft.setLockFee(true);
@@ -127,7 +117,6 @@ public class TransactionPageTest {
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
-		bft.setDescription("Partial refund for unlocking item wilderness:1291,65,37");
 		bft.setAmount(500);
 		bft.setBalance(212990);
 		bft.setLockFee(true);
@@ -135,7 +124,6 @@ public class TransactionPageTest {
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
-		bft.setDescription("Opened cross-server vault");
 		bft.setAmount(-10);
 		bft.setBalance(212990);
 		bft.setVaultFee(true);
@@ -143,18 +131,13 @@ public class TransactionPageTest {
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
-		bft.setDescription("Eggified a Wolf");
 		bft.setAmount(-100);
 		bft.setBalance(212990);
 		bft.setEggifyFee(true);
 		expected.add(bft);
 
-		List<RawTransaction> actual = page.getTransactions();
-		for (int i = 0; i < actual.size(); i++) {
-			assertEquals(expected.get(i), actual.get(i));
-		}
-
-		//assertEquals(expected, actual);
+		List<RupeeTransaction> actual = page.getTransactions();
+		assertEquals(expected, actual);
 	}
 
 	@Test

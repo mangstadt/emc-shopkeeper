@@ -221,29 +221,12 @@ public class TransactionPuller {
 						break;
 					}
 
-					if (stopAtDate != null) {
-						List<RawTransaction> transactions = transactionPage.getTransactions();
-						int end = -1;
-						for (int i = 0; i < transactions.size(); i++) {
-							RawTransaction transaction = transactions.get(i);
-							if (transaction.getTs().getTime() <= stopAtDate.getTime()) {
-								end = i;
-								break;
-							}
-						}
-
-						if (end >= 0) {
-							transactions = transactions.subList(0, end);
-							quit = true;
-						}
-					}
-
-					List<RawTransaction> transactions = transactionPage.getTransactions();
+					List<RupeeTransaction> transactions = transactionPage.getTransactions();
 
 					//remove old payment transactions
 					if (oldestPaymentTransactionDate != null) {
 						for (int i = 0; i < transactions.size(); i++) {
-							RawTransaction transaction = transactions.get(i);
+							RupeeTransaction transaction = transactions.get(i);
 							if (!(transaction instanceof PaymentTransaction)) {
 								continue;
 							}
@@ -261,7 +244,7 @@ public class TransactionPuller {
 					if (stopAtDate != null) {
 						int end = -1;
 						for (int i = 0; i < transactions.size(); i++) {
-							RawTransaction transaction = transactions.get(i);
+							RupeeTransaction transaction = transactions.get(i);
 							long ts = transaction.getTs().getTime();
 
 							if (ts <= stopAtDate.getTime()) {
@@ -297,16 +280,16 @@ public class TransactionPuller {
 		 * @param page the page number
 		 * @param transactions the scraped transactions (may be empty)
 		 */
-		public abstract void onPageScraped(int page, List<RawTransaction> transactions);
+		public abstract void onPageScraped(int page, List<RupeeTransaction> transactions);
 
-		public <T extends RawTransaction> List<T> filter(List<RawTransaction> transactions, Class<T> clazz) {
-			List<T> shopTransactions = new ArrayList<T>();
-			for (RawTransaction transaction : transactions) {
-				if (clazz.isInstance(transaction)) {
-					shopTransactions.add(clazz.cast(transaction));
+		public <T extends RupeeTransaction> List<T> filter(List<RupeeTransaction> transactions, Class<T> filterBy) {
+			List<T> filtered = new ArrayList<T>();
+			for (RupeeTransaction transaction : transactions) {
+				if (transaction.getClass() == filterBy) {
+					filtered.add(filterBy.cast(transaction));
 				}
 			}
-			return shopTransactions;
+			return filtered;
 		}
 	}
 

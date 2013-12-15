@@ -50,7 +50,7 @@ public class TransactionPage {
 	private boolean loggedIn;
 	private Integer rupeeBalance;
 	private Date firstTransactionDate;
-	private List<RawTransaction> transactions = new ArrayList<RawTransaction>();
+	private List<RupeeTransaction> transactions = new ArrayList<RupeeTransaction>();
 
 	/**
 	 * @param document the webpage to parse
@@ -70,18 +70,17 @@ public class TransactionPage {
 
 		for (Element element : elements) {
 			String description = parseDescription(element);
-			RawTransaction transaction = parseTransaction(description);
+			RupeeTransaction transaction = parseTransaction(description);
 
 			transaction.setTs(parseTs(element));
-			transaction.setDescription(description);
 			transaction.setAmount(parseAmount(element));
 			transaction.setBalance(parseBalance(element));
 			transactions.add(transaction);
 		}
 	}
 
-	public RawTransaction parseTransaction(String description) {
-		RawTransaction transaction = toShopTransaction(description);
+	public RupeeTransaction parseTransaction(String description) {
+		RupeeTransaction transaction = toShopTransaction(description);
 		if (transaction != null) {
 			return transaction;
 		}
@@ -96,7 +95,7 @@ public class TransactionPage {
 			return transaction;
 		}
 
-		return new RawTransaction();
+		return toRawTransaction(description);
 	}
 
 	/**
@@ -128,7 +127,7 @@ public class TransactionPage {
 	 * Gets the transactions.
 	 * @return the miscellaneous transactions
 	 */
-	public List<RawTransaction> getTransactions() {
+	public List<RupeeTransaction> getTransactions() {
 		return transactions;
 	}
 
@@ -211,6 +210,12 @@ public class TransactionPage {
 		}
 
 		return null;
+	}
+
+	private RawTransaction toRawTransaction(String description) {
+		RawTransaction t = new RawTransaction();
+		t.setDescription(description);
+		return t;
 	}
 
 	private Integer parseRupeeBalance(Document document) {

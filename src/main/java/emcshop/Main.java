@@ -431,7 +431,7 @@ public class Main {
 					NumberFormat nf = NumberFormat.getInstance();
 
 					@Override
-					public synchronized void onPageScraped(int page, List<RawTransaction> transactions) {
+					public synchronized void onPageScraped(int page, List<RupeeTransaction> transactions) {
 						try {
 							List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
 							dao.insertTransactions(shopTransactions);

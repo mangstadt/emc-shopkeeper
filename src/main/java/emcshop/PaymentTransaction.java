@@ -4,7 +4,7 @@ package emcshop;
  * Represents a player-to-player payment transaction.
  * @author Michael Angstadt
  */
-public class PaymentTransaction extends RawTransaction {
+public class PaymentTransaction extends RupeeTransaction {
 	private Integer id;
 	private String player;
 
@@ -35,16 +35,23 @@ public class PaymentTransaction extends RawTransaction {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (!super.equals(obj)) return false;
-		if (getClass() != obj.getClass()) return false;
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
 		PaymentTransaction other = (PaymentTransaction) obj;
 		if (id == null) {
-			if (other.id != null) return false;
-		} else if (!id.equals(other.id)) return false;
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
 		if (player == null) {
-			if (other.player != null) return false;
-		} else if (!player.equals(other.player)) return false;
+			if (other.player != null)
+				return false;
+		} else if (!player.equals(other.player))
+			return false;
 		return true;
 	}
 }

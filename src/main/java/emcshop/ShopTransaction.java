@@ -4,7 +4,7 @@ package emcshop;
  * Represents a shop transaction.
  * @author Michael Angstadt
  */
-public class ShopTransaction extends RawTransaction {
+public class ShopTransaction extends RupeeTransaction {
 	private Integer id;
 	private String player;
 	private String item;
@@ -55,25 +55,30 @@ public class ShopTransaction extends RawTransaction {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (!super.equals(obj)) return false;
-		if (getClass() != obj.getClass()) return false;
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
 		ShopTransaction other = (ShopTransaction) obj;
 		if (id == null) {
-			if (other.id != null) return false;
-		} else if (!id.equals(other.id)) return false;
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
 		if (item == null) {
-			if (other.item != null) return false;
-		} else if (!item.equals(other.item)) return false;
+			if (other.item != null)
+				return false;
+		} else if (!item.equals(other.item))
+			return false;
 		if (player == null) {
-			if (other.player != null) return false;
-		} else if (!player.equals(other.player)) return false;
-		if (quantity != other.quantity) return false;
+			if (other.player != null)
+				return false;
+		} else if (!player.equals(other.player))
+			return false;
+		if (quantity != other.quantity)
+			return false;
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "ShopTransaction [id=" + id + ", player=" + player + ", item=" + item + ", quantity=" + quantity + "]";
 	}
 }
