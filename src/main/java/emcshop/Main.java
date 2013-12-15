@@ -151,6 +151,8 @@ public class Main {
 
 	private static MainFrame frame;
 
+	private static Date earliestParsedTransactionDate;
+
 	public static void main(String[] args) throws Throwable {
 		Arguments arguments = new Arguments(args);
 
@@ -432,12 +434,23 @@ public class Main {
 
 					@Override
 					public synchronized void onPageScraped(int page, List<RupeeTransaction> transactions) {
+						if (!transactions.isEmpty()) {
+							RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
+							Date lastTs = last.getTs();
+							if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
+								earliestParsedTransactionDate = lastTs;
+							}
+						}
+
 						try {
 							List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
 							dao.insertTransactions(shopTransactions);
 
 							List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
 							dao.insertPaymentTransactions(paymentTransactions);
+
+							List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
+							dao.updateBonusesFees(bonusFeeTransactions);
 
 							pageCount++;
 							transactionCount += shopTransactions.size() + paymentTransactions.size();
@@ -465,6 +478,9 @@ public class Main {
 					dao.rollback();
 					throw result.getThrown();
 				case COMPLETED:
+					if (earliestParsedTransactionDate != null) {
+						dao.updateBonusesFeesSince(earliestParsedTransactionDate);
+					}
 					dao.commit();
 
 					settings.setPreviousUpdate(settings.getLastUpdated());
