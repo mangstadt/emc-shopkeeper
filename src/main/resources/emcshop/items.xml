@@ -445,7 +445,7 @@
 	<Item name="Potion of Harming" emcNames="Potion:8204" image="potion_harming.png" />
 	<Item name="Potion of Harming II" emcNames="Potion:8236,Potion:8268" image="potion_harming.png" />
 	<Item name="Splash Potion of Harming" emcNames="Potion:16396" image="potion_harming_splash.png" />
-	<Item name="Splash Potion of Harming II" emcNames="Potion:16428,Potion:16460" image="potion_harming_splash.png" />
+	<Item name="Splash Potion of Harming II" emcNames="Potion:16428,Potion:16460,Potion:24620" image="potion_harming_splash.png" />
 
 	<Item name="Potion of Invisibility" emcNames="Potion:8206,Potion:8238" image="potion_invisibility.png" />
 	<Item name="Potion of Invisibility Ext" emcNames="Potion:8270" image="potion_invisibility.png" />
