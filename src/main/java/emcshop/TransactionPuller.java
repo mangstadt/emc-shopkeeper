@@ -221,12 +221,50 @@ public class TransactionPuller {
 						break;
 					}
 
-					List<ShopTransaction> transactions = transactionPage.getShopTransactions();
+					if (stopAtDate != null) {
+						List<RawTransaction> transactions = transactionPage.getTransactions();
+						int end = -1;
+						for (int i = 0; i < transactions.size(); i++) {
+							RawTransaction transaction = transactions.get(i);
+							if (transaction.getTs().getTime() <= stopAtDate.getTime()) {
+								end = i;
+								break;
+							}
+						}
+
+						if (end >= 0) {
+							transactions = transactions.subList(0, end);
+							quit = true;
+						}
+					}
+
+					List<RawTransaction> transactions = transactionPage.getTransactions();
+
+					//remove old payment transactions
+					if (oldestPaymentTransactionDate != null) {
+						for (int i = 0; i < transactions.size(); i++) {
+							RawTransaction transaction = transactions.get(i);
+							if (!(transaction instanceof PaymentTransaction)) {
+								continue;
+							}
+
+							long ts = transaction.getTs().getTime();
+							if (ts < oldestPaymentTransactionDate.getTime()) {
+								transactions.remove(i);
+								i--;
+								break;
+							}
+						}
+					}
+
+					//ignore any transactions that are past the "stop-at" date
 					if (stopAtDate != null) {
 						int end = -1;
 						for (int i = 0; i < transactions.size(); i++) {
-							ShopTransaction transaction = transactions.get(i);
-							if (transaction.getTs().getTime() <= stopAtDate.getTime()) {
+							RawTransaction transaction = transactions.get(i);
+							long ts = transaction.getTs().getTime();
+
+							if (ts <= stopAtDate.getTime()) {
 								end = i;
 								break;
 							}
@@ -237,40 +275,13 @@ public class TransactionPuller {
 						}
 					}
 
-					List<PaymentTransaction> paymentTransactions = transactionPage.getPaymentTransactions();
-					if (stopAtDate != null || oldestPaymentTransactionDate != null) {
-						boolean stopAtDateReached = false;
-						int end = -1;
-						for (int i = 0; i < paymentTransactions.size(); i++) {
-							PaymentTransaction transaction = paymentTransactions.get(i);
-							long ts = transaction.getTs().getTime();
-
-							if (stopAtDate != null && ts <= stopAtDate.getTime()) {
-								end = i;
-								stopAtDateReached = true;
-								break;
-							}
-							if (oldestPaymentTransactionDate != null && ts < oldestPaymentTransactionDate.getTime()) {
-								end = i;
-								break;
-							}
-						}
-						if (end >= 0) {
-							paymentTransactions = paymentTransactions.subList(0, end);
-							if (stopAtDateReached) {
-								quit = true;
-							}
-						}
-					}
-
 					synchronized (TransactionPuller.this) {
 						pageCount++;
-						transactionCount += transactions.size() + paymentTransactions.size();
+						transactionCount += transactions.size() + transactions.size();
 					}
 
 					if (!cancel) {
-						//TODO check for end dates for other transactions
-						listener.onPageScraped(page, transactions, paymentTransactions, transactionPage.getBonusFeeTransactions(), transactionPage.getMiscTransactions());
+						listener.onPageScraped(page, transactions);
 					}
 				}
 			} catch (Throwable e) {
@@ -280,16 +291,23 @@ public class TransactionPuller {
 		}
 	}
 
-	public static interface Listener {
+	public static abstract class Listener {
 		/**
 		 * Called when a page has been scraped.
 		 * @param page the page number
-		 * @param transactions the scraped shop transactions (may be empty)
-		 * @param paymentTransactions the scraped payment transactions (may be
-		 * empty)
-		 * @param otherTransactions all other rupee transactions
+		 * @param transactions the scraped transactions (may be empty)
 		 */
-		void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions, List<BonusFeeTransaction> bonusFeeTransactions, List<RawTransaction> otherTransactions);
+		public abstract void onPageScraped(int page, List<RawTransaction> transactions);
+
+		public <T extends RawTransaction> List<T> filter(List<RawTransaction> transactions, Class<T> clazz) {
+			List<T> shopTransactions = new ArrayList<T>();
+			for (RawTransaction transaction : transactions) {
+				if (clazz.isInstance(transaction)) {
+					shopTransactions.add(clazz.cast(transaction));
+				}
+			}
+			return shopTransactions;
+		}
 	}
 
 	public static class Result {

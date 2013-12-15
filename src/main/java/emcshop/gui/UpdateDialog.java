@@ -25,7 +25,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
-import emcshop.BonusFeeTransaction;
 import emcshop.EmcSession;
 import emcshop.PaymentTransaction;
 import emcshop.RawTransaction;
@@ -145,18 +144,21 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							long previousTime = 0;
 
 							@Override
-							public void onPageScraped(int page, List<ShopTransaction> transactions, List<PaymentTransaction> paymentTransactions, List<BonusFeeTransaction> bonusFeeTransactions, List<RawTransaction> otherTransactions) {
+							public void onPageScraped(int page, List<RawTransaction> transactions) {
 								synchronized (puller) { //the method itself cannot have a "synchronized" flag because there is a synchronized block in the cancel button's click handler
 									if (puller.isCanceled()) {
 										return;
 									}
 
 									try {
-										dao.insertTransactions(transactions);
+										List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
+										dao.insertTransactions(shopTransactions);
+
+										List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
 										dao.insertPaymentTransactions(paymentTransactions);
 
 										pageCount++;
-										transactionCount += transactions.size() + paymentTransactions.size();
+										transactionCount += shopTransactions.size() + paymentTransactions.size();
 
 										String pagesText = nf.format(pageCount);
 										if (stopAtPage != null) {

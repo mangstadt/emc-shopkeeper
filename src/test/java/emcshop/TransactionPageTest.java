@@ -6,8 +6,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -29,119 +30,131 @@ public class TransactionPageTest {
 		assertEquals(new Date(1354210000000L), page.getFirstTransactionDate());
 		assertEquals(Integer.valueOf(214308), page.getRupeeBalance());
 
-		{
-			Iterator<ShopTransaction> it = page.getShopTransactions().iterator();
+		List<RawTransaction> expected = new ArrayList<RawTransaction>();
 
-			ShopTransaction t = it.next();
-			assertEquals(10, t.getAmount());
-			assertEquals(213329, t.getBalance());
-			assertEquals("Leather", t.getItem());
-			assertEquals("jtc0999", t.getPlayer());
-			assertEquals(-1, t.getQuantity());
-			assertEquals(new Date(1354230649000L), t.getTs());
+		RawTransaction t = new RawTransaction();
+		t.setTs(new Date(1354210000000L));
+		t.setDescription("Blah");
+		t.setAmount(500);
+		t.setBalance(212994);
+		expected.add(t);
 
-			t = it.next();
-			assertEquals(30000, t.getAmount());
-			assertEquals(213194, t.getBalance());
-			assertEquals("Brewing Stand", t.getItem());
-			assertEquals("SebaB2001", t.getPlayer());
-			assertEquals(-2, t.getQuantity());
-			assertEquals(new Date(1354227236000L), t.getTs());
+		ShopTransaction st = new ShopTransaction();
+		st.setTs(new Date(1354230649000L));
+		st.setDescription("Player shop sold 1 Leather to jtc0999");
+		st.setAmount(10);
+		st.setBalance(213329);
+		st.setItem("Leather");
+		st.setPlayer("jtc0999");
+		st.setQuantity(-1);
+		expected.add(st);
 
-			t = it.next();
-			assertEquals(-8, t.getAmount());
-			assertEquals(200, t.getBalance());
-			assertEquals("Blue Wool", t.getItem());
-			assertEquals("longtimeshelf8", t.getPlayer());
-			assertEquals(8, t.getQuantity());
-			assertEquals(new Date(1354225000000L), t.getTs());
+		st = new ShopTransaction();
+		st.setTs(new Date(1354227236000L));
+		st.setDescription("Player shop sold 2 Brewing Stand to SebaB2001");
+		st.setAmount(30000);
+		st.setBalance(213194);
+		st.setItem("Brewing Stand");
+		st.setPlayer("SebaB2001");
+		st.setQuantity(-2);
+		expected.add(st);
 
-			assertFalse(it.hasNext());
+		PaymentTransaction pt = new PaymentTransaction();
+		pt.setTs(new Date(1354226347000L));
+		pt.setDescription("Payment to WeirdManaico");
+		pt.setAmount(-100);
+		pt.setBalance(212994);
+		pt.setPlayer("WeirdManaico");
+		expected.add(pt);
+
+		pt = new PaymentTransaction();
+		pt.setTs(new Date(1354226247000L));
+		pt.setDescription("Payment from ColeWalser");
+		pt.setAmount(6);
+		pt.setBalance(212990);
+		pt.setPlayer("ColeWalser");
+		expected.add(pt);
+
+		st = new ShopTransaction();
+		st.setTs(new Date(1354225000000L));
+		st.setDescription("Your player shop bought 8 Blue Wool from longtimeshelf8");
+		st.setAmount(-8);
+		st.setBalance(200);
+		st.setItem("Blue Wool");
+		st.setPlayer("longtimeshelf8");
+		st.setQuantity(8);
+		expected.add(st);
+
+		BonusFeeTransaction bft = new BonusFeeTransaction();
+		bft.setTs(new Date(1354226247000L));
+		bft.setDescription("Daily sign-in bonus");
+		bft.setAmount(400);
+		bft.setBalance(212990);
+		bft.setSignInBonus(true);
+		expected.add(bft);
+
+		bft = new BonusFeeTransaction();
+		bft.setTs(new Date(1354226247000L));
+		bft.setDescription("Voted for Empire Minecraft on TopG.org - day bonus: 0");
+		bft.setAmount(100);
+		bft.setBalance(212990);
+		bft.setVoteBonus(true);
+		expected.add(bft);
+
+		bft = new BonusFeeTransaction();
+		bft.setTs(new Date(1354226247000L));
+		bft.setDescription("Summoned stabled horse in the wild @ wastelands:-31:64:-3126:11.914186:205.0087");
+		bft.setAmount(-100);
+		bft.setBalance(212990);
+		bft.setHorseFee(true);
+		expected.add(bft);
+
+		bft = new BonusFeeTransaction();
+		bft.setTs(new Date(1354226247000L));
+		bft.setDescription("Locked an item wilderness:1291,65,37");
+		bft.setAmount(-1000);
+		bft.setBalance(212990);
+		bft.setLockFee(true);
+		expected.add(bft);
+
+		bft = new BonusFeeTransaction();
+		bft.setTs(new Date(1354226247000L));
+		bft.setDescription("Full refund for unlocking item wilderness:1291,65,37");
+		bft.setAmount(1000);
+		bft.setBalance(212990);
+		bft.setLockFee(true);
+		expected.add(bft);
+
+		bft = new BonusFeeTransaction();
+		bft.setTs(new Date(1354226247000L));
+		bft.setDescription("Partial refund for unlocking item wilderness:1291,65,37");
+		bft.setAmount(500);
+		bft.setBalance(212990);
+		bft.setLockFee(true);
+		expected.add(bft);
+
+		bft = new BonusFeeTransaction();
+		bft.setTs(new Date(1354226247000L));
+		bft.setDescription("Opened cross-server vault");
+		bft.setAmount(-10);
+		bft.setBalance(212990);
+		bft.setVaultFee(true);
+		expected.add(bft);
+
+		bft = new BonusFeeTransaction();
+		bft.setTs(new Date(1354226247000L));
+		bft.setDescription("Eggified a Wolf");
+		bft.setAmount(-100);
+		bft.setBalance(212990);
+		bft.setEggifyFee(true);
+		expected.add(bft);
+
+		List<RawTransaction> actual = page.getTransactions();
+		for (int i = 0; i < actual.size(); i++) {
+			assertEquals(expected.get(i), actual.get(i));
 		}
 
-		{
-			Iterator<PaymentTransaction> it = page.getPaymentTransactions().iterator();
-
-			PaymentTransaction t = it.next();
-			assertEquals(-100, t.getAmount());
-			assertEquals(212994, t.getBalance());
-			assertEquals("WeirdManaico", t.getPlayer());
-			assertEquals(new Date(1354226347000L), t.getTs());
-
-			t = it.next();
-			assertEquals(6, t.getAmount());
-			assertEquals(212990, t.getBalance());
-			assertEquals("ColeWalser", t.getPlayer());
-			assertEquals(new Date(1354226247000L), t.getTs());
-
-			assertFalse(it.hasNext());
-		}
-
-		{
-			Iterator<BonusFeeTransaction> it = page.getBonusFeeTransactions().iterator();
-
-			BonusFeeTransaction t = it.next();
-			assertEquals(400, t.getAmount());
-			assertEquals(212990, t.getBalance());
-			assertEquals(new Date(1354226247000L), t.getTs());
-			assertTrue(t.isSignInBonus());
-
-			t = it.next();
-			assertEquals(100, t.getAmount());
-			assertEquals(212990, t.getBalance());
-			assertEquals(new Date(1354226247000L), t.getTs());
-			assertTrue(t.isVoteBonus());
-
-			t = it.next();
-			assertEquals(-100, t.getAmount());
-			assertEquals(212990, t.getBalance());
-			assertEquals(new Date(1354226247000L), t.getTs());
-			assertTrue(t.isHorseFee());
-
-			t = it.next();
-			assertEquals(-1000, t.getAmount());
-			assertEquals(212990, t.getBalance());
-			assertEquals(new Date(1354226247000L), t.getTs());
-			assertTrue(t.isLockFee());
-
-			t = it.next();
-			assertEquals(1000, t.getAmount());
-			assertEquals(212990, t.getBalance());
-			assertEquals(new Date(1354226247000L), t.getTs());
-			assertTrue(t.isLockFee());
-
-			t = it.next();
-			assertEquals(500, t.getAmount());
-			assertEquals(212990, t.getBalance());
-			assertEquals(new Date(1354226247000L), t.getTs());
-			assertTrue(t.isLockFee());
-
-			t = it.next();
-			assertEquals(-10, t.getAmount());
-			assertEquals(212990, t.getBalance());
-			assertEquals(new Date(1354226247000L), t.getTs());
-			assertTrue(t.isVaultFee());
-
-			t = it.next();
-			assertEquals(-100, t.getAmount());
-			assertEquals(212990, t.getBalance());
-			assertEquals(new Date(1354226247000L), t.getTs());
-			assertTrue(t.isEggifyFee());
-
-			assertFalse(it.hasNext());
-		}
-
-		{
-			Iterator<RawTransaction> it = page.getMiscTransactions().iterator();
-
-			RawTransaction t = it.next();
-			assertEquals(500, t.getAmount());
-			assertEquals(212994, t.getBalance());
-			assertEquals("Blah", t.getDescription());
-			assertEquals(new Date(1354210000000L), t.getTs());
-
-			assertFalse(it.hasNext());
-		}
+		//assertEquals(expected, actual);
 	}
 
 	@Test
@@ -153,6 +166,6 @@ public class TransactionPageTest {
 		assertFalse(page.isLoggedIn());
 		assertNull(page.getFirstTransactionDate());
 		assertNull(page.getRupeeBalance());
-		assertTrue(page.getShopTransactions().isEmpty());
+		assertTrue(page.getTransactions().isEmpty());
 	}
 }

@@ -50,10 +50,7 @@ public class TransactionPage {
 	private boolean loggedIn;
 	private Integer rupeeBalance;
 	private Date firstTransactionDate;
-	private List<ShopTransaction> shopTransactions = new ArrayList<ShopTransaction>();
-	private List<PaymentTransaction> paymentTransactions = new ArrayList<PaymentTransaction>();
-	private List<BonusFeeTransaction> bonusFeeTransactions = new ArrayList<BonusFeeTransaction>();
-	private List<RawTransaction> miscTransactions = new ArrayList<RawTransaction>();
+	private List<RawTransaction> transactions = new ArrayList<RawTransaction>();
 
 	/**
 	 * @param document the webpage to parse
@@ -72,28 +69,34 @@ public class TransactionPage {
 		firstTransactionDate = parseTs(elements.first());
 
 		for (Element element : elements) {
-			RawTransaction rawTransaction = scrapeTransaction(element);
+			String description = parseDescription(element);
+			RawTransaction transaction = parseTransaction(description);
 
-			ShopTransaction shopTransaction = toShopTransaction(rawTransaction);
-			if (shopTransaction != null) {
-				shopTransactions.add(shopTransaction);
-				continue;
-			}
-
-			PaymentTransaction paymentTransaction = toPaymentTransaction(rawTransaction);
-			if (paymentTransaction != null) {
-				paymentTransactions.add(paymentTransaction);
-				continue;
-			}
-
-			BonusFeeTransaction bonusFeeTransaction = toBonusOrFeeTransaction(rawTransaction);
-			if (bonusFeeTransaction != null) {
-				bonusFeeTransactions.add(bonusFeeTransaction);
-				continue;
-			}
-
-			miscTransactions.add(rawTransaction);
+			transaction.setTs(parseTs(element));
+			transaction.setDescription(description);
+			transaction.setAmount(parseAmount(element));
+			transaction.setBalance(parseBalance(element));
+			transactions.add(transaction);
 		}
+	}
+
+	public RawTransaction parseTransaction(String description) {
+		RawTransaction transaction = toShopTransaction(description);
+		if (transaction != null) {
+			return transaction;
+		}
+
+		transaction = toPaymentTransaction(description);
+		if (transaction != null) {
+			return transaction;
+		}
+
+		transaction = toBonusOrFeeTransaction(description);
+		if (transaction != null) {
+			return transaction;
+		}
+
+		return new RawTransaction();
 	}
 
 	/**
@@ -122,44 +125,19 @@ public class TransactionPage {
 	}
 
 	/**
-	 * Gets the payment transactions from the page.
-	 * @return the payment transactions or empty list if none were found
-	 */
-	public List<PaymentTransaction> getPaymentTransactions() {
-		return paymentTransactions;
-	}
-
-	/**
-	 * Gets the shop transactions from the page.
-	 * @return the shop transactions or empty list if none were found
-	 */
-	public List<ShopTransaction> getShopTransactions() {
-		return shopTransactions;
-	}
-
-	/**
-	 * Gets the bonus/fee transactions from the page.
-	 * @return the bonus/fee transactions or empty list if none were found
-	 */
-	public List<BonusFeeTransaction> getBonusFeeTransactions() {
-		return bonusFeeTransactions;
-	}
-
-	/**
-	 * Gets the transactions that weren't parsed as a payment or shop
-	 * transaction.
+	 * Gets the transactions.
 	 * @return the miscellaneous transactions
 	 */
-	public List<RawTransaction> getMiscTransactions() {
-		return miscTransactions;
+	public List<RawTransaction> getTransactions() {
+		return transactions;
 	}
 
-	private ShopTransaction toShopTransaction(RawTransaction raw) {
+	private ShopTransaction toShopTransaction(String description) {
 		int negate = -1;
-		Matcher m = soldRegex.matcher(raw.getDescription());
+		Matcher m = soldRegex.matcher(description);
 		if (!m.find()) {
 			negate = 1;
-			m = boughtRegex.matcher(raw.getDescription());
+			m = boughtRegex.matcher(description);
 			if (!m.find()) {
 				//not a shop transaction
 				return null;
@@ -167,21 +145,16 @@ public class TransactionPage {
 		}
 
 		ShopTransaction transaction = new ShopTransaction();
-
 		transaction.setQuantity(Integer.parseInt(m.group(1).replace(",", "")) * negate);
 		transaction.setItem(itemIndex.getDisplayName(m.group(2)));
 		transaction.setPlayer(m.group(3));
-		transaction.setTs(raw.getTs());
-		transaction.setAmount(raw.getAmount());
-		transaction.setBalance(raw.getBalance());
-
 		return transaction;
 	}
 
-	private PaymentTransaction toPaymentTransaction(RawTransaction raw) {
-		Matcher m = paymentFromRegex.matcher(raw.getDescription());
+	private PaymentTransaction toPaymentTransaction(String description) {
+		Matcher m = paymentFromRegex.matcher(description);
 		if (!m.find()) {
-			m = paymentToRegex.matcher(raw.getDescription());
+			m = paymentToRegex.matcher(description);
 			if (!m.find()) {
 				//not a payment transaction
 				return null;
@@ -189,56 +162,50 @@ public class TransactionPage {
 		}
 
 		PaymentTransaction transaction = new PaymentTransaction();
-
 		transaction.setPlayer(m.group(1));
-		transaction.setTs(raw.getTs());
-		transaction.setAmount(raw.getAmount());
-		transaction.setBalance(raw.getBalance());
-
 		return transaction;
 	}
 
-	private BonusFeeTransaction toBonusOrFeeTransaction(RawTransaction raw) {
-		String description = raw.getDescription();
-
+	private BonusFeeTransaction toBonusOrFeeTransaction(String description) {
 		Matcher m = signInBonusRegex.matcher(description);
+
 		if (m.find()) {
-			BonusFeeTransaction t = new BonusFeeTransaction(raw);
+			BonusFeeTransaction t = new BonusFeeTransaction();
 			t.setSignInBonus(true);
 			return t;
 		}
 
 		m = voteBonusRegex.matcher(description);
 		if (m.find()) {
-			BonusFeeTransaction t = new BonusFeeTransaction(raw);
+			BonusFeeTransaction t = new BonusFeeTransaction();
 			t.setVoteBonus(true);
 			return t;
 		}
 
 		m = lockFeeRegex.matcher(description);
 		if (m.find()) {
-			BonusFeeTransaction t = new BonusFeeTransaction(raw);
+			BonusFeeTransaction t = new BonusFeeTransaction();
 			t.setLockFee(true);
 			return t;
 		}
 
 		m = vaultFeeRegex.matcher(description);
 		if (m.find()) {
-			BonusFeeTransaction t = new BonusFeeTransaction(raw);
+			BonusFeeTransaction t = new BonusFeeTransaction();
 			t.setVaultFee(true);
 			return t;
 		}
 
 		m = horseFeeRegex.matcher(description);
 		if (m.find()) {
-			BonusFeeTransaction t = new BonusFeeTransaction(raw);
+			BonusFeeTransaction t = new BonusFeeTransaction();
 			t.setHorseFee(true);
 			return t;
 		}
 
 		m = eggifyFeeRegex.matcher(description);
 		if (m.find()) {
-			BonusFeeTransaction t = new BonusFeeTransaction(raw);
+			BonusFeeTransaction t = new BonusFeeTransaction();
 			t.setEggifyFee(true);
 			return t;
 		}
