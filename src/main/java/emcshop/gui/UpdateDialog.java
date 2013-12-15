@@ -25,6 +25,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import emcshop.BonusFeeTransaction;
 import emcshop.EmcSession;
 import emcshop.PaymentTransaction;
 import emcshop.RupeeTransaction;
@@ -52,6 +53,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 	private Thread pullerThread;
 
 	private long started;
+	private Date earliestParsedTransactionDate;
 
 	public UpdateDialog(final MainFrame owner, final DbDao dao, final Settings settings) throws SQLException {
 		super(owner, "Updating Transactions", true);
@@ -150,12 +152,23 @@ public class UpdateDialog extends JDialog implements WindowListener {
 										return;
 									}
 
+									if (!transactions.isEmpty()) {
+										RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
+										Date lastTs = last.getTs();
+										if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
+											earliestParsedTransactionDate = lastTs;
+										}
+									}
+
 									try {
 										List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
 										dao.insertTransactions(shopTransactions);
 
 										List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
 										dao.insertPaymentTransactions(paymentTransactions);
+
+										List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
+										dao.updateBonusesFees(bonusFeeTransactions);
 
 										pageCount++;
 										transactionCount += shopTransactions.size() + paymentTransactions.size();
@@ -241,6 +254,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							break;
 						case COMPLETED:
 							try {
+								if (earliestParsedTransactionDate != null) {
+									dao.updateBonusesFeesSince(earliestParsedTransactionDate);
+								}
 								dao.commit();
 								dispose();
 								owner.updateSuccessful(new Date(started), result.getRupeeBalance(), result.getTimeTaken(), result.getTransactionCount(), result.getPageCount(), display.isSelected());

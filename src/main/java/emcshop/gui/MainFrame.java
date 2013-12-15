@@ -62,7 +62,6 @@ import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame implements WindowListener {
-	//TODO add update check--include a release date with the app and check the timestamp on the file in github
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
 
 	private JButton update;
@@ -74,6 +73,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private TransactionsTab transactionsTab;
 	private PaymentsTab paymentsTab;
 	private InventoryTab inventoryTab;
+	private BonusFeeTab bonusFeeTab;
 
 	JMenuItem clearSession;
 
@@ -237,6 +237,7 @@ public class MainFrame extends JFrame implements WindowListener {
 									updatePaymentsCount();
 									paymentsTab.reset();
 									inventoryTab.refresh();
+									bonusFeeTab.refresh();
 									loading.dispose();
 								} catch (Throwable e) {
 									loading.dispose();
@@ -349,6 +350,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		transactionsTab = new TransactionsTab(this, dao, profileImageLoader, settings);
 		paymentsTab = new PaymentsTab(this, dao, profileImageLoader);
 		inventoryTab = new InventoryTab(this, dao);
+		bonusFeeTab = new BonusFeeTab(dao);
 	}
 
 	private void layoutWidgets() {
@@ -380,6 +382,8 @@ public class MainFrame extends JFrame implements WindowListener {
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Payments Tab</b></font><br><br>Displays payment transactions that are awaiting your review.  Payment transactions that are shop-related (such as buying an item in bulk) can be added to your shop transaction history.\n\nA payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."));
 		tabs.addTab("Inventory", inventoryTab);
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Inventory Tab</b></font><br><br>Allows you to define how much of each item you have in stock.  Your inventory is updated every time you download new transactions from EMC, so this tab will show you the items in your shop that are low in stock."));
+		tabs.addTab("Bonuses/Fees", bonusFeeTab);
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Bonuses/Fees Tab</b></font><br><br>Keeps a tally of the rupee bonuses and fees your account has received.  This tally is updated every time you update your transactions."));
 
 		add(tabs, "span 3, h 100%, w 100%");
 	}
@@ -428,6 +432,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 
 			inventoryTab.refresh();
+			bonusFeeTab.refresh();
 
 			long components[] = TimeUtils.parseTimeComponents(time);
 			NumberFormat nf = NumberFormat.getInstance();

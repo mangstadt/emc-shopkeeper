@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
+import emcshop.BonusFeeTransaction;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.util.ClasspathUtils;
@@ -787,6 +788,98 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public void updateBonusesFees(List<BonusFeeTransaction> transactions) throws SQLException {
+		if (transactions.isEmpty()) {
+			return;
+		}
+
+		int horse, lock, eggify, vault, signIn, vote;
+		horse = lock = eggify = vault = signIn = vote = 0;
+
+		for (BonusFeeTransaction transaction : transactions) {
+			int amount = transaction.getAmount();
+
+			if (transaction.isEggifyFee()) {
+				eggify += amount;
+				continue;
+			}
+
+			if (transaction.isHorseFee()) {
+				horse += amount;
+				continue;
+			}
+
+			if (transaction.isLockFee()) {
+				lock += amount;
+				continue;
+			}
+
+			if (transaction.isSignInBonus()) {
+				signIn += amount;
+				continue;
+			}
+
+			if (transaction.isVaultFee()) {
+				vault += amount;
+				continue;
+			}
+
+			if (transaction.isVoteBonus()) {
+				vote += amount;
+				continue;
+			}
+		}
+
+		PreparedStatement stmt = stmt("UPDATE bonuses_fees SET eggify = eggify + ?, horse = horse + ?, lock = lock + ?, sign_in = sign_in + ?, vault = vault + ?, vote = vote + ?");
+		try {
+			int i = 1;
+			stmt.setInt(i++, eggify);
+			stmt.setInt(i++, horse);
+			stmt.setInt(i++, lock);
+			stmt.setInt(i++, signIn);
+			stmt.setInt(i++, vault);
+			stmt.setInt(i++, vote);
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public BonusFee getBonusesFees() throws SQLException {
+		PreparedStatement stmt = stmt("SELECT * FROM bonuses_fees");
+
+		try {
+			ResultSet rs = stmt.executeQuery();
+			if (!rs.next()) {
+				return null;
+			}
+
+			BonusFee bonusesFees = new BonusFee();
+			bonusesFees.setSince(toDate(rs.getTimestamp("since")));
+			bonusesFees.setEggify(rs.getInt("eggify"));
+			bonusesFees.setHorse(rs.getInt("horse"));
+			bonusesFees.setLock(rs.getInt("lock"));
+			bonusesFees.setSignIn(rs.getInt("sign_in"));
+			bonusesFees.setVault(rs.getInt("vault"));
+			bonusesFees.setVote(rs.getInt("vote"));
+			return bonusesFees;
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	public void updateBonusesFeesSince(Date since) throws SQLException {
+		PreparedStatement stmt = stmt("UPDATE bonuses_fees SET since = ? WHERE since IS NULL");
+		try {
+			stmt.setTimestamp(1, toTimestamp(since));
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
 	public void wipe() throws SQLException, IOException {
 		logger.info("Wiping transactions...");
 		Statement stmt = conn.createStatement();
@@ -796,11 +889,13 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.execute("DELETE FROM transactions");
 			stmt.execute("DELETE FROM players");
 			stmt.execute("DELETE FROM items");
+			stmt.execute("DELETE FROM bonuses_fees");
 			stmt.execute("ALTER TABLE inventory ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE items ALTER COLUMN id RESTART WITH 1");
+			stmt.execute("INSERT INTO bonuses_fees (horse) VALUES (0)");
 			MigrationSprocs.populateItemsTableConn(conn);
 			commit();
 		} finally {

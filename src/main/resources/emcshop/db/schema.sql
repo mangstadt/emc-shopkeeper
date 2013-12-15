@@ -73,6 +73,17 @@ CREATE TABLE inventory(
 	quantity INT NOT NULL
 );
 
+CREATE TABLE bonuses_fees(
+	since TIMESTAMP,
+	horse INT NOT NULL DEFAULT 0,
+	lock INT NOT NULL DEFAULT 0,
+	eggify INT NOT NULL DEFAULT 0,
+	vault INT NOT NULL DEFAULT 0,
+	sign_in INT NOT NULL DEFAULT 0,
+	vote INT NOT NULL DEFAULT 0
+);
+INSERT INTO bonuses_fees (horse) VALUES (0);
+
 CREATE INDEX ts_index ON transactions(ts);
 CREATE INDEX player_index ON transactions(player);
 CREATE INDEX item_index ON transactions(item);

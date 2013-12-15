@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import emcshop.BonusFeeTransaction;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 
@@ -211,8 +212,31 @@ public interface DbDao {
 	/**
 	 * Deletes one or more inventory items.
 	 * @param ids the inventory IDs to delete
+	 * @throws SQLException
 	 */
 	void deleteInventory(Collection<Integer> ids) throws SQLException;
+
+	/**
+	 * Updates the bonus/fee totals.
+	 * @param transactions the bonus/fee transactions
+	 * @throws SQLException
+	 */
+	void updateBonusesFees(List<BonusFeeTransaction> transactions) throws SQLException;
+
+	/**
+	 * Gets the bonus/fee totals.
+	 * @return the totals
+	 * @throws SQLException
+	 */
+	BonusFee getBonusesFees() throws SQLException;
+
+	/**
+	 * Updates the date that the bonus/fee tally began (only if the date has not
+	 * been set yet).
+	 * @param since the date
+	 * @throws SQLException
+	 */
+	void updateBonusesFeesSince(Date since) throws SQLException;
 
 	/**
 	 * Deletes all data in the database.
