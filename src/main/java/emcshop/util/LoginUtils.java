@@ -133,4 +133,8 @@ public class LoginUtils {
 
 		return response.getStatusLine().getStatusCode() == 303;
 	}
+
+	private LoginUtils() {
+		//hide
+	}
 }

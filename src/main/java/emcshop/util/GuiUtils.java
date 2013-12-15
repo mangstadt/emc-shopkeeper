@@ -105,4 +105,8 @@ public class GuiUtils {
 		Cursor cursor = busy ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) : Cursor.getDefaultCursor();
 		window.setCursor(cursor);
 	}
+
+	private GuiUtils() {
+		//hide
+	}
 }

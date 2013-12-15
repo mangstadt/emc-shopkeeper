@@ -112,4 +112,8 @@ public class ClasspathUtils {
 
 		return filesInPackage;
 	}
+
+	private ClasspathUtils() {
+		//hide
+	}
 }

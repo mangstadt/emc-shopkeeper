@@ -81,4 +81,8 @@ public class NumberFormatter {
 		String color = (number < 0) ? "red" : "green";
 		return "<font color=" + color + ">" + text + "</font>";
 	}
+
+	private NumberFormatter() {
+		//hide
+	}
 }
