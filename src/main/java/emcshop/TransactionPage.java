@@ -47,31 +47,37 @@ public class TransactionPage {
 	 */
 	private final DateFormat weekOldTimestampFormat = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
 
-	private boolean loggedIn;
-	private Integer rupeeBalance;
-	private List<RupeeTransaction> transactions = new ArrayList<RupeeTransaction>();
+	private final boolean loggedIn;
+	private final Integer rupeeBalance;
+	private final List<RupeeTransaction> transactions = new ArrayList<RupeeTransaction>();
 
 	/**
 	 * @param document the webpage to parse
 	 */
 	public TransactionPage(Document document) {
-		Elements elements = document.select("li.sectionItem");
-		if (elements.isEmpty()) {
+		rupeeBalance = parseRupeeBalance(document);
+
+		Element containerElement = document.select("ol.sectionItems").first();
+		if (containerElement == null) {
 			loggedIn = false;
 			return;
 		}
 		loggedIn = true;
 
-		rupeeBalance = parseRupeeBalance(document);
-
+		Elements elements = containerElement.select("li.sectionItem");
 		for (Element element : elements) {
-			String description = parseDescription(element);
-			RupeeTransaction transaction = parseTransaction(description);
+			try {
+				String description = parseDescription(element);
+				RupeeTransaction transaction = parseTransaction(description);
 
-			transaction.setTs(parseTs(element));
-			transaction.setAmount(parseAmount(element));
-			transaction.setBalance(parseBalance(element));
-			transactions.add(transaction);
+				transaction.setTs(parseTs(element));
+				transaction.setAmount(parseAmount(element));
+				transaction.setBalance(parseBalance(element));
+				transactions.add(transaction);
+			} catch (Throwable t) {
+				//skip if any of the fields cannot be properly parsed
+				logger.log(Level.WARNING, "Problem parsing transaction from webpage.", t);
+			}
 		}
 	}
 
@@ -163,7 +169,6 @@ public class TransactionPage {
 
 	private BonusFeeTransaction toBonusOrFeeTransaction(String description) {
 		Matcher m = signInBonusRegex.matcher(description);
-
 		if (m.find()) {
 			BonusFeeTransaction t = new BonusFeeTransaction();
 			t.setSignInBonus(true);
@@ -229,62 +234,40 @@ public class TransactionPage {
 	}
 
 	private String parseDescription(Element transactionElement) {
-		Element descriptionElement = transactionElement.select("div.description").first();
-		return (descriptionElement == null) ? null : descriptionElement.text();
+		Element descriptionElement = transactionElement.select("div.description").first(); //do not check for null (exception is caught in the constructor)
+		return descriptionElement.text();
 	}
 
-	private Date parseTs(Element transactionElement) {
+	private Date parseTs(Element transactionElement) throws ParseException {
 		Element tsElement = transactionElement.select("div.time abbr[data-time]").first();
 		if (tsElement != null) {
 			String dataTime = tsElement.attr("data-time");
-			try {
-				long ts = Long.parseLong(dataTime) * 1000;
-				return new Date(ts);
-			} catch (NumberFormatException e) {
-				logger.log(Level.WARNING, "Transaction time could not be parsed from webpage: " + dataTime, e);
-			}
+			long ts = Long.parseLong(dataTime) * 1000; //do not check for NumberFormatException (exception is caught in the constructor)
+			return new Date(ts);
 		} else {
 			tsElement = transactionElement.select("div.time span[title]").first();
 			String tsText = tsElement.attr("title");
-			try {
-				return weekOldTimestampFormat.parse(tsText);
-			} catch (ParseException e) {
-				logger.log(Level.WARNING, "Transaction time could not be parsed from webpage: " + tsText, e);
-			}
+			return weekOldTimestampFormat.parse(tsText);
 		}
-		return null;
 	}
 
 	private int parseAmount(Element element) {
 		Element amountElement = element.select("div.amount").first();
-		if (amountElement != null) {
-			String amountText = amountElement.text();
-			Matcher m = amountRegex.matcher(amountText);
-			if (m.find()) {
-				try {
-					int amount = Integer.parseInt(m.group(2).replace(",", ""));
-					if ("-".equals(m.group(1))) {
-						amount *= -1;
-					}
-					return amount;
-				} catch (NumberFormatException e) {
-					logger.log(Level.WARNING, "Transaction amount could not be parsed from webpage: " + amountText, e);
-				}
-			}
+		String amountText = amountElement.text();
+
+		Matcher m = amountRegex.matcher(amountText);
+		m.find();
+
+		int amount = Integer.parseInt(m.group(2).replace(",", "")); //do not check for NumberFormatException (exception is caught in the constructor)
+		if ("-".equals(m.group(1))) {
+			amount *= -1;
 		}
-		return 0;
+		return amount;
 	}
 
 	private int parseBalance(Element element) {
-		Element balanceElement = element.select("div.balance").first();
-		if (balanceElement != null) {
-			String balanceText = balanceElement.text().replace(",", "");
-			try {
-				return Integer.parseInt(balanceText);
-			} catch (NumberFormatException e) {
-				logger.log(Level.WARNING, "Transaction balance could not be parsed from webpage: " + balanceText, e);
-			}
-		}
-		return 0;
+		Element balanceElement = element.select("div.balance").first(); //do not check for null (exception is caught in the constructor)
+		String balanceText = balanceElement.text().replace(",", "");
+		return Integer.parseInt(balanceText);
 	}
 }

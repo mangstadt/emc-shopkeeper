@@ -5,10 +5,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,9 +26,7 @@ import emcshop.util.ClasspathUtils;
 public class TransactionPageTest {
 	@Test
 	public void transactionPage() throws Exception {
-		InputStream in = ClasspathUtils.getResourceAsStream("transaction-page-sample.html", TransactionPageTest.class);
-		Document d = Jsoup.parse(in, "UTF-8", "");
-		TransactionPage page = new TransactionPage(d);
+		TransactionPage page = load("transaction-page-sample.html");
 
 		assertTrue(page.isLoggedIn());
 		assertEquals(new Date(1354210000000L), page.getFirstTransactionDate());
@@ -32,12 +34,12 @@ public class TransactionPageTest {
 
 		List<RupeeTransaction> expected = new ArrayList<RupeeTransaction>();
 
-		RawTransaction t = new RawTransaction();
-		t.setTs(new Date(1354210000000L));
-		t.setDescription("Blah");
-		t.setAmount(500);
-		t.setBalance(212994);
-		expected.add(t);
+		RawTransaction rt = new RawTransaction();
+		rt.setTs(new Date(1354210000000L));
+		rt.setDescription("Blah");
+		rt.setAmount(500);
+		rt.setBalance(212994);
+		expected.add(rt);
 
 		ShopTransaction st = new ShopTransaction();
 		st.setTs(new Date(1354230649000L));
@@ -136,19 +138,51 @@ public class TransactionPageTest {
 		bft.setEggifyFee(true);
 		expected.add(bft);
 
+		DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
+		rt = new RawTransaction();
+		rt.setTs(df.parse("Nov 22, 2012 at 9:54 PM"));
+		rt.setDescription("Week-old transaction");
+		rt.setAmount(-100);
+		rt.setBalance(212990);
+		expected.add(rt);
+
 		List<RupeeTransaction> actual = page.getTransactions();
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void loggedOutPage() throws Exception {
-		InputStream in = ClasspathUtils.getResourceAsStream("transaction-page-not-logged-in.html", TransactionPageTest.class);
-		Document d = Jsoup.parse(in, "UTF-8", "");
-		TransactionPage page = new TransactionPage(d);
+		TransactionPage page = load("transaction-page-not-logged-in.html");
 
 		assertFalse(page.isLoggedIn());
 		assertNull(page.getFirstTransactionDate());
 		assertNull(page.getRupeeBalance());
 		assertTrue(page.getTransactions().isEmpty());
+	}
+
+	@Test
+	public void invalidRupeeBalance() throws Exception {
+		TransactionPage page = load("transaction-page-invalid-rupee-balance.html");
+
+		assertTrue(page.isLoggedIn());
+		assertNull(page.getFirstTransactionDate());
+		assertNull(page.getRupeeBalance());
+		assertTrue(page.getTransactions().isEmpty());
+	}
+
+	@Test
+	public void missingRupeeBalance() throws Exception {
+		TransactionPage page = load("transaction-page-missing-rupee-balance.html");
+
+		assertTrue(page.isLoggedIn());
+		assertNull(page.getFirstTransactionDate());
+		assertNull(page.getRupeeBalance());
+		assertTrue(page.getTransactions().isEmpty());
+	}
+
+	private TransactionPage load(String file) throws IOException {
+		InputStream in = ClasspathUtils.getResourceAsStream(file, TransactionPageTest.class);
+		Document document = Jsoup.parse(in, "UTF-8", "");
+		return new TransactionPage(document);
 	}
 }
