@@ -60,6 +60,7 @@
 	<Item name="Chicken" />
 	<Item name="Chicken Egg" />
 	<Item name="Chirp Disc" />
+	<Item name="Chiseled Quartz" />
 	<Item name="Clay Ball" />
 	<Item name="Clay Block" />
 	<Item name="Clock" />
@@ -285,6 +286,7 @@
 	<Item name="Purple Wool" />
 	<Item name="Quartz" />
 	<Item name="Quartz Block" />
+	<Item name="Quartz Pillar" />
 	<Item name="Quartz Ore" />
 	<Item name="Rails" />
 	<Item name="Raw Beef" />
