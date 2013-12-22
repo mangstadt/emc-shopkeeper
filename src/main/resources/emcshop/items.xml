@@ -5,6 +5,8 @@
 	<Item name="Acacia Log" id="162:0" emcNames="Acacia Wood" />
 	<Item name="Acacia Plank" id="5:4" />
 	<Item name="Acacia Sapling" id="6:4" />
+	<Item name="Acacia Slab" id="126:4" />
+	<Item name="Acacia Stairs" id="163"  />
 	<Item name="Allium" id="38:2" />
 	<Item name="Anvil" id="145" />
 	<Item name="Apple" id="260" />
@@ -90,6 +92,8 @@
 	<Item name="Dark Oak Log" emcNames="Dark Oak Wood" />
 	<Item name="Dark Oak Plank" id="5:5" />
 	<Item name="Dark Oak Sapling" id="6:5" emcNames="Darkoak Sapling" />
+	<Item name="Dark Oak Slab" id="126:5" />
+	<Item name="Dark Oak Stairs" id="164" />
 	<Item name="Daylight Detector" id="151" />
 	<Item name="Dead Bush" id="32" />
 	<Item name="Detector Rail" id="28" />
@@ -241,7 +245,7 @@
 	<Item name="Nethbrick" id="405" />
 	<Item name="Nether Brick" id="112" />
 	<Item name="Nether Brick Stairs" id="114" />
-	<Item name="Nether Brick Fence" id="113" emcNames="Nether Fence" />
+	<Item name="Nether Fence" id="113" />
 	<Item name="Nether Brick Slab" id="44:6" emcNames="Nethbrick Slab" />
 	<Item name="Nether Stalk" id="372" />
 	<Item name="Nether Star" id="399" />
