@@ -7,64 +7,64 @@
 	<Item name="Acacia Sapling" />
 	<Item name="Allium" />
 	<Item name="Anvil" id="145" />
-	<Item name="Apple" />
-	<Item name="Arrow" />
+	<Item name="Apple" id="260" />
+	<Item name="Arrow" id="262" />
 	<Item name="Azure Bluet" />
-	<Item name="Baked Potato" />
-	<Item name="Bat Egg" />
-	<Item name="Beacon" />
-	<Item name="Bed" />
+	<Item name="Baked Potato" id="393" />
+	<Item name="Bat Egg" id="383:65" />
+	<Item name="Beacon" id="138" />
+	<Item name="Bed" id="355" />
 	<Item name="Birch Leaves" id="18:2" />
 	<Item name="Birch Log" id="17:2" />
 	<Item name="Birch Plank" id="5:2" />
 	<Item name="Birch Sapling" id="6:2" />
 	<Item name="Birch Slab" id="126:2" />
 	<Item name="Birch Stairs" id="135" />
-	<Item name="Black Stclay" />
+	<Item name="Black Stclay" id="159:15" />
 	<Item name="Black Dye" id="351:0" />
 	<Item name="Black Wool" id="35:15" />
-	<Item name="Blaze Powder" />
-	<Item name="Blaze Rod" />
+	<Item name="Blaze Powder" id="377" />
+	<Item name="Blaze Rod" id="369" />
 	<Item name="Blocks Disc" id="2258" />
-	<Item name="Blue Stclay" />
+	<Item name="Blue Stclay" id="159:11" />
 	<Item name="Blue Dye" id="351:4" />
 	<Item name="Blue Orchid" />
 	<Item name="Blue Wool" id="35:11" />
-	<Item name="Boat" />
-	<Item name="Bone" />
+	<Item name="Boat" id="333" />
+	<Item name="Bone" id="352" />
 	<Item name="Bone Meal" emcNames="Bonemeal" />
-	<Item name="Book" />
-	<Item name="Book And Quill" />
+	<Item name="Book" id="340" />
+	<Item name="Book And Quill" id="386" />
 	<Item name="Bookshelf" id="47" />
-	<Item name="Bow" />
-	<Item name="Bowl" />
-	<Item name="Bread" />
+	<Item name="Bow" id="261" />
+	<Item name="Bowl" id="281" />
+	<Item name="Bread" id="297" />
 	<Item name="Brewing Stand" id="117" />
 	<Item name="Brick" id="336" />
 	<Item name="Brick Block" id="45" />
 	<Item name="Brick Slab" id="44:4" />
 	<Item name="Brick Stairs" id="108" />
-	<Item name="Brown Stclay" />
+	<Item name="Brown Stclay" id="159:12" />
 	<Item name="Brown Mushroom" id="39" />
 	<Item name="Brown Wool" id="35:12" />
-	<Item name="Cactus" />
-	<Item name="Cake" />
-	<Item name="Carrot" emcNames="Carrot Item" />
+	<Item name="Cactus" id="81" />
+	<Item name="Cake" id="354" />
+	<Item name="Carrot" id="391" emcNames="Carrot Item" />
 	<Item name="Cat Disc" id="2257" />
 	<Item name="Cauldron" id="118" />
-	<Item name="Chain Boots" />
-	<Item name="Chain Chestplate" />
-	<Item name="Chain Helmet" />
-	<Item name="Chain Leggings" />
+	<Item name="Chain Boots" id="305" />
+	<Item name="Chain Chestplate" id="303" />
+	<Item name="Chain Helmet" id="302" />
+	<Item name="Chain Leggings" id="304" />
 	<Item name="Charcoal" id="263:1" />
 	<Item name="Chest" id="54" />
-	<Item name="Chicken" />
-	<Item name="Chicken Egg" />
+	<Item name="Chicken" id="366" />
+	<Item name="Chicken Egg" id="383:93" />
 	<Item name="Chirp Disc" id="2259" />
 	<Item name="Chiseled Quartz" id="155:1" />
-	<Item name="Clay Ball" />
+	<Item name="Clay Ball" id="337" />
 	<Item name="Clay Block" id="82" />
-	<Item name="Clock" />
+	<Item name="Clock" id="347" />
 	<Item name="Clownfish" />
 	<Item name="Coal" id="263:0" />
 	<Item name="Coal Block" id="173" />
@@ -74,15 +74,15 @@
 	<Item name="Cobblestone Slab" id="44:3" emcNames="Cobble Slab" />
 	<Item name="Cobblestone Stairs" id="67" />
 	<Item name="Cocoa Beans" id="351:3" emcNames="Brown Dye" />
-	<Item name="Compass" />
-	<Item name="Cooked Fish" />
+	<Item name="Compass" id="345" />
+	<Item name="Cooked Fish" id="350" />
 	<Item name="Cooked Salmon" />
-	<Item name="Cookie" />
-	<Item name="Cow Egg" />
+	<Item name="Cookie" id="357" />
+	<Item name="Cow Egg" id="383:92" />
 	<Item name="Cracked Stone" id="98:2" />
-	<Item name="Creeper Head" />
+	<Item name="Creeper Head" id="397:4" />
 	<Item name="Creeper Sandstone" id="24:1" emcNames="Creeper Sandsto" />
-	<Item name="Cyan Stclay" />
+	<Item name="Cyan Stclay" id="159:9" />
 	<Item name="Cyan Dye" id="351:6" />
 	<Item name="Cyan Wool" id="35:9" />
 	<Item name="Dandelion" id="37" />
@@ -90,7 +90,7 @@
 	<Item name="Dark Oak Log" emcNames="Dark Oak Wood" />
 	<Item name="Dark Oak Plank" />
 	<Item name="Dark Oak Sapling" emcNames="Darkoak Sapling" />
-	<Item name="Daylight Detector" />
+	<Item name="Daylight Detector" id="151" />
 	<Item name="Dead Bush" id="32" />
 	<Item name="Detector Rail" id="28" />
 	<Item name="Diamond" id="264" />
@@ -110,8 +110,8 @@
 	<Item name="Dispenser" id="23" />
 	<Item name="Door" id="64" />
 	<Item name="Dragon Egg" />
-	<Item name="Dropper" />
-	<Item name="Egg" />
+	<Item name="Dropper" id="158" />
+	<Item name="Egg" id="344" />
 	<Item name="Emerald" id="388" />
 	<Item name="Emerald Block" id="133" />
 	<Item name="Emerald Ore" id="129" />
@@ -119,27 +119,27 @@
 	<Item name="End Stone" id="121" />
 	<Item name="Ender Chest" id="130" />
 	<Item name="Ender Pearl" id="368" />
-	<Item name="Exp Bottle" />
+	<Item name="Exp Bottle" id="384" />
 	<Item name="Eye Of Ender" id="381" />
 	<Item name="Far Disc" id="2260" />
-	<Item name="Feather" />
+	<Item name="Feather" id="288" />
 	<Item name="Fence" id="85" />
 	<Item name="Fence Gate" id="107" />
-	<Item name="Fermented Spider Eye" />
+	<Item name="Fermented Spider Eye" id="376" />
 	<Item name="Fern" id="31:2" />
-	<Item name="Firework" />
-	<Item name="Fishing Rod" />
-	<Item name="Flint" />
-	<Item name="Flint And Steel" />
-	<Item name="Flower Pot" emcNames="Flower Pot Item" />
+	<Item name="Firework" id="401" />
+	<Item name="Fishing Rod" id="346" />
+	<Item name="Flint" id="318" />
+	<Item name="Flint And Steel" id="259" />
+	<Item name="Flower Pot" id="390" emcNames="Flower Pot Item" />
 	<Item name="Furnace" id="61" />
-	<Item name="Ghast Tear" />
+	<Item name="Ghast Tear" id="370" />
 	<Item name="Glass" id="20" />
-	<Item name="Glass Bottle" />
+	<Item name="Glass Bottle" id="374" />
 	<Item name="Glass Pane" id="102" />
-	<Item name="Glistering Melon" />
+	<Item name="Glistering Melon" id="382" />
 	<Item name="Glowstone" id="89" />
-	<Item name="Glowstone Dust" />
+	<Item name="Glowstone Dust" id="348" />
 	<Item name="Gold Axe" id="286" />
 	<Item name="Gold Barding" id="418" />
 	<Item name="Gold Block" id="41" />
@@ -158,28 +158,28 @@
 	<Item name="Golden Carrot" id="396" />
 	<Item name="Grass" id="2" />
 	<Item name="Gravel" id="13" />
-	<Item name="Gray Stclay" />
+	<Item name="Gray Stclay" id="159:7" />
 	<Item name="Gray Dye" id="351:8" />
 	<Item name="Gray Wool" id="35:7" />
-	<Item name="Green Stclay" />
+	<Item name="Green Stclay" id="159:13" />
 	<Item name="Green Dye" id="351:2" />
 	<Item name="Green Wool" id="35:13" />
-	<Item name="Gunpowder" />
-	<Item name="Hard Clay" />
+	<Item name="Gunpowder" id="289" emcNames="Sulphur" />
+	<Item name="Hard Clay" id="172" />
 	<Item name="Haunted Candy - Bone" emcNames="Bone - §eHaunted Candy" />
 	<Item name="Haunted Candy - Ender Pearl" emcNames="Ender Pearl - §eHaunted Candy" />
 	<Item name="Haunted Candy - Gunpowder" emcNames="Gunpowder - §eHaunted Candy" />
 	<Item name="Haunted Candy - Rotten Flesh" emcNames="Rotten Flesh - §eHaunted Candy" />
 	<Item name="Haunted Candy - Spider Eye" emcNames="Spider Eye - §eHaunted Candy" />
-	<Item name="Hay Block" />
-	<Item name="Hopper" />
+	<Item name="Hay Block" id="170" />
+	<Item name="Hopper" id="154" />
 	<Item name="Ice" id="79" />
 	<Item name="Iron Axe" id="258" />
 	<Item name="Iron Barding" id="417" />
 	<Item name="Iron Bars" id="101" />
 	<Item name="Iron Block" id="42" />
 	<Item name="Iron Boots" id="309" />
-	<Item name="Iron Bucket" />
+	<Item name="Iron Bucket" id="325" />
 	<Item name="Iron Chest" id="307" />
 	<Item name="Iron Door" id="71" />
 	<Item name="Iron Helmet" id="306" />
@@ -190,7 +190,7 @@
 	<Item name="Iron Pickaxe" id="257" />
 	<Item name="Iron Shovel" id="256" />
 	<Item name="Iron Sword" id="267" />
-	<Item name="Item Frame" />
+	<Item name="Item Frame" id="389" />
 	<Item name="Jack O Lantern" id="91" />
 	<Item name="Jukebox" id="84" />
 	<Item name="Jungle Leaves" id="18:3" />
@@ -202,48 +202,49 @@
 	<Item name="Ladder" id="65" />
 	<Item name="Lapis Block" id="22" />
 	<Item name="Lapis Ore" id="21" />
-	<Item name="Lava Bucket" />
-	<Item name="Leash" />
-	<Item name="Leather" />
-	<Item name="Leather Boots" />
-	<Item name="Leather Chest" />
-	<Item name="Leather Helmet" />
-	<Item name="Leather Leggings" />
+	<Item name="Lava Bucket" id="327" />
+	<Item name="Leash" id="420" />
+	<Item name="Leather" id="334" />
+	<Item name="Leather Boots" id="301" />
+	<Item name="Leather Chest" id="299" />
+	<Item name="Leather Helmet" id="298" />
+	<Item name="Leather Leggings" id="300" />
 	<Item name="Lever" id="69" />
-	<Item name="Lghtblue Stclay" />
+	<Item name="Lghtblue Stclay" id="159:3" />
 	<Item name="Light Blue Dye" id="351:12" />
 	<Item name="Light Blue Wool" id="35:3" />
-	<Item name="Lghtgray Stclay" />
+	<Item name="Lghtgray Stclay" id="159:8" />
 	<Item name="Lilac" />
-	<Item name="Lime Stclay" />
+	<Item name="Lime Stclay" id="159:5" />
 	<Item name="Lime Dye" id="351:10" />
 	<Item name="Lime Wool" id="35:5" />
-	<Item name="Long Grass" />
-	<Item name="Magenta Stclay" />
+	<Item name="Long Grass" id="31:1" />
+	<Item name="Magenta Stclay" id="159:2" />
 	<Item name="Magenta Dye" id="351:13" />
 	<Item name="Magenta Wool" id="35:2" />
-	<Item name="Magma Cream" />
+	<Item name="Magma Cream" id="378" />
 	<Item name="Mall Disc" id="2261" />
-	<Item name="Map" />
+	<Item name="Map" id="358" />
 	<Item name="Mellohi Disc" id="2262" />
-	<Item name="Melon" />
+	<Item name="Melon" id="360" />
 	<Item name="Melon Block" id="103" />
-	<Item name="Melon Seeds" />
-	<Item name="Milk Bucket" />
-	<Item name="Minecart" />
-	<Item name="Mooshroom Egg" />
+	<Item name="Melon Seeds" id="362" />
+	<Item name="Milk Bucket" id="335" />
+	<Item name="Minecart" id="328" />
+	<Item name="Mooshroom Egg" id="383:96" />
 	<Item name="Mossy Cobble" id="48" />
 	<Item name="Mossy Stone" id="98:1" />
 	<Item name="Mossy Wall" id="139:1" />
-	<Item name="Mushroom Stew" />
+	<Item name="Mushroom Stew" id="282" />
 	<Item name="Mycel" id="110" />
+	<Item name="Name Tag" id="421" />
 	<Item name="Nethbrick" id="405" />
 	<Item name="Nether Brick" id="112" />
 	<Item name="Nether Brick Stairs" id="114" />
 	<Item name="Nether Brick Fence" id="113" emcNames="Nether Fence" />
 	<Item name="Nether Brick Slab" id="44:6" emcNames="Nethbrick Slab" />
-	<Item name="Nether Stalk" />
-	<Item name="Nether Star" />
+	<Item name="Nether Stalk" id="372" />
+	<Item name="Nether Star" id="399" />
 	<Item name="Netherrack" id="87" />
 	<Item name="Note Block" id="25" />
 	<Item name="Oak Leaves" id="18:0" emcNames="Leaves" />
@@ -253,41 +254,41 @@
 	<Item name="Oak Slab" id="126:0" emcNames="Wood Slab" />
 	<Item name="Oak Stairs" id="53" emcNames="Wood Stairs" />
 	<Item name="Obsidian" id="49" />
-	<Item name="Ocelot Egg" />
-	<Item name="Orange Stclay" />
+	<Item name="Ocelot Egg" id="383:98" />
+	<Item name="Orange Stclay" id="159:1" />
 	<Item name="Orange Dye" id="351:14" />
 	<Item name="Orange Tulip" />
 	<Item name="Orange Wool" id="35:1" />
 	<Item name="Oxeye Daisy" />
 	<Item name="Packed Ice" />
-	<Item name="Painting" />
-	<Item name="Paper" />
+	<Item name="Painting" id="321" />
+	<Item name="Paper" id="339" />
 	<Item name="Peony" />
-	<Item name="Pig Egg" />
+	<Item name="Pig Egg" id="383:90" />
 	<Item name="Pine Leaves" id="18:1" emcNames="Spruce Leaves" />
 	<Item name="Pine Log" id="17:1" />
 	<Item name="Pine Plank" id="5:1" />
 	<Item name="Pine Sapling" id="6:1" />
 	<Item name="Pine Slab" id="126:1" />
 	<Item name="Pine Stairs" id="134" />
-	<Item name="Pink Stclay" />
+	<Item name="Pink Stclay" id="159:6" />
 	<Item name="Pink Dye" id="351:9" />
 	<Item name="Pink Tulip" />
 	<Item name="Pink Wool" id="35:6" />
 	<Item name="Piston" id="33" />
 	<Item name="Podzol" />
-	<Item name="Poisonous Potato" />
+	<Item name="Poisonous Potato" id="394" />
 	<Item name="Poppy" id="38" emcNames="Rose" />
-	<Item name="Pork" />
-	<Item name="Pork Chop" />
-	<Item name="Potato" emcNames="Potato Item" />
-	<Item name="Powered Minecart" />
+	<Item name="Pork" id="319" />
+	<Item name="Pork Chop" id="320" />
+	<Item name="Potato" id="392" emcNames="Potato Item" />
+	<Item name="Powered Minecart" id="343" />
 	<Item name="Powered Rail" id="27" />
 	<Item name="Pufferfish" />
 	<Item name="Pumpkin" id="86" />
-	<Item name="Pumpkin Pie" />
-	<Item name="Pumpkin Seeds" />
-	<Item name="Purple Stclay" />
+	<Item name="Pumpkin Pie" id="400" />
+	<Item name="Pumpkin Seeds" id="361" />
+	<Item name="Purple Stclay" id="159:10" />
 	<Item name="Purple Dye" id="351:5" />
 	<Item name="Purple Wool" id="35:10" />
 	<Item name="Quartz" id="406" />
@@ -297,12 +298,12 @@
 	<Item name="Quartz Slab" id="44:7" />
 	<Item name="Quartz Stairs" id="156" />
 	<Item name="Rails" id="66" />
-	<Item name="Raw Beef" />
-	<Item name="Raw Chicken" />
-	<Item name="Raw Fish" />
+	<Item name="Raw Beef" id="363" />
+	<Item name="Raw Chicken" id="365" />
+	<Item name="Raw Fish" id="349" />
 	<Item name="Raw Salmon" />
-	<Item name="Record 12" />
-	<Item name="Red Stclay" />
+	<Item name="Record 12" id="2267" />
+	<Item name="Red Stclay" id="159:14" />
 	<Item name="Red Dye" id="351:1" />
 	<Item name="Red Mushroom" id="40" />
 	<Item name="Red Sand" id="12:1" />
@@ -315,31 +316,31 @@
 	<Item name="Redstone Torch" id="76" />
 	<Item name="Repeater" id="356" />
 	<Item name="Rose Bush" />
-	<Item name="Rotten Flesh" />
-	<Item name="Saddle" />
+	<Item name="Rotten Flesh" id="367" />
+	<Item name="Saddle" id="329" />
 	<Item name="Sand" id="12" />
 	<Item name="Sandstone" id="24:0" />
 	<Item name="Sandstone Slab" id="44:1" />
 	<Item name="Sandstone Stairs" id="128" />
-	<Item name="Seeds" />
-	<Item name="Shears" />
-	<Item name="Sheep Egg" />
+	<Item name="Seeds" id="295" />
+	<Item name="Shears" id="359" />
+	<Item name="Sheep Egg" id="383:91" />
 	<Item name="Shiny Arrow" emcNames="Arrow - §bShiny Arrow" />
 	<Item name="Shiny Flesh" emcNames="Rotten Flesh - §6Shiny Flesh" />
 	<Item name="Sign" id="63" />
 	<Item name="Silver Dye" id="351:7" />
 	<Item name="Silver Wool" id="35:8" />
-	<Item name="Skull Item" />
-	<Item name="Slime Ball" />
+	<Item name="Skull Item" id="397:0" />
+	<Item name="Slime Ball" id="341" />
 	<Item name="Smooth Sandstone" id="24:2" emcNames="Smooth Sandston" />
-	<Item name="Snow Ball" />
+	<Item name="Snow Ball" id="332" />
 	<Item name="Snow Block" id="80" />
 	<Item name="Soul Sand" id="88" />
-	<Item name="Spider Eye" />
-	<Item name="Squid Egg" />
+	<Item name="Spider Eye" id="375" />
+	<Item name="Squid Egg" id="383:94" />
 	<Item name="Stal Disc" id="2263" />
-	<Item name="Steak" />
-	<Item name="Stick" />
+	<Item name="Steak" id="364" />
+	<Item name="Stick" id="280" />
 	<Item name="Sticky Piston" id="29" />
 	<Item name="Stone" id="1" />
 	<Item name="Stone Axe" id="275" />
@@ -352,121 +353,120 @@
 	<Item name="Stone Shovel" id="273" />
 	<Item name="Stone Slab" id="44:0" />
 	<Item name="Stone Sword" id="272" />
-	<Item name="Storage Minecart" />
+	<Item name="Storage Minecart" id="342" />
 	<Item name="Strad Disc" id="2264" />
-	<Item name="String" />
-	<Item name="Sugar" />
-	<Item name="Sugar Cane" />
-	<Item name="Sulphur" />
+	<Item name="String" id="287" />
+	<Item name="Sugar" id="353" />
+	<Item name="Sugar Cane" id="338" />
 	<Item name="Sunflower" />
 	<Item name="Tall Grass" id="31:1" />
 	<Item name="Tnt" id="46" />
 	<Item name="Torch" id="50" />
 	<Item name="Trapdoor" id="96" />
 	<Item name="Trapped Chest" id="146" />
-	<Item name="Villager Egg" />
+	<Item name="Villager Egg" id="383:120" />
 	<Item name="Vine" id="106" />
 	<Item name="Ward Disc" id="2265" />
 	<Item name="Water Bottle" />
-	<Item name="Water Bucket" />
+	<Item name="Water Bucket" id="326" />
 	<Item name="Water Lily" id="111" />
 	<Item name="Web" id="30" />
-	<Item name="Wheat" />
-	<Item name="White Stclay" />
+	<Item name="Wheat" id="296" />
+	<Item name="White Stclay" id="159:0" />
 	<Item name="White Tulip" />
 	<Item name="White Wool" id="35:0" />
-	<Item name="Wither Head" />
-	<Item name="Wither Skull" />
-	<Item name="Wolf Egg" />
+	<Item name="Wither Head" id="397:1" />
+	<Item name="Wither Skull" id="397:1" />
+	<Item name="Wolf Egg" id="383:95" />
 	<Item name="Wood Button" id="143" />
-	<Item name="Wooden Axe" />
-	<Item name="Wooden Hoe" />
-	<Item name="Wooden Pickaxe" />
-	<Item name="Wooden Plate" />
-	<Item name="Wooden Shovel" />
-	<Item name="Wooden Sword" />
+	<Item name="Wooden Axe" id="271" />
+	<Item name="Wooden Hoe" id="290" />
+	<Item name="Wooden Pickaxe" id="270" />
+	<Item name="Wooden Plate" id="72" />
+	<Item name="Wooden Shovel" id="269" />
+	<Item name="Wooden Sword" id="268" />
 	<Item name="Workbench" id="58" />
-	<Item name="Yellow Stclay" />
+	<Item name="Yellow Stclay" id="159:4" />
 	<Item name="Yellow Dye" id="351:11" />
 	<Item name="Yellow Wool" id="35:4" />
-	<Item name="Zombie Head" />
+	<Item name="Zombie Head" id="397:2" />
 	<Item name="Zombie Virus" emcNames="Water Bottle - §aZombie Virus" image="water_bottle.png" />
 	
 	<!-- Potions -->
 	
-	<Item name="Awkward Potion" emcNames="Potion:16" image="water_bottle.png" />
-	<Item name="Thick Potion" emcNames="Potion:32" image="water_bottle.png" />
-	<Item name="Mundane Potion Ext" emcNames="Potion:64" image="water_bottle.png" />
-	<Item name="Mundane Potion" emcNames="Potion:8192" image="water_bottle.png" />
-	<Item name="Splash Mundane Potion" emcNames="Potion:16384" image="potion_splash.png" />
+	<Item name="Awkward Potion" id="373:16" emcNames="Potion:16" image="water_bottle.png" />
+	<Item name="Thick Potion" id="373:32" emcNames="Potion:32" image="water_bottle.png" />
+	<Item name="Mundane Potion Ext" id="373:64" emcNames="Potion:64" image="water_bottle.png" />
+	<Item name="Mundane Potion" id="373:8192" emcNames="Potion:8192" image="water_bottle.png" />
+	<Item name="Splash Mundane Potion" id="373:16384" emcNames="Potion:16384" image="potion_splash.png" />
 	
-	<Item name="Potion of Regeneration" emcNames="Potion:8193" image="potion_regeneration.png" />
-	<Item name="Potion of Regeneration II" emcNames="Potion:8225" image="potion_regeneration.png" />
-	<Item name="Potion of Regeneration Ext" emcNames="Potion:8257" image="potion_regeneration.png" />
-	<Item name="Splash Potion of Regeneration" emcNames="Potion:16385" image="potion_regeneration_splash.png" />
-	<Item name="Splash Potion of Regeneration II" emcNames="Potion:16417" image="potion_regeneration_splash.png" />
-	<Item name="Splash Potion of Regeneration Ext" emcNames="Potion:16449" image="potion_regeneration_splash.png" />
+	<Item name="Potion of Regeneration" id="373:8193" emcNames="Potion:8193" image="potion_regeneration.png" />
+	<Item name="Potion of Regeneration II" id="373:8225" emcNames="Potion:8225" image="potion_regeneration.png" />
+	<Item name="Potion of Regeneration Ext" id="373:8257" emcNames="Potion:8257" image="potion_regeneration.png" />
+	<Item name="Splash Potion of Regeneration" id="373:16385" emcNames="Potion:16385" image="potion_regeneration_splash.png" />
+	<Item name="Splash Potion of Regeneration II" id="373:16417" emcNames="Potion:16417" image="potion_regeneration_splash.png" />
+	<Item name="Splash Potion of Regeneration Ext" id="373:16449" emcNames="Potion:16449" image="potion_regeneration_splash.png" />
 
-	<Item name="Potion of Swiftness" emcNames="Potion:8194" image="potion_swiftness.png" />
-	<Item name="Potion of Swiftness II" emcNames="Potion:8226" image="potion_swiftness.png" />
-	<Item name="Potion of Swiftness Ext" emcNames="Potion:8258" image="potion_swiftness.png" />
-	<Item name="Splash Potion of Swiftness" emcNames="Potion:16386" image="potion_swiftness_splash.png" />
-	<Item name="Splash Potion of Swiftness II" emcNames="Potion:16418" image="potion_swiftness_splash.png" />
-	<Item name="Splash Potion of Swiftness Ext" emcNames="Potion:16450" image="potion_swiftness_splash.png" />
+	<Item name="Potion of Swiftness" id="373:8194" emcNames="Potion:8194" image="potion_swiftness.png" />
+	<Item name="Potion of Swiftness II" id="373:8226" emcNames="Potion:8226" image="potion_swiftness.png" />
+	<Item name="Potion of Swiftness Ext" id="373:8258" emcNames="Potion:8258" image="potion_swiftness.png" />
+	<Item name="Splash Potion of Swiftness" id="373:16386" emcNames="Potion:16386" image="potion_swiftness_splash.png" />
+	<Item name="Splash Potion of Swiftness II" id="373:16418" emcNames="Potion:16418" image="potion_swiftness_splash.png" />
+	<Item name="Splash Potion of Swiftness Ext" id="373:16450" emcNames="Potion:16450" image="potion_swiftness_splash.png" />
 
-	<Item name="Potion of Fire Resistance" emcNames="Potion:8195,Potion:8227" image="potion_fire_resistance.png" />
-	<Item name="Potion of Fire Resistance Ext" emcNames="Potion:8259" image="potion_fire_resistance.png" />
-	<Item name="Splash Potion of Fire Resistance" emcNames="Potion:16387,Potion:16419" image="potion_fire_resistance_splash.png" />
-	<Item name="Splash Potion of Fire Resistance Ext" emcNames="Potion:16451" image="potion_fire_resistance_splash.png" />
+	<Item name="Potion of Fire Resistance" id="373:8195,373:8227" emcNames="Potion:8195,Potion:8227" image="potion_fire_resistance.png" />
+	<Item name="Potion of Fire Resistance Ext" id="373:8259" emcNames="Potion:8259" image="potion_fire_resistance.png" />
+	<Item name="Splash Potion of Fire Resistance" id="373:16387,373:16419" emcNames="Potion:16387,Potion:16419" image="potion_fire_resistance_splash.png" />
+	<Item name="Splash Potion of Fire Resistance Ext" id="373:16451" emcNames="Potion:16451" image="potion_fire_resistance_splash.png" />
 
-	<Item name="Potion of Poison" emcNames="Potion:8196" image="potion_poison.png" />
-	<Item name="Potion of Poison II" emcNames="Potion:8228" image="potion_poison.png" />
-	<Item name="Potion of Poison Ext" emcNames="Potion:8260" image="potion_poison.png" />
-	<Item name="Splash Potion of Poison" emcNames="Potion:16388" image="potion_poison_splash.png" />
-	<Item name="Splash Potion of Poison II" emcNames="Potion:16420" image="potion_poison_splash.png" />
-	<Item name="Splash Potion of Poison Ext" emcNames="Potion:16452" image="potion_poison_splash.png" />
+	<Item name="Potion of Poison" id="373:8196" emcNames="Potion:8196" image="potion_poison.png" />
+	<Item name="Potion of Poison II" id="373:8228" emcNames="Potion:8228" image="potion_poison.png" />
+	<Item name="Potion of Poison Ext" id="373:8260" emcNames="Potion:8260" image="potion_poison.png" />
+	<Item name="Splash Potion of Poison" id="373:16388" emcNames="Potion:16388" image="potion_poison_splash.png" />
+	<Item name="Splash Potion of Poison II" id="373:16420" emcNames="Potion:16420" image="potion_poison_splash.png" />
+	<Item name="Splash Potion of Poison Ext" id="373:16452" emcNames="Potion:16452" image="potion_poison_splash.png" />
 
-	<Item name="Potion of Health" emcNames="Potion:8197" image="potion_health.png" />
-	<Item name="Potion of Health II" emcNames="Potion:8229,Potion:8261" image="potion_health.png" />
-	<Item name="Splash Potion of Health" emcNames="Potion:16389" image="potion_health_splash.png" />
-	<Item name="Splash Potion of Health II" emcNames="Potion:16421,Potion:16453" image="potion_health_splash.png" />
+	<Item name="Potion of Health" id="373:8197" emcNames="Potion:8197" image="potion_health.png" />
+	<Item name="Potion of Health II" id="373:8229,373:8261" emcNames="Potion:8229,Potion:8261" image="potion_health.png" />
+	<Item name="Splash Potion of Health" id="373:16389" emcNames="Potion:16389" image="potion_health_splash.png" />
+	<Item name="Splash Potion of Health II" id="373:16421,373:16453" emcNames="Potion:16421,Potion:16453" image="potion_health_splash.png" />
 
-	<Item name="Potion of Night Vision" emcNames="Potion:8198,Potion:8230" image="potion_night_vision.png" />
-	<Item name="Potion of Night Vision Ext" emcNames="Potion:8262" image="potion_night_vision.png" />
-	<Item name="Splash Potion of Night Vision" emcNames="Potion:16390,Potion:16422" image="potion_night_vision_splash.png" />
-	<Item name="Splash Potion of Night Vision Ext" emcNames="Potion:16454" image="potion_night_vision_splash.png" />
+	<Item name="Potion of Night Vision" id="373:8198,373:8230" emcNames="Potion:8198,Potion:8230" image="potion_night_vision.png" />
+	<Item name="Potion of Night Vision Ext" id="373:8262" emcNames="Potion:8262" image="potion_night_vision.png" />
+	<Item name="Splash Potion of Night Vision" id="373:16390,373:16422" emcNames="Potion:16390,Potion:16422" image="potion_night_vision_splash.png" />
+	<Item name="Splash Potion of Night Vision Ext" id="373:16454" emcNames="Potion:16454" image="potion_night_vision_splash.png" />
 
-	<Item name="Potion of Weakness" emcNames="Potion:8200,Potion:8232" image="potion_weakness.png" />
-	<Item name="Potion of Weakness Ext" emcNames="Potion:8264" image="potion_weakness.png" />
-	<Item name="Splash Potion of Weakness" emcNames="Potion:16392,Potion:16424" image="potion_weakness_splash.png" />
-	<Item name="Splash Potion of Weakness Ext" emcNames="Potion:16456" image="potion_weakness_splash.png" />
+	<Item name="Potion of Weakness" id="373:8200,373:8232" emcNames="Potion:8200,Potion:8232" image="potion_weakness.png" />
+	<Item name="Potion of Weakness Ext" id="373:8264" emcNames="Potion:8264" image="potion_weakness.png" />
+	<Item name="Splash Potion of Weakness" id="373:16392,373:16424" emcNames="Potion:16392,Potion:16424" image="potion_weakness_splash.png" />
+	<Item name="Splash Potion of Weakness Ext" id="373:16456" emcNames="Potion:16456" image="potion_weakness_splash.png" />
 
-	<Item name="Potion of Strength" emcNames="Potion:8201" image="potion_strength.png" />
-	<Item name="Potion of Strength II" emcNames="Potion:8233" image="potion_strength.png" />
-	<Item name="Potion of Strength Ext" emcNames="Potion:8265" image="potion_strength.png" />
-	<Item name="Splash Potion of Strength" emcNames="Potion:16393" image="potion_strength_splash.png" />
-	<Item name="Splash Potion of Strength II" emcNames="Potion:16425" image="potion_strength_splash.png" />
-	<Item name="Splash Potion of Strength Ext" emcNames="Potion:16457" image="potion_strength_splash.png" />
+	<Item name="Potion of Strength" id="373:8201" emcNames="Potion:8201" image="potion_strength.png" />
+	<Item name="Potion of Strength II" id="373:8233" emcNames="Potion:8233" image="potion_strength.png" />
+	<Item name="Potion of Strength Ext" id="373:8265" emcNames="Potion:8265" image="potion_strength.png" />
+	<Item name="Splash Potion of Strength" id="373:16393" emcNames="Potion:16393" image="potion_strength_splash.png" />
+	<Item name="Splash Potion of Strength II" id="373:16425" emcNames="Potion:16425" image="potion_strength_splash.png" />
+	<Item name="Splash Potion of Strength Ext" id="373:16457" emcNames="Potion:16457" image="potion_strength_splash.png" />
 	
-	<Item name="Potion of Slowness" emcNames="Potion:8202,Potion:8234" image="potion_slowness.png" />
-	<Item name="Potion of Slowness Ext" emcNames="Potion:8266" image="potion_slowness.png" />
-	<Item name="Splash Potion of Slowness" emcNames="Potion:16394,Potion:16426" image="potion_slowness_splash.png" />
-	<Item name="Splash Potion of Slowness Ext" emcNames="Potion:16458" image="potion_slowness_splash.png" />
+	<Item name="Potion of Slowness" id="373:8202,373:8234" emcNames="Potion:8202,Potion:8234" image="potion_slowness.png" />
+	<Item name="Potion of Slowness Ext" id="373:8266" emcNames="Potion:8266" image="potion_slowness.png" />
+	<Item name="Splash Potion of Slowness" id="373:16394,373:16426" emcNames="Potion:16394,Potion:16426" image="potion_slowness_splash.png" />
+	<Item name="Splash Potion of Slowness Ext" id="373:16458" emcNames="Potion:16458" image="potion_slowness_splash.png" />
 	
-	<Item name="Potion of Harming" emcNames="Potion:8204" image="potion_harming.png" />
-	<Item name="Potion of Harming II" emcNames="Potion:8236,Potion:8268" image="potion_harming.png" />
-	<Item name="Splash Potion of Harming" emcNames="Potion:16396" image="potion_harming_splash.png" />
-	<Item name="Splash Potion of Harming II" emcNames="Potion:16428,Potion:16460,Potion:24620" image="potion_harming_splash.png" />
+	<Item name="Potion of Harming" id="373:8204" emcNames="Potion:8204" image="potion_harming.png" />
+	<Item name="Potion of Harming II" id="373:8236,373:8268" emcNames="Potion:8236,Potion:8268" image="potion_harming.png" />
+	<Item name="Splash Potion of Harming" id="373:16396" emcNames="Potion:16396" image="potion_harming_splash.png" />
+	<Item name="Splash Potion of Harming II" id="373:16428,373:16460,373:24620" emcNames="Potion:16428,Potion:16460,Potion:24620" image="potion_harming_splash.png" />
 
-	<Item name="Potion of Invisibility" emcNames="Potion:8206,Potion:8238" image="potion_invisibility.png" />
-	<Item name="Potion of Invisibility Ext" emcNames="Potion:8270" image="potion_invisibility.png" />
-	<Item name="Splash Potion of Invisibility" emcNames="Potion:16398,Potion:16430" image="potion_invisibility_splash.png" />
-	<Item name="Splash Potion of Invisibility Ext" emcNames="Potion:16462" image="potion_invisibility_splash.png" />
+	<Item name="Potion of Invisibility" id="373:8206,373:8238" emcNames="Potion:8206,Potion:8238" image="potion_invisibility.png" />
+	<Item name="Potion of Invisibility Ext" id="373:8270" emcNames="Potion:8270" image="potion_invisibility.png" />
+	<Item name="Splash Potion of Invisibility" id="373:16398,373:16430" emcNames="Potion:16398,Potion:16430" image="potion_invisibility_splash.png" />
+	<Item name="Splash Potion of Invisibility Ext" id="373:16462" emcNames="Potion:16462" image="potion_invisibility_splash.png" />
 	
-	<Item name="Potion of Water Breathing" emcNames="Potion:8205,Potion:8237" image="potion_water_breathing.png" />
-	<Item name="Potion of Water Breathing Ext" emcNames="Potion:8269" image="potion_water_breathing.png" />
-	<Item name="Splash Potion of Water Breathing" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" />
-	<Item name="Splash Potion of Water Breathing Ext" emcNames="Potion:16461" image="potion_water_breathing_splash.png" />
+	<Item name="Potion of Water Breathing" id="373:8205,373:8237" emcNames="Potion:8205,Potion:8237" image="potion_water_breathing.png" />
+	<Item name="Potion of Water Breathing Ext" id="373:8269" emcNames="Potion:8269" image="potion_water_breathing.png" />
+	<Item name="Splash Potion of Water Breathing" id="373:16397,373:16429" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" />
+	<Item name="Splash Potion of Water Breathing Ext" id="373:16461" emcNames="Potion:16461" image="potion_water_breathing_splash.png" />
 	
 	<Item name="Magenta Glass" emcNames="Magentastnglass" />
 	<Item name="Pink Glass" emcNames="Pink Stn Glass" />
