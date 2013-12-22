@@ -348,7 +348,7 @@
 	<Item name="Sticky Piston" id="29" />
 	<Item name="Stone" id="1" />
 	<Item name="Stone Axe" id="275" />
-	<Item name="Stone Button" id="77" />
+	<Item name="Stone Button" id="77" emcNames="Button" />
 	<Item name="Stone Brick" id="98" />
 	<Item name="Stone Brick Slab" id="44:5" emcNames="Stonebrick Slab" />
 	<Item name="Stone Brick Stairs" id="109" />
@@ -488,4 +488,22 @@
 	<Item name="Gray Glass" id="95:7" emcNames="Gray Stn Glass" />
 	<Item name="Light Gray Glass" id="95:8" emcNames="Ltgraystn Glass" />
 	<Item name="White Glass" id="95:0" emcNames="White Stn Glass" />
+	
+	<Item name="Magenta Glass Pane" id="160:2" />
+	<Item name="Pink Glass Pane" id="160:6" />
+	<Item name="Purple Glass Pane" id="160:10" />
+	<Item name="Cyan Glass Pane" id="160:9" />
+	<Item name="Blue Glass Pane" id="160:11" />
+	<Item name="Light Blue Glass Pane" id="160:3" />
+	<Item name="Green Glass Pane" id="160:13" />
+	<Item name="Lime Glass Pane" id="160:5" />
+	<Item name="Brown Glass Pane" id="160:12" />
+	<Item name="Red Glass Pane" id="160:14" />
+	<Item name="Orange Glass Pane" id="160:1" />
+	<Item name="Yellow Glass Pane" id="160:4" />
+	<Item name="Black Glass Pane" id="160:15" />
+	<Item name="Gray Glass Pane" id="160:7" />
+	<Item name="Light Gray Glass Pane" id="160:8" />
+	<Item name="White Glass Pane" id="160:0" />
+	
 </Items>
