@@ -38,7 +38,7 @@ public class BonusFeeTab extends JPanel {
 	 * are defined is the order that they will appear in the table.
 	 */
 	private enum Column {
-		DESCRIPTION("Item Name"), TOTAL("Total");
+		DESCRIPTION("Description"), TOTAL("Total");
 
 		private final String name;
 
