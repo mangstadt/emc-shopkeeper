@@ -1,15 +1,15 @@
 <Items>
 	<Item name="11 Disc" id="2266" />
 	<Item name="13 Disc" id="2256" />
-	<Item name="Acacia Leaves" />
-	<Item name="Acacia Log" emcNames="Acacia Wood" />
-	<Item name="Acacia Plank" />
-	<Item name="Acacia Sapling" />
-	<Item name="Allium" />
+	<Item name="Acacia Leaves" id="161:0" />
+	<Item name="Acacia Log" id="162:0" emcNames="Acacia Wood" />
+	<Item name="Acacia Plank" id="5:4" />
+	<Item name="Acacia Sapling" id="6:4" />
+	<Item name="Allium" id="38:2" />
 	<Item name="Anvil" id="145" />
 	<Item name="Apple" id="260" />
 	<Item name="Arrow" id="262" />
-	<Item name="Azure Bluet" />
+	<Item name="Azure Bluet" id="38:3" />
 	<Item name="Baked Potato" id="393" />
 	<Item name="Bat Egg" id="383:65" />
 	<Item name="Beacon" id="138" />
@@ -28,11 +28,11 @@
 	<Item name="Blocks Disc" id="2258" />
 	<Item name="Blue Stclay" id="159:11" />
 	<Item name="Blue Dye" id="351:4" />
-	<Item name="Blue Orchid" />
+	<Item name="Blue Orchid" id="38:1" />
 	<Item name="Blue Wool" id="35:11" />
 	<Item name="Boat" id="333" />
 	<Item name="Bone" id="352" />
-	<Item name="Bone Meal" emcNames="Bonemeal" />
+	<Item name="Bone Meal" id="351:15" emcNames="Bonemeal" />
 	<Item name="Book" id="340" />
 	<Item name="Book And Quill" id="386" />
 	<Item name="Bookshelf" id="47" />
@@ -65,7 +65,7 @@
 	<Item name="Clay Ball" id="337" />
 	<Item name="Clay Block" id="82" />
 	<Item name="Clock" id="347" />
-	<Item name="Clownfish" />
+	<Item name="Clownfish" id="349:2" />
 	<Item name="Coal" id="263:0" />
 	<Item name="Coal Block" id="173" />
 	<Item name="Coal Ore" id="16" />
@@ -76,7 +76,7 @@
 	<Item name="Cocoa Beans" id="351:3" emcNames="Brown Dye" />
 	<Item name="Compass" id="345" />
 	<Item name="Cooked Fish" id="350" />
-	<Item name="Cooked Salmon" />
+	<Item name="Cooked Salmon" id="350:1" />
 	<Item name="Cookie" id="357" />
 	<Item name="Cow Egg" id="383:92" />
 	<Item name="Cracked Stone" id="98:2" />
@@ -86,10 +86,10 @@
 	<Item name="Cyan Dye" id="351:6" />
 	<Item name="Cyan Wool" id="35:9" />
 	<Item name="Dandelion" id="37" />
-	<Item name="Dark Oak Leaves" />
+	<Item name="Dark Oak Leaves" id="161:1" />
 	<Item name="Dark Oak Log" emcNames="Dark Oak Wood" />
-	<Item name="Dark Oak Plank" />
-	<Item name="Dark Oak Sapling" emcNames="Darkoak Sapling" />
+	<Item name="Dark Oak Plank" id="5:5" />
+	<Item name="Dark Oak Sapling" id="6:5" emcNames="Darkoak Sapling" />
 	<Item name="Daylight Detector" id="151" />
 	<Item name="Dead Bush" id="32" />
 	<Item name="Detector Rail" id="28" />
@@ -109,7 +109,7 @@
 	<Item name="Dirt" id="3" />
 	<Item name="Dispenser" id="23" />
 	<Item name="Door" id="64" />
-	<Item name="Dragon Egg" />
+	<Item name="Dragon Egg" id="122" />
 	<Item name="Dropper" id="158" />
 	<Item name="Egg" id="344" />
 	<Item name="Emerald" id="388" />
@@ -214,7 +214,7 @@
 	<Item name="Light Blue Dye" id="351:12" />
 	<Item name="Light Blue Wool" id="35:3" />
 	<Item name="Lghtgray Stclay" id="159:8" />
-	<Item name="Lilac" />
+	<Item name="Lilac" id="175:1" />
 	<Item name="Lime Stclay" id="159:5" />
 	<Item name="Lime Dye" id="351:10" />
 	<Item name="Lime Wool" id="35:5" />
@@ -257,13 +257,13 @@
 	<Item name="Ocelot Egg" id="383:98" />
 	<Item name="Orange Stclay" id="159:1" />
 	<Item name="Orange Dye" id="351:14" />
-	<Item name="Orange Tulip" />
+	<Item name="Orange Tulip" id="38:5" />
 	<Item name="Orange Wool" id="35:1" />
-	<Item name="Oxeye Daisy" />
-	<Item name="Packed Ice" />
+	<Item name="Oxeye Daisy" id="35:8" />
+	<Item name="Packed Ice" id="174" />
 	<Item name="Painting" id="321" />
 	<Item name="Paper" id="339" />
-	<Item name="Peony" />
+	<Item name="Peony" id="175:5" />
 	<Item name="Pig Egg" id="383:90" />
 	<Item name="Pine Leaves" id="18:1" emcNames="Spruce Leaves" />
 	<Item name="Pine Log" id="17:1" />
@@ -273,10 +273,10 @@
 	<Item name="Pine Stairs" id="134" />
 	<Item name="Pink Stclay" id="159:6" />
 	<Item name="Pink Dye" id="351:9" />
-	<Item name="Pink Tulip" />
+	<Item name="Pink Tulip" id="38:7" />
 	<Item name="Pink Wool" id="35:6" />
 	<Item name="Piston" id="33" />
-	<Item name="Podzol" />
+	<Item name="Podzol" id="3:2" />
 	<Item name="Poisonous Potato" id="394" />
 	<Item name="Poppy" id="38" emcNames="Rose" />
 	<Item name="Pork" id="319" />
@@ -284,7 +284,7 @@
 	<Item name="Potato" id="392" emcNames="Potato Item" />
 	<Item name="Powered Minecart" id="343" />
 	<Item name="Powered Rail" id="27" />
-	<Item name="Pufferfish" />
+	<Item name="Pufferfish" id="349:3" />
 	<Item name="Pumpkin" id="86" />
 	<Item name="Pumpkin Pie" id="400" />
 	<Item name="Pumpkin Seeds" id="361" />
@@ -301,13 +301,13 @@
 	<Item name="Raw Beef" id="363" />
 	<Item name="Raw Chicken" id="365" />
 	<Item name="Raw Fish" id="349" />
-	<Item name="Raw Salmon" />
+	<Item name="Raw Salmon" id="349:1" />
 	<Item name="Record 12" id="2267" />
 	<Item name="Red Stclay" id="159:14" />
 	<Item name="Red Dye" id="351:1" />
 	<Item name="Red Mushroom" id="40" />
 	<Item name="Red Sand" id="12:1" />
-	<Item name="Red Tulip" />
+	<Item name="Red Tulip" id="38:4" />
 	<Item name="Red Wool" id="35:14" />
 	<Item name="Redstone Block" id="152" />
 	<Item name="Redstone Dust" id="331" />
@@ -315,7 +315,7 @@
 	<Item name="Redstone Ore" id="73" />
 	<Item name="Redstone Torch" id="76" />
 	<Item name="Repeater" id="356" />
-	<Item name="Rose Bush" />
+	<Item name="Rose Bush" id="175:4" />
 	<Item name="Rotten Flesh" id="367" />
 	<Item name="Saddle" id="329" />
 	<Item name="Sand" id="12" />
@@ -358,7 +358,7 @@
 	<Item name="String" id="287" />
 	<Item name="Sugar" id="353" />
 	<Item name="Sugar Cane" id="338" />
-	<Item name="Sunflower" />
+	<Item name="Sunflower" id="175:0" />
 	<Item name="Tall Grass" id="31:1" />
 	<Item name="Tnt" id="46" />
 	<Item name="Torch" id="50" />
@@ -367,13 +367,13 @@
 	<Item name="Villager Egg" id="383:120" />
 	<Item name="Vine" id="106" />
 	<Item name="Ward Disc" id="2265" />
-	<Item name="Water Bottle" />
+	<Item name="Water Bottle" id="373:0" />
 	<Item name="Water Bucket" id="326" />
 	<Item name="Water Lily" id="111" />
 	<Item name="Web" id="30" />
 	<Item name="Wheat" id="296" />
 	<Item name="White Stclay" id="159:0" />
-	<Item name="White Tulip" />
+	<Item name="White Tulip" id="38:6" />
 	<Item name="White Wool" id="35:0" />
 	<Item name="Wither Head" id="397:1" />
 	<Item name="Wither Skull" id="397:1" />
@@ -468,20 +468,20 @@
 	<Item name="Splash Potion of Water Breathing" id="373:16397,373:16429" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" />
 	<Item name="Splash Potion of Water Breathing Ext" id="373:16461" emcNames="Potion:16461" image="potion_water_breathing_splash.png" />
 	
-	<Item name="Magenta Glass" emcNames="Magentastnglass" />
-	<Item name="Pink Glass" emcNames="Pink Stn Glass" />
-	<Item name="Purple Glass" emcNames="Purplestn Glass" />
-	<Item name="Cyan Glass" emcNames="Cyan Stn Glass" />
-	<Item name="Blue Glass" emcNames="Blue Stn Glass" />
-	<Item name="Light Blue Glass" emcNames="Ltbluestn Glass" />
-	<Item name="Green Glass" emcNames="Green Stn Glass" />
-	<Item name="Lime Glass" emcNames="Lime Stn Glass" />
-	<Item name="Brown Glass" emcNames="Brown Stn Glass" />
-	<Item name="Red Glass" emcNames="Red Stn Glass" />
-	<Item name="Orange Glass" emcNames="Orangestn Glass" />
-	<Item name="Yellow Glass" emcNames="Yellowstn Glass" />
-	<Item name="Black Glass" emcNames="Black Stn Glass" />
-	<Item name="Gray Glass" emcNames="Gray Stn Glass" />
-	<Item name="Light Gray Glass" emcNames="Ltgraystn Glass" />
-	<Item name="White Glass" emcNames="White Stn Glass" />
+	<Item name="Magenta Glass" id="95:2" emcNames="Magentastnglass" />
+	<Item name="Pink Glass" id="95:6" emcNames="Pink Stn Glass" />
+	<Item name="Purple Glass" id="95:10" emcNames="Purplestn Glass" />
+	<Item name="Cyan Glass" id="95:9" emcNames="Cyan Stn Glass" />
+	<Item name="Blue Glass" id="95:11" emcNames="Blue Stn Glass" />
+	<Item name="Light Blue Glass" id="95:3" emcNames="Ltbluestn Glass" />
+	<Item name="Green Glass" id="95:13" emcNames="Green Stn Glass" />
+	<Item name="Lime Glass" id="95:5" emcNames="Lime Stn Glass" />
+	<Item name="Brown Glass" id="95:12" emcNames="Brown Stn Glass" />
+	<Item name="Red Glass" id="95:14" emcNames="Red Stn Glass" />
+	<Item name="Orange Glass" id="95:1" emcNames="Orangestn Glass" />
+	<Item name="Yellow Glass" id="95:4" emcNames="Yellowstn Glass" />
+	<Item name="Black Glass" id="95:15" emcNames="Black Stn Glass" />
+	<Item name="Gray Glass" id="95:7" emcNames="Gray Stn Glass" />
+	<Item name="Light Gray Glass" id="95:8" emcNames="Ltgraystn Glass" />
+	<Item name="White Glass" id="95:0" emcNames="White Stn Glass" />
 </Items>
