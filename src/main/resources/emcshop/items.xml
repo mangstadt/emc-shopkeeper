@@ -1,12 +1,12 @@
 <Items>
-	<Item name="11 Disc" />
-	<Item name="13 Disc" />
+	<Item name="11 Disc" id="2266" />
+	<Item name="13 Disc" id="2256" />
 	<Item name="Acacia Leaves" />
 	<Item name="Acacia Log" emcNames="Acacia Wood" />
 	<Item name="Acacia Plank" />
 	<Item name="Acacia Sapling" />
 	<Item name="Allium" />
-	<Item name="Anvil" />
+	<Item name="Anvil" id="145" />
 	<Item name="Apple" />
 	<Item name="Arrow" />
 	<Item name="Azure Bluet" />
@@ -14,155 +14,156 @@
 	<Item name="Bat Egg" />
 	<Item name="Beacon" />
 	<Item name="Bed" />
-	<Item name="Birch Leaves" />
-	<Item name="Birch Log" />
-	<Item name="Birch Plank" />
-	<Item name="Birch Sapling" />
+	<Item name="Birch Leaves" id="18:2" />
+	<Item name="Birch Log" id="17:2" />
+	<Item name="Birch Plank" id="5:2" />
+	<Item name="Birch Sapling" id="6:2" />
+	<Item name="Birch Slab" id="126:2" />
+	<Item name="Birch Stairs" id="135" />
 	<Item name="Black Stclay" />
-	<Item name="Black Dye" />
-	<Item name="Black Wool" />
+	<Item name="Black Dye" id="351:0" />
+	<Item name="Black Wool" id="35:15" />
 	<Item name="Blaze Powder" />
 	<Item name="Blaze Rod" />
-	<Item name="Blocks Disc" />
+	<Item name="Blocks Disc" id="2258" />
 	<Item name="Blue Stclay" />
-	<Item name="Blue Dye" />
+	<Item name="Blue Dye" id="351:4" />
 	<Item name="Blue Orchid" />
-	<Item name="Blue Wool" />
+	<Item name="Blue Wool" id="35:11" />
 	<Item name="Boat" />
 	<Item name="Bone" />
 	<Item name="Bone Meal" emcNames="Bonemeal" />
 	<Item name="Book" />
 	<Item name="Book And Quill" />
-	<Item name="Bookshelf" />
+	<Item name="Bookshelf" id="47" />
 	<Item name="Bow" />
 	<Item name="Bowl" />
 	<Item name="Bread" />
-	<Item name="Brewing Stand" />
-	<Item name="Brick" />
-	<Item name="Brick Block" />
-	<Item name="Brick Slab" />
-	<Item name="Brick Stairs" />
+	<Item name="Brewing Stand" id="117" />
+	<Item name="Brick" id="336" />
+	<Item name="Brick Block" id="45" />
+	<Item name="Brick Slab" id="44:4" />
+	<Item name="Brick Stairs" id="108" />
 	<Item name="Brown Stclay" />
-	<Item name="Brown Mushroom" />
-	<Item name="Brown Wool" />
-	<Item name="Button" />
+	<Item name="Brown Mushroom" id="39" />
+	<Item name="Brown Wool" id="35:12" />
 	<Item name="Cactus" />
 	<Item name="Cake" />
 	<Item name="Carrot" emcNames="Carrot Item" />
-	<Item name="Cat Disc" />
-	<Item name="Cauldron" />
+	<Item name="Cat Disc" id="2257" />
+	<Item name="Cauldron" id="118" />
 	<Item name="Chain Boots" />
 	<Item name="Chain Chestplate" />
 	<Item name="Chain Helmet" />
 	<Item name="Chain Leggings" />
-	<Item name="Charcoal" />
-	<Item name="Chest" />
+	<Item name="Charcoal" id="263:1" />
+	<Item name="Chest" id="54" />
 	<Item name="Chicken" />
 	<Item name="Chicken Egg" />
-	<Item name="Chirp Disc" />
-	<Item name="Chiseled Quartz" />
+	<Item name="Chirp Disc" id="2259" />
+	<Item name="Chiseled Quartz" id="155:1" />
 	<Item name="Clay Ball" />
-	<Item name="Clay Block" />
+	<Item name="Clay Block" id="82" />
 	<Item name="Clock" />
 	<Item name="Clownfish" />
-	<Item name="Coal" />
-	<Item name="Coal Block" />
-	<Item name="Coal Ore" />
-	<Item name="Cobble Wall" />
-	<Item name="Cobblestone" />
-	<Item name="Cobblestone Slab" />
-	<Item name="Cobblestone Stairs" />
-	<Item name="Cocoa Beans" emcNames="Brown Dye" />
+	<Item name="Coal" id="263:0" />
+	<Item name="Coal Block" id="173" />
+	<Item name="Coal Ore" id="16" />
+	<Item name="Cobble Wall" id="139" />
+	<Item name="Cobblestone" id="4" />
+	<Item name="Cobblestone Slab" id="44:3" emcNames="Cobble Slab" />
+	<Item name="Cobblestone Stairs" id="67" />
+	<Item name="Cocoa Beans" id="351:3" emcNames="Brown Dye" />
 	<Item name="Compass" />
 	<Item name="Cooked Fish" />
 	<Item name="Cooked Salmon" />
 	<Item name="Cookie" />
 	<Item name="Cow Egg" />
-	<Item name="Cracked Stone" />
+	<Item name="Cracked Stone" id="98:2" />
 	<Item name="Creeper Head" />
-	<Item name="Creeper Sandstone" emcNames="Creeper Sandsto" />
+	<Item name="Creeper Sandstone" id="24:1" emcNames="Creeper Sandsto" />
 	<Item name="Cyan Stclay" />
-	<Item name="Cyan Dye" />
-	<Item name="Cyan Wool" />
-	<Item name="Dandelion" />
+	<Item name="Cyan Dye" id="351:6" />
+	<Item name="Cyan Wool" id="35:9" />
+	<Item name="Dandelion" id="37" />
 	<Item name="Dark Oak Leaves" />
 	<Item name="Dark Oak Log" emcNames="Dark Oak Wood" />
 	<Item name="Dark Oak Plank" />
 	<Item name="Dark Oak Sapling" emcNames="Darkoak Sapling" />
 	<Item name="Daylight Detector" />
-	<Item name="Dead Bush" />
-	<Item name="Detector Rail" />
-	<Item name="Diamond" />
-	<Item name="Diamond Axe" />
-	<Item name="Diamond Barding" />
-	<Item name="Diamond Block" />
-	<Item name="Diamond Boots" />
-	<Item name="Diamond Chest" />
-	<Item name="Diamond Helmet" />
-	<Item name="Diamond Hoe" />
-	<Item name="Diamond Leggings" />
-	<Item name="Diamond Ore" />
-	<Item name="Diamond Pickaxe" />
-	<Item name="Diamond Shovel" />
-	<Item name="Diamond Sword" />
-	<Item name="Dirt" />
-	<Item name="Dispenser" />
-	<Item name="Door" />
+	<Item name="Dead Bush" id="32" />
+	<Item name="Detector Rail" id="28" />
+	<Item name="Diamond" id="264" />
+	<Item name="Diamond Axe" id="279" />
+	<Item name="Diamond Barding" id="419" />
+	<Item name="Diamond Block" id="57" />
+	<Item name="Diamond Boots" id="313" />
+	<Item name="Diamond Chest" id="311" />
+	<Item name="Diamond Helmet" id="310" />
+	<Item name="Diamond Hoe" id="293" />
+	<Item name="Diamond Leggings" id="312" />
+	<Item name="Diamond Ore" id="56" />
+	<Item name="Diamond Pickaxe" id="278" />
+	<Item name="Diamond Shovel" id="277" />
+	<Item name="Diamond Sword" id="276" />
+	<Item name="Dirt" id="3" />
+	<Item name="Dispenser" id="23" />
+	<Item name="Door" id="64" />
 	<Item name="Dragon Egg" />
 	<Item name="Dropper" />
 	<Item name="Egg" />
-	<Item name="Emerald" />
-	<Item name="Emerald Block" />
-	<Item name="Emerald Ore" />
-	<Item name="Enchantment Table" />
-	<Item name="End Stone" />
-	<Item name="Ender Chest" />
-	<Item name="Ender Pearl" />
+	<Item name="Emerald" id="388" />
+	<Item name="Emerald Block" id="133" />
+	<Item name="Emerald Ore" id="129" />
+	<Item name="Enchantment Table" id="116" />
+	<Item name="End Stone" id="121" />
+	<Item name="Ender Chest" id="130" />
+	<Item name="Ender Pearl" id="368" />
 	<Item name="Exp Bottle" />
-	<Item name="Eye Of Ender" />
-	<Item name="Far Disc" />
+	<Item name="Eye Of Ender" id="381" />
+	<Item name="Far Disc" id="2260" />
 	<Item name="Feather" />
-	<Item name="Fence" />
-	<Item name="Fence Gate" />
+	<Item name="Fence" id="85" />
+	<Item name="Fence Gate" id="107" />
 	<Item name="Fermented Spider Eye" />
-	<Item name="Fern" />
+	<Item name="Fern" id="31:2" />
 	<Item name="Firework" />
 	<Item name="Fishing Rod" />
 	<Item name="Flint" />
 	<Item name="Flint And Steel" />
 	<Item name="Flower Pot" emcNames="Flower Pot Item" />
-	<Item name="Furnace" />
+	<Item name="Furnace" id="61" />
 	<Item name="Ghast Tear" />
-	<Item name="Glass" />
+	<Item name="Glass" id="20" />
 	<Item name="Glass Bottle" />
-	<Item name="Glass Pane" />
+	<Item name="Glass Pane" id="102" />
 	<Item name="Glistering Melon" />
-	<Item name="Glowstone" />
+	<Item name="Glowstone" id="89" />
 	<Item name="Glowstone Dust" />
-	<Item name="Gold Axe" />
-	<Item name="Gold Barding" />
-	<Item name="Gold Block" />
-	<Item name="Gold Boots" />
-	<Item name="Gold Chest" />
-	<Item name="Gold Helmet" />
-	<Item name="Gold Hoe" />
-	<Item name="Gold Ingot" />
-	<Item name="Gold Leggings" />
-	<Item name="Gold Nugget" />
-	<Item name="Gold Ore" />
-	<Item name="Gold Pickaxe" />
-	<Item name="Gold Shovel" />
-	<Item name="Gold Sword" />
-	<Item name="Golden Apple" />
-	<Item name="Golden Carrot" />
-	<Item name="Grass" />
-	<Item name="Gravel" />
+	<Item name="Gold Axe" id="286" />
+	<Item name="Gold Barding" id="418" />
+	<Item name="Gold Block" id="41" />
+	<Item name="Gold Boots" id="317" />
+	<Item name="Gold Chest" id="315" />
+	<Item name="Gold Helmet" id="314" />
+	<Item name="Gold Hoe" id="294" />
+	<Item name="Gold Ingot" id="266" />
+	<Item name="Gold Leggings" id="316" />
+	<Item name="Gold Nugget" id="371" />
+	<Item name="Gold Ore" id="14" />
+	<Item name="Gold Pickaxe" id="285" />
+	<Item name="Gold Shovel" id="284" />
+	<Item name="Gold Sword" id="283" />
+	<Item name="Golden Apple" id="322" />
+	<Item name="Golden Carrot" id="396" />
+	<Item name="Grass" id="2" />
+	<Item name="Gravel" id="13" />
 	<Item name="Gray Stclay" />
-	<Item name="Gray Dye" />
-	<Item name="Gray Wool" />
+	<Item name="Gray Dye" id="351:8" />
+	<Item name="Gray Wool" id="35:7" />
 	<Item name="Green Stclay" />
-	<Item name="Green Dye" />
-	<Item name="Green Wool" />
+	<Item name="Green Dye" id="351:2" />
+	<Item name="Green Wool" id="35:13" />
 	<Item name="Gunpowder" />
 	<Item name="Hard Clay" />
 	<Item name="Haunted Candy - Bone" emcNames="Bone - §eHaunted Candy" />
@@ -172,33 +173,35 @@
 	<Item name="Haunted Candy - Spider Eye" emcNames="Spider Eye - §eHaunted Candy" />
 	<Item name="Hay Block" />
 	<Item name="Hopper" />
-	<Item name="Ice" />
-	<Item name="Iron Axe" />
-	<Item name="Iron Barding" />
-	<Item name="Iron Bars" />
-	<Item name="Iron Block" />
-	<Item name="Iron Boots" />
+	<Item name="Ice" id="79" />
+	<Item name="Iron Axe" id="258" />
+	<Item name="Iron Barding" id="417" />
+	<Item name="Iron Bars" id="101" />
+	<Item name="Iron Block" id="42" />
+	<Item name="Iron Boots" id="309" />
 	<Item name="Iron Bucket" />
-	<Item name="Iron Chest" />
-	<Item name="Iron Door" />
-	<Item name="Iron Helmet" />
-	<Item name="Iron Hoe" />
-	<Item name="Iron Ingot" />
-	<Item name="Iron Leggings" />
-	<Item name="Iron Ore" />
-	<Item name="Iron Pickaxe" />
-	<Item name="Iron Shovel" />
-	<Item name="Iron Sword" />
+	<Item name="Iron Chest" id="307" />
+	<Item name="Iron Door" id="71" />
+	<Item name="Iron Helmet" id="306" />
+	<Item name="Iron Hoe" id="292" />
+	<Item name="Iron Ingot" id="265" />
+	<Item name="Iron Leggings" id="308" />
+	<Item name="Iron Ore" id="15" />
+	<Item name="Iron Pickaxe" id="257" />
+	<Item name="Iron Shovel" id="256" />
+	<Item name="Iron Sword" id="267" />
 	<Item name="Item Frame" />
-	<Item name="Jack O Lantern" />
-	<Item name="Jukebox" />
-	<Item name="Jungle Leaves" />
-	<Item name="Jungle Log" />
-	<Item name="Jungle Plank" />
-	<Item name="Jungle Sapling" />
-	<Item name="Ladder" />
-	<Item name="Lapis Block" />
-	<Item name="Lapis Ore" />
+	<Item name="Jack O Lantern" id="91" />
+	<Item name="Jukebox" id="84" />
+	<Item name="Jungle Leaves" id="18:3" />
+	<Item name="Jungle Log" id="17:3" />
+	<Item name="Jungle Plank" id="5:3" />
+	<Item name="Jungle Sapling" id="6:3" />
+	<Item name="Jungle Slab" id="126:3" />
+	<Item name="Jungle Stairs" id="136" />
+	<Item name="Ladder" id="65" />
+	<Item name="Lapis Block" id="22" />
+	<Item name="Lapis Ore" id="21" />
 	<Item name="Lava Bucket" />
 	<Item name="Leash" />
 	<Item name="Leather" />
@@ -206,180 +209,186 @@
 	<Item name="Leather Chest" />
 	<Item name="Leather Helmet" />
 	<Item name="Leather Leggings" />
-	<Item name="Leaves" />
-	<Item name="Lever" />
+	<Item name="Lever" id="69" />
 	<Item name="Lghtblue Stclay" />
-	<Item name="Light Blue Dye" />
-	<Item name="Light Blue Wool" />
+	<Item name="Light Blue Dye" id="351:12" />
+	<Item name="Light Blue Wool" id="35:3" />
 	<Item name="Lghtgray Stclay" />
 	<Item name="Lilac" />
 	<Item name="Lime Stclay" />
-	<Item name="Lime Dye" />
-	<Item name="Lime Wool" />
+	<Item name="Lime Dye" id="351:10" />
+	<Item name="Lime Wool" id="35:5" />
 	<Item name="Long Grass" />
 	<Item name="Magenta Stclay" />
-	<Item name="Magenta Dye" />
-	<Item name="Magenta Wool" />
+	<Item name="Magenta Dye" id="351:13" />
+	<Item name="Magenta Wool" id="35:2" />
 	<Item name="Magma Cream" />
-	<Item name="Mall Disc" />
+	<Item name="Mall Disc" id="2261" />
 	<Item name="Map" />
-	<Item name="Mellohi Disc" />
+	<Item name="Mellohi Disc" id="2262" />
 	<Item name="Melon" />
-	<Item name="Melon Block" />
+	<Item name="Melon Block" id="103" />
 	<Item name="Melon Seeds" />
 	<Item name="Milk Bucket" />
 	<Item name="Minecart" />
 	<Item name="Mooshroom Egg" />
-	<Item name="Mossy Cobble" />
-	<Item name="Mossy Stone" />
-	<Item name="Mossy Wall" />
+	<Item name="Mossy Cobble" id="48" />
+	<Item name="Mossy Stone" id="98:1" />
+	<Item name="Mossy Wall" id="139:1" />
 	<Item name="Mushroom Stew" />
-	<Item name="Mycel" />
-	<Item name="Nether Brick" />
-	<Item name="Nether Fence" />
-	<Item name="Nether Stairs" />
+	<Item name="Mycel" id="110" />
+	<Item name="Nethbrick" id="405" />
+	<Item name="Nether Brick" id="112" />
+	<Item name="Nether Brick Stairs" id="114" />
+	<Item name="Nether Brick Fence" id="113" emcNames="Nether Fence" />
+	<Item name="Nether Brick Slab" id="44:6" emcNames="Nethbrick Slab" />
 	<Item name="Nether Stalk" />
 	<Item name="Nether Star" />
-	<Item name="Netherrack" />
-	<Item name="Note Block" />
-	<Item name="Oak Leaves" />
-	<Item name="Oak Log" />
-	<Item name="Oak Plank" />
-	<Item name="Oak Sapling" />
-	<Item name="Oak Slab" />
-	<Item name="Oak Stairs" />
-	<Item name="Obsidian" />
+	<Item name="Netherrack" id="87" />
+	<Item name="Note Block" id="25" />
+	<Item name="Oak Leaves" id="18:0" emcNames="Leaves" />
+	<Item name="Oak Log" id="17:0" />
+	<Item name="Oak Plank" id="5:0" />
+	<Item name="Oak Sapling" id="6:0" />
+	<Item name="Oak Slab" id="126:0" emcNames="Wood Slab" />
+	<Item name="Oak Stairs" id="53" emcNames="Wood Stairs" />
+	<Item name="Obsidian" id="49" />
 	<Item name="Ocelot Egg" />
 	<Item name="Orange Stclay" />
-	<Item name="Orange Dye" />
+	<Item name="Orange Dye" id="351:14" />
 	<Item name="Orange Tulip" />
-	<Item name="Orange Wool" />
+	<Item name="Orange Wool" id="35:1" />
 	<Item name="Oxeye Daisy" />
 	<Item name="Packed Ice" />
 	<Item name="Painting" />
 	<Item name="Paper" />
 	<Item name="Peony" />
 	<Item name="Pig Egg" />
-	<Item name="Pine Leaves" emcNames="Spruce Leaves" />
-	<Item name="Pine Log" />
-	<Item name="Pine Plank" />
-	<Item name="Pine Sapling" />
+	<Item name="Pine Leaves" id="18:1" emcNames="Spruce Leaves" />
+	<Item name="Pine Log" id="17:1" />
+	<Item name="Pine Plank" id="5:1" />
+	<Item name="Pine Sapling" id="6:1" />
+	<Item name="Pine Slab" id="126:1" />
+	<Item name="Pine Stairs" id="134" />
 	<Item name="Pink Stclay" />
-	<Item name="Pink Dye" />
+	<Item name="Pink Dye" id="351:9" />
 	<Item name="Pink Tulip" />
-	<Item name="Pink Wool" />
-	<Item name="Piston" />
+	<Item name="Pink Wool" id="35:6" />
+	<Item name="Piston" id="33" />
 	<Item name="Podzol" />
 	<Item name="Poisonous Potato" />
-	<Item name="Poppy" />
+	<Item name="Poppy" id="38" emcNames="Rose" />
 	<Item name="Pork" />
 	<Item name="Pork Chop" />
 	<Item name="Potato" emcNames="Potato Item" />
 	<Item name="Powered Minecart" />
-	<Item name="Powered Rail" />
+	<Item name="Powered Rail" id="27" />
 	<Item name="Pufferfish" />
-	<Item name="Pumpkin" />
+	<Item name="Pumpkin" id="86" />
 	<Item name="Pumpkin Pie" />
 	<Item name="Pumpkin Seeds" />
 	<Item name="Purple Stclay" />
-	<Item name="Purple Dye" />
-	<Item name="Purple Wool" />
-	<Item name="Quartz" />
-	<Item name="Quartz Block" />
-	<Item name="Quartz Pillar" />
-	<Item name="Quartz Ore" />
-	<Item name="Rails" />
+	<Item name="Purple Dye" id="351:5" />
+	<Item name="Purple Wool" id="35:10" />
+	<Item name="Quartz" id="406" />
+	<Item name="Quartz Block" id="155:0" />
+	<Item name="Quartz Pillar" id="155:2" />
+	<Item name="Quartz Ore" id="153" />
+	<Item name="Quartz Slab" id="44:7" />
+	<Item name="Quartz Stairs" id="156" />
+	<Item name="Rails" id="66" />
 	<Item name="Raw Beef" />
 	<Item name="Raw Chicken" />
 	<Item name="Raw Fish" />
 	<Item name="Raw Salmon" />
 	<Item name="Record 12" />
 	<Item name="Red Stclay" />
-	<Item name="Red Dye" />
-	<Item name="Red Mushroom" />
-	<Item name="Red Sand" />
+	<Item name="Red Dye" id="351:1" />
+	<Item name="Red Mushroom" id="40" />
+	<Item name="Red Sand" id="12:1" />
 	<Item name="Red Tulip" />
-	<Item name="Red Wool" />
-	<Item name="Redstone Block" />
-	<Item name="Redstone Dust" />
-	<Item name="Redstone Lamp" />
-	<Item name="Redstone Ore" />
-	<Item name="Redstone Torch" />
-	<Item name="Repeater" />
-	<Item name="Rose" />
+	<Item name="Red Wool" id="35:14" />
+	<Item name="Redstone Block" id="152" />
+	<Item name="Redstone Dust" id="331" />
+	<Item name="Redstone Lamp" id="123" />
+	<Item name="Redstone Ore" id="73" />
+	<Item name="Redstone Torch" id="76" />
+	<Item name="Repeater" id="356" />
 	<Item name="Rose Bush" />
 	<Item name="Rotten Flesh" />
 	<Item name="Saddle" />
-	<Item name="Sand" />
-	<Item name="Sandstone" />
-	<Item name="Sandstone Slab" />
+	<Item name="Sand" id="12" />
+	<Item name="Sandstone" id="24:0" />
+	<Item name="Sandstone Slab" id="44:1" />
+	<Item name="Sandstone Stairs" id="128" />
 	<Item name="Seeds" />
 	<Item name="Shears" />
 	<Item name="Sheep Egg" />
 	<Item name="Shiny Arrow" emcNames="Arrow - §bShiny Arrow" />
 	<Item name="Shiny Flesh" emcNames="Rotten Flesh - §6Shiny Flesh" />
-	<Item name="Sign" />
-	<Item name="Silver Dye" />
-	<Item name="Silver Wool" />
+	<Item name="Sign" id="63" />
+	<Item name="Silver Dye" id="351:7" />
+	<Item name="Silver Wool" id="35:8" />
 	<Item name="Skull Item" />
 	<Item name="Slime Ball" />
-	<Item name="Smooth Sandstone" emcNames="Smooth Sandston" />
+	<Item name="Smooth Sandstone" id="24:2" emcNames="Smooth Sandston" />
 	<Item name="Snow Ball" />
-	<Item name="Snow Block" />
-	<Item name="Soul Sand" />
+	<Item name="Snow Block" id="80" />
+	<Item name="Soul Sand" id="88" />
 	<Item name="Spider Eye" />
 	<Item name="Squid Egg" />
-	<Item name="Stal Disc" />
+	<Item name="Stal Disc" id="2263" />
 	<Item name="Steak" />
 	<Item name="Stick" />
-	<Item name="Sticky Piston" />
-	<Item name="Stone" />
-	<Item name="Stone Axe" />
-	<Item name="Stone Brick" />
-	<Item name="Stone Brick Slab" />
-	<Item name="Stone Brick Stairs" />
-	<Item name="Stone Hoe" />
-	<Item name="Stone Pickaxe" />
-	<Item name="Stone Plate" />
-	<Item name="Stone Shovel" />
-	<Item name="Stone Slab" />
-	<Item name="Stone Sword" />
+	<Item name="Sticky Piston" id="29" />
+	<Item name="Stone" id="1" />
+	<Item name="Stone Axe" id="275" />
+	<Item name="Stone Button" id="77" />
+	<Item name="Stone Brick" id="98" />
+	<Item name="Stone Brick Slab" id="44:5" emcNames="Stonebrick Slab" />
+	<Item name="Stone Brick Stairs" id="109" />
+	<Item name="Stone Hoe" id="291" />
+	<Item name="Stone Pickaxe" id="274" />
+	<Item name="Stone Shovel" id="273" />
+	<Item name="Stone Slab" id="44:0" />
+	<Item name="Stone Sword" id="272" />
 	<Item name="Storage Minecart" />
-	<Item name="Strad Disc" />
+	<Item name="Strad Disc" id="2264" />
 	<Item name="String" />
 	<Item name="Sugar" />
 	<Item name="Sugar Cane" />
 	<Item name="Sulphur" />
 	<Item name="Sunflower" />
-	<Item name="Tall Grass" />
-	<Item name="Tnt" />
-	<Item name="Torch" />
-	<Item name="Trapdoor" />
-	<Item name="Trapped Chest" />
+	<Item name="Tall Grass" id="31:1" />
+	<Item name="Tnt" id="46" />
+	<Item name="Torch" id="50" />
+	<Item name="Trapdoor" id="96" />
+	<Item name="Trapped Chest" id="146" />
 	<Item name="Villager Egg" />
-	<Item name="Vine" />
-	<Item name="Ward Disc" />
+	<Item name="Vine" id="106" />
+	<Item name="Ward Disc" id="2265" />
 	<Item name="Water Bottle" />
 	<Item name="Water Bucket" />
-	<Item name="Water Lily" />
-	<Item name="Web" />
+	<Item name="Water Lily" id="111" />
+	<Item name="Web" id="30" />
 	<Item name="Wheat" />
 	<Item name="White Stclay" />
 	<Item name="White Tulip" />
-	<Item name="White Wool" />
+	<Item name="White Wool" id="35:0" />
 	<Item name="Wither Head" />
 	<Item name="Wither Skull" />
 	<Item name="Wolf Egg" />
+	<Item name="Wood Button" id="143" />
 	<Item name="Wooden Axe" />
 	<Item name="Wooden Hoe" />
 	<Item name="Wooden Pickaxe" />
 	<Item name="Wooden Plate" />
 	<Item name="Wooden Shovel" />
 	<Item name="Wooden Sword" />
-	<Item name="Workbench" />
+	<Item name="Workbench" id="58" />
 	<Item name="Yellow Stclay" />
-	<Item name="Yellow Dye" />
-	<Item name="Yellow Wool" />
+	<Item name="Yellow Dye" id="351:11" />
+	<Item name="Yellow Wool" id="35:4" />
 	<Item name="Zombie Head" />
 	<Item name="Zombie Virus" emcNames="Water Bottle - §aZombie Virus" image="water_bottle.png" />
 	
