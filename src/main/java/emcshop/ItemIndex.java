@@ -30,6 +30,7 @@ public class ItemIndex {
 	private static ItemIndex INSTANCE;
 
 	private final Map<String, String> emcNameToDisplayName;
+	private final Map<String, String> minecraftIdToDisplayName;
 	private final Map<String, String> itemImages;
 	private final List<String> itemNames;
 
@@ -82,6 +83,7 @@ public class ItemIndex {
 			throw new RuntimeException(e);
 		}
 
+		Map<String, String> minecraftIdToDisplayName = new HashMap<String, String>();
 		Map<String, String> emcNameToDisplayName = new HashMap<String, String>();
 		Map<String, String> itemImages = new HashMap<String, String>();
 		List<String> itemNames = new ArrayList<String>();
@@ -98,6 +100,13 @@ public class ItemIndex {
 				}
 			}
 
+			String ids = itemNode.getAttribute("id");
+			if (!ids.isEmpty()) {
+				for (String id : ids.split(",")) {
+					minecraftIdToDisplayName.put(id, name);
+				}
+			}
+
 			String image = itemNode.getAttribute("image");
 			if (!image.isEmpty()) {
 				itemImages.put(name, image);
@@ -105,6 +114,7 @@ public class ItemIndex {
 		}
 
 		this.emcNameToDisplayName = Collections.unmodifiableMap(emcNameToDisplayName);
+		this.minecraftIdToDisplayName = Collections.unmodifiableMap(minecraftIdToDisplayName);
 		this.itemImages = Collections.unmodifiableMap(itemImages);
 		this.itemNames = Collections.unmodifiableList(itemNames);
 	}
@@ -118,6 +128,34 @@ public class ItemIndex {
 	public String getDisplayName(String emcName) {
 		String displayName = emcNameToDisplayName.get(emcName);
 		return (displayName == null) ? emcName : displayName;
+	}
+
+	/**
+	 * Gets the display name of an item, given its Minecraft item ID.
+	 * @param id the Minecraft item ID
+	 * @return the display name or null if the ID was not recognized
+	 */
+	public String getDisplayNameFromMinecraftId(String id) {
+		String displayName = minecraftIdToDisplayName.get(id);
+		if (displayName != null) {
+			return displayName;
+		}
+
+		if (!id.contains(":")) {
+			displayName = minecraftIdToDisplayName.get(id + ":0");
+			if (displayName != null) {
+				return displayName;
+			}
+		}
+
+		if (id.endsWith(":0")) {
+			displayName = minecraftIdToDisplayName.get(id.substring(0, id.length() - 2));
+			if (displayName != null) {
+				return displayName;
+			}
+		}
+
+		return null;
 	}
 
 	/**

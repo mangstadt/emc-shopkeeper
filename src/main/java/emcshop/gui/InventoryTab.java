@@ -8,17 +8,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -30,11 +38,17 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+
+import emcshop.ItemIndex;
 import emcshop.QueryExporter;
 import emcshop.db.DbDao;
 import emcshop.db.Inventory;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.CheckBoxColumn;
+import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {
@@ -43,6 +57,7 @@ public class InventoryTab extends JPanel {
 
 	private final JButton addEdit;
 	private final JButton delete;
+	private final JButton chester;
 	private final ItemSuggestField item;
 	private final JLabel quantityLabel;
 	private final JTextField quantity;
@@ -106,6 +121,30 @@ public class InventoryTab extends JPanel {
 					dao.rollback();
 					throw new RuntimeException(e);
 				}
+			}
+		});
+
+		chester = new JButton("Start Chester");
+		chester.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				ChesterDialog dialog = new ChesterDialog();
+				dialog.setVisible(true);
+				if (dialog.cancelled) {
+					return;
+				}
+
+				Collection<Inventory> items = compressItems(dialog.items);
+				try {
+					for (Inventory item : items) {
+						dao.upsertInventory(item);
+					}
+					dao.commit();
+				} catch (SQLException e) {
+					dao.rollback();
+				}
+
+				refresh();
 			}
 		});
 
@@ -174,6 +213,24 @@ public class InventoryTab extends JPanel {
 		leftBottom.add(filterByItem.getClearButton(), "w 25!, h 20!, wrap");
 
 		add(leftBottom, "growy");
+	}
+
+	private Collection<Inventory> compressItems(List<Inventory> items) {
+		Map<String, Inventory> map = new HashMap<String, Inventory>();
+
+		for (Inventory item : items) {
+			Inventory mapItem = map.get(item.getItem());
+			if (mapItem == null) {
+				mapItem = new Inventory();
+				mapItem.setItem(item.getItem());
+				mapItem.setQuantity(item.getQuantity());
+				map.put(mapItem.getItem(), mapItem);
+			} else {
+				mapItem.setQuantity(mapItem.getQuantity() + item.getQuantity());
+			}
+		}
+
+		return map.values();
 	}
 
 	private void addItem() {
@@ -535,6 +592,164 @@ public class InventoryTab extends JPanel {
 				inventory.add(row.inventory);
 			}
 			return inventory;
+		}
+	}
+
+	private class ChesterDialog extends JDialog {
+		private final InventoryTable table;
+		private final JButton ok, cancel;
+		private final List<Inventory> items = new ArrayList<Inventory>();
+		private boolean cancelled = false;
+		private final ChesterThread thread;
+
+		public ChesterDialog() {
+			super(owner, "Listening to Chester", true);
+			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			setResizable(false);
+			GuiUtils.onEscapeKeyPress(this, new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					cancel.doClick();
+				}
+			});
+
+			ok = new JButton("Ok");
+			ok.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					thread.stopMe();
+					cancelled = false;
+					dispose();
+				}
+			});
+
+			cancel = new JButton("Cancel");
+			cancel.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					thread.stopMe();
+					cancelled = true;
+					dispose();
+				}
+			});
+
+			table = new InventoryTable(new ArrayList<Inventory>());
+
+			/////////////////////////
+
+			setLayout(new MigLayout("insets 0"));
+
+			add(new JLabel("<html><h3>Listenering to Chester...</h3></html>", ImageManager.getLoading(), SwingConstants.LEFT), "align center, wrap");
+
+			MyJScrollPane pane = new MyJScrollPane(table);
+			table.setFillsViewportHeight(true);
+			add(pane, "align center, wrap");
+
+			add(ok, "split 2, align center");
+			add(cancel);
+
+			pack();
+			setSize(getWidth(), getHeight() + 200);
+			setLocationRelativeTo(owner);
+
+			thread = new ChesterThread();
+			thread.setDaemon(true);
+			thread.start();
+		}
+
+		private class ChesterThread extends Thread {
+			private final long started = System.currentTimeMillis();
+			private boolean running = true;
+
+			public void stopMe() {
+				running = false;
+				try {
+					join();
+				} catch (InterruptedException e) {
+					//ignore
+				}
+			}
+
+			@Override
+			public void run() {
+				File dir = new File(FileUtils.getUserDirectory(), ".chester");
+				while (running) {
+					try {
+						if (!dir.exists()) {
+							Thread.sleep(100);
+							continue;
+						}
+
+						for (File file : dir.listFiles()) {
+							if (file.lastModified() < started) {
+								//file was there before EMC Shopkeeper started listening for files
+								continue;
+							}
+
+							if (!file.getName().endsWith(".chester")) {
+								//file is not a Chester file
+								continue;
+							}
+
+							ChesterFile chesterFile = ChesterFile.parse(file);
+							items.addAll(chesterFile.items);
+							file.delete();
+						}
+
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						running = false;
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		}
+	}
+
+	private static class ChesterFile {
+		private static final ItemIndex index = ItemIndex.instance();
+
+		private final String version;
+		private final double playerX, playerY, playerZ;
+		private final List<Inventory> items;
+
+		public static ChesterFile parse(File file) throws IOException {
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			try {
+				String version = reader.readLine();
+
+				String split[] = reader.readLine().split(" ", 3);
+				double playerX = Double.parseDouble(split[0]);
+				double playerY = Double.parseDouble(split[1]);
+				double playerZ = Double.parseDouble(split[2]);
+
+				List<Inventory> items = new ArrayList<Inventory>();
+				String line;
+				while ((line = reader.readLine()) != null) {
+					split = line.split(" ", 2);
+					String id = split[0];
+					int quantity = Integer.parseInt(split[1]);
+					String itemName = index.getDisplayNameFromMinecraftId(id);
+
+					Inventory inv = new Inventory();
+					inv.setItem(itemName);
+					inv.setQuantity(quantity);
+					items.add(inv);
+				}
+
+				return new ChesterFile(version, playerX, playerY, playerZ, items);
+			} finally {
+				IOUtils.closeQuietly(reader);
+			}
+		}
+
+		public ChesterFile(String version, double playerX, double playerY, double playerZ, List<Inventory> items) {
+			this.version = version;
+			this.playerX = playerX;
+			this.playerY = playerY;
+			this.playerZ = playerZ;
+			this.items = items;
 		}
 	}
 }

@@ -201,6 +201,13 @@ public interface DbDao {
 
 	/**
 	 * Updates or inserts an inventory item.
+	 * @param inventory the inventory item
+	 * @throws SQLException
+	 */
+	void upsertInventory(Inventory inventory) throws SQLException;
+
+	/**
+	 * Updates or inserts an inventory item.
 	 * @param item the item name
 	 * @param quantity the new quantity
 	 * @param add true to add the given quantity to the existing total, false to

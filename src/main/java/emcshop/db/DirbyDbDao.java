@@ -720,6 +720,11 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public void upsertInventory(Inventory inventory) throws SQLException {
+		upsertInventory(inventory.getItem(), inventory.getQuantity(), false);
+	}
+
+	@Override
 	public void upsertInventory(String item, Integer quantity, boolean add) throws SQLException {
 		int itemId = getItemId(item);
 
