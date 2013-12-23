@@ -1,5 +1,6 @@
 package emcshop.gui;
 
+import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatQuantity;
 
 import java.awt.Color;
@@ -8,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -22,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -48,10 +53,13 @@ import emcshop.db.DbDao;
 import emcshop.db.Inventory;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.CheckBoxColumn;
+import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {
+	private static final Logger logger = Logger.getLogger(InventoryTab.class.getName());
+
 	private final MainFrame owner;
 	private final DbDao dao;
 
@@ -74,7 +82,7 @@ public class InventoryTab extends JPanel {
 	 * are defined is the order that they will appear in the table.
 	 */
 	private enum Column {
-		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Total (stacks/remainder)");
+		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Stacks/remainder");
 
 		private final String name;
 
@@ -100,7 +108,7 @@ public class InventoryTab extends JPanel {
 			}
 		});
 
-		delete = new JButton("Delete Selected");
+		delete = new JButton("Delete");
 		delete.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -125,6 +133,7 @@ public class InventoryTab extends JPanel {
 		});
 
 		chester = new JButton("Start Chester");
+		chester.setToolTipText(toolTipText("Allows you to record your shop's inventory by simply opening your shop chests in-game.  Requires the \"Chester\" mod to be installed on your Minecraft client."));
 		chester.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -134,7 +143,7 @@ public class InventoryTab extends JPanel {
 					return;
 				}
 
-				Collection<Inventory> items = compressItems(dialog.items);
+				Collection<Inventory> items = dialog.getItems();
 				try {
 					for (Inventory item : items) {
 						dao.upsertInventory(item);
@@ -147,6 +156,8 @@ public class InventoryTab extends JPanel {
 				refresh();
 			}
 		});
+
+		ClickableLabel chesterUrl = new ClickableLabel("<html><font color=navy><u>Download Chester</u></font></html>", "http://github.com/mangstadt/chester");
 
 		item = new ItemSuggestField(owner);
 
@@ -181,7 +192,7 @@ public class InventoryTab extends JPanel {
 				return a.getQuantity() - b.getQuantity();
 			}
 		});
-		table = new InventoryTable(inventory);
+		table = new InventoryTable(Column.REMAINING, true);
 
 		///////////////////////
 
@@ -193,8 +204,10 @@ public class InventoryTab extends JPanel {
 		leftTop.add(quantityLabel, "wrap");
 		leftTop.add(item, "w 200");
 		leftTop.add(quantity, "w 75, wrap");
-		leftTop.add(addEdit, "span 2, wrap");
-		leftTop.add(delete, "span 2");
+		leftTop.add(addEdit, "span 2, split 2");
+		leftTop.add(delete, "wrap");
+		leftTop.add(chester, "span 2, split 2");
+		leftTop.add(chesterUrl);
 
 		add(leftTop);
 
@@ -213,24 +226,8 @@ public class InventoryTab extends JPanel {
 		leftBottom.add(filterByItem.getClearButton(), "w 25!, h 20!, wrap");
 
 		add(leftBottom, "growy");
-	}
 
-	private Collection<Inventory> compressItems(List<Inventory> items) {
-		Map<String, Inventory> map = new HashMap<String, Inventory>();
-
-		for (Inventory item : items) {
-			Inventory mapItem = map.get(item.getItem());
-			if (mapItem == null) {
-				mapItem = new Inventory();
-				mapItem.setItem(item.getItem());
-				mapItem.setQuantity(item.getQuantity());
-				map.put(mapItem.getItem(), mapItem);
-			} else {
-				mapItem.setQuantity(mapItem.getQuantity() + item.getQuantity());
-			}
-		}
-
-		return map.values();
+		refresh();
 	}
 
 	private void addItem() {
@@ -302,6 +299,7 @@ public class InventoryTab extends JPanel {
 	private class Row {
 		private final Inventory inventory;
 		private boolean selected = false;
+		private boolean idUnknown = false;
 
 		public Row(Inventory inventory) {
 			this.inventory = inventory;
@@ -313,19 +311,11 @@ public class InventoryTab extends JPanel {
 		private boolean ascending;
 		private CheckBoxColumn checkboxes;
 		private List<Row> rows = new ArrayList<Row>();
-		private List<Row> displayedRows;
+		private List<Row> displayedRows = rows;
 
-		public InventoryTable(List<Inventory> inventory) {
-			prevColumnClicked = Column.REMAINING;
-			ascending = true;
-
-			for (Inventory inv : inventory) {
-				rows.add(new Row(inv));
-			}
-			displayedRows = rows;
-
-			setModel();
-			setColumns();
+		public InventoryTable(Column sortBy, boolean asc) {
+			prevColumnClicked = sortBy;
+			this.ascending = asc;
 
 			getTableHeader().setReorderingAllowed(false);
 			setColumnSelectionAllowed(false);
@@ -365,6 +355,7 @@ public class InventoryTab extends JPanel {
 					}
 
 					sortData();
+					redraw();
 				}
 			});
 
@@ -380,14 +371,18 @@ public class InventoryTab extends JPanel {
 					Inventory inv = rowObj.inventory;
 
 					if (col == Column.ITEM_NAME.ordinal()) {
-						ImageIcon img = ImageManager.getItemImage(inv.getItem());
-						label = new JLabel(inv.getItem(), img, SwingConstants.LEFT);
+						if (rowObj.idUnknown) {
+							label = new JLabel("<html><font color=red>unknown ID: " + inv.getItem().substring(4) + "</font></html>");
+						} else {
+							ImageIcon img = ImageManager.getItemImage(inv.getItem());
+							label = new JLabel(inv.getItem(), img, SwingConstants.LEFT);
+						}
 					} else if (col == Column.REMAINING.ordinal()) {
 						int quantity = inv.getQuantity();
 						int stacks = quantity / 64;
 						int remainder = quantity % 64;
 
-						label = new JLabel(formatQuantity(quantity, false) + " (" + stacks + "/" + remainder + ")");
+						label = new JLabel(stacks + "/" + remainder + " (" + formatQuantity(quantity, false) + ")");
 					}
 
 					//set the background color of the row
@@ -398,9 +393,23 @@ public class InventoryTab extends JPanel {
 					return label;
 				}
 			});
+
+			setModel();
+			setColumns();
 		}
 
 		public void refresh(List<Inventory> inventory) {
+			setData(inventory);
+			redraw();
+		}
+
+		public void add(Inventory inventory, boolean idUnknown) {
+			Row row = new Row(inventory);
+			row.idUnknown = idUnknown;
+			rows.add(row);
+		}
+
+		public void setData(List<Inventory> inventory) {
 			Set<String> selectedItems = new HashSet<String>();
 			for (Row row : rows) {
 				if (row.selected) {
@@ -419,8 +428,6 @@ public class InventoryTab extends JPanel {
 			displayedRows = rows;
 
 			sortData();
-			setModel();
-			setColumns();
 		}
 
 		public void filter(List<String> filteredItemNames) {
@@ -449,7 +456,7 @@ public class InventoryTab extends JPanel {
 						}
 					}
 				}
-				refresh();
+				redraw();
 			}
 		}
 
@@ -480,11 +487,9 @@ public class InventoryTab extends JPanel {
 					}
 				}
 			});
-
-			refresh();
 		}
 
-		private void refresh() {
+		private void redraw() {
 			AbstractTableModel model = (AbstractTableModel) getModel();
 			model.fireTableStructureChanged();
 
@@ -533,7 +538,7 @@ public class InventoryTab extends JPanel {
 					Column column = columns[index];
 
 					String text = column.getName();
-					if (prevColumnClicked == column && prevColumnClicked != Column.CHECKBOX) {
+					if (prevColumnClicked != null && prevColumnClicked == column && prevColumnClicked != Column.CHECKBOX) {
 						String arrow = (ascending) ? "\u25bc" : "\u25b2";
 						text = arrow + " " + text;
 					}
@@ -595,26 +600,24 @@ public class InventoryTab extends JPanel {
 		}
 	}
 
-	private class ChesterDialog extends JDialog {
+	private class ChesterDialog extends JDialog implements WindowListener {
 		private final InventoryTable table;
-		private final JButton ok, cancel;
-		private final List<Inventory> items = new ArrayList<Inventory>();
-		private boolean cancelled = false;
+		private final JButton done, cancel, remove;
+		private boolean cancelled = true;
 		private final ChesterThread thread;
 
 		public ChesterDialog() {
-			super(owner, "Listening to Chester", true);
-			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-			setResizable(false);
+			super(owner, "Chester", true);
 			GuiUtils.onEscapeKeyPress(this, new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					cancel.doClick();
 				}
 			});
+			addWindowListener(this);
 
-			ok = new JButton("Ok");
-			ok.addActionListener(new ActionListener() {
+			done = new JButton("Done");
+			done.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					thread.stopMe();
@@ -633,23 +636,42 @@ public class InventoryTab extends JPanel {
 				}
 			});
 
-			table = new InventoryTable(new ArrayList<Inventory>());
+			remove = new JButton("Remove");
+			remove.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					for (int i = 0; i < table.displayedRows.size(); i++) {
+						Row row = table.displayedRows.get(i);
+						if (row.selected) {
+							table.displayedRows.remove(i);
+							i--;
+						}
+					}
+
+					table.redraw();
+				}
+			});
+
+			table = new InventoryTable(null, true);
 
 			/////////////////////////
 
 			setLayout(new MigLayout("insets 0"));
 
-			add(new JLabel("<html><h3>Listenering to Chester...</h3></html>", ImageManager.getLoading(), SwingConstants.LEFT), "align center, wrap");
+			add(new JLabel("<html><h3>Listening . . .</h3></html>", ImageManager.getLoading(), SwingConstants.LEFT), "align center, wrap");
+
+			add(new JLabel("You may now login to Minecraft and start opening your shop chests."), "align center, wrap");
+			add(new JLabel("Do not open the same chest twice, as its contents will be recorded twice."), "align center, wrap");
 
 			MyJScrollPane pane = new MyJScrollPane(table);
 			table.setFillsViewportHeight(true);
-			add(pane, "align center, wrap");
+			add(pane, "align center, w 100%, h 100%, grow, wrap");
 
-			add(ok, "split 2, align center");
+			add(done, "split 3, align center");
+			add(remove);
 			add(cancel);
 
-			pack();
-			setSize(getWidth(), getHeight() + 200);
+			setSize(500, 400);
 			setLocationRelativeTo(owner);
 
 			thread = new ChesterThread();
@@ -657,9 +679,32 @@ public class InventoryTab extends JPanel {
 			thread.start();
 		}
 
+		public Collection<Inventory> getItems() {
+			Map<String, Inventory> map = new HashMap<String, Inventory>();
+
+			for (Row row : table.displayedRows) {
+				if (row.idUnknown) {
+					continue;
+				}
+
+				Inventory item = row.inventory;
+				Inventory mapItem = map.get(item.getItem());
+				if (mapItem == null) {
+					mapItem = new Inventory();
+					mapItem.setItem(item.getItem());
+					mapItem.setQuantity(item.getQuantity());
+					map.put(mapItem.getItem(), mapItem);
+				} else {
+					mapItem.setQuantity(mapItem.getQuantity() + item.getQuantity());
+				}
+			}
+
+			return map.values();
+		}
+
 		private class ChesterThread extends Thread {
 			private final long started = System.currentTimeMillis();
-			private boolean running = true;
+			private volatile boolean running = true;
 
 			public void stopMe() {
 				running = false;
@@ -675,8 +720,9 @@ public class InventoryTab extends JPanel {
 				File dir = new File(FileUtils.getUserDirectory(), ".chester");
 				while (running) {
 					try {
+						Thread.sleep(100);
+
 						if (!dir.exists()) {
-							Thread.sleep(100);
 							continue;
 						}
 
@@ -691,19 +737,61 @@ public class InventoryTab extends JPanel {
 								continue;
 							}
 
-							ChesterFile chesterFile = ChesterFile.parse(file);
-							items.addAll(chesterFile.items);
+							try {
+								ChesterFile chesterFile = ChesterFile.parse(file);
+								for (Inventory item : chesterFile.items) {
+									boolean idUnknown = item.getItem().startsWith("_id ");
+									table.add(item, idUnknown);
+								}
+								table.redraw();
+							} catch (Throwable t) {
+								logger.log(Level.SEVERE, "Problem reading Chester file.", t);
+							}
 							file.delete();
 						}
-
-						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						running = false;
-					} catch (IOException e) {
-						throw new RuntimeException(e);
 					}
 				}
 			}
+		}
+
+		@Override
+		public void windowActivated(WindowEvent arg0) {
+			//empty
+		}
+
+		@Override
+		public void windowClosed(WindowEvent arg0) {
+			//fired when the window is disposed in the code
+			//empty
+		}
+
+		@Override
+		public void windowClosing(WindowEvent arg0) {
+			//fired when the user closes the window
+			thread.stopMe();
+			cancelled = true;
+		}
+
+		@Override
+		public void windowDeactivated(WindowEvent arg0) {
+			//empty
+		}
+
+		@Override
+		public void windowDeiconified(WindowEvent arg0) {
+			//empty
+		}
+
+		@Override
+		public void windowIconified(WindowEvent arg0) {
+			//empty
+		}
+
+		@Override
+		public void windowOpened(WindowEvent arg0) {
+			//empty
 		}
 	}
 
@@ -727,10 +815,17 @@ public class InventoryTab extends JPanel {
 				List<Inventory> items = new ArrayList<Inventory>();
 				String line;
 				while ((line = reader.readLine()) != null) {
+					if (line.isEmpty()) {
+						continue;
+					}
+
 					split = line.split(" ", 2);
 					String id = split[0];
 					int quantity = Integer.parseInt(split[1]);
 					String itemName = index.getDisplayNameFromMinecraftId(id);
+					if (itemName == null) {
+						itemName = "_id " + id;
+					}
 
 					Inventory inv = new Inventory();
 					inv.setItem(itemName);
