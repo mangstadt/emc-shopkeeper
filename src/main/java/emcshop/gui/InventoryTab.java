@@ -798,7 +798,9 @@ public class InventoryTab extends JPanel {
 	private static class ChesterFile {
 		private static final ItemIndex index = ItemIndex.instance();
 
+		@SuppressWarnings("unused")
 		private final String version;
+		@SuppressWarnings("unused")
 		private final double playerX, playerY, playerZ;
 		private final List<Inventory> items;
 
@@ -822,9 +824,15 @@ public class InventoryTab extends JPanel {
 					split = line.split(" ", 2);
 					String id = split[0];
 					int quantity = Integer.parseInt(split[1]);
-					String itemName = index.getDisplayNameFromMinecraftId(id);
-					if (itemName == null) {
-						itemName = "_id " + id;
+					String itemName;
+					if (id.matches("[\\d:]+")) {
+						itemName = index.getDisplayNameFromMinecraftId(id);
+						if (itemName == null) {
+							itemName = "_id " + id;
+						}
+					} else {
+						//for EMC-exclusive items, Chester uses the item name instead of the item ID
+						itemName = id.replace("_", " ");
 					}
 
 					Inventory inv = new Inventory();
