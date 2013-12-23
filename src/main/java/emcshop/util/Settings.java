@@ -203,7 +203,7 @@ public class Settings {
 		showProfilesOnStartup = props.getBoolean("showProfilesOnStartup", false);
 	}
 
-	public void save() throws IOException {
+	public void save() {
 		PropertiesWrapper props = new PropertiesWrapper();
 
 		props.setInteger("version", version);
@@ -221,6 +221,10 @@ public class Settings {
 		props.setInteger("rupeeBalance", rupeeBalance);
 		props.setBoolean("showProfilesOnStartup", showProfilesOnStartup);
 
-		props.store(file, "EMC Shopkeeper settings");
+		try {
+			props.store(file, "EMC Shopkeeper settings");
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Problem saving settings file.", e);
+		}
 	}
 }

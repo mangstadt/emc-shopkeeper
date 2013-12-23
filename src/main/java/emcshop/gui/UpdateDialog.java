@@ -224,11 +224,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							if (session != null) {
 								settings.setSession(session);
 								settings.setPersistSession(loginResult.isRememberMe());
-								try {
-									settings.save();
-								} catch (IOException e) {
-									logger.log(Level.SEVERE, "An error occurred saving the settings.", e);
-								}
+								settings.save();
+
 								if (settings.isPersistSession()) {
 									owner.clearSession.setEnabled(true);
 								}

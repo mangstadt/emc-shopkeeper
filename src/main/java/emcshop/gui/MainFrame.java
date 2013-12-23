@@ -159,11 +159,7 @@ public class MainFrame extends JFrame implements WindowListener {
 							logger.finest("Changing log level to " + level.getName() + ".");
 							logManager.setLevel(level);
 							settings.setLogLevel(level);
-							try {
-								settings.save();
-							} catch (IOException e) {
-								logger.log(Level.SEVERE, "Problem saving settings file.", e);
-							}
+							settings.save();
 						}
 					});
 					if (logManager.getLevel().equals(level)) {
@@ -180,11 +176,7 @@ public class MainFrame extends JFrame implements WindowListener {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					settings.setSession(null);
-					try {
-						settings.save();
-					} catch (IOException e) {
-						logger.log(Level.SEVERE, "Problem saving settings file.", e);
-					}
+					settings.save();
 					clearSession.setEnabled(false);
 					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
 				}
@@ -198,11 +190,7 @@ public class MainFrame extends JFrame implements WindowListener {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
 						settings.setShowProfilesOnStartup(showProfilesOnStartup.isSelected());
-						try {
-							settings.save();
-						} catch (IOException e) {
-							logger.log(Level.SEVERE, "Problem saving settings file.", e);
-						}
+						settings.save();
 					}
 				});
 				tools.add(showProfilesOnStartup);
@@ -226,11 +214,7 @@ public class MainFrame extends JFrame implements WindowListener {
 									settings.setLastUpdated(null);
 									settings.setRupeeBalance(null);
 									settings.setSession(null);
-									try {
-										settings.save();
-									} catch (IOException e) {
-										logger.log(Level.SEVERE, "Problem saving settings file.", e);
-									}
+									settings.save();
 									lastUpdateDate.setText("-");
 									updateRupeeBalance();
 									transactionsTab.clear();
@@ -308,11 +292,7 @@ public class MainFrame extends JFrame implements WindowListener {
 					}
 					settings.setPersistSession(result.isRememberMe());
 					settings.setSession(session);
-					try {
-						settings.save();
-					} catch (IOException e) {
-						logger.log(Level.SEVERE, "Problem saving settings file.", e);
-					}
+					settings.save();
 
 					if (settings.isPersistSession()) {
 						clearSession.setEnabled(true);
@@ -454,11 +434,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		settings.setLastUpdated(started);
 		settings.setRupeeBalance(rupeeTotal);
-		try {
-			settings.save();
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Problem writing to settings file.", e);
-		}
+		settings.save();
 
 		updateLastUpdateDate(started);
 		updateRupeeBalance();
@@ -580,11 +556,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	public void windowClosed(WindowEvent arg0) {
 		settings.setWindowWidth(getWidth());
 		settings.setWindowHeight(getHeight());
-		try {
-			settings.save();
-		} catch (IOException e) {
-			logger.log(Level.WARNING, "Problem persisting settings file.", e);
-		}
+		settings.save();
 
 		System.exit(0);
 	}
