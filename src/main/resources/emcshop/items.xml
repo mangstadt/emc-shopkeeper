@@ -71,9 +71,9 @@
 	<Item name="Coal" id="263:0" />
 	<Item name="Coal Block" id="173" />
 	<Item name="Coal Ore" id="16" />
+	<Item name="Cobble Slab" id="44:3" emcNames="Cobblestone Slab" />
 	<Item name="Cobble Wall" id="139" />
 	<Item name="Cobblestone" id="4" />
-	<Item name="Cobblestone Slab" id="44:3" emcNames="Cobble Slab" />
 	<Item name="Cobblestone Stairs" id="67" />
 	<Item name="Cocoa Beans" id="351:3" emcNames="Brown Dye" />
 	<Item name="Compass" id="345" />
@@ -244,7 +244,7 @@
 	<Item name="Name Tag" id="421" />
 	<Item name="Nethbrick" id="405" />
 	<Item name="Nether Brick" id="112" />
-	<Item name="Nether Brick Stairs" id="114" />
+	<Item name="Nether Brick Stairs" id="114" emcNames="Nether Stairs" />
 	<Item name="Nether Fence" id="113" />
 	<Item name="Nether Brick Slab" id="44:6" emcNames="Nethbrick Slab" />
 	<Item name="Nether Stalk" id="372" />
