@@ -11,10 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +42,6 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import emcshop.ItemIndex;
 import emcshop.QueryExporter;
@@ -54,6 +50,7 @@ import emcshop.db.Inventory;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.gui.lib.ClickableLabel;
+import emcshop.util.ChesterFile;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
@@ -372,7 +369,7 @@ public class InventoryTab extends JPanel {
 
 					if (col == Column.ITEM_NAME.ordinal()) {
 						if (rowObj.idUnknown) {
-							label = new JLabel("<html><font color=red>unknown ID: " + inv.getItem().substring(4) + "</font></html>");
+							label = new JLabel("<html><font color=red>unknown ID: " + inv.getItem() + "</font></html>");
 						} else {
 							ImageIcon img = ImageManager.getItemImage(inv.getItem());
 							label = new JLabel(inv.getItem(), img, SwingConstants.LEFT);
@@ -718,6 +715,7 @@ public class InventoryTab extends JPanel {
 			@Override
 			public void run() {
 				File dir = new File(FileUtils.getUserDirectory(), ".chester");
+				ItemIndex index = ItemIndex.instance();
 				while (running) {
 					try {
 						Thread.sleep(100);
@@ -739,8 +737,27 @@ public class InventoryTab extends JPanel {
 
 							try {
 								ChesterFile chesterFile = ChesterFile.parse(file);
-								for (Inventory item : chesterFile.items) {
-									boolean idUnknown = item.getItem().startsWith("_id ");
+								for (Map.Entry<String, Integer> entry : chesterFile.getItems().entrySet()) {
+									String id = entry.getKey();
+									Integer quantity = entry.getValue();
+
+									String name;
+									boolean idUnknown;
+									if (id.matches("[\\d:]+")) {
+										name = index.getDisplayNameFromMinecraftId(id);
+										idUnknown = (name == null);
+										if (idUnknown) {
+											name = id;
+										}
+									} else {
+										//it's an EMC-exclusive item, like Zombie Virus
+										name = id;
+										idUnknown = false;
+									}
+
+									Inventory item = new Inventory();
+									item.setItem(name);
+									item.setQuantity(quantity);
 									table.add(item, idUnknown);
 								}
 								table.redraw();
@@ -792,67 +809,6 @@ public class InventoryTab extends JPanel {
 		@Override
 		public void windowOpened(WindowEvent arg0) {
 			//empty
-		}
-	}
-
-	private static class ChesterFile {
-		private static final ItemIndex index = ItemIndex.instance();
-
-		@SuppressWarnings("unused")
-		private final String version;
-		@SuppressWarnings("unused")
-		private final double playerX, playerY, playerZ;
-		private final List<Inventory> items;
-
-		public static ChesterFile parse(File file) throws IOException {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			try {
-				String version = reader.readLine();
-
-				String split[] = reader.readLine().split(" ", 3);
-				double playerX = Double.parseDouble(split[0]);
-				double playerY = Double.parseDouble(split[1]);
-				double playerZ = Double.parseDouble(split[2]);
-
-				List<Inventory> items = new ArrayList<Inventory>();
-				String line;
-				while ((line = reader.readLine()) != null) {
-					if (line.isEmpty()) {
-						continue;
-					}
-
-					split = line.split(" ", 2);
-					String id = split[0];
-					int quantity = Integer.parseInt(split[1]);
-					String itemName;
-					if (id.matches("[\\d:]+")) {
-						itemName = index.getDisplayNameFromMinecraftId(id);
-						if (itemName == null) {
-							itemName = "_id " + id;
-						}
-					} else {
-						//for EMC-exclusive items, Chester uses the item name instead of the item ID
-						itemName = id.replace("_", " ");
-					}
-
-					Inventory inv = new Inventory();
-					inv.setItem(itemName);
-					inv.setQuantity(quantity);
-					items.add(inv);
-				}
-
-				return new ChesterFile(version, playerX, playerY, playerZ, items);
-			} finally {
-				IOUtils.closeQuietly(reader);
-			}
-		}
-
-		public ChesterFile(String version, double playerX, double playerY, double playerZ, List<Inventory> items) {
-			this.version = version;
-			this.playerX = playerX;
-			this.playerY = playerY;
-			this.playerZ = playerZ;
-			this.items = items;
 		}
 	}
 }
