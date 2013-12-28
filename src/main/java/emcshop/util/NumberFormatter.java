@@ -52,7 +52,11 @@ public class NumberFormatter {
 	public static String formatStacks(int quantity, boolean addPlus) {
 		int stacks = quantity / 64;
 		if (stacks == 0) {
-			return quantity + "";
+			String quantityStr = quantity + "";
+			if (quantity > 0 && addPlus) {
+				quantityStr = "+" + quantityStr;
+			}
+			return quantityStr;
 		}
 
 		int remaining = quantity % 64;
