@@ -402,7 +402,7 @@ public class TransactionsTab extends JPanel {
 					}
 
 					//render table
-					itemsTable = new ItemsTable(itemGroupsList);
+					itemsTable = new ItemsTable(itemGroupsList, settings.isShowQuantitiesInStacks());
 					itemsTable.setFillsViewportHeight(true);
 					itemsTableScrollPane = new MyJScrollPane(itemsTable);
 					tablePanel.add(itemsTableScrollPane, "grow, w 100%, h 100%, wrap");
@@ -458,7 +458,7 @@ public class TransactionsTab extends JPanel {
 					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(from, to).values();
 
 					//render table
-					playersPanel = new PlayersPanel(playerGroups, profileImageLoader);
+					playersPanel = new PlayersPanel(playerGroups, profileImageLoader, settings);
 					playersPanelScrollPane = new MyJScrollPane(playersPanel);
 					tablePanel.add(playersPanelScrollPane, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();

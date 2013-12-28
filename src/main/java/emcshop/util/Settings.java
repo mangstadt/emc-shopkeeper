@@ -24,6 +24,7 @@ public class Settings {
 	private Level logLevel;
 	private Integer rupeeBalance;
 	private boolean showProfilesOnStartup;
+	private boolean showQuantitiesInStacks;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -117,6 +118,14 @@ public class Settings {
 		this.showProfilesOnStartup = showProfilesOnStartup;
 	}
 
+	public boolean isShowQuantitiesInStacks() {
+		return showQuantitiesInStacks;
+	}
+
+	public void setShowQuantitiesInStacks(boolean showQuantitiesInStacks) {
+		this.showQuantitiesInStacks = showQuantitiesInStacks;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowWidth = 900;
@@ -128,6 +137,7 @@ public class Settings {
 		logLevel = Level.INFO;
 		rupeeBalance = null;
 		showProfilesOnStartup = false;
+		showQuantitiesInStacks = false;
 	}
 
 	public void load() throws IOException {
@@ -201,6 +211,8 @@ public class Settings {
 		}
 
 		showProfilesOnStartup = props.getBoolean("showProfilesOnStartup", false);
+
+		showQuantitiesInStacks = props.getBoolean("showQuantitiesInStacks", false);
 	}
 
 	public void save() {
@@ -220,6 +232,7 @@ public class Settings {
 		props.set("log.level", logLevel.getName());
 		props.setInteger("rupeeBalance", rupeeBalance);
 		props.setBoolean("showProfilesOnStartup", showProfilesOnStartup);
+		props.setBoolean("showQuantitiesInStacks", showQuantitiesInStacks);
 
 		try {
 			props.store(file, "EMC Shopkeeper settings");

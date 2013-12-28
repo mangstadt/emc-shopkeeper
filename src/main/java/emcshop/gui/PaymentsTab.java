@@ -33,7 +33,6 @@ import emcshop.db.DbDao;
 import emcshop.gui.ProfileImageLoader.ImageAssignedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ButtonColumn;
-import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
@@ -405,7 +404,7 @@ public class PaymentsTab extends JPanel {
 
 	private class AssignDialog extends JDialog {
 		private final ItemSuggestField item;
-		private final JNumberTextField quantity;
+		private final QuantityTextField quantity;
 		private final JButton ok, cancel;
 
 		public AssignDialog(final PaymentTransaction transaction) {
@@ -415,14 +414,25 @@ public class PaymentsTab extends JPanel {
 			GuiUtils.closeOnEscapeKeyPress(this);
 
 			item = new ItemSuggestField(this);
-			quantity = new JNumberTextField();
+			quantity = new QuantityTextField();
+			quantity.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					ok.doClick();
+				}
+			});
 
 			ok = new JButton("Ok");
 			ok.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					if (item.getText().isEmpty() || quantity.getInteger() == null) {
-						JOptionPane.showMessageDialog(AssignDialog.this, "Invalid item information.", "Error", JOptionPane.ERROR_MESSAGE);
+					if (item.getText().isEmpty()) {
+						JOptionPane.showMessageDialog(AssignDialog.this, "No item specified.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+
+					if (quantity.getText().isEmpty()) {
+						JOptionPane.showMessageDialog(AssignDialog.this, "No quantity specified.", "Error", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 
@@ -433,7 +443,14 @@ public class PaymentsTab extends JPanel {
 					shop.setBalance(transaction.getBalance());
 					shop.setItem(item.getText());
 
-					Integer qty = quantity.getInteger();
+					Integer qty;
+					try {
+						qty = quantity.getQuantity();
+					} catch (NumberFormatException e) {
+						JOptionPane.showMessageDialog(AssignDialog.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+
 					if (transaction.getAmount() > 0) {
 						//negate quantity if it's a sale
 						qty *= -1;

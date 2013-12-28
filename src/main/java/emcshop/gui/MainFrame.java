@@ -171,18 +171,17 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 			tools.add(logLevel);
 
-			clearSession = new JMenuItem("Clear Saved Session");
-			clearSession.addActionListener(new ActionListener() {
+			tools.addSeparator();
+
+			final JCheckBoxMenuItem showQuantitiesInStacks = new JCheckBoxMenuItem("Show Quantities in Stacks", settings.isShowQuantitiesInStacks());
+			showQuantitiesInStacks.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					settings.setSession(null);
+					settings.setShowQuantitiesInStacks(showQuantitiesInStacks.isSelected());
 					settings.save();
-					clearSession.setEnabled(false);
-					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
 				}
 			});
-			clearSession.setEnabled(settings.getSession() != null);
-			tools.add(clearSession);
+			tools.add(showQuantitiesInStacks);
 
 			if (profile.equals("default")) {
 				final JCheckBoxMenuItem showProfilesOnStartup = new JCheckBoxMenuItem("Show Profiles On Startup", settings.isShowProfilesOnStartup());
@@ -197,6 +196,19 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 
 			tools.addSeparator();
+
+			clearSession = new JMenuItem("Clear Saved Session");
+			clearSession.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					settings.setSession(null);
+					settings.save();
+					clearSession.setEnabled(false);
+					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
+				}
+			});
+			clearSession.setEnabled(settings.getSession() != null);
+			tools.add(clearSession);
 
 			JMenuItem resetDb = new JMenuItem("Reset database...");
 			resetDb.addActionListener(new ActionListener() {
@@ -329,7 +341,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		transactionsTab = new TransactionsTab(this, dao, profileImageLoader, settings);
 		paymentsTab = new PaymentsTab(this, dao, profileImageLoader);
-		inventoryTab = new InventoryTab(this, dao);
+		inventoryTab = new InventoryTab(this, dao, settings);
 		bonusFeeTab = new BonusFeeTab(dao);
 	}
 

@@ -2,6 +2,7 @@ package emcshop.gui;
 
 import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatQuantity;
+import static emcshop.util.NumberFormatter.formatStacks;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -34,7 +35,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -52,6 +52,7 @@ import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.ChesterFile;
 import emcshop.util.GuiUtils;
+import emcshop.util.Settings;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {
@@ -65,11 +66,13 @@ public class InventoryTab extends JPanel {
 	private final JButton chester;
 	private final ItemSuggestField item;
 	private final JLabel quantityLabel;
-	private final JTextField quantity;
+	private final QuantityTextField quantity;
 
 	private final ExportComboBox export;
 	private final JLabel filterByItemLabel;
 	private final FilterTextField filterByItem;
+
+	private final Settings settings;
 
 	private InventoryTable table;
 	private MyJScrollPane tableScrollPane;
@@ -79,7 +82,7 @@ public class InventoryTab extends JPanel {
 	 * are defined is the order that they will appear in the table.
 	 */
 	private enum Column {
-		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Stacks/remainder");
+		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Remaining");
 
 		private final String name;
 
@@ -92,9 +95,10 @@ public class InventoryTab extends JPanel {
 		}
 	}
 
-	public InventoryTab(MainFrame owner, final DbDao dao) {
+	public InventoryTab(MainFrame owner, final DbDao dao, Settings settings) {
 		this.owner = owner;
 		this.dao = dao;
+		this.settings = settings;
 
 		addEdit = new JButton("Add/Edit");
 		addEdit.addActionListener(new ActionListener() {
@@ -160,7 +164,7 @@ public class InventoryTab extends JPanel {
 
 		quantityLabel = new HelpLabel("Qty:", "Tip: You can specify the quantity in \"stacks\" (groups of 64) instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)\n\nPrepending a \"+\" will add the quantity to the existing total.\n\n<b>Example inputs</b>:\n\"+1/\" (add 1 stack to the existing amount)");
 
-		quantity = new JTextField();
+		quantity = new QuantityTextField();
 		quantity.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -242,20 +246,8 @@ public class InventoryTab extends JPanel {
 		Integer quantityValue;
 		boolean add;
 		try {
-			if (quantityStr.startsWith("+")) {
-				add = true;
-				quantityStr = quantityStr.substring(1);
-			} else {
-				add = false;
-			}
-
-			String split[] = quantityStr.split("/", 2);
-			if (split.length == 1) {
-				quantityValue = Integer.valueOf(split[0]);
-			} else {
-				int remainder = split[1].isEmpty() ? 0 : Integer.valueOf(split[1]);
-				quantityValue = Integer.valueOf(split[0]) * 64 + remainder;
-			}
+			add = quantity.isAdd();
+			quantityValue = quantity.getQuantity();
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
 			quantity.requestFocusInWindow();
@@ -375,11 +367,8 @@ public class InventoryTab extends JPanel {
 							label = new JLabel(inv.getItem(), img, SwingConstants.LEFT);
 						}
 					} else if (col == Column.REMAINING.ordinal()) {
-						int quantity = inv.getQuantity();
-						int stacks = quantity / 64;
-						int remainder = quantity % 64;
-
-						label = new JLabel(stacks + "/" + remainder + " (" + formatQuantity(quantity, false) + ")");
+						String text = settings.isShowQuantitiesInStacks() ? formatStacks(inv.getQuantity(), false) : formatQuantity(inv.getQuantity(), false);
+						label = new JLabel(text);
 					}
 
 					//set the background color of the row

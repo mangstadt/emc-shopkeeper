@@ -34,6 +34,41 @@ public class NumberFormatter {
 	}
 
 	/**
+	 * Formats a quantity in stacks.
+	 * @param quantity the quantity
+	 * @return the quantity string (e.g. "+1/30")
+	 */
+	public static String formatStacks(int quantity) {
+		return formatStacks(quantity, true);
+	}
+
+	/**
+	 * Formats a quantity in stacks.
+	 * @param quantity the quantity
+	 * @param addPlus true to prepend a "+" character to positive values, false
+	 * not to
+	 * @return the quantity string (e.g. "+1/30")
+	 */
+	public static String formatStacks(int quantity, boolean addPlus) {
+		int stacks = quantity / 64;
+		if (stacks == 0) {
+			return quantity + "";
+		}
+
+		int remaining = quantity % 64;
+		if (remaining < 0) {
+			//the remaining part should not contain a "-"
+			remaining *= -1;
+		}
+
+		String quantityStr = nf.format(stacks) + "/" + remaining;
+		if (quantity > 0 && addPlus) {
+			quantityStr = "+" + quantityStr;
+		}
+		return quantityStr;
+	}
+
+	/**
 	 * Formats a rupee amount as a string.
 	 * @param rupees the amount of rupees
 	 * @return the rupee string (e.g. "+1,210r")
@@ -70,6 +105,16 @@ public class NumberFormatter {
 	 */
 	public static String formatQuantityWithColor(int quantity) {
 		String text = formatQuantity(quantity);
+		return colorize(text, quantity);
+	}
+
+	/**
+	 * Formats a quantity as colored HTML.
+	 * @param quantity the quantity
+	 * @return the colored HTML string
+	 */
+	public static String formatStacksWithColor(int quantity) {
+		String text = formatStacks(quantity);
 		return colorize(text, quantity);
 	}
 

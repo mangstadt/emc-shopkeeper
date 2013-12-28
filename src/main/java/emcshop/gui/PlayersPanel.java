@@ -23,6 +23,7 @@ import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.lib.ClickableLabel;
+import emcshop.util.Settings;
 
 /**
  * A panel that displays transactions grouped by player.
@@ -33,6 +34,7 @@ public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
 	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
 	private final ProfileImageLoader profileImageLoader;
+	private final Settings settings;
 	private List<PlayerGroup> displayedPlayers;
 	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
 	private List<String> filteredPlayerNames = new ArrayList<String>(0);
@@ -43,7 +45,7 @@ public class PlayersPanel extends JPanel {
 	 * Creates the panel.
 	 * @param playerGroups the players to display in the table
 	 */
-	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileImageLoader profileImageLoader) {
+	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileImageLoader profileImageLoader, Settings settings) {
 		//add all the data to Lists so they can be sorted
 		this.playerGroups = new ArrayList<PlayerGroup>(playerGroups);
 		for (PlayerGroup playerGroup : playerGroups) {
@@ -52,6 +54,7 @@ public class PlayersPanel extends JPanel {
 		}
 
 		this.profileImageLoader = profileImageLoader;
+		this.settings = settings;
 
 		setLayout(new MigLayout("fillx"));
 		sortByPlayerName();
@@ -163,7 +166,7 @@ public class PlayersPanel extends JPanel {
 				break;
 			}
 
-			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup), column, ascending);
+			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup), column, ascending, settings.isShowQuantitiesInStacks());
 			add(table.getTableHeader(), "growx, wrap");
 			add(table, "growx, wrap");
 

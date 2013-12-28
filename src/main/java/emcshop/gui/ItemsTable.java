@@ -4,6 +4,8 @@ import static emcshop.util.NumberFormatter.formatQuantity;
 import static emcshop.util.NumberFormatter.formatQuantityWithColor;
 import static emcshop.util.NumberFormatter.formatRupees;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
+import static emcshop.util.NumberFormatter.formatStacks;
+import static emcshop.util.NumberFormatter.formatStacksWithColor;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -58,8 +60,8 @@ public class ItemsTable extends GroupableColumnsTable {
 	/**
 	 * @param itemGroups the items to display
 	 */
-	public ItemsTable(List<ItemGroup> itemGroups) {
-		this(itemGroups, Column.ITEM_NAME, true);
+	public ItemsTable(List<ItemGroup> itemGroups, boolean showQuantitiesInStacks) {
+		this(itemGroups, Column.ITEM_NAME, true, showQuantitiesInStacks);
 	}
 
 	/**
@@ -68,7 +70,7 @@ public class ItemsTable extends GroupableColumnsTable {
 	 * @param sortedByAscending true if the items list is sorted ascending,
 	 * false if descending
 	 */
-	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending) {
+	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending, final boolean showQuantitiesInStacks) {
 		this.itemGroups = itemGroups;
 		this.itemGroupsToDisplay = itemGroups;
 		prevColumnClicked = sortedBy;
@@ -111,43 +113,53 @@ public class ItemsTable extends GroupableColumnsTable {
 		setDefaultRenderer(ItemGroup.class, new TableCellRenderer() {
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
+			private final JLabel label = new JLabel();
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-				JLabel label = null;
+				label.setIcon(null);
+				label.setHorizontalAlignment(SwingConstants.LEFT);
 
 				ItemGroup group = (ItemGroup) value;
 				if (col == Column.ITEM_NAME.ordinal()) {
 					ImageIcon img = ImageManager.getItemImage(group.getItem());
-					label = new JLabel(group.getItem(), img, SwingConstants.LEFT);
+					label.setText(group.getItem());
+					label.setIcon(img);
 				} else if (col == Column.SOLD_QTY.ordinal()) {
 					if (group.getSoldQuantity() == 0) {
-						label = new JLabel("-", SwingConstants.CENTER);
+						label.setText("-");
+						label.setHorizontalAlignment(SwingConstants.CENTER);
 					} else {
-						label = new JLabel(formatQuantity(group.getSoldQuantity()));
+						String text = showQuantitiesInStacks ? formatStacks(group.getSoldQuantity()) : formatQuantity(group.getSoldQuantity());
+						label.setText(text);
 					}
 				} else if (col == Column.SOLD_AMT.ordinal()) {
 					if (group.getSoldQuantity() == 0) {
-						label = new JLabel("-", SwingConstants.CENTER);
+						label.setText("-");
+						label.setHorizontalAlignment(SwingConstants.CENTER);
 					} else {
-						label = new JLabel(formatRupees(group.getSoldAmount()));
+						label.setText(formatRupees(group.getSoldAmount()));
 					}
 				} else if (col == Column.BOUGHT_QTY.ordinal()) {
 					if (group.getBoughtQuantity() == 0) {
-						label = new JLabel("-", SwingConstants.CENTER);
+						label.setText("-");
+						label.setHorizontalAlignment(SwingConstants.CENTER);
 					} else {
-						label = new JLabel(formatQuantity(group.getBoughtQuantity()));
+						String text = showQuantitiesInStacks ? formatStacks(group.getBoughtQuantity()) : formatQuantity(group.getBoughtQuantity());
+						label.setText(text);
 					}
 				} else if (col == Column.BOUGHT_AMT.ordinal()) {
 					if (group.getBoughtQuantity() == 0) {
-						label = new JLabel("-", SwingConstants.CENTER);
+						label.setText("-");
+						label.setHorizontalAlignment(SwingConstants.CENTER);
 					} else {
-						label = new JLabel(formatRupees(group.getBoughtAmount()));
+						label.setText(formatRupees(group.getBoughtAmount()));
 					}
 				} else if (col == Column.NET_QTY.ordinal()) {
-					label = new JLabel("<html>" + formatQuantityWithColor(group.getNetQuantity()) + "</html>");
+					String text = showQuantitiesInStacks ? formatStacksWithColor(group.getNetQuantity()) : formatQuantityWithColor(group.getNetQuantity());
+					label.setText("<html>" + text + "</html>");
 				} else if (col == Column.NET_AMT.ordinal()) {
-					label = new JLabel("<html>" + formatRupeesWithColor(group.getNetAmount()) + "</html>");
+					label.setText("<html>" + formatRupeesWithColor(group.getNetAmount()) + "</html>");
 				}
 
 				//set the background color of the row
