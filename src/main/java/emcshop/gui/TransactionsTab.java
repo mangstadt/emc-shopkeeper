@@ -458,7 +458,7 @@ public class TransactionsTab extends JPanel {
 					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(from, to).values();
 
 					//render table
-					playersPanel = new PlayersPanel(playerGroups, profileImageLoader, settings);
+					playersPanel = new PlayersPanel(playerGroups, profileImageLoader, settings.isShowQuantitiesInStacks());
 					playersPanelScrollPane = new MyJScrollPane(playersPanel);
 					tablePanel.add(playersPanelScrollPane, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
@@ -578,6 +578,16 @@ public class TransactionsTab extends JPanel {
 		}
 
 		return new Date[] { from, to };
+	}
+
+	public void setShowQuantitiesInStacks(boolean stacks) {
+		if (itemsTable != null) {
+			itemsTable.setShowQuantitiesInStacks(stacks);
+		}
+
+		if (playersPanel != null) {
+			playersPanel.setShowQuantitiesInStacks(stacks);
+		}
 	}
 
 	private class ExportComboBoxImpl extends ExportComboBox {

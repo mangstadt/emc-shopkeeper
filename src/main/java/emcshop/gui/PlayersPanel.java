@@ -23,7 +23,6 @@ import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.lib.ClickableLabel;
-import emcshop.util.Settings;
 
 /**
  * A panel that displays transactions grouped by player.
@@ -34,18 +33,19 @@ public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
 	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
 	private final ProfileImageLoader profileImageLoader;
-	private final Settings settings;
+	private boolean showQuantitiesInStacks;
 	private List<PlayerGroup> displayedPlayers;
 	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
 	private List<String> filteredPlayerNames = new ArrayList<String>(0);
 	private List<String> filteredItemNames = new ArrayList<String>(0);
+	private List<ItemsTable> tables = new ArrayList<ItemsTable>();
 	private Sort sort;
 
 	/**
 	 * Creates the panel.
 	 * @param playerGroups the players to display in the table
 	 */
-	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileImageLoader profileImageLoader, Settings settings) {
+	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileImageLoader profileImageLoader, boolean showQtyInStacks) {
 		//add all the data to Lists so they can be sorted
 		this.playerGroups = new ArrayList<PlayerGroup>(playerGroups);
 		for (PlayerGroup playerGroup : playerGroups) {
@@ -54,7 +54,7 @@ public class PlayersPanel extends JPanel {
 		}
 
 		this.profileImageLoader = profileImageLoader;
-		this.settings = settings;
+		showQuantitiesInStacks = showQtyInStacks;
 
 		setLayout(new MigLayout("fillx"));
 		sortByPlayerName();
@@ -108,6 +108,13 @@ public class PlayersPanel extends JPanel {
 		return displayedItems;
 	}
 
+	public void setShowQuantitiesInStacks(boolean enable) {
+		showQuantitiesInStacks = enable;
+		for (ItemsTable table : tables) {
+			table.setShowQuantitiesInStacks(enable);
+		}
+	}
+
 	private void refresh() {
 		//filter players
 		displayedPlayers = filterPlayers();
@@ -120,6 +127,7 @@ public class PlayersPanel extends JPanel {
 
 		//display data
 		removeAll();
+		tables.clear();
 		DateFormat df = new SimpleDateFormat("MMMM dd yyyy, HH:mm");
 		final int profileImageSize = 64;
 		for (PlayerGroup playerGroup : displayedPlayers) {
@@ -166,9 +174,10 @@ public class PlayersPanel extends JPanel {
 				break;
 			}
 
-			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup), column, ascending, settings.isShowQuantitiesInStacks());
+			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup), column, ascending, showQuantitiesInStacks);
 			add(table.getTableHeader(), "growx, wrap");
 			add(table, "growx, wrap");
+			tables.add(table);
 
 			JLabel netAmount;
 			{

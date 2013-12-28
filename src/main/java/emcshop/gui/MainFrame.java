@@ -177,8 +177,12 @@ public class MainFrame extends JFrame implements WindowListener {
 			showQuantitiesInStacks.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					settings.setShowQuantitiesInStacks(showQuantitiesInStacks.isSelected());
+					boolean stacks = showQuantitiesInStacks.isSelected();
+					settings.setShowQuantitiesInStacks(stacks);
 					settings.save();
+
+					inventoryTab.setShowQuantitiesInStacks(stacks);
+					transactionsTab.setShowQuantitiesInStacks(stacks);
 				}
 			});
 			tools.add(showQuantitiesInStacks);
@@ -341,7 +345,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		transactionsTab = new TransactionsTab(this, dao, profileImageLoader, settings);
 		paymentsTab = new PaymentsTab(this, dao, profileImageLoader);
-		inventoryTab = new InventoryTab(this, dao, settings);
+		inventoryTab = new InventoryTab(this, dao, settings.isShowQuantitiesInStacks());
 		bonusFeeTab = new BonusFeeTab(dao);
 	}
 

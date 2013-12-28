@@ -52,7 +52,6 @@ import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.ChesterFile;
 import emcshop.util.GuiUtils;
-import emcshop.util.Settings;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {
@@ -72,9 +71,8 @@ public class InventoryTab extends JPanel {
 	private final JLabel filterByItemLabel;
 	private final FilterTextField filterByItem;
 
-	private final Settings settings;
-
 	private InventoryTable table;
+	private boolean showQuantitiesInStacks;
 	private MyJScrollPane tableScrollPane;
 
 	/**
@@ -95,10 +93,10 @@ public class InventoryTab extends JPanel {
 		}
 	}
 
-	public InventoryTab(MainFrame owner, final DbDao dao, Settings settings) {
+	public InventoryTab(MainFrame owner, final DbDao dao, boolean showQtyInStacks) {
 		this.owner = owner;
 		this.dao = dao;
-		this.settings = settings;
+		showQuantitiesInStacks = showQtyInStacks;
 
 		addEdit = new JButton("Add/Edit");
 		addEdit.addActionListener(new ActionListener() {
@@ -279,6 +277,11 @@ public class InventoryTab extends JPanel {
 		return inventory;
 	}
 
+	public void setShowQuantitiesInStacks(boolean enable) {
+		showQuantitiesInStacks = enable;
+		table.redraw();
+	}
+
 	public void refresh() {
 		List<Inventory> inventory = getInventory();
 		table.refresh(inventory);
@@ -367,7 +370,7 @@ public class InventoryTab extends JPanel {
 							label = new JLabel(inv.getItem(), img, SwingConstants.LEFT);
 						}
 					} else if (col == Column.REMAINING.ordinal()) {
-						String text = settings.isShowQuantitiesInStacks() ? formatStacks(inv.getQuantity(), false) : formatQuantity(inv.getQuantity(), false);
+						String text = showQuantitiesInStacks ? formatStacks(inv.getQuantity(), false) : formatQuantity(inv.getQuantity(), false);
 						label = new JLabel(text);
 					}
 

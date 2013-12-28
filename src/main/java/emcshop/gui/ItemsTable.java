@@ -55,7 +55,7 @@ public class ItemsTable extends GroupableColumnsTable {
 	private List<ItemGroup> itemGroupsToDisplay;
 
 	private Column prevColumnClicked;
-	private boolean ascending;
+	private boolean ascending, showQuantitiesInStacks;
 
 	/**
 	 * @param itemGroups the items to display
@@ -70,11 +70,12 @@ public class ItemsTable extends GroupableColumnsTable {
 	 * @param sortedByAscending true if the items list is sorted ascending,
 	 * false if descending
 	 */
-	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending, final boolean showQuantitiesInStacks) {
+	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending, boolean showQtyInStacks) {
 		this.itemGroups = itemGroups;
 		this.itemGroupsToDisplay = itemGroups;
 		prevColumnClicked = sortedBy;
 		ascending = sortedByAscending;
+		showQuantitiesInStacks = showQtyInStacks;
 
 		getTableHeader().setReorderingAllowed(false);
 		setColumnSelectionAllowed(false);
@@ -296,6 +297,12 @@ public class ItemsTable extends GroupableColumnsTable {
 
 		Collections.sort(itemGroupsToDisplay, comparator);
 		refresh();
+	}
+
+	public void setShowQuantitiesInStacks(boolean enable) {
+		showQuantitiesInStacks = enable;
+		AbstractTableModel model = (AbstractTableModel) getModel();
+		model.fireTableDataChanged();
 	}
 
 	private void refresh() {
