@@ -36,30 +36,32 @@ public class NumberFormatter {
 	/**
 	 * Formats a quantity in stacks.
 	 * @param quantity the quantity
+	 * @param stackSize the size of a stack (e.g. "64")
 	 * @return the quantity string (e.g. "+1/30")
 	 */
-	public static String formatStacks(int quantity) {
-		return formatStacks(quantity, true);
+	public static String formatStacks(int quantity, int stackSize) {
+		return formatStacks(quantity, stackSize, true);
 	}
 
 	/**
 	 * Formats a quantity in stacks.
 	 * @param quantity the quantity
+	 * @param stackSize the size of a stack (e.g. "64")
 	 * @param addPlus true to prepend a "+" character to positive values, false
 	 * not to
 	 * @return the quantity string (e.g. "+1/30")
 	 */
-	public static String formatStacks(int quantity, boolean addPlus) {
-		int stacks = quantity / 64;
-		if (stacks == 0) {
-			String quantityStr = quantity + "";
-			if (quantity > 0 && addPlus) {
-				quantityStr = "+" + quantityStr;
-			}
-			return quantityStr;
+	public static String formatStacks(int quantity, int stackSize, boolean addPlus) {
+		if (stackSize == 1) {
+			return formatQuantity(quantity, addPlus);
 		}
 
-		int remaining = quantity % 64;
+		int stacks = quantity / stackSize;
+		if (stacks == 0) {
+			return formatQuantity(quantity, addPlus);
+		}
+
+		int remaining = quantity % stackSize;
 		if (remaining < 0) {
 			//the remaining part should not contain a "-"
 			remaining *= -1;
@@ -115,10 +117,11 @@ public class NumberFormatter {
 	/**
 	 * Formats a quantity as colored HTML.
 	 * @param quantity the quantity
+	 * @param stackSize the size of a stack (e.g. "64")
 	 * @return the colored HTML string
 	 */
-	public static String formatStacksWithColor(int quantity) {
-		String text = formatStacks(quantity);
+	public static String formatStacksWithColor(int quantity, int stackSize) {
+		String text = formatStacks(quantity, stackSize);
 		return colorize(text, quantity);
 	}
 

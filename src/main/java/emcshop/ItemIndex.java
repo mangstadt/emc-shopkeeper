@@ -32,6 +32,7 @@ public class ItemIndex {
 	private final Map<String, String> emcNameToDisplayName;
 	private final Map<String, String> minecraftIdToDisplayName;
 	private final Map<String, String> itemImages;
+	private final Map<String, Integer> stackSizes;
 	private final List<String> itemNames;
 
 	/**
@@ -86,6 +87,7 @@ public class ItemIndex {
 		Map<String, String> minecraftIdToDisplayName = new HashMap<String, String>();
 		Map<String, String> emcNameToDisplayName = new HashMap<String, String>();
 		Map<String, String> itemImages = new HashMap<String, String>();
+		Map<String, Integer> stackSizes = new HashMap<String, Integer>();
 		List<String> itemNames = new ArrayList<String>();
 		for (int i = 0; i < itemNodes.getLength(); i++) {
 			Element itemNode = (Element) itemNodes.item(i);
@@ -111,11 +113,17 @@ public class ItemIndex {
 			if (!image.isEmpty()) {
 				itemImages.put(name, image);
 			}
+
+			String stackSize = itemNode.getAttribute("stack");
+			if (!stackSize.isEmpty()) {
+				stackSizes.put(name.toLowerCase(), Integer.valueOf(stackSize));
+			}
 		}
 
 		this.emcNameToDisplayName = Collections.unmodifiableMap(emcNameToDisplayName);
 		this.minecraftIdToDisplayName = Collections.unmodifiableMap(minecraftIdToDisplayName);
 		this.itemImages = Collections.unmodifiableMap(itemImages);
+		this.stackSizes = Collections.unmodifiableMap(stackSizes);
 		this.itemNames = Collections.unmodifiableList(itemNames);
 	}
 
@@ -169,6 +177,16 @@ public class ItemIndex {
 			image = displayName.toLowerCase().replace(" ", "_") + ".png";
 		}
 		return image;
+	}
+
+	/**
+	 * Gets the stack size of an item.
+	 * @param displayName the item name
+	 * @return the stack size (e.g. "64")
+	 */
+	public Integer getStackSize(String displayName) {
+		Integer stackSize = stackSizes.get(displayName.toLowerCase());
+		return (stackSize == null) ? 64 : stackSize;
 	}
 
 	/**

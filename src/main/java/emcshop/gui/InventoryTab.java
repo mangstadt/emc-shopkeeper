@@ -343,6 +343,7 @@ public class InventoryTab extends JPanel {
 			setDefaultRenderer(Row.class, new TableCellRenderer() {
 				private final Color evenRowColor = new Color(255, 255, 255);
 				private final Color oddRowColor = new Color(240, 240, 240);
+				private final ItemIndex index = ItemIndex.instance();
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -359,7 +360,7 @@ public class InventoryTab extends JPanel {
 							label = new JLabel(inv.getItem(), img, SwingConstants.LEFT);
 						}
 					} else if (col == Column.REMAINING.ordinal()) {
-						String text = showQuantitiesInStacks ? formatStacks(inv.getQuantity(), false) : formatQuantity(inv.getQuantity(), false);
+						String text = showQuantitiesInStacks ? formatStacks(inv.getQuantity(), index.getStackSize(inv.getItem()), false) : formatQuantity(inv.getQuantity(), false);
 						label = new JLabel(text);
 					}
 

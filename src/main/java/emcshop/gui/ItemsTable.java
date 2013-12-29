@@ -23,6 +23,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
+import emcshop.ItemIndex;
 import emcshop.db.ItemGroup;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupableColumnsTable;
@@ -118,6 +119,7 @@ public class ItemsTable extends GroupableColumnsTable {
 			private final Color oddRowColor = new Color(240, 240, 240);
 			private final JLabel label = new JLabel();
 			private final Column[] columns = Column.values();
+			private final ItemIndex index = ItemIndex.instance();
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -161,7 +163,7 @@ public class ItemsTable extends GroupableColumnsTable {
 					if (group.getSoldQuantity() == 0) {
 						return null;
 					}
-					return showQuantitiesInStacks ? formatStacks(group.getSoldQuantity()) : formatQuantity(group.getSoldQuantity());
+					return showQuantitiesInStacks ? formatStacks(group.getSoldQuantity(), index.getStackSize(group.getItem())) : formatQuantity(group.getSoldQuantity());
 				case SOLD_AMT:
 					if (group.getSoldQuantity() == 0) {
 						return null;
@@ -171,14 +173,14 @@ public class ItemsTable extends GroupableColumnsTable {
 					if (group.getBoughtQuantity() == 0) {
 						return null;
 					}
-					return showQuantitiesInStacks ? formatStacks(group.getBoughtQuantity()) : formatQuantity(group.getBoughtQuantity());
+					return showQuantitiesInStacks ? formatStacks(group.getBoughtQuantity(), index.getStackSize(group.getItem())) : formatQuantity(group.getBoughtQuantity());
 				case BOUGHT_AMT:
 					if (group.getBoughtQuantity() == 0) {
 						return null;
 					}
 					return formatRupees(group.getBoughtAmount());
 				case NET_QTY:
-					return "<html>" + (showQuantitiesInStacks ? formatStacksWithColor(group.getNetQuantity()) : formatQuantityWithColor(group.getNetQuantity())) + "</html>";
+					return "<html>" + (showQuantitiesInStacks ? formatStacksWithColor(group.getNetQuantity(), index.getStackSize(group.getItem())) : formatQuantityWithColor(group.getNetQuantity())) + "</html>";
 				case NET_AMT:
 					return "<html>" + formatRupeesWithColor(group.getNetAmount()) + "</html>";
 				default:

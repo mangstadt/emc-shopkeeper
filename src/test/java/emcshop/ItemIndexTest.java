@@ -23,6 +23,7 @@ public class ItemIndexTest {
 			"<Item name=\"Potion of Fire Resistance\" id=\"373:8195,373:8227\" emcNames=\"Potion:8195,Potion:8227\" />" +
 			"<Item name=\"Zombie Potion\" image=\"water_bottle.png\" />" +
 			"<Item name=\"Oak Log\" id=\"17:0\" />" +
+			"<Item name=\"Ender Pearl\" id=\"368\" stack=\"16\" />" +
 		"</Items>";
 		//@formatter:on
 
@@ -66,7 +67,14 @@ public class ItemIndexTest {
 	@Test
 	public void getItemNames() {
 		Set<String> actual = new HashSet<String>(index.getItemNames());
-		Set<String> expected = new HashSet<String>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion", "Oak Log"));
+		Set<String> expected = new HashSet<String>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion", "Oak Log", "Ender Pearl"));
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void getStackSize() {
+		assertEquals(Integer.valueOf(16), index.getStackSize("Ender Pearl"));
+		assertEquals(Integer.valueOf(64), index.getStackSize("Diamond"));
+		assertEquals(Integer.valueOf(64), index.getStackSize("unknown"));
 	}
 }
