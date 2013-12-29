@@ -26,6 +26,7 @@ import javax.swing.table.TableCellRenderer;
 import emcshop.db.ItemGroup;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupableColumnsTable;
+import emcshop.util.FilterList;
 
 /**
  * A table that displays transactions grouped by item.
@@ -106,6 +107,7 @@ public class ItemsTable extends GroupableColumnsTable {
 				}
 
 				sortData();
+				redraw();
 			}
 		});
 
@@ -175,35 +177,21 @@ public class ItemsTable extends GroupableColumnsTable {
 		setColumns();
 	}
 
-	public void filter(List<String> filteredItemNames) {
-		if (filteredItemNames.isEmpty()) {
+	public void filter(FilterList filterList) {
+		if (filterList.isEmpty()) {
 			itemGroupsToDisplay = itemGroups;
 			sortData();
 		} else {
 			itemGroupsToDisplay = new ArrayList<ItemGroup>();
 			for (ItemGroup itemGroup : itemGroups) {
-				String itemName = itemGroup.getItem().toLowerCase();
-				for (String filteredItem : filteredItemNames) {
-					filteredItem = filteredItem.toLowerCase();
-					boolean add = false;
-					if (filteredItem.startsWith("\"") && filteredItem.endsWith("\"")) {
-						filteredItem = filteredItem.substring(1, filteredItem.length() - 1); //remove double quotes
-						if (itemName.equals(filteredItem)) {
-							add = true;
-						}
-					} else if (itemName.contains(filteredItem)) {
-						add = true;
-					}
-
-					if (add) {
-						itemGroupsToDisplay.add(itemGroup);
-						break;
-					}
+				String itemName = itemGroup.getItem();
+				if (filterList.contains(itemName)) {
+					itemGroupsToDisplay.add(itemGroup);
 				}
 			}
 		}
 
-		refresh();
+		redraw();
 	}
 
 	public List<ItemGroup> getDisplayedItemGroups() {
@@ -211,92 +199,34 @@ public class ItemsTable extends GroupableColumnsTable {
 	}
 
 	private void sortData() {
-		Comparator<ItemGroup> comparator = null;
+		Collections.sort(itemGroupsToDisplay, new Comparator<ItemGroup>() {
+			@Override
+			public int compare(ItemGroup a, ItemGroup b) {
+				if (!ascending) {
+					ItemGroup temp = a;
+					a = b;
+					b = temp;
+				}
 
-		switch (prevColumnClicked) {
-		case ITEM_NAME:
-			//sort by item name
-			comparator = new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					if (ascending) {
-						return a.getItem().compareToIgnoreCase(b.getItem());
-					}
-					return b.getItem().compareToIgnoreCase(a.getItem());
+				switch (prevColumnClicked) {
+				case ITEM_NAME:
+					return a.getItem().compareToIgnoreCase(b.getItem());
+				case BOUGHT_AMT:
+					return a.getBoughtAmount() - b.getBoughtAmount();
+				case BOUGHT_QTY:
+					return a.getBoughtQuantity() - b.getBoughtQuantity();
+				case SOLD_AMT:
+					return a.getSoldAmount() - b.getSoldAmount();
+				case SOLD_QTY:
+					return a.getSoldQuantity() - b.getSoldQuantity();
+				case NET_AMT:
+					return a.getNetAmount() - b.getNetAmount();
+				case NET_QTY:
+					return a.getNetQuantity() - b.getNetQuantity();
 				}
-			};
-			break;
-		case BOUGHT_AMT:
-			comparator = new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					if (ascending) {
-						return a.getBoughtAmount() - b.getBoughtAmount();
-					}
-					return b.getBoughtAmount() - a.getBoughtAmount();
-				}
-			};
-			break;
-		case BOUGHT_QTY:
-			comparator = new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					if (ascending) {
-						return a.getBoughtQuantity() - b.getBoughtQuantity();
-					}
-					return b.getBoughtQuantity() - a.getBoughtQuantity();
-				}
-			};
-			break;
-
-		case SOLD_AMT:
-			comparator = new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					if (ascending) {
-						return a.getSoldAmount() - b.getSoldAmount();
-					}
-					return b.getSoldAmount() - a.getSoldAmount();
-				}
-			};
-			break;
-		case SOLD_QTY:
-			comparator = new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					if (ascending) {
-						return a.getSoldQuantity() - b.getSoldQuantity();
-					}
-					return b.getSoldQuantity() - a.getSoldQuantity();
-				}
-			};
-			break;
-		case NET_AMT:
-			comparator = new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					if (ascending) {
-						return a.getNetAmount() - b.getNetAmount();
-					}
-					return b.getNetAmount() - a.getNetAmount();
-				}
-			};
-			break;
-		case NET_QTY:
-			comparator = new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup a, ItemGroup b) {
-					if (ascending) {
-						return a.getNetQuantity() - b.getNetQuantity();
-					}
-					return b.getNetQuantity() - a.getNetQuantity();
-				}
-			};
-			break;
-		}
-
-		Collections.sort(itemGroupsToDisplay, comparator);
-		refresh();
+				return 0;
+			}
+		});
 	}
 
 	public void setShowQuantitiesInStacks(boolean enable) {
@@ -305,7 +235,7 @@ public class ItemsTable extends GroupableColumnsTable {
 		model.fireTableDataChanged();
 	}
 
-	private void refresh() {
+	private void redraw() {
 		//updates the table's data
 		//AbstractTableModel model = (AbstractTableModel) getModel();
 		//model.fireTableDataChanged();

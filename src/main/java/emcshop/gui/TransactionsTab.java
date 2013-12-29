@@ -34,6 +34,7 @@ import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
+import emcshop.util.FilterList;
 import emcshop.util.Settings;
 
 @SuppressWarnings("serial")
@@ -173,14 +174,14 @@ public class TransactionsTab extends JPanel {
 		filterByItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				List<String> filteredItems = filterByItem.getNames();
+				FilterList filterList = filterByItem.getNames();
 
 				if (itemsTable != null) {
-					itemsTable.filter(filteredItems);
+					itemsTable.filter(filterList);
 					itemsTableScrollPane.scrollToTop();
 				}
 				if (playersPanel != null) {
-					playersPanel.filterByItems(filteredItems);
+					playersPanel.filterByItems(filterList);
 					playersPanelScrollPane.scrollToTop();
 				}
 
@@ -195,10 +196,10 @@ public class TransactionsTab extends JPanel {
 		filterByPlayer.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				List<String> filteredPlayers = filterByPlayer.getNames();
+				FilterList filterList = filterByPlayer.getNames();
 
 				if (playersPanel != null) {
-					playersPanel.filterByPlayers(filteredPlayers);
+					playersPanel.filterByPlayers(filterList);
 					playersPanelScrollPane.scrollToTop();
 				}
 

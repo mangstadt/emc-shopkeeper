@@ -2,13 +2,12 @@ package emcshop.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JTextField;
 
 import emcshop.gui.images.ImageManager;
+import emcshop.util.FilterList;
 import emcshop.util.GuiUtils;
 
 /**
@@ -38,15 +37,23 @@ public class FilterTextField extends JTextField {
 	 * Splits the player/item names that are comma-delimited.
 	 * @return the names
 	 */
-	public List<String> getNames() {
-		String split[] = getText().trim().split("\\s*,\\s*");
-		List<String> filteredItems = new ArrayList<String>(split.length);
-		for (String s : split) {
-			if (s.length() > 0) {
-				filteredItems.add(s);
+	public FilterList getNames() {
+		FilterList list = new FilterList();
+		String keywords[] = getText().trim().split("\\s*,\\s*");
+		for (String keyword : keywords) {
+			if (keyword.isEmpty()) {
+				continue;
 			}
+
+			boolean wholeMatch = false;
+			if (keyword.startsWith("\"") && keyword.endsWith("\"")) {
+				keyword = keyword.substring(1, keyword.length() - 1); //remove double quotes
+				wholeMatch = true;
+			}
+
+			list.add(keyword, wholeMatch);
 		}
-		return filteredItems;
+		return list;
 	}
 
 	/**

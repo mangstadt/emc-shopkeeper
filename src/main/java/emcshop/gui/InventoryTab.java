@@ -51,6 +51,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.ChesterFile;
+import emcshop.util.FilterList;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
@@ -178,8 +179,8 @@ public class InventoryTab extends JPanel {
 		filterByItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				List<String> filteredItems = filterByItem.getNames();
-				table.filter(filteredItems);
+				FilterList filterList = filterByItem.getNames();
+				table.filter(filterList);
 				tableScrollPane.scrollToTop();
 			}
 		});
@@ -419,30 +420,16 @@ public class InventoryTab extends JPanel {
 			sortData();
 		}
 
-		public void filter(List<String> filteredItemNames) {
-			if (filteredItemNames.isEmpty()) {
+		public void filter(FilterList filterList) {
+			if (filterList.isEmpty()) {
 				displayedRows = rows;
 				sortData();
 			} else {
 				displayedRows = new ArrayList<Row>();
 				for (Row row : rows) {
-					String itemName = row.inventory.getItem().toLowerCase();
-					for (String filteredItem : filteredItemNames) {
-						filteredItem = filteredItem.toLowerCase();
-						boolean add = false;
-						if (filteredItem.startsWith("\"") && filteredItem.endsWith("\"")) {
-							filteredItem = filteredItem.substring(1, filteredItem.length() - 1); //remove double quotes
-							if (itemName.equals(filteredItem)) {
-								add = true;
-							}
-						} else if (itemName.contains(filteredItem)) {
-							add = true;
-						}
-
-						if (add) {
-							displayedRows.add(row);
-							break;
-						}
+					String itemName = row.inventory.getItem();
+					if (filterList.contains(itemName)) {
+						displayedRows.add(row);
 					}
 				}
 				redraw();

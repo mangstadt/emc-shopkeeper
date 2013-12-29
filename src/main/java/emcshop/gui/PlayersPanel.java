@@ -23,6 +23,7 @@ import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.lib.ClickableLabel;
+import emcshop.util.FilterList;
 
 /**
  * A panel that displays transactions grouped by player.
@@ -36,8 +37,8 @@ public class PlayersPanel extends JPanel {
 	private boolean showQuantitiesInStacks;
 	private List<PlayerGroup> displayedPlayers;
 	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
-	private List<String> filteredPlayerNames = new ArrayList<String>(0);
-	private List<String> filteredItemNames = new ArrayList<String>(0);
+	private FilterList filteredPlayerNames = new FilterList();
+	private FilterList filteredItemNames = new FilterList();
 	private List<ItemsTable> tables = new ArrayList<ItemsTable>();
 	private Sort sort;
 
@@ -87,7 +88,7 @@ public class PlayersPanel extends JPanel {
 	/**
 	 * Filters the data by player.
 	 */
-	public void filterByPlayers(List<String> players) {
+	public void filterByPlayers(FilterList players) {
 		filteredPlayerNames = players;
 		refresh();
 	}
@@ -95,7 +96,7 @@ public class PlayersPanel extends JPanel {
 	/**
 	 * Filters the data by item.
 	 */
-	public void filterByItems(List<String> items) {
+	public void filterByItems(FilterList items) {
 		filteredItemNames = items;
 		refresh();
 	}
@@ -204,23 +205,9 @@ public class PlayersPanel extends JPanel {
 		} else {
 			filteredPlayers = new LinkedList<PlayerGroup>();
 			for (PlayerGroup playerGroup : playerGroups) {
-				String playerName = playerGroup.getPlayer().getName().toLowerCase();
-				for (String filteredPlayer : filteredPlayerNames) {
-					filteredPlayer = filteredPlayer.toLowerCase();
-					boolean add = false;
-					if (filteredPlayer.startsWith("\"") && filteredPlayer.endsWith("\"")) {
-						filteredPlayer = filteredPlayer.substring(1, filteredPlayer.length() - 1); //remove double quotes
-						if (playerName.equals(filteredPlayer)) {
-							add = true;
-						}
-					} else if (playerName.contains(filteredPlayer)) {
-						add = true;
-					}
-
-					if (add) {
-						filteredPlayers.add(playerGroup);
-						break;
-					}
+				String playerName = playerGroup.getPlayer().getName();
+				if (filteredPlayerNames.contains(playerName)) {
+					filteredPlayers.add(playerGroup);
 				}
 			}
 		}
@@ -242,23 +229,9 @@ public class PlayersPanel extends JPanel {
 				} else {
 					itemGroups = new ArrayList<ItemGroup>();
 					for (ItemGroup itemGroup : this.itemGroups.get(playerGroup)) {
-						String itemName = itemGroup.getItem().toLowerCase();
-						for (String filteredItem : filteredItemNames) {
-							filteredItem = filteredItem.toLowerCase();
-							boolean add = false;
-							if (filteredItem.startsWith("\"") && filteredItem.endsWith("\"")) {
-								filteredItem = filteredItem.substring(1, filteredItem.length() - 1); //remove double quotes
-								if (itemName.equals(filteredItem)) {
-									add = true;
-								}
-							} else if (itemName.contains(filteredItem)) {
-								add = true;
-							}
-
-							if (add) {
-								itemGroups.add(itemGroup);
-								break;
-							}
+						String itemName = itemGroup.getItem();
+						if (filteredItemNames.contains(itemName)) {
+							itemGroups.add(itemGroup);
 						}
 					}
 					if (itemGroups.isEmpty()) {
