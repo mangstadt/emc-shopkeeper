@@ -120,50 +120,20 @@ public class ItemsTable extends GroupableColumnsTable {
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-				label.setIcon(null);
-				label.setHorizontalAlignment(SwingConstants.LEFT);
-
 				ItemGroup group = (ItemGroup) value;
-				if (col == Column.ITEM_NAME.ordinal()) {
-					ImageIcon img = ImageManager.getItemImage(group.getItem());
-					label.setText(group.getItem());
-					label.setIcon(img);
-				} else if (col == Column.SOLD_QTY.ordinal()) {
-					if (group.getSoldQuantity() == 0) {
-						label.setText("-");
-						label.setHorizontalAlignment(SwingConstants.CENTER);
-					} else {
-						String text = showQuantitiesInStacks ? formatStacks(group.getSoldQuantity()) : formatQuantity(group.getSoldQuantity());
-						label.setText(text);
-					}
-				} else if (col == Column.SOLD_AMT.ordinal()) {
-					if (group.getSoldQuantity() == 0) {
-						label.setText("-");
-						label.setHorizontalAlignment(SwingConstants.CENTER);
-					} else {
-						label.setText(formatRupees(group.getSoldAmount()));
-					}
-				} else if (col == Column.BOUGHT_QTY.ordinal()) {
-					if (group.getBoughtQuantity() == 0) {
-						label.setText("-");
-						label.setHorizontalAlignment(SwingConstants.CENTER);
-					} else {
-						String text = showQuantitiesInStacks ? formatStacks(group.getBoughtQuantity()) : formatQuantity(group.getBoughtQuantity());
-						label.setText(text);
-					}
-				} else if (col == Column.BOUGHT_AMT.ordinal()) {
-					if (group.getBoughtQuantity() == 0) {
-						label.setText("-");
-						label.setHorizontalAlignment(SwingConstants.CENTER);
-					} else {
-						label.setText(formatRupees(group.getBoughtAmount()));
-					}
-				} else if (col == Column.NET_QTY.ordinal()) {
-					String text = showQuantitiesInStacks ? formatStacksWithColor(group.getNetQuantity()) : formatQuantityWithColor(group.getNetQuantity());
-					label.setText("<html>" + text + "</html>");
-				} else if (col == Column.NET_AMT.ordinal()) {
-					label.setText("<html>" + formatRupeesWithColor(group.getNetAmount()) + "</html>");
+				Column column = Column.values()[col];
+
+				ImageIcon image = getIcon(group, column);
+				String text = getText(group, column);
+				int alignment = SwingConstants.LEFT;
+				if (text == null) {
+					text = "-";
+					alignment = SwingConstants.CENTER;
 				}
+
+				label.setIcon(image);
+				label.setText(text);
+				label.setHorizontalAlignment(alignment);
 
 				//set the background color of the row
 				Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
@@ -171,6 +141,48 @@ public class ItemsTable extends GroupableColumnsTable {
 				label.setBackground(color);
 
 				return label;
+			}
+
+			private ImageIcon getIcon(ItemGroup group, Column column) {
+				switch (column) {
+				case ITEM_NAME:
+					return ImageManager.getItemImage(group.getItem());
+				default:
+					return null;
+				}
+			}
+
+			public String getText(ItemGroup group, Column column) {
+				switch (column) {
+				case ITEM_NAME:
+					return group.getItem();
+				case SOLD_QTY:
+					if (group.getSoldQuantity() == 0) {
+						return null;
+					}
+					return showQuantitiesInStacks ? formatStacks(group.getSoldQuantity()) : formatQuantity(group.getSoldQuantity());
+				case SOLD_AMT:
+					if (group.getSoldQuantity() == 0) {
+						return null;
+					}
+					return formatRupees(group.getSoldAmount());
+				case BOUGHT_QTY:
+					if (group.getBoughtQuantity() == 0) {
+						return null;
+					}
+					return showQuantitiesInStacks ? formatStacks(group.getBoughtQuantity()) : formatQuantity(group.getBoughtQuantity());
+				case BOUGHT_AMT:
+					if (group.getBoughtQuantity() == 0) {
+						return null;
+					}
+					return formatRupees(group.getBoughtAmount());
+				case NET_QTY:
+					return "<html>" + (showQuantitiesInStacks ? formatStacksWithColor(group.getNetQuantity()) : formatQuantityWithColor(group.getNetQuantity())) + "</html>";
+				case NET_AMT:
+					return "<html>" + formatRupeesWithColor(group.getNetAmount()) + "</html>";
+				default:
+					return null;
+				}
 			}
 		});
 
