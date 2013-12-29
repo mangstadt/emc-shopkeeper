@@ -483,6 +483,8 @@ public class PaymentsTab extends JPanel {
 				}
 			});
 
+			JLabel quantityLabel = new HelpLabel("Qty:", "Tip: You can specify the quantity in \"stacks\" (groups of 64) instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)");
+
 			/////////////////////////
 
 			setLayout(new MigLayout("insets 0"));
@@ -502,7 +504,7 @@ public class PaymentsTab extends JPanel {
 			JPanel bottom = new JPanel(new MigLayout());
 
 			bottom.add(new JLabel("Item:"));
-			bottom.add(new JLabel("Qty:"), "wrap");
+			bottom.add(quantityLabel, "wrap");
 			bottom.add(item, "w 175");
 			bottom.add(quantity, "w 100");
 
