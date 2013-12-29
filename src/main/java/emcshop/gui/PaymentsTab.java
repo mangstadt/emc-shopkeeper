@@ -158,14 +158,19 @@ public class PaymentsTab extends JPanel {
 			});
 
 			setDefaultRenderer(PaymentTransaction.class, new TableCellRenderer() {
+				private final Column columns[] = Column.values();
+
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
-					final PaymentTransaction transaction = (PaymentTransaction) value;
+					PaymentTransaction transaction = (PaymentTransaction) value;
+					Column column = columns[col];
 
 					JLabel label = null;
-					if (col == Column.TIME.ordinal()) {
+					switch (column) {
+					case TIME:
 						label = new JLabel("<html>" + df.format(transaction.getTs()) + "</html>");
-					} else if (col == Column.PLAYER.ordinal()) {
+						break;
+					case PLAYER:
 						label = new JLabel("<html>" + transaction.getPlayer() + "</html>"); //add player's profile image
 						profileImageLoader.load(transaction.getPlayer(), label, 16, new ImageAssignedListener() {
 							@Override
@@ -174,8 +179,12 @@ public class PaymentsTab extends JPanel {
 								model.fireTableCellUpdated(row, col);
 							}
 						});
-					} else if (col == Column.AMOUNT.ordinal()) {
+						break;
+					case AMOUNT:
 						label = new JLabel("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
+						break;
+					default:
+						label = new JLabel();
 					}
 
 					//set the background color of the row
@@ -249,32 +258,43 @@ public class PaymentsTab extends JPanel {
 
 				@Override
 				public Object getValueAt(int row, int col) {
-					if (col == Column.DELETE.ordinal()) {
+					Column column = columns[col];
+					switch (column) {
+					case DELETE:
 						return deleteIcon;
-					}
-					if (col == Column.ASSIGN.ordinal()) {
+					case ASSIGN:
 						return assignIcon;
-					}
-					if (col == Column.SPLIT.ordinal()) {
+					case SPLIT:
 						return splitIcon;
+					default:
+						return rows.get(row);
 					}
-					return rows.get(row);
 				}
 
 				public Class<?> getColumnClass(int col) {
-					if (col == Column.DELETE.ordinal() || col == Column.ASSIGN.ordinal() || col == Column.SPLIT.ordinal()) {
+					Column column = columns[col];
+					switch (column) {
+					case DELETE:
+					case ASSIGN:
+					case SPLIT:
 						return Icon.class;
+					default:
+						return PaymentTransaction.class;
 					}
-					return PaymentTransaction.class;
 				}
 
 				@Override
 				public boolean isCellEditable(int row, int col) {
-					if (col == Column.DELETE.ordinal() || col == Column.ASSIGN.ordinal() || col == Column.SPLIT.ordinal()) {
+					Column column = columns[col];
+					switch (column) {
+					case DELETE:
+					case ASSIGN:
+					case SPLIT:
 						//allows the buttons to be clicked
 						return true;
+					default:
+						return false;
 					}
-					return false;
 				}
 			});
 		}

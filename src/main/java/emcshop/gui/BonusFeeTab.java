@@ -137,16 +137,23 @@ public class BonusFeeTab extends JPanel {
 			setDefaultRenderer(Row.class, new TableCellRenderer() {
 				private final Color evenRowColor = new Color(255, 255, 255);
 				private final Color oddRowColor = new Color(240, 240, 240);
+				private final Column columns[] = Column.values();
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-					final Row rowObj = (Row) value;
+					Row rowObj = (Row) value;
+					Column column = columns[col];
 
 					JLabel label = null;
-					if (col == Column.DESCRIPTION.ordinal()) {
+					switch (column) {
+					case DESCRIPTION:
 						label = new JLabel(rowObj.description);
-					} else if (col == Column.TOTAL.ordinal()) {
+						break;
+					case TOTAL:
 						label = new JLabel("<html>" + formatRupeesWithColor(rowObj.total) + "</html>");
+						break;
+					default:
+						label = new JLabel();
 					}
 
 					//set the background color of the row
@@ -159,7 +166,6 @@ public class BonusFeeTab extends JPanel {
 			});
 
 			setModel();
-
 		}
 
 		public void refresh(BonusFee bonusFee) {

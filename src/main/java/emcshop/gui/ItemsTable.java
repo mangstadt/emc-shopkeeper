@@ -117,11 +117,12 @@ public class ItemsTable extends GroupableColumnsTable {
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
 			private final JLabel label = new JLabel();
+			private final Column[] columns = Column.values();
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 				ItemGroup group = (ItemGroup) value;
-				Column column = Column.values()[col];
+				Column column = columns[col];
 
 				ImageIcon image = getIcon(group, column);
 				String text = getText(group, column);

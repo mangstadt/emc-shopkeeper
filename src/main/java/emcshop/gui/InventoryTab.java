@@ -185,13 +185,6 @@ public class InventoryTab extends JPanel {
 			}
 		});
 
-		List<Inventory> inventory = getInventory();
-		Collections.sort(inventory, new Comparator<Inventory>() {
-			@Override
-			public int compare(Inventory a, Inventory b) {
-				return a.getQuantity() - b.getQuantity();
-			}
-		});
 		table = new InventoryTable(Column.REMAINING, true);
 
 		///////////////////////
@@ -267,7 +260,12 @@ public class InventoryTab extends JPanel {
 		item.requestFocusInWindow();
 	}
 
-	private List<Inventory> getInventory() {
+	public void setShowQuantitiesInStacks(boolean enable) {
+		showQuantitiesInStacks = enable;
+		table.redraw();
+	}
+
+	public void refresh() {
 		List<Inventory> inventory;
 		try {
 			inventory = dao.getInventory();
@@ -275,16 +273,6 @@ public class InventoryTab extends JPanel {
 			throw new RuntimeException(e);
 		}
 
-		return inventory;
-	}
-
-	public void setShowQuantitiesInStacks(boolean enable) {
-		showQuantitiesInStacks = enable;
-		table.redraw();
-	}
-
-	public void refresh() {
-		List<Inventory> inventory = getInventory();
 		table.refresh(inventory);
 		filterByItem.setText("");
 	}
@@ -528,25 +516,34 @@ public class InventoryTab extends JPanel {
 
 				@Override
 				public Object getValueAt(int row, int col) {
-					if (col == Column.CHECKBOX.ordinal()) {
+					Column column = columns[col];
+					switch (column) {
+					case CHECKBOX:
 						return "";
+					default:
+						return displayedRows.get(row);
 					}
-					return displayedRows.get(row);
 				}
 
 				public Class<?> getColumnClass(int col) {
-					if (col == Column.CHECKBOX.ordinal()) {
+					Column column = columns[col];
+					switch (column) {
+					case CHECKBOX:
 						return String.class;
+					default:
+						return Row.class;
 					}
-					return Row.class;
 				}
 
 				@Override
 				public boolean isCellEditable(int row, int col) {
-					if (col == Column.CHECKBOX.ordinal()) {
+					Column column = columns[col];
+					switch (column) {
+					case CHECKBOX:
 						return true;
+					default:
+						return false;
 					}
-					return false;
 				}
 			});
 		}
