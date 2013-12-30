@@ -27,6 +27,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.ItemIndex;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.db.DbDao;
@@ -40,6 +41,7 @@ public class PaymentsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
 	private final ProfileImageLoader profileImageLoader;
+	private final ItemIndex index = ItemIndex.instance();
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private boolean stale = true;
 
@@ -456,20 +458,21 @@ public class PaymentsTab extends JPanel {
 						return;
 					}
 
+					String itemName = item.getText();
+					Integer qty;
+					try {
+						qty = quantity.getQuantity(index.getStackSize(itemName));
+					} catch (NumberFormatException e) {
+						JOptionPane.showMessageDialog(AssignDialog.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+
 					ShopTransaction shop = new ShopTransaction();
 					shop.setTs(transaction.getTs());
 					shop.setPlayer(transaction.getPlayer());
 					shop.setAmount(transaction.getAmount());
 					shop.setBalance(transaction.getBalance());
-					shop.setItem(item.getText());
-
-					Integer qty;
-					try {
-						qty = quantity.getQuantity();
-					} catch (NumberFormatException e) {
-						JOptionPane.showMessageDialog(AssignDialog.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
-						return;
-					}
+					shop.setItem(itemName);
 
 					if (transaction.getAmount() > 0) {
 						//negate quantity if it's a sale
@@ -503,7 +506,7 @@ public class PaymentsTab extends JPanel {
 				}
 			});
 
-			JLabel quantityLabel = new HelpLabel("Qty:", "Tip: You can specify the quantity in \"stacks\" (groups of 64) instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)");
+			JLabel quantityLabel = new HelpLabel("Qty:", "<b>Tip:</b> You can specify the quantity in stacks instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)\n\"+1/\" (add 1 stack to the existing amount)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16, and others are not stackable at all!");
 
 			/////////////////////////
 

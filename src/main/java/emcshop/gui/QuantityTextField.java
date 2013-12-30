@@ -9,10 +9,11 @@ import javax.swing.JTextField;
 public class QuantityTextField extends JTextField {
 	/**
 	 * Gets the quantity value.
+	 * @param stackSize the size of a stack (e.g. "64")
 	 * @return the quantity value
 	 * @throws NumberFormatException if the text is not in the correct format
 	 */
-	public Integer getQuantity() throws NumberFormatException {
+	public Integer getQuantity(int stackSize) throws NumberFormatException {
 		String text = getText();
 		if (isAdd()) {
 			text = text.substring(1);
@@ -24,7 +25,7 @@ public class QuantityTextField extends JTextField {
 		}
 
 		int remainder = split[1].isEmpty() ? 0 : Integer.valueOf(split[1]);
-		return Integer.valueOf(split[0]) * 64 + remainder;
+		return Integer.valueOf(split[0]) * stackSize + remainder;
 	}
 
 	/**

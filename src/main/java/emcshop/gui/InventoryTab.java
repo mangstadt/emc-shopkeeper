@@ -60,6 +60,7 @@ public class InventoryTab extends JPanel {
 
 	private final MainFrame owner;
 	private final DbDao dao;
+	private final ItemIndex index = ItemIndex.instance();
 
 	private final JButton addEdit;
 	private final JButton delete;
@@ -161,7 +162,7 @@ public class InventoryTab extends JPanel {
 
 		item = new ItemSuggestField(owner);
 
-		quantityLabel = new HelpLabel("Qty:", "Tip: You can specify the quantity in \"stacks\" (groups of 64) instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)\n\nPrepending a \"+\" will add the quantity to the existing total.\n\n<b>Example inputs</b>:\n\"+1/\" (add 1 stack to the existing amount)");
+		quantityLabel = new HelpLabel("Qty:", "<b>Tip:</b> You can specify the quantity in stacks instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)\n\"+1/\" (add 1 stack to the existing amount)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16 and others are not stackable at all!");
 
 		quantity = new QuantityTextField();
 		quantity.addActionListener(new ActionListener() {
@@ -239,7 +240,7 @@ public class InventoryTab extends JPanel {
 		boolean add;
 		try {
 			add = quantity.isAdd();
-			quantityValue = quantity.getQuantity();
+			quantityValue = quantity.getQuantity(index.getStackSize(itemStr));
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
 			quantity.requestFocusInWindow();
@@ -343,7 +344,6 @@ public class InventoryTab extends JPanel {
 			setDefaultRenderer(Row.class, new TableCellRenderer() {
 				private final Color evenRowColor = new Color(255, 255, 255);
 				private final Color oddRowColor = new Color(240, 240, 240);
-				private final ItemIndex index = ItemIndex.instance();
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
