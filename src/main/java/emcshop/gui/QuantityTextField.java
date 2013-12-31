@@ -15,7 +15,7 @@ public class QuantityTextField extends JTextField {
 	 */
 	public Integer getQuantity(int stackSize) throws NumberFormatException {
 		String text = getText();
-		if (isAdd()) {
+		if (text.startsWith("+")) {
 			text = text.substring(1);
 		}
 
@@ -33,6 +33,7 @@ public class QuantityTextField extends JTextField {
 	 * @return true to add, false not to
 	 */
 	public boolean isAdd() {
-		return getText().startsWith("+");
+		String text = getText();
+		return text.startsWith("+") || text.startsWith("-");
 	}
 }

@@ -462,6 +462,7 @@ public class PaymentsTab extends JPanel {
 					Integer qty;
 					try {
 						qty = quantity.getQuantity(index.getStackSize(itemName));
+						qty = Math.abs(qty); //incase the user enters a negative value
 					} catch (NumberFormatException e) {
 						JOptionPane.showMessageDialog(AssignDialog.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
 						return;
@@ -506,7 +507,7 @@ public class PaymentsTab extends JPanel {
 				}
 			});
 
-			JLabel quantityLabel = new HelpLabel("Qty:", "<b>Tip:</b> You can specify the quantity in stacks instead of having to specify the exact number.\n\n<b>Example inputs</b>:\n\"5/23\" (5 stacks, plus 23 more)\n\"5/\" (5 stacks)\n\"5\" (5 items total)\n\"+1/\" (add 1 stack to the existing amount)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16, and others are not stackable at all!");
+			JLabel quantityLabel = new HelpLabel("Qty:", "You can specify the quantity in stacks instead of having to specify the exact number.\n\n<b>Examples</b>:\n\"264\" (264 items total)\n\"4/10\" (4 stacks, plus 10 more)\n\"4/\" (4 stacks)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16 (like Signs) and others are not stackable at all (like armor)!");
 
 			/////////////////////////
 
