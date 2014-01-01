@@ -38,7 +38,7 @@ public abstract class DirbyDbDao implements DbDao {
 	/**
 	 * The current version of the database schema.
 	 */
-	private static final int schemaVersion = 11;
+	private static final int schemaVersion = 12;
 
 	/**
 	 * The database connection.

@@ -379,8 +379,7 @@
 	<Item name="White Stclay" id="159:0" />
 	<Item name="White Tulip" id="38:6" />
 	<Item name="White Wool" id="35:0" />
-	<Item name="Wither Head" id="397:1" />
-	<Item name="Wither Skull" id="397:1" />
+	<Item name="Wither Skull" id="397:1" emcNames="Wither Head" />
 	<Item name="Wolf Egg" id="383:95" />
 	<Item name="Wood Button" id="143" />
 	<Item name="Wooden Axe" id="271" stack="1" />
