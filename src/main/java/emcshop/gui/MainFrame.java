@@ -74,6 +74,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private PaymentsTab paymentsTab;
 	private InventoryTab inventoryTab;
 	private BonusFeeTab bonusFeeTab;
+	private GraphsTab graphsTab;
 
 	JMenuItem clearSession;
 
@@ -238,6 +239,7 @@ public class MainFrame extends JFrame implements WindowListener {
 									paymentsTab.reset();
 									inventoryTab.refresh();
 									bonusFeeTab.refresh();
+									graphsTab.clear();
 									loading.dispose();
 								} catch (Throwable e) {
 									loading.dispose();
@@ -347,6 +349,7 @@ public class MainFrame extends JFrame implements WindowListener {
 		paymentsTab = new PaymentsTab(this, dao, profileImageLoader);
 		inventoryTab = new InventoryTab(this, dao, settings.isShowQuantitiesInStacks());
 		bonusFeeTab = new BonusFeeTab(dao);
+		graphsTab = new GraphsTab(this, dao);
 	}
 
 	private void layoutWidgets() {
@@ -380,6 +383,8 @@ public class MainFrame extends JFrame implements WindowListener {
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Inventory Tab</b></font><br><br>Allows you to define how much of each item you have in stock.  Your inventory is updated every time you download new transactions from EMC, so this tab will show you the items in your shop that are low in stock."));
 		tabs.addTab("Bonuses/Fees", bonusFeeTab);
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Bonuses/Fees Tab</b></font><br><br>Keeps a tally of the rupee bonuses and fees your account has received.  This tally is updated every time you update your transactions."));
+		tabs.addTab("Graphs", graphsTab);
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Graphs Tab</b></font><br><br>Displays graphs of your shop transaction data."));
 
 		add(tabs, "span 3, h 100%, w 100%");
 	}

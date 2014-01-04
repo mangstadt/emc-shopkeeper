@@ -11,9 +11,11 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -873,6 +875,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
+	@Override
 	public void updateBonusesFeesSince(Date since) throws SQLException {
 		PreparedStatement stmt = stmt("UPDATE bonuses_fees SET since = ? WHERE since IS NULL");
 		try {
@@ -881,6 +884,70 @@ public abstract class DirbyDbDao implements DbDao {
 		} finally {
 			closeStatements(stmt);
 		}
+	}
+
+	@Override
+	public Map<Date, Profits> getProfitsByDay(Date from, Date to) throws SQLException {
+		return getProfits(from, to, true);
+	}
+
+	@Override
+	public Map<Date, Profits> getProfitsByMonth(Date from, Date to) throws SQLException {
+		return getProfits(from, to, false);
+	}
+
+	private Map<Date, Profits> getProfits(Date from, Date to, boolean byDay) throws SQLException {
+		Map<Date, Profits> profits = new LinkedHashMap<Date, Profits>();
+
+		String sql = "SELECT ts, amount FROM transactions ";
+		if (from != null) {
+			sql += "WHERE ts >= ? ";
+		}
+		if (to != null) {
+			sql += ((from == null) ? "WHERE" : "AND") + " ts < ? ";
+		}
+
+		PreparedStatement stmt = stmt(sql);
+		try {
+			int index = 1;
+			if (from != null) {
+				stmt.setTimestamp(index++, toTimestamp(from));
+			}
+			if (to != null) {
+				stmt.setTimestamp(index++, toTimestamp(to));
+			}
+			ResultSet rs = stmt.executeQuery();
+			Calendar c = Calendar.getInstance();
+			while (rs.next()) {
+				Date ts = toDate(rs.getTimestamp("ts"));
+				c.setTime(ts);
+				if (!byDay) {
+					c.set(Calendar.DATE, 1);
+				}
+				c.set(Calendar.HOUR_OF_DAY, 0);
+				c.set(Calendar.MINUTE, 0);
+				c.set(Calendar.SECOND, 0);
+				c.set(Calendar.MILLISECOND, 0);
+				Date date = c.getTime();
+
+				Profits p = profits.get(date);
+				if (p == null) {
+					p = new Profits();
+					profits.put(date, p);
+				}
+
+				int amount = rs.getInt("amount");
+				if (amount > 0) {
+					p.setCustomer(p.getCustomer() + amount);
+				} else if (amount < 0) {
+					p.setSupplier(p.getSupplier() + amount);
+				}
+			}
+		} finally {
+			closeStatements(stmt);
+		}
+
+		return profits;
 	}
 
 	@Override

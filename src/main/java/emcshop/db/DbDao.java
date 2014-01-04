@@ -246,6 +246,24 @@ public interface DbDao {
 	void updateBonusesFeesSince(Date since) throws SQLException;
 
 	/**
+	 * Tallies up the profits by day.
+	 * @param from the start date
+	 * @param to the end date
+	 * @return the profits
+	 * @throws SQLException
+	 */
+	Map<Date, Profits> getProfitsByDay(Date from, Date to) throws SQLException;
+
+	/**
+	 * Tallies up the profits by month.
+	 * @param from the start date
+	 * @param to the end date
+	 * @return the profits
+	 * @throws SQLException
+	 */
+	Map<Date, Profits> getProfitsByMonth(Date from, Date to) throws SQLException;
+
+	/**
 	 * Deletes all data in the database.
 	 * @throws IOException
 	 * @throws SQLException
