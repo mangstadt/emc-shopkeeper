@@ -3,10 +3,13 @@ package emcshop;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,6 +36,8 @@ public class ItemIndex {
 	private final Map<String, String> minecraftIdToDisplayName;
 	private final Map<String, String> itemImages;
 	private final Map<String, Integer> stackSizes;
+	private final Map<String, List<String>> itemNameToGroups;
+	private final Set<String> itemGroupNames;
 	private final List<String> itemNames;
 
 	/**
@@ -87,8 +92,10 @@ public class ItemIndex {
 		Map<String, String> minecraftIdToDisplayName = new HashMap<String, String>();
 		Map<String, String> emcNameToDisplayName = new HashMap<String, String>();
 		Map<String, String> itemImages = new HashMap<String, String>();
+		Map<String, List<String>> itemNameToGroups = new HashMap<String, List<String>>();
 		Map<String, Integer> stackSizes = new HashMap<String, Integer>();
 		List<String> itemNames = new ArrayList<String>();
+		Set<String> groupNames = new HashSet<String>();
 		for (int i = 0; i < itemNodes.getLength(); i++) {
 			Element itemNode = (Element) itemNodes.item(i);
 			String name = itemNode.getAttribute("name");
@@ -118,6 +125,13 @@ public class ItemIndex {
 			if (!stackSize.isEmpty()) {
 				stackSizes.put(name.toLowerCase(), Integer.valueOf(stackSize));
 			}
+
+			String groups = itemNode.getAttribute("group");
+			if (!groups.isEmpty()) {
+				List<String> groupsList = Arrays.asList(groups.split(","));
+				groupNames.addAll(groupsList);
+				itemNameToGroups.put(name, groupsList);
+			}
 		}
 
 		this.emcNameToDisplayName = Collections.unmodifiableMap(emcNameToDisplayName);
@@ -125,6 +139,8 @@ public class ItemIndex {
 		this.itemImages = Collections.unmodifiableMap(itemImages);
 		this.stackSizes = Collections.unmodifiableMap(stackSizes);
 		this.itemNames = Collections.unmodifiableList(itemNames);
+		this.itemGroupNames = Collections.unmodifiableSet(groupNames);
+		this.itemNameToGroups = Collections.unmodifiableMap(itemNameToGroups);
 	}
 
 	/**
@@ -213,5 +229,23 @@ public class ItemIndex {
 	 */
 	public List<String> getItemNames() {
 		return itemNames;
+	}
+
+	/**
+	 * Gets all the item group names.
+	 * @return the item group names
+	 */
+	public Set<String> getItemGroupNames() {
+		return itemGroupNames;
+	}
+
+	/**
+	 * Gets the groups an item belongs to.
+	 * @param itemName the item name (e.g. "Oak Log")
+	 * @return the groups (e.g. "Wood")
+	 */
+	public List<String> getGroups(String itemName) {
+		List<String> groups = itemNameToGroups.get(itemName);
+		return (groups == null) ? Collections.<String> emptyList() : groups;
 	}
 }

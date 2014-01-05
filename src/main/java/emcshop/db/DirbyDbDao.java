@@ -26,6 +26,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
 import emcshop.BonusFeeTransaction;
+import emcshop.ItemIndex;
 import emcshop.PaymentTransaction;
 import emcshop.ShopTransaction;
 import emcshop.util.ClasspathUtils;
@@ -899,14 +900,15 @@ public abstract class DirbyDbDao implements DbDao {
 	private Map<Date, Profits> getProfits(Date from, Date to, boolean byDay) throws SQLException {
 		Map<Date, Profits> profits = new LinkedHashMap<Date, Profits>();
 
-		String sql = "SELECT ts, amount FROM transactions ";
+		String sql = "SELECT t.ts, t.amount, i.name AS item FROM transactions t INNER JOIN items i ON t.item = i.id ";
 		if (from != null) {
-			sql += "WHERE ts >= ? ";
+			sql += "WHERE t.ts >= ? ";
 		}
 		if (to != null) {
-			sql += ((from == null) ? "WHERE" : "AND") + " ts < ? ";
+			sql += ((from == null) ? "WHERE" : "AND") + " t.ts < ? ";
 		}
 
+		ItemIndex itemIndex = ItemIndex.instance();
 		PreparedStatement stmt = stmt(sql);
 		try {
 			int index = 1;
@@ -937,6 +939,12 @@ public abstract class DirbyDbDao implements DbDao {
 				}
 
 				int amount = rs.getInt("amount");
+				String item = rs.getString("item");
+				List<String> groups = itemIndex.getGroups(item);
+				for (String group : groups) {
+					p.putGroup(group, amount);
+				}
+
 				if (amount > 0) {
 					p.setCustomer(p.getCustomer() + amount);
 				} else if (amount < 0) {
