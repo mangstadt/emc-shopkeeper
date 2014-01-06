@@ -1,4 +1,4 @@
-package emcshop;
+package emcshop.scraper;
 
 /**
  * Represents a shop transaction.

@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import emcshop.EmcSession;
+import emcshop.scraper.EmcSession;
 
 public class Settings {
 	private static final Logger logger = Logger.getLogger(Settings.class.getName());

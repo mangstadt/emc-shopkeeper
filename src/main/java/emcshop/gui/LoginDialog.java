@@ -19,8 +19,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
-import emcshop.EmcSession;
 import emcshop.gui.images.ImageManager;
+import emcshop.scraper.EmcSession;
 import emcshop.util.GuiUtils;
 
 /**

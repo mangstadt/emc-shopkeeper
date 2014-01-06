@@ -7,9 +7,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import emcshop.BonusFeeTransaction;
-import emcshop.PaymentTransaction;
-import emcshop.ShopTransaction;
+import emcshop.scraper.BonusFeeTransaction;
+import emcshop.scraper.PaymentTransaction;
+import emcshop.scraper.ShopTransaction;
 
 public interface DbDao {
 	/**

@@ -25,10 +25,10 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
-import emcshop.BonusFeeTransaction;
 import emcshop.ItemIndex;
-import emcshop.PaymentTransaction;
-import emcshop.ShopTransaction;
+import emcshop.scraper.BonusFeeTransaction;
+import emcshop.scraper.PaymentTransaction;
+import emcshop.scraper.ShopTransaction;
 import emcshop.util.ClasspathUtils;
 
 /**

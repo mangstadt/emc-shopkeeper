@@ -1,4 +1,5 @@
-package emcshop;
+package emcshop.scraper;
+
 
 /**
  * Represents a raw transaction on the transaction history page.

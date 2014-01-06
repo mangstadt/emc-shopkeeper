@@ -1,4 +1,4 @@
-package emcshop;
+package emcshop.scraper;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,6 +53,9 @@ public class TransactionPuller {
 	 * @param session the login session
 	 */
 	public void setSession(EmcSession session) {
+		if (started > 0) {
+			throw new IllegalStateException("Cannot change property while download is in progress.");
+		}
 		loginCookies = session.getCookiesMap();
 	}
 
@@ -64,7 +67,7 @@ public class TransactionPuller {
 	 */
 	public void setStopAtDate(Date date) {
 		if (started > 0) {
-			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+			throw new IllegalStateException("Cannot change property while download is in progress.");
 		}
 		this.stopAtDate = date;
 	}
@@ -77,7 +80,7 @@ public class TransactionPuller {
 	 */
 	public void setStopAtPage(Integer page) {
 		if (started > 0) {
-			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+			throw new IllegalStateException("Cannot change property while download is in progress.");
 		}
 		this.stopAtPage = page;
 	}
@@ -90,7 +93,7 @@ public class TransactionPuller {
 	 */
 	public void setMaxPaymentTransactionAge(Integer days) {
 		if (started > 0) {
-			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+			throw new IllegalStateException("Cannot change property while download is in progress.");
 		}
 		this.maxPaymentTransactionAge = days;
 	}
@@ -102,7 +105,7 @@ public class TransactionPuller {
 	 */
 	public void setStartAtPage(int page) {
 		if (started > 0) {
-			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+			throw new IllegalStateException("Cannot change property while download is in progress.");
 		}
 		startAtPage = page;
 	}
@@ -115,7 +118,7 @@ public class TransactionPuller {
 	 */
 	public void setThreadCount(int threadCount) {
 		if (started > 0) {
-			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+			throw new IllegalStateException("Cannot change property while download is in progress.");
 		}
 		this.threadCount = threadCount;
 	}
@@ -126,63 +129,67 @@ public class TransactionPuller {
 	 * @throws IOException if there's a network error
 	 */
 	public Result start(Listener listener) throws IOException {
-		//reset variables in case user calls start() more than once
-		thrown = null;
-		cancel = false;
-		curPage = new AtomicInteger(startAtPage);
+		try {
+			//reset variables in case user calls start() more than once
+			thrown = null;
+			cancel = false;
+			curPage = new AtomicInteger(startAtPage);
 
-		started = System.currentTimeMillis();
+			started = System.currentTimeMillis();
 
-		//calculate how old a payment transaction can be before it is ignored
-		if (maxPaymentTransactionAge != null) {
-			Calendar c = Calendar.getInstance();
-			c.add(Calendar.DATE, -maxPaymentTransactionAge);
-			oldestPaymentTransactionDate = c.getTime();
-		} else {
-			oldestPaymentTransactionDate = null;
-		}
-
-		TransactionPage firstPage = getPage(1);
-
-		//is the user logged in?
-		if (!firstPage.isLoggedIn()) {
-			return Result.notLoggedIn();
-		}
-
-		//get the rupee balance
-		Integer rupeeBalance = firstPage.getRupeeBalance();
-
-		//get the date of the latest transaction so we know when we've reached the last transaction page
-		latestTransactionDate = firstPage.getFirstTransactionDate();
-
-		//start threads
-		List<ScrapeThread> threads = new ArrayList<ScrapeThread>(threadCount);
-		for (int i = 0; i < threadCount; i++) {
-			ScrapeThread thread = new ScrapeThread(listener);
-			thread.setDaemon(true);
-			threads.add(thread);
-			thread.start();
-		}
-
-		//wait for threads to finish
-		for (ScrapeThread thread : threads) {
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				logger.log(Level.WARNING, "Thread interrupted.", e);
+			//calculate how old a payment transaction can be before it is ignored
+			if (maxPaymentTransactionAge != null) {
+				Calendar c = Calendar.getInstance();
+				c.add(Calendar.DATE, -maxPaymentTransactionAge);
+				oldestPaymentTransactionDate = c.getTime();
+			} else {
+				oldestPaymentTransactionDate = null;
 			}
-		}
 
-		if (thrown != null) {
-			return Result.failed(thrown);
-		}
+			TransactionPage firstPage = getPage(1);
 
-		if (cancel) {
-			return Result.cancelled();
-		}
+			//is the user logged in?
+			if (!firstPage.isLoggedIn()) {
+				return Result.notLoggedIn();
+			}
 
-		long timeTaken = System.currentTimeMillis() - started;
-		return Result.completed(rupeeBalance, pageCount, transactionCount, timeTaken);
+			//get the rupee balance
+			Integer rupeeBalance = firstPage.getRupeeBalance();
+
+			//get the date of the latest transaction so we know when we've reached the last transaction page
+			latestTransactionDate = firstPage.getFirstTransactionDate();
+
+			//start threads
+			List<ScrapeThread> threads = new ArrayList<ScrapeThread>(threadCount);
+			for (int i = 0; i < threadCount; i++) {
+				ScrapeThread thread = new ScrapeThread(listener);
+				thread.setDaemon(true);
+				threads.add(thread);
+				thread.start();
+			}
+
+			//wait for threads to finish
+			for (ScrapeThread thread : threads) {
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					logger.log(Level.WARNING, "Thread interrupted.", e);
+				}
+			}
+
+			if (thrown != null) {
+				return Result.failed(thrown);
+			}
+
+			if (cancel) {
+				return Result.cancelled();
+			}
+
+			long timeTaken = System.currentTimeMillis() - started;
+			return Result.completed(rupeeBalance, pageCount, transactionCount, timeTaken);
+		} finally {
+			started = 0;
+		}
 	}
 
 	/**

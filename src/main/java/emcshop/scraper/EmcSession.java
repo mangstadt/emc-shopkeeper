@@ -1,4 +1,4 @@
-package emcshop;
+package emcshop.scraper;
 
 import java.io.IOException;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package emcshop;
+package emcshop.scraper;
 
 /**
  * Represents a bonus/fee transaction on the transaction history page.

@@ -49,12 +49,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import emcshop.EmcSession;
 import emcshop.LogManager;
 import emcshop.Main;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.MacSupport;
+import emcshop.scraper.EmcSession;
 import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;

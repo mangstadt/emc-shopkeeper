@@ -1,4 +1,4 @@
-package emcshop;
+package emcshop.scraper;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import emcshop.ItemIndex;
 
 /**
  * Screen-scrapes the transactions from a rupee transaction history page.

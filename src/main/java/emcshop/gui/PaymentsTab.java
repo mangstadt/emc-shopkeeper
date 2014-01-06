@@ -28,12 +28,12 @@ import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.ItemIndex;
-import emcshop.PaymentTransaction;
-import emcshop.ShopTransaction;
 import emcshop.db.DbDao;
 import emcshop.gui.ProfileImageLoader.ImageAssignedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ButtonColumn;
+import emcshop.scraper.PaymentTransaction;
+import emcshop.scraper.ShopTransaction;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")

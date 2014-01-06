@@ -61,6 +61,12 @@ import emcshop.gui.ProfileImageLoader;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.MacHandler;
 import emcshop.gui.lib.MacSupport;
+import emcshop.scraper.BonusFeeTransaction;
+import emcshop.scraper.EmcSession;
+import emcshop.scraper.PaymentTransaction;
+import emcshop.scraper.RupeeTransaction;
+import emcshop.scraper.ShopTransaction;
+import emcshop.scraper.TransactionPuller;
 import emcshop.util.Settings;
 
 public class Main {

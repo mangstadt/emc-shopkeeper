@@ -25,14 +25,14 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
-import emcshop.BonusFeeTransaction;
-import emcshop.EmcSession;
-import emcshop.PaymentTransaction;
-import emcshop.RupeeTransaction;
-import emcshop.ShopTransaction;
-import emcshop.TransactionPuller;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
+import emcshop.scraper.BonusFeeTransaction;
+import emcshop.scraper.EmcSession;
+import emcshop.scraper.PaymentTransaction;
+import emcshop.scraper.RupeeTransaction;
+import emcshop.scraper.ShopTransaction;
+import emcshop.scraper.TransactionPuller;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
