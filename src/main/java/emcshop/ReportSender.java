@@ -28,6 +28,7 @@ public class ReportSender {
 	private static ReportSender instance;
 
 	private final String url;
+	private Integer dbVersion;
 	private final LinkedBlockingQueue<Job> queue = new LinkedBlockingQueue<Job>();
 
 	/**
@@ -69,6 +70,14 @@ public class ReportSender {
 		SenderThread t = new SenderThread();
 		t.setDaemon(true);
 		t.start();
+	}
+
+	/**
+	 * Sets the version of the database.
+	 * @param version the database version
+	 */
+	public void setDatabaseVersion(Integer version) {
+		dbVersion = version;
 	}
 
 	/**
@@ -122,6 +131,11 @@ public class ReportSender {
 
 			String timestamp = df.format(job.received);
 			xml.append(xml.root(), "Timestamp", timestamp);
+
+			xml.append(xml.root(), "Version", Main.VERSION);
+
+			String dbVersionStr = (dbVersion == null) ? "null" : dbVersion.toString();
+			xml.append(xml.root(), "DatabaseVersion", dbVersionStr);
 
 			xml.append(xml.root(), "Locale", Locale.getDefault().toString());
 

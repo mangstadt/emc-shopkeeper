@@ -67,12 +67,11 @@ public abstract class DirbyDbDao implements DbDao {
 		this.jdbcUrl = jdbcUrl;
 		logger.info("Starting database...");
 
-		//shutdown Derby when the program terminates
-		//if the Dirby database is not shutdown, then changes to it will be lost
+		//create shutdown hook to shutdown Derby when the program terminates
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				logger.info("Shutting down the database...");
+				logger.fine("Shutting down the database...");
 				try {
 					close();
 				} catch (SQLException e) {
@@ -91,50 +90,59 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 			logger.info("Database not found.  Creating the database...");
 			createSchema();
-		} else {
-			//update the database schema if it's not up to date
-			int version = selectDbVersion();
-			if (version < schemaVersion) {
-				if (listener != null) {
-					listener.onMigrate(version, schemaVersion);
-				}
-
-				logger.info("Database schema out of date.  Upgrading from version " + version + " to " + schemaVersion + ".");
-				String sql = null;
-				Statement statement = conn.createStatement();
-				try {
-					while (version < schemaVersion) {
-						logger.info("Performing schema update from version " + version + " to " + (version + 1) + ".");
-
-						String script = "migrate-" + version + "-" + (version + 1) + ".sql";
-						SQLStatementReader in = new SQLStatementReader(new InputStreamReader(ClasspathUtils.getResourceAsStream(script, getClass())));
-						try {
-							while ((sql = in.readStatement()) != null) {
-								statement.execute(sql);
-							}
-							sql = null;
-						} finally {
-							IOUtils.closeQuietly(in);
-						}
-
-						version++;
-					}
-					updateDbVersion(schemaVersion);
-				} catch (IOException e) {
-					rollback();
-					throw new SQLException("Error updating database schema.", e);
-				} catch (SQLException e) {
-					rollback();
-					if (sql == null) {
-						throw e;
-					}
-					throw new SQLException("Error executing SQL statement during schema update: " + sql, e);
-				} finally {
-					closeStatements(statement);
-				}
-				commit();
-			}
 		}
+	}
+
+	@Override
+	public void updateToLatestVersion(DbListener listener) throws SQLException {
+		int curVersion = selectDbVersion();
+		if (curVersion == schemaVersion) {
+			//schema up to date
+			return;
+		}
+
+		if (curVersion > schemaVersion) {
+			throw new SQLException("The version of your EMC Shopkeeper database is newer than the EMC Shopkeeper app you are running.  Please download the latest version of EMC Shopkeeper.");
+		}
+
+		if (listener != null) {
+			listener.onMigrate(curVersion, schemaVersion);
+		}
+
+		logger.info("Database schema out of date.  Upgrading from version " + curVersion + " to " + schemaVersion + ".");
+		String sql = null;
+		Statement statement = conn.createStatement();
+		try {
+			while (curVersion < schemaVersion) {
+				logger.info("Performing schema update from version " + curVersion + " to " + (curVersion + 1) + ".");
+
+				String script = "migrate-" + curVersion + "-" + (curVersion + 1) + ".sql";
+				SQLStatementReader in = new SQLStatementReader(new InputStreamReader(getClass().getResourceAsStream(script)));
+				try {
+					while ((sql = in.readStatement()) != null) {
+						statement.execute(sql);
+					}
+					sql = null;
+				} finally {
+					IOUtils.closeQuietly(in);
+				}
+
+				curVersion++;
+			}
+			updateDbVersion(schemaVersion);
+		} catch (IOException e) {
+			rollback();
+			throw new SQLException("Error updating database schema.", e);
+		} catch (SQLException e) {
+			rollback();
+			if (sql == null) {
+				throw e;
+			}
+			throw new SQLException("Error executing SQL statement during schema update: " + sql, e);
+		} finally {
+			closeStatements(statement);
+		}
+		commit();
 	}
 
 	@Override

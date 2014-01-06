@@ -13,6 +13,14 @@ import emcshop.ShopTransaction;
 
 public interface DbDao {
 	/**
+	 * Updates the database schema to the latest version if the schema is out of
+	 * date.
+	 * @param listener
+	 * @throws SQLException
+	 */
+	void updateToLatestVersion(DbListener listener) throws SQLException;
+
+	/**
 	 * Gets the database schema version.
 	 * @return the version number
 	 * @throws SQLException

@@ -346,6 +346,9 @@ public class Main {
 
 	private static void launchCli() throws Throwable {
 		final DbDao dao = new DirbyEmbeddedDbDao(dbDir);
+		ReportSender.instance().setDatabaseVersion(dao.selectDbVersion());
+		dao.updateToLatestVersion(null);
+		ReportSender.instance().setDatabaseVersion(dao.selectDbVersion());
 
 		if (update) {
 			Date latestTransactionDateFromDb = dao.getLatestTransactionDate();
@@ -674,6 +677,7 @@ public class Main {
 		//start the profile image loader
 		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir);
 
+		//connect to database
 		DbDao dao;
 		try {
 			dao = new DirbyEmbeddedDbDao(dbDir, listener);
@@ -684,6 +688,12 @@ public class Main {
 			}
 			throw e;
 		}
+
+		//update database schema
+		ReportSender.instance().setDatabaseVersion(dao.selectDbVersion());
+		dao.updateToLatestVersion(listener);
+		ReportSender.instance().setDatabaseVersion(dao.selectDbVersion());
+
 		splash.close();
 
 		//run Mac OS X customizations if user is on a Mac
