@@ -62,7 +62,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ImageCheckBox;
 
 @SuppressWarnings("serial")
-public class GraphsTab extends JPanel {
+public class ChartsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
@@ -123,7 +123,7 @@ public class GraphsTab extends JPanel {
 		}
 	}
 
-	public GraphsTab(MainFrame owner, DbDao dao) {
+	public ChartsTab(MainFrame owner, DbDao dao) {
 		this.owner = owner;
 		this.dao = dao;
 
