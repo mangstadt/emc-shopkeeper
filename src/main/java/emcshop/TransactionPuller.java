@@ -14,6 +14,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,34 +25,47 @@ import org.jsoup.nodes.Document;
  */
 public class TransactionPuller {
 	private static final Logger logger = Logger.getLogger(TransactionPuller.class.getName());
-	private final Map<String, String> loginCookies;
+
+	private Map<String, String> loginCookies;
 	private Date stopAtDate;
 	private Integer stopAtPage;
 	private Integer maxPaymentTransactionAge;
 	private Date oldestPaymentTransactionDate;
 	private int threadCount = 4;
 	private Date latestTransactionDate;
-	private Integer rupeeBalance;
+	private int startAtPage;
 	private AtomicInteger curPage;
 	private int pageCount, transactionCount;
 	private long started;
 	private Throwable thrown = null;
-	private boolean cancel = false;
+	private volatile boolean cancel = false;
 
 	/**
 	 * @param session the website login session
 	 */
 	public TransactionPuller(EmcSession session) {
-		loginCookies = session.getCookiesMap();
+		setSession(session);
 		setStartAtPage(1);
+	}
+
+	/**
+	 * Sets the EMC login session.
+	 * @param session the login session
+	 */
+	public void setSession(EmcSession session) {
+		loginCookies = session.getCookiesMap();
 	}
 
 	/**
 	 * Sets the date at which it should stop parsing transactions. If not
 	 * specified, it will parse the entire history.
 	 * @param date the date to stop parsing transactions (exclusive)
+	 * @throws IllegalStateException if the puller has already started
 	 */
 	public void setStopAtDate(Date date) {
+		if (started > 0) {
+			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+		}
 		this.stopAtDate = date;
 	}
 
@@ -59,8 +73,12 @@ public class TransactionPuller {
 	 * Sets the page number to stop at.
 	 * @param page the page number to stop at (inclusive, starts at "1") or null
 	 * to not stop
+	 * @throws IllegalStateException if the puller has already started
 	 */
 	public void setStopAtPage(Integer page) {
+		if (started > 0) {
+			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+		}
 		this.stopAtPage = page;
 	}
 
@@ -68,25 +86,37 @@ public class TransactionPuller {
 	 * Sets the number of days old a payment transaction can be in order for it
 	 * to be parsed.
 	 * @param days the number of days
+	 * @throws IllegalStateException if the puller has already started
 	 */
 	public void setMaxPaymentTransactionAge(Integer days) {
+		if (started > 0) {
+			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+		}
 		this.maxPaymentTransactionAge = days;
 	}
 
 	/**
 	 * Sets the page to start on (defaults to "1").
 	 * @param page the page number to start on
+	 * @throws IllegalStateException if the puller has already started
 	 */
 	public void setStartAtPage(int page) {
-		curPage = new AtomicInteger(page);
+		if (started > 0) {
+			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+		}
+		startAtPage = page;
 	}
 
 	/**
 	 * Sets the number of simultaneous transaction page downloads that can occur
 	 * at once (defaults to 4).
 	 * @param threadCount the number of simultaneous page downloads
+	 * @throws IllegalStateException if the puller has already started
 	 */
 	public void setThreadCount(int threadCount) {
+		if (started > 0) {
+			throw new IllegalStateException("Cannot change property once the transaction puller starts.");
+		}
 		this.threadCount = threadCount;
 	}
 
@@ -96,6 +126,11 @@ public class TransactionPuller {
 	 * @throws IOException if there's a network error
 	 */
 	public Result start(Listener listener) throws IOException {
+		//reset variables in case user calls start() more than once
+		thrown = null;
+		cancel = false;
+		curPage = new AtomicInteger(startAtPage);
+
 		started = System.currentTimeMillis();
 
 		//calculate how old a payment transaction can be before it is ignored
@@ -103,19 +138,21 @@ public class TransactionPuller {
 			Calendar c = Calendar.getInstance();
 			c.add(Calendar.DATE, -maxPaymentTransactionAge);
 			oldestPaymentTransactionDate = c.getTime();
+		} else {
+			oldestPaymentTransactionDate = null;
 		}
 
 		TransactionPage firstPage = getPage(1);
 
-		//is the user logged in?		
+		//is the user logged in?
 		if (!firstPage.isLoggedIn()) {
 			return Result.notLoggedIn();
 		}
 
 		//get the rupee balance
-		rupeeBalance = firstPage.getRupeeBalance();
+		Integer rupeeBalance = firstPage.getRupeeBalance();
 
-		//get the date of the latest transaction
+		//get the date of the latest transaction so we know when we've reached the last transaction page
 		latestTransactionDate = firstPage.getFirstTransactionDate();
 
 		//start threads
@@ -138,12 +175,14 @@ public class TransactionPuller {
 
 		if (thrown != null) {
 			return Result.failed(thrown);
-		} else if (cancel) {
-			return Result.cancelled();
-		} else {
-			long timeTaken = System.currentTimeMillis() - started;
-			return Result.completed(rupeeBalance, pageCount, transactionCount, timeTaken);
 		}
+
+		if (cancel) {
+			return Result.cancelled();
+		}
+
+		long timeTaken = System.currentTimeMillis() - started;
+		return Result.completed(rupeeBalance, pageCount, transactionCount, timeTaken);
 	}
 
 	/**
@@ -153,11 +192,15 @@ public class TransactionPuller {
 		cancel = true;
 	}
 
+	/**
+	 * Determines if the download operation was canceled.
+	 * @return true if it was canceled, false if not
+	 */
 	public boolean isCanceled() {
 		return cancel;
 	}
 
-	protected TransactionPage getPage(int page) throws IOException {
+	private TransactionPage getPage(int page) throws IOException {
 		/*
 		 * Note: The HttpClient library is used here because using
 		 * "Jsoup.connect()" doesn't always work when the application is run as
@@ -180,10 +223,15 @@ public class TransactionPuller {
 
 		DefaultHttpClient client = new DefaultHttpClient();
 		HttpGet request = new HttpGet(url);
-		for (Map.Entry<String, String> cookie : loginCookies.entrySet()) {
-			String name = cookie.getKey();
-			String value = cookie.getValue();
-			request.addHeader("Cookie", name + "=" + value);
+
+		for (Map.Entry<String, String> entry : loginCookies.entrySet()) {
+			String name = entry.getKey();
+			String value = entry.getValue();
+
+			BasicClientCookie cookie = new BasicClientCookie(name, value);
+			cookie.setDomain(".empireminecraft.com");
+			cookie.setPath("/");
+			client.getCookieStore().addCookie(cookie);
 		}
 
 		HttpResponse response = client.execute(request);
@@ -252,14 +300,14 @@ public class TransactionPuller {
 							}
 						}
 						if (end >= 0) {
-							transactions = transactions.subList(0, end);
+							transactions.subList(end, transactions.size()).clear();
 							quit = true;
 						}
 					}
 
 					synchronized (TransactionPuller.this) {
 						pageCount++;
-						transactionCount += transactions.size() + transactions.size();
+						transactionCount += transactions.size();
 					}
 
 					if (!cancel) {
@@ -281,17 +329,29 @@ public class TransactionPuller {
 		 */
 		public abstract void onPageScraped(int page, List<RupeeTransaction> transactions);
 
+		/**
+		 * Filters out a instances of a specific sub-class of
+		 * {@link RupeeTransaction}.
+		 * @param <T> the class to filter out
+		 * @param transactions the list of transactions
+		 * @param filterBy the class to filter out
+		 * @return the filtered instances
+		 */
 		public <T extends RupeeTransaction> List<T> filter(List<RupeeTransaction> transactions, Class<T> filterBy) {
 			List<T> filtered = new ArrayList<T>();
 			for (RupeeTransaction transaction : transactions) {
 				if (transaction.getClass() == filterBy) {
-					filtered.add(filterBy.cast(transaction));
+					T t = filterBy.cast(transaction);
+					filtered.add(t);
 				}
 			}
 			return filtered;
 		}
 	}
 
+	/**
+	 * Represents the result of a transaction download operation.
+	 */
 	public static class Result {
 		private final State state;
 		private Throwable thrown;

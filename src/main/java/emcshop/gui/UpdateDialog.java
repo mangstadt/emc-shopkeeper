@@ -139,11 +139,11 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						started = System.currentTimeMillis();
 
 						TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
-							NumberFormat nf = NumberFormat.getInstance();
-							NumberFormat timeNf = new DecimalFormat("00");
-							int transactionCount = 0;
-							int pageCount = 0;
-							long previousTime = 0;
+							private final NumberFormat nf = NumberFormat.getInstance();
+							private final NumberFormat timeNf = new DecimalFormat("00");
+							private int transactionCount = 0;
+							private int pageCount = 0;
+							private long previousTime = 0;
 
 							@Override
 							public void onPageScraped(int page, List<RupeeTransaction> transactions) {
@@ -230,16 +230,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 									owner.clearSession.setEnabled(true);
 								}
 
-								puller = new TransactionPuller(session);
-								if (latestTransactionDate != null) {
-									puller.setStopAtDate(latestTransactionDate);
-								}
-								if (stopAtPage != null) {
-									puller.setStopAtPage(stopAtPage);
-								}
-								if (oldestPaymentTransactionDays != null) {
-									puller.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
-								}
+								puller.setSession(session);
 
 								repeat = true;
 							}
