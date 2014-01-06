@@ -162,6 +162,9 @@ public class LoginDialog extends JDialog {
 					if (session == null) {
 						error.setText("Invalid login credentials.");
 						messagePanel.add(error);
+
+						password.requestFocus();
+						password.selectAll();
 					} else if (isVisible()) { //if the user has cancelled
 						dispose();
 					}
