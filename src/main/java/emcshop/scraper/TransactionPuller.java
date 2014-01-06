@@ -26,7 +26,6 @@ import org.jsoup.nodes.Document;
 public class TransactionPuller {
 	private static final Logger logger = Logger.getLogger(TransactionPuller.class.getName());
 
-	private Map<String, String> loginCookies;
 	private Date stopAtDate;
 	private Integer stopAtPage;
 	private Integer maxPaymentTransactionAge;
@@ -39,25 +38,6 @@ public class TransactionPuller {
 	private long started;
 	private Throwable thrown = null;
 	private volatile boolean cancel = false;
-
-	/**
-	 * @param session the website login session
-	 */
-	public TransactionPuller(EmcSession session) {
-		setSession(session);
-		setStartAtPage(1);
-	}
-
-	/**
-	 * Sets the EMC login session.
-	 * @param session the login session
-	 */
-	public void setSession(EmcSession session) {
-		if (started > 0) {
-			throw new IllegalStateException("Cannot change property while download is in progress.");
-		}
-		loginCookies = session.getCookiesMap();
-	}
 
 	/**
 	 * Sets the date at which it should stop parsing transactions. If not
@@ -125,10 +105,11 @@ public class TransactionPuller {
 
 	/**
 	 * Starts the download.
+	 * @param session the login session
 	 * @param listener for handling events
 	 * @throws IOException if there's a network error
 	 */
-	public Result start(Listener listener) throws IOException {
+	public Result start(EmcSession session, Listener listener) throws IOException {
 		try {
 			//reset variables in case user calls start() more than once
 			thrown = null;
@@ -146,11 +127,11 @@ public class TransactionPuller {
 				oldestPaymentTransactionDate = null;
 			}
 
-			TransactionPage firstPage = getPage(1);
+			TransactionPage firstPage = getPage(1, createHttpClient(session));
 
 			//is the user logged in?
 			if (!firstPage.isLoggedIn()) {
-				return Result.notLoggedIn();
+				return Result.badSession();
 			}
 
 			//get the rupee balance
@@ -162,7 +143,7 @@ public class TransactionPuller {
 			//start threads
 			List<ScrapeThread> threads = new ArrayList<ScrapeThread>(threadCount);
 			for (int i = 0; i < threadCount; i++) {
-				ScrapeThread thread = new ScrapeThread(listener);
+				ScrapeThread thread = new ScrapeThread(listener, session);
 				thread.setDaemon(true);
 				threads.add(thread);
 				thread.start();
@@ -207,7 +188,7 @@ public class TransactionPuller {
 		return cancel;
 	}
 
-	private TransactionPage getPage(int page) throws IOException {
+	private TransactionPage getPage(int page, DefaultHttpClient client) throws IOException {
 		/*
 		 * Note: The HttpClient library is used here because using
 		 * "Jsoup.connect()" doesn't always work when the application is run as
@@ -228,10 +209,19 @@ public class TransactionPuller {
 		String base = "http://empireminecraft.com/rupees/transactions/";
 		String url = base + "?page=" + page;
 
-		DefaultHttpClient client = new DefaultHttpClient();
 		HttpGet request = new HttpGet(url);
+		HttpResponse response = client.execute(request);
+		HttpEntity entity = response.getEntity();
+		Document document = Jsoup.parse(entity.getContent(), "UTF-8", base);
+		EntityUtils.consume(entity);
 
-		for (Map.Entry<String, String> entry : loginCookies.entrySet()) {
+		return new TransactionPage(document);
+	}
+
+	private DefaultHttpClient createHttpClient(EmcSession session) {
+		DefaultHttpClient client = new DefaultHttpClient();
+
+		for (Map.Entry<String, String> entry : session.getCookiesMap().entrySet()) {
 			String name = entry.getKey();
 			String value = entry.getValue();
 
@@ -241,19 +231,16 @@ public class TransactionPuller {
 			client.getCookieStore().addCookie(cookie);
 		}
 
-		HttpResponse response = client.execute(request);
-		HttpEntity entity = response.getEntity();
-		Document document = Jsoup.parse(entity.getContent(), "UTF-8", base);
-		EntityUtils.consume(entity);
-
-		return new TransactionPage(document);
+		return client;
 	}
 
 	private class ScrapeThread extends Thread {
 		private final Listener listener;
+		private final DefaultHttpClient client;
 
-		public ScrapeThread(Listener listener) {
+		public ScrapeThread(Listener listener, EmcSession session) {
 			this.listener = listener;
+			this.client = createHttpClient(session);
 		}
 
 		@Override
@@ -267,7 +254,7 @@ public class TransactionPuller {
 						break;
 					}
 
-					TransactionPage transactionPage = getPage(page);
+					TransactionPage transactionPage = getPage(page, client);
 
 					//EMC will load the first page if an invalid page number is given (i.e. if we've reached the last page)
 					boolean lastPageReached = page > 1 && transactionPage.getFirstTransactionDate().getTime() >= latestTransactionDate.getTime();
@@ -399,8 +386,8 @@ public class TransactionPuller {
 			return new Result(State.CANCELLED);
 		}
 
-		public static Result notLoggedIn() {
-			return new Result(State.NOT_LOGGED_IN);
+		public static Result badSession() {
+			return new Result(State.BAD_SESSION);
 		}
 
 		public static Result failed(Throwable thrown) {
@@ -420,6 +407,6 @@ public class TransactionPuller {
 	}
 
 	public static enum State {
-		CANCELLED, NOT_LOGGED_IN, FAILED, COMPLETED
+		CANCELLED, BAD_SESSION, FAILED, COMPLETED
 	}
 }

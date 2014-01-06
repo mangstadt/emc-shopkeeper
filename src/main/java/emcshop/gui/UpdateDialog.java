@@ -72,7 +72,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		setLocationRelativeTo(owner);
 		addWindowListener(this);
 
-		puller = new TransactionPuller(settings.getSession());
+		puller = new TransactionPuller();
 		pullerThread = new Thread() {
 			String errorDisplayMessage;
 			Throwable error;
@@ -138,7 +138,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 						started = System.currentTimeMillis();
 
-						TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
+						TransactionPuller.Result result = puller.start(settings.getSession(), new TransactionPuller.Listener() {
 							private final NumberFormat nf = NumberFormat.getInstance();
 							private final NumberFormat timeNf = new DecimalFormat("00");
 							private int transactionCount = 0;
@@ -211,7 +211,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								dao.rollback();
 							}
 							break;
-						case NOT_LOGGED_IN:
+						case BAD_SESSION:
 							timerThread.interrupt();
 
 							String username = null;
@@ -229,8 +229,6 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								if (settings.isPersistSession()) {
 									owner.clearSession.setEnabled(true);
 								}
-
-								puller.setSession(session);
 
 								repeat = true;
 							}

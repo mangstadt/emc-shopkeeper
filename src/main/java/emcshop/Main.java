@@ -424,7 +424,7 @@ public class Main {
 					settings.save();
 				}
 
-				final TransactionPuller puller = new TransactionPuller(session);
+				final TransactionPuller puller = new TransactionPuller();
 				if (firstUpdate) {
 					puller.setMaxPaymentTransactionAge(7);
 					if (stopAtPage != null) {
@@ -436,10 +436,10 @@ public class Main {
 				}
 
 				Date started = new Date();
-				TransactionPuller.Result result = puller.start(new TransactionPuller.Listener() {
-					int transactionCount = 0;
-					int pageCount = 0;
-					NumberFormat nf = NumberFormat.getInstance();
+				TransactionPuller.Result result = puller.start(session, new TransactionPuller.Listener() {
+					private int transactionCount = 0;
+					private int pageCount = 0;
+					private final NumberFormat nf = NumberFormat.getInstance();
 
 					@Override
 					public synchronized void onPageScraped(int page, List<RupeeTransaction> transactions) {
@@ -478,7 +478,7 @@ public class Main {
 						throw pullerError;
 					}
 					break;
-				case NOT_LOGGED_IN:
+				case BAD_SESSION:
 					out.println("Your login session has expired.");
 					session = null;
 					repeat = true;
