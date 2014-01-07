@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
-import emcshop.ItemIndex;
 import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
@@ -916,7 +915,6 @@ public abstract class DirbyDbDao implements DbDao {
 			sql += ((from == null) ? "WHERE" : "AND") + " t.ts < ? ";
 		}
 
-		ItemIndex itemIndex = ItemIndex.instance();
 		PreparedStatement stmt = stmt(sql);
 		try {
 			int index = 1;
@@ -948,16 +946,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 				int amount = rs.getInt("amount");
 				String item = rs.getString("item");
-				List<String> groups = itemIndex.getGroups(item);
-				for (String group : groups) {
-					p.putGroup(group, amount);
-				}
-
-				if (amount > 0) {
-					p.setCustomer(p.getCustomer() + amount);
-				} else if (amount < 0) {
-					p.setSupplier(p.getSupplier() + amount);
-				}
+				p.addTransaction(item, amount);
 			}
 		} finally {
 			closeStatements(stmt);

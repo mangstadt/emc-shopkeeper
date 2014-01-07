@@ -95,7 +95,7 @@ public class ItemIndex {
 		Map<String, List<String>> itemNameToGroups = new HashMap<String, List<String>>();
 		Map<String, Integer> stackSizes = new HashMap<String, Integer>();
 		List<String> itemNames = new ArrayList<String>();
-		Set<String> groupNames = new HashSet<String>();
+		Set<String> itemGroupNames = new HashSet<String>();
 		for (int i = 0; i < itemNodes.getLength(); i++) {
 			Element itemNode = (Element) itemNodes.item(i);
 			String name = itemNode.getAttribute("name");
@@ -129,8 +129,8 @@ public class ItemIndex {
 			String groups = itemNode.getAttribute("group");
 			if (!groups.isEmpty()) {
 				List<String> groupsList = Arrays.asList(groups.split(","));
-				groupNames.addAll(groupsList);
-				itemNameToGroups.put(name, groupsList);
+				itemGroupNames.addAll(groupsList);
+				itemNameToGroups.put(name.toLowerCase(), groupsList);
 			}
 		}
 
@@ -139,7 +139,7 @@ public class ItemIndex {
 		this.itemImages = Collections.unmodifiableMap(itemImages);
 		this.stackSizes = Collections.unmodifiableMap(stackSizes);
 		this.itemNames = Collections.unmodifiableList(itemNames);
-		this.itemGroupNames = Collections.unmodifiableSet(groupNames);
+		this.itemGroupNames = Collections.unmodifiableSet(itemGroupNames);
 		this.itemNameToGroups = Collections.unmodifiableMap(itemNameToGroups);
 	}
 
@@ -245,7 +245,7 @@ public class ItemIndex {
 	 * @return the groups (e.g. "Wood")
 	 */
 	public List<String> getGroups(String itemName) {
-		List<String> groups = itemNameToGroups.get(itemName);
+		List<String> groups = itemNameToGroups.get(itemName.toLowerCase());
 		return (groups == null) ? Collections.<String> emptyList() : groups;
 	}
 }

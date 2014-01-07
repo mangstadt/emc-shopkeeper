@@ -7,6 +7,8 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.beans.PropertyVetoException;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -24,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -32,7 +33,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -94,11 +94,13 @@ public class ChartsTab extends JPanel {
 	private final JLabel fromDatePickerLabel;
 	private final DatePicker fromDatePicker;
 	private final JComboBox groupBy;
-	private final JButton display;
+	private final JButton loadData;
 
-	private final JRadioButton showNetTotals, showItems;
-	private final Map<String, ImageCheckBox> chartLines = new LinkedHashMap<String, ImageCheckBox>();
-	private final JPanel chartLinesPanel;
+	private final JComboBox show;
+	private final JPanel showPanel;
+	private final Map<String, ImageCheckBox> itemGroupCheckboxes = new LinkedHashMap<String, ImageCheckBox>();
+	private final JPanel itemGroupsPanel, itemNamesPanel;
+	private final List<ItemSuggestField> itemNames;
 
 	private final JLabel dateRangeQueried;
 	private final JPanel graphPanel;
@@ -107,6 +109,22 @@ public class ChartsTab extends JPanel {
 
 	private Map<Date, Profits> profits;
 	private GroupBy profitsGroupBy;
+	private int netTotal = 0;
+
+	private enum Show {
+		NET_PROFITS("Net Profits"), ITEM_GROUPS("Item Groups"), ITEMS("Items");
+
+		private final String display;
+
+		private Show(String display) {
+			this.display = display;
+		}
+
+		@Override
+		public String toString() {
+			return display;
+		}
+	}
 
 	private enum GroupBy {
 		DAY("Day"), MONTH("Month");
@@ -167,8 +185,8 @@ public class ChartsTab extends JPanel {
 		groupBy = new JComboBox(GroupBy.values());
 		groupBy.setEditable(false);
 
-		display = new JButton("Display", ImageManager.getSearch());
-		display.addActionListener(new ActionListener() {
+		loadData = new JButton("Load Data", ImageManager.getSearch());
+		loadData.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if (!checkDateRange()) {
@@ -185,55 +203,86 @@ public class ChartsTab extends JPanel {
 		netTotalLabelLabel = new JLabel("<html><font size=5>Net Profit:</font></html>");
 		netTotalLabel = new JLabel();
 
-		showNetTotals = new JRadioButton("<html><b>Show Net Totals</b></html>", true);
-		showNetTotals.addActionListener(new ActionListener() {
+		show = new JComboBox(Show.values());
+		show.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				boolean selected = showNetTotals.isSelected();
-				for (ImageCheckBox checkBox : chartLines.values()) {
-					checkBox.setEnabled(!selected);
+				Show selected = (Show) show.getSelectedItem();
+
+				showPanel.removeAll();
+				switch (selected) {
+				case NET_PROFITS:
+					break;
+				case ITEM_GROUPS:
+					showPanel.add(new MyJScrollPane(itemGroupsPanel), "w 100%");
+					break;
+				case ITEMS:
+					showPanel.add(itemNamesPanel, "w 100%");
+					break;
 				}
-				if (selected) {
-					refreshChart();
-				}
+				showPanel.validate();
+				showPanel.repaint();
+
+				refreshChart();
 			}
 		});
 
-		showItems = new JRadioButton("<html>Show Items</html>");
-		showItems.addActionListener(new ActionListener() {
+		showPanel = new JPanel(new MigLayout("insets 0"));
+
+		ActionListener checkboxListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				boolean selected = showItems.isSelected();
-				for (ImageCheckBox checkBox : chartLines.values()) {
-					checkBox.setEnabled(selected);
-				}
-				if (selected) {
-					refreshChart();
-				}
+				refreshChart();
 			}
-		});
-
-		ButtonGroup bg = new ButtonGroup();
-		bg.add(showNetTotals);
-		bg.add(showItems);
-
+		};
 		List<String> groupNames = new ArrayList<String>(index.getItemGroupNames());
 		Collections.sort(groupNames);
-		for (final String group : groupNames) {
+		for (String group : groupNames) {
 			ImageIcon icon = groupIcons.get(group);
 			if (icon == null) {
 				continue;
 			}
 
 			ImageCheckBox checkBox = new ImageCheckBox(group, icon);
-			checkBox.setEnabled(false); //because "Show Net Total" radio button is selected
-			checkBox.addActionListener(new ActionListener() {
+			checkBox.addActionListener(checkboxListener);
+			itemGroupCheckboxes.put(group, checkBox);
+		}
+
+		itemGroupsPanel = new JPanel(new MigLayout("insets 0"));
+		int column = 0;
+		for (Map.Entry<String, ImageCheckBox> entry : itemGroupCheckboxes.entrySet()) {
+			final ImageCheckBox checkBox = entry.getValue();
+
+			String constraints = (column % 2 == 1) ? "wrap" : "";
+			itemGroupsPanel.add(checkBox.getCheckbox(), "split 2");
+			itemGroupsPanel.add(checkBox.getLabel(), constraints);
+			column++;
+		}
+
+		itemNamesPanel = new JPanel(new MigLayout("insets 0"));
+		itemNames = new ArrayList<ItemSuggestField>();
+		for (int i = 0; i < 6; i++) {
+			String wrap = (i % 2 == 1) ? ", wrap" : "";
+
+			final ItemSuggestField f = new ItemSuggestField(owner);
+			f.addFocusListener(new FocusListener() {
+				private String textOnFocusGained;
+
 				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					refreshChart();
+				public void focusGained(FocusEvent arg0) {
+					textOnFocusGained = f.getText();
+				}
+
+				@Override
+				public void focusLost(FocusEvent arg0) {
+					String textOnFocusLost = f.getText();
+					if (!textOnFocusLost.equals(textOnFocusGained)) {
+						refreshChart();
+					}
 				}
 			});
-			chartLines.put(group, checkBox);
+			itemNames.add(f);
+			itemNamesPanel.add(f, "w 150" + wrap);
 		}
 
 		///////////////////////////////////////
@@ -248,37 +297,24 @@ public class ChartsTab extends JPanel {
 		left.add(toDatePicker, "wrap");
 		left.add(new JLabel("Group By:"), "split 2");
 		left.add(groupBy, "wrap");
-		left.add(display);
-		add(left);
+		left.add(loadData);
+		add(left, "w 100%");
+
+		add(showPanel, "w 700, growy");
 
 		JPanel right = new JPanel(new MigLayout("insets 0"));
-
-		right.add(showNetTotals);
-
-		chartLinesPanel = new JPanel(new MigLayout("insets 0"));
-		int column = 0;
-		for (Map.Entry<String, ImageCheckBox> entry : chartLines.entrySet()) {
-			final ImageCheckBox checkBox = entry.getValue();
-
-			String constraints = (column % 2 == 1) ? "wrap" : "";
-			chartLinesPanel.add(checkBox.getCheckbox(), "split 2");
-			chartLinesPanel.add(checkBox.getLabel(), constraints);
-			column++;
-		}
-		right.add(new MyJScrollPane(chartLinesPanel), "span 1 2, w 250, wrap");
-
-		right.add(showItems);
-
-		add(right, "w 100%, wrap");
+		right.add(new JLabel("Show:"), "split 2, align right");
+		right.add(show);
+		add(right, "align right, growy, wrap");
 
 		add(dateRangeQueried, "gaptop 20, w 100%, wrap"); //putting this label here allows the left panel to be vertically aligned to the top of the tab
 
-		add(graphPanel, "span 2, grow, h 100%, wrap");
+		add(graphPanel, "span 3, grow, h 100%, wrap");
 
-		add(netTotalLabelLabel, "span 2, split 2, align right");
+		add(netTotalLabelLabel, "span 3, split 2, align right");
 		add(netTotalLabel);
 
-		updateNetTotal(0);
+		updateNetTotal();
 	}
 
 	public void clear() {
@@ -291,7 +327,7 @@ public class ChartsTab extends JPanel {
 
 		graphPanel.removeAll();
 
-		updateNetTotal(0);
+		updateNetTotal();
 
 		validate();
 	}
@@ -332,6 +368,8 @@ public class ChartsTab extends JPanel {
 			return;
 		}
 
+		netTotal = 0;
+
 		//build the chart
 		JFreeChart chart = createChart(createDataset(profits));
 
@@ -345,42 +383,60 @@ public class ChartsTab extends JPanel {
 		graphPanel.add(panel, "grow, w 100%, h 100%, wrap");
 		graphPanel.validate();
 
-		//calculate net total
-		int netTotal = 0;
-		if (showNetTotals.isSelected()) {
-			for (Profits p : profits.values()) {
-				netTotal += p.getCustomer() + p.getSupplier();
-			}
-		} else {
-			for (Profits p : profits.values()) {
-				Set<String> groups = new HashSet<String>(p.getGroupCustomer().keySet());
-				groups.addAll(p.getGroupSupplier().keySet());
-				for (String group : groups) {
-					ImageCheckBox checkBox = chartLines.get(group);
-					if (checkBox == null || !checkBox.isSelected()) {
-						continue;
-					}
+		updateNetTotal();
+	}
 
-					Integer customer = p.getGroupCustomer().get(group);
-					if (customer == null) {
-						customer = 0;
-					}
-					Integer supplier = p.getGroupSupplier().get(group);
-					if (supplier == null) {
-						supplier = 0;
-					}
+	private Map<String, Integer> organizeIntoGroups(Map<String, Integer> itemAmounts) {
+		Map<String, Integer> groupAmounts = new HashMap<String, Integer>();
 
-					netTotal += customer + supplier;
+		for (Map.Entry<String, Integer> entry : itemAmounts.entrySet()) {
+			String item = entry.getKey();
+			Integer amount = entry.getValue();
+
+			List<String> groups = index.getGroups(item);
+			for (String group : groups) {
+				Integer groupAmount = groupAmounts.get(group);
+				if (groupAmount == null) {
+					groupAmount = 0;
 				}
+				groupAmounts.put(group, groupAmount + amount);
 			}
 		}
-		updateNetTotal(netTotal);
+
+		return groupAmounts;
+	}
+
+	private List<String> getSelectedGroups() {
+		List<String> groups = new ArrayList<String>();
+
+		for (Map.Entry<String, ImageCheckBox> entry : itemGroupCheckboxes.entrySet()) {
+			ImageCheckBox checkbox = entry.getValue();
+			if (checkbox.isSelected()) {
+				String group = entry.getKey();
+				groups.add(group);
+			}
+		}
+
+		return groups;
+	}
+
+	private Set<String> getSelectedItems() {
+		Set<String> items = new HashSet<String>();
+
+		for (ItemSuggestField field : itemNames) {
+			String item = field.getText();
+			if (!item.isEmpty()) {
+				items.add(item);
+			}
+		}
+
+		return items;
 	}
 
 	private XYDataset createDataset(Map<Date, Profits> profits) {
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
 
-		if (showNetTotals.isSelected()) {
+		if (show.getSelectedItem() == Show.NET_PROFITS) {
 			TimeSeries customersSeries = new TimeSeries("Customers");
 			TimeSeries suppliersSeries = new TimeSeries("Suppliers");
 			TimeSeries netProfitSeries = new TimeSeries("Net Profit");
@@ -390,9 +446,10 @@ public class ChartsTab extends JPanel {
 				Profits p = entry.getValue();
 				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
 
-				customersSeries.add(timePeriod, p.getCustomer());
-				suppliersSeries.add(timePeriod, p.getSupplier());
-				netProfitSeries.add(timePeriod, p.getCustomer() + p.getSupplier());
+				customersSeries.add(timePeriod, p.getCustomerTotal());
+				suppliersSeries.add(timePeriod, p.getSupplierTotal());
+				netProfitSeries.add(timePeriod, p.getCustomerTotal() + p.getSupplierTotal());
+				netTotal += p.getCustomerTotal() + p.getSupplierTotal();
 			}
 
 			dataset.addSeries(customersSeries);
@@ -401,41 +458,73 @@ public class ChartsTab extends JPanel {
 			return dataset;
 		}
 
-		if (showItems.isSelected()) {
+		if (show.getSelectedItem() == Show.ITEM_GROUPS) {
+			//create TimeSeries for each selected group
 			Map<String, TimeSeries> series = new HashMap<String, TimeSeries>();
+			for (String group : getSelectedGroups()) {
+				TimeSeries ts = new TimeSeries(group);
+				series.put(group, ts);
+				dataset.addSeries(ts);
+			}
+
 			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
 				Date date = entry.getKey();
 				Profits p = entry.getValue();
 				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
 
-				for (Map.Entry<String, ImageCheckBox> chartLine : chartLines.entrySet()) {
-					ImageCheckBox checkbox = chartLine.getValue();
-					if (checkbox == null || !checkbox.isSelected()) {
-						continue;
-					}
+				Map<String, Integer> customerGroupTotals = organizeIntoGroups(p.getCustomerTotals());
+				Map<String, Integer> supplierGroupTotals = organizeIntoGroups(p.getSupplierTotals());
+				for (Map.Entry<String, TimeSeries> tsEntry : series.entrySet()) {
+					String group = tsEntry.getKey();
+					TimeSeries ts = tsEntry.getValue();
 
-					String group = chartLine.getKey();
-					TimeSeries ts = series.get(group);
-					if (ts == null) {
-						ts = new TimeSeries(group);
-						series.put(group, ts);
-					}
-
-					Integer customer = p.getGroupCustomer().get(group);
+					Integer customer = customerGroupTotals.get(group);
 					if (customer == null) {
 						customer = 0;
 					}
-					Integer supplier = p.getGroupSupplier().get(group);
+					Integer supplier = supplierGroupTotals.get(group);
 					if (supplier == null) {
 						supplier = 0;
 					}
 
 					ts.add(timePeriod, customer + supplier);
+					netTotal += customer + supplier;
 				}
 			}
 
-			for (TimeSeries ts : series.values()) {
+			return dataset;
+		}
+
+		if (show.getSelectedItem() == Show.ITEMS) {
+			//create TimeSeries for each item
+			Map<String, TimeSeries> series = new HashMap<String, TimeSeries>();
+			for (String item : getSelectedItems()) {
+				TimeSeries ts = new TimeSeries(item);
+				series.put(item.toLowerCase(), ts);
 				dataset.addSeries(ts);
+			}
+
+			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
+				Date date = entry.getKey();
+				Profits p = entry.getValue();
+				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
+
+				for (Map.Entry<String, TimeSeries> tsEntry : series.entrySet()) {
+					String item = tsEntry.getKey();
+					TimeSeries ts = tsEntry.getValue();
+
+					Integer customer = p.getCustomerTotals().get(item);
+					if (customer == null) {
+						customer = 0;
+					}
+					Integer supplier = p.getSupplierTotals().get(item);
+					if (supplier == null) {
+						supplier = 0;
+					}
+
+					ts.add(timePeriod, customer + supplier);
+					netTotal += customer + supplier;
+				}
 			}
 
 			return dataset;
@@ -459,7 +548,7 @@ public class ChartsTab extends JPanel {
 		plot.setShadowGenerator(new DefaultShadowGenerator());
 
 		XYItemRenderer renderer = plot.getRenderer();
-		if (showNetTotals.isSelected()) {
+		if (show.getSelectedItem() == Show.NET_PROFITS) {
 			renderer.setSeriesPaint(0, new Color(0, 128, 0));
 			renderer.setSeriesPaint(1, Color.red);
 			renderer.setSeriesPaint(2, Color.blue);
@@ -503,7 +592,7 @@ public class ChartsTab extends JPanel {
 		dateRangeQueried.setText("<html>" + dateRangeStr + "</html>");
 	}
 
-	private void updateNetTotal(int netTotal) {
+	private void updateNetTotal() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html><font size=5><code>");
 		sb.append(formatRupeesWithColor(netTotal));

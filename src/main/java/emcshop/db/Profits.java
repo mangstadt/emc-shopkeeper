@@ -4,42 +4,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Profits {
-	private int customer, supplier;
-	private Map<String, Integer> groupCustomer = new HashMap<String, Integer>();
-	private Map<String, Integer> groupSupplier = new HashMap<String, Integer>();
+	private final Map<String, Integer> customerTotals = new HashMap<String, Integer>();
+	private final Map<String, Integer> supplierTotals = new HashMap<String, Integer>();
 
-	public int getCustomer() {
-		return customer;
-	}
-
-	public void setCustomer(int customer) {
-		this.customer = customer;
-	}
-
-	public int getSupplier() {
-		return supplier;
-	}
-
-	public void setSupplier(int supplier) {
-		this.supplier = supplier;
-	}
-
-	public void putGroup(String group, int amount) {
-		Map<String, Integer> map = (amount > 0) ? groupCustomer : groupSupplier;
-		Integer value = map.get(group);
+	public void addTransaction(String item, int amount) {
+		item = item.toLowerCase();
+		Map<String, Integer> map = (amount > 0) ? customerTotals : supplierTotals;
+		Integer value = map.get(item);
 		if (value == null) {
 			value = 0;
 		}
 		value += amount;
-		map.put(group, value);
+		map.put(item, value);
 	}
 
-	public Map<String, Integer> getGroupCustomer() {
-		return groupCustomer;
+	public Map<String, Integer> getCustomerTotals() {
+		return customerTotals;
 	}
 
-	public Map<String, Integer> getGroupSupplier() {
-		return groupSupplier;
+	public Map<String, Integer> getSupplierTotals() {
+		return supplierTotals;
 	}
 
+	public int getCustomerTotal() {
+		return getTotal(customerTotals);
+	}
+
+	public int getSupplierTotal() {
+		return getTotal(supplierTotals);
+	}
+
+	private int getTotal(Map<String, Integer> map) {
+		int total = 0;
+		for (Integer value : map.values()) {
+			total += value;
+		}
+		return total;
+	}
 }
