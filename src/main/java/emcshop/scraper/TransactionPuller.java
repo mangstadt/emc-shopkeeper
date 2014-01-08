@@ -32,7 +32,7 @@ public class TransactionPuller {
 	private Date oldestPaymentTransactionDate;
 	private int threadCount = 4;
 	private Date latestTransactionDate;
-	private int startAtPage;
+	private int startAtPage = 1;
 	private AtomicInteger curPage;
 	private int pageCount, transactionCount;
 	private long started;
@@ -114,6 +114,7 @@ public class TransactionPuller {
 			//reset variables in case user calls start() more than once
 			thrown = null;
 			cancel = false;
+			pageCount = transactionCount = 0;
 			curPage = new AtomicInteger(startAtPage);
 
 			started = System.currentTimeMillis();
