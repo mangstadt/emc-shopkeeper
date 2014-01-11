@@ -45,7 +45,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 	private JButton cancel;
 	private volatile boolean cancelClicked = false;
-	private JLabel transactions;
+	private JLabel shopTransactionsLabel, paymentTransactionsLabel, bonusFeeTransactionsLabel;
 	private JLabel pages;
 	private JLabel timerLabel;
 	private JCheckBox display;
@@ -141,72 +141,10 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 						started = System.currentTimeMillis();
 
-						TransactionPuller.Result result = puller.start(settings.getSession(), new TransactionPuller.Listener() {
-							private final NumberFormat nf = NumberFormat.getInstance();
-							private final NumberFormat timeNf = new DecimalFormat("00");
-							private int transactionCount = 0;
-							private int pageCount = 0;
-							private long previousTime = 0;
+						TransactionPullerListener listener = new TransactionPullerListener(stopAtPage);
+						TransactionPuller.Result result = puller.start(settings.getSession(), listener);
 
-							@Override
-							public void onPageScraped(int page, List<RupeeTransaction> transactions) {
-								synchronized (puller) { //the method itself cannot have a "synchronized" flag because there is a synchronized block in the cancel button's click handler
-									if (puller.isCanceled()) {
-										return;
-									}
-
-									if (!transactions.isEmpty()) {
-										RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
-										Date lastTs = last.getTs();
-										if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
-											earliestParsedTransactionDate = lastTs;
-										}
-									}
-
-									try {
-										List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
-										dao.insertTransactions(shopTransactions);
-
-										List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
-										dao.insertPaymentTransactions(paymentTransactions);
-
-										List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
-										dao.updateBonusesFees(bonusFeeTransactions);
-
-										pageCount++;
-										transactionCount += shopTransactions.size() + paymentTransactions.size();
-
-										String pagesText = nf.format(pageCount);
-										if (stopAtPage != null) {
-											pagesText += " / " + stopAtPage;
-										}
-										UpdateDialog.this.pages.setText(pagesText);
-
-										UpdateDialog.this.transactions.setText(nf.format(transactionCount));
-
-										if (pageCount % 100 == 0 && logger.isLoggable(Level.FINEST)) {
-											long fromStart = System.currentTimeMillis() - started;
-											long fromPrevious = System.currentTimeMillis() - previousTime;
-											long fromStartComponents[] = TimeUtils.parseTimeComponents(fromStart);
-											long fromPreviousComponents[] = TimeUtils.parseTimeComponents(fromPrevious);
-											//@formatter:off
-											logger.finest(
-												"DOWNLOAD STATS | " + 
-												"Pages: " + pageCount + " | " +
-												"From start: " + timeNf.format(fromStartComponents[3]) + ":" + timeNf.format(fromStartComponents[2]) + ":" + timeNf.format(fromStartComponents[1]) + " | " +
-												"From previous: " + timeNf.format(fromPreviousComponents[3]) + ":" + timeNf.format(fromPreviousComponents[2]) + ":" + timeNf.format(fromPreviousComponents[1])
-											);
-											//@formatter:on
-											previousTime = System.currentTimeMillis();
-										}
-									} catch (SQLException e) {
-										error = e;
-										errorDisplayMessage = "An error occurred while inserting transactions into the database.";
-										puller.cancel();
-									}
-								}
-							}
-						});
+						timerThread.interrupt();
 
 						switch (result.getState()) {
 						case CANCELLED:
@@ -215,8 +153,6 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							}
 							break;
 						case BAD_SESSION:
-							timerThread.interrupt();
-
 							String username = null;
 							EmcSession oldSession = settings.getSession();
 							if (oldSession != null) {
@@ -239,7 +175,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 						case FAILED:
 							dao.rollback();
 							error = result.getThrown();
-							errorDisplayMessage = "An error occurred while getting the transactions.";
+							errorDisplayMessage = "An error occurred while downloading the transactions.";
 							break;
 						case COMPLETED:
 							try {
@@ -248,7 +184,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								}
 								dao.commit();
 								dispose();
-								owner.updateSuccessful(new Date(started), result.getRupeeBalance(), result.getTimeTaken(), result.getTransactionCount(), result.getPageCount(), display.isSelected());
+
+								int parsedTransactionCount = listener.shopTransactionCount + listener.paymentTransactionCount + listener.bonusFeeTransactionCount;
+								owner.updateSuccessful(new Date(started), result.getRupeeBalance(), result.getTimeTaken(), parsedTransactionCount, result.getPageCount(), display.isSelected());
 							} catch (SQLException e) {
 								dao.rollback();
 								error = e;
@@ -291,7 +229,9 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		});
 
 		pages = new JLabel("0");
-		transactions = new JLabel("0");
+		shopTransactionsLabel = new JLabel("0");
+		paymentTransactionsLabel = new JLabel("0");
+		bonusFeeTransactionsLabel = new JLabel("0");
 		timerLabel = new JLabel("...");
 		display = new JCheckBox("Display transactions when finished");
 		display.setSelected(true);
@@ -308,8 +248,13 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		add(new JLabel("Pages:"));
 		add(pages, "wrap");
 
-		add(new JLabel("Transactions:"));
-		add(transactions, "wrap");
+		add(new JLabel("Transactions:"), "span 2, wrap");
+		add(new JLabel("Shop:"), "gapleft 30");
+		add(shopTransactionsLabel, "wrap");
+		add(new JLabel("Payment:"), "gapleft 30");
+		add(paymentTransactionsLabel, "wrap");
+		add(new JLabel("Bonus/Fee:"), "gapleft 30");
+		add(bonusFeeTransactionsLabel, "wrap");
 
 		add(new JLabel("Time:"));
 		add(timerLabel, "wrap");
@@ -354,5 +299,75 @@ public class UpdateDialog extends JDialog implements WindowListener {
 	@Override
 	public void windowOpened(WindowEvent arg0) {
 		pullerThread.start();
+	}
+
+	private class TransactionPullerListener extends TransactionPuller.Listener {
+		private final NumberFormat nf = NumberFormat.getInstance();
+		private final NumberFormat timeNf = new DecimalFormat("00");
+		private final Integer stopAtPage;
+		private int shopTransactionCount = 0, paymentTransactionCount = 0, bonusFeeTransactionCount = 0;
+		private int pageCount = 0;
+		private long previousTime = 0;
+
+		public TransactionPullerListener(Integer stopAtPage) {
+			this.stopAtPage = stopAtPage;
+		}
+
+		@Override
+		public void onPageScraped(int page, List<RupeeTransaction> transactions) throws Throwable {
+			synchronized (puller) { //the method itself cannot have a "synchronized" flag because there is a synchronized block in the cancel button's click handler
+				if (puller.isCanceled()) {
+					return;
+				}
+
+				if (!transactions.isEmpty()) {
+					RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
+					Date lastTs = last.getTs();
+					if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
+						earliestParsedTransactionDate = lastTs;
+					}
+				}
+
+				List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
+				dao.insertTransactions(shopTransactions);
+				shopTransactionCount += shopTransactions.size();
+
+				List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
+				dao.insertPaymentTransactions(paymentTransactions);
+				paymentTransactionCount += paymentTransactions.size();
+
+				List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
+				dao.updateBonusesFees(bonusFeeTransactions);
+				bonusFeeTransactionCount += bonusFeeTransactions.size();
+
+				pageCount++;
+
+				String pagesText = nf.format(pageCount);
+				if (stopAtPage != null) {
+					pagesText += " / " + stopAtPage;
+				}
+				UpdateDialog.this.pages.setText(pagesText);
+
+				shopTransactionsLabel.setText(nf.format(shopTransactionCount));
+				paymentTransactionsLabel.setText(nf.format(paymentTransactionCount));
+				bonusFeeTransactionsLabel.setText(nf.format(bonusFeeTransactionCount));
+
+				if (pageCount % 100 == 0 && logger.isLoggable(Level.FINEST)) {
+					long fromStart = System.currentTimeMillis() - started;
+					long fromPrevious = System.currentTimeMillis() - previousTime;
+					long fromStartComponents[] = TimeUtils.parseTimeComponents(fromStart);
+					long fromPreviousComponents[] = TimeUtils.parseTimeComponents(fromPrevious);
+					//@formatter:off
+						logger.finest(
+							"DOWNLOAD STATS | " + 
+							"Pages: " + pageCount + " | " +
+							"From start: " + timeNf.format(fromStartComponents[3]) + ":" + timeNf.format(fromStartComponents[2]) + ":" + timeNf.format(fromStartComponents[1]) + " | " +
+							"From previous: " + timeNf.format(fromPreviousComponents[3]) + ":" + timeNf.format(fromPreviousComponents[2]) + ":" + timeNf.format(fromPreviousComponents[1])
+						);
+						//@formatter:on
+					previousTime = System.currentTimeMillis();
+				}
+			}
+		}
 	}
 }

@@ -244,8 +244,10 @@ public class TransactionPuller {
 		 * Called when a page has been scraped.
 		 * @param page the page number
 		 * @param transactions the scraped transactions (may be empty)
+		 * @throws Throwable any unhandled exceptions will be caught by the
+		 * transaction puller and will cause it to cancel the download operation
 		 */
-		public abstract void onPageScraped(int page, List<RupeeTransaction> transactions);
+		public abstract void onPageScraped(int page, List<RupeeTransaction> transactions) throws Throwable;
 
 		/**
 		 * Filters out a instances of a specific sub-class of
