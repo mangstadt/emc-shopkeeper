@@ -455,7 +455,7 @@ public class Main {
 
 						try {
 							List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
-							dao.insertTransactions(shopTransactions);
+							dao.insertTransactions(shopTransactions, true);
 
 							List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
 							dao.insertPaymentTransactions(paymentTransactions);

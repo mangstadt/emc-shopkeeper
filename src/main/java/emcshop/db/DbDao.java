@@ -91,16 +91,18 @@ public interface DbDao {
 	/**
 	 * Inserts a transaction.
 	 * @param transaction
+	 * @param updateInventory true to update the inventory, false not to
 	 * @throws SQLException
 	 */
-	void insertTransaction(ShopTransaction transaction) throws SQLException;
+	void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException;
 
 	/**
 	 * Inserts multiple transactions.
 	 * @param transactions
+	 * @param updateInventory true to update the inventory, false not to
 	 * @throws SQLException
 	 */
-	void insertTransactions(Collection<ShopTransaction> transactions) throws SQLException;
+	void insertTransactions(Collection<ShopTransaction> transactions, boolean updateInventory) throws SQLException;
 
 	/**
 	 * Inserts multiple payment transactions.

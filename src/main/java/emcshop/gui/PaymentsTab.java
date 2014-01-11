@@ -18,6 +18,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -428,8 +429,9 @@ public class PaymentsTab extends JPanel {
 		private final ItemSuggestField item;
 		private final QuantityTextField quantity;
 		private final JButton ok, cancel;
+		private final JCheckBox updateInventory;
 
-		public AssignDialog(final PaymentTransaction transaction) {
+		public AssignDialog(final PaymentTransaction paymentTransaction) {
 			super(owner, "Assign Payment Transaction", true);
 			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 			setResizable(false);
@@ -468,29 +470,29 @@ public class PaymentsTab extends JPanel {
 						return;
 					}
 
-					ShopTransaction shop = new ShopTransaction();
-					shop.setTs(transaction.getTs());
-					shop.setPlayer(transaction.getPlayer());
-					shop.setAmount(transaction.getAmount());
-					shop.setBalance(transaction.getBalance());
-					shop.setItem(itemName);
+					ShopTransaction shopTransaction = new ShopTransaction();
+					shopTransaction.setTs(paymentTransaction.getTs());
+					shopTransaction.setPlayer(paymentTransaction.getPlayer());
+					shopTransaction.setAmount(paymentTransaction.getAmount());
+					shopTransaction.setBalance(paymentTransaction.getBalance());
+					shopTransaction.setItem(itemName);
 
-					if (transaction.getAmount() > 0) {
+					if (paymentTransaction.getAmount() > 0) {
 						//negate quantity if it's a sale
 						qty *= -1;
 					}
-					shop.setQuantity(qty);
+					shopTransaction.setQuantity(qty);
 
 					try {
-						dao.insertTransaction(shop);
-						dao.assignPaymentTransaction(transaction.getId(), shop.getId());
+						dao.insertTransaction(shopTransaction, updateInventory.isSelected());
+						dao.assignPaymentTransaction(paymentTransaction.getId(), shopTransaction.getId());
 						dao.commit();
 					} catch (SQLException e) {
 						dao.rollback();
 						throw new RuntimeException(e);
 					}
 
-					paymentsTable.removeRow(transaction);
+					paymentsTable.removeRow(paymentTransaction);
 					paymentsTable.refresh();
 					owner.updateInventoryTab();
 					owner.updatePaymentsCount();
@@ -507,6 +509,8 @@ public class PaymentsTab extends JPanel {
 				}
 			});
 
+			updateInventory = new JCheckBox("Apply to Inventory", true);
+
 			JLabel quantityLabel = new HelpLabel("Qty:", "You can specify the quantity in stacks instead of having to specify the exact number.\n\n<b>Examples</b>:\n\"264\" (264 items total)\n\"4/10\" (4 stacks, plus 10 more)\n\"4/\" (4 stacks)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16 (like Signs) and others are not stackable at all (like armor)!");
 
 			/////////////////////////
@@ -519,9 +523,9 @@ public class PaymentsTab extends JPanel {
 			top.add(new JLabel("Player:"));
 			top.add(new JLabel("Amount:"), "wrap");
 
-			top.add(new JLabel(df.format(transaction.getTs())), "gapright 10");
-			top.add(new JLabel(transaction.getPlayer()), "gapright 10");
-			top.add(new JLabel("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>"));
+			top.add(new JLabel(df.format(paymentTransaction.getTs())), "gapright 10");
+			top.add(new JLabel(paymentTransaction.getPlayer()), "gapright 10");
+			top.add(new JLabel("<html>" + formatRupeesWithColor(paymentTransaction.getAmount()) + "</html>"));
 
 			add(top, "wrap");
 
@@ -530,10 +534,12 @@ public class PaymentsTab extends JPanel {
 			bottom.add(new JLabel("Item:"));
 			bottom.add(quantityLabel, "wrap");
 			bottom.add(item, "w 175");
-			bottom.add(quantity, "w 100");
+			bottom.add(quantity, "w 100, wrap");
 
 			add(bottom, "wrap");
 
+			bottom.add(updateInventory, "split 2");
+			bottom.add(new HelpLabel("", "Check this box to apply this transaction to your shop's inventory."), "wrap");
 			add(ok, "split 2, align center");
 			add(cancel);
 

@@ -256,12 +256,12 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void insertTransaction(ShopTransaction transaction) throws SQLException {
-		insertTransactions(Arrays.asList(transaction));
+	public void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException {
+		insertTransactions(Arrays.asList(transaction), updateInventory);
 	}
 
 	@Override
-	public void insertTransactions(Collection<ShopTransaction> transactions) throws SQLException {
+	public void insertTransactions(Collection<ShopTransaction> transactions, boolean updateInventory) throws SQLException {
 		if (transactions.isEmpty()) {
 			return;
 		}
@@ -312,7 +312,9 @@ public abstract class DirbyDbDao implements DbDao {
 			int id = stmt.execute(conn);
 			transaction.setId(id);
 
-			addToInventory(itemId, transaction.getQuantity());
+			if (updateInventory) {
+				addToInventory(itemId, transaction.getQuantity());
+			}
 		}
 	}
 

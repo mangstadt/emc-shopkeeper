@@ -329,7 +329,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 				}
 
 				List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
-				dao.insertTransactions(shopTransactions);
+				dao.insertTransactions(shopTransactions, true);
 				shopTransactionCount += shopTransactions.size();
 
 				List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
