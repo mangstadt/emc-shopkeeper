@@ -67,6 +67,7 @@ import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RupeeTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
+import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.Settings;
 
 public class Main {
@@ -395,6 +396,17 @@ public class Main {
 				}
 			}
 
+			TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
+			if (firstUpdate) {
+				pullerFactory.setMaxPaymentTransactionAge(7);
+				if (stopAtPage != null) {
+					pullerFactory.setStopAtPage(stopAtPage);
+				}
+				pullerFactory.setStartAtPage(startAtPage);
+			} else {
+				pullerFactory.setStopAtDate(latestTransactionDateFromDb);
+			}
+
 			EmcSession session = settings.getSession();
 			String sessionUsername = (session == null) ? null : session.getUsername();
 			boolean repeat;
@@ -424,17 +436,7 @@ public class Main {
 					settings.save();
 				}
 
-				final TransactionPuller puller = new TransactionPuller();
-				if (firstUpdate) {
-					puller.setMaxPaymentTransactionAge(7);
-					if (stopAtPage != null) {
-						puller.setStopAtPage(stopAtPage);
-					}
-					puller.setStartAtPage(startAtPage);
-				} else {
-					puller.setStopAtDate(latestTransactionDateFromDb);
-				}
-
+				final TransactionPuller puller = pullerFactory.newInstance();
 				Date started = new Date();
 				TransactionPuller.Result result = puller.start(session, new TransactionPuller.Listener() {
 					private int transactionCount = 0;

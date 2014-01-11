@@ -33,6 +33,7 @@ import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RupeeTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
+import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
@@ -72,10 +73,10 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		setLocationRelativeTo(owner);
 		addWindowListener(this);
 
-		puller = new TransactionPuller();
+		final TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
 		pullerThread = new Thread() {
-			String errorDisplayMessage;
-			Throwable error;
+			private String errorDisplayMessage;
+			private Throwable error;
 
 			@Override
 			public void run() {
@@ -85,16 +86,17 @@ public class UpdateDialog extends JDialog implements WindowListener {
 					final String estimatedTimeDisplay;
 					final Integer oldestPaymentTransactionDays;
 					if (latestTransactionDate == null) {
+						//it's the first update
 						FirstUpdateDialog.Result result = FirstUpdateDialog.show(UpdateDialog.this);
 						if (result.isCancelled()) {
 							return;
 						}
 
 						stopAtPage = result.getStopAtPage();
-						puller.setStopAtPage(stopAtPage);
+						pullerFactory.setStopAtPage(stopAtPage);
 
 						oldestPaymentTransactionDays = result.getOldestPaymentTransactionDays();
-						puller.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
+						pullerFactory.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
 
 						if (result.getEstimatedTime() != null) {
 							estimatedTimeDisplay = DurationFormatUtils.formatDuration(result.getEstimatedTime(), "HH:mm:ss", true);
@@ -102,12 +104,13 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							estimatedTimeDisplay = null;
 						}
 					} else {
-						puller.setStopAtDate(latestTransactionDate);
+						pullerFactory.setStopAtDate(latestTransactionDate);
 						stopAtPage = null;
 						estimatedTimeDisplay = null;
 						oldestPaymentTransactionDays = null;
 					}
 
+					puller = pullerFactory.newInstance();
 					boolean repeat;
 					do {
 						repeat = false;
