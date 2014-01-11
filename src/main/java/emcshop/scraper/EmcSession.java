@@ -2,7 +2,9 @@ package emcshop.scraper;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.Map;
+
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
 
 import emcshop.util.LoginUtils;
 
@@ -42,7 +44,14 @@ public class EmcSession {
 		return created;
 	}
 
-	public Map<String, String> getCookiesMap() {
-		return LoginUtils.buildLoginCookiesMap(sessionId);
+	/**
+	 * Creates a new HTTP client for this session.
+	 * @return the HTTP client
+	 */
+	public DefaultHttpClient createHttpClient() {
+		DefaultHttpClient client = new DefaultHttpClient();
+		BasicClientCookie sessionCookie = LoginUtils.buildSessionCookie(sessionId);
+		client.getCookieStore().addCookie(sessionCookie);
+		return client;
 	}
 }

@@ -2,9 +2,7 @@ package emcshop.util;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.junit.Test;
 
 /**
@@ -12,10 +10,11 @@ import org.junit.Test;
  */
 public class LoginUtilsTest {
 	@Test
-	public void buildLoginCookiesMap() {
-		Map<String, String> expected = new HashMap<String, String>();
-		expected.put("emc_session", "session-id");
-		Map<String, String> actual = LoginUtils.buildLoginCookiesMap("session-id");
-		assertEquals(expected, actual);
+	public void buildSessionCookie() {
+		BasicClientCookie cookie = LoginUtils.buildSessionCookie("session-id");
+		assertEquals("emc_session", cookie.getName());
+		assertEquals("session-id", cookie.getValue());
+		assertEquals(".empireminecraft.com", cookie.getDomain());
+		assertEquals("/", cookie.getPath());
 	}
 }

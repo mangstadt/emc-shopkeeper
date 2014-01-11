@@ -27,6 +27,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import emcshop.gui.images.ImageManager;
+import emcshop.scraper.EmcSession;
+import emcshop.util.Settings;
 
 /**
  * Used for downloading player profile pictures.
@@ -36,6 +38,7 @@ public class ProfileImageLoader {
 	private static final Logger logger = Logger.getLogger(ProfileImageLoader.class.getName());
 
 	private final File cacheDir;
+	private final Settings settings;
 	private final Set<String> downloaded = Collections.synchronizedSet(new HashSet<String>());
 	private final LinkedBlockingQueue<Job> queue = new LinkedBlockingQueue<Job>();
 
@@ -43,8 +46,8 @@ public class ProfileImageLoader {
 	 * Creates a profile image loader with 4 threads.
 	 * @param cacheDir the directory where the images are cached
 	 */
-	public ProfileImageLoader(File cacheDir) {
-		this(cacheDir, 4);
+	public ProfileImageLoader(File cacheDir, Settings settings) {
+		this(cacheDir, settings, 4);
 	}
 
 	/**
@@ -52,8 +55,9 @@ public class ProfileImageLoader {
 	 * @param cacheDir the directory where the images are cached
 	 * @param numThreads the number of threads to add to the thread pool
 	 */
-	public ProfileImageLoader(File cacheDir, int numThreads) {
+	public ProfileImageLoader(File cacheDir, Settings settings, int numThreads) {
 		this.cacheDir = cacheDir;
+		this.settings = settings;
 
 		//initialize the thread pool
 		for (int i = 0; i < numThreads; i++) {
@@ -111,7 +115,8 @@ public class ProfileImageLoader {
 	 * @throws IOException
 	 */
 	private byte[] fetchImage(String playerName) throws IOException {
-		DefaultHttpClient client = new DefaultHttpClient();
+		EmcSession session = settings.getSession();
+		DefaultHttpClient client = (session == null) ? new DefaultHttpClient() : session.createHttpClient();
 
 		//download image and save to cache
 		HttpEntity entity = null;

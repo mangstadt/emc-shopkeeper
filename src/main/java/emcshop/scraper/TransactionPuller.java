@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,7 +13,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -128,7 +126,7 @@ public class TransactionPuller {
 				oldestPaymentTransactionDate = null;
 			}
 
-			TransactionPage firstPage = getPage(1, createHttpClient(session));
+			TransactionPage firstPage = getPage(1, session.createHttpClient());
 
 			//is the user logged in?
 			if (!firstPage.isLoggedIn()) {
@@ -219,29 +217,13 @@ public class TransactionPuller {
 		return new TransactionPage(document);
 	}
 
-	private DefaultHttpClient createHttpClient(EmcSession session) {
-		DefaultHttpClient client = new DefaultHttpClient();
-
-		for (Map.Entry<String, String> entry : session.getCookiesMap().entrySet()) {
-			String name = entry.getKey();
-			String value = entry.getValue();
-
-			BasicClientCookie cookie = new BasicClientCookie(name, value);
-			cookie.setDomain(".empireminecraft.com");
-			cookie.setPath("/");
-			client.getCookieStore().addCookie(cookie);
-		}
-
-		return client;
-	}
-
 	private class ScrapeThread extends Thread {
 		private final Listener listener;
 		private final DefaultHttpClient client;
 
 		public ScrapeThread(Listener listener, EmcSession session) {
 			this.listener = listener;
-			this.client = createHttpClient(session);
+			this.client = session.createHttpClient();
 		}
 
 		@Override

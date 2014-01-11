@@ -3,9 +3,7 @@ package emcshop.util;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -78,9 +76,7 @@ public class LoginUtils {
 		DefaultHttpClient client = new DefaultHttpClient();
 		client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 
-		BasicClientCookie cookie = new BasicClientCookie(SESSION_COOKIE_NAME, sessionId);
-		cookie.setDomain(".empireminecraft.com");
-		cookie.setPath("/");
+		BasicClientCookie cookie = buildSessionCookie(sessionId);
 		client.getCookieStore().addCookie(cookie);
 
 		try {
@@ -99,14 +95,15 @@ public class LoginUtils {
 	}
 
 	/**
-	 * Builds a map containing the login cookies.
+	 * Builds the cookie that contains the session ID.
 	 * @param sessionId the session ID
-	 * @return the cookies map
+	 * @return the session cookie
 	 */
-	public static Map<String, String> buildLoginCookiesMap(String sessionId) {
-		Map<String, String> cookies = new HashMap<String, String>();
-		cookies.put(SESSION_COOKIE_NAME, sessionId);
-		return cookies;
+	public static BasicClientCookie buildSessionCookie(String sessionId) {
+		BasicClientCookie cookie = new BasicClientCookie(SESSION_COOKIE_NAME, sessionId);
+		cookie.setDomain(".empireminecraft.com");
+		cookie.setPath("/");
+		return cookie;
 	}
 
 	private static void loadHomePage(DefaultHttpClient client) throws IOException {

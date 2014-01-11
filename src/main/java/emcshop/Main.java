@@ -681,7 +681,7 @@ public class Main {
 		initCacheDir(cacheDir);
 
 		//start the profile image loader
-		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir);
+		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir, settings);
 
 		//connect to database
 		DbDao dao;
