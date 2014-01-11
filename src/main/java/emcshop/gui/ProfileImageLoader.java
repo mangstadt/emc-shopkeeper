@@ -63,6 +63,7 @@ public class ProfileImageLoader {
 		for (int i = 0; i < numThreads; i++) {
 			LoadThread t = new LoadThread();
 			t.setDaemon(true); //terminate the thread when the program exits
+			t.setPriority(Thread.MIN_PRIORITY);
 			t.start();
 		}
 	}

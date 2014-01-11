@@ -563,6 +563,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			}
 		};
 		t.setDaemon(true);
+		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
 
