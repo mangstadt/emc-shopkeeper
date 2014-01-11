@@ -409,10 +409,10 @@ public class MainFrame extends JFrame implements WindowListener {
 	/**
 	 * Called after an update has completed.
 	 */
-	public void updateSuccessful(Date started, Integer rupeeTotal, long time, int transactionCount, int pageCount, boolean showResults) {
+	public void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int pageCount, boolean showResults) {
 		String message;
-		if (transactionCount == 0) {
-			message = "No new transactions found.";
+		if (shopTransactionCount == 0) {
+			message = "No new shop transactions found.";
 		} else {
 			boolean firstUpdate = (settings.getLastUpdated() == null && settings.getPreviousUpdate() == null);
 
@@ -440,7 +440,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Update complete.\n");
 			sb.append(nf.format(pageCount)).append(" pages parsed and ");
-			sb.append(nf.format(transactionCount)).append(" transactions parsed in ");
+			sb.append(nf.format(shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount)).append(" transactions parsed in ");
 			if (components[3] > 0) {
 				sb.append(components[3]).append(" hours, ");
 			}
