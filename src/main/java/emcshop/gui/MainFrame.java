@@ -229,6 +229,7 @@ public class MainFrame extends JFrame implements WindowListener {
 								try {
 									dao.wipe();
 									settings.setLastUpdated(null);
+									settings.setPreviousUpdate(null);
 									settings.setRupeeBalance(null);
 									settings.setSession(null);
 									settings.save();
