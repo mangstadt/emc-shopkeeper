@@ -86,18 +86,24 @@ public class ProfileImageLoader {
 	 * @param listener invoked when the image has been assigned to the label
 	 */
 	public void load(String playerName, JLabel label, int maxSize, ImageAssignedListener listener) {
-		if (downloaded.contains(playerName.toLowerCase())) {
-			//it was already downloaded, so read the image from the cache
-			try {
-				byte[] data = loadFromCache(playerName);
-				ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
-				image = ImageManager.scale(image, maxSize);
-				label.setIcon(image);
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
-			}
-		} else {
-			//queue the image for download
+		//attempt to load the image from the cache
+		byte data[] = null;
+		try {
+			data = loadFromCache(playerName);
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
+		}
+
+		//assign an image to the label
+		ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
+		image = ImageManager.scale(image, maxSize);
+		label.setIcon(image);
+		if (listener != null) {
+			listener.onImageAssigned(label);
+		}
+
+		//download the most up-to-date image if it hasn't been downloaded already
+		if (!downloaded.contains(playerName.toLowerCase())) {
 			Job job = new Job(playerName, label, maxSize, listener);
 			try {
 				queue.put(job);
