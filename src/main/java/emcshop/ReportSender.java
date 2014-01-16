@@ -137,6 +137,8 @@ public class ReportSender {
 			String dbVersionStr = (dbVersion == null) ? "null" : dbVersion.toString();
 			xml.append(xml.root(), "DatabaseVersion", dbVersionStr);
 
+			xml.append(xml.root(), "JavaVersion", System.getProperty("java.version"));
+
 			xml.append(xml.root(), "Locale", Locale.getDefault().toString());
 
 			String stackTrace = ExceptionUtils.getStackTrace(job.throwable);
