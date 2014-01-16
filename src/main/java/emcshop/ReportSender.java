@@ -139,6 +139,8 @@ public class ReportSender {
 
 			xml.append(xml.root(), "JavaVersion", System.getProperty("java.version"));
 
+			xml.append(xml.root(), "OS", System.getProperty("os.name"));
+
 			xml.append(xml.root(), "Locale", Locale.getDefault().toString());
 
 			String stackTrace = ExceptionUtils.getStackTrace(job.throwable);
