@@ -18,6 +18,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.util.XmlBuilder;
 
 /**
@@ -142,6 +143,8 @@ public class ReportSender {
 			xml.append(xml.root(), "OS", System.getProperty("os.name"));
 
 			xml.append(xml.root(), "Locale", Locale.getDefault().toString());
+
+			xml.append(xml.root(), "WebStart", JarSignersHardLinker.isRunningOnWebstart() + "");
 
 			String stackTrace = ExceptionUtils.getStackTrace(job.throwable);
 			xml.append(xml.root(), "StackTrace", stackTrace);
