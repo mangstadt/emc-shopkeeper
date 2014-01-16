@@ -3,7 +3,6 @@ package emcshop.gui.lib;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -14,10 +13,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * A utility class for working around the java webstart jar signing/security bug
- * 
+ * A utility class for working around the java Web Start jar signing/security
+ * bug.
  * @see "http://bugs.sun.com/view_bug.do?bug_id=6967414"
  * @see "http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6805618"
  * @see "https://community.oracle.com/thread/1305543"
@@ -25,18 +26,18 @@ import java.util.jar.JarFile;
  * @author Scott Chan
  */
 public class JarSignersHardLinker {
+	private static final Logger logger = Logger.getLogger(JarSignersHardLinker.class.getName());
 	private static final String JRE_1_6_0 = "1.6.0_";
 
 	/**
-	 * the 1.6.0 update where this problem first occurred
+	 * The 1.6.0 update where this problem first occurred.
 	 */
 	private static final int PROBLEM_JRE_UPDATE = 19;
 
 	public static final List<Object> sm_hardRefs = new ArrayList<Object>();
 
-	protected static void makeHardSignersRef(JarFile jar) throws java.io.IOException {
-
-		System.out.println("Making hard refs for: " + jar);
+	private static void makeHardSignersRef(JarFile jar) throws java.io.IOException {
+		logger.fine("Making hard refs for: " + jar);
 
 		if (jar != null && jar.getClass().getName().equals("com.sun.deploy.cache.CachedJarFile")) {
 
@@ -65,16 +66,14 @@ public class JarSignersHardLinker {
 	}
 
 	/**
-	 * if the specified field for the given instance is a Softreference That
-	 * soft reference is resolved and the returned ref is stored in a static
-	 * list, making it a hard link that should never be garbage collected
+	 * If the specified field for the given instance is a {@link SoftReference},
+	 * it is resolved and the returned ref is stored in a static list, making it
+	 * a hard link that should never be garbage collected
 	 * @param fieldName
 	 * @param instance
 	 */
 	private static void makeHardLink(String fieldName, Object instance) {
-
-		System.out.println("attempting hard ref to " + instance.getClass().getName() + "." + fieldName);
-
+		logger.fine("Attempting hard ref to " + instance.getClass().getName() + "." + fieldName);
 		try {
 			Field signersRef = instance.getClass().getDeclaredField(fieldName);
 
@@ -86,14 +85,9 @@ public class JarSignersHardLinker {
 				SoftReference<?> r = (SoftReference<?>) o;
 				Object o2 = r.get();
 				sm_hardRefs.add(o2);
-			} else {
-				System.out.println("noooo!");
 			}
-		} catch (NoSuchFieldException e) {
-			e.printStackTrace();
-			return;
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+		} catch (Throwable t) {
+			logger.log(Level.FINE, "Problem accessing field.", t);
 		}
 	}
 
@@ -103,23 +97,14 @@ public class JarSignersHardLinker {
 	 * @param instance
 	 */
 	private static void callNoArgMethod(String methodName, Object instance) {
-		System.out.println("calling noarg method hard ref to " + instance.getClass().getName() + "." + methodName + "()");
+		logger.fine("Calling noarg method hard ref to " + instance.getClass().getName() + "." + methodName + "()");
 		try {
 			Method m = instance.getClass().getDeclaredMethod(methodName);
 			m.setAccessible(true);
 
 			m.invoke(instance);
-
-		} catch (SecurityException e1) {
-			e1.printStackTrace();
-		} catch (NoSuchMethodException e1) {
-			e1.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+		} catch (Throwable t) {
+			logger.log(Level.FINE, "Problem calling method.", t);
 		}
 	}
 
@@ -128,18 +113,14 @@ public class JarSignersHardLinker {
 	 * environment
 	 * @return
 	 */
-	public static boolean isHardLinkerEnabled() {
-
+	private static boolean isHardLinkerEnabled() {
 		boolean isHardLinkerDisabled = false; //change this to use whatever mechanism you use to enable or disable the preloader
 
 		return !isHardLinkerDisabled && isRunningOnJre1_6_0_19OrHigher() && isRunningOnWebstart();
 	}
 
 	/**
-	 * is the application currently running on webstart
-	 * 
-	 * detect the presence of a JNLPclassloader
-	 * 
+	 * Determines if the application is running on Web Start.
 	 * @return
 	 */
 	public static boolean isRunningOnWebstart() {
@@ -157,10 +138,10 @@ public class JarSignersHardLinker {
 	}
 
 	/**
-	 * Is the JRE 1.6.0_19 or higher?
-	 * @return
+	 * Determines if the JRE is version 1.6.0_19 or higher.
+	 * @return true if it's 1.6.0_19 or higher, false if not
 	 */
-	public static boolean isRunningOnJre1_6_0_19OrHigher() {
+	private static boolean isRunningOnJre1_6_0_19OrHigher() {
 		String javaVersion = System.getProperty("java.version");
 
 		if (javaVersion.startsWith(JRE_1_6_0)) {
@@ -177,41 +158,39 @@ public class JarSignersHardLinker {
 
 		//all other cases
 		return false;
-
 	}
 
 	/**
-	 * get all the JarFile objects for all of the jars in the classpath
-	 * @return
+	 * Gets all the {@link JarFile} objects for all of the jars in the
+	 * classpath.
+	 * @return the {@link JarFile} objects
 	 */
-	public static Set<JarFile> getAllJarsFilesInClassPath() {
-
+	private static Set<JarFile> getAllJarsFilesInClassPath() {
 		Set<JarFile> jars = new LinkedHashSet<JarFile>();
-
 		for (URL url : getAllJarUrls()) {
 			try {
 				jars.add(getJarFile(url));
 			} catch (IOException e) {
-				System.out.println("unable to retrieve jar at URL: " + url);
+				logger.log(Level.SEVERE, "Unable to retrieve jar at URL: " + url, e);
 			}
 		}
-
 		return jars;
 	}
 
 	/**
-	 * Returns set of URLS for the jars in the classpath. URLS will have the
-	 * protocol of jar eg:
-	 * jar:http://HOST/PATH/JARNAME.jar!/META-INF/MANIFEST.MF
+	 * Returns set of URLs for the jars in the classpath.
+	 * @return the URLs (e.g.
+	 * "jar:http://HOST/PATH/JARNAME.jar!/META-INF/MANIFEST.MF")
 	 */
-	static Set<URL> getAllJarUrls() {
+	private static Set<URL> getAllJarUrls() {
 		try {
 			Set<URL> urls = new LinkedHashSet<URL>();
 			Enumeration<URL> mfUrls = Thread.currentThread().getContextClassLoader().getResources("META-INF/MANIFEST.MF");
 			while (mfUrls.hasMoreElements()) {
 				URL jarUrl = mfUrls.nextElement();
-				//                System.out.println(jarUrl);
-				if (!jarUrl.getProtocol().equals("jar")) continue;
+				if (!jarUrl.getProtocol().equals("jar")) {
+					continue;
+				}
 				urls.add(jarUrl);
 			}
 			return urls;
@@ -221,12 +200,12 @@ public class JarSignersHardLinker {
 	}
 
 	/**
-	 * get the jarFile object for the given url
-	 * @param jarUrl
-	 * @return
+	 * Gets the {@link JarFile} object for the given URL.
+	 * @param jarUrl the JAR URL
+	 * @return the JAR file
 	 * @throws IOException
 	 */
-	public static JarFile getJarFile(URL jarUrl) throws IOException {
+	private static JarFile getJarFile(URL jarUrl) throws IOException {
 		URLConnection urlConnnection = jarUrl.openConnection();
 		if (urlConnnection instanceof JarURLConnection) {
 			// Using a JarURLConnection will load the JAR from the cache when using Webstart 1.6
@@ -239,7 +218,7 @@ public class JarSignersHardLinker {
 	}
 
 	/**
-	 * Spawn a new thread to run through each jar in the classpath and create a
+	 * Spawns a new thread to run through each jar in the classpath and create a
 	 * hardlink to the jars softly referenced signers infomation.
 	 */
 	public static void go() {
@@ -247,31 +226,22 @@ public class JarSignersHardLinker {
 			return;
 		}
 
-		System.out.println("Starting Resource Preloader Hardlinker");
+		logger.fine("Starting Resource Preloader Hardlinker");
 
 		Thread t = new Thread(new Runnable() {
-
 			public void run() {
-
 				try {
 					Set<JarFile> jars = getAllJarsFilesInClassPath();
 
 					for (JarFile jar : jars) {
 						makeHardSignersRef(jar);
 					}
-
-				} catch (Exception e) {
-					System.out.println("Problem preloading resources");
-					e.printStackTrace();
-				} catch (Error e) {
-					System.out.println("Error preloading resources");
-					e.printStackTrace();
+				} catch (Throwable t) {
+					logger.log(Level.SEVERE, "Problem preloading resources.", t);
 				}
 			}
-
 		});
-
+		t.setDaemon(true);
 		t.start();
-
 	}
 }
