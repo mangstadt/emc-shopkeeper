@@ -59,6 +59,7 @@ import emcshop.gui.ErrorDialog;
 import emcshop.gui.MainFrame;
 import emcshop.gui.ProfileImageLoader;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacHandler;
 import emcshop.gui.lib.MacSupport;
 import emcshop.scraper.BonusFeeTransaction;
@@ -161,6 +162,9 @@ public class Main {
 	private static Date earliestParsedTransactionDate;
 
 	public static void main(String[] args) throws Throwable {
+		//iron out the JNLP quirks
+		JarSignersHardLinker.go();
+
 		Arguments arguments = new Arguments(args);
 
 		//print help
