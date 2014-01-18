@@ -53,6 +53,7 @@ import emcshop.LogManager;
 import emcshop.Main;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
 import emcshop.scraper.EmcSession;
 import emcshop.util.GuiUtils;
@@ -106,7 +107,9 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		addWindowListener(this);
 
-		checkForNewVersion();
+		if (!JarSignersHardLinker.isRunningOnWebstart()) {
+			checkForNewVersion();
+		}
 	}
 
 	private void createMenu() {
@@ -489,7 +492,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			@Override
 			public void run() {
 				try {
-					logger.log(Level.FINEST, "Checking for updates.");
+					logger.finest("Checking for updates.");
 					String json;
 					try {
 						json = downloadCommitInfo();
@@ -507,7 +510,7 @@ public class MainFrame extends JFrame implements WindowListener {
 					long diff = latestRelease.getTime() - Main.BUILT.getTime();
 					if (diff < 1000 * 60 * 10) { //give a buffer of 10 minutes because there will be a few minutes difference between the build timestamp and the commit timestamp
 						//already running the latest version
-						logger.log(Level.FINEST, "Running latest version.");
+						logger.finest("Running latest version.");
 						return;
 					}
 
