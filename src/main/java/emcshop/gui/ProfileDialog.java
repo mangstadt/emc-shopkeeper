@@ -59,7 +59,7 @@ public class ProfileDialog extends JDialog {
 		ok.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				String profile = (String) profiles.getSelectedItem();
+				String profile = (String) profiles.getEditor().getItem();
 				if (profile.isEmpty()) {
 					JOptionPane.showMessageDialog(ProfileDialog.this, "Profile name cannot be blank.", "Error", JOptionPane.ERROR_MESSAGE);
 					return;
