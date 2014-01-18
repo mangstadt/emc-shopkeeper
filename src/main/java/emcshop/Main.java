@@ -1,11 +1,6 @@
 package emcshop;
 
-import static emcshop.util.NumberFormatter.formatQuantity;
-import static emcshop.util.NumberFormatter.formatRupees;
-
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,67 +8,40 @@ import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.sql.SQLException;
 import java.text.DateFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.ToolTipManager;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 
-import emcshop.cli.Arguments;
+import emcshop.cli.CliController;
+import emcshop.cli.EmcShopArguments;
 import emcshop.db.DbDao;
 import emcshop.db.DbListener;
 import emcshop.db.DirbyEmbeddedDbDao;
-import emcshop.db.ItemGroup;
 import emcshop.gui.AboutDialog;
 import emcshop.gui.ErrorDialog;
 import emcshop.gui.MainFrame;
+import emcshop.gui.ProfileDialog;
 import emcshop.gui.ProfileImageLoader;
 import emcshop.gui.SplashFrame;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacHandler;
 import emcshop.gui.lib.MacSupport;
-import emcshop.scraper.BonusFeeTransaction;
-import emcshop.scraper.EmcSession;
-import emcshop.scraper.PaymentTransaction;
-import emcshop.scraper.RupeeTransaction;
-import emcshop.scraper.ShopTransaction;
-import emcshop.scraper.TransactionPuller;
-import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.Settings;
 
 public class Main {
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
 	private static final String NEWLINE = System.getProperty("line.separator");
-
 	private static final PrintStream out = System.out;
-	private static Throwable pullerError = null;
 
 	/**
 	 * The version of the app.
@@ -121,84 +89,58 @@ public class Main {
 		BUILT = built;
 	}
 
-	private static final Set<String> validArgs;
-	static {
-		Set<String> set = new HashSet<String>();
-		set.add("profile");
-		set.add("profile-dir");
-		set.add("db");
-		set.add("settings");
-		set.add("log-level");
-
-		set.add("update");
-		set.add("stop-page");
-		set.add("start-page");
-		set.add("query");
-		set.add("format");
-		set.add("version");
-		set.add("help");
-		validArgs = Collections.unmodifiableSet(set);
-	}
-
 	private static final File defaultProfileRootDir = new File(FileUtils.getUserDirectory(), ".emc-shopkeeper");
-	private static final String defaultProfile = "default";
-	private static final int defaultStartPage = 1;
+	public static final String defaultProfileName = "default";
+	private static final Integer defaultStartPage = 1;
 	private static final String defaultFormat = "TABLE";
 
 	private static File profileRootDir, profileDir, dbDir;
 	private static String profile, query, format;
-	private static Settings settings;
-	private static LogManager logManager;
-	private static Integer stopAtPage;
-	private static int startAtPage;
+	private static Integer startAtPage, stopAtPage;
 	private static boolean update;
 	private static Level logLevel;
 
-	private static MainFrame frame;
+	private static Settings settings;
+	private static LogManager logManager;
 
-	private static Date earliestParsedTransactionDate;
+	private static MainFrame mainFrame;
 
 	public static void main(String[] args) throws Throwable {
 		//stop the random SecurityExceptions from being thrown
 		JarSignersHardLinker.go();
 
-		Arguments arguments = new Arguments(args);
+		EmcShopArguments arguments = null;
+		try {
+			arguments = new EmcShopArguments(args);
+		} catch (IllegalArgumentException e) {
+			printHelp();
+			out.println();
+			out.println("Error: The following arguments are invalid: " + e.getMessage());
+			System.exit(1);
+		}
 
 		//print help
-		if (arguments.exists(null, "help")) {
+		if (arguments.help()) {
 			printHelp();
 			return;
 		}
 
-		//check for invalid arguments
-		Collection<String> invalidArgs = arguments.invalidArgs(validArgs);
-		if (!invalidArgs.isEmpty()) {
-			printHelp();
-			out.println();
-
-			out.println("Error: The following arguments are invalid:");
-			for (String invalidArg : invalidArgs) {
-				out.println("  " + invalidArg);
-			}
-			System.exit(1);
-		}
-
 		//print version
-		if (arguments.exists(null, "version")) {
+		if (arguments.version()) {
 			out.println(VERSION);
 			return;
 		}
 
 		//get profile root dir
-		String profileRootDirStr = arguments.value(null, "profile-dir");
+		String profileRootDirStr = arguments.profileDir();
 		profileRootDir = (profileRootDirStr == null) ? defaultProfileRootDir : new File(profileRootDirStr);
 
 		//get profile
 		boolean profileSpecified = true;
-		profile = arguments.value(null, "profile");
+		profile = arguments.profile();
 		if (profile == null) {
 			profileSpecified = false;
-			profile = defaultProfile;
+			profile = defaultProfileName;
 		}
 
 		//create profile dir
@@ -217,74 +159,67 @@ public class Main {
 		}
 
 		//load settings
-		String settingsFileStr = arguments.value(null, "settings");
+		String settingsFileStr = arguments.settings();
 		File settingsFile = (settingsFileStr == null) ? new File(profileDir, "settings.properties") : new File(settingsFileStr);
 		settings = new Settings(settingsFile);
 
 		//show the "choose profile" dialog
-		boolean cliMode = arguments.exists(null, "query") || arguments.exists(null, "update");
+		boolean cliMode = arguments.query() != null || arguments.update();
 		if (!cliMode && !profileSpecified && settings.isShowProfilesOnStartup()) {
-			ProfileDialog dialog = new ProfileDialog();
-			dialog.setVisible(true);
-			if (dialog.selectedProfileDir == null) {
-				//user canceled the dialog
-				//quit the application
+			File selectedProfileDir = ProfileDialog.show(null, profileRootDir);
+			if (selectedProfileDir == null) {
+				//user canceled the dialog, so quit the application
 				return;
 			}
 
 			//reset the profile dir
-			profileDir = dialog.selectedProfileDir;
+			profileDir = selectedProfileDir;
 			profile = profileDir.getName();
 			settings = new Settings(new File(profileDir, "settings.properties"));
 		}
 
 		//get database dir
-		String dbDirStr = arguments.value(null, "db");
+		String dbDirStr = arguments.db();
 		dbDir = (dbDirStr == null) ? new File(profileDir, "db") : new File(dbDirStr);
 
 		//get update flag
-		update = arguments.exists(null, "update");
+		update = arguments.update();
 		if (update) {
 			//get stop at page
-			stopAtPage = arguments.valueInt(null, "stop-page");
+			stopAtPage = arguments.stopPage();
 			if (stopAtPage != null && stopAtPage < 1) {
 				out.println("Error: \"stop-page\" must be greater than 0.");
 				System.exit(1);
 			}
 
 			//get start at page
-			startAtPage = arguments.valueInt(null, "start-page", defaultStartPage);
-			if (startAtPage < 1) {
+			startAtPage = arguments.startPage();
+			if (startAtPage == null) {
+				startAtPage = defaultStartPage;
+			} else if (startAtPage < 1) {
 				out.println("Error: \"start-page\" must be greater than 0.");
 				System.exit(1);
 			}
 		}
 
 		//get query
-		if (arguments.exists(null, "query")) {
-			query = arguments.value(null, "query");
-			if (query == null) {
-				query = "";
-			}
-			format = arguments.value(null, "format");
+		query = arguments.query();
+		if (query != null) {
+			String format = arguments.format();
 			if (format == null) {
 				format = defaultFormat;
 			}
-		} else {
-			query = null;
 		}
 
 		//get log level
-		String logLevelStr = arguments.value(null, "log-level");
-		if (logLevelStr == null) {
-			logLevel = settings.getLogLevel();
-		} else {
-			try {
-				logLevel = Level.parse(logLevelStr.toUpperCase());
-			} catch (IllegalArgumentException e) {
-				out.println("Error: Invalid log level \"" + logLevelStr + "\".");
-				System.exit(1);
+		try {
+			logLevel = arguments.logLevel();
+			if (logLevel == null) {
+				logLevel = settings.getLogLevel();
 			}
+		} catch (IllegalArgumentException e) {
+			out.println("Error: Invalid log level.");
+			System.exit(1);
 		}
 
 		logManager = new LogManager(logLevel, new File(profileDir, "app.log"));
@@ -307,7 +242,7 @@ public class Main {
 		"These arguments can be used for the GUI and CLI." + NEWLINE +
 		"================================================" + NEWLINE +
 		"--profile=PROFILE" + NEWLINE +
-		"  The profile to use (defaults to \"" + defaultProfile + "\")." + NEWLINE +
+		"  The profile to use (defaults to \"" + defaultProfileName + "\")." + NEWLINE +
 		NEWLINE +
 		"--profile-dir=DIR" + NEWLINE +
 		"  The path to the directory that contains all the profiles" + NEWLINE +
@@ -354,300 +289,19 @@ public class Main {
 
 	private static void launchCli() throws Throwable {
 		final DbDao dao = new DirbyEmbeddedDbDao(dbDir);
-		ReportSender.instance().setDatabaseVersion(dao.selectDbVersion());
+		ReportSender reportSender = ReportSender.instance();
+		reportSender.setDatabaseVersion(dao.selectDbVersion());
 		dao.updateToLatestVersion(null);
-		ReportSender.instance().setDatabaseVersion(dao.selectDbVersion());
+		reportSender.setDatabaseVersion(dao.selectDbVersion());
+
+		CliController cli = new CliController(dao, settings);
 
 		if (update) {
-			Date latestTransactionDateFromDb = dao.getLatestTransactionDate();
-			boolean firstUpdate = (latestTransactionDateFromDb == null);
-
-			if (firstUpdate) {
-				//@formatter:off
-				out.println(
-				"================================================================================" + NEWLINE +
-				"NOTE: This is the first time you are running an update.  To ensure accurate" + NEWLINE +
-				"results, it is recommended that you set MOVE PERMS to FALSE on your res for this" + NEWLINE +
-				"first update." + NEWLINE +
-				"                                /res set move false" + NEWLINE);
-				//@formatter:on
-
-				if (stopAtPage == null) {
-					//@formatter:off
-					out.println(
-					"Your entire transaction history will be parsed." + NEWLINE +
-					"This could take up to 60 MINUTES depending on its size.");
-					//@formatter:on
-				} else {
-					long time = estimateUpdateTime(stopAtPage);
-					int pages = stopAtPage - startAtPage + 1;
-
-					//@formatter:off
-					out.println(
-					pages + " pages will be parsed." + NEWLINE +
-					"Estimated time: " + DurationFormatUtils.formatDuration(time, "HH:mm:ss", true));
-					//@formatter:on
-				}
-
-				out.println("--------------------------------------------------------------------------------");
-				String ready = System.console().readLine("Are you ready to start? (y/n) ");
-				if (!"y".equalsIgnoreCase(ready)) {
-					out.println("Goodbye.");
-					return;
-				}
-			}
-
-			TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
-			if (firstUpdate) {
-				pullerFactory.setMaxPaymentTransactionAge(7);
-				if (stopAtPage != null) {
-					pullerFactory.setStopAtPage(stopAtPage);
-				}
-				pullerFactory.setStartAtPage(startAtPage);
-			} else {
-				pullerFactory.setStopAtDate(latestTransactionDateFromDb);
-			}
-
-			EmcSession session = settings.getSession();
-			String sessionUsername = (session == null) ? null : session.getUsername();
-			boolean repeat;
-			do {
-				repeat = false;
-				if (session == null) {
-					out.println("Please enter your EMC login credentials.");
-					do {
-						//note: "System.console()" doesn't work from Eclipse
-						String username;
-						if (sessionUsername == null) {
-							username = System.console().readLine("Username: ");
-						} else {
-							username = System.console().readLine("Username [" + sessionUsername + "]: ");
-							if (username.isEmpty()) {
-								username = sessionUsername;
-							}
-						}
-						String password = new String(System.console().readPassword("Password: "));
-						out.println("Logging in...");
-						session = EmcSession.login(username, password, settings.isPersistSession());
-						if (session == null) {
-							out.println("Login failed.  Please try again.");
-						}
-					} while (session == null);
-					settings.setSession(session);
-					settings.save();
-				}
-
-				final TransactionPuller puller = pullerFactory.newInstance();
-				Date started = new Date();
-				TransactionPuller.Result result = puller.start(session, new TransactionPuller.Listener() {
-					private int transactionCount = 0;
-					private int pageCount = 0;
-					private final NumberFormat nf = NumberFormat.getInstance();
-
-					@Override
-					public synchronized void onPageScraped(int page, List<RupeeTransaction> transactions) {
-						if (!transactions.isEmpty()) {
-							RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
-							Date lastTs = last.getTs();
-							if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
-								earliestParsedTransactionDate = lastTs;
-							}
-						}
-
-						try {
-							List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
-							dao.insertTransactions(shopTransactions, true);
-
-							List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
-							dao.insertPaymentTransactions(paymentTransactions);
-
-							List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
-							dao.updateBonusesFees(bonusFeeTransactions);
-
-							pageCount++;
-							transactionCount += shopTransactions.size() + paymentTransactions.size();
-							out.print("\rPages: " + nf.format(pageCount) + " | Transactions: " + nf.format(transactionCount));
-						} catch (SQLException e) {
-							pullerError = e;
-							puller.cancel();
-						}
-					}
-				});
-
-				switch (result.getState()) {
-				case CANCELLED:
-					dao.rollback();
-					if (pullerError != null) {
-						throw pullerError;
-					}
-					break;
-				case BAD_SESSION:
-					out.println("Your login session has expired.");
-					session = null;
-					repeat = true;
-					break;
-				case FAILED:
-					dao.rollback();
-					throw result.getThrown();
-				case COMPLETED:
-					if (earliestParsedTransactionDate != null) {
-						dao.updateBonusesFeesSince(earliestParsedTransactionDate);
-					}
-					dao.commit();
-
-					settings.setPreviousUpdate(settings.getLastUpdated());
-					settings.setLastUpdated(started);
-					settings.setRupeeBalance(result.getRupeeBalance());
-					settings.save();
-
-					out.println("\n" + result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
-					logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
-					break;
-				}
-			} while (repeat);
+			cli.update(startAtPage, stopAtPage);
 		}
 
 		if (query != null) {
-			Map<String, ItemGroup> itemGroups;
-			Date from, to;
-			if (query.isEmpty()) {
-				itemGroups = dao.getItemGroups();
-				from = to = null;
-			} else {
-				Date range[] = parseDateRange(query);
-				from = range[0];
-				to = range[1];
-				itemGroups = dao.getItemGroups(from, to);
-			}
-
-			//sort items
-			List<ItemGroup> sortedItemGroups = new ArrayList<ItemGroup>(itemGroups.values());
-			Collections.sort(sortedItemGroups, new Comparator<ItemGroup>() {
-				@Override
-				public int compare(ItemGroup left, ItemGroup right) {
-					return left.getItem().compareTo(right.getItem());
-				}
-			});
-
-			if ("CSV".equalsIgnoreCase(format)) {
-				//calculate net total
-				int netTotal = 0;
-				for (Map.Entry<String, ItemGroup> entry : itemGroups.entrySet()) {
-					ItemGroup itemGroup = entry.getValue();
-					netTotal += itemGroup.getNetAmount();
-				}
-
-				//generate CSV
-				out.println(QueryExporter.generateItemsCsv(sortedItemGroups, netTotal, from, to));
-			} else if ("BBCODE".equalsIgnoreCase(format)) {
-				//calculate net total
-				int netTotal = 0;
-				for (Map.Entry<String, ItemGroup> entry : itemGroups.entrySet()) {
-					ItemGroup itemGroup = entry.getValue();
-					netTotal += itemGroup.getNetAmount();
-				}
-
-				//generate BBCode
-				out.println(QueryExporter.generateItemsBBCode(sortedItemGroups, netTotal, from, to));
-			} else {
-				out.println("Item                |Sold                |Bought              |Net");
-				out.println("--------------------------------------------------------------------------------");
-				int totalAmount = 0;
-				for (ItemGroup itemGroup : sortedItemGroups) {
-					//TODO ANSI colors
-					//TODO String.format("%-20s | %-20s | %-20s | %-20s\n", group.getItem(), sold, bought, net);
-
-					out.print(itemGroup.getItem());
-					int spaces = 20 - itemGroup.getItem().length();
-					if (spaces > 0) {
-						out.print(StringUtils.repeat(' ', spaces));
-					}
-					out.print('|');
-
-					String s;
-
-					if (itemGroup.getSoldQuantity() == 0) {
-						s = " - ";
-					} else {
-						s = formatQuantity(itemGroup.getSoldQuantity(), false) + " / " + formatRupees(itemGroup.getSoldAmount(), false);
-					}
-					out.print(s);
-					spaces = 20 - s.length();
-					if (spaces > 0) {
-						out.print(StringUtils.repeat(' ', spaces));
-					}
-					out.print('|');
-
-					if (itemGroup.getBoughtQuantity() == 0) {
-						s = " - ";
-					} else {
-						s = formatQuantity(itemGroup.getBoughtQuantity(), false) + " / " + formatRupees(itemGroup.getBoughtAmount(), false);
-					}
-					out.print(s);
-					spaces = 20 - s.length();
-					if (spaces > 0) {
-						out.print(StringUtils.repeat(' ', spaces));
-					}
-					out.print('|');
-
-					out.print(formatQuantity(itemGroup.getNetQuantity(), false));
-					out.print(" / ");
-					out.print(formatRupees(itemGroup.getNetAmount(), false));
-
-					out.println();
-
-					totalAmount += itemGroup.getNetAmount();
-				}
-
-				out.print(StringUtils.repeat(' ', 62));
-				out.print('|');
-				out.println(formatRupees(totalAmount));
-			}
-		}
-	}
-
-	protected static Date[] parseDateRange(String dateRangeStr) throws ParseException {
-		dateRangeStr = dateRangeStr.trim().toLowerCase();
-
-		Date from, to;
-		if ("today".equals(dateRangeStr)) {
-			Calendar c = Calendar.getInstance();
-			c.set(Calendar.MILLISECOND, 0);
-			c.set(Calendar.SECOND, 0);
-			c.set(Calendar.MINUTE, 0);
-			c.set(Calendar.HOUR_OF_DAY, 0);
-			from = c.getTime();
-
-			to = new Date();
-		} else {
-			String split[] = dateRangeStr.split("\\s+to\\s+");
-			from = parseDate(split[0], false);
-
-			if (split.length == 1 || "today".equals(split[1])) {
-				to = new Date();
-			} else {
-				to = parseDate(split[1], true);
-			}
-		}
-
-		return new Date[] { from, to };
-	}
-
-	private static Date parseDate(String s, boolean to) throws ParseException {
-		int colonCount = StringUtils.countMatches(s, ":");
-		if (colonCount == 0) {
-			Date date = new SimpleDateFormat("yyyy-MM-dd").parse(s);
-			if (to) {
-				Calendar c = Calendar.getInstance();
-				c.setTime(date);
-				c.add(Calendar.DATE, 1);
-				date = c.getTime();
-			}
-			return date;
-		} else if (colonCount == 1) {
-			return new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(s);
-		} else {
-			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(s);
+			cli.query(query, format);
 		}
 	}
 
@@ -658,18 +312,20 @@ public class Main {
 		MacSupport.initIfMac("EMC Shopkeeper", false, appIcon, new MacHandler() {
 			@Override
 			public void handleQuit(Object applicationEvent) {
-				frame.windowClosed(null);
+				mainFrame.windowClosed(null);
 			}
 
 			@Override
 			public void handleAbout(Object applicationEvent) {
-				AboutDialog.show(frame);
+				AboutDialog.show(mainFrame);
 			}
 		});
 
+		//show splash screen
 		final SplashFrame splash = new SplashFrame();
 		splash.setVisible(true);
 
+		//set uncaught exception handler
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread thread, Throwable thrown) {
@@ -715,17 +371,19 @@ public class Main {
 		}
 
 		//update database schema
-		ReportSender.instance().setDatabaseVersion(dao.selectDbVersion());
+		ReportSender reportSender = ReportSender.instance();
+		reportSender.setDatabaseVersion(dao.selectDbVersion());
 		dao.updateToLatestVersion(listener);
-		ReportSender.instance().setDatabaseVersion(dao.selectDbVersion());
+		reportSender.setDatabaseVersion(dao.selectDbVersion());
 
 		//tweak tooltip settings
-		ToolTipManager.sharedInstance().setInitialDelay(0);
-		ToolTipManager.sharedInstance().setDismissDelay(30000);
+		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+		toolTipManager.setInitialDelay(0);
+		toolTipManager.setDismissDelay(30000);
 
 		splash.setMessage("Loading item icons...");
-		frame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName());
-		frame.setVisible(true);
+		mainFrame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName());
+		mainFrame.setVisible(true);
 		splash.dispose();
 	}
 
@@ -771,86 +429,6 @@ public class Main {
 				}
 			}
 			FileUtils.writeStringToFile(versionFile, CACHE_VERSION);
-		}
-	}
-
-	@SuppressWarnings("serial")
-	private static class ProfileDialog extends JDialog {
-		private final JComboBox profiles;
-		private final JButton ok, quit;
-		private File selectedProfileDir = null;
-
-		public ProfileDialog() {
-			setTitle("Choose Profile");
-			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-			setResizable(false);
-			setModal(true);
-
-			//get list of existing profiles
-			Vector<String> profileNames = new Vector<String>();
-			File files[] = profileRootDir.listFiles();
-			for (File file : files) {
-				if (!file.isDirectory()) {
-					continue;
-				}
-
-				profileNames.add(file.getName());
-			}
-
-			profiles = new JComboBox(profileNames);
-			profiles.setEditable(true);
-			if (profileNames.contains(defaultProfile)) {
-				profiles.setSelectedItem(defaultProfile);
-			}
-			profiles.getEditor().addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					ok.doClick();
-				}
-			});
-
-			ok = new JButton("OK");
-			ok.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					String profile = (String) profiles.getSelectedItem();
-					if (profile.isEmpty()) {
-						JOptionPane.showMessageDialog(ProfileDialog.this, "Profile name cannot be blank.", "Error", JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-
-					File profileDir = new File(profileRootDir, profile);
-					if (!profileDir.exists() && !profileDir.mkdir()) {
-						//if it couldn't create the directory
-						JOptionPane.showMessageDialog(ProfileDialog.this, "Invalid profile name.  Please choose another.", "Error", JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-
-					selectedProfileDir = profileDir;
-					dispose();
-				}
-			});
-
-			quit = new JButton("Quit");
-			quit.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					dispose();
-				}
-			});
-
-			///////////////////////
-
-			setLayout(new MigLayout());
-
-			add(new JLabel(ImageManager.getImageIcon("header.png")), "align center, wrap");
-			add(new JLabel("<html><div width=250><center>Select a profile:</center></div>"), "align center, wrap");
-			add(profiles, "w 200, align center, wrap");
-			add(ok, "split 2, align center");
-			add(quit);
-
-			pack();
-			setLocationRelativeTo(null); //center on screen
 		}
 	}
 }

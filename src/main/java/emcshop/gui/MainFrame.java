@@ -191,7 +191,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			});
 			tools.add(showQuantitiesInStacks);
 
-			if (profile.equals("default")) {
+			if (profile.equals(Main.defaultProfileName)) {
 				final JCheckBoxMenuItem showProfilesOnStartup = new JCheckBoxMenuItem("Show Profiles On Startup", settings.isShowProfilesOnStartup());
 				showProfilesOnStartup.addActionListener(new ActionListener() {
 					@Override
@@ -371,7 +371,7 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		JPanel right = new JPanel(new MigLayout("insets 0"));
 
-		if (!profile.equals("default")) {
+		if (!profile.equals(Main.defaultProfileName)) {
 			right.add(new JLabel("Profile: " + profile), "align right, wrap");
 		}
 		right.add(new JLabel("<html><h2>Rupees:</h2></html>"), "split 2, gapright 10, align right");
