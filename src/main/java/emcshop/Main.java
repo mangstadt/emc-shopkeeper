@@ -3,11 +3,7 @@ package emcshop;
 import static emcshop.util.NumberFormatter.formatQuantity;
 import static emcshop.util.NumberFormatter.formatRupees;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.SplashScreen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -58,6 +54,7 @@ import emcshop.gui.AboutDialog;
 import emcshop.gui.ErrorDialog;
 import emcshop.gui.MainFrame;
 import emcshop.gui.ProfileImageLoader;
+import emcshop.gui.SplashFrame;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacHandler;
@@ -162,7 +159,7 @@ public class Main {
 	private static Date earliestParsedTransactionDate;
 
 	public static void main(String[] args) throws Throwable {
-		//iron out the JNLP quirks
+		//stop the random SecurityExceptions from being thrown
 		JarSignersHardLinker.go();
 
 		Arguments arguments = new Arguments(args);
@@ -655,8 +652,37 @@ public class Main {
 	}
 
 	private static void launchGui() throws SQLException, IOException {
-		final SplashScreenWrapper splash = new SplashScreenWrapper();
-		splash.setMessage("Starting database...");
+		//run Mac OS X customizations if user is on a Mac
+		//this code must run before *anything* else graphics-related
+		Image appIcon = ImageManager.getAppIcon().getImage();
+		MacSupport.initIfMac("EMC Shopkeeper", false, appIcon, new MacHandler() {
+			@Override
+			public void handleQuit(Object applicationEvent) {
+				frame.windowClosed(null);
+			}
+
+			@Override
+			public void handleAbout(Object applicationEvent) {
+				AboutDialog.show(frame);
+			}
+		});
+
+		final SplashFrame splash = new SplashFrame();
+		splash.setVisible(true);
+
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread thread, Throwable thrown) {
+				ErrorDialog.show(null, "An error occurred.", thrown);
+			}
+		});
+
+		//init the cache
+		File cacheDir = new File(profileDir, "cache");
+		initCacheDir(cacheDir);
+
+		//start the profile image loader
+		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir, settings);
 
 		DbListener listener = new DbListener() {
 			@Override
@@ -675,21 +701,8 @@ public class Main {
 			}
 		};
 
-		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-			@Override
-			public void uncaughtException(Thread thread, Throwable thrown) {
-				ErrorDialog.show(null, "An error occurred.", thrown);
-			}
-		});
-
-		//init the cache
-		File cacheDir = new File(profileDir, "cache");
-		initCacheDir(cacheDir);
-
-		//start the profile image loader
-		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir, settings);
-
 		//connect to database
+		splash.setMessage("Starting database...");
 		DbDao dao;
 		try {
 			dao = new DirbyEmbeddedDbDao(dbDir, listener);
@@ -706,29 +719,14 @@ public class Main {
 		dao.updateToLatestVersion(listener);
 		ReportSender.instance().setDatabaseVersion(dao.selectDbVersion());
 
-		splash.close();
-
-		//run Mac OS X customizations if user is on a Mac
-		//this code must run before *anything* else graphics-related
-		Image appIcon = ImageManager.getAppIcon().getImage();
-		MacSupport.initIfMac("EMC Shopkeeper", false, appIcon, new MacHandler() {
-			@Override
-			public void handleQuit(Object applicationEvent) {
-				frame.windowClosed(null);
-			}
-
-			@Override
-			public void handleAbout(Object applicationEvent) {
-				AboutDialog.show(frame);
-			}
-		});
-
 		//tweak tooltip settings
 		ToolTipManager.sharedInstance().setInitialDelay(0);
 		ToolTipManager.sharedInstance().setDismissDelay(30000);
 
+		splash.setMessage("Loading item icons...");
 		frame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName());
 		frame.setVisible(true);
+		splash.dispose();
 	}
 
 	/**
@@ -745,45 +743,6 @@ public class Main {
 			last = cur;
 		}
 		return totalMs;
-	}
-
-	private static class SplashScreenWrapper {
-		private final SplashScreen splash;
-		private final Graphics2D gfx;
-
-		public SplashScreenWrapper() {
-			splash = SplashScreen.getSplashScreen();
-			if (splash == null) {
-				logger.warning("Splash screen not configured to display.");
-				gfx = null;
-			} else {
-				gfx = splash.createGraphics();
-				if (gfx == null) {
-					logger.warning("Could not get Graphics2D object from splash screen.");
-				}
-			}
-		}
-
-		public void setMessage(String message) {
-			if (gfx == null) {
-				return;
-			}
-
-			gfx.setComposite(AlphaComposite.Clear);
-			gfx.fillRect(40, 60, 200, 40);
-			gfx.setPaintMode();
-			gfx.setColor(Color.BLACK);
-			gfx.drawString(message, 40, 80);
-			splash.update();
-		}
-
-		public void close() {
-			if (splash == null) {
-				return;
-			}
-
-			splash.close();
-		}
 	}
 
 	/**
@@ -843,7 +802,7 @@ public class Main {
 			if (profileNames.contains(defaultProfile)) {
 				profiles.setSelectedItem(defaultProfile);
 			}
-			profiles.addActionListener(new ActionListener() {
+			profiles.getEditor().addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					ok.doClick();

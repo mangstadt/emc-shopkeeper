@@ -119,9 +119,6 @@
 						<manifest>
 							<mainClass>emcshop.Main</mainClass>
 						</manifest>
-						<manifestEntries>
-							<SplashScreen-Image>emcshop/gui/images/splash.png</SplashScreen-Image>
-						</manifestEntries>
 					</archive>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
