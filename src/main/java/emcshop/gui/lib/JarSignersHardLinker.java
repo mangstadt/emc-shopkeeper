@@ -27,12 +27,6 @@ import java.util.logging.Logger;
  */
 public class JarSignersHardLinker {
 	private static final Logger logger = Logger.getLogger(JarSignersHardLinker.class.getName());
-	private static final String JRE_1_6_0 = "1.6.0_";
-
-	/**
-	 * The 1.6.0 update where this problem first occurred.
-	 */
-	private static final int PROBLEM_JRE_UPDATE = 19;
 
 	public static final List<Object> sm_hardRefs = new ArrayList<Object>();
 
@@ -109,17 +103,6 @@ public class JarSignersHardLinker {
 	}
 
 	/**
-	 * is the preloader enabled. ie: will the preloader run in the current
-	 * environment
-	 * @return
-	 */
-	private static boolean isHardLinkerEnabled() {
-		boolean isHardLinkerDisabled = false; //change this to use whatever mechanism you use to enable or disable the preloader
-
-		return !isHardLinkerDisabled && isRunningOnJre1_6_0_19OrHigher() && isRunningOnWebstart();
-	}
-
-	/**
 	 * Determines if the application is running on Web Start.
 	 * @return
 	 */
@@ -138,26 +121,23 @@ public class JarSignersHardLinker {
 	}
 
 	/**
-	 * Determines if the JRE is version 1.6.0_19 or higher.
-	 * @return true if it's 1.6.0_19 or higher, false if not
+	 * Determines if the JRE is version 1.6 or higher.
+	 * @return true if it's 1.6 or higher, false if not
 	 */
-	private static boolean isRunningOnJre1_6_0_19OrHigher() {
-		String javaVersion = System.getProperty("java.version");
-
-		if (javaVersion.startsWith(JRE_1_6_0)) {
-			//then lets figure out what update we are on
-			String updateStr = javaVersion.substring(JRE_1_6_0.length());
-
-			try {
-				return Integer.parseInt(updateStr) >= PROBLEM_JRE_UPDATE;
-			} catch (NumberFormatException e) {
-				//then unable to determine updatedate level
-				return false;
-			}
+	private static boolean isRunningOnJava6OrHigher() {
+		String version = System.getProperty("java.version");
+		String split[] = version.split("\\.");
+		if (split.length < 2) {
+			return false;
 		}
 
-		//all other cases
-		return false;
+		try {
+			int major = Integer.parseInt(split[0]);
+			int minor = Integer.parseInt(split[1]);
+			return (major > 1 || (major == 1 && minor >= 6));
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	/**
@@ -222,7 +202,7 @@ public class JarSignersHardLinker {
 	 * hardlink to the jars softly referenced signers infomation.
 	 */
 	public static void go() {
-		if (!isHardLinkerEnabled()) {
+		if (!isRunningOnJava6OrHigher() || !isRunningOnWebstart()) {
 			return;
 		}
 
