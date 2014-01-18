@@ -121,26 +121,6 @@ public class JarSignersHardLinker {
 	}
 
 	/**
-	 * Determines if the JRE is version 1.6 or higher.
-	 * @return true if it's 1.6 or higher, false if not
-	 */
-	private static boolean isRunningOnJava6OrHigher() {
-		String version = System.getProperty("java.version");
-		String split[] = version.split("\\.");
-		if (split.length < 2) {
-			return false;
-		}
-
-		try {
-			int major = Integer.parseInt(split[0]);
-			int minor = Integer.parseInt(split[1]);
-			return (major > 1 || (major == 1 && minor >= 6));
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
-	/**
 	 * Gets all the {@link JarFile} objects for all of the jars in the
 	 * classpath.
 	 * @return the {@link JarFile} objects
@@ -202,7 +182,7 @@ public class JarSignersHardLinker {
 	 * hardlink to the jars softly referenced signers infomation.
 	 */
 	public static void go() {
-		if (!isRunningOnJava6OrHigher() || !isRunningOnWebstart()) {
+		if (!isRunningOnWebstart()) {
 			return;
 		}
 
