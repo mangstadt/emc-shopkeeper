@@ -155,11 +155,11 @@ public class PlayersPanel extends JPanel {
 			};
 
 			@Override
-			public Component getListCellRendererComponent(final JList list, Object value, int index, boolean selected, boolean hasFocus) {
+			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
 				PlayerGroup playerGroup = (PlayerGroup) value;
 				Player player = playerGroup.getPlayer();
 
-				JPanel row = new JPanel(new MigLayout("insets 0"));
+				JPanel row = new JPanel(new MigLayout("insets 3"));
 
 				JLabel profileImage = new JLabel();
 				profileImage.setHorizontalAlignment(SwingConstants.CENTER);
@@ -200,11 +200,11 @@ public class PlayersPanel extends JPanel {
 				return (prevSelected != null && Arrays.equals(prevSelected, selectedIndices));
 			}
 		});
-		add(new MyJScrollPane(list), "w 400");
+		add(new MyJScrollPane(list), "w 400, growy");
 
-		tablesPanel = new JPanel(new MigLayout("fill"));
+		tablesPanel = new JPanel(new MigLayout("insets 1"));
 		tablesPanelScrollPane = new MyJScrollPane(tablesPanel);
-		add(tablesPanelScrollPane, "grow, w 100%");
+		add(tablesPanelScrollPane, "grow, w 100%, h 100%");
 
 		validate();
 	}
@@ -217,7 +217,7 @@ public class PlayersPanel extends JPanel {
 		for (PlayerGroup playerGroup : playerGroups) {
 			Player player = playerGroup.getPlayer();
 
-			JPanel header = new JPanel(new MigLayout("insets 0"));
+			JPanel header = new JPanel(new MigLayout("insets 3"));
 
 			JLabel profileImage = new JLabel();
 			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
