@@ -3,7 +3,6 @@ package emcshop.gui;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -129,7 +128,7 @@ public class PlayersPanel extends JPanel {
 		//display data
 		removeAll();
 		tables.clear();
-		DateFormat df = new SimpleDateFormat("MMMM dd yyyy, HH:mm");
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 		final int profileImageSize = 64;
 		for (PlayerGroup playerGroup : displayedPlayers) {
 			Player player = playerGroup.getPlayer();
