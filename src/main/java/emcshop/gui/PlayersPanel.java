@@ -2,8 +2,11 @@ package emcshop.gui;
 
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,16 +14,23 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.ItemsTable.Column;
+import emcshop.gui.ProfileImageLoader.ImageAssignedListener;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.FilterList;
 
@@ -31,15 +41,19 @@ import emcshop.util.FilterList;
 @SuppressWarnings("serial")
 public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
-	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
 	private final ProfileImageLoader profileImageLoader;
 	private boolean showQuantitiesInStacks;
+
+	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
 	private List<PlayerGroup> displayedPlayers;
 	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 	private List<ItemsTable> tables = new ArrayList<ItemsTable>();
 	private Sort sort;
+	private JPanel tablesPanel;
+	private MyJScrollPane tablesPanelScrollPane;
 
 	/**
 	 * Creates the panel.
@@ -128,9 +142,79 @@ public class PlayersPanel extends JPanel {
 		//display data
 		removeAll();
 		tables.clear();
-		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+
+		final JList list = new JList(new Vector<PlayerGroup>(displayedPlayers));
+		list.setCellRenderer(new ListCellRenderer() {
+			private final int profileImageSize = 32;
+			private final Color selectedBg = new Color(192, 192, 192);
+			private final ImageAssignedListener onImageDownloaded = new ImageAssignedListener() {
+				@Override
+				public void onImageAssigned(JLabel label) {
+					list.repaint();
+				}
+			};
+
+			@Override
+			public Component getListCellRendererComponent(final JList list, Object value, int index, boolean selected, boolean hasFocus) {
+				PlayerGroup playerGroup = (PlayerGroup) value;
+				Player player = playerGroup.getPlayer();
+
+				JPanel row = new JPanel(new MigLayout("insets 0"));
+
+				JLabel profileImage = new JLabel();
+				profileImage.setHorizontalAlignment(SwingConstants.CENTER);
+				profileImage.setVerticalAlignment(SwingConstants.CENTER);
+				profileImageLoader.load(player.getName(), profileImage, profileImageSize, onImageDownloaded);
+				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!");
+
+				row.add(new JLabel("<html>" + player.getName() + "<br>" + formatRupeesWithColor(calculateNetTotal(playerGroup)) + "</html>"), "wrap");
+
+				if (selected) {
+					row.setBackground(selectedBg);
+				}
+
+				return row;
+			}
+		});
+		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		list.addListSelectionListener(new ListSelectionListener() {
+			private int[] prevSelected;
+
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				int[] selectedIndices = list.getSelectedIndices();
+				if (sameSelection(selectedIndices)) {
+					return;
+				}
+
+				List<PlayerGroup> selected = new ArrayList<PlayerGroup>();
+				for (int index : selectedIndices) {
+					selected.add(displayedPlayers.get(index));
+				}
+				showTables(selected);
+
+				prevSelected = selectedIndices;
+			}
+
+			private boolean sameSelection(int[] selectedIndices) {
+				return (prevSelected != null && Arrays.equals(prevSelected, selectedIndices));
+			}
+		});
+		add(new MyJScrollPane(list), "w 400");
+
+		tablesPanel = new JPanel(new MigLayout("fill"));
+		tablesPanelScrollPane = new MyJScrollPane(tablesPanel);
+		add(tablesPanelScrollPane, "grow, w 100%");
+
+		validate();
+	}
+
+	private void showTables(List<PlayerGroup> playerGroups) {
+		tablesPanel.removeAll();
+		tables.clear();
+
 		final int profileImageSize = 64;
-		for (PlayerGroup playerGroup : displayedPlayers) {
+		for (PlayerGroup playerGroup : playerGroups) {
 			Player player = playerGroup.getPlayer();
 
 			JPanel header = new JPanel(new MigLayout("insets 0"));
@@ -138,8 +222,8 @@ public class PlayersPanel extends JPanel {
 			JLabel profileImage = new JLabel();
 			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 			profileImage.setVerticalAlignment(SwingConstants.TOP);
-			header.add(profileImage, "span 1 2, w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
 			profileImageLoader.load(player.getName(), profileImage, profileImageSize);
+			header.add(profileImage, "span 1 2, w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
 
 			JLabel playerName = new ClickableLabel("<html><h3><u>" + player.getName() + "</u></h3></html>", "http://u.emc.gs/" + player.getName());
 			header.add(playerName, "wrap");
@@ -155,7 +239,7 @@ public class PlayersPanel extends JPanel {
 			//@formatter:on
 			header.add(new JLabel(seen), "wrap");
 
-			add(header, "growx, wrap");
+			tablesPanel.add(header, "growx, wrap");
 
 			Column column = null;
 			boolean ascending = true;
@@ -175,16 +259,13 @@ public class PlayersPanel extends JPanel {
 			}
 
 			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup), column, ascending, showQuantitiesInStacks);
-			add(table.getTableHeader(), "growx, wrap");
-			add(table, "growx, wrap");
+			tablesPanel.add(table.getTableHeader(), "growx, wrap");
+			tablesPanel.add(table, "growx, wrap");
 			tables.add(table);
 
 			JLabel netAmount;
 			{
-				int amount = 0;
-				for (ItemGroup item : displayedItems.get(playerGroup)) {
-					amount += item.getNetAmount();
-				}
+				int amount = calculateNetTotal(playerGroup);
 
 				StringBuilder sb = new StringBuilder();
 				sb.append("<html><code><b>");
@@ -192,57 +273,65 @@ public class PlayersPanel extends JPanel {
 				sb.append("</b></code></html>");
 				netAmount = new JLabel(sb.toString());
 			}
-			add(netAmount, "align right, span 2, wrap");
+			tablesPanel.add(netAmount, "align right, span 2, wrap");
 		}
-		validate();
+
+		tablesPanel.validate();
+		tablesPanelScrollPane.scrollToTop();
+	}
+
+	private int calculateNetTotal(PlayerGroup playerGroup) {
+		int total = 0;
+		for (ItemGroup item : displayedItems.get(playerGroup)) {
+			total += item.getNetAmount();
+		}
+		return total;
 	}
 
 	private List<PlayerGroup> filterPlayers() {
-		List<PlayerGroup> filteredPlayers;
 		if (filteredPlayerNames.isEmpty()) {
-			filteredPlayers = new LinkedList<PlayerGroup>(playerGroups);
-		} else {
-			filteredPlayers = new LinkedList<PlayerGroup>();
-			for (PlayerGroup playerGroup : playerGroups) {
-				String playerName = playerGroup.getPlayer().getName();
-				if (filteredPlayerNames.contains(playerName)) {
-					filteredPlayers.add(playerGroup);
-				}
+			return new LinkedList<PlayerGroup>(playerGroups);
+		}
+
+		List<PlayerGroup> filteredPlayers = new LinkedList<PlayerGroup>();
+		for (PlayerGroup playerGroup : playerGroups) {
+			String playerName = playerGroup.getPlayer().getName();
+			if (filteredPlayerNames.contains(playerName)) {
+				filteredPlayers.add(playerGroup);
 			}
 		}
 		return filteredPlayers;
 	}
 
 	private Map<PlayerGroup, List<ItemGroup>> filterItems(List<PlayerGroup> filteredPlayers) {
-		Map<PlayerGroup, List<ItemGroup>> filteredItems;
 		if (filteredPlayerNames.isEmpty() && filteredItemNames.isEmpty()) {
-			filteredItems = itemGroups;
-		} else {
-			List<PlayerGroup> removePlayers = new ArrayList<PlayerGroup>();
-			filteredItems = new HashMap<PlayerGroup, List<ItemGroup>>();
-			for (PlayerGroup playerGroup : filteredPlayers) {
-				List<ItemGroup> itemGroups;
-				if (filteredItemNames.isEmpty()) {
-					itemGroups = this.itemGroups.get(playerGroup);
-					filteredItems.put(playerGroup, itemGroups);
-				} else {
-					itemGroups = new ArrayList<ItemGroup>();
-					for (ItemGroup itemGroup : this.itemGroups.get(playerGroup)) {
-						String itemName = itemGroup.getItem();
-						if (filteredItemNames.contains(itemName)) {
-							itemGroups.add(itemGroup);
-						}
-					}
-					if (itemGroups.isEmpty()) {
-						removePlayers.add(playerGroup);
-					} else {
-						filteredItems.put(playerGroup, itemGroups);
+			return itemGroups;
+		}
+
+		List<PlayerGroup> removePlayers = new ArrayList<PlayerGroup>();
+		Map<PlayerGroup, List<ItemGroup>> filteredItems = new HashMap<PlayerGroup, List<ItemGroup>>();
+		for (PlayerGroup playerGroup : filteredPlayers) {
+			List<ItemGroup> itemGroups;
+			if (filteredItemNames.isEmpty()) {
+				itemGroups = this.itemGroups.get(playerGroup);
+				filteredItems.put(playerGroup, itemGroups);
+			} else {
+				itemGroups = new ArrayList<ItemGroup>();
+				for (ItemGroup itemGroup : this.itemGroups.get(playerGroup)) {
+					String itemName = itemGroup.getItem();
+					if (filteredItemNames.contains(itemName)) {
+						itemGroups.add(itemGroup);
 					}
 				}
+				if (itemGroups.isEmpty()) {
+					removePlayers.add(playerGroup);
+				} else {
+					filteredItems.put(playerGroup, itemGroups);
+				}
 			}
-			for (PlayerGroup playerGroup : removePlayers) {
-				filteredPlayers.remove(playerGroup);
-			}
+		}
+		for (PlayerGroup playerGroup : removePlayers) {
+			filteredPlayers.remove(playerGroup);
 		}
 		return filteredItems;
 	}

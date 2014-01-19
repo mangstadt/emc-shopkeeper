@@ -74,7 +74,6 @@ public class TransactionsTab extends JPanel {
 	private MyJScrollPane itemsTableScrollPane;
 
 	private PlayersPanel playersPanel;
-	private MyJScrollPane playersPanelScrollPane;
 
 	private int netTotal;
 
@@ -182,7 +181,6 @@ public class TransactionsTab extends JPanel {
 				}
 				if (playersPanel != null) {
 					playersPanel.filterByItems(filterList);
-					playersPanelScrollPane.scrollToTop();
 				}
 
 				updateNetTotal();
@@ -200,7 +198,6 @@ public class TransactionsTab extends JPanel {
 
 				if (playersPanel != null) {
 					playersPanel.filterByPlayers(filterList);
-					playersPanelScrollPane.scrollToTop();
 				}
 
 				updateNetTotal();
@@ -299,7 +296,6 @@ public class TransactionsTab extends JPanel {
 		itemsTable = null;
 		itemsTableScrollPane = null;
 		playersPanel = null;
-		playersPanelScrollPane = null;
 		netTotal = 0;
 
 		if (settings.getPreviousUpdate() == null) {
@@ -368,7 +364,6 @@ public class TransactionsTab extends JPanel {
 		tablePanel.validate();
 
 		playersPanel = null;
-		playersPanelScrollPane = null;
 
 		exportLabel.setEnabled(true);
 		export.setEnabled(true);
@@ -460,8 +455,7 @@ public class TransactionsTab extends JPanel {
 
 					//render table
 					playersPanel = new PlayersPanel(playerGroups, profileImageLoader, settings.isShowQuantitiesInStacks());
-					playersPanelScrollPane = new MyJScrollPane(playersPanel);
-					tablePanel.add(playersPanelScrollPane, "grow, w 100%, h 100%, wrap");
+					tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
 					updateDateRangeLabel(from, to);
@@ -668,8 +662,6 @@ public class TransactionsTab extends JPanel {
 					playersPanel.sortBySuppliers();
 				}
 				currentSelection = selected;
-
-				playersPanelScrollPane.scrollToTop();
 			} finally {
 				busyCursor(owner, false);
 			}

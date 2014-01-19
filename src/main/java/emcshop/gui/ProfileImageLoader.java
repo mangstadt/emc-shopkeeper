@@ -98,9 +98,6 @@ public class ProfileImageLoader {
 		ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
 		image = ImageManager.scale(image, maxSize);
 		label.setIcon(image);
-		if (listener != null) {
-			listener.onImageAssigned(label);
-		}
 
 		//download the most up-to-date image if it hasn't been downloaded already
 		if (!downloaded.contains(playerName.toLowerCase())) {
