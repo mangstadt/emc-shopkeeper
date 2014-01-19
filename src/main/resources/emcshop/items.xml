@@ -64,6 +64,7 @@
 	<Item name="Chicken Egg" id="383:93" group="Spawn Eggs" />
 	<Item name="Chirp Disc" id="2259" stack="1" group="Discs" />
 	<Item name="Chiseled Quartz" id="155:1" group="Quartz" />
+	<Item name="Circle Stone" id="98:3" group="Stone" />
 	<Item name="Clay Ball" id="337" group="Clay" />
 	<Item name="Clay Block" id="82" group="Clay" />
 	<Item name="Clock" id="347" group="Gold" />
