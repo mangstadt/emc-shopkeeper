@@ -60,6 +60,8 @@ public class PlayersPanel extends JPanel {
 	 * @param playerGroups the players to display in the table
 	 */
 	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileImageLoader profileImageLoader, boolean showQtyInStacks) {
+		super(new MigLayout("fillx, insets 0"));
+
 		//add all the data to Lists so they can be sorted
 		this.playerGroups = new ArrayList<PlayerGroup>(playerGroups);
 		for (PlayerGroup playerGroup : playerGroups) {
@@ -70,7 +72,6 @@ public class PlayersPanel extends JPanel {
 		this.profileImageLoader = profileImageLoader;
 		showQuantitiesInStacks = showQtyInStacks;
 
-		setLayout(new MigLayout("fillx"));
 		sortByPlayerName();
 	}
 
@@ -202,7 +203,7 @@ public class PlayersPanel extends JPanel {
 		});
 		add(new MyJScrollPane(list), "w 400, growy");
 
-		tablesPanel = new JPanel(new MigLayout("insets 1"));
+		tablesPanel = new JPanel(new MigLayout("insets 1, fillx"));
 		tablesPanelScrollPane = new MyJScrollPane(tablesPanel);
 		add(tablesPanelScrollPane, "grow, w 100%, h 100%");
 
@@ -239,7 +240,7 @@ public class PlayersPanel extends JPanel {
 			//@formatter:on
 			header.add(new JLabel(seen), "wrap");
 
-			tablesPanel.add(header, "growx, wrap");
+			tablesPanel.add(header, "wrap");
 
 			Column column = null;
 			boolean ascending = true;

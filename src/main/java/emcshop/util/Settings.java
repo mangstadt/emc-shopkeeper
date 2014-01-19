@@ -128,7 +128,7 @@ public class Settings {
 
 	private void defaults() {
 		version = CURRENT_VERSION;
-		windowWidth = 900;
+		windowWidth = 1000;
 		windowHeight = 800;
 		lastUpdated = null;
 		previousUpdate = null;
@@ -149,10 +149,10 @@ public class Settings {
 		}
 
 		try {
-			windowWidth = props.getInteger("window.width", 900);
+			windowWidth = props.getInteger("window.width", 1000);
 		} catch (NumberFormatException e) {
 			logger.log(Level.WARNING, "Problem parsing window.width: ", e);
-			windowWidth = 900;
+			windowWidth = 1000;
 		}
 
 		try {
