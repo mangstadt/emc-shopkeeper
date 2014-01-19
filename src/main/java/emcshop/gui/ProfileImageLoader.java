@@ -265,7 +265,7 @@ public class ProfileImageLoader {
 
 				if (data == null) {
 					//label does not need to be updated
-					return;
+					continue;
 				}
 
 				ImageIcon image = new ImageIcon(data);
