@@ -30,7 +30,7 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 import emcshop.ItemIndex;
 import emcshop.db.DbDao;
-import emcshop.gui.ProfileImageLoader.ImageAssignedListener;
+import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ButtonColumn;
 import emcshop.scraper.PaymentTransaction;
@@ -175,9 +175,9 @@ public class PaymentsTab extends JPanel {
 						break;
 					case PLAYER:
 						label = new JLabel("<html>" + transaction.getPlayer() + "</html>"); //add player's profile image
-						profileImageLoader.load(transaction.getPlayer(), label, 16, new ImageAssignedListener() {
+						profileImageLoader.load(transaction.getPlayer(), label, 16, new ImageDownloadedListener() {
 							@Override
-							public void onImageAssigned(JLabel label) {
+							public void onImageDownloaded(JLabel label) {
 								AbstractTableModel model = (AbstractTableModel) getModel();
 								model.fireTableCellUpdated(row, col);
 							}

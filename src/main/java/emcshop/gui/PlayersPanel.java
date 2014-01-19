@@ -30,7 +30,7 @@ import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.ItemsTable.Column;
-import emcshop.gui.ProfileImageLoader.ImageAssignedListener;
+import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.FilterList;
 
@@ -147,9 +147,9 @@ public class PlayersPanel extends JPanel {
 		list.setCellRenderer(new ListCellRenderer() {
 			private final int profileImageSize = 32;
 			private final Color selectedBg = new Color(192, 192, 192);
-			private final ImageAssignedListener onImageDownloaded = new ImageAssignedListener() {
+			private final ImageDownloadedListener onImageDownloaded = new ImageDownloadedListener() {
 				@Override
-				public void onImageAssigned(JLabel label) {
+				public void onImageDownloaded(JLabel label) {
 					list.repaint();
 				}
 			};

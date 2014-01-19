@@ -85,7 +85,7 @@ public class ProfileImageLoader {
 	 * @param maxSize the size to scale the image to
 	 * @param listener invoked when the image has been assigned to the label
 	 */
-	public void load(String playerName, JLabel label, int maxSize, ImageAssignedListener listener) {
+	public void load(String playerName, JLabel label, int maxSize, ImageDownloadedListener listener) {
 		//attempt to load the image from the cache
 		byte data[] = null;
 		try {
@@ -114,24 +114,24 @@ public class ProfileImageLoader {
 	/**
 	 * Downloads the image and saves it to the cache.
 	 * @param playerName the player name
-	 * @return the image data or null the image could not be fetched (either
-	 * from the Web or from the cache)
+	 * @return the image data, null if the image hasn't changed, or null the
+	 * image could not be fetched
 	 * @throws IOException
 	 */
-	private byte[] fetchImage(String playerName) throws IOException {
+	private byte[] downloadImage(String playerName) throws IOException {
 		EmcSession session = settings.getSession();
 		DefaultHttpClient client = (session == null) ? new DefaultHttpClient() : session.createHttpClient();
 
 		//download image and save to cache
 		HttpEntity entity = null;
 		File cachedFile = getCacheFile(playerName);
+		byte[] data;
 		try {
 			//get the URL of the user's profile image
 			String imageUrl = scrapeProfileImageUrl(client, playerName);
-
-			//return the cached image if the profile image URL can't be found
 			if (imageUrl == null) {
-				return loadFromCache(playerName);
+				//no image found
+				return null;
 			}
 
 			HttpGet request = new HttpGet(imageUrl);
@@ -146,27 +146,32 @@ public class ProfileImageLoader {
 			HttpResponse response = client.execute(request);
 			if (response.getStatusLine().getStatusCode() == 304) {
 				//"not modified" response
-				return loadFromCache(cachedFile);
+				return null;
 			}
 
 			entity = response.getEntity();
-			byte data[] = EntityUtils.toByteArray(entity);
-
-			//save to cache
-			//synchronize in-case two threads download the same profile image and try to save it at the same time 
-			synchronized (this) {
-				FileUtils.writeByteArrayToFile(cachedFile, data);
-			}
-
-			return data;
-		} catch (IOException e) {
-			logger.log(Level.WARNING, "Problem downloading profile image.  Attempting to retrieve from cache.", e);
-			return loadFromCache(cachedFile);
+			data = EntityUtils.toByteArray(entity);
 		} finally {
 			if (entity != null) {
-				EntityUtils.consume(entity);
+				try {
+					EntityUtils.consume(entity);
+				} catch (IOException e) {
+					//ignore
+				}
 			}
 		}
+
+		//save to cache
+		//synchronize in-case two threads download the same profile image and try to save it at the same time 
+		synchronized (this) {
+			try {
+				FileUtils.writeByteArrayToFile(cachedFile, data);
+			} catch (IOException e) {
+				logger.log(Level.WARNING, "Problem saving image to cache.", e);
+			}
+		}
+
+		return data;
 	}
 
 	/**
@@ -209,17 +214,13 @@ public class ProfileImageLoader {
 	private String scrapeProfileImageUrl(DefaultHttpClient client, String playerName) throws IOException {
 		//load the user's profile page
 		Document profilePage;
-		HttpEntity entity = null;
+		HttpGet request = new HttpGet("http://u.emc.gs/" + playerName);
+		HttpResponse response = client.execute(request);
+		HttpEntity entity = response.getEntity();
 		try {
-			HttpGet request = new HttpGet("http://u.emc.gs/" + playerName);
-			HttpResponse response = client.execute(request);
-
-			entity = response.getEntity();
 			profilePage = Jsoup.parse(entity.getContent(), "UTF-8", "");
 		} finally {
-			if (entity != null) {
-				EntityUtils.consume(entity);
-			}
+			EntityUtils.consume(entity);
 		}
 
 		Elements elements = profilePage.select(".avatarScaler img");
@@ -253,20 +254,25 @@ public class ProfileImageLoader {
 					break;
 				}
 
+				//download the image
 				byte[] data = null;
 				try {
-					data = fetchImage(job.playerName);
+					data = downloadImage(job.playerName);
 				} catch (IOException e) {
-					//image could not be fetched, either from the Internet or from cache
+					logger.log(Level.WARNING, "Problem downloading profile image.", e);
 				}
-
 				downloaded.add(job.playerName.toLowerCase());
 
-				ImageIcon image = (data == null) ? ImageManager.getUnknown() : new ImageIcon(data);
+				if (data == null) {
+					//label does not need to be updated
+					return;
+				}
+
+				ImageIcon image = new ImageIcon(data);
 				image = ImageManager.scale(image, job.maxSize);
 				job.label.setIcon(image);
 				if (job.listener != null) {
-					job.listener.onImageAssigned(job.label);
+					job.listener.onImageDownloaded(job.label);
 				}
 			}
 		}
@@ -276,12 +282,12 @@ public class ProfileImageLoader {
 	 * Represents a queued download request for a profile image.
 	 */
 	private class Job {
-		final String playerName;
-		final JLabel label;
-		final int maxSize;
-		final ImageAssignedListener listener;
+		private final String playerName;
+		private final JLabel label;
+		private final int maxSize;
+		private final ImageDownloadedListener listener;
 
-		private Job(String playerName, JLabel label, int maxSize, ImageAssignedListener listener) {
+		private Job(String playerName, JLabel label, int maxSize, ImageDownloadedListener listener) {
 			this.playerName = playerName;
 			this.label = label;
 			this.maxSize = maxSize;
@@ -289,11 +295,11 @@ public class ProfileImageLoader {
 		}
 	}
 
-	public static interface ImageAssignedListener {
+	public static interface ImageDownloadedListener {
 		/**
-		 * Called when the image is assigned to the label.
+		 * Called when a new, downloaded image is assigned to the label.
 		 * @param label the label
 		 */
-		void onImageAssigned(JLabel label);
+		void onImageDownloaded(JLabel label);
 	}
 }
