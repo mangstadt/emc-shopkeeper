@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -140,7 +141,6 @@ public class PlayersPanel extends JPanel {
 		//sort data
 		sortData(displayedPlayers, displayedItems);
 
-		//display data
 		removeAll();
 		tables.clear();
 
@@ -148,10 +148,14 @@ public class PlayersPanel extends JPanel {
 		list.setCellRenderer(new ListCellRenderer() {
 			private final int profileImageSize = 32;
 			private final Color selectedBg = new Color(192, 192, 192);
+			private final Map<String, Icon> playerIcons = new HashMap<String, Icon>();
 			private final ImageDownloadedListener onImageDownloaded = new ImageDownloadedListener() {
 				@Override
 				public void onImageDownloaded(JLabel label) {
-					list.repaint();
+					synchronized (playerIcons) {
+						playerIcons.put(label.getName(), label.getIcon());
+						list.repaint();
+					}
 				}
 			};
 
@@ -165,7 +169,18 @@ public class PlayersPanel extends JPanel {
 				JLabel profileImage = new JLabel();
 				profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 				profileImage.setVerticalAlignment(SwingConstants.CENTER);
-				profileImageLoader.load(player.getName(), profileImage, profileImageSize, onImageDownloaded);
+
+				synchronized (playerIcons) {
+					Icon icon = playerIcons.get(player.getName());
+
+					if (icon == null) {
+						profileImage.setName(player.getName());
+						profileImageLoader.load(player.getName(), profileImage, profileImageSize, onImageDownloaded);
+					} else {
+						profileImage.setIcon(icon);
+					}
+				}
+
 				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!");
 
 				row.add(new JLabel("<html>" + player.getName() + "<br>" + formatRupeesWithColor(calculateNetTotal(playerGroup)) + "</html>"), "wrap");
