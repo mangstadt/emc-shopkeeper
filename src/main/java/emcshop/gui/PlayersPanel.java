@@ -164,7 +164,7 @@ public class PlayersPanel extends JPanel {
 				PlayerGroup playerGroup = (PlayerGroup) value;
 				Player player = playerGroup.getPlayer();
 
-				JPanel row = new JPanel(new MigLayout("insets 3"));
+				JPanel row = new JPanel(new MigLayout("insets 5"));
 
 				JLabel profileImage = new JLabel();
 				profileImage.setHorizontalAlignment(SwingConstants.CENTER);
@@ -216,7 +216,7 @@ public class PlayersPanel extends JPanel {
 				return (prevSelected != null && Arrays.equals(prevSelected, selectedIndices));
 			}
 		});
-		add(new MyJScrollPane(list), "w 400, growy");
+		add(new MyJScrollPane(list), "w 450, growy");
 
 		tablesPanel = new JPanel(new MigLayout("insets 1, fillx"));
 		tablesPanelScrollPane = new MyJScrollPane(tablesPanel);
