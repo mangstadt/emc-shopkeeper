@@ -1,5 +1,7 @@
 package emcshop.gui;
 
+import static emcshop.util.GuiUtils.toolTipText;
+
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,9 +43,10 @@ import emcshop.util.TimeUtils;
 public class UpdateDialog extends JDialog implements WindowListener {
 	private static final Logger logger = Logger.getLogger(UpdateDialog.class.getName());
 
+	private final MainFrame owner;
 	private final DbDao dao;
 
-	private JButton cancel;
+	private JButton cancel, stop;
 	private volatile boolean cancelClicked = false;
 	private JLabel shopTransactionsLabel, paymentTransactionsLabel, bonusFeeTransactionsLabel;
 	private JLabel pages;
@@ -54,11 +57,12 @@ public class UpdateDialog extends JDialog implements WindowListener {
 	private Thread pullerThread;
 
 	private long started;
-	private Date earliestParsedTransactionDate;
+	private TransactionPullerListener listener;
 
 	public UpdateDialog(final MainFrame owner, final DbDao dao, final Settings settings) throws SQLException {
 		super(owner, "Updating Transactions", true);
 
+		this.owner = owner;
 		this.dao = dao;
 
 		createWidgets();
@@ -73,7 +77,6 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		setLocationRelativeTo(owner);
 		addWindowListener(this);
 
-		final TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
 		pullerThread = new Thread() {
 			private String errorDisplayMessage;
 			private Throwable error;
@@ -81,6 +84,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 			@Override
 			public void run() {
 				try {
+					TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
 					Date latestTransactionDate = dao.getLatestTransactionDate();
 					final Integer stopAtPage;
 					final String estimatedTimeDisplay;
@@ -104,6 +108,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							estimatedTimeDisplay = null;
 						}
 					} else {
+						remove(stop); //only show the "stop" button during a first update
+
 						pullerFactory.setStopAtDate(latestTransactionDate);
 						stopAtPage = null;
 						estimatedTimeDisplay = null;
@@ -141,7 +147,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 						started = System.currentTimeMillis();
 
-						TransactionPullerListener listener = new TransactionPullerListener(stopAtPage);
+						listener = new TransactionPullerListener(stopAtPage);
 						TransactionPuller.Result result = puller.start(settings.getSession(), listener);
 
 						timerThread.interrupt();
@@ -179,8 +185,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 							break;
 						case COMPLETED:
 							try {
-								if (earliestParsedTransactionDate != null) {
-									dao.updateBonusesFeesSince(earliestParsedTransactionDate);
+								if (listener.earliestParsedTransactionDate != null) {
+									dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
 								}
 								dao.commit();
 								dispose();
@@ -214,6 +220,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 	private void createWidgets() {
 		cancel = new JButton("Cancel");
+		cancel.setToolTipText(toolTipText("Stops the update process and <b>discards</b> all transactions that were parsed."));
 		cancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -224,6 +231,39 @@ public class UpdateDialog extends JDialog implements WindowListener {
 					dao.rollback();
 				}
 				dispose();
+			}
+		});
+
+		stop = new JButton("Stop");
+		stop.setToolTipText(toolTipText("Stops the update process and <b>saves</b> all transactions that were parsed."));
+		stop.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				synchronized (puller) {
+					//synchronized so the code in the listener is not executed at the same time as this code
+					cancelClicked = true;
+					puller.cancel();
+
+					if (listener.getParsedTransactionsCount() == 0) {
+						dispose();
+						return;
+					}
+
+					try {
+						if (listener.earliestParsedTransactionDate != null) {
+							dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
+						}
+						dao.commit();
+					} catch (SQLException e) {
+						ErrorDialog.show(null, "Error committing transactions.", e);
+						dispose();
+						return;
+					}
+				}
+
+				dispose();
+				long timeTaken = System.currentTimeMillis() - started;
+				owner.updateSuccessful(new Date(started), puller.getRupeeBalance(), timeTaken, listener.shopTransactionCount, listener.paymentTransactionCount, listener.bonusFeeTransactionCount, listener.pageCount, display.isSelected());
 			}
 		});
 
@@ -260,7 +300,8 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 		add(display, "span 2, align center, wrap");
 
-		add(cancel, "span 2, align center");
+		add(cancel, "span 2, split 2, align center");
+		add(stop);
 	}
 
 	////////////////////////////////
@@ -307,6 +348,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		private int shopTransactionCount = 0, paymentTransactionCount = 0, bonusFeeTransactionCount = 0;
 		private int pageCount = 0;
 		private long previousTime = 0;
+		private Date earliestParsedTransactionDate;
 
 		public TransactionPullerListener(Integer stopAtPage) {
 			this.stopAtPage = stopAtPage;
@@ -319,6 +361,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 					return;
 				}
 
+				//keep track of the oldest transaction date
 				if (!transactions.isEmpty()) {
 					RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
 					Date lastTs = last.getTs();
@@ -367,6 +410,10 @@ public class UpdateDialog extends JDialog implements WindowListener {
 					previousTime = System.currentTimeMillis();
 				}
 			}
+		}
+
+		public int getParsedTransactionsCount() {
+			return shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount;
 		}
 	}
 }

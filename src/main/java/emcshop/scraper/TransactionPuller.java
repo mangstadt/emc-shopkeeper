@@ -37,6 +37,7 @@ public class TransactionPuller {
 	private int pageCount, transactionCount;
 	private long started;
 	private Throwable thrown = null;
+	private Integer rupeeBalance;
 	private volatile boolean cancel = false;
 
 	TransactionPuller(TransactionPullerFactory factory) {
@@ -78,7 +79,7 @@ public class TransactionPuller {
 		}
 
 		//get the rupee balance
-		Integer rupeeBalance = firstPage.getRupeeBalance();
+		rupeeBalance = firstPage.getRupeeBalance();
 
 		//get the date of the latest transaction so we know when we've reached the last transaction page
 		latestTransactionDate = firstPage.getFirstTransactionDate();
@@ -126,6 +127,14 @@ public class TransactionPuller {
 	 */
 	public boolean isCanceled() {
 		return cancel;
+	}
+
+	/**
+	 * Gets the rupee balance that was parsed from the first page.
+	 * @return the rupee balance or null if it could not be found
+	 */
+	public Integer getRupeeBalance() {
+		return rupeeBalance;
 	}
 
 	private TransactionPage getPage(int page, DefaultHttpClient client) throws IOException {
