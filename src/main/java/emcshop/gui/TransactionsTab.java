@@ -83,18 +83,7 @@ public class TransactionsTab extends JPanel {
 		this.profileImageLoader = profileImageLoader;
 		this.settings = settings;
 
-		Date earliestTransactionDate = null;
-		try {
-			earliestTransactionDate = dao.getEarliestTransactionDate();
-		} catch (SQLException e) {
-			//ignore
-		}
-
-		String text = "entire history";
-		if (earliestTransactionDate != null) {
-			text += " (since " + df.format(earliestTransactionDate) + ")";
-		}
-		entireHistory = new JCheckBox(text);
+		entireHistory = new JCheckBox();
 		entireHistory.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -283,6 +272,7 @@ public class TransactionsTab extends JPanel {
 		updateNetTotal();
 		updateCustomers();
 		updateSinceLastUpdateCheckbox();
+		updateEntireHistoryCheckbox();
 	}
 
 	public void clear() {
@@ -319,6 +309,7 @@ public class TransactionsTab extends JPanel {
 		updateNetTotal();
 		updateCustomers();
 		updateSinceLastUpdateCheckbox();
+		updateEntireHistoryCheckbox();
 
 		validate();
 	}
@@ -329,6 +320,9 @@ public class TransactionsTab extends JPanel {
 			showSinceLastUpdate.setVisible(true);
 		}
 		updateSinceLastUpdateCheckbox();
+		if (firstUpdate) {
+			updateEntireHistoryCheckbox();
+		}
 
 		if (showResults) {
 			if (showSinceLastUpdate.isVisible()) {
@@ -350,6 +344,21 @@ public class TransactionsTab extends JPanel {
 		}
 
 		showSinceLastUpdate.setText(text);
+	}
+
+	private void updateEntireHistoryCheckbox() {
+		Date earliestTransactionDate = null;
+		try {
+			earliestTransactionDate = dao.getEarliestTransactionDate();
+		} catch (SQLException e) {
+			//ignore
+		}
+
+		String text = "entire history";
+		if (earliestTransactionDate != null) {
+			text += " (since " + df.format(earliestTransactionDate) + ")";
+		}
+		entireHistory.setText(text);
 	}
 
 	private void showTransactions() {
