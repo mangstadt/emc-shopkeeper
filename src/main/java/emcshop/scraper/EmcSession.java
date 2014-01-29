@@ -5,6 +5,7 @@ import java.util.Date;
 
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.params.CoreConnectionPNames;
 
 import emcshop.util.LoginUtils;
 
@@ -50,6 +51,8 @@ public class EmcSession {
 	 */
 	public DefaultHttpClient createHttpClient() {
 		DefaultHttpClient client = new DefaultHttpClient();
+		client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 10 * 60 * 1000); //set a high timeout because old transaction pages take a while to load
+
 		BasicClientCookie sessionCookie = LoginUtils.buildSessionCookie(sessionId);
 		client.getCookieStore().addCookie(sessionCookie);
 		return client;
