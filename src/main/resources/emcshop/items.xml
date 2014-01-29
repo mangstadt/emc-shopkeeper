@@ -472,6 +472,7 @@
 	<Item name="Splash Potion of Water Breathing" id="373:16397,373:16429" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" stack="1" group="Potions" />
 	<Item name="Splash Potion of Water Breathing Ext" id="373:16461" emcNames="Potion:16461" image="potion_water_breathing_splash.png" stack="1" group="Potions" />
 	
+	<!-- Stained Glass -->
 	<Item name="Magenta Glass" id="95:2" emcNames="Magentastnglass" group="Glass" />
 	<Item name="Pink Glass" id="95:6" emcNames="Pink Stn Glass" group="Glass" />
 	<Item name="Purple Glass" id="95:10" emcNames="Purplestn Glass" group="Glass" />
@@ -489,6 +490,7 @@
 	<Item name="Light Gray Glass" id="95:8" emcNames="Ltgraystn Glass" group="Glass" />
 	<Item name="White Glass" id="95:0" emcNames="White Stn Glass" group="Glass" />
 	
+	<!-- Stained Glass Panes -->
 	<Item name="Magenta Glass Pane" id="160:2" emcNames="Magentastnpane" group="Glass" />
 	<Item name="Pink Glass Pane" id="160:6" emcNames="Pink Stn Pane" group="Glass" />
 	<Item name="Purple Glass Pane" id="160:10" emcNames="Purplestn Pane" group="Glass" />
@@ -506,4 +508,22 @@
 	<Item name="Light Gray Glass Pane" id="160:8" emcNames="Ltgraystn Pane" group="Glass" />
 	<Item name="White Glass Pane" id="160:0" emcNames="White Stn Pane" group="Glass" />
 	
+	<!-- Skin-based Mob Heads -->
+	<Item name="Blaze Head" emcNames="Head - Blaze Head" />
+	<Item name="CaveSpider Head" emcNames="Head - CaveSpider Head" />
+	<Item name="Chicken Head" emcNames="Head - Chicken Head" />
+	<Item name="Cow Head" emcNames="Head - Cow Head" />
+	<Item name="Enderman Head" emcNames="Head - Enderman Head" />
+	<Item name="Ghast Head" emcNames="Head - Ghast Head" />
+	<Item name="Golem Head" emcNames="Head - Golem Head" />
+	<Item name="LavaSlime Head" emcNames="Head - LavaSlime Head" />
+	<Item name="MushroomCow Head" emcNames="Head - MushroomCow Head" />
+	<Item name="Ocelot Head" emcNames="Head - Ocelot Head" />
+	<Item name="Pig Head" emcNames="Head - Pig Head" />
+	<Item name="PigZombie Head" emcNames="Head - PigZombie Head" />
+	<Item name="Sheep Head" emcNames="Head - Sheep Head" />
+	<Item name="Slime Head" emcNames="Head - Slime Head" />
+	<Item name="Spider Head" emcNames="Head - Spider Head" />
+	<Item name="Squid Head" emcNames="Head - Squid Head" />
+	<Item name="Villager Head" emcNames="Head - Villager Head" />
 </Items>
