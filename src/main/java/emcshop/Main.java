@@ -348,12 +348,12 @@ public class Main {
 
 			@Override
 			public void onBackup(int oldVersion, int newVersion) {
-				splash.setMessage("Preparing for database migration...");
+				splash.setMessage("Preparing for database update...");
 			}
 
 			@Override
 			public void onMigrate(int oldVersion, int newVersion) {
-				splash.setMessage("Migrating database...");
+				splash.setMessage("Updating database...");
 			}
 		};
 
