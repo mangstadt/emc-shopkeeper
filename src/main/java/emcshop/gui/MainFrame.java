@@ -293,12 +293,6 @@ public class MainFrame extends JFrame implements WindowListener {
 	}
 
 	private void createWidgets() {
-		try {
-			ItemSuggestField.init(dao);
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-
 		update = new JButton("Update Transactions", ImageManager.getUpdate());
 		update.setToolTipText(toolTipText("<font size=4><b>Update Transactions</b></font><br><br>Downloads your latest transactions from the EMC website."));
 		update.addActionListener(new ActionListener() {

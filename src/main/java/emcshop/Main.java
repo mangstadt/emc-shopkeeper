@@ -28,6 +28,7 @@ import emcshop.db.DbListener;
 import emcshop.db.DirbyEmbeddedDbDao;
 import emcshop.gui.AboutDialog;
 import emcshop.gui.ErrorDialog;
+import emcshop.gui.ItemSuggestField;
 import emcshop.gui.MainFrame;
 import emcshop.gui.ProfileDialog;
 import emcshop.gui.ProfileImageLoader;
@@ -382,7 +383,10 @@ public class Main {
 		toolTipManager.setInitialDelay(0);
 		toolTipManager.setDismissDelay(30000);
 
+		//pre-load the labels for the item suggest fields
 		splash.setMessage("Loading item icons...");
+		ItemSuggestField.init(dao);
+
 		mainFrame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName());
 		mainFrame.setVisible(true);
 		splash.dispose();
