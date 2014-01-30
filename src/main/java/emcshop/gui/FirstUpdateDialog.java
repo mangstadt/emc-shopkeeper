@@ -1,42 +1,39 @@
 package emcshop.gui;
 
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import emcshop.Main;
-import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
-public class FirstUpdateDialog extends JDialog implements WindowListener {
+public class FirstUpdateDialog extends JDialog {
 	private static final int DEFAULT_STOP_PAGE = 5000;
 	private static final int DEFAULT_PAYMENT_TRANS_AGE = 7;
 
-	private JButton beginButton, cancel;
+	private final JButton begin, cancel;
 
-	private JNumberTextField stopAt;
-	private JLabel estimate;
-	private JCheckBox stopAtCheckBox;
+	private final JNumberTextField stopAt;
+	private final JLabel estimate;
+	private final JCheckBox stopAtCheckBox;
 
-	private JNumberTextField paymentTransactionAge;
-	private JCheckBox paymentTransactionAgeCheckbox;
-	private JLabel paymentTransactionAgeLabel;
+	private final JNumberTextField paymentTransactionAge;
+	private final JCheckBox paymentTransactionAgeCheckbox;
+	private final JLabel paymentTransactionAgeLabel;
 
 	private boolean cancelled;
 
@@ -67,13 +64,12 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				cancelled = true;
-				dispose();
+				cancel();
 			}
 		});
 
-		beginButton = new JButton("Begin");
-		beginButton.addActionListener(new ActionListener() {
+		begin = new JButton("Begin");
+		begin.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				cancelled = false;
@@ -85,13 +81,12 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		cancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				cancelled = true;
-				dispose();
+				cancel();
 			}
 		});
 
 		estimate = new JLabel() {
-			String text;
+			private String text;
 
 			@Override
 			public void setText(String text) {
@@ -166,42 +161,43 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 
 		paymentTransactionAgeLabel = new JLabel("days");
 
-		JLabel warningIcon = new JLabel(ImageManager.getWarningIcon());
-
 		//@formatter:off
 		JLabel text = new JLabel(
 		"<html><div width=600>" +
-		"<b><u><center>This is the first time you are running an update!!</center></u></b><br>" +
-		"<center>To ensure accurate results, it is recommended that you <u><b>set move perms to false</b></u> on your res for the duration of this update:</center><br><br>" +
+		"<b><u><font color=red><center>This is the first time you are running an update!</center></font></u></b><br>" +
+		"<center>To ensure accurate results, it is recommended that you <u><b>set move perms to false</b></u> on your res for the duration of this update:</center><br>" +
 		"<center><b><font size=5><code>/res set move false</code></font></b></center><br>" +
-		"<center>Also note, that the higher a transaction page number is, the longer it takes to load (for example, page 2000 takes much longer to load than page 20).  The updater is configured to stop at a certain page so that this first update doesn't take too long, but you may change this value if you wish (below)." +
 		"</div></html>");
 		//@formatter:on
 
 		setLayout(new MigLayout());
 
-		add(warningIcon, "span 1 4");
 		add(text, "align center, wrap");
 
-		JPanel p = new JPanel(new MigLayout());
-		p.add(stopAtCheckBox);
-		p.add(stopAt, "w 75");
-		p.add(estimate);
-		add(p, "align center, wrap");
+		add(new JLabel("<html><b>Settings:</b></html>"), "wrap");
 
-		p = new JPanel(new MigLayout());
-		p.add(paymentTransactionAgeCheckbox);
-		p.add(paymentTransactionAge, "w 50");
-		p.add(paymentTransactionAgeLabel);
-		add(p, "align center, wrap");
+		add(new HelpLabel(null, "The higher a transaction page number is, the longer it takes for EMC to load the page.  For example, page 2000 takes much longer to load than page 20.<br><br>Therefore, it is recommended that you stop around page 5000, but you may change or disable this setting if you wish.  During the update operation, you can also click the \"Stop\" button, which will halt the update process and keep all transactions that were downloaded."), "split 4");
+		add(stopAtCheckBox);
+		add(stopAt, "w 75");
+		add(estimate, "wrap");
 
-		p = new JPanel(new FlowLayout());
-		p.add(beginButton);
-		p.add(cancel);
-		add(p, "align center");
+		add(new HelpLabel(null, "This setting causes the updater to ignore old payment transactions, since it might be hard to remember what they were for.<br><br>A payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."), "split 4");
+		add(paymentTransactionAgeCheckbox);
+		add(paymentTransactionAge, "w 50");
+		add(paymentTransactionAgeLabel, "wrap");
+
+		add(begin, "split 2, align center");
+		add(cancel);
 
 		pack();
 		setLocationRelativeTo(owner);
+
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				cancel();
+			}
+		});
 	}
 
 	private String calculateEstimateDisplay(int pages) {
@@ -209,42 +205,9 @@ public class FirstUpdateDialog extends JDialog implements WindowListener {
 		return DurationFormatUtils.formatDuration(totalMs, "HH:mm:ss", true);
 	}
 
-	////////////////////////////////////////////////
-
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowClosed(WindowEvent arg0) {
+	private void cancel() {
 		cancelled = true;
 		dispose();
-	}
-
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-		//do nothing
 	}
 
 	public static class Result {
