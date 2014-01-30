@@ -313,7 +313,7 @@ public class Main {
 		MacSupport.initIfMac("EMC Shopkeeper", false, appIcon, new MacHandler() {
 			@Override
 			public void handleQuit(Object applicationEvent) {
-				mainFrame.windowClosed(null);
+				mainFrame.exit();
 			}
 
 			@Override

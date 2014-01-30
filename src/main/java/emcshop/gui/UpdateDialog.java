@@ -5,8 +5,8 @@ import static emcshop.util.GuiUtils.toolTipText;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -40,7 +40,7 @@ import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")
-public class UpdateDialog extends JDialog implements WindowListener {
+public class UpdateDialog extends JDialog {
 	private static final Logger logger = Logger.getLogger(UpdateDialog.class.getName());
 
 	private final MainFrame owner;
@@ -75,7 +75,12 @@ public class UpdateDialog extends JDialog implements WindowListener {
 		pack();
 		setSize(getWidth() + 20, getHeight());
 		setLocationRelativeTo(owner);
-		addWindowListener(this);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowOpened(WindowEvent arg0) {
+				pullerThread.start();
+			}
+		});
 
 		pullerThread = new Thread() {
 			private String errorDisplayMessage;
@@ -302,43 +307,6 @@ public class UpdateDialog extends JDialog implements WindowListener {
 
 		add(cancel, "span 2, split 2, align center");
 		add(stop);
-	}
-
-	////////////////////////////////
-
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowClosed(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-		pullerThread.start();
 	}
 
 	private class TransactionPullerListener extends TransactionPuller.Listener {

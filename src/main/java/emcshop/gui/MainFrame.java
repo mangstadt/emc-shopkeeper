@@ -6,8 +6,8 @@ import static emcshop.util.GuiUtils.toolTipText;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -62,7 +62,7 @@ import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")
-public class MainFrame extends JFrame implements WindowListener {
+public class MainFrame extends JFrame {
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
 
 	private JButton update;
@@ -104,7 +104,12 @@ public class MainFrame extends JFrame implements WindowListener {
 
 		updatePaymentsCount();
 
-		addWindowListener(this);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				exit();
+			}
+		});
 
 		if (!JarSignersHardLinker.isRunningOnWebstart()) {
 			checkForNewVersion();
@@ -125,7 +130,7 @@ public class MainFrame extends JFrame implements WindowListener {
 			exit.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					windowClosed(null);
+					exit();
 				}
 			});
 			file.add(exit);
@@ -488,6 +493,15 @@ public class MainFrame extends JFrame implements WindowListener {
 		rupeeBalance.setText("<html><h2><b>" + balanceStr + "</b></h2></html>");
 	}
 
+	public void exit() {
+		//remember the window size
+		settings.setWindowWidth(getWidth());
+		settings.setWindowHeight(getHeight());
+		settings.save();
+
+		System.exit(0);
+	}
+
 	private void checkForNewVersion() {
 		Thread t = new Thread() {
 			@Override
@@ -570,46 +584,5 @@ public class MainFrame extends JFrame implements WindowListener {
 		t.setDaemon(true);
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
-	}
-
-	///////////////////////////////////
-
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowClosed(WindowEvent arg0) {
-		settings.setWindowWidth(getWidth());
-		settings.setWindowHeight(getHeight());
-		settings.save();
-
-		System.exit(0);
-	}
-
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-		//do nothing
 	}
 }

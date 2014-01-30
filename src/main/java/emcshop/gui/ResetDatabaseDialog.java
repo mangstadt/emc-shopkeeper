@@ -4,8 +4,8 @@ import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -21,7 +21,7 @@ import emcshop.util.GuiUtils;
  * @author Michael Angstadt
  */
 @SuppressWarnings("serial")
-public class ResetDatabaseDialog extends JDialog implements WindowListener {
+public class ResetDatabaseDialog extends JDialog {
 	private boolean result;
 
 	/**
@@ -85,45 +85,15 @@ public class ResetDatabaseDialog extends JDialog implements WindowListener {
 		p.add(cancel);
 		add(p, "align center");
 
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				result = false;
+				dispose();
+			}
+		});
+
 		pack();
 		setLocationRelativeTo(owner);
-	}
-
-	////////////////////////////////////////////////
-
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowClosed(WindowEvent arg0) {
-		result = false;
-		dispose();
-	}
-
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-		//do nothing
 	}
 }
