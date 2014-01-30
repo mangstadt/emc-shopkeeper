@@ -76,8 +76,7 @@ public class MainFrame extends JFrame implements WindowListener {
 	private InventoryTab inventoryTab;
 	private BonusFeeTab bonusFeeTab;
 	private ChartsTab graphsTab;
-
-	JMenuItem clearSession;
+	private JMenuItem clearSessionMenuItem;
 
 	private final DbDao dao;
 	private final Settings settings;
@@ -205,18 +204,18 @@ public class MainFrame extends JFrame implements WindowListener {
 
 			tools.addSeparator();
 
-			clearSession = new JMenuItem("Clear Saved Session");
-			clearSession.addActionListener(new ActionListener() {
+			clearSessionMenuItem = new JMenuItem("Clear Saved Session");
+			clearSessionMenuItem.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					settings.setSession(null);
 					settings.save();
-					clearSession.setEnabled(false);
+					clearSessionMenuItem.setEnabled(false);
 					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
 				}
 			});
-			clearSession.setEnabled(settings.getSession() != null);
-			tools.add(clearSession);
+			clearSessionMenuItem.setEnabled(settings.getSession() != null);
+			tools.add(clearSessionMenuItem);
 
 			JMenuItem resetDb = new JMenuItem("Reset database...");
 			resetDb.addActionListener(new ActionListener() {
@@ -311,7 +310,7 @@ public class MainFrame extends JFrame implements WindowListener {
 					settings.save();
 
 					if (settings.isPersistSession()) {
-						clearSession.setEnabled(true);
+						clearSessionMenuItem.setEnabled(true);
 					}
 				}
 
@@ -402,6 +401,14 @@ public class MainFrame extends JFrame implements WindowListener {
 
 	public void updateInventoryTab() {
 		inventoryTab.refresh();
+	}
+
+	/**
+	 * Enables/disables the "Clear Session" menu item.
+	 * @param enabled true to enable, false to disable
+	 */
+	public void setClearSessionMenuItemEnabled(boolean enabled) {
+		clearSessionMenuItem.setEnabled(enabled);
 	}
 
 	/**

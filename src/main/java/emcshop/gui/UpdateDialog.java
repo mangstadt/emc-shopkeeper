@@ -172,7 +172,7 @@ public class UpdateDialog extends JDialog implements WindowListener {
 								settings.save();
 
 								if (settings.isPersistSession()) {
-									owner.clearSession.setEnabled(true);
+									owner.setClearSessionMenuItemEnabled(true);
 								}
 
 								repeat = true;
