@@ -157,6 +157,7 @@
 	<Item name="Gold Nugget" id="371" group="Gold" />
 	<Item name="Gold Ore" id="14" group="Gold" />
 	<Item name="Gold Pickaxe" id="285" stack="1" group="Gold" />
+	<Item name="Gold Plate" id="147" group="Gold" />
 	<Item name="Gold Shovel" id="284" stack="1" group="Gold" />
 	<Item name="Gold Sword" id="283" stack="1" group="Gold" />
 	<Item name="Golden Apple" id="322" group="Gold" />
@@ -193,6 +194,7 @@
 	<Item name="Iron Leggings" id="308" stack="1" group="Iron" />
 	<Item name="Iron Ore" id="15" group="Iron" />
 	<Item name="Iron Pickaxe" id="257" stack="1" group="Iron" />
+	<Item name="Iron Plate" id="148" group="Iron" />
 	<Item name="Iron Shovel" id="256" stack="1" group="Iron" />
 	<Item name="Iron Sword" id="267" stack="1" group="Iron" />
 	<Item name="Item Frame" id="389" group="Leather" />
@@ -315,6 +317,7 @@
 	<Item name="Red Tulip" id="38:4" group="Flowers" />
 	<Item name="Red Wool" id="35:14" group="Wool" />
 	<Item name="Redstone Block" id="152" />
+	<Item name="Redstone Comparator" id="404" />
 	<Item name="Redstone Dust" id="331" />
 	<Item name="Redstone Lamp" id="123" />
 	<Item name="Redstone Ore" id="73" />
@@ -386,7 +389,7 @@
 	<Item name="Wooden Axe" id="271" stack="1" group="Wood" />
 	<Item name="Wooden Hoe" id="290" stack="1" group="Wood" />
 	<Item name="Wooden Pickaxe" id="270" stack="1" group="Wood" />
-	<Item name="Wooden Plate" id="72" group="Wood" />
+	<Item name="Wood Plate" id="72" group="Wood" emcNames="Wooden Plate" />
 	<Item name="Wooden Shovel" id="269" stack="1" group="Wood" />
 	<Item name="Wooden Sword" id="268" stack="1" group="Wood" />
 	<Item name="Workbench" id="58" group="Wood" />
