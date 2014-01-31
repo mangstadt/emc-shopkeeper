@@ -69,8 +69,8 @@ public class ErrorDialog extends JDialog {
 		});
 
 		setLayout(new MigLayout());
-		add(errorIcon, "span 1 3");
-		add(displayText, "w 100:100%:100%, align left, wrap");
+		add(errorIcon, "split 2");
+		add(displayText, "w 100:100%:100%, gapleft 10, wrap");
 		JScrollPane scroll = new JScrollPane(stackTrace);
 		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
