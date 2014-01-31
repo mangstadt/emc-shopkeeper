@@ -2,12 +2,8 @@ package emcshop.gui;
 
 import static emcshop.util.GuiUtils.toolTipText;
 
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -20,7 +16,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
 import net.miginfocom.swing.MigLayout;
@@ -29,13 +24,13 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
+import emcshop.scraper.BadSessionException;
 import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.EmcSession;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RupeeTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
-import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
@@ -59,173 +54,104 @@ public class UpdateDialog extends JDialog {
 	private long started;
 	private TransactionPullerListener listener;
 
-	public UpdateDialog(final MainFrame owner, final DbDao dao, final Settings settings) throws SQLException {
+	private UpdateDialog(final MainFrame owner, final DbDao dao, final Settings settings, final TransactionPuller puller, final Long estimatedTime) {
 		super(owner, "Updating Transactions", true);
-
 		this.owner = owner;
 		this.dao = dao;
-
-		createWidgets();
-		layoutWidgets();
-		setResizable(false);
+		this.puller = puller;
+		listener = new TransactionPullerListener(puller.getStopAtPage());
 
 		setUndecorated(true);
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+		setResizable(false);
+
+		boolean firstUpdate = (puller.getStopAtDate() == null);
+		createWidgets(firstUpdate);
+		layoutWidgets(firstUpdate);
 
 		pack();
 		setSize(getWidth() + 20, getHeight());
 		setLocationRelativeTo(owner);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				pullerThread.start();
-			}
-		});
 
 		pullerThread = new Thread() {
-			private String errorDisplayMessage;
-			private Throwable error;
-
 			@Override
 			public void run() {
-				try {
-					TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
-					Date latestTransactionDate = dao.getLatestTransactionDate();
-					final Integer stopAtPage;
-					final String estimatedTimeDisplay;
-					final Integer oldestPaymentTransactionDays;
-					if (latestTransactionDate == null) {
-						//it's the first update
-						FirstUpdateDialog.Result result = FirstUpdateDialog.show(UpdateDialog.this);
-						if (result.isCancelled()) {
-							return;
+				TransactionPuller.Result result = null;
+				boolean repeat;
+				do {
+					repeat = false;
+
+					Thread timerThread = new TimerThread(estimatedTime);
+					timerThread.setDaemon(true);
+					timerThread.start();
+
+					started = System.currentTimeMillis();
+
+					try {
+						result = puller.start(settings.getSession(), listener);
+					} catch (BadSessionException e) {
+						String username = null;
+						EmcSession oldSession = settings.getSession();
+						if (oldSession != null) {
+							username = oldSession.getUsername();
 						}
+						LoginDialog.Result loginResult = LoginDialog.show(UpdateDialog.this, settings.isPersistSession(), username);
+						EmcSession session = loginResult.getSession();
+						if (session != null) {
+							settings.setSession(session);
+							settings.setPersistSession(loginResult.isRememberMe());
+							settings.save();
 
-						stopAtPage = result.getStopAtPage();
-						pullerFactory.setStopAtPage(stopAtPage);
+							if (settings.isPersistSession()) {
+								owner.setClearSessionMenuItemEnabled(true);
+							}
 
-						oldestPaymentTransactionDays = result.getOldestPaymentTransactionDays();
-						pullerFactory.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
-
-						if (result.getEstimatedTime() != null) {
-							estimatedTimeDisplay = DurationFormatUtils.formatDuration(result.getEstimatedTime(), "HH:mm:ss", true);
-						} else {
-							estimatedTimeDisplay = null;
+							//restart the puller with the new session token
+							repeat = true;
 						}
-					} else {
-						remove(stop); //only show the "stop" button during a first update
+					} catch (Throwable t) {
+						//an error occurred
+						dao.rollback();
+						dispose();
+						throw new RuntimeException(t);
+					} finally {
+						timerThread.interrupt();
+					}
+				} while (repeat);
 
-						pullerFactory.setStopAtDate(latestTransactionDate);
-						stopAtPage = null;
-						estimatedTimeDisplay = null;
-						oldestPaymentTransactionDays = null;
+				//puller was canceled
+				if (result == null) {
+					if (!cancelClicked) {
+						dao.rollback();
 					}
 
-					puller = pullerFactory.newInstance();
-					boolean repeat;
-					do {
-						repeat = false;
-
-						Thread timerThread = new Thread() {
-							@Override
-							public void run() {
-								long start = System.currentTimeMillis();
-								NumberFormat nf = new DecimalFormat("00");
-								while (UpdateDialog.this.isVisible()) {
-									long components[] = TimeUtils.parseTimeComponents((System.currentTimeMillis() - start));
-									String timerText = nf.format(components[3]) + ":" + nf.format(components[2]) + ":" + nf.format(components[1]);
-									if (estimatedTimeDisplay != null) {
-										timerText += " / " + estimatedTimeDisplay;
-									}
-									timerLabel.setText(timerText);
-
-									try {
-										Thread.sleep(1000);
-									} catch (InterruptedException e) {
-										break;
-									}
-								}
-							}
-						};
-						timerThread.setDaemon(true);
-						timerThread.start();
-
-						started = System.currentTimeMillis();
-
-						listener = new TransactionPullerListener(stopAtPage);
-						TransactionPuller.Result result = puller.start(settings.getSession(), listener);
-
-						timerThread.interrupt();
-
-						switch (result.getState()) {
-						case CANCELLED:
-							if (!cancelClicked) {
-								dao.rollback();
-							}
-							break;
-						case BAD_SESSION:
-							String username = null;
-							EmcSession oldSession = settings.getSession();
-							if (oldSession != null) {
-								username = oldSession.getUsername();
-							}
-							LoginDialog.Result loginResult = LoginDialog.show(UpdateDialog.this, settings.isPersistSession(), username);
-							EmcSession session = loginResult.getSession();
-							if (session != null) {
-								settings.setSession(session);
-								settings.setPersistSession(loginResult.isRememberMe());
-								settings.save();
-
-								if (settings.isPersistSession()) {
-									owner.setClearSessionMenuItemEnabled(true);
-								}
-
-								repeat = true;
-							}
-							break;
-						case FAILED:
-							dao.rollback();
-							error = result.getThrown();
-							errorDisplayMessage = "An error occurred while downloading the transactions.";
-							break;
-						case COMPLETED:
-							try {
-								if (listener.earliestParsedTransactionDate != null) {
-									dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
-								}
-								dao.commit();
-								dispose();
-
-								owner.updateSuccessful(new Date(started), result.getRupeeBalance(), result.getTimeTaken(), listener.shopTransactionCount, listener.paymentTransactionCount, listener.bonusFeeTransactionCount, result.getPageCount(), display.isSelected());
-							} catch (SQLException e) {
-								dao.rollback();
-								error = e;
-								errorDisplayMessage = "An error occurred completing the update.";
-							}
-							break;
-						}
-					} while (repeat);
-				} catch (IOException e) {
-					error = e;
-					errorDisplayMessage = "An error occurred starting the transaction update.";
-				} catch (SQLException e) {
-					error = e;
-					errorDisplayMessage = "An error occurred connecting to the database.";
-				} finally {
 					dispose();
+					return;
 				}
 
-				if (error != null) {
-					ErrorDialog.show(null, errorDisplayMessage, error);
+				try {
+					if (listener.earliestParsedTransactionDate != null) {
+						dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
+					}
+					dao.commit();
+					dispose();
+
+					owner.updateSuccessful(new Date(started), result.getRupeeBalance(), result.getTimeTaken(), listener.shopTransactionCount, listener.paymentTransactionCount, listener.bonusFeeTransactionCount, result.getPageCount(), display.isSelected());
+				} catch (SQLException e) {
+					dao.rollback();
+					throw new RuntimeException(e);
 				}
 			}
 		};
 		pullerThread.setDaemon(true);
+		pullerThread.start();
 	}
 
-	private void createWidgets() {
+	private void createWidgets(boolean firstUpdate) {
 		cancel = new JButton("Cancel");
-		cancel.setToolTipText(toolTipText("Stops the update process and <b>discards</b> all transactions that were parsed."));
+		if (firstUpdate) {
+			cancel.setToolTipText(toolTipText("Stops the update process and <b>discards</b> all transactions that were parsed."));
+		}
 		cancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -239,38 +165,40 @@ public class UpdateDialog extends JDialog {
 			}
 		});
 
-		stop = new JButton("Stop");
-		stop.setToolTipText(toolTipText("Stops the update process and <b>saves</b> all transactions that were parsed."));
-		stop.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				synchronized (puller) {
-					//synchronized so the code in the listener is not executed at the same time as this code
-					cancelClicked = true;
-					puller.cancel();
+		if (firstUpdate) {
+			stop = new JButton("Stop");
+			stop.setToolTipText(toolTipText("Stops the update process and <b>saves</b> all transactions that were parsed."));
+			stop.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					synchronized (puller) {
+						//synchronized so the code in the listener is not executed at the same time as this code
+						cancelClicked = true;
+						puller.cancel();
 
-					if (listener.getParsedTransactionsCount() == 0) {
-						dispose();
-						return;
-					}
-
-					try {
-						if (listener.earliestParsedTransactionDate != null) {
-							dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
+						if (listener.getParsedTransactionsCount() == 0) {
+							dispose();
+							return;
 						}
-						dao.commit();
-					} catch (SQLException e) {
-						ErrorDialog.show(null, "Error committing transactions.", e);
-						dispose();
-						return;
-					}
-				}
 
-				dispose();
-				long timeTaken = System.currentTimeMillis() - started;
-				owner.updateSuccessful(new Date(started), puller.getRupeeBalance(), timeTaken, listener.shopTransactionCount, listener.paymentTransactionCount, listener.bonusFeeTransactionCount, listener.pageCount, display.isSelected());
-			}
-		});
+						try {
+							if (listener.earliestParsedTransactionDate != null) {
+								dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
+							}
+							dao.commit();
+						} catch (SQLException e) {
+							ErrorDialog.show(null, "Error committing transactions.", e);
+							dispose();
+							return;
+						}
+					}
+
+					dispose();
+					long timeTaken = System.currentTimeMillis() - started;
+					owner.updateSuccessful(new Date(started), puller.getRupeeBalance(), timeTaken, listener.shopTransactionCount, listener.paymentTransactionCount, listener.bonusFeeTransactionCount, listener.pageCount, display.isSelected());
+				}
+			});
+		}
 
 		pages = new JLabel("0");
 		shopTransactionsLabel = new JLabel("0");
@@ -281,13 +209,11 @@ public class UpdateDialog extends JDialog {
 		display.setSelected(true);
 	}
 
-	private void layoutWidgets() {
+	private void layoutWidgets(boolean firstUpdate) {
 		setLayout(new MigLayout());
 
-		JPanel p = new JPanel(new FlowLayout());
-		p.add(new JLabel(ImageManager.getLoading()));
-		p.add(new JLabel("<html><b>Updating...</b></html>"));
-		add(p, "span 2, align center, wrap");
+		add(new JLabel(ImageManager.getLoading()), "span 2, split 2, align center");
+		add(new JLabel("<html><b>Updating...</b></html>"), "wrap");
 
 		add(new JLabel("Pages:"));
 		add(pages, "wrap");
@@ -305,8 +231,12 @@ public class UpdateDialog extends JDialog {
 
 		add(display, "span 2, align center, wrap");
 
-		add(cancel, "span 2, split 2, align center");
-		add(stop);
+		if (firstUpdate) {
+			add(cancel, "span 2, split 2, align center");
+			add(stop);
+		} else {
+			add(cancel, "span 2, align center");
+		}
 	}
 
 	private class TransactionPullerListener extends TransactionPuller.Listener {
@@ -383,5 +313,39 @@ public class UpdateDialog extends JDialog {
 		public int getParsedTransactionsCount() {
 			return shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount;
 		}
+	}
+
+	private class TimerThread extends Thread {
+		private final String estimatedTimeDisplay;
+
+		public TimerThread(Long estimatedTime) {
+			estimatedTimeDisplay = (estimatedTime == null) ? null : DurationFormatUtils.formatDuration(estimatedTime, "HH:mm:ss", true);
+		}
+
+		@Override
+		public void run() {
+			long start = System.currentTimeMillis();
+			NumberFormat nf = new DecimalFormat("00");
+			while (isVisible()) {
+				long elapsed = System.currentTimeMillis() - start;
+				long components[] = TimeUtils.parseTimeComponents(elapsed);
+				String timerText = nf.format(components[3]) + ":" + nf.format(components[2]) + ":" + nf.format(components[1]);
+				if (estimatedTimeDisplay != null) {
+					timerText += " / " + estimatedTimeDisplay;
+				}
+				timerLabel.setText(timerText);
+
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+		}
+	}
+
+	public static void show(MainFrame owner, DbDao dao, Settings settings, TransactionPuller puller, Long estimatedTime) {
+		UpdateDialog dialog = new UpdateDialog(owner, dao, settings, puller, estimatedTime);
+		dialog.setVisible(true);
 	}
 }

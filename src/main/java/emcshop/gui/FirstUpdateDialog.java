@@ -1,5 +1,6 @@
 package emcshop.gui;
 
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -37,9 +38,13 @@ public class FirstUpdateDialog extends JDialog {
 
 	private boolean cancelled;
 
-	public static Result show(JDialog owner) {
+	public static Result show(Window owner) {
 		FirstUpdateDialog dialog = new FirstUpdateDialog(owner);
 		dialog.setVisible(true);
+
+		if (dialog.cancelled) {
+			return null;
+		}
 
 		Integer stopAtPage = null;
 		Long estimatedTime = null;
@@ -55,11 +60,11 @@ public class FirstUpdateDialog extends JDialog {
 			oldestPaymentTransactionDays = dialog.paymentTransactionAge.getInteger();
 		}
 
-		return new Result(dialog.cancelled, stopAtPage, estimatedTime, oldestPaymentTransactionDays);
+		return new Result(stopAtPage, estimatedTime, oldestPaymentTransactionDays);
 	}
 
-	public FirstUpdateDialog(JDialog owner) {
-		super(owner, "First Update", true);
+	public FirstUpdateDialog(Window owner) {
+		super(owner, "First Update", ModalityType.APPLICATION_MODAL);
 		setResizable(false);
 		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
 			@Override
@@ -211,20 +216,14 @@ public class FirstUpdateDialog extends JDialog {
 	}
 
 	public static class Result {
-		private final boolean cancelled;
 		private final Integer stopAtPage;
 		private final Long estimatedTime;
 		private final Integer oldestPaymentTransactionDays;
 
-		public Result(boolean cancelled, Integer stopAtPage, Long estimatedTime, Integer oldestPaymentTransactionDays) {
-			this.cancelled = cancelled;
+		public Result(Integer stopAtPage, Long estimatedTime, Integer oldestPaymentTransactionDays) {
 			this.stopAtPage = stopAtPage;
 			this.estimatedTime = estimatedTime;
 			this.oldestPaymentTransactionDays = oldestPaymentTransactionDays;
-		}
-
-		public boolean isCancelled() {
-			return cancelled;
 		}
 
 		public Integer getStopAtPage() {

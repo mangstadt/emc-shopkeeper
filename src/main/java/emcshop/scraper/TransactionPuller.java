@@ -48,34 +48,60 @@ public class TransactionPuller {
 		threadCount = factory.getThreadCount();
 	}
 
+	public Date getStopAtDate() {
+		return stopAtDate;
+	}
+
+	public Integer getStopAtPage() {
+		return stopAtPage;
+	}
+
+	public int getStartAtPage() {
+		return startAtPage;
+	}
+
+	public Integer getMaxPaymentTransactionAge() {
+		return maxPaymentTransactionAge;
+	}
+
+	public int getThreadCount() {
+		return threadCount;
+	}
+
 	/**
 	 * Starts the download.
 	 * @param session the login session
 	 * @param listener for handling events
+	 * @return statistics on the download operation or null if the puller was
+	 * canceled
 	 * @throws IOException if there's a network error
+	 * @throws BadSessionException if the given session is invalid
+	 * @throws Throwable if the listener encounters an error handling a
+	 * transaction
 	 */
-	public Result start(EmcSession session, Listener listener) throws IOException {
+	public Result start(EmcSession session, Listener listener) throws IOException, BadSessionException, Throwable {
 		//reset variables in case user calls start() more than once
 		thrown = null;
 		cancel = false;
 		pageCount = transactionCount = 0;
 		curPage = new AtomicInteger(startAtPage);
 		started = System.currentTimeMillis();
+		rupeeBalance = null;
+		latestTransactionDate = null;
+		oldestPaymentTransactionDate = null;
+
+		TransactionPage firstPage = getPage(1, session.createHttpClient());
+
+		//is the user logged in?
+		if (!firstPage.isLoggedIn()) {
+			throw new BadSessionException();
+		}
 
 		//calculate how old a payment transaction can be before it is ignored
 		if (maxPaymentTransactionAge != null) {
 			Calendar c = Calendar.getInstance();
 			c.add(Calendar.DATE, -maxPaymentTransactionAge);
 			oldestPaymentTransactionDate = c.getTime();
-		} else {
-			oldestPaymentTransactionDate = null;
-		}
-
-		TransactionPage firstPage = getPage(1, session.createHttpClient());
-
-		//is the user logged in?
-		if (!firstPage.isLoggedIn()) {
-			return Result.badSession();
 		}
 
 		//get the rupee balance
@@ -103,15 +129,15 @@ public class TransactionPuller {
 		}
 
 		if (thrown != null) {
-			return Result.failed(thrown);
+			throw thrown;
 		}
 
 		if (cancel) {
-			return Result.cancelled();
+			return null;
 		}
 
 		long timeTaken = System.currentTimeMillis() - started;
-		return Result.completed(rupeeBalance, pageCount, transactionCount, timeTaken);
+		return new Result(pageCount, transactionCount, timeTaken, rupeeBalance);
 	}
 
 	/**
@@ -279,26 +305,19 @@ public class TransactionPuller {
 	}
 
 	/**
-	 * Represents the result of a transaction download operation.
+	 * Represents the result of a successful download operation.
 	 */
 	public static class Result {
-		private final State state;
-		private Throwable thrown;
-		private int pageCount;
-		private int transactionCount;
-		private long timeTaken;
-		private Integer rupeeBalance;
+		private final int pageCount;
+		private final int transactionCount;
+		private final long timeTaken;
+		private final Integer rupeeBalance;
 
-		private Result(State state) {
-			this.state = state;
-		}
-
-		public State getState() {
-			return state;
-		}
-
-		public Throwable getThrown() {
-			return thrown;
+		public Result(int pageCount, int transactionCount, long timeTaken, Integer rupeeBalance) {
+			this.rupeeBalance = rupeeBalance;
+			this.pageCount = pageCount;
+			this.transactionCount = transactionCount;
+			this.timeTaken = timeTaken;
 		}
 
 		public int getPageCount() {
@@ -316,32 +335,5 @@ public class TransactionPuller {
 		public Integer getRupeeBalance() {
 			return rupeeBalance;
 		}
-
-		public static Result cancelled() {
-			return new Result(State.CANCELLED);
-		}
-
-		public static Result badSession() {
-			return new Result(State.BAD_SESSION);
-		}
-
-		public static Result failed(Throwable thrown) {
-			Result result = new Result(State.FAILED);
-			result.thrown = thrown;
-			return result;
-		}
-
-		public static Result completed(Integer rupeeBalance, int pageCount, int transactionCount, long timeTaken) {
-			Result result = new Result(State.COMPLETED);
-			result.rupeeBalance = rupeeBalance;
-			result.pageCount = pageCount;
-			result.transactionCount = transactionCount;
-			result.timeTaken = timeTaken;
-			return result;
-		}
-	}
-
-	public static enum State {
-		CANCELLED, BAD_SESSION, FAILED, COMPLETED
 	}
 }

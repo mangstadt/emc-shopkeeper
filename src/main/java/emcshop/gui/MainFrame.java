@@ -56,6 +56,8 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
 import emcshop.scraper.EmcSession;
+import emcshop.scraper.TransactionPuller;
+import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
@@ -319,12 +321,38 @@ public class MainFrame extends JFrame {
 					}
 				}
 
+				Date latestTransactionDate;
 				try {
-					UpdateDialog w = new UpdateDialog(MainFrame.this, dao, settings);
-					w.setVisible(true);
+					latestTransactionDate = dao.getLatestTransactionDate();
 				} catch (SQLException e) {
-					ErrorDialog.show(MainFrame.this, "An error occurred connecting to the database.", e);
+					throw new RuntimeException(e);
 				}
+
+				TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
+				Long estimatedTime;
+				if (latestTransactionDate == null) {
+					//it's the first update
+
+					FirstUpdateDialog.Result result = FirstUpdateDialog.show(MainFrame.this);
+					if (result == null) {
+						//user canceled the dialog
+						return;
+					}
+
+					Integer stopAtPage = result.getStopAtPage();
+					pullerFactory.setStopAtPage(stopAtPage);
+
+					Integer oldestPaymentTransactionDays = result.getOldestPaymentTransactionDays();
+					pullerFactory.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
+
+					estimatedTime = result.getEstimatedTime();
+				} else {
+					pullerFactory.setStopAtDate(latestTransactionDate);
+					estimatedTime = null;
+				}
+
+				TransactionPuller puller = pullerFactory.newInstance();
+				UpdateDialog.show(MainFrame.this, dao, settings, puller, estimatedTime);
 			}
 		});
 
