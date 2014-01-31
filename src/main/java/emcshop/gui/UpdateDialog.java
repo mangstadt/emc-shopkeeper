@@ -2,9 +2,12 @@ package emcshop.gui;
 
 import static emcshop.util.GuiUtils.toolTipText;
 
+import java.awt.Font;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
@@ -16,12 +19,17 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import emcshop.ReportSender;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.BadSessionException;
@@ -31,6 +39,7 @@ import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RupeeTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
+import emcshop.util.GuiUtils;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
@@ -111,9 +120,31 @@ public class UpdateDialog extends JDialog {
 						}
 					} catch (Throwable t) {
 						//an error occurred
-						dao.rollback();
 						dispose();
-						throw new RuntimeException(t);
+
+						if (listener.getParsedTransactionsCount() == 0) {
+							dao.rollback();
+							throw new RuntimeException(t);
+						}
+
+						long timeTaken = System.currentTimeMillis() - started;
+						boolean saveTransactions = UpdateErrorDialog.show(owner, listener.pageCount, listener.getParsedTransactionsCount(), listener.earliestParsedTransactionDate, t);
+						if (saveTransactions) {
+							try {
+								if (listener.earliestParsedTransactionDate != null) {
+									dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
+								}
+								dao.commit();
+
+								owner.updateSuccessful(new Date(started), puller.getRupeeBalance(), timeTaken, listener.shopTransactionCount, listener.paymentTransactionCount, listener.bonusFeeTransactionCount, listener.pageCount, display.isSelected());
+							} catch (SQLException e) {
+								dao.rollback();
+								throw new RuntimeException(e);
+							}
+						} else {
+							dao.rollback();
+						}
+						return;
 					} finally {
 						timerThread.interrupt();
 					}
@@ -187,9 +218,9 @@ public class UpdateDialog extends JDialog {
 							}
 							dao.commit();
 						} catch (SQLException e) {
-							ErrorDialog.show(null, "Error committing transactions.", e);
+							dao.rollback();
 							dispose();
-							return;
+							throw new RuntimeException(e);
 						}
 					}
 
@@ -347,5 +378,91 @@ public class UpdateDialog extends JDialog {
 	public static void show(MainFrame owner, DbDao dao, Settings settings, TransactionPuller puller, Long estimatedTime) {
 		UpdateDialog dialog = new UpdateDialog(owner, dao, settings, puller, estimatedTime);
 		dialog.setVisible(true);
+	}
+
+	private static class UpdateErrorDialog extends JDialog {
+		private boolean saveTransactions = false;
+
+		private UpdateErrorDialog(Window owner, int pages, int transactions, Date oldestTransaction, final Throwable thrown) {
+			super(owner, "Error", ModalityType.DOCUMENT_MODAL);
+			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			GuiUtils.closeOnEscapeKeyPress(this);
+
+			JTextArea displayText = new JTextArea("An unexpected error occurred while downloading your transactions.");
+			displayText.setEditable(false);
+			displayText.setBackground(getBackground());
+			displayText.setLineWrap(true);
+			displayText.setWrapStyleWord(true);
+
+			JLabel errorIcon = new JLabel(ImageManager.getErrorIcon());
+
+			JTextArea stackTrace = new JTextArea(ExceptionUtils.getStackTrace(thrown));
+			stackTrace.setEditable(false);
+			stackTrace.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+			final JButton report = new JButton("Report Error");
+			report.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					ReportSender.instance().report(thrown);
+					report.setEnabled(false);
+					report.setText("Reported");
+					JOptionPane.showMessageDialog(UpdateErrorDialog.this, "Error report sent.  Thanks!");
+				}
+			});
+
+			JButton save = new JButton("Save Transactions");
+			save.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					saveTransactions = true;
+					dispose();
+				}
+			});
+
+			JButton discard = new JButton("Discard transactions");
+			discard.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					dispose();
+				}
+			});
+
+			setLayout(new MigLayout());
+			add(errorIcon, "split 2");
+			add(displayText, "w 100:100%:100%, gapleft 10, wrap");
+			JScrollPane scroll = new JScrollPane(stackTrace);
+			scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+			add(scroll, "grow, w 100%, h 100%, align center, wrap");
+			add(report, "align right, wrap");
+
+			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+			//@formatter:off
+			add(new JLabel(
+			"<html>" +
+				"<b>Do you want to save the transactions that have been parsed or try starting over from scratch?</b><br><br>" +
+				"<table border=0>" +
+					"<tr><td>Date of oldest transaction:</td><td>" + df.format(oldestTransaction) + "</td></tr>" +
+					"<tr><td>Total transactions parsed:</td><td>" + transactions + "</td></tr>" +
+					"<tr><td>Total pages parsed:</td><td>" + pages + "</td></tr>" +
+				"</table>" +
+			"</html>"), "align center, wrap");
+			//@formatter:on
+
+			add(save, "align center, split 2");
+			add(discard);
+
+			setSize(500, 500);
+			setLocationRelativeTo(owner);
+		}
+
+		public static boolean show(Window owner, int pages, int transactions, Date oldestTransaction, Throwable thrown) {
+			logger.log(Level.SEVERE, "Error downloading transactions.", thrown);
+
+			UpdateErrorDialog dialog = new UpdateErrorDialog(owner, pages, transactions, oldestTransaction, thrown);
+			dialog.setVisible(true);
+			return dialog.saveTransactions;
+		}
 	}
 }
