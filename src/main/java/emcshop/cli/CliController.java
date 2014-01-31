@@ -23,6 +23,7 @@ import emcshop.Main;
 import emcshop.QueryExporter;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
+import emcshop.scraper.BadSessionException;
 import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.EmcSession;
 import emcshop.scraper.PaymentTransaction;
@@ -95,9 +96,14 @@ public class CliController {
 			pullerFactory.setStopAtDate(latestTransactionDateFromDb);
 		}
 
+		TransactionPuller puller = pullerFactory.newInstance();
 		EmcSession session = settings.getSession();
 		String sessionUsername = (session == null) ? null : session.getUsername();
+		TransactionPullerListener listener = new TransactionPullerListener();
+
 		boolean repeat;
+		Date started;
+		TransactionPuller.Result result = null;
 		do {
 			repeat = false;
 			if (session == null) {
@@ -124,39 +130,37 @@ public class CliController {
 				settings.save();
 			}
 
-			TransactionPuller puller = pullerFactory.newInstance();
-			Date started = new Date();
-			TransactionPullerListener listener = new TransactionPullerListener();
-			TransactionPuller.Result result = puller.start(session, listener);
-
-			switch (result.getState()) {
-			case CANCELLED:
-				dao.rollback();
-				break;
-			case BAD_SESSION:
+			started = new Date();
+			try {
+				result = puller.start(session, listener);
+			} catch (BadSessionException e) {
 				out.println("Your login session has expired.");
 				session = null;
 				repeat = true;
-				break;
-			case FAILED:
+			} catch (Throwable t) {
 				dao.rollback();
-				throw result.getThrown();
-			case COMPLETED:
-				if (listener.earliestParsedTransactionDate != null) {
-					dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
-				}
-				dao.commit();
-
-				settings.setPreviousUpdate(settings.getLastUpdated());
-				settings.setLastUpdated(started);
-				settings.setRupeeBalance(result.getRupeeBalance());
-				settings.save();
-
-				out.println("\n" + result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
-				logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
-				break;
+				throw t;
 			}
 		} while (repeat);
+
+		if (result == null) {
+			//puller was cancelled
+			dao.rollback();
+			return;
+		}
+
+		if (listener.earliestParsedTransactionDate != null) {
+			dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
+		}
+		dao.commit();
+
+		settings.setPreviousUpdate(settings.getLastUpdated());
+		settings.setLastUpdated(started);
+		settings.setRupeeBalance(result.getRupeeBalance());
+		settings.save();
+
+		out.println("\n" + result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
+		logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
 	}
 
 	public void query(String query, String format) throws Throwable {
