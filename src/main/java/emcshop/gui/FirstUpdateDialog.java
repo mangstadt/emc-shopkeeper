@@ -199,7 +199,7 @@ public class FirstUpdateDialog extends JDialog {
 
 		addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowClosed(WindowEvent arg0) {
+			public void windowClosing(WindowEvent arg0) {
 				cancel();
 			}
 		});
