@@ -365,8 +365,8 @@ public class Main {
 			dao = new DirbyEmbeddedDbDao(dbDir, listener);
 		} catch (SQLException e) {
 			if ("XJ040".equals(e.getSQLState())) {
-				JOptionPane.showMessageDialog(null, "EMC Shopkeeper is already running.", "Already running", JOptionPane.ERROR_MESSAGE);
 				splash.dispose();
+				JOptionPane.showMessageDialog(null, "EMC Shopkeeper is already running.", "Already running", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			throw e;
