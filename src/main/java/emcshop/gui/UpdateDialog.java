@@ -74,7 +74,7 @@ public class UpdateDialog extends JDialog {
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 		setResizable(false);
 
-		boolean firstUpdate = (puller.getStopAtDate() == null);
+		final boolean firstUpdate = (puller.getStopAtDate() == null);
 		createWidgets(firstUpdate);
 		layoutWidgets(firstUpdate);
 
@@ -122,7 +122,7 @@ public class UpdateDialog extends JDialog {
 						//an error occurred
 						dispose();
 
-						if (listener.getParsedTransactionsCount() == 0) {
+						if (!firstUpdate || listener.getParsedTransactionsCount() == 0) {
 							dao.rollback();
 							throw new RuntimeException(t);
 						}
