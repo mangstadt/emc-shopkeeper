@@ -49,24 +49,26 @@ public class UpdateDialog extends JDialog {
 
 	private final MainFrame owner;
 	private final DbDao dao;
+	private final Settings settings;
+	private final TransactionPuller puller;
 
 	private JButton cancel, stop;
-	private volatile boolean cancelClicked = false;
+	private volatile boolean updateCanceled = true;
 	private JLabel shopTransactionsLabel, paymentTransactionsLabel, bonusFeeTransactionsLabel;
 	private JLabel pages;
 	private JLabel timerLabel;
 	private JCheckBox display;
 
-	private TransactionPuller puller;
 	private Thread pullerThread;
 
-	private long started;
+	private long started, timeTaken;
 	private TransactionPullerListener listener;
 
 	private UpdateDialog(final MainFrame owner, final DbDao dao, final Settings settings, final TransactionPuller puller, final Long estimatedTime) {
 		super(owner, "Updating Transactions", true);
 		this.owner = owner;
 		this.dao = dao;
+		this.settings = settings;
 		this.puller = puller;
 		listener = new TransactionPullerListener(puller.getStopAtPage());
 
@@ -85,7 +87,6 @@ public class UpdateDialog extends JDialog {
 		pullerThread = new Thread() {
 			@Override
 			public void run() {
-				TransactionPuller.Result result = null;
 				boolean repeat;
 				do {
 					repeat = false;
@@ -97,85 +98,85 @@ public class UpdateDialog extends JDialog {
 					started = System.currentTimeMillis();
 
 					try {
-						result = puller.start(settings.getSession(), listener);
+						TransactionPuller.Result result = puller.start(settings.getSession(), listener);
+
+						if (result != null) {
+							//update completed successfully
+							timeTaken = System.currentTimeMillis() - started;
+							completeUpdate();
+						}
 					} catch (BadSessionException e) {
-						String username = null;
-						EmcSession oldSession = settings.getSession();
-						if (oldSession != null) {
-							username = oldSession.getUsername();
-						}
-						LoginDialog.Result loginResult = LoginDialog.show(UpdateDialog.this, settings.isPersistSession(), username);
-						EmcSession session = loginResult.getSession();
-						if (session != null) {
-							settings.setSession(session);
-							settings.setPersistSession(loginResult.isRememberMe());
-							settings.save();
-
-							if (settings.isPersistSession()) {
-								owner.setClearSessionMenuItemEnabled(true);
-							}
-
-							//restart the puller with the new session token
-							repeat = true;
-						}
+						//session token is invalid
+						repeat = getNewSession();
 					} catch (Throwable t) {
-						//an error occurred
-						dispose();
+						//an error occurred during the update
+						timeTaken = System.currentTimeMillis() - started;
 
 						if (!firstUpdate || listener.getParsedTransactionsCount() == 0) {
 							dao.rollback();
+							dispose();
 							throw new RuntimeException(t);
 						}
 
-						long timeTaken = System.currentTimeMillis() - started;
-						boolean saveTransactions = UpdateErrorDialog.show(owner, listener.pageCount, listener.getParsedTransactionsCount(), listener.earliestParsedTransactionDate, t);
+						timerThread.interrupt();
+						boolean saveTransactions = UpdateErrorDialog.show(UpdateDialog.this, listener.pageCount, listener.getParsedTransactionsCount(), listener.earliestParsedTransactionDate, t);
 						if (saveTransactions) {
-							try {
-								if (listener.earliestParsedTransactionDate != null) {
-									dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
-								}
-								dao.commit();
-
-								owner.updateSuccessful(new Date(started), puller.getRupeeBalance(), timeTaken, listener.shopTransactionCount, listener.paymentTransactionCount, listener.bonusFeeTransactionCount, listener.pageCount, display.isSelected());
-							} catch (SQLException e) {
-								dao.rollback();
-								throw new RuntimeException(e);
-							}
+							completeUpdate();
 						} else {
 							dao.rollback();
+							dispose();
 						}
-						return;
 					} finally {
 						timerThread.interrupt();
 					}
 				} while (repeat);
 
-				//puller was canceled
-				if (result == null) {
-					if (!cancelClicked) {
-						dao.rollback();
-					}
-
-					dispose();
-					return;
-				}
-
-				try {
-					if (listener.earliestParsedTransactionDate != null) {
-						dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
-					}
-					dao.commit();
-					dispose();
-
-					owner.updateSuccessful(new Date(started), result.getRupeeBalance(), result.getTimeTaken(), listener.shopTransactionCount, listener.paymentTransactionCount, listener.bonusFeeTransactionCount, result.getPageCount(), display.isSelected());
-				} catch (SQLException e) {
-					dao.rollback();
-					throw new RuntimeException(e);
-				}
+				dispose();
 			}
 		};
 		pullerThread.setDaemon(true);
 		pullerThread.start();
+	}
+
+	/**
+	 * Gets a new session token.
+	 * @return true if a new session token was acquired, false if not
+	 */
+	private boolean getNewSession() {
+		EmcSession oldSession = settings.getSession();
+		String username = (oldSession == null) ? null : oldSession.getUsername();
+
+		LoginDialog.Result loginResult = LoginDialog.show(this, settings.isPersistSession(), username);
+		EmcSession session = loginResult.getSession();
+		if (session == null) {
+			//user canceled the login dialog, so cancel the update operation
+			return false;
+		}
+
+		settings.setSession(session);
+		settings.setPersistSession(loginResult.isRememberMe());
+		settings.save();
+		if (settings.isPersistSession()) {
+			owner.setClearSessionMenuItemEnabled(true);
+		}
+
+		//restart the puller with the new session token
+		return true;
+	}
+
+	private void completeUpdate() {
+		try {
+			if (listener.earliestParsedTransactionDate != null) {
+				dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
+			}
+			dao.commit();
+			updateCanceled = false;
+		} catch (SQLException e) {
+			dao.rollback();
+			throw new RuntimeException(e);
+		} finally {
+			dispose();
+		}
 	}
 
 	private void createWidgets(boolean firstUpdate) {
@@ -188,7 +189,6 @@ public class UpdateDialog extends JDialog {
 			public void actionPerformed(ActionEvent arg0) {
 				synchronized (puller) {
 					//synchronized so the code in the listener is not executed at the same time as this code
-					cancelClicked = true;
 					puller.cancel();
 					dao.rollback();
 				}
@@ -204,29 +204,16 @@ public class UpdateDialog extends JDialog {
 				public void actionPerformed(ActionEvent arg0) {
 					synchronized (puller) {
 						//synchronized so the code in the listener is not executed at the same time as this code
-						cancelClicked = true;
+						timeTaken = System.currentTimeMillis() - started;
 						puller.cancel();
 
 						if (listener.getParsedTransactionsCount() == 0) {
 							dispose();
 							return;
 						}
-
-						try {
-							if (listener.earliestParsedTransactionDate != null) {
-								dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
-							}
-							dao.commit();
-						} catch (SQLException e) {
-							dao.rollback();
-							dispose();
-							throw new RuntimeException(e);
-						}
 					}
 
-					dispose();
-					long timeTaken = System.currentTimeMillis() - started;
-					owner.updateSuccessful(new Date(started), puller.getRupeeBalance(), timeTaken, listener.shopTransactionCount, listener.paymentTransactionCount, listener.bonusFeeTransactionCount, listener.pageCount, display.isSelected());
+					completeUpdate();
 				}
 			});
 		}
@@ -375,9 +362,23 @@ public class UpdateDialog extends JDialog {
 		}
 	}
 
-	public static void show(MainFrame owner, DbDao dao, Settings settings, TransactionPuller puller, Long estimatedTime) {
+	public static Result show(MainFrame owner, DbDao dao, Settings settings, TransactionPuller puller, Long estimatedTime) {
 		UpdateDialog dialog = new UpdateDialog(owner, dao, settings, puller, estimatedTime);
 		dialog.setVisible(true);
+
+		if (dialog.updateCanceled) {
+			return null;
+		}
+
+		Result result = new Result();
+		result.setShopTransactions(dialog.listener.shopTransactionCount);
+		result.setPaymentTransactions(dialog.listener.paymentTransactionCount);
+		result.setBonusFeeTransactions(dialog.listener.bonusFeeTransactionCount);
+		result.setPageCount(dialog.listener.pageCount);
+		result.setShowResults(dialog.display.isSelected());
+		result.setStarted(new Date(dialog.started));
+		result.setTimeTaken(dialog.timeTaken);
+		return result;
 	}
 
 	private static class UpdateErrorDialog extends JDialog {
@@ -463,6 +464,79 @@ public class UpdateDialog extends JDialog {
 			UpdateErrorDialog dialog = new UpdateErrorDialog(owner, pages, transactions, oldestTransaction, thrown);
 			dialog.setVisible(true);
 			return dialog.saveTransactions;
+		}
+	}
+
+	public static class Result {
+		private Date started;
+		private Integer rupeeBalance;
+		private long timeTaken;
+		private int shopTransactions, paymentTransactions, bonusFeeTransactions;
+		private int pageCount;
+		private boolean showResults;
+
+		public Date getStarted() {
+			return started;
+		}
+
+		public void setStarted(Date started) {
+			this.started = started;
+		}
+
+		public Integer getRupeeBalance() {
+			return rupeeBalance;
+		}
+
+		public void setRupeeBalance(Integer rupeeBalance) {
+			this.rupeeBalance = rupeeBalance;
+		}
+
+		public long getTimeTaken() {
+			return timeTaken;
+		}
+
+		public void setTimeTaken(long timeTaken) {
+			this.timeTaken = timeTaken;
+		}
+
+		public int getShopTransactions() {
+			return shopTransactions;
+		}
+
+		public void setShopTransactions(int shopTransactions) {
+			this.shopTransactions = shopTransactions;
+		}
+
+		public int getPaymentTransactions() {
+			return paymentTransactions;
+		}
+
+		public void setPaymentTransactions(int paymentTransactions) {
+			this.paymentTransactions = paymentTransactions;
+		}
+
+		public int getBonusFeeTransactions() {
+			return bonusFeeTransactions;
+		}
+
+		public void setBonusFeeTransactions(int bonusFeeTransactions) {
+			this.bonusFeeTransactions = bonusFeeTransactions;
+		}
+
+		public int getPageCount() {
+			return pageCount;
+		}
+
+		public void setPageCount(int pageCount) {
+			this.pageCount = pageCount;
+		}
+
+		public boolean isShowResults() {
+			return showResults;
+		}
+
+		public void setShowResults(boolean showResults) {
+			this.showResults = showResults;
 		}
 	}
 }

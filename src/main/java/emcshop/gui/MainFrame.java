@@ -242,6 +242,7 @@ public class MainFrame extends JFrame {
 									settings.setRupeeBalance(null);
 									settings.setSession(null);
 									settings.save();
+									clearSessionMenuItem.setEnabled(false);
 									lastUpdateDate.setText("-");
 									updateRupeeBalance();
 									transactionsTab.clear();
@@ -352,7 +353,10 @@ public class MainFrame extends JFrame {
 				}
 
 				TransactionPuller puller = pullerFactory.newInstance();
-				UpdateDialog.show(MainFrame.this, dao, settings, puller, estimatedTime);
+				UpdateDialog.Result result = UpdateDialog.show(MainFrame.this, dao, settings, puller, estimatedTime);
+				if (result != null) {
+					updateSuccessful(result.getStarted(), result.getRupeeBalance(), result.getTimeTaken(), result.getShopTransactions(), result.getPaymentTransactions(), result.getBonusFeeTransactions(), result.getPageCount(), result.isShowResults());
+				}
 			}
 		});
 
@@ -447,7 +451,7 @@ public class MainFrame extends JFrame {
 	/**
 	 * Called after an update has completed.
 	 */
-	public void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int pageCount, boolean showResults) {
+	private void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int pageCount, boolean showResults) {
 		String message;
 		if (shopTransactionCount == 0) {
 			message = "No new shop transactions found.";
