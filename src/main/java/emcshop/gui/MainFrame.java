@@ -561,21 +561,24 @@ public class MainFrame extends JFrame {
 						return;
 					}
 
-					JButton downloadUpdate = new JButton("Download");
-					downloadUpdate.setIcon(ImageManager.getImageIcon("download.png"));
-					downloadUpdate.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent event) {
-							try {
-								GuiUtils.openWebPage(URI.create("https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar"));
-							} catch (IOException e) {
-								throw new RuntimeException("Error opening webpage.", e);
-							}
-						}
-					});
-
 					updateAvailablePanel.add(new JLabel("<html><center><b>New Version Available!</b></center></html>"), "gapleft 10, align center, wrap");
-					updateAvailablePanel.add(downloadUpdate, "gapleft 10, align center");
+
+					if (GuiUtils.canOpenWebPages()) {
+						JButton downloadUpdate = new JButton("Download");
+						downloadUpdate.setIcon(ImageManager.getImageIcon("download.png"));
+						downloadUpdate.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent event) {
+								try {
+									GuiUtils.openWebPage(URI.create("https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar"));
+								} catch (IOException e) {
+									throw new RuntimeException("Error opening webpage.", e);
+								}
+							}
+						});
+						updateAvailablePanel.add(downloadUpdate, "gapleft 10, align center");
+					}
+
 					validate();
 				} catch (Throwable e) {
 					logger.log(Level.WARNING, "Problem checking for updates.", e);

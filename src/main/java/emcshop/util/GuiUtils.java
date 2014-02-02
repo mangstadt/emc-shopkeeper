@@ -48,6 +48,14 @@ public class GuiUtils {
 	}
 
 	/**
+	 * Determines if the user's computer supports opening webpages.
+	 * @return true if it can open web pages, false if not
+	 */
+	public static boolean canOpenWebPages() {
+		return desktop != null;
+	}
+
+	/**
 	 * Builds a standardized tooltip string.
 	 * @param text the tooltip text
 	 * @return the standardized tooltip string
