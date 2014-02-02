@@ -493,14 +493,14 @@ public class MainFrame extends JFrame {
 			message = sb.toString();
 		}
 
-		JOptionPane.showMessageDialog(this, message, "Update complete", JOptionPane.INFORMATION_MESSAGE);
-
 		settings.setLastUpdated(started);
 		settings.setRupeeBalance(rupeeTotal);
 		settings.save();
 
 		updateLastUpdateDate(started);
 		updateRupeeBalance();
+
+		JOptionPane.showMessageDialog(this, message, "Update complete", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private void updateLastUpdateDate(Date date) {
