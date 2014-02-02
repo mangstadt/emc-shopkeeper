@@ -362,6 +362,15 @@ public class UpdateDialog extends JDialog {
 		}
 	}
 
+	/**
+	 * Shows the update dialog.
+	 * @param owner
+	 * @param dao
+	 * @param settings
+	 * @param puller
+	 * @param estimatedTime
+	 * @return statistics of the update or null if the update was canceled
+	 */
 	public static Result show(MainFrame owner, DbDao dao, Settings settings, TransactionPuller puller, Long estimatedTime) {
 		UpdateDialog dialog = new UpdateDialog(owner, dao, settings, puller, estimatedTime);
 		dialog.setVisible(true);
@@ -375,6 +384,7 @@ public class UpdateDialog extends JDialog {
 		result.setPaymentTransactions(dialog.listener.paymentTransactionCount);
 		result.setBonusFeeTransactions(dialog.listener.bonusFeeTransactionCount);
 		result.setPageCount(dialog.listener.pageCount);
+		result.setRupeeBalance(puller.getRupeeBalance());
 		result.setShowResults(dialog.display.isSelected());
 		result.setStarted(new Date(dialog.started));
 		result.setTimeTaken(dialog.timeTaken);
