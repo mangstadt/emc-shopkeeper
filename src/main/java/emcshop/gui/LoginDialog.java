@@ -4,6 +4,8 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,17 +40,28 @@ public class LoginDialog extends JDialog {
 	private JPanel messagePanel;
 	private EmcSession session;
 	private JCheckBox rememberMe;
-	private boolean canceled;
+	private boolean canceled = false;
 
 	public LoginDialog(final Window owner) {
 		super(owner, "Login");
 		setModal(true);
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		GuiUtils.closeOnEscapeKeyPress(this);
-
-		createWidgets();
-		layoutWidgets();
 		setResizable(false);
+
+		//cancel when the window is closed
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				cancel();
+			}
+		});
+
+		//cancel when escape is pressed
+		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				cancel();
+			}
+		});
 
 		//login when enter is pressed
 		GuiUtils.onKeyPress(this, KeyEvent.VK_ENTER, new ActionListener() {
@@ -58,39 +71,10 @@ public class LoginDialog extends JDialog {
 			}
 		});
 
+		createWidgets();
+		layoutWidgets();
 		pack();
 		setLocationRelativeTo(owner);
-	}
-
-	/**
-	 * Shows the login dialog.
-	 * @param owner the owner window
-	 * @param rememberMe if the "remember me" checkbox should be checked
-	 * @return the user's EMC session and the state of the "remember me"
-	 * checkbox
-	 */
-	public static Result show(Window owner, boolean rememberMe) {
-		return show(owner, rememberMe, null);
-	}
-
-	/**
-	 * Shows the login dialog.
-	 * @param owner the owner window
-	 * @param rememberMe if the "remember me" checkbox should be checked
-	 * @param username the player's username or null if there isn't one
-	 * @return the user's EMC session and the state of the "remember me"
-	 * checkbox, or null if the user canceled the dialog
-	 */
-	public static Result show(Window owner, boolean rememberMe, String username) {
-		LoginDialog dialog = new LoginDialog(owner);
-		dialog.rememberMe.setSelected(rememberMe);
-		if (username != null) {
-			dialog.username.setText(username);
-			dialog.password.requestFocusInWindow();
-		}
-		dialog.setVisible(true);
-
-		return dialog.canceled ? null : new Result(dialog.session, dialog.rememberMe.isSelected());
 	}
 
 	private void createWidgets() {
@@ -127,9 +111,9 @@ public class LoginDialog extends JDialog {
 		add(messagePanel, "align center, span 2, wrap");
 
 		add(new JLabel("Username:"), "align right");
-		add(username, "w 100%, wrap");
+		add(username, "w 150, wrap");
 		add(new JLabel("Password:"), "align right");
-		add(password, "w 100%, wrap");
+		add(password, "w 150, wrap");
 
 		add(rememberMe, "align center, span 2, wrap");
 
@@ -137,8 +121,12 @@ public class LoginDialog extends JDialog {
 		add(cancel);
 	}
 
+	private void cancel() {
+		canceled = true;
+		dispose();
+	}
+
 	private void login() {
-		canceled = false;
 		messagePanel.removeAll();
 		messagePanel.add(loading);
 		login.setEnabled(false);
@@ -182,6 +170,37 @@ public class LoginDialog extends JDialog {
 		password.setEnabled(true);
 		rememberMe.setEnabled(true);
 		validate();
+	}
+
+	/**
+	 * Shows the login dialog.
+	 * @param owner the owner window
+	 * @param rememberMe if the "remember me" checkbox should be checked
+	 * @return the user's EMC session and the state of the "remember me"
+	 * checkbox, or null if the user canceled the dialog
+	 */
+	public static Result show(Window owner, boolean rememberMe) {
+		return show(owner, rememberMe, null);
+	}
+
+	/**
+	 * Shows the login dialog.
+	 * @param owner the owner window
+	 * @param rememberMe if the "remember me" checkbox should be checked
+	 * @param username the player's username or null if there isn't one
+	 * @return the user's EMC session and the state of the "remember me"
+	 * checkbox, or null if the user canceled the dialog
+	 */
+	public static Result show(Window owner, boolean rememberMe, String username) {
+		LoginDialog dialog = new LoginDialog(owner);
+		dialog.rememberMe.setSelected(rememberMe);
+		if (username != null) {
+			dialog.username.setText(username);
+			dialog.password.requestFocusInWindow();
+		}
+		dialog.setVisible(true);
+
+		return dialog.canceled ? null : new Result(dialog.session, dialog.rememberMe.isSelected());
 	}
 
 	public static class Result {
