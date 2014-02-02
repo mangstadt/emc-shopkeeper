@@ -78,9 +78,11 @@ public class MigrationSprocs {
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 
 		try {
+			int dbVersion = getDbVersion(conn);
+
 			PreparedStatement getItemId = conn.prepareStatement("SELECT id FROM items WHERE Lower(name) = Lower(?)");
 			PreparedStatement updateTransactionsWithNewName = conn.prepareStatement("UPDATE transactions SET item = ? WHERE item = ?");
-			PreparedStatement updateInventoryWithNewName = conn.prepareStatement("UPDATE inventory SET item = ? WHERE item = ?");
+			PreparedStatement updateInventoryWithNewName = (dbVersion < 7) ? null : conn.prepareStatement("UPDATE inventory SET item = ? WHERE item = ?");
 			PreparedStatement deleteItem = conn.prepareStatement("DELETE FROM items WHERE id = ?");
 			PreparedStatement updateItemName = conn.prepareStatement("UPDATE items SET name = ? WHERE id = ?");
 
@@ -115,9 +117,11 @@ public class MigrationSprocs {
 					updateTransactionsWithNewName.setInt(2, oldNameId);
 					updateTransactionsWithNewName.executeUpdate();
 
-					updateInventoryWithNewName.setInt(1, newNameId);
-					updateInventoryWithNewName.setInt(2, oldNameId);
-					updateInventoryWithNewName.executeUpdate();
+					if (updateInventoryWithNewName != null) {
+						updateInventoryWithNewName.setInt(1, newNameId);
+						updateInventoryWithNewName.setInt(2, oldNameId);
+						updateInventoryWithNewName.executeUpdate();
+					}
 
 					deleteItem.setInt(1, oldNameId);
 					deleteItem.executeUpdate();
@@ -152,9 +156,11 @@ public class MigrationSprocs {
 				ids.add(id);
 			}
 
+			int dbVersion = getDbVersion(conn);
+
 			//update the transactions to use just one of the item rows, and delete the rest
 			PreparedStatement updateTransactions = conn.prepareStatement("UPDATE transactions SET item = ? WHERE item = ?");
-			PreparedStatement updateInventory = conn.prepareStatement("UPDATE inventory SET item = ? WHERE item = ?");
+			PreparedStatement updateInventory = (dbVersion < 7) ? null : conn.prepareStatement("UPDATE inventory SET item = ? WHERE item = ?");
 			PreparedStatement deleteItem = conn.prepareStatement("DELETE FROM items WHERE id = ?");
 			for (List<Integer> ids : itemIds.values()) {
 				if (ids.size() <= 1) {
@@ -168,9 +174,11 @@ public class MigrationSprocs {
 					updateTransactions.setInt(2, oldId);
 					updateTransactions.executeUpdate();
 
-					updateInventory.setInt(1, newId);
-					updateInventory.setInt(2, oldId);
-					updateInventory.executeUpdate();
+					if (updateInventory != null) {
+						updateInventory.setInt(1, newId);
+						updateInventory.setInt(2, oldId);
+						updateInventory.executeUpdate();
+					}
 
 					deleteItem.setInt(1, oldId);
 					deleteItem.executeUpdate();
@@ -179,5 +187,11 @@ public class MigrationSprocs {
 		} finally {
 			conn.close();
 		}
+	}
+
+	private static int getDbVersion(Connection conn) throws SQLException {
+		PreparedStatement getDatabaseVersion = conn.prepareStatement("SELECT db_schema_version FROM meta");
+		ResultSet rs = getDatabaseVersion.executeQuery();
+		return rs.next() ? rs.getInt("db_schema_version") : 0;
 	}
 }
