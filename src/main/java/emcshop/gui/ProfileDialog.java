@@ -61,19 +61,23 @@ public class ProfileDialog extends JDialog {
 			public void actionPerformed(ActionEvent arg0) {
 				String profile = (String) profiles.getEditor().getItem();
 				if (profile.isEmpty()) {
-					JOptionPane.showMessageDialog(ProfileDialog.this, "Profile name cannot be blank.", "Error", JOptionPane.ERROR_MESSAGE);
+					showError("Profile name cannot be blank.");
 					return;
 				}
 
 				File profileDir = new File(profileRootDir, profile);
 				if (!profileDir.exists() && !profileDir.mkdir()) {
 					//if it couldn't create the directory
-					JOptionPane.showMessageDialog(ProfileDialog.this, "Profile directory could not be created.  Try changing the name.", "Error", JOptionPane.ERROR_MESSAGE);
+					showError("Profile directory could not be created.  Try changing the name.");
 					return;
 				}
 
 				selectedProfileDir = profileDir;
 				dispose();
+			}
+
+			private void showError(String message) {
+				JOptionPane.showMessageDialog(ProfileDialog.this, message, "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		});
 
