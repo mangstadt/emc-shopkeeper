@@ -28,7 +28,7 @@ public class AboutDialog extends JDialog {
 		GuiUtils.closeOnEscapeKeyPress(this);
 
 		//@formatter:off
-		JLabel label1 = new JLabel(
+		JLabel titleLabel = new JLabel(
 		"<html>" +
 		"<font size=4><b>EMC Shopkeeper</b></font><br>" +
 		"by Michael Angstadt (shavingfoam)<br>" +
@@ -37,19 +37,19 @@ public class AboutDialog extends JDialog {
 		);
 		
 		String forumUrl = "http://empire.us/threads/shop-statistics.22507/";
-		ClickableLabel label2 = new ClickableLabel(
+		ClickableLabel forumUrlLabel = new ClickableLabel(
 		"<html><center>" +
 		"<u>" + forumUrl + "</u>" +
 		"</center></html>",
 		forumUrl);
 
-		ClickableLabel label3 = new ClickableLabel(
+		ClickableLabel sourceUrlLabel = new ClickableLabel(
 		"<html><center>" +
 		"<u>" + Main.URL + "</u>" +
 		"</center></html>",
 		Main.URL);
 
-		JLabel label4 = new JLabel(
+		JLabel copyrightLabel = new JLabel(
 		"<html>" +
 		"<br>" +
 		"<font size=2>Copyright 2013-2014 Michael Angstadt.  This program is a fan creation and is not affiliated with<br>Minecraft (copyright Mojang) or Empire Minecraft (copyright Starlis).<br></font>" +
@@ -68,16 +68,16 @@ public class AboutDialog extends JDialog {
 		});
 
 		setLayout(new MigLayout());
-		add(label1, "split 2, w 100%");
+		add(titleLabel, "split 2, w 100%");
 		add(new JLabel(ImageManager.getImageIcon("creeper.png")), "wrap");
 
 		add(new JLabel("Forum thread:"), "split 2");
-		add(label2, "wrap");
+		add(forumUrlLabel, "wrap");
 
 		add(new JLabel("Source code:"), "split 2");
-		add(label3, "wrap");
+		add(sourceUrlLabel, "wrap");
 
-		add(label4, "wrap");
+		add(copyrightLabel, "wrap");
 		add(close, "align center");
 
 		pack();

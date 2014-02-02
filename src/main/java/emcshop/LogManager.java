@@ -35,6 +35,7 @@ public class LogManager {
 		handler.setFilter(new Filter() {
 			@Override
 			public boolean isLoggable(LogRecord record) {
+				//only log messages from this app
 				return record.getLoggerName().startsWith(Main.class.getPackage().getName());
 			}
 		});

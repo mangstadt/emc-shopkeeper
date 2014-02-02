@@ -162,6 +162,7 @@ public class MainFrame extends JFrame {
 				for (Map.Entry<String, Level> entry : levels.entrySet()) {
 					String name = entry.getKey();
 					final Level level = entry.getValue();
+
 					JMenuItem levelItem = new JRadioButtonMenuItem(name);
 					levelItem.addActionListener(new ActionListener() {
 						@Override
@@ -175,6 +176,7 @@ public class MainFrame extends JFrame {
 					if (logManager.getLevel().equals(level)) {
 						levelItem.setSelected(true);
 					}
+
 					group.add(levelItem);
 					logLevel.add(levelItem);
 				}
@@ -229,40 +231,42 @@ public class MainFrame extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					boolean reset = ResetDatabaseDialog.show(MainFrame.this);
-					if (reset) {
-						final LoadingDialog loading = new LoadingDialog(MainFrame.this, "Resetting database", "Resetting database...");
-						Thread t = new Thread() {
-							@Override
-							public void run() {
-								busyCursor(MainFrame.this, true);
-								try {
-									dao.wipe();
-									settings.setLastUpdated(null);
-									settings.setPreviousUpdate(null);
-									settings.setRupeeBalance(null);
-									settings.setSession(null);
-									settings.save();
-									clearSessionMenuItem.setEnabled(false);
-									lastUpdateDate.setText("-");
-									updateRupeeBalance();
-									transactionsTab.clear();
-									updatePaymentsCount();
-									paymentsTab.reset();
-									inventoryTab.refresh();
-									bonusFeeTab.refresh();
-									graphsTab.clear();
-									loading.dispose();
-								} catch (Throwable e) {
-									loading.dispose();
-									ErrorDialog.show(MainFrame.this, "Problem resetting database.", e);
-								} finally {
-									busyCursor(MainFrame.this, false);
-								}
-							}
-						};
-						t.start();
-						loading.setVisible(true);
+					if (!reset) {
+						return;
 					}
+
+					final LoadingDialog loading = new LoadingDialog(MainFrame.this, "Resetting database", "Resetting database...");
+					busyCursor(MainFrame.this, true);
+					Thread t = new Thread() {
+						@Override
+						public void run() {
+							try {
+								dao.wipe();
+								settings.setLastUpdated(null);
+								settings.setPreviousUpdate(null);
+								settings.setRupeeBalance(null);
+								settings.setSession(null);
+								settings.save();
+								clearSessionMenuItem.setEnabled(false);
+								lastUpdateDate.setText("-");
+								updateRupeeBalance();
+								transactionsTab.clear();
+								updatePaymentsCount();
+								paymentsTab.reset();
+								inventoryTab.refresh();
+								bonusFeeTab.refresh();
+								graphsTab.clear();
+								loading.dispose();
+							} catch (Throwable e) {
+								loading.dispose();
+								ErrorDialog.show(MainFrame.this, "Problem resetting database.", e);
+							} finally {
+								busyCursor(MainFrame.this, false);
+							}
+						}
+					};
+					t.start();
+					loading.setVisible(true);
 				}
 			});
 			tools.add(resetDb);
@@ -424,16 +428,18 @@ public class MainFrame extends JFrame {
 	}
 
 	public void updatePaymentsCount() {
+		int count;
 		try {
-			String title = "Payments";
-			int count = dao.countPendingPaymentTransactions();
-			if (count > 0) {
-				title += " (" + count + ")";
-			}
-			tabs.setTitleAt(1, title);
+			count = dao.countPendingPaymentTransactions();
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+
+		String title = "Payments";
+		if (count > 0) {
+			title += " (" + count + ")";
+		}
+		tabs.setTitleAt(1, title);
 	}
 
 	public void updateInventoryTab() {
