@@ -106,18 +106,20 @@ public class LoginDialog extends JDialog {
 	private void layoutWidgets() {
 		setLayout(new MigLayout());
 
-		add(new JLabel("<html><center><b>Please enter your </b><code>empireminecraft.com</code><b><br>login credentials.</b></center></html>"), "align center, span 2, wrap");
+		add(new JLabel("<html><center><b>Please enter your </b><code>empireminecraft.com</code><b><br>login credentials.</b></center></html>"), "align center, wrap");
 
-		add(messagePanel, "align center, span 2, wrap");
+		add(messagePanel, "align center, wrap");
 
-		add(new JLabel("Username:"), "align right");
-		add(username, "w 150, wrap");
-		add(new JLabel("Password:"), "align right");
-		add(password, "w 150, wrap");
+		JPanel p = new JPanel(new MigLayout("insets 0"));
+		p.add(new JLabel("Username:"), "align right");
+		p.add(username, "w 150, wrap");
+		p.add(new JLabel("Password:"), "align right");
+		p.add(password, "w 150, wrap");
+		add(p, "align center, wrap");
 
-		add(rememberMe, "align center, span 2, wrap");
+		add(rememberMe, "align center, wrap");
 
-		add(login, "span 2, split 2, align center");
+		add(login, "split 2, align center");
 		add(cancel);
 	}
 
