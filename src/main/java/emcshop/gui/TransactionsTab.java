@@ -303,6 +303,7 @@ public class TransactionsTab extends JPanel {
 		filterByPlayer.setText("");
 		sortByLabel.setEnabled(false);
 		sortBy.setEnabled(false);
+		dateRangeQueried.setText("");
 
 		tablePanel.removeAll();
 
@@ -312,6 +313,7 @@ public class TransactionsTab extends JPanel {
 		updateEntireHistoryCheckbox();
 
 		validate();
+		repaint(); //the table was still visible in Linux
 	}
 
 	public void updateComplete(boolean showResults, boolean firstUpdate) {
