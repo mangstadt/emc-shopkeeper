@@ -1,6 +1,7 @@
 package emcshop.db;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -25,5 +26,12 @@ public class DirbyEmbeddedDbDao extends DirbyDbDao {
 		databaseDir = new File(databaseDir.getAbsolutePath());
 		System.setProperty("derby.system.home", databaseDir.getParentFile().getAbsolutePath());
 		init("jdbc:derby:" + databaseDir.getName(), !databaseDir.isDirectory(), listener);
+	}
+
+	/**
+	 * @param connection the connection to wrap
+	 */
+	public DirbyEmbeddedDbDao(Connection connection) {
+		init(connection);
 	}
 }

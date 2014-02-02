@@ -2,15 +2,8 @@ package emcshop.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import emcshop.ItemIndex;
 
@@ -27,44 +20,12 @@ public class MigrationSprocs {
 	 */
 	public static void populateItemsTable() throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		DbDao dao = new DirbyEmbeddedDbDao(conn);
+
 		try {
-			populateItemsTableConn(conn);
+			dao.populateItemsTable();
 		} finally {
 			conn.close();
-		}
-	}
-
-	/**
-	 * Ensures that the "items" table contains the names of all items. This
-	 * method is meant to be called from Java code.
-	 * @throws SQLException
-	 */
-	public static void populateItemsTableConn(Connection conn) throws SQLException {
-		//get all existing item names
-		Set<String> existingItemNames = new HashSet<String>();
-		PreparedStatement getItemNames = conn.prepareStatement("SELECT name FROM items");
-		ResultSet rs = getItemNames.executeQuery();
-		while (rs.next()) {
-			existingItemNames.add(rs.getString(1).toLowerCase());
-		}
-
-		//insert all items names that aren't in the database
-		InsertStatement insertItems = null;
-		ItemIndex itemIndex = ItemIndex.instance();
-		for (String itemName : itemIndex.getItemNames()) {
-			if (existingItemNames.contains(itemName.toLowerCase())) {
-				continue;
-			}
-
-			if (insertItems == null) {
-				insertItems = new InsertStatement("items");
-			} else {
-				insertItems.nextRow();
-			}
-			insertItems.setString("name", itemName);
-		}
-		if (insertItems != null) {
-			insertItems.execute(conn);
 		}
 	}
 
@@ -76,15 +37,10 @@ public class MigrationSprocs {
 	 */
 	public static void updateItemNames() throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		DbDao dao = new DirbyEmbeddedDbDao(conn);
 
 		try {
-			int dbVersion = getDbVersion(conn);
-
-			PreparedStatement getItemId = conn.prepareStatement("SELECT id FROM items WHERE Lower(name) = Lower(?)");
-			PreparedStatement updateTransactionsWithNewName = conn.prepareStatement("UPDATE transactions SET item = ? WHERE item = ?");
-			PreparedStatement updateInventoryWithNewName = (dbVersion < 7) ? null : conn.prepareStatement("UPDATE inventory SET item = ? WHERE item = ?");
-			PreparedStatement deleteItem = conn.prepareStatement("DELETE FROM items WHERE id = ?");
-			PreparedStatement updateItemName = conn.prepareStatement("UPDATE items SET name = ? WHERE id = ?");
+			int dbVersion = dao.selectDbVersion();
 
 			//convert any old item names to the new names (e.g. "Potion:8193" to "Potion of Regeneration")
 			ItemIndex itemIndex = ItemIndex.instance();
@@ -92,13 +48,8 @@ public class MigrationSprocs {
 				String oldName = entry.getKey();
 				String newName = entry.getValue();
 
-				getItemId.setString(1, oldName);
-				ResultSet rs = getItemId.executeQuery();
-				Integer oldNameId = rs.next() ? rs.getInt("id") : null;
-
-				getItemId.setString(1, newName);
-				rs = getItemId.executeQuery();
-				Integer newNameId = rs.next() ? rs.getInt("id") : null;
+				Integer oldNameId = dao.getItemId(oldName);
+				Integer newNameId = dao.getItemId(newName);
 
 				if (oldNameId == null && newNameId == null) {
 					//nothing needs to be changed because neither name exists
@@ -106,25 +57,18 @@ public class MigrationSprocs {
 					//nothing needs to be changed because the new name is already in use
 				} else if (oldNameId != null && newNameId == null) {
 					//the old name is still being used, so change it to the new name
-					updateItemName.setString(1, newName);
-					updateItemName.setInt(2, oldNameId);
-					updateItemName.executeUpdate();
+					dao.updateItemName(oldNameId, newName);
 				} else if (oldNameId != null && newNameId != null) {
 					//both the old and new names exist
 					//update all transactions that use the old name with the new name, and delete the old name
 
-					updateTransactionsWithNewName.setInt(1, newNameId);
-					updateTransactionsWithNewName.setInt(2, oldNameId);
-					updateTransactionsWithNewName.executeUpdate();
+					dao.updateTransactionItem(oldNameId, newNameId);
 
-					if (updateInventoryWithNewName != null) {
-						updateInventoryWithNewName.setInt(1, newNameId);
-						updateInventoryWithNewName.setInt(2, oldNameId);
-						updateInventoryWithNewName.executeUpdate();
+					if (dbVersion >= 7) {
+						dao.updateInventoryItem(oldNameId, newNameId);
 					}
 
-					deleteItem.setInt(1, oldNameId);
-					deleteItem.executeUpdate();
+					dao.deleteItem(oldNameId);
 				}
 			}
 		} finally {
@@ -138,60 +82,12 @@ public class MigrationSprocs {
 	 */
 	public static void removeDuplicateItemNames() throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		DbDao dao = new DirbyEmbeddedDbDao(conn);
 
 		try {
-			//get the ID(s) of each item
-			PreparedStatement getItems = conn.prepareStatement("SELECT id, name FROM items");
-			Map<String, List<Integer>> itemIds = new HashMap<String, List<Integer>>();
-			ResultSet rs = getItems.executeQuery();
-			while (rs.next()) {
-				Integer id = rs.getInt("id");
-				String name = rs.getString("name").toLowerCase();
-
-				List<Integer> ids = itemIds.get(name);
-				if (ids == null) {
-					ids = new ArrayList<Integer>();
-					itemIds.put(name, ids);
-				}
-				ids.add(id);
-			}
-
-			int dbVersion = getDbVersion(conn);
-
-			//update the transactions to use just one of the item rows, and delete the rest
-			PreparedStatement updateTransactions = conn.prepareStatement("UPDATE transactions SET item = ? WHERE item = ?");
-			PreparedStatement updateInventory = (dbVersion < 7) ? null : conn.prepareStatement("UPDATE inventory SET item = ? WHERE item = ?");
-			PreparedStatement deleteItem = conn.prepareStatement("DELETE FROM items WHERE id = ?");
-			for (List<Integer> ids : itemIds.values()) {
-				if (ids.size() <= 1) {
-					//there are no duplicates
-					continue;
-				}
-
-				Integer newId = ids.get(0);
-				for (Integer oldId : ids.subList(1, ids.size())) {
-					updateTransactions.setInt(1, newId);
-					updateTransactions.setInt(2, oldId);
-					updateTransactions.executeUpdate();
-
-					if (updateInventory != null) {
-						updateInventory.setInt(1, newId);
-						updateInventory.setInt(2, oldId);
-						updateInventory.executeUpdate();
-					}
-
-					deleteItem.setInt(1, oldId);
-					deleteItem.executeUpdate();
-				}
-			}
+			dao.removeDuplicateItems();
 		} finally {
 			conn.close();
 		}
-	}
-
-	private static int getDbVersion(Connection conn) throws SQLException {
-		PreparedStatement getDatabaseVersion = conn.prepareStatement("SELECT db_schema_version FROM meta");
-		ResultSet rs = getDatabaseVersion.executeQuery();
-		return rs.next() ? rs.getInt("db_schema_version") : 0;
 	}
 }

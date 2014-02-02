@@ -15,9 +15,11 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +27,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
+import emcshop.ItemIndex;
 import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
@@ -90,6 +93,10 @@ public abstract class DirbyDbDao implements DbDao {
 			logger.info("Database not found.  Creating the database...");
 			createSchema();
 		}
+	}
+
+	protected void init(Connection connection) {
+		conn = connection;
 	}
 
 	@Override
@@ -205,27 +212,27 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public Integer getItemId(String name) throws SQLException {
 		PreparedStatement stmt = stmt("SELECT id FROM items WHERE Lower(name) = Lower(?)");
-
 		try {
 			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
-			Integer itemId;
-			if (rs.next()) {
-				itemId = rs.getInt("id");
-			} else {
-				itemId = insertItem(name);
-			}
-			return itemId;
+			return rs.next() ? rs.getInt(1) : null;
 		} finally {
 			closeStatements(stmt);
 		}
 	}
 
-	public List<String> getItemNames() throws SQLException {
-		PreparedStatement stmt = null;
+	@Override
+	public int upsertItem(String name) throws SQLException {
+		Integer itemId = getItemId(name);
+		if (itemId == null) {
+			itemId = insertItem(name);
+		}
+		return itemId;
+	}
 
+	public List<String> getItemNames() throws SQLException {
+		PreparedStatement stmt = stmt("SELECT name FROM items ORDER BY Lower(name)");
 		try {
-			stmt = stmt("SELECT name FROM items ORDER BY Lower(name)");
 			ResultSet rs = stmt.executeQuery();
 			List<String> names = new ArrayList<String>();
 			while (rs.next()) {
@@ -238,10 +245,117 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public void removeDuplicateItems() throws SQLException {
+		//get the ID(s) of each item
+		PreparedStatement stmt = stmt("SELECT id, name FROM items");
+		Map<String, List<Integer>> itemIds = new HashMap<String, List<Integer>>();
+		try {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				Integer id = rs.getInt("id");
+				String name = rs.getString("name").toLowerCase();
+
+				List<Integer> ids = itemIds.get(name);
+				if (ids == null) {
+					ids = new ArrayList<Integer>();
+					itemIds.put(name, ids);
+				}
+				ids.add(id);
+			}
+		} finally {
+			closeStatements(stmt);
+		}
+
+		int dbVersion = selectDbVersion();
+
+		//update the transactions to use just one of the item rows, and delete the rest
+		for (List<Integer> ids : itemIds.values()) {
+			if (ids.size() <= 1) {
+				//there are no duplicates
+				continue;
+			}
+
+			Integer newId = ids.get(0);
+			for (Integer oldId : ids.subList(1, ids.size())) {
+				updateTransactionItem(oldId, newId);
+
+				if (dbVersion >= 7) {
+					updateInventoryItem(oldId, newId);
+				}
+
+				deleteItem(oldId);
+			}
+		}
+	}
+
+	@Override
 	public int insertItem(String name) throws SQLException {
 		InsertStatement stmt = new InsertStatement("items");
 		stmt.setString("name", name);
 		return stmt.execute(conn);
+	}
+
+	@Override
+	public void insertItems(List<String> names) throws SQLException {
+		if (names.isEmpty()) {
+			return;
+		}
+
+		InsertStatement stmt = null;
+		for (String name : names) {
+			if (stmt == null) {
+				stmt = new InsertStatement("items");
+			} else {
+				stmt.nextRow();
+			}
+			stmt.setString("name", name);
+		}
+		stmt.execute(conn);
+	}
+
+	@Override
+	public void updateItemName(Integer id, String newName) throws SQLException {
+		PreparedStatement stmt = stmt("UPDATE items SET name = ? WHERE id = ?");
+		try {
+			stmt.setString(1, newName);
+			stmt.setInt(2, id);
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void deleteItem(Integer id) throws SQLException {
+		PreparedStatement stmt = stmt("DELETE FROM items WHERE id = ?");
+		try {
+			stmt.setInt(1, id);
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void populateItemsTable() throws SQLException {
+		//get all existing item names
+		Set<String> existingItemNames = new HashSet<String>();
+		for (String itemName : getItemNames()) {
+			existingItemNames.add(itemName.toLowerCase());
+		}
+
+		//insert all items names that aren't in the database
+		ItemIndex itemIndex = ItemIndex.instance();
+		List<String> toInsert = new ArrayList<String>();
+		for (String itemName : itemIndex.getItemNames()) {
+			if (existingItemNames.contains(itemName.toLowerCase())) {
+				continue;
+			}
+
+			toInsert.add(itemName);
+		}
+
+		insertItems(toInsert);
 	}
 
 	@Override
@@ -250,6 +364,18 @@ public abstract class DirbyDbDao implements DbDao {
 		try {
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() ? toDate(rs.getTimestamp(1)) : null;
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void updateTransactionItem(int oldItemId, int newItemId) throws SQLException {
+		PreparedStatement stmt = stmt("UPDATE transactions SET item = ? WHERE item = ?");
+		try {
+			stmt.setInt(1, newItemId);
+			stmt.setInt(2, oldItemId);
+			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
 		}
@@ -270,7 +396,7 @@ public abstract class DirbyDbDao implements DbDao {
 			InsertStatement stmt = new InsertStatement("transactions");
 
 			Player player = selsertPlayer(transaction.getPlayer());
-			Integer itemId = getItemId(transaction.getItem());
+			Integer itemId = upsertItem(transaction.getItem());
 			Date ts = transaction.getTs();
 
 			//keep track of the first/last seen dates so they can be updated
@@ -732,13 +858,25 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public void updateInventoryItem(int oldItemId, int newItemId) throws SQLException {
+		PreparedStatement stmt = stmt("UPDATE inventory SET item = ? WHERE item = ?");
+		try {
+			stmt.setInt(1, newItemId);
+			stmt.setInt(2, oldItemId);
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
 	public void upsertInventory(Inventory inventory) throws SQLException {
 		upsertInventory(inventory.getItem(), inventory.getQuantity(), false);
 	}
 
 	@Override
 	public void upsertInventory(String item, Integer quantity, boolean add) throws SQLException {
-		int itemId = getItemId(item);
+		int itemId = upsertItem(item);
 
 		PreparedStatement stmt = stmt("SELECT id FROM inventory WHERE item = ?");
 		Integer invId;
@@ -975,7 +1113,7 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE items ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("INSERT INTO bonuses_fees (horse) VALUES (0)");
-			MigrationSprocs.populateItemsTableConn(conn);
+			populateItemsTable();
 
 			commit();
 		} finally {

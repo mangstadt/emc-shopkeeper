@@ -66,12 +66,20 @@ public interface DbDao {
 	int insertPlayer(String name) throws SQLException;
 
 	/**
+	 * Gets the ID of an item.
+	 * @param name the item name, case in-sensitive (e.g. "apple")
+	 * @return the item ID or null if not found
+	 * @throws SQLException
+	 */
+	Integer getItemId(String name) throws SQLException;
+
+	/**
 	 * Gets the ID of an item, inserting the item if it doesn't exist.
 	 * @param name the item name, case in-sensitive (e.g. "apple")
 	 * @return the item ID
 	 * @throws SQLException
 	 */
-	Integer getItemId(String name) throws SQLException;
+	int upsertItem(String name) throws SQLException;
 
 	/**
 	 * Gets the names of all items in the database sorted alphabetically.
@@ -81,12 +89,56 @@ public interface DbDao {
 	List<String> getItemNames() throws SQLException;
 
 	/**
+	 * Changes the item that a transaction is associated with.
+	 * @param oldItemId the old item ID
+	 * @param newItemId the new item ID
+	 * @throws SQLException
+	 */
+	void updateTransactionItem(int oldItemId, int newItemId) throws SQLException;
+
+	/**
 	 * Inserts an item.
 	 * @param name the item name
 	 * @return the ID of the inserted item
 	 * @throws SQLException
 	 */
 	int insertItem(String name) throws SQLException;
+
+	/**
+	 * Inserts multiple items.
+	 * @param names the item names
+	 * @throws SQLException
+	 */
+	void insertItems(List<String> names) throws SQLException;
+
+	/**
+	 * Changes the name of an item.
+	 * @param id the item ID
+	 * @param newName the new name
+	 * @throws SQLException
+	 */
+	void updateItemName(Integer id, String newName) throws SQLException;
+
+	/**
+	 * Deletes an item.
+	 * @param id the item ID
+	 * @return
+	 * @throws SQLException
+	 */
+	void deleteItem(Integer id) throws SQLException;
+
+	/**
+	 * Seeds the items table with all known items;
+	 * @throws SQLException
+	 */
+	void populateItemsTable() throws SQLException;
+
+	/**
+	 * Removes items that have identical names, ensuring that a single item ID
+	 * is used for each item throughout the database.
+	 * @throws SQLException
+	 */
+	void removeDuplicateItems() throws SQLException;
 
 	/**
 	 * Inserts a transaction.
@@ -208,6 +260,14 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	List<Inventory> getInventory() throws SQLException;
+
+	/**
+	 * Changes the item that an inventory entry is associated with.
+	 * @param oldItemId the old item ID
+	 * @param newItemId the new item ID
+	 * @throws SQLException
+	 */
+	void updateInventoryItem(int oldItemId, int newItemId) throws SQLException;
 
 	/**
 	 * Updates or inserts an inventory item.
