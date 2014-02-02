@@ -37,6 +37,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacHandler;
 import emcshop.gui.lib.MacSupport;
+import emcshop.util.GuiUtils;
 import emcshop.util.Settings;
 
 public class Main {
@@ -380,8 +381,14 @@ public class Main {
 
 		//tweak tooltip settings
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-		toolTipManager.setInitialDelay(0);
-		toolTipManager.setDismissDelay(30000);
+		if (GuiUtils.linux) {
+			//disable tooltips on linux because of an Open JDK bug
+			//see: http://josm.openstreetmap.de/ticket/8921
+			toolTipManager.setEnabled(false);
+		} else {
+			toolTipManager.setInitialDelay(0);
+			toolTipManager.setDismissDelay(30000);
+		}
 
 		//pre-load the labels for the item suggest fields
 		splash.setMessage("Loading item icons...");

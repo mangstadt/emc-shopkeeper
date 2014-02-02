@@ -5,9 +5,9 @@ import static emcshop.util.GuiUtils.toolTipText;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 
 import emcshop.gui.images.ImageManager;
-import emcshop.util.GuiUtils;
 
 /**
  * Represents a JLabel with a help icon.
@@ -15,6 +15,7 @@ import emcshop.util.GuiUtils;
 @SuppressWarnings("serial")
 public class HelpLabel extends JLabel {
 	private static final ImageIcon helpIcon = ImageManager.getHelpIcon();
+	private static final boolean toopTipsEnabled = ToolTipManager.sharedInstance().isEnabled();
 
 	/**
 	 * @param text the label text
@@ -22,7 +23,7 @@ public class HelpLabel extends JLabel {
 	 */
 	public HelpLabel(String text, String tooltip) {
 		super(text);
-		if (!GuiUtils.linux) {
+		if (toopTipsEnabled) {
 			setIcon(helpIcon);
 			setHorizontalAlignment(SwingConstants.LEFT);
 			setToolTipText(toolTipText(tooltip));

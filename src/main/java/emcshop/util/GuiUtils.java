@@ -61,12 +61,6 @@ public class GuiUtils {
 	 * @return the standardized tooltip string
 	 */
 	public static String toolTipText(String text) {
-		//disable tooltips on linux because of a JVM bug
-		//see: http://josm.openstreetmap.de/ticket/8921
-		if (linux) {
-			return null;
-		}
-
 		text = text.replace("\n", "<br>");
 		return "<html><div width=300>" + text + "</div></html>";
 	}
