@@ -5,10 +5,13 @@ import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Collections;
@@ -334,8 +337,38 @@ public class PaymentsTab extends JPanel {
 					int row = Integer.valueOf(event.getActionCommand());
 					PaymentTransaction transaction = rows.get(row);
 
-					AssignDialog dialog = new AssignDialog(transaction);
-					dialog.setVisible(true);
+					AssignDialog.Result result = AssignDialog.show(owner, transaction);
+					if (result == null) {
+						return;
+					}
+
+					ShopTransaction shopTransaction = new ShopTransaction();
+					shopTransaction.setTs(transaction.getTs());
+					shopTransaction.setPlayer(transaction.getPlayer());
+					shopTransaction.setAmount(transaction.getAmount());
+					shopTransaction.setBalance(transaction.getBalance());
+					shopTransaction.setItem(result.getItemName());
+
+					int quantity = result.getQuantity();
+					if (transaction.getAmount() > 0) {
+						//negate quantity if it's a sale
+						quantity *= -1;
+					}
+					shopTransaction.setQuantity(quantity);
+
+					try {
+						dao.insertTransaction(shopTransaction, result.isUpdateInventory());
+						dao.assignPaymentTransaction(transaction.getId(), shopTransaction.getId());
+						dao.commit();
+					} catch (SQLException e) {
+						dao.rollback();
+						throw new RuntimeException(e);
+					}
+
+					paymentsTable.removeRow(transaction);
+					paymentsTable.refresh();
+					owner.updateInventoryTab();
+					owner.updatePaymentsCount();
 				}
 			}, Column.ASSIGN.ordinal());
 
@@ -345,7 +378,7 @@ public class PaymentsTab extends JPanel {
 					int row = Integer.valueOf(event.getActionCommand());
 					PaymentTransaction transaction = rows.get(row);
 
-					Integer splitAmount = getSplitAmount(transaction);
+					Integer splitAmount = showSplitDialog(transaction);
 					if (splitAmount == null) {
 						//user canceled the dialog
 						return;
@@ -379,32 +412,34 @@ public class PaymentsTab extends JPanel {
 					refresh();
 				}
 
-				private Integer getSplitAmount(PaymentTransaction transaction) {
-					int origAmount = transaction.getAmount();
-					int origAmountAbs = Math.abs(origAmount);
+				private Integer showSplitDialog(PaymentTransaction transaction) {
+					int origAmount = Math.abs(transaction.getAmount());
 					do {
-						String amountStr = JOptionPane.showInputDialog(owner, "Enter the number of rupees you'd like to subtract\nfrom this payment transaction.  A new payment transaction\nwill then be created with the value you enter.\n\nEnter a value between 1 and " + (origAmountAbs - 1) + ":", "Split Payment Transaction", JOptionPane.QUESTION_MESSAGE);
+						String amountStr = JOptionPane.showInputDialog(owner, "Enter the number of rupees you'd like to subtract\nfrom this payment transaction.  A new payment transaction\nwill then be created with the value you enter.\n\nEnter a value between 1 and " + (origAmount - 1) + ":", "Split Payment Transaction", JOptionPane.QUESTION_MESSAGE);
 						if (amountStr == null) {
 							//user canceled dialog
 							return null;
 						}
 
-						String error = null;
+						Integer amountInt;
 						try {
-							Integer amountInt = Integer.valueOf(amountStr);
-							if (amountInt <= 0 || amountInt >= origAmountAbs) {
-								error = "Amount must be between 1 and " + (origAmountAbs - 1) + ".";
-							} else {
-								if (origAmount < 0) {
-									amountInt *= -1;
-								}
-								return amountInt;
-							}
+							amountInt = Integer.valueOf(amountStr);
 						} catch (NumberFormatException e) {
-							error = "Invalid number.";
+							showError("Invalid number.");
+							continue;
 						}
-						JOptionPane.showMessageDialog(owner, error, "Error", JOptionPane.ERROR_MESSAGE);
+
+						if (amountInt <= 0 || amountInt >= origAmount) {
+							showError("Amount must be between 1 and " + (origAmount - 1) + ".");
+							continue;
+						}
+
+						return amountInt;
 					} while (true);
+				}
+
+				private void showError(String message) {
+					JOptionPane.showMessageDialog(owner, message, "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}, Column.SPLIT.ordinal());
 
@@ -425,17 +460,34 @@ public class PaymentsTab extends JPanel {
 		}
 	}
 
-	private class AssignDialog extends JDialog {
+	private static class AssignDialog extends JDialog {
+		private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 		private final ItemSuggestField item;
 		private final QuantityTextField quantity;
 		private final JButton ok, cancel;
 		private final JCheckBox updateInventory;
+		private boolean canceled = false;
 
-		public AssignDialog(final PaymentTransaction paymentTransaction) {
-			super(owner, "Assign Payment Transaction", true);
-			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		public AssignDialog(Window owner, final PaymentTransaction paymentTransaction) {
+			super(owner, "Assign Payment Transaction");
+			setModal(true);
 			setResizable(false);
-			GuiUtils.closeOnEscapeKeyPress(this);
+
+			//cancel when the window is closed
+			addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent arg0) {
+					cancel();
+				}
+			});
+
+			//cancel when escape is pressed
+			GuiUtils.onEscapeKeyPress(this, new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					cancel();
+				}
+			});
 
 			item = new ItemSuggestField(this);
 			quantity = new QuantityTextField();
@@ -451,53 +503,25 @@ public class PaymentsTab extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					if (item.getText().isEmpty()) {
-						JOptionPane.showMessageDialog(AssignDialog.this, "No item specified.", "Error", JOptionPane.ERROR_MESSAGE);
+						showError("No item specified.");
 						return;
 					}
 
 					if (quantity.getText().isEmpty()) {
-						JOptionPane.showMessageDialog(AssignDialog.this, "No quantity specified.", "Error", JOptionPane.ERROR_MESSAGE);
+						showError("No quantity specified.");
 						return;
 					}
 
-					String itemName = item.getText();
-					Integer qty;
-					try {
-						qty = quantity.getQuantity(index.getStackSize(itemName));
-						qty = Math.abs(qty); //incase the user enters a negative value
-					} catch (NumberFormatException e) {
-						JOptionPane.showMessageDialog(AssignDialog.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
+					if (!quantity.hasValidValue()) {
+						showError("Invalid quantity value.");
 						return;
 					}
-
-					ShopTransaction shopTransaction = new ShopTransaction();
-					shopTransaction.setTs(paymentTransaction.getTs());
-					shopTransaction.setPlayer(paymentTransaction.getPlayer());
-					shopTransaction.setAmount(paymentTransaction.getAmount());
-					shopTransaction.setBalance(paymentTransaction.getBalance());
-					shopTransaction.setItem(itemName);
-
-					if (paymentTransaction.getAmount() > 0) {
-						//negate quantity if it's a sale
-						qty *= -1;
-					}
-					shopTransaction.setQuantity(qty);
-
-					try {
-						dao.insertTransaction(shopTransaction, updateInventory.isSelected());
-						dao.assignPaymentTransaction(paymentTransaction.getId(), shopTransaction.getId());
-						dao.commit();
-					} catch (SQLException e) {
-						dao.rollback();
-						throw new RuntimeException(e);
-					}
-
-					paymentsTable.removeRow(paymentTransaction);
-					paymentsTable.refresh();
-					owner.updateInventoryTab();
-					owner.updatePaymentsCount();
 
 					dispose();
+				}
+
+				private void showError(String message) {
+					JOptionPane.showMessageDialog(AssignDialog.this, message, "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			});
 
@@ -505,19 +529,19 @@ public class PaymentsTab extends JPanel {
 			cancel.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					dispose();
+					cancel();
 				}
 			});
 
 			updateInventory = new JCheckBox("Apply to Inventory", true);
 
-			JLabel quantityLabel = new HelpLabel("Qty:", "You can specify the quantity in stacks instead of having to specify the exact number.\n\n<b>Examples</b>:\n\"264\" (264 items total)\n\"4/10\" (4 stacks, plus 10 more)\n\"4/\" (4 stacks)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16 (like Signs) and others are not stackable at all (like armor)!");
+			JLabel quantityLabel = new HelpLabel("Qty:", "In addition to specifying the exact number of items, you can also specify the quantity in stacks.\n\n<b>Examples</b>:\n\"264\" (264 items total)\n\"4/10\" (4 stacks, plus 10 more)\n\"4/\" (4 stacks)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16 (like Signs) and others are not stackable at all (like armor)!");
 
 			/////////////////////////
 
-			setLayout(new MigLayout("insets 0"));
+			setLayout(new MigLayout());
 
-			JPanel top = new JPanel(new MigLayout());
+			JPanel top = new JPanel(new MigLayout("insets 0"));
 
 			top.add(new JLabel("Time:"));
 			top.add(new JLabel("Player:"));
@@ -529,22 +553,65 @@ public class PaymentsTab extends JPanel {
 
 			add(top, "wrap");
 
-			JPanel bottom = new JPanel(new MigLayout());
+			JPanel bottom = new JPanel(new MigLayout("insets 0"));
 
 			bottom.add(new JLabel("Item:"));
 			bottom.add(quantityLabel, "wrap");
 			bottom.add(item, "w 175");
 			bottom.add(quantity, "w 100, wrap");
+			add(bottom, "gaptop 20, wrap");
 
-			add(bottom, "wrap");
+			add(new HelpLabel("", "Check this box to apply this transaction to your shop's inventory."), "split 2");
+			add(updateInventory, "wrap");
 
-			bottom.add(updateInventory, "split 2");
-			bottom.add(new HelpLabel("", "Check this box to apply this transaction to your shop's inventory."), "wrap");
 			add(ok, "split 2, align center");
 			add(cancel);
 
 			pack();
 			setLocationRelativeTo(owner);
+		}
+
+		private void cancel() {
+			canceled = true;
+			dispose();
+		}
+
+		public static Result show(Window owner, PaymentTransaction paymentTransaction) {
+			AssignDialog dialog = new AssignDialog(owner, paymentTransaction);
+			dialog.setVisible(true);
+			if (dialog.canceled) {
+				return null;
+			}
+
+			String itemName = dialog.item.getText();
+			int quantity = dialog.quantity.getQuantity(ItemIndex.instance().getStackSize(itemName));
+			quantity = Math.abs(quantity); //incase the user enters a negative value
+
+			return new Result(itemName, quantity, dialog.updateInventory.isSelected());
+		}
+
+		public static class Result {
+			private final String itemName;
+			private final Integer quantity;
+			private final boolean updateInventory;
+
+			public Result(String itemName, Integer quantity, boolean updateInventory) {
+				this.itemName = itemName;
+				this.quantity = quantity;
+				this.updateInventory = updateInventory;
+			}
+
+			public String getItemName() {
+				return itemName;
+			}
+
+			public Integer getQuantity() {
+				return quantity;
+			}
+
+			public boolean isUpdateInventory() {
+				return updateInventory;
+			}
 		}
 	}
 }

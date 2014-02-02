@@ -36,4 +36,17 @@ public class QuantityTextField extends JTextField {
 		String text = getText();
 		return text.startsWith("+") || text.startsWith("-");
 	}
+
+	/**
+	 * Determines if the text box contains a parsable value.
+	 * @return true if the value is valid, false if not
+	 */
+	public boolean hasValidValue() {
+		try {
+			getQuantity(64);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
 }
