@@ -313,10 +313,11 @@ public class MainFrame extends JFrame {
 				EmcSession session = settings.getSession();
 				if (session == null) {
 					LoginDialog.Result result = LoginDialog.show(MainFrame.this, settings.isPersistSession());
-					session = result.getSession();
-					if (session == null) {
+					if (result == null) {
 						return;
 					}
+
+					session = result.getSession();
 					settings.setPersistSession(result.isRememberMe());
 					settings.setSession(session);
 					settings.save();

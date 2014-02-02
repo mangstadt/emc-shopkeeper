@@ -147,12 +147,12 @@ public class UpdateDialog extends JDialog {
 		String username = (oldSession == null) ? null : oldSession.getUsername();
 
 		LoginDialog.Result loginResult = LoginDialog.show(this, settings.isPersistSession(), username);
-		EmcSession session = loginResult.getSession();
-		if (session == null) {
+		if (loginResult == null) {
 			//user canceled the login dialog, so cancel the update operation
 			return false;
 		}
 
+		EmcSession session = loginResult.getSession();
 		settings.setSession(session);
 		settings.setPersistSession(loginResult.isRememberMe());
 		settings.save();

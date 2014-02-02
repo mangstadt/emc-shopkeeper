@@ -1,6 +1,5 @@
 package emcshop.gui;
 
-import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,15 +29,16 @@ import emcshop.util.GuiUtils;
 @SuppressWarnings("serial")
 public class LoginDialog extends JDialog {
 	private static final Logger logger = Logger.getLogger(LoginDialog.class.getName());
+
 	private JButton login;
 	private JButton cancel;
 	private JTextField username;
 	private JPasswordField password;
 	private JLabel loading;
-	private JLabel error;
 	private JPanel messagePanel;
 	private EmcSession session;
 	private JCheckBox rememberMe;
+	private boolean canceled;
 
 	public LoginDialog(final Window owner) {
 		super(owner, "Login");
@@ -54,7 +54,7 @@ public class LoginDialog extends JDialog {
 		GuiUtils.onKeyPress(this, KeyEvent.VK_ENTER, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				onClickLogin();
+				login();
 			}
 		});
 
@@ -79,7 +79,7 @@ public class LoginDialog extends JDialog {
 	 * @param rememberMe if the "remember me" checkbox should be checked
 	 * @param username the player's username or null if there isn't one
 	 * @return the user's EMC session and the state of the "remember me"
-	 * checkbox
+	 * checkbox, or null if the user canceled the dialog
 	 */
 	public static Result show(Window owner, boolean rememberMe, String username) {
 		LoginDialog dialog = new LoginDialog(owner);
@@ -89,7 +89,8 @@ public class LoginDialog extends JDialog {
 			dialog.password.requestFocusInWindow();
 		}
 		dialog.setVisible(true);
-		return new Result(dialog.session, dialog.rememberMe.isSelected());
+
+		return dialog.canceled ? null : new Result(dialog.session, dialog.rememberMe.isSelected());
 	}
 
 	private void createWidgets() {
@@ -97,7 +98,7 @@ public class LoginDialog extends JDialog {
 		login.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				onClickLogin();
+				login();
 			}
 		});
 
@@ -105,6 +106,7 @@ public class LoginDialog extends JDialog {
 		cancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				canceled = true;
 				dispose();
 			}
 		});
@@ -114,39 +116,29 @@ public class LoginDialog extends JDialog {
 		username = new JTextField();
 		password = new JPasswordField();
 		loading = new JLabel("Logging in...", ImageManager.getLoadingSmall(), SwingConstants.CENTER);
-		error = new JLabel() {
-			@Override
-			public void setText(String text) {
-				super.setText("<html><font color=red>" + text + "</font></html>");
-			}
-		};
-
 		rememberMe = new JCheckBox("Remember me");
 	}
 
 	private void layoutWidgets() {
 		setLayout(new MigLayout());
 
-		add(new JLabel("<html><center><b>Please enter your </b><code>empireminecraft.com</code><b><br>login credentials.</b></center></html>"), "align center, wrap");
+		add(new JLabel("<html><center><b>Please enter your </b><code>empireminecraft.com</code><b><br>login credentials.</b></center></html>"), "align center, span 2, wrap");
 
-		add(messagePanel, "align center, wrap");
+		add(messagePanel, "align center, span 2, wrap");
 
-		JPanel p = new JPanel(new MigLayout("insets 0"));
-		p.add(new JLabel("Username:"), "align right");
-		p.add(username, "w 150, wrap");
-		p.add(new JLabel("Password:"), "align right");
-		p.add(password, "w 150, wrap");
-		add(p, "align center, wrap");
+		add(new JLabel("Username:"), "align right");
+		add(username, "w 100%, wrap");
+		add(new JLabel("Password:"), "align right");
+		add(password, "w 100%, wrap");
 
-		add(rememberMe, "align center, wrap");
+		add(rememberMe, "align center, span 2, wrap");
 
-		p = new JPanel(new FlowLayout());
-		p.add(login);
-		p.add(cancel);
-		add(p, "align center");
+		add(login, "span 2, split 2, align center");
+		add(cancel);
 	}
 
-	private void onClickLogin() {
+	private void login() {
+		canceled = false;
 		messagePanel.removeAll();
 		messagePanel.add(loading);
 		login.setEnabled(false);
@@ -154,35 +146,42 @@ public class LoginDialog extends JDialog {
 		password.setEnabled(false);
 		rememberMe.setEnabled(false);
 		validate();
+
 		Thread t = new Thread() {
 			@Override
 			public void run() {
 				try {
 					session = EmcSession.login(username.getText(), new String(password.getPassword()), rememberMe.isSelected());
-					if (session == null) {
-						error.setText("Invalid login credentials.");
-						messagePanel.add(error);
-
-						password.requestFocus();
-						password.selectAll();
-					} else if (isVisible()) { //if the user has cancelled
-						dispose();
-					}
 				} catch (IOException e) {
 					logger.log(Level.SEVERE, "An error occurred while logging the user into EMC.", e);
-					error.setText("Error contacting EMC.");
-					messagePanel.add(error);
-				} finally {
-					login.setEnabled(true);
-					messagePanel.remove(loading);
-					username.setEnabled(true);
-					password.setEnabled(true);
-					rememberMe.setEnabled(true);
-					validate();
+					showError("Network error contacting EMC.");
+					return;
 				}
+
+				if (session == null) {
+					showError("Invalid login credentials.");
+					password.requestFocus();
+					password.selectAll();
+					return;
+				}
+
+				dispose();
 			}
 		};
+		t.setDaemon(true);
 		t.start();
+	}
+
+	private void showError(String text) {
+		JLabel error = new JLabel("<html><font color=red>" + text + "</font></html>");
+		messagePanel.add(error);
+
+		login.setEnabled(true);
+		messagePanel.remove(loading);
+		username.setEnabled(true);
+		password.setEnabled(true);
+		rememberMe.setEnabled(true);
+		validate();
 	}
 
 	public static class Result {
