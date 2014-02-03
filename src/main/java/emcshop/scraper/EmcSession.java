@@ -3,6 +3,7 @@ package emcshop.scraper;
 import java.io.IOException;
 import java.util.Date;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.params.CoreConnectionPNames;
@@ -50,7 +51,7 @@ public class EmcSession {
 	 * Creates a new HTTP client for this session.
 	 * @return the HTTP client
 	 */
-	public DefaultHttpClient createHttpClient() {
+	public HttpClient createHttpClient() {
 		DefaultHttpClient client = new DefaultHttpClient();
 
 		//set a high timeout because old transaction pages take a while to load

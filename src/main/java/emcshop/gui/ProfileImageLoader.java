@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -121,7 +122,7 @@ public class ProfileImageLoader {
 	 */
 	private byte[] downloadImage(String playerName) throws IOException {
 		EmcSession session = settings.getSession();
-		DefaultHttpClient client = (session == null) ? new DefaultHttpClient() : session.createHttpClient();
+		HttpClient client = (session == null) ? new DefaultHttpClient() : session.createHttpClient();
 
 		//download image and save to cache
 		HttpEntity entity = null;
@@ -212,7 +213,7 @@ public class ProfileImageLoader {
 	 * @return the URL or null if not found
 	 * @throws IOException
 	 */
-	private String scrapeProfileImageUrl(DefaultHttpClient client, String playerName) throws IOException {
+	private String scrapeProfileImageUrl(HttpClient client, String playerName) throws IOException {
 		//load the user's profile page
 		Document profilePage;
 		HttpGet request = new HttpGet("http://u.emc.gs/" + playerName);
