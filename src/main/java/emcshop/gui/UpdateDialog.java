@@ -119,6 +119,7 @@ public class UpdateDialog extends JDialog {
 						}
 
 						timerThread.interrupt();
+						logger.log(Level.SEVERE, "Error downloading transactions.", t);
 						boolean saveTransactions = UpdateErrorDialog.show(UpdateDialog.this, listener.pageCount, listener.getParsedTransactionsCount(), listener.earliestParsedTransactionDate, t);
 						if (saveTransactions) {
 							completeUpdate();
@@ -469,8 +470,6 @@ public class UpdateDialog extends JDialog {
 		}
 
 		public static boolean show(Window owner, int pages, int transactions, Date oldestTransaction, Throwable thrown) {
-			logger.log(Level.SEVERE, "Error downloading transactions.", thrown);
-
 			UpdateErrorDialog dialog = new UpdateErrorDialog(owner, pages, transactions, oldestTransaction, thrown);
 			dialog.setVisible(true);
 			return dialog.saveTransactions;
