@@ -344,7 +344,7 @@ public class UpdateDialog extends JDialog {
 		public void run() {
 			long start = System.currentTimeMillis();
 			NumberFormat nf = new DecimalFormat("00");
-			while (isVisible()) {
+			while (true) {
 				long elapsed = System.currentTimeMillis() - start;
 				long components[] = TimeUtils.parseTimeComponents(elapsed);
 				String timerText = nf.format(components[3]) + ":" + nf.format(components[2]) + ":" + nf.format(components[1]);
