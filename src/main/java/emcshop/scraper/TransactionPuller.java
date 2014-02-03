@@ -1,6 +1,7 @@
 package emcshop.scraper;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,8 +12,8 @@ import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -163,7 +164,7 @@ public class TransactionPuller {
 		return rupeeBalance;
 	}
 
-	private TransactionPage getPage(int page, DefaultHttpClient client) throws IOException {
+	private TransactionPage getPage(int page, HttpClient client) throws IOException {
 		/*
 		 * Note: The HttpClient library is used here because using
 		 * "Jsoup.connect()" doesn't always work when the application is run as
@@ -195,10 +196,12 @@ public class TransactionPuller {
 
 	private class ScrapeThread extends Thread {
 		private final Listener listener;
-		private final DefaultHttpClient client;
+		private final EmcSession session;
+		private HttpClient client;
 
 		public ScrapeThread(Listener listener, EmcSession session) {
 			this.listener = listener;
+			this.session = session;
 			this.client = session.createHttpClient();
 		}
 
@@ -213,7 +216,15 @@ public class TransactionPuller {
 						break;
 					}
 
-					TransactionPage transactionPage = getPage(page, client);
+					TransactionPage transactionPage = null;
+					try {
+						transactionPage = getPage(page, client);
+					} catch (ConnectException e) {
+						//one user reported getting connection errors at various points while trying to download 12k pages: http://empireminecraft.com/threads/shop-statistics.22507/page-14#post-684085
+						//if there's a connection problem, try re-creating the connection
+						client = session.createHttpClient();
+						transactionPage = getPage(page, client);
+					}
 
 					//EMC will load the first page if an invalid page number is given (i.e. if we've reached the last page)
 					boolean lastPageReached = page > 1 && transactionPage.getFirstTransactionDate().getTime() >= latestTransactionDate.getTime();
