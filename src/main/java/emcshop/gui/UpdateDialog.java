@@ -412,7 +412,7 @@ public class UpdateDialog extends JDialog {
 			stackTrace.setEditable(false);
 			stackTrace.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 
-			final JButton report = new JButton("Report Error");
+			final JButton report = new JButton("Send Error Report");
 			report.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {

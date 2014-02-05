@@ -57,7 +57,7 @@ public class ErrorDialog extends JDialog {
 			}
 		});
 
-		final JButton report = new JButton("Report");
+		final JButton report = new JButton("Send Error Report");
 		report.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
