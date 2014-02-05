@@ -45,7 +45,6 @@ public class PaymentsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
 	private final ProfileImageLoader profileImageLoader;
-	private final ItemIndex index = ItemIndex.instance();
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private boolean stale = true;
 

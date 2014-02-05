@@ -49,7 +49,6 @@ import emcshop.db.DbDao;
 import emcshop.db.Inventory;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.CheckBoxColumn;
-import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.ChesterFile;
 import emcshop.util.FilterList;
 import emcshop.util.GuiUtils;
@@ -158,7 +157,7 @@ public class InventoryTab extends JPanel {
 			}
 		});
 
-		ClickableLabel chesterUrl = new ClickableLabel("<html><font color=navy><u>Download Chester</u></font></html>", "http://github.com/mangstadt/chester");
+		//ClickableLabel chesterUrl = new ClickableLabel("<html><font color=navy><u>Download Chester</u></font></html>", "http://github.com/mangstadt/chester");
 
 		item = new ItemSuggestField(owner);
 
