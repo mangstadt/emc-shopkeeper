@@ -729,6 +729,71 @@ public abstract class DirbyDbDao implements DbDao {
 		return itemGroups;
 	}
 
+	public List<ConsolidatedTransaction> getTransactionsByDate(Date from, Date to) throws SQLException {
+		//@formatter:off
+		String sql =
+		"SELECT t.ts, p.name AS player, i.name AS item, t.amount, t.quantity " + 
+		"FROM transactions t INNER JOIN items i ON t.item = i.id " +
+		"INNER JOIN players p ON t.player = p.id ";
+		if (from != null) {
+			sql += "WHERE ts >= ? ";
+		}
+		if (to != null) {
+			sql += (from == null) ? "WHERE" : "AND";
+			sql += " ts < ? ";
+		}
+		sql += " ORDER BY t.ts DESC";
+		//@formatter:on
+
+		PreparedStatement stmt = stmt(sql);
+		List<ConsolidatedTransaction> transactions = new ArrayList<ConsolidatedTransaction>();
+		Map<String, ConsolidatedTransaction> lastTransaction = new HashMap<String, ConsolidatedTransaction>();
+		try {
+			int index = 1;
+			if (from != null) {
+				stmt.setTimestamp(index++, toTimestamp(from));
+			}
+			if (to != null) {
+				stmt.setTimestamp(index++, toTimestamp(to));
+			}
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				Date ts = toDate(rs.getTimestamp("ts"));
+				String player = rs.getString("player");
+				String item = rs.getString("item");
+				int amount = rs.getInt("amount");
+				int quantity = rs.getInt("quantity");
+
+				String key = player + ":" + item;
+				ConsolidatedTransaction transaction = lastTransaction.get(key);
+				if (transaction != null) {
+					long diff = transaction.getLastTransactionDate().getTime() - ts.getTime();
+					if (diff <= 1000 * 60 * 2) {
+						//if the transactions occurred within 2 minutes of the last one, then consider it part of the same, consolidated transaction
+						transaction.setAmount(transaction.getAmount() + amount);
+						transaction.setQuantity(transaction.getQuantity() + quantity);
+						transaction.setLastTransactionDate(ts);
+						continue;
+					}
+				}
+
+				transaction = new ConsolidatedTransaction();
+				transaction.setFirstTransactionDate(ts);
+				transaction.setLastTransactionDate(ts);
+				transaction.setPlayer(player);
+				transaction.setItem(item);
+				transaction.setAmount(amount);
+				transaction.setQuantity(quantity);
+				lastTransaction.put(key, transaction);
+				transactions.add(transaction);
+			}
+		} finally {
+			closeStatements(stmt);
+		}
+
+		return transactions;
+	}
+
 	@Override
 	public Map<String, PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException {
 		Map<String, PlayerGroup> playerGroups = new HashMap<String, PlayerGroup>();

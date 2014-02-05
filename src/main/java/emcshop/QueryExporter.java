@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import emcshop.db.ConsolidatedTransaction;
 import emcshop.db.Inventory;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
@@ -281,6 +282,115 @@ public class QueryExporter {
 		return bbCode.toString();
 	}
 
+	public static String generateTransactionsBBCode(Collection<ConsolidatedTransaction> transactions, int netTotal, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		BBCodeBuilder bbCode = new BBCodeBuilder();
+
+		bbCode.font("courier new");
+
+		//date range
+		bbCode.b();
+		if (from == null && to == null) {
+			bbCode.text("entire history");
+		} else if (from == null) {
+			bbCode.text("up to ").text(df.format(to));
+		} else if (to == null) {
+			bbCode.text(df.format(from)).text(" to today");
+		} else if (from.equals(to)) {
+			bbCode.text(df.format(from));
+		} else {
+			bbCode.text(df.format(from)).text(" to ").text(df.format(to));
+		}
+		bbCode.close().nl();
+
+		//item table
+		bbCode.text("| - - -Date- - - | - - Player- - | - - -Item - - - | - Quantity- | - -Amount - |").nl();
+		for (ConsolidatedTransaction transaction : transactions) {
+			Date ts = transaction.getFirstTransactionDate();
+			bbCode.text(df.format(ts) + " | ");
+
+			String player = transaction.getPlayer();
+			bbCodeColumn(player, 13, bbCode);
+			bbCode.text(" | ");
+
+			String item = transaction.getItem();
+			bbCodeColumn(item, 15, bbCode);
+			bbCode.text(" | ");
+
+			int quantity = transaction.getQuantity();
+			String quantityStr = formatQuantity(quantity);
+			if (quantity > 0) {
+				bbCode.color("green", quantityStr);
+			} else if (quantity < 0) {
+				bbCode.color("red", quantityStr);
+			} else {
+				bbCode.text(quantityStr);
+			}
+			bbCodeColumn("", 11 - quantityStr.length(), bbCode);
+			bbCode.text(" | ");
+
+			int amount = transaction.getAmount();
+			String amountStr = formatRupees(amount);
+			if (amount > 0) {
+				bbCode.color("green", amountStr);
+			} else if (amount < 0) {
+				bbCode.color("red", amountStr);
+			} else {
+				bbCode.text(amountStr);
+			}
+
+			bbCode.nl();
+		}
+
+		//footer and total
+		String footer = "EMC Shopkeeper v" + Main.VERSION;
+		bbCode.url(Main.URL, footer);
+		bbCode.text(" | ");
+		bbCode.b();
+		bbCode.text(" Total: ");
+		String netTotalStr = formatRupees(netTotal);
+		if (netTotal > 0) {
+			bbCode.color("green", netTotalStr);
+		} else if (netTotal < 0) {
+			bbCode.color("red", netTotalStr);
+		} else {
+			bbCode.text(netTotalStr);
+		}
+		bbCode.close(); //close "b"
+
+		bbCode.close(); //close "font"
+
+		return bbCode.toString();
+	}
+
+	public static String generateTransactionsCsv(Collection<ConsolidatedTransaction> transactions, int netTotal, Date from, Date to) {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		StringWriter sw = new StringWriter();
+		CSVWriter writer = new CSVWriter(sw);
+
+		writer.writeNext(new String[] { (from == null) ? "no start date" : df.format(from), (to == null) ? "no end date" : df.format(to) });
+		writer.writeNext(new String[] { "Date", "Player", "Item", "Quantity", "Amount" });
+		for (ConsolidatedTransaction group : transactions) {
+			//@formatter:off
+			writer.writeNext(new String[]{
+				df.format(group.getFirstTransactionDate()),
+				group.getPlayer(),
+				group.getItem(),
+				group.getQuantity() + "",
+				group.getAmount() + ""
+			});
+			//@formatter:on
+		}
+		writer.writeNext(new String[] { "EMC Shopkeeper v" + Main.VERSION + " - " + Main.URL, "", "", "", netTotal + "" });
+
+		try {
+			writer.close();
+		} catch (IOException e) {
+			//writing to string
+		}
+		return sw.toString();
+	}
+
 	public static String generateInventoryCsv(Collection<Inventory> inventory) {
 		StringWriter sw = new StringWriter();
 		CSVWriter writer = new CSVWriter(sw);
@@ -332,16 +442,26 @@ public class QueryExporter {
 	}
 
 	private static void bbCodeColumn(String text, int length, BBCodeBuilder sb) {
-		sb.text(text);
+		if (text.length() == length) {
+			sb.text(text);
+			return;
+		}
+
+		if (text.length() > length) {
+			text = text.substring(0, length).trim();
+		}
+
 		if (length - text.length() == 1) {
-			sb.text('.');
-		} else {
-			for (int i = text.length(); i < length; i++) {
-				if (i == text.length()) {
-					sb.text(' ');
-				} else {
-					sb.text('.');
-				}
+			sb.text(text + '.');
+			return;
+		}
+
+		sb.text(text);
+		for (int i = text.length(); i < length; i++) {
+			if (i == text.length()) {
+				sb.text(' ');
+			} else {
+				sb.text('.');
 			}
 		}
 	}

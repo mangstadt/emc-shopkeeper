@@ -30,6 +30,7 @@ import net.miginfocom.swing.MigLayout;
 import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.QueryExporter;
+import emcshop.db.ConsolidatedTransaction;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
@@ -45,14 +46,10 @@ public class TransactionsTab extends JPanel {
 	private final Settings settings;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 
-	private final JCheckBox showSinceLastUpdate;
-	private final JCheckBox entireHistory;
-	private final JLabel toDatePickerLabel;
-	private final DatePicker toDatePicker;
-	private final JLabel fromDatePickerLabel;
-	private final DatePicker fromDatePicker;
-	private final JButton showItems;
-	private final JButton showPlayers;
+	private final JCheckBox entireHistory, showSinceLastUpdate;
+	private final JLabel fromDatePickerLabel, toDatePickerLabel;
+	private final DatePicker fromDatePicker, toDatePicker;
+	private final JButton showItems, showPlayers, showTransactions;
 
 	private final JLabel exportLabel;
 	private final ExportComboBox export;
@@ -74,6 +71,9 @@ public class TransactionsTab extends JPanel {
 	private MyJScrollPane itemsTableScrollPane;
 
 	private PlayersPanel playersPanel;
+
+	private TransactionsTable transactionsTable;
+	private MyJScrollPane transactionsTableScrollPane;
 
 	private int netTotal;
 
@@ -136,7 +136,7 @@ public class TransactionsTab extends JPanel {
 				if (!checkDateRange()) {
 					return;
 				}
-				showTransactions();
+				showItems();
 			}
 		});
 
@@ -151,6 +151,17 @@ public class TransactionsTab extends JPanel {
 			}
 		});
 
+		showTransactions = new JButton("By Date", ImageManager.getSearch());
+		showTransactions.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (!checkDateRange()) {
+					return;
+				}
+				showTransactions();
+			}
+		});
+
 		tablePanel = new JPanel(new MigLayout("width 100%, height 100%, fillx, insets 0"));
 
 		exportLabel = new JLabel("Export:");
@@ -162,18 +173,7 @@ public class TransactionsTab extends JPanel {
 		filterByItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				FilterList filterList = filterByItem.getNames();
-
-				if (itemsTable != null) {
-					itemsTable.filter(filterList);
-					itemsTableScrollPane.scrollToTop();
-				}
-				if (playersPanel != null) {
-					playersPanel.filterByItems(filterList);
-				}
-
-				updateNetTotal();
-				updateCustomers();
+				filter();
 			}
 		});
 
@@ -183,14 +183,7 @@ public class TransactionsTab extends JPanel {
 		filterByPlayer.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				FilterList filterList = filterByPlayer.getNames();
-
-				if (playersPanel != null) {
-					playersPanel.filterByPlayers(filterList);
-				}
-
-				updateNetTotal();
-				updateCustomers();
+				filter();
 			}
 		});
 
@@ -218,8 +211,9 @@ public class TransactionsTab extends JPanel {
 		left.add(toDatePickerLabel);
 		left.add(toDatePicker, "wrap");
 
-		left.add(showItems, "split 2");
+		left.add(showItems, "split 3");
 		left.add(showPlayers);
+		left.add(showTransactions);
 
 		add(left, "w 100%"); //width of 100% forces the right panel to be compact
 
@@ -275,6 +269,28 @@ public class TransactionsTab extends JPanel {
 		updateEntireHistoryCheckbox();
 	}
 
+	private void filter() {
+		FilterList items = filterByItem.getNames();
+		FilterList players = filterByPlayer.getNames();
+
+		if (itemsTable != null) {
+			itemsTable.filter(items);
+			itemsTableScrollPane.scrollToTop();
+		}
+		if (playersPanel != null) {
+			playersPanel.filterByItems(items);
+			playersPanel.filterByPlayers(players);
+		}
+		if (transactionsTable != null) {
+			transactionsTable.filterByItem(items);
+			transactionsTable.filterByPlayers(players);
+			transactionsTableScrollPane.scrollToTop();
+		}
+
+		updateNetTotal();
+		updateCustomers();
+	}
+
 	public void clear() {
 		try {
 			fromDatePicker.setDate(new Date());
@@ -286,6 +302,8 @@ public class TransactionsTab extends JPanel {
 		itemsTable = null;
 		itemsTableScrollPane = null;
 		playersPanel = null;
+		transactionsTable = null;
+		transactionsTableScrollPane = null;
 		netTotal = 0;
 
 		if (settings.getPreviousUpdate() == null) {
@@ -334,7 +352,7 @@ public class TransactionsTab extends JPanel {
 				}
 			}
 
-			showTransactions();
+			showItems();
 		}
 	}
 
@@ -363,29 +381,13 @@ public class TransactionsTab extends JPanel {
 		entireHistory.setText(text);
 	}
 
-	private void showTransactions() {
+	private void showItems() {
 		Date range[] = getQueryDateRange();
-		showTransactions(range[0], range[1]);
+		showItems(range[0], range[1]);
 	}
 
-	public void showTransactions(final Date from, final Date to) {
+	public void showItems(final Date from, final Date to) {
 		busyCursor(owner, true);
-
-		tablePanel.removeAll();
-		tablePanel.validate();
-
-		playersPanel = null;
-
-		exportLabel.setEnabled(true);
-		export.setEnabled(true);
-		filterByItemLabel.setEnabled(true);
-		filterByItem.setEnabled(true);
-		filterByItem.setText("");
-		filterByPlayerLabel.setEnabled(false);
-		filterByPlayer.setEnabled(false);
-		filterByPlayer.setText("");
-		sortByLabel.setEnabled(false);
-		sortBy.setEnabled(false);
 
 		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
 		Thread t = new Thread() {
@@ -407,6 +409,25 @@ public class TransactionsTab extends JPanel {
 							}
 						});
 					}
+
+					//reset GUI
+					tablePanel.removeAll();
+					tablePanel.validate();
+
+					playersPanel = null;
+					transactionsTable = null;
+					transactionsTableScrollPane = null;
+
+					exportLabel.setEnabled(true);
+					export.setEnabled(true);
+					filterByItemLabel.setEnabled(true);
+					filterByItem.setEnabled(true);
+					filterByItem.setText("");
+					filterByPlayerLabel.setEnabled(false);
+					filterByPlayer.setEnabled(false);
+					filterByPlayer.setText("");
+					sortByLabel.setEnabled(false);
+					sortBy.setEnabled(false);
 
 					//render table
 					itemsTable = new ItemsTable(itemGroupsList, settings.isShowQuantitiesInStacks());
@@ -438,24 +459,6 @@ public class TransactionsTab extends JPanel {
 	public void showPlayers(final Date from, final Date to) {
 		busyCursor(owner, true);
 
-		tablePanel.removeAll();
-		tablePanel.validate();
-
-		itemsTable = null;
-		itemsTableScrollPane = null;
-
-		exportLabel.setEnabled(true);
-		export.setEnabled(true);
-		filterByItemLabel.setEnabled(true);
-		filterByItem.setEnabled(true);
-		filterByItem.setText("");
-		filterByPlayerLabel.setEnabled(true);
-		filterByPlayer.setEnabled(true);
-		filterByPlayer.setText("");
-		sortBy.setEnabled(true);
-		sortBy.setSelectedIndex(0);
-		sortByLabel.setEnabled(true);
-
 		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
 		Thread t = new Thread() {
 			@Override
@@ -463,6 +466,27 @@ public class TransactionsTab extends JPanel {
 				try {
 					//query database
 					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(from, to).values();
+
+					//reset GUI
+					tablePanel.removeAll();
+					tablePanel.validate();
+
+					itemsTable = null;
+					itemsTableScrollPane = null;
+					transactionsTable = null;
+					transactionsTableScrollPane = null;
+
+					exportLabel.setEnabled(true);
+					export.setEnabled(true);
+					filterByItemLabel.setEnabled(true);
+					filterByItem.setEnabled(true);
+					filterByItem.setText("");
+					filterByPlayerLabel.setEnabled(true);
+					filterByPlayer.setEnabled(true);
+					filterByPlayer.setText("");
+					sortBy.setEnabled(true);
+					sortBy.setSelectedIndex(0);
+					sortByLabel.setEnabled(true);
 
 					//render table
 					playersPanel = new PlayersPanel(playerGroups, profileImageLoader, settings.isShowQuantitiesInStacks());
@@ -474,6 +498,62 @@ public class TransactionsTab extends JPanel {
 					updateCustomers();
 				} catch (SQLException e) {
 					loading.dispose();
+					ErrorDialog.show(owner, "An error occurred querying the database.", e);
+				} finally {
+					loading.dispose();
+					busyCursor(owner, false);
+				}
+			}
+		};
+		t.start();
+		loading.setVisible(true);
+	}
+
+	private void showTransactions() {
+		busyCursor(owner, true);
+
+		Date range[] = getQueryDateRange();
+		final Date from = range[0];
+		final Date to = range[1];
+
+		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				try {
+					//query database
+					List<ConsolidatedTransaction> transactions = dao.getTransactionsByDate(from, to);
+
+					//reset GUI
+					tablePanel.removeAll();
+					tablePanel.validate();
+
+					itemsTable = null;
+					itemsTableScrollPane = null;
+					playersPanel = null;
+
+					exportLabel.setEnabled(true);
+					export.setEnabled(true);
+					filterByItemLabel.setEnabled(true);
+					filterByItem.setEnabled(true);
+					filterByItem.setText("");
+					filterByPlayerLabel.setEnabled(true);
+					filterByPlayer.setEnabled(true);
+					filterByPlayer.setText("");
+					sortByLabel.setEnabled(false);
+					sortBy.setEnabled(false);
+
+					//render table
+					transactionsTable = new TransactionsTable(transactions, settings.isShowQuantitiesInStacks(), profileImageLoader);
+					transactionsTable.setFillsViewportHeight(true);
+					transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
+					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
+					tablePanel.validate();
+
+					updateDateRangeLabel(from, to);
+					updateNetTotal();
+					updateCustomers();
+				} catch (SQLException e) {
 					ErrorDialog.show(owner, "An error occurred querying the database.", e);
 				} finally {
 					loading.dispose();
@@ -518,6 +598,10 @@ public class TransactionsTab extends JPanel {
 					netTotal += item.getNetAmount();
 				}
 			}
+		} else if (transactionsTable != null) {
+			for (ConsolidatedTransaction transaction : transactionsTable.getDisplayedTransactions()) {
+				netTotal += transaction.getAmount();
+			}
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -528,18 +612,22 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private void updateCustomers() {
-		boolean visible = false;
-
+		//get the number of customers being displayed
+		Integer customersCount = null;
 		if (playersPanel != null) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("<html><font size=5><code>");
-			sb.append(playersPanel.getDisplayedPlayers().size());
-			sb.append("</code></font></html>");
-
-			customers.setText(sb.toString());
-			visible = true;
+			customersCount = playersPanel.getDisplayedPlayers().size();
+		}
+		if (transactionsTable != null) {
+			customersCount = transactionsTable.getDisplayedPlayers().size();
 		}
 
+		//update the label text
+		if (customersCount != null) {
+			customers.setText("<html><font size=5><code>" + customersCount + "</code></font></html>");
+		}
+
+		//make label visible
+		boolean visible = (customersCount != null);
 		customersLabel.setVisible(visible);
 		customers.setVisible(visible);
 	}
@@ -590,9 +678,11 @@ public class TransactionsTab extends JPanel {
 		if (itemsTable != null) {
 			itemsTable.setShowQuantitiesInStacks(stacks);
 		}
-
 		if (playersPanel != null) {
 			playersPanel.setShowQuantitiesInStacks(stacks);
+		}
+		if (transactionsTable != null) {
+			transactionsTable.setShowQuantitiesInStacks(stacks);
 		}
 	}
 
@@ -603,8 +693,9 @@ public class TransactionsTab extends JPanel {
 
 		@Override
 		public String bbCode() {
-			Date from = fromDatePicker.getDate();
-			Date to = toDatePicker.getDate();
+			Date range[] = getQueryDateRange();
+			Date from = range[0];
+			Date to = range[1];
 
 			if (itemsTable != null) {
 				return QueryExporter.generateItemsBBCode(itemsTable.getDisplayedItemGroups(), netTotal, from, to);
@@ -616,13 +707,18 @@ public class TransactionsTab extends JPanel {
 				return QueryExporter.generatePlayersBBCode(players, items, from, to);
 			}
 
+			if (transactionsTable != null) {
+				return QueryExporter.generateTransactionsBBCode(transactionsTable.getDisplayedTransactions(), netTotal, from, to);
+			}
+
 			return null;
 		}
 
 		@Override
 		public String csv() {
-			Date from = fromDatePicker.getDate();
-			Date to = toDatePicker.getDate();
+			Date range[] = getQueryDateRange();
+			Date from = range[0];
+			Date to = range[1];
 
 			if (itemsTable != null) {
 				return QueryExporter.generateItemsCsv(itemsTable.getDisplayedItemGroups(), netTotal, from, to);
@@ -632,6 +728,10 @@ public class TransactionsTab extends JPanel {
 				List<PlayerGroup> players = playersPanel.getDisplayedPlayers();
 				Map<PlayerGroup, List<ItemGroup>> items = playersPanel.getDisplayedItems();
 				return QueryExporter.generatePlayersCsv(players, items, from, to);
+			}
+
+			if (transactionsTable != null) {
+				return QueryExporter.generateTransactionsCsv(transactionsTable.getDisplayedTransactions(), netTotal, from, to);
 			}
 
 			return null;

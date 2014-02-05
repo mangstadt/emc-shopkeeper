@@ -238,6 +238,16 @@ public interface DbDao {
 	Map<String, ItemGroup> getItemGroups(Date from, Date to) throws SQLException;
 
 	/**
+	 * Gets all transactions by date, consolidating them so consecutive
+	 * purchases are combined into a single transaction.
+	 * @param from the start date
+	 * @param to the end date
+	 * @return the transactions
+	 * @throws SQLException
+	 */
+	List<ConsolidatedTransaction> getTransactionsByDate(Date from, Date to) throws SQLException;
+
+	/**
 	 * Computes what each player bought/sold over a date range.
 	 * @param from the start date
 	 * @param to the end date
