@@ -372,6 +372,7 @@
 	<Item name="Torch" id="50" />
 	<Item name="Trapdoor" id="96" group="Wood" />
 	<Item name="Trapped Chest" id="146" group="Wood" />
+	<Item name="Tripwire Hook" id="131" group="Iron" />
 	<Item name="Villager Egg" id="383:120" group="Spawn Eggs" />
 	<Item name="Vine" id="106" />
 	<Item name="Ward Disc" id="2265" stack="1" group="Discs" />
