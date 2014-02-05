@@ -4,9 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -29,6 +30,8 @@ import org.jsoup.select.Elements;
 
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.EmcSession;
+import emcshop.util.CaseInsensitiveHashMap;
+import emcshop.util.CaseInsensitiveHashSet;
 import emcshop.util.Settings;
 
 /**
@@ -40,8 +43,9 @@ public class ProfileImageLoader {
 
 	private final File cacheDir;
 	private final Settings settings;
-	private final Set<String> downloaded = Collections.synchronizedSet(new HashSet<String>());
-	private final LinkedBlockingQueue<Job> queue = new LinkedBlockingQueue<Job>();
+	private final Set<String> downloaded = new CaseInsensitiveHashSet();
+	private final Map<String, List<Job>> waitList = new CaseInsensitiveHashMap<List<Job>>();
+	private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<String>();
 
 	/**
 	 * Creates a profile image loader with 4 threads.
@@ -101,15 +105,31 @@ public class ProfileImageLoader {
 		image = ImageManager.scale(image, maxSize);
 		label.setIcon(image);
 
-		//download the most up-to-date image if it hasn't been downloaded already
-		if (!downloaded.contains(playerName.toLowerCase())) {
-			Job job = new Job(playerName, label, maxSize, listener);
-			try {
-				queue.put(job);
-			} catch (InterruptedException e) {
-				//should never be thrown because the queue doesn't have a max size
-				logger.log(Level.SEVERE, "Queue's \"put\" operation was interrupted.", e);
+		synchronized (downloaded) {
+			if (downloaded.contains(playerName)) {
+				//the image has already been downloaded, so the cached version is the most up-to-date version of the image
+				return;
 			}
+
+			Job job = new Job(playerName, label, maxSize, listener);
+
+			//see if the image is already queued for download
+			List<Job> waiting = waitList.get(playerName);
+			if (waiting == null) {
+				//player name is not queued for download, so add it to the queue
+				try {
+					downloadQueue.put(job.playerName);
+				} catch (InterruptedException e) {
+					//should never be thrown because the queue doesn't have a max size
+					logger.log(Level.SEVERE, "Queue's \"put\" operation was interrupted.", e);
+				}
+
+				waiting = new ArrayList<Job>();
+				waitList.put(playerName, waiting);
+			}
+
+			//add job to wait list
+			waiting.add(job);
 		}
 	}
 
@@ -248,10 +268,10 @@ public class ProfileImageLoader {
 		@Override
 		public void run() {
 			while (true) {
-				//get the next job
-				Job job;
+				//get the next player name
+				String playerName;
 				try {
-					job = queue.take();
+					playerName = downloadQueue.take();
 				} catch (InterruptedException e) {
 					break;
 				}
@@ -259,23 +279,39 @@ public class ProfileImageLoader {
 				//download the image
 				byte[] data = null;
 				try {
-					data = downloadImage(job.playerName);
+					data = downloadImage(playerName);
 				} catch (IOException e) {
 					logger.log(Level.WARNING, "Problem downloading profile image.", e);
 				}
-				downloaded.add(job.playerName.toLowerCase());
+
+				List<Job> waiting;
+				synchronized (downloaded) {
+					downloaded.add(playerName);
+
+					waiting = waitList.get(playerName);
+					if (waiting == null) {
+						//there are no labels waiting to be updated
+						//should never happen, there should always be at least 1 label waiting to be updated
+						continue;
+					}
+				}
 
 				if (data == null) {
-					//label does not need to be updated
+					//the image hasn't changed (or there was an error downloading the image), so the labels don't need to be updated
+					waitList.remove(playerName);
 					continue;
 				}
 
+				//update all the labels with the new image
 				ImageIcon image = new ImageIcon(data);
-				image = ImageManager.scale(image, job.maxSize);
-				job.label.setIcon(image);
-				if (job.listener != null) {
-					job.listener.onImageDownloaded(job.label);
+				for (Job job : waiting) {
+					ImageIcon scaledImage = ImageManager.scale(image, job.maxSize);
+					job.label.setIcon(scaledImage);
+					if (job.listener != null) {
+						job.listener.onImageDownloaded(job.label);
+					}
 				}
+				waitList.remove(playerName);
 			}
 		}
 	}
