@@ -115,6 +115,8 @@
 	<Item name="Dispenser" id="23" group="Stone" />
 	<Item name="Door" id="64" stack="1" group="Wood" />
 	<Item name="Dragon Egg" id="122" />
+	<Item name="Dragon Stone" emcNames="Coal - §5§lDragon Stone" />
+	<Item name="Dragon Stone Fragment" emcNames="Flint - §5Dragon Stone Fragment" />
 	<Item name="Dropper" id="158" group="Stone" />
 	<Item name="Egg" id="344" stack="1" />
 	<Item name="Emerald" id="388" />
