@@ -42,7 +42,7 @@ public class TransactionsTable extends JTable {
 	 * are defined is the order that they will appear in the table.
 	 */
 	public static enum Column {
-		TS("Date"), PLAYER_NAME("Player"), ITEM_NAME("Item Name"), QUANTITY("Quantity"), AMOUNT("Amount");
+		TS("Date"), PLAYER_NAME("Player"), ITEM_NAME("Item"), QUANTITY("Quantity"), AMOUNT("Amount");
 
 		private final String name;
 
