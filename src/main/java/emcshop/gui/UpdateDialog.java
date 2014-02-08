@@ -1,11 +1,13 @@
 package emcshop.gui;
 
+import static emcshop.scraper.TransactionPuller.filter;
 import static emcshop.util.GuiUtils.toolTipText;
 
 import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -40,43 +42,37 @@ import emcshop.scraper.RupeeTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
 import emcshop.util.GuiUtils;
-import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
 
 @SuppressWarnings("serial")
 public class UpdateDialog extends JDialog {
 	private static final Logger logger = Logger.getLogger(UpdateDialog.class.getName());
 
-	private final MainFrame owner;
 	private final DbDao dao;
-	private final Settings settings;
-	private final TransactionPuller puller;
+	private TransactionPuller puller;
 
 	private JButton cancel, stop;
-	private volatile boolean updateCanceled = true;
 	private JLabel shopTransactionsLabel, paymentTransactionsLabel, bonusFeeTransactionsLabel;
 	private JLabel pages;
 	private JLabel timerLabel;
 	private JCheckBox display;
 
-	private Thread pullerThread;
-
+	private BadSessionException badLogin;
+	private boolean updateComitted = false, cancelOrStopClicked = false;
 	private long started, timeTaken;
-	private TransactionPullerListener listener;
+	private int shopTransactionCount, paymentTransactionCount, bonusFeeTransactionCount, transactionCount;
+	private int pageCount;
+	private Date earliestParsedTransactionDate;
 
-	private UpdateDialog(final MainFrame owner, final DbDao dao, final Settings settings, final TransactionPuller puller, final Long estimatedTime) {
+	private UpdateDialog(MainFrame owner, final DbDao dao, final EmcSession session, final TransactionPuller.Config pullerConfig, final Long estimatedTime) {
 		super(owner, "Updating Transactions", true);
-		this.owner = owner;
 		this.dao = dao;
-		this.settings = settings;
-		this.puller = puller;
-		listener = new TransactionPullerListener(puller.getStopAtPage());
 
 		setUndecorated(true);
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 		setResizable(false);
 
-		final boolean firstUpdate = (puller.getStopAtDate() == null);
+		final boolean firstUpdate = (pullerConfig.getStopAtDate() == null);
 		createWidgets(firstUpdate);
 		layoutWidgets(firstUpdate);
 
@@ -84,99 +80,153 @@ public class UpdateDialog extends JDialog {
 		setSize(getWidth() + 20, getHeight());
 		setLocationRelativeTo(owner);
 
-		pullerThread = new Thread() {
+		Thread pullerThread = new Thread() {
 			@Override
 			public void run() {
-				boolean repeat;
-				do {
-					repeat = false;
+				final Integer stopAtPage = pullerConfig.getStopAtPage();
+				final NumberFormat nf = NumberFormat.getInstance();
+				final NumberFormat timeNf = new DecimalFormat("00");
+				long previousTime = 0;
 
-					Thread timerThread = new TimerThread(estimatedTime);
-					timerThread.setDaemon(true);
-					timerThread.start();
+				Thread timerThread = new TimerThread(estimatedTime);
+				timerThread.setDaemon(true);
+				timerThread.start();
 
-					started = System.currentTimeMillis();
+				started = System.currentTimeMillis();
 
+				try {
+					puller = new TransactionPuller(session, pullerConfig);
+				} catch (BadSessionException e) {
+					badLogin = e;
+					dispose();
+					return;
+				} catch (IOException e) {
+					dispose();
+					throw new RuntimeException(e);
+				}
+
+				try {
+					List<RupeeTransaction> transactions;
+					while ((transactions = puller.nextPage()) != null) {
+						synchronized (UpdateDialog.this) {
+							if (cancelOrStopClicked) {
+								puller.cancel();
+								break;
+							}
+
+							//keep track of the oldest transaction date
+							if (!transactions.isEmpty()) {
+								RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
+								Date lastTs = last.getTs();
+								if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
+									earliestParsedTransactionDate = lastTs;
+								}
+							}
+
+							List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
+							dao.insertTransactions(shopTransactions, true);
+							shopTransactionCount += shopTransactions.size();
+							transactionCount += shopTransactions.size();
+
+							List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
+							dao.insertPaymentTransactions(paymentTransactions);
+							paymentTransactionCount += paymentTransactions.size();
+							transactionCount += paymentTransactions.size();
+
+							List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
+							dao.updateBonusesFees(bonusFeeTransactions);
+							bonusFeeTransactionCount += bonusFeeTransactions.size();
+							transactionCount += bonusFeeTransactions.size();
+
+							pageCount++;
+						}
+
+						String pagesText = nf.format(pageCount);
+						if (stopAtPage != null) {
+							pagesText += " / " + stopAtPage;
+						}
+						UpdateDialog.this.pages.setText(pagesText);
+
+						shopTransactionsLabel.setText(nf.format(shopTransactionCount));
+						paymentTransactionsLabel.setText(nf.format(paymentTransactionCount));
+						bonusFeeTransactionsLabel.setText(nf.format(bonusFeeTransactionCount));
+
+						if (pageCount % 100 == 0 && logger.isLoggable(Level.FINEST)) {
+							long fromStart = System.currentTimeMillis() - started;
+							long fromPrevious = System.currentTimeMillis() - previousTime;
+							long fromStartComponents[] = TimeUtils.parseTimeComponents(fromStart);
+							long fromPreviousComponents[] = TimeUtils.parseTimeComponents(fromPrevious);
+							//@formatter:off
+							logger.finest(
+								"DOWNLOAD STATS | " + 
+								"Pages: " + pageCount + " | " +
+								"From start: " + timeNf.format(fromStartComponents[3]) + ":" + timeNf.format(fromStartComponents[2]) + ":" + timeNf.format(fromStartComponents[1]) + " | " +
+								"From previous: " + timeNf.format(fromPreviousComponents[3]) + ":" + timeNf.format(fromPreviousComponents[2]) + ":" + timeNf.format(fromPreviousComponents[1])
+							);
+							//@formatter:on
+							previousTime = System.currentTimeMillis();
+						}
+					}
+
+					//update completed successfully
 					try {
-						TransactionPuller.Result result = puller.start(settings.getSession(), listener);
-
-						if (result != null) {
-							//update completed successfully
+						synchronized (UpdateDialog.this) {
+							if (cancelOrStopClicked) {
+								return;
+							}
 							timeTaken = System.currentTimeMillis() - started;
 							completeUpdate();
 						}
-					} catch (BadSessionException e) {
-						//session token is invalid
-						repeat = getNewSession();
-					} catch (Throwable t) {
-						//an error occurred during the update
-						timeTaken = System.currentTimeMillis() - started;
+					} finally {
+						dispose();
+					}
+				} catch (Throwable t) {
+					//an error occurred during the update
 
-						if (!firstUpdate || listener.getParsedTransactionsCount() == 0) {
-							dao.rollback();
-							dispose();
-							throw new RuntimeException(t);
-						}
+					cancel.setEnabled(false);
+					if (stop != null) {
+						stop.setEnabled(false);
+					}
 
-						timerThread.interrupt();
-						logger.log(Level.SEVERE, "Error downloading transactions.", t);
-						boolean saveTransactions = UpdateErrorDialog.show(UpdateDialog.this, listener.pageCount, listener.getParsedTransactionsCount(), listener.earliestParsedTransactionDate, t);
-						if (saveTransactions) {
-							completeUpdate();
-						} else {
-							dao.rollback();
-							dispose();
+					timerThread.interrupt();
+					timeTaken = System.currentTimeMillis() - started;
+
+					try {
+						synchronized (UpdateDialog.this) {
+							if (!firstUpdate || transactionCount == 0) {
+								dao.rollback();
+								throw new RuntimeException(t);
+							}
+
+							logger.log(Level.SEVERE, "Error downloading transactions.", t);
+
+							boolean saveTransactions = UpdateErrorDialog.show(UpdateDialog.this, pageCount, transactionCount, earliestParsedTransactionDate, t);
+							if (saveTransactions) {
+								completeUpdate();
+							} else {
+								dao.rollback();
+							}
 						}
 					} finally {
-						timerThread.interrupt();
+						dispose(); //Java doesn't seem to like it when dispose() calls are within synchronized blocks
 					}
-				} while (repeat);
-
-				dispose();
+				}
 			}
 		};
 		pullerThread.setDaemon(true);
 		pullerThread.start();
 	}
 
-	/**
-	 * Gets a new session token.
-	 * @return true if a new session token was acquired, false if not
-	 */
-	private boolean getNewSession() {
-		EmcSession oldSession = settings.getSession();
-		String username = (oldSession == null) ? null : oldSession.getUsername();
-
-		LoginDialog.Result loginResult = LoginDialog.show(this, settings.isPersistSession(), username);
-		if (loginResult == null) {
-			//user canceled the login dialog, so cancel the update operation
-			return false;
-		}
-
-		EmcSession session = loginResult.getSession();
-		settings.setSession(session);
-		settings.setPersistSession(loginResult.isRememberMe());
-		settings.save();
-		if (settings.isPersistSession()) {
-			owner.setClearSessionMenuItemEnabled(true);
-		}
-
-		//restart the puller with the new session token
-		return true;
-	}
-
 	private void completeUpdate() {
 		try {
-			if (listener.earliestParsedTransactionDate != null) {
-				dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
+			if (earliestParsedTransactionDate != null) {
+				dao.updateBonusesFeesSince(earliestParsedTransactionDate);
 			}
 			dao.commit();
-			updateCanceled = false;
+			updateComitted = true;
 		} catch (SQLException e) {
 			dao.rollback();
 			throw new RuntimeException(e);
-		} finally {
-			dispose();
 		}
 	}
 
@@ -188,9 +238,8 @@ public class UpdateDialog extends JDialog {
 		cancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				synchronized (puller) {
-					//synchronized so the code in the listener is not executed at the same time as this code
-					puller.cancel();
+				synchronized (UpdateDialog.this) {
+					cancelOrStopClicked = true;
 					dao.rollback();
 				}
 				dispose();
@@ -203,18 +252,19 @@ public class UpdateDialog extends JDialog {
 			stop.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					synchronized (puller) {
-						//synchronized so the code in the listener is not executed at the same time as this code
+					boolean noTransactions = false;
+					synchronized (UpdateDialog.this) {
+						cancelOrStopClicked = true;
 						timeTaken = System.currentTimeMillis() - started;
-						puller.cancel();
-
-						if (listener.getParsedTransactionsCount() == 0) {
-							dispose();
-							return;
+						if (transactionCount == 0) {
+							noTransactions = true;
 						}
 					}
 
-					completeUpdate();
+					if (!noTransactions) {
+						completeUpdate();
+					}
+					dispose();
 				}
 			});
 		}
@@ -258,82 +308,6 @@ public class UpdateDialog extends JDialog {
 		}
 	}
 
-	private class TransactionPullerListener extends TransactionPuller.Listener {
-		private final NumberFormat nf = NumberFormat.getInstance();
-		private final NumberFormat timeNf = new DecimalFormat("00");
-		private final Integer stopAtPage;
-		private int shopTransactionCount = 0, paymentTransactionCount = 0, bonusFeeTransactionCount = 0;
-		private int pageCount = 0;
-		private long previousTime = 0;
-		private Date earliestParsedTransactionDate;
-
-		public TransactionPullerListener(Integer stopAtPage) {
-			this.stopAtPage = stopAtPage;
-		}
-
-		@Override
-		public void onPageScraped(int page, List<RupeeTransaction> transactions) throws Throwable {
-			synchronized (puller) { //the method itself cannot have a "synchronized" flag because there is a synchronized block in the cancel button's click handler
-				if (puller.isCanceled()) {
-					return;
-				}
-
-				//keep track of the oldest transaction date
-				if (!transactions.isEmpty()) {
-					RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
-					Date lastTs = last.getTs();
-					if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
-						earliestParsedTransactionDate = lastTs;
-					}
-				}
-
-				List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
-				dao.insertTransactions(shopTransactions, true);
-				shopTransactionCount += shopTransactions.size();
-
-				List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
-				dao.insertPaymentTransactions(paymentTransactions);
-				paymentTransactionCount += paymentTransactions.size();
-
-				List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
-				dao.updateBonusesFees(bonusFeeTransactions);
-				bonusFeeTransactionCount += bonusFeeTransactions.size();
-
-				pageCount++;
-
-				String pagesText = nf.format(pageCount);
-				if (stopAtPage != null) {
-					pagesText += " / " + stopAtPage;
-				}
-				UpdateDialog.this.pages.setText(pagesText);
-
-				shopTransactionsLabel.setText(nf.format(shopTransactionCount));
-				paymentTransactionsLabel.setText(nf.format(paymentTransactionCount));
-				bonusFeeTransactionsLabel.setText(nf.format(bonusFeeTransactionCount));
-
-				if (pageCount % 100 == 0 && logger.isLoggable(Level.FINEST)) {
-					long fromStart = System.currentTimeMillis() - started;
-					long fromPrevious = System.currentTimeMillis() - previousTime;
-					long fromStartComponents[] = TimeUtils.parseTimeComponents(fromStart);
-					long fromPreviousComponents[] = TimeUtils.parseTimeComponents(fromPrevious);
-					//@formatter:off
-						logger.finest(
-							"DOWNLOAD STATS | " + 
-							"Pages: " + pageCount + " | " +
-							"From start: " + timeNf.format(fromStartComponents[3]) + ":" + timeNf.format(fromStartComponents[2]) + ":" + timeNf.format(fromStartComponents[1]) + " | " +
-							"From previous: " + timeNf.format(fromPreviousComponents[3]) + ":" + timeNf.format(fromPreviousComponents[2]) + ":" + timeNf.format(fromPreviousComponents[1])
-						);
-						//@formatter:on
-					previousTime = System.currentTimeMillis();
-				}
-			}
-		}
-
-		public int getParsedTransactionsCount() {
-			return shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount;
-		}
-	}
-
 	private class TimerThread extends Thread {
 		private final String estimatedTimeDisplay;
 
@@ -345,7 +319,7 @@ public class UpdateDialog extends JDialog {
 		public void run() {
 			long start = System.currentTimeMillis();
 			NumberFormat nf = new DecimalFormat("00");
-			while (true) {
+			while (isDisplayable()) {
 				long elapsed = System.currentTimeMillis() - start;
 				long components[] = TimeUtils.parseTimeComponents(elapsed);
 				String timerText = nf.format(components[3]) + ":" + nf.format(components[2]) + ":" + nf.format(components[1]);
@@ -367,25 +341,28 @@ public class UpdateDialog extends JDialog {
 	 * Shows the update dialog.
 	 * @param owner
 	 * @param dao
-	 * @param settings
 	 * @param puller
 	 * @param estimatedTime
 	 * @return statistics of the update or null if the update was canceled
 	 */
-	public static Result show(MainFrame owner, DbDao dao, Settings settings, TransactionPuller puller, Long estimatedTime) {
-		UpdateDialog dialog = new UpdateDialog(owner, dao, settings, puller, estimatedTime);
+	public static Result show(MainFrame owner, DbDao dao, EmcSession session, TransactionPuller.Config pullerConfig, Long estimatedTime) throws BadSessionException {
+		UpdateDialog dialog = new UpdateDialog(owner, dao, session, pullerConfig, estimatedTime);
 		dialog.setVisible(true);
 
-		if (dialog.updateCanceled) {
+		if (dialog.badLogin != null) {
+			throw dialog.badLogin;
+		}
+
+		if (!dialog.updateComitted) {
 			return null;
 		}
 
 		Result result = new Result();
-		result.setShopTransactions(dialog.listener.shopTransactionCount);
-		result.setPaymentTransactions(dialog.listener.paymentTransactionCount);
-		result.setBonusFeeTransactions(dialog.listener.bonusFeeTransactionCount);
-		result.setPageCount(dialog.listener.pageCount);
-		result.setRupeeBalance(puller.getRupeeBalance());
+		result.setShopTransactions(dialog.shopTransactionCount);
+		result.setPaymentTransactions(dialog.paymentTransactionCount);
+		result.setBonusFeeTransactions(dialog.bonusFeeTransactionCount);
+		result.setPageCount(dialog.pageCount);
+		result.setRupeeBalance(dialog.puller.getRupeeBalance());
 		result.setShowResults(dialog.display.isSelected());
 		result.setStarted(new Date(dialog.started));
 		result.setTimeTaken(dialog.timeTaken);

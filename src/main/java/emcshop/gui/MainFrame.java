@@ -55,9 +55,9 @@ import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
+import emcshop.scraper.BadSessionException;
 import emcshop.scraper.EmcSession;
 import emcshop.scraper.TransactionPuller;
-import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
@@ -310,20 +310,10 @@ public class MainFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				//log the user in if he's not logged in
-				EmcSession session = settings.getSession();
-				if (session == null) {
-					LoginDialog.Result result = LoginDialog.show(MainFrame.this, settings.isPersistSession());
-					if (result == null) {
+				if (settings.getSession() == null) {
+					if (!login()) {
+						//user canceled the dialog
 						return;
-					}
-
-					session = result.getSession();
-					settings.setPersistSession(result.isRememberMe());
-					settings.setSession(session);
-					settings.save();
-
-					if (settings.isPersistSession()) {
-						clearSessionMenuItem.setEnabled(true);
 					}
 				}
 
@@ -334,7 +324,7 @@ public class MainFrame extends JFrame {
 					throw new RuntimeException(e);
 				}
 
-				TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
+				TransactionPuller.Config.Builder pullerConfigBuilder = new TransactionPuller.Config.Builder();
 				Long estimatedTime;
 				if (latestTransactionDate == null) {
 					//it's the first update
@@ -346,22 +336,34 @@ public class MainFrame extends JFrame {
 					}
 
 					Integer stopAtPage = result.getStopAtPage();
-					pullerFactory.setStopAtPage(stopAtPage);
+					pullerConfigBuilder.stopAtPage(stopAtPage);
 
 					Integer oldestPaymentTransactionDays = result.getOldestPaymentTransactionDays();
-					pullerFactory.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
+					pullerConfigBuilder.maxPaymentTransactionAge(oldestPaymentTransactionDays);
 
 					estimatedTime = result.getEstimatedTime();
 				} else {
-					pullerFactory.setStopAtDate(latestTransactionDate);
+					pullerConfigBuilder.stopAtDate(latestTransactionDate);
 					estimatedTime = null;
 				}
+				TransactionPuller.Config pullerConfig = pullerConfigBuilder.build();
 
-				TransactionPuller puller = pullerFactory.newInstance();
-				UpdateDialog.Result result = UpdateDialog.show(MainFrame.this, dao, settings, puller, estimatedTime);
-				if (result != null) {
-					updateSuccessful(result.getStarted(), result.getRupeeBalance(), result.getTimeTaken(), result.getShopTransactions(), result.getPaymentTransactions(), result.getBonusFeeTransactions(), result.getPageCount(), result.isShowResults());
-				}
+				boolean repeat;
+				do {
+					repeat = false;
+					try {
+						UpdateDialog.Result result = UpdateDialog.show(MainFrame.this, dao, settings.getSession(), pullerConfig, estimatedTime);
+						if (result != null) {
+							updateSuccessful(result.getStarted(), result.getRupeeBalance(), result.getTimeTaken(), result.getShopTransactions(), result.getPaymentTransactions(), result.getBonusFeeTransactions(), result.getPageCount(), result.isShowResults());
+						}
+					} catch (BadSessionException e) {
+						if (!login()) {
+							//user canceled the dialog
+							return;
+						}
+						repeat = true;
+					}
+				} while (repeat);
 			}
 		});
 
@@ -389,6 +391,29 @@ public class MainFrame extends JFrame {
 		inventoryTab = new InventoryTab(this, dao, settings.isShowQuantitiesInStacks());
 		bonusFeeTab = new BonusFeeTab(dao);
 		graphsTab = new ChartsTab(this, dao);
+	}
+
+	/**
+	 * Shows the login dialog.
+	 * @return true if the user logged in, false if he canceled the dialog
+	 */
+	private boolean login() {
+		EmcSession oldSession = settings.getSession();
+		String username = (oldSession == null) ? null : oldSession.getUsername();
+
+		LoginDialog.Result loginResult = LoginDialog.show(this, settings.isPersistSession(), username);
+		if (loginResult == null) {
+			return false;
+		}
+
+		EmcSession session = loginResult.getSession();
+		settings.setSession(session);
+		settings.setPersistSession(loginResult.isRememberMe());
+		settings.save();
+		if (settings.isPersistSession()) {
+			clearSessionMenuItem.setEnabled(true);
+		}
+		return true;
 	}
 
 	private void layoutWidgets() {
@@ -445,14 +470,6 @@ public class MainFrame extends JFrame {
 
 	public void updateInventoryTab() {
 		inventoryTab.refresh();
-	}
-
-	/**
-	 * Enables/disables the "Clear Session" menu item.
-	 * @param enabled true to enable, false to disable
-	 */
-	public void setClearSessionMenuItemEnabled(boolean enabled) {
-		clearSessionMenuItem.setEnabled(enabled);
 	}
 
 	/**

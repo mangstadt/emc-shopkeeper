@@ -1,5 +1,6 @@
 package emcshop.cli;
 
+import static emcshop.scraper.TransactionPuller.filter;
 import static emcshop.util.NumberFormatter.formatQuantity;
 import static emcshop.util.NumberFormatter.formatRupees;
 
@@ -30,7 +31,6 @@ import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RupeeTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
-import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.Settings;
 
 public class CliController {
@@ -85,25 +85,23 @@ public class CliController {
 			}
 		}
 
-		TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
+		TransactionPuller.Config.Builder cb = new TransactionPuller.Config.Builder();
 		if (firstUpdate) {
-			pullerFactory.setMaxPaymentTransactionAge(7);
+			cb.maxPaymentTransactionAge(7);
 			if (stopAtPage != null) {
-				pullerFactory.setStopAtPage(stopAtPage);
+				cb.stopAtPage(stopAtPage);
 			}
-			pullerFactory.setStartAtPage(startAtPage);
+			cb.startAtPage(startAtPage);
 		} else {
-			pullerFactory.setStopAtDate(latestTransactionDateFromDb);
+			cb.stopAtDate(latestTransactionDateFromDb);
 		}
+		TransactionPuller.Config config = cb.build();
 
-		TransactionPuller puller = pullerFactory.newInstance();
+		TransactionPuller puller = null;
 		EmcSession session = settings.getSession();
 		String sessionUsername = (session == null) ? null : session.getUsername();
-		TransactionPullerListener listener = new TransactionPullerListener();
-
 		boolean repeat;
-		Date started;
-		TransactionPuller.Result result = null;
+		long started;
 		do {
 			repeat = false;
 			if (session == null) {
@@ -130,37 +128,56 @@ public class CliController {
 				settings.save();
 			}
 
-			started = new Date();
+			started = System.currentTimeMillis();
 			try {
-				result = puller.start(session, listener);
+				puller = new TransactionPuller(session, config);
 			} catch (BadSessionException e) {
 				out.println("Your login session has expired.");
 				session = null;
 				repeat = true;
-			} catch (Throwable t) {
-				dao.rollback();
-				throw t;
 			}
 		} while (repeat);
 
-		if (result == null) {
-			//puller was cancelled
-			dao.rollback();
-			return;
+		final NumberFormat nf = NumberFormat.getInstance();
+		int pageCount = 0, transactionCount = 0;
+		Date earliestParsedTransactionDate = null;
+		List<RupeeTransaction> transactions;
+		while ((transactions = puller.nextPage()) != null) {
+			if (!transactions.isEmpty()) {
+				RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
+				Date lastTs = last.getTs();
+				if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
+					earliestParsedTransactionDate = lastTs;
+				}
+			}
+
+			List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
+			dao.insertTransactions(shopTransactions, true);
+
+			List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
+			dao.insertPaymentTransactions(paymentTransactions);
+
+			List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
+			dao.updateBonusesFees(bonusFeeTransactions);
+
+			pageCount++;
+			transactionCount += shopTransactions.size() + paymentTransactions.size() + bonusFeeTransactions.size();
+			out.print("\rPages: " + nf.format(pageCount) + " | Transactions: " + nf.format(transactionCount));
 		}
 
-		if (listener.earliestParsedTransactionDate != null) {
-			dao.updateBonusesFeesSince(listener.earliestParsedTransactionDate);
+		if (earliestParsedTransactionDate != null) {
+			dao.updateBonusesFeesSince(earliestParsedTransactionDate);
 		}
 		dao.commit();
 
 		settings.setPreviousUpdate(settings.getLastUpdated());
-		settings.setLastUpdated(started);
-		settings.setRupeeBalance(result.getRupeeBalance());
+		settings.setLastUpdated(new Date(started));
+		settings.setRupeeBalance(puller.getRupeeBalance());
 		settings.save();
 
-		out.println("\n" + result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
-		logger.info(result.getPageCount() + " pages processed and " + result.getTransactionCount() + " transactions saved in " + (result.getTimeTaken() / 1000) + " seconds.");
+		long timeTaken = System.currentTimeMillis() - started;
+		out.println("\n" + pageCount + " pages processed and " + transactionCount + " transactions saved in " + (timeTaken / 1000) + " seconds.");
+		logger.info(pageCount + " pages processed and " + transactionCount + " transactions saved in " + (timeTaken / 1000) + " seconds.");
 	}
 
 	public void query(String query, String format) throws Throwable {
@@ -303,37 +320,6 @@ public class CliController {
 			return new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(s);
 		} else {
 			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(s);
-		}
-	}
-
-	private class TransactionPullerListener extends TransactionPuller.Listener {
-		private int transactionCount = 0;
-		private int pageCount = 0;
-		private final NumberFormat nf = NumberFormat.getInstance();
-		private Date earliestParsedTransactionDate;
-
-		@Override
-		public synchronized void onPageScraped(int page, List<RupeeTransaction> transactions) throws Throwable {
-			if (!transactions.isEmpty()) {
-				RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
-				Date lastTs = last.getTs();
-				if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
-					earliestParsedTransactionDate = lastTs;
-				}
-			}
-
-			List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
-			dao.insertTransactions(shopTransactions, true);
-
-			List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
-			dao.insertPaymentTransactions(paymentTransactions);
-
-			List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
-			dao.updateBonusesFees(bonusFeeTransactions);
-
-			pageCount++;
-			transactionCount += shopTransactions.size() + paymentTransactions.size();
-			out.print("\rPages: " + nf.format(pageCount) + " | Transactions: " + nf.format(transactionCount));
 		}
 	}
 }
