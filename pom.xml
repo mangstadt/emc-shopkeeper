@@ -117,7 +117,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>emcshop.Main</mainClass>
+							<mainClass>emcshop.EMCShopkeeper</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
