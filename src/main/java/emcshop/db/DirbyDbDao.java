@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -186,27 +185,26 @@ public abstract class DirbyDbDao implements DbDao {
 		try {
 			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
-			Player player = new Player();
 			if (rs.next()) {
+				Player player = new Player();
 				player.setId(rs.getInt("id"));
 				player.setName(rs.getString("name"));
 				player.setFirstSeen(toDate(rs.getTimestamp("first_seen")));
 				player.setLastSeen(toDate(rs.getTimestamp("last_seen")));
-			} else {
-				player.setId(insertPlayer(name));
-				player.setName(name);
+				return player;
 			}
-			return player;
 		} finally {
 			closeStatements(stmt);
 		}
-	}
 
-	@Override
-	public int insertPlayer(String name) throws SQLException {
-		InsertStatement stmt = new InsertStatement("players");
-		stmt.setString("name", name);
-		return stmt.execute(conn);
+		InsertStatement insertStmt = new InsertStatement("players");
+		insertStmt.setString("name", name);
+		int id = insertStmt.execute(conn);
+
+		Player player = new Player();
+		player.setId(id);
+		player.setName(name);
+		return player;
 	}
 
 	@Override
@@ -225,7 +223,9 @@ public abstract class DirbyDbDao implements DbDao {
 	public int upsertItem(String name) throws SQLException {
 		Integer itemId = getItemId(name);
 		if (itemId == null) {
-			itemId = insertItem(name);
+			InsertStatement stmt = new InsertStatement("items");
+			stmt.setString("name", name);
+			itemId = stmt.execute(conn);
 		}
 		return itemId;
 	}
@@ -287,31 +287,6 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public int insertItem(String name) throws SQLException {
-		InsertStatement stmt = new InsertStatement("items");
-		stmt.setString("name", name);
-		return stmt.execute(conn);
-	}
-
-	@Override
-	public void insertItems(List<String> names) throws SQLException {
-		if (names.isEmpty()) {
-			return;
-		}
-
-		InsertStatement stmt = null;
-		for (String name : names) {
-			if (stmt == null) {
-				stmt = new InsertStatement("items");
-			} else {
-				stmt.nextRow();
-			}
-			stmt.setString("name", name);
-		}
-		stmt.execute(conn);
-	}
-
-	@Override
 	public void updateItemName(Integer id, String newName) throws SQLException {
 		PreparedStatement stmt = stmt("UPDATE items SET name = ? WHERE id = ?");
 		try {
@@ -349,9 +324,9 @@ public abstract class DirbyDbDao implements DbDao {
 			existingItemNames.add(itemName.toLowerCase());
 		}
 
-		//insert all items names that aren't in the database
-		ItemIndex itemIndex = ItemIndex.instance();
+		//find all items names that aren't in the database
 		List<String> toInsert = new ArrayList<String>();
+		ItemIndex itemIndex = ItemIndex.instance();
 		for (String itemName : itemIndex.getItemNames()) {
 			if (existingItemNames.contains(itemName.toLowerCase())) {
 				continue;
@@ -359,8 +334,22 @@ public abstract class DirbyDbDao implements DbDao {
 
 			toInsert.add(itemName);
 		}
+		if (toInsert.isEmpty()) {
+			//no items to insert
+			return;
+		}
 
-		insertItems(toInsert);
+		//insert the missing item names
+		InsertStatement stmt = null;
+		for (String name : toInsert) {
+			if (stmt == null) {
+				stmt = new InsertStatement("items");
+			} else {
+				stmt.nextRow();
+			}
+			stmt.setString("name", name);
+		}
+		stmt.execute(conn);
 	}
 
 	@Override
@@ -395,64 +384,53 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException {
-		insertTransactions(Arrays.asList(transaction), updateInventory);
-	}
+		InsertStatement stmt = new InsertStatement("transactions");
 
-	@Override
-	public void insertTransactions(Collection<ShopTransaction> transactions, boolean updateInventory) throws SQLException {
-		if (transactions.isEmpty()) {
-			return;
+		Player player = selsertPlayer(transaction.getPlayer());
+		Integer itemId = upsertItem(transaction.getItem());
+		Date ts = transaction.getTs();
+
+		//keep track of the first/last seen dates so they can be updated
+		//if the player doesn't have a first seen or last seen date, then calculate it later (see "getPlayerGroups()")
+		if (player.getFirstSeen() != null && player.getLastSeen() != null) {
+			Date earliest, latest;
+			Date dates[] = firstLastSeenDates.get(player.getId());
+			if (dates == null) {
+				earliest = null;
+				latest = null;
+			} else {
+				earliest = dates[0];
+				latest = dates[1];
+			}
+
+			if (player.getFirstSeen() == null || (ts.getTime() < player.getFirstSeen().getTime())) {
+				if (earliest == null || ts.getTime() < earliest.getTime()) {
+					earliest = ts;
+				}
+			}
+
+			if (player.getLastSeen() == null || (ts.getTime() > player.getLastSeen().getTime())) {
+				if (latest == null || ts.getTime() > latest.getTime()) {
+					latest = ts;
+				}
+			}
+
+			if (earliest != null || latest != null) {
+				firstLastSeenDates.put(player.getId(), new Date[] { earliest, latest });
+			}
 		}
 
-		for (ShopTransaction transaction : transactions) {
-			InsertStatement stmt = new InsertStatement("transactions");
+		stmt.setTimestamp("ts", ts);
+		stmt.setInt("player", player.getId());
+		stmt.setInt("item", itemId);
+		stmt.setInt("quantity", transaction.getQuantity());
+		stmt.setInt("amount", transaction.getAmount());
+		stmt.setInt("balance", transaction.getBalance());
+		int id = stmt.execute(conn);
+		transaction.setId(id);
 
-			Player player = selsertPlayer(transaction.getPlayer());
-			Integer itemId = upsertItem(transaction.getItem());
-			Date ts = transaction.getTs();
-
-			//keep track of the first/last seen dates so they can be updated
-			//if the player doesn't have a first seen or last seen date, then calculate it later (see "getPlayerGroups()")
-			if (player.getFirstSeen() != null && player.getLastSeen() != null) {
-				Date earliest, latest;
-				Date dates[] = firstLastSeenDates.get(player.getId());
-				if (dates == null) {
-					earliest = null;
-					latest = null;
-				} else {
-					earliest = dates[0];
-					latest = dates[1];
-				}
-
-				if (player.getFirstSeen() == null || (ts.getTime() < player.getFirstSeen().getTime())) {
-					if (earliest == null || ts.getTime() < earliest.getTime()) {
-						earliest = ts;
-					}
-				}
-
-				if (player.getLastSeen() == null || (ts.getTime() > player.getLastSeen().getTime())) {
-					if (latest == null || ts.getTime() > latest.getTime()) {
-						latest = ts;
-					}
-				}
-
-				if (earliest != null || latest != null) {
-					firstLastSeenDates.put(player.getId(), new Date[] { earliest, latest });
-				}
-			}
-
-			stmt.setTimestamp("ts", ts);
-			stmt.setInt("player", player.getId());
-			stmt.setInt("item", itemId);
-			stmt.setInt("quantity", transaction.getQuantity());
-			stmt.setInt("amount", transaction.getAmount());
-			stmt.setInt("balance", transaction.getBalance());
-			int id = stmt.execute(conn);
-			transaction.setId(id);
-
-			if (updateInventory) {
-				addToInventory(itemId, transaction.getQuantity());
-			}
+		if (updateInventory) {
+			addToInventory(itemId, transaction.getQuantity());
 		}
 	}
 
@@ -466,10 +444,7 @@ public abstract class DirbyDbDao implements DbDao {
 		for (PaymentTransaction transaction : transactions) {
 			Player player = selsertPlayer(transaction.getPlayer());
 
-			stmt.setTimestamp("ts", transaction.getTs());
-			stmt.setInt("player", player.getId());
-			stmt.setInt("amount", transaction.getAmount());
-			stmt.setInt("balance", transaction.getBalance());
+			insertPaymentTransaction(transaction, player.getId(), stmt);
 			stmt.nextRow();
 		}
 		stmt.execute(conn);
@@ -481,11 +456,7 @@ public abstract class DirbyDbDao implements DbDao {
 			Player player = selsertPlayer(transaction.getPlayer());
 
 			InsertStatement stmt = new InsertStatement("payment_transactions");
-			stmt.setTimestamp("ts", transaction.getTs());
-			stmt.setInt("player", player.getId());
-			stmt.setInt("amount", transaction.getAmount());
-			stmt.setInt("balance", transaction.getBalance());
-
+			insertPaymentTransaction(transaction, player.getId(), stmt);
 			Integer id = stmt.execute(conn);
 			transaction.setId(id);
 		} else {
@@ -501,9 +472,11 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
-	@Override
-	public List<ShopTransaction> getTransactions() throws SQLException {
-		return getTransactions(-1);
+	private void insertPaymentTransaction(PaymentTransaction transaction, int playerId, InsertStatement stmt) {
+		stmt.setTimestamp("ts", transaction.getTs());
+		stmt.setInt("player", playerId);
+		stmt.setInt("amount", transaction.getAmount());
+		stmt.setInt("balance", transaction.getBalance());
 	}
 
 	@Override
@@ -544,7 +517,7 @@ public abstract class DirbyDbDao implements DbDao {
 		return (shopTs.compareTo(paymentTs) > 0) ? shopTs : paymentTs;
 	}
 
-	public List<ShopTransaction> getTransactions(int limit) throws SQLException {
+	private List<ShopTransaction> getTransactions(int limit) throws SQLException {
 		//@formatter:off
 		String sql =
 		"SELECT t.id, t.ts, t.amount, t.balance, t.quantity, p.name AS playerName, i.name AS itemName " +
@@ -652,11 +625,6 @@ public abstract class DirbyDbDao implements DbDao {
 		} finally {
 			closeStatements(stmt);
 		}
-	}
-
-	@Override
-	public Map<String, ItemGroup> getItemGroups() throws SQLException {
-		return getItemGroups(null, null);
 	}
 
 	@Override

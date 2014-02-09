@@ -50,14 +50,6 @@ public interface DbDao {
 	Date getEarliestTransactionDate() throws SQLException;
 
 	/**
-	 * Inserts a player.
-	 * @param name the player name
-	 * @return the ID of the inserted player
-	 * @throws SQLException
-	 */
-	int insertPlayer(String name) throws SQLException;
-
-	/**
 	 * Gets the ID of an item.
 	 * @param name the item name, case in-sensitive (e.g. "apple")
 	 * @return the item ID or null if not found
@@ -87,21 +79,6 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	void updateTransactionItem(List<Integer> oldItemIds, int newItemId) throws SQLException;
-
-	/**
-	 * Inserts an item.
-	 * @param name the item name
-	 * @return the ID of the inserted item
-	 * @throws SQLException
-	 */
-	int insertItem(String name) throws SQLException;
-
-	/**
-	 * Inserts multiple items.
-	 * @param names the item names
-	 * @throws SQLException
-	 */
-	void insertItems(List<String> names) throws SQLException;
 
 	/**
 	 * Changes the name of an item.
@@ -140,14 +117,6 @@ public interface DbDao {
 	void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException;
 
 	/**
-	 * Inserts multiple transactions.
-	 * @param transactions
-	 * @param updateInventory true to update the inventory, false not to
-	 * @throws SQLException
-	 */
-	void insertTransactions(Collection<ShopTransaction> transactions, boolean updateInventory) throws SQLException;
-
-	/**
 	 * Inserts multiple payment transactions.
 	 * @param transactions
 	 * @throws SQLException
@@ -160,13 +129,6 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	void upsertPaymentTransaction(PaymentTransaction transaction) throws SQLException;
-
-	/**
-	 * Gets all transactions in the database.
-	 * @return the transactions
-	 * @throws SQLException
-	 */
-	List<ShopTransaction> getTransactions() throws SQLException;
 
 	/**
 	 * Gets all unhandled payment transactions from the database.
@@ -213,16 +175,9 @@ public interface DbDao {
 	Date getLatestTransactionDate() throws SQLException;
 
 	/**
-	 * Computes the net gains/losses for each item.
-	 * @return the net gains/losses for each item
-	 * @throws SQLException
-	 */
-	Map<String, ItemGroup> getItemGroups() throws SQLException;
-
-	/**
 	 * Computes the net gains/losses for each item over a date range.
-	 * @param from the start date
-	 * @param to the end date
+	 * @param from the start date or null to start at the first transaction
+	 * @param to the end date or null to end at the last transaction
 	 * @return the net gains/losses for each item
 	 * @throws SQLException
 	 */

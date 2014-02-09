@@ -152,7 +152,9 @@ public class CliController {
 			}
 
 			List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
-			dao.insertTransactions(shopTransactions, true);
+			for (ShopTransaction shopTransaction : shopTransactions) {
+				dao.insertTransaction(shopTransaction, true);
+			}
 
 			List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
 			dao.insertPaymentTransactions(paymentTransactions);
@@ -184,7 +186,7 @@ public class CliController {
 		Map<String, ItemGroup> itemGroups;
 		Date from, to;
 		if (query.isEmpty()) {
-			itemGroups = dao.getItemGroups();
+			itemGroups = dao.getItemGroups(null, null);
 			from = to = null;
 		} else {
 			Date range[] = parseDateRange(query);

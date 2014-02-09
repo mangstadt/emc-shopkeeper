@@ -124,7 +124,9 @@ public class UpdateDialog extends JDialog {
 							}
 
 							List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
-							dao.insertTransactions(shopTransactions, true);
+							for (ShopTransaction shopTransaction : shopTransactions) {
+								dao.insertTransaction(shopTransaction, true);
+							}
 							shopTransactionCount += shopTransactions.size();
 							transactionCount += shopTransactions.size();
 
