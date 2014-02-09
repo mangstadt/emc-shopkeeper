@@ -503,6 +503,64 @@ public class DirbyDbDaoTest {
 		}
 	}
 
+	@Test
+	public void getTransactionsByDate() throws Throwable {
+		int jeb = insertPlayer("Jeb");
+		insertTransaction(date("2014-01-01 01:00:00"), appleId, notchId, 100, -10);
+		insertTransaction(date("2014-01-01 01:00:00"), appleId, notchId, -10, 1);
+		insertTransaction(date("2014-01-01 01:00:01"), diamondId, notchId, 1000, -5);
+		insertTransaction(date("2014-01-01 01:00:02"), appleId, jeb, -10, 1);
+		insertTransaction(date("2014-01-01 01:00:02"), appleId, notchId, 100, -10);
+		insertTransaction(date("2014-01-01 01:00:03"), appleId, notchId, 100, -10);
+		insertTransaction(date("2014-01-01 01:01:00"), appleId, notchId, 100, -10);
+		insertTransaction(date("2014-01-01 01:03:00"), appleId, notchId, 100, -10);
+		insertTransaction(date("2014-01-01 01:05:01"), appleId, notchId, 100, -10);
+		insertTransaction(date("2014-01-01 01:10:00"), appleId, notchId, 100, -10);
+
+		//no date range
+		{
+			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, null).iterator();
+
+			ShopTransaction t = it.next();
+			assertEquals(date("2014-01-01 01:00:00"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-49, t.getQuantity());
+			assertEquals(490, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:00:01"), t.getTs());
+			assertEquals("Diamond", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-5, t.getQuantity());
+			assertEquals(1000, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:00:02"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Jeb", t.getPlayer());
+			assertEquals(1, t.getQuantity());
+			assertEquals(-10, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:05:01"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-10, t.getQuantity());
+			assertEquals(100, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:10:00"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-10, t.getQuantity());
+			assertEquals(100, t.getAmount());
+
+			assertFalse(it.hasNext());
+
+		}
+	}
+
 	private static ItemGroupTester assertItemGroup() {
 		return new ItemGroupTester();
 	}

@@ -722,7 +722,7 @@ public abstract class DirbyDbDao implements DbDao {
 			sql += (from == null) ? "WHERE" : "AND";
 			sql += " ts < ? ";
 		}
-		sql += " ORDER BY t.ts DESC";
+		sql += " ORDER BY t.ts";
 		//@formatter:on
 
 		PreparedStatement stmt = stmt(sql);
@@ -748,7 +748,7 @@ public abstract class DirbyDbDao implements DbDao {
 				String key = player + ":" + item;
 				ShopTransaction transaction = lastTransactionByItem.get(key);
 				if (transaction != null) {
-					long diff = dateOfLastTransaction.get(transaction).getTime() - ts.getTime();
+					long diff = ts.getTime() - dateOfLastTransaction.get(transaction).getTime();
 					if (diff <= 1000 * 60 * 2) {
 						//if the transactions occurred within 2 minutes of the last one, then consider it part of the same, consolidated transaction
 						transaction.setAmount(transaction.getAmount() + amount);

@@ -79,6 +79,7 @@ public class TransactionsTable extends JTable {
 		prevColumnClicked = sortedBy;
 		ascending = sortedByAscending;
 		this.showQuantitiesInStacks = showQuantitiesInStacks;
+		sortData();
 
 		getTableHeader().setReorderingAllowed(false);
 		setColumnSelectionAllowed(false);
