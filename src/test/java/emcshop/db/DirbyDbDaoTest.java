@@ -87,14 +87,14 @@ public class DirbyDbDaoTest {
 		Player player = dao.selsertPlayer("Notch");
 		assertIntEquals(notchId, player.getId());
 		assertEquals("Notch", player.getName());
-		assertEquals(df.parse("2014-01-01 00:00:00"), player.getFirstSeen());
-		assertEquals(df.parse("2014-01-02 12:00:00"), player.getLastSeen());
+		assertEquals(date("2014-01-01 00:00:00"), player.getFirstSeen());
+		assertEquals(date("2014-01-02 12:00:00"), player.getLastSeen());
 
 		player = dao.selsertPlayer("notch");
 		assertIntEquals(notchId, player.getId());
 		assertEquals("Notch", player.getName());
-		assertEquals(df.parse("2014-01-01 00:00:00"), player.getFirstSeen());
-		assertEquals(df.parse("2014-01-02 12:00:00"), player.getLastSeen());
+		assertEquals(date("2014-01-01 00:00:00"), player.getFirstSeen());
+		assertEquals(date("2014-01-02 12:00:00"), player.getLastSeen());
 
 		player = dao.selsertPlayer("Jeb");
 		assertNotNull(player.getId());
@@ -113,7 +113,7 @@ public class DirbyDbDaoTest {
 		insertTransaction("2014-01-10 00:00:00", 1, notchId, 1, 1);
 
 		Date actual = dao.getEarliestTransactionDate();
-		Date expected = df.parse("2014-01-01 00:00:00");
+		Date expected = date("2014-01-01 00:00:00");
 		assertEquals(expected, actual);
 	}
 
@@ -239,8 +239,9 @@ public class DirbyDbDaoTest {
 
 	@Test
 	public void insertTransaction() throws Throwable {
+		DateGenerator dg = new DateGenerator();
 		ShopTransaction transaction = new ShopTransaction();
-		transaction.setTs(df.parse("2014-01-01 01:23:45"));
+		transaction.setTs(dg.next());
 		transaction.setItem("apple");
 		transaction.setPlayer("notch");
 		transaction.setBalance(1000);
@@ -249,7 +250,7 @@ public class DirbyDbDaoTest {
 		dao.insertTransaction(transaction, false);
 
 		transaction = new ShopTransaction();
-		transaction.setTs(df.parse("2014-01-01 02:23:45"));
+		transaction.setTs(dg.next());
 		transaction.setItem("Item");
 		transaction.setPlayer("Jeb");
 		transaction.setBalance(1200);
@@ -268,7 +269,7 @@ public class DirbyDbDaoTest {
 		ResultSet rs = stmt.executeQuery("SELECT * FROM transactions ORDER BY id");
 
 		rs.next();
-		assertEquals(ts("2014-01-01 01:23:45"), rs.getTimestamp("ts"));
+		assertEquals(dg.getGenerated(0), rs.getTimestamp("ts"));
 		assertEquals(appleId, rs.getInt("item"));
 		assertEquals(notchId, rs.getInt("player"));
 		assertEquals(1000, rs.getInt("balance"));
@@ -276,7 +277,7 @@ public class DirbyDbDaoTest {
 		assertEquals(5, rs.getInt("quantity"));
 
 		rs.next();
-		assertEquals(ts("2014-01-01 02:23:45"), rs.getTimestamp("ts"));
+		assertEquals(dg.getGenerated(1), rs.getTimestamp("ts"));
 		assertIntEquals(dao.getItemId("Item"), rs.getInt("item"));
 		assertIntEquals(getPlayerId("Jeb"), rs.getInt("player"));
 		assertEquals(1200, rs.getInt("balance"));
@@ -288,11 +289,12 @@ public class DirbyDbDaoTest {
 
 	@Test
 	public void insertTransaction_updateInventory() throws Throwable {
+		DateGenerator dg = new DateGenerator();
 		insertInventory(appleId, 100);
 		insertInventory(diamondId, 20);
 
 		ShopTransaction transaction = new ShopTransaction();
-		transaction.setTs(df.parse("2014-01-01 01:23:45"));
+		transaction.setTs(dg.next());
 		transaction.setItem("apple");
 		transaction.setPlayer("notch");
 		transaction.setBalance(1000);
@@ -832,10 +834,6 @@ public class DirbyDbDaoTest {
 		return getKey(stmt);
 	}
 
-	private int insertPaymentTransaction(String ts, int player, int amount, int balance, boolean ignore, Integer transaction) throws SQLException {
-		return insertPaymentTransaction(date(ts), player, amount, balance, ignore, transaction);
-	}
-
 	private int insertPaymentTransaction(Date ts, int player, int amount, int balance, boolean ignore, Integer transaction) throws SQLException {
 		PreparedStatement stmt = conn.prepareStatement("INSERT INTO payment_transactions (ts, player, amount, balance, ignore, \"transaction\") VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
@@ -878,10 +876,6 @@ public class DirbyDbDaoTest {
 		} catch (ParseException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	private static Date ts(String date) throws ParseException {
-		return new Timestamp(date(date).getTime());
 	}
 
 	private static void assertIntEquals(Integer expected, int actual) {
