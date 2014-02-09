@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.LogManager;
 
 import org.junit.After;
 import org.junit.Test;
@@ -37,6 +38,8 @@ public class DirbyDbDaoTest {
 	private static final DirbyDbDao dao;
 	private static final int appleId, diamondId, notchId;
 	static {
+		LogManager.getLogManager().reset();
+
 		try {
 			//@formatter:off
 			String sql[] = {
