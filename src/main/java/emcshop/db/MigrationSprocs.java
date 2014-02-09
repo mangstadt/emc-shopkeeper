@@ -3,6 +3,9 @@ package emcshop.db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import emcshop.ItemIndex;
@@ -31,7 +34,8 @@ public class MigrationSprocs {
 
 	/**
 	 * Updates the names of all items that have display names which differ from
-	 * the names on the transaction page.
+	 * the names on the transaction page. For example, converts "Potion:8193" to
+	 * "Potion of Regeneration".
 	 * @param conn
 	 * @throws SQLException
 	 */
@@ -40,35 +44,64 @@ public class MigrationSprocs {
 		DbDao dao = new DirbyEmbeddedDbDao(conn);
 
 		try {
-			int dbVersion = dao.selectDbVersion();
-
-			//convert any old item names to the new names (e.g. "Potion:8193" to "Potion of Regeneration")
+			//map each display name to its list of EMC aliases
 			ItemIndex itemIndex = ItemIndex.instance();
+			Map<String, List<String>> displayNameToEmcNames = new HashMap<String, List<String>>();
 			for (Map.Entry<String, String> entry : itemIndex.getEmcNameToDisplayNameMapping().entrySet()) {
-				String oldName = entry.getKey();
-				String newName = entry.getValue();
+				String emcName = entry.getKey();
+				String displayName = entry.getValue();
 
-				Integer oldNameId = dao.getItemId(oldName);
+				List<String> emcNames = displayNameToEmcNames.get(displayName);
+				if (emcNames == null) {
+					emcNames = new ArrayList<String>();
+					displayNameToEmcNames.put(displayName, emcNames);
+				}
+				emcNames.add(emcName);
+			}
+
+			int dbVersion = dao.selectDbVersion();
+			for (Map.Entry<String, List<String>> entry : displayNameToEmcNames.entrySet()) {
+				String newName = entry.getKey();
 				Integer newNameId = dao.getItemId(newName);
 
-				if (oldNameId == null && newNameId == null) {
+				List<String> oldNames = entry.getValue();
+				List<Integer> oldNameIds = new ArrayList<Integer>(oldNames.size());
+				for (String oldName : oldNames) {
+					Integer oldNameId = dao.getItemId(oldName);
+					if (oldNameId != null) {
+						oldNameIds.add(oldNameId);
+					}
+				}
+
+				if (oldNameIds.isEmpty() && newNameId == null) {
 					//nothing needs to be changed because neither name exists
-				} else if (oldNameId == null && newNameId != null) {
+				} else if (oldNameIds.isEmpty() && newNameId != null) {
 					//nothing needs to be changed because the new name is already in use
-				} else if (oldNameId != null && newNameId == null) {
+				} else if (!oldNameIds.isEmpty() && newNameId == null) {
 					//the old name is still being used, so change it to the new name
-					dao.updateItemName(oldNameId, newName);
-				} else if (oldNameId != null && newNameId != null) {
+					newNameId = oldNameIds.get(0);
+					oldNameIds = oldNameIds.subList(1, oldNameIds.size());
+
+					//change the name in the "items" table
+					dao.updateItemName(newNameId, newName);
+
+					if (!oldNameIds.isEmpty()) {
+						if (dbVersion >= 7) {
+							dao.updateInventoryItem(oldNameIds, newNameId);
+						}
+						dao.deleteItems(oldNameIds.toArray(new Integer[0]));
+					}
+				} else if (!oldNameIds.isEmpty() && newNameId != null) {
 					//both the old and new names exist
 					//update all transactions that use the old name with the new name, and delete the old name
 
-					dao.updateTransactionItem(oldNameId, newNameId);
+					dao.updateTransactionItem(oldNameIds, newNameId);
 
 					if (dbVersion >= 7) {
-						dao.updateInventoryItem(oldNameId, newNameId);
+						dao.updateInventoryItem(oldNameIds, newNameId);
 					}
 
-					dao.deleteItem(oldNameId);
+					dao.deleteItems(oldNameIds.toArray(new Integer[0]));
 				}
 			}
 		} finally {

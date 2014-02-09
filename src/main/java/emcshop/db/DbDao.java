@@ -90,11 +90,11 @@ public interface DbDao {
 
 	/**
 	 * Changes the item that a transaction is associated with.
-	 * @param oldItemId the old item ID
+	 * @param oldItemIds the old item ID(s)
 	 * @param newItemId the new item ID
 	 * @throws SQLException
 	 */
-	void updateTransactionItem(int oldItemId, int newItemId) throws SQLException;
+	void updateTransactionItem(List<Integer> oldItemIds, int newItemId) throws SQLException;
 
 	/**
 	 * Inserts an item.
@@ -120,12 +120,11 @@ public interface DbDao {
 	void updateItemName(Integer id, String newName) throws SQLException;
 
 	/**
-	 * Deletes an item.
-	 * @param id the item ID
-	 * @return
+	 * Deletes one or more items.
+	 * @param id the item ID(s)
 	 * @throws SQLException
 	 */
-	void deleteItem(Integer id) throws SQLException;
+	void deleteItems(Integer... ids) throws SQLException;
 
 	/**
 	 * Seeds the items table with all known items;
@@ -273,11 +272,11 @@ public interface DbDao {
 
 	/**
 	 * Changes the item that an inventory entry is associated with.
-	 * @param oldItemId the old item ID
+	 * @param oldItemIds the old item ID(s)
 	 * @param newItemId the new item ID
 	 * @throws SQLException
 	 */
-	void updateInventoryItem(int oldItemId, int newItemId) throws SQLException;
+	void updateInventoryItem(List<Integer> oldItemIds, int newItemId) throws SQLException;
 
 	/**
 	 * Updates or inserts an inventory item.

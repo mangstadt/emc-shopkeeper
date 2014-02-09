@@ -276,15 +276,13 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 
 			Integer newId = ids.get(0);
-			for (Integer oldId : ids.subList(1, ids.size())) {
-				updateTransactionItem(oldId, newId);
+			List<Integer> oldIds = ids.subList(1, ids.size());
 
-				if (dbVersion >= 7) {
-					updateInventoryItem(oldId, newId);
-				}
-
-				deleteItem(oldId);
+			if (dbVersion >= 7) {
+				updateInventoryItem(oldIds, newId);
 			}
+			updateTransactionItem(oldIds, newId);
+			deleteItems(oldIds.toArray(new Integer[0]));
 		}
 	}
 
@@ -326,10 +324,17 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void deleteItem(Integer id) throws SQLException {
-		PreparedStatement stmt = stmt("DELETE FROM items WHERE id = ?");
+	public void deleteItems(Integer... ids) throws SQLException {
+		if (ids.length == 0) {
+			return;
+		}
+
+		PreparedStatement stmt = stmt("DELETE FROM items WHERE id " + in(ids.length));
 		try {
-			stmt.setInt(1, id);
+			int i = 1;
+			for (Integer id : ids) {
+				stmt.setInt(i++, id);
+			}
 			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
@@ -370,11 +375,18 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void updateTransactionItem(int oldItemId, int newItemId) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE transactions SET item = ? WHERE item = ?");
+	public void updateTransactionItem(List<Integer> oldItemIds, int newItemId) throws SQLException {
+		if (oldItemIds.isEmpty()) {
+			return;
+		}
+
+		PreparedStatement stmt = stmt("UPDATE transactions SET item = ? WHERE item " + in(oldItemIds.size()));
 		try {
-			stmt.setInt(1, newItemId);
-			stmt.setInt(2, oldItemId);
+			int i = 1;
+			stmt.setInt(i++, newItemId);
+			for (Integer oldItemId : oldItemIds) {
+				stmt.setInt(i++, oldItemId);
+			}
 			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
@@ -923,11 +935,45 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void updateInventoryItem(int oldItemId, int newItemId) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE inventory SET item = ? WHERE item = ?");
+	public void updateInventoryItem(List<Integer> oldItemIds, int newItemId) throws SQLException {
+		if (oldItemIds.isEmpty()) {
+			return;
+		}
+
+		List<Integer> allIds = new ArrayList<Integer>(oldItemIds);
+		allIds.add(newItemId);
+
+		int totalQuantity = 0;
+		PreparedStatement stmt = stmt("SELECT Sum(quantity) FROM inventory WHERE item " + in(allIds.size()));
 		try {
-			stmt.setInt(1, newItemId);
-			stmt.setInt(2, oldItemId);
+			int i = 1;
+			for (Integer id : allIds) {
+				stmt.setInt(i++, id);
+			}
+
+			ResultSet rs = stmt.executeQuery();
+			totalQuantity = rs.next() ? rs.getInt(1) : 0;
+		} finally {
+			closeStatements(stmt);
+		}
+
+		//update the quantity
+		stmt = stmt("UPDATE inventory SET quantity = ? WHERE item = ?");
+		try {
+			stmt.setInt(1, totalQuantity);
+			stmt.setInt(2, newItemId);
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+
+		//delete the old entries
+		stmt = stmt("DELETE FROM inventory WHERE item " + in(oldItemIds.size()));
+		try {
+			int i = 1;
+			for (Integer id : oldItemIds) {
+				stmt.setInt(i++, id);
+			}
 			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
@@ -1401,5 +1447,20 @@ public abstract class DirbyDbDao implements DbDao {
 	 */
 	protected PreparedStatement stmt(String sql) throws SQLException {
 		return conn.prepareStatement(sql);
+	}
+
+	protected String in(int size) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("IN (");
+
+		for (int i = 0; i < size; i++) {
+			if (i > 0) {
+				sb.append(" ,");
+			}
+			sb.append("?");
+		}
+
+		sb.append(")");
+		return sb.toString();
 	}
 }
