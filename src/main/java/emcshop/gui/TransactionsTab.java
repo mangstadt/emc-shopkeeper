@@ -30,11 +30,11 @@ import net.miginfocom.swing.MigLayout;
 import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.QueryExporter;
-import emcshop.db.ConsolidatedTransaction;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
+import emcshop.scraper.ShopTransaction;
 import emcshop.util.FilterList;
 import emcshop.util.Settings;
 
@@ -522,7 +522,7 @@ public class TransactionsTab extends JPanel {
 			public void run() {
 				try {
 					//query database
-					List<ConsolidatedTransaction> transactions = dao.getTransactionsByDate(from, to);
+					List<ShopTransaction> transactions = dao.getTransactionsByDate(from, to);
 
 					//reset GUI
 					tablePanel.removeAll();
@@ -599,7 +599,7 @@ public class TransactionsTab extends JPanel {
 				}
 			}
 		} else if (transactionsTable != null) {
-			for (ConsolidatedTransaction transaction : transactionsTable.getDisplayedTransactions()) {
+			for (ShopTransaction transaction : transactionsTable.getDisplayedTransactions()) {
 				netTotal += transaction.getAmount();
 			}
 		}

@@ -26,9 +26,9 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import emcshop.ItemIndex;
-import emcshop.db.ConsolidatedTransaction;
 import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
+import emcshop.scraper.ShopTransaction;
 import emcshop.util.FilterList;
 
 /**
@@ -55,15 +55,15 @@ public class TransactionsTable extends JTable {
 		}
 	}
 
-	private final List<ConsolidatedTransaction> transactions;
-	private List<ConsolidatedTransaction> transactionsToDisplay;
+	private final List<ShopTransaction> transactions;
+	private List<ShopTransaction> transactionsToDisplay;
 
 	private Column prevColumnClicked;
 	private boolean ascending, showQuantitiesInStacks;
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 
-	public TransactionsTable(List<ConsolidatedTransaction> transactions, boolean showQuantitiesInStacks, ProfileImageLoader profileImageLoader) {
+	public TransactionsTable(List<ShopTransaction> transactions, boolean showQuantitiesInStacks, ProfileImageLoader profileImageLoader) {
 		this(transactions, Column.TS, false, showQuantitiesInStacks, profileImageLoader);
 	}
 
@@ -73,7 +73,7 @@ public class TransactionsTable extends JTable {
 	 * @param sortedByAscending true if the items list is sorted ascending,
 	 * false if descending
 	 */
-	public TransactionsTable(List<ConsolidatedTransaction> transactions, Column sortedBy, boolean sortedByAscending, boolean showQuantitiesInStacks, final ProfileImageLoader profileImageLoader) {
+	public TransactionsTable(List<ShopTransaction> transactions, Column sortedBy, boolean sortedByAscending, boolean showQuantitiesInStacks, final ProfileImageLoader profileImageLoader) {
 		this.transactions = transactions;
 		this.transactionsToDisplay = transactions;
 		prevColumnClicked = sortedBy;
@@ -115,7 +115,7 @@ public class TransactionsTable extends JTable {
 
 		setModel();
 
-		setDefaultRenderer(ConsolidatedTransaction.class, new TableCellRenderer() {
+		setDefaultRenderer(ShopTransaction.class, new TableCellRenderer() {
 			private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 			private final DateFormat tf = DateFormat.getTimeInstance(DateFormat.SHORT);
 			private final Color evenRowColor = new Color(255, 255, 255);
@@ -126,7 +126,7 @@ public class TransactionsTable extends JTable {
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-				ConsolidatedTransaction transaction = (ConsolidatedTransaction) value;
+				ShopTransaction transaction = (ShopTransaction) value;
 				Column column = columns[col];
 
 				JLabel label = new JLabel();
@@ -153,7 +153,7 @@ public class TransactionsTable extends JTable {
 				return label;
 			}
 
-			private ImageIcon getIcon(ConsolidatedTransaction transaction, final int row, final Column column, JLabel label) {
+			private ImageIcon getIcon(ShopTransaction transaction, final int row, final Column column, JLabel label) {
 				switch (column) {
 				case ITEM_NAME:
 					return ImageManager.getItemImage(transaction.getItem());
@@ -171,10 +171,10 @@ public class TransactionsTable extends JTable {
 				}
 			}
 
-			public String getText(ConsolidatedTransaction transaction, Column column) {
+			public String getText(ShopTransaction transaction, Column column) {
 				switch (column) {
 				case TS:
-					Date ts = transaction.getFirstTransactionDate();
+					Date ts = transaction.getTs();
 					if (daysAgo(ts) == 0) {
 						return "Today at " + tf.format(ts);
 					}
@@ -222,8 +222,8 @@ public class TransactionsTable extends JTable {
 			transactionsToDisplay = transactions;
 			sortData();
 		} else {
-			transactionsToDisplay = new ArrayList<ConsolidatedTransaction>();
-			for (ConsolidatedTransaction transaction : transactions) {
+			transactionsToDisplay = new ArrayList<ShopTransaction>();
+			for (ShopTransaction transaction : transactions) {
 				String itemName = transaction.getItem();
 				String playerName = transaction.getPlayer();
 				if ((filteredItemNames.isEmpty() || filteredItemNames.contains(itemName)) && (filteredPlayerNames.isEmpty() || filteredPlayerNames.contains(playerName))) {
@@ -235,31 +235,31 @@ public class TransactionsTable extends JTable {
 		redraw();
 	}
 
-	public List<ConsolidatedTransaction> getDisplayedTransactions() {
+	public List<ShopTransaction> getDisplayedTransactions() {
 		return transactionsToDisplay;
 	}
 
 	public List<String> getDisplayedPlayers() {
 		Set<String> players = new LinkedHashSet<String>();
-		for (ConsolidatedTransaction transaction : transactionsToDisplay) {
+		for (ShopTransaction transaction : transactionsToDisplay) {
 			players.add(transaction.getPlayer());
 		}
 		return new ArrayList<String>(players);
 	}
 
 	private void sortData() {
-		Collections.sort(transactionsToDisplay, new Comparator<ConsolidatedTransaction>() {
+		Collections.sort(transactionsToDisplay, new Comparator<ShopTransaction>() {
 			@Override
-			public int compare(ConsolidatedTransaction a, ConsolidatedTransaction b) {
+			public int compare(ShopTransaction a, ShopTransaction b) {
 				if (!ascending) {
-					ConsolidatedTransaction temp = a;
+					ShopTransaction temp = a;
 					a = b;
 					b = temp;
 				}
 
 				switch (prevColumnClicked) {
 				case TS:
-					return a.getFirstTransactionDate().compareTo(b.getFirstTransactionDate());
+					return a.getTs().compareTo(b.getTs());
 				case PLAYER_NAME:
 					return a.getPlayer().compareToIgnoreCase(b.getPlayer());
 				case ITEM_NAME:
@@ -328,7 +328,7 @@ public class TransactionsTable extends JTable {
 			}
 
 			public Class<?> getColumnClass(int c) {
-				return ConsolidatedTransaction.class;
+				return ShopTransaction.class;
 			}
 
 			@Override

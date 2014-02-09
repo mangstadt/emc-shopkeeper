@@ -191,7 +191,7 @@ public interface DbDao {
 	 * @return the transactions
 	 * @throws SQLException
 	 */
-	List<ConsolidatedTransaction> getTransactionsByDate(Date from, Date to) throws SQLException;
+	List<ShopTransaction> getTransactionsByDate(Date from, Date to) throws SQLException;
 
 	/**
 	 * Computes what each player bought/sold over a date range.

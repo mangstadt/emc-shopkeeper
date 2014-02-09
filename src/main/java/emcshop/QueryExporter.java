@@ -15,11 +15,11 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import emcshop.db.ConsolidatedTransaction;
 import emcshop.db.Inventory;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
+import emcshop.scraper.ShopTransaction;
 import emcshop.util.BBCodeBuilder;
 
 /**
@@ -282,7 +282,7 @@ public class QueryExporter {
 		return bbCode.toString();
 	}
 
-	public static String generateTransactionsBBCode(Collection<ConsolidatedTransaction> transactions, int netTotal, Date from, Date to) {
+	public static String generateTransactionsBBCode(Collection<ShopTransaction> transactions, int netTotal, Date from, Date to) {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
@@ -305,8 +305,8 @@ public class QueryExporter {
 
 		//item table
 		bbCode.text("| - - -Date- - - | - - Player- - | - - -Item - - - | - Quantity- | - -Amount - |").nl();
-		for (ConsolidatedTransaction transaction : transactions) {
-			Date ts = transaction.getFirstTransactionDate();
+		for (ShopTransaction transaction : transactions) {
+			Date ts = transaction.getTs();
 			bbCode.text(df.format(ts) + " | ");
 
 			String player = transaction.getPlayer();
@@ -363,17 +363,17 @@ public class QueryExporter {
 		return bbCode.toString();
 	}
 
-	public static String generateTransactionsCsv(Collection<ConsolidatedTransaction> transactions, int netTotal, Date from, Date to) {
+	public static String generateTransactionsCsv(Collection<ShopTransaction> transactions, int netTotal, Date from, Date to) {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
 		CSVWriter writer = new CSVWriter(sw);
 
 		writer.writeNext(new String[] { (from == null) ? "no start date" : df.format(from), (to == null) ? "no end date" : df.format(to) });
 		writer.writeNext(new String[] { "Date", "Player", "Item", "Quantity", "Amount" });
-		for (ConsolidatedTransaction group : transactions) {
+		for (ShopTransaction group : transactions) {
 			//@formatter:off
 			writer.writeNext(new String[]{
-				df.format(group.getFirstTransactionDate()),
+				df.format(group.getTs()),
 				group.getPlayer(),
 				group.getItem(),
 				group.getQuantity() + "",

@@ -709,7 +709,7 @@ public abstract class DirbyDbDao implements DbDao {
 		return itemGroups;
 	}
 
-	public List<ConsolidatedTransaction> getTransactionsByDate(Date from, Date to) throws SQLException {
+	public List<ShopTransaction> getTransactionsByDate(Date from, Date to) throws SQLException {
 		//@formatter:off
 		String sql =
 		"SELECT t.ts, p.name AS player, i.name AS item, t.amount, t.quantity " + 
@@ -726,8 +726,9 @@ public abstract class DirbyDbDao implements DbDao {
 		//@formatter:on
 
 		PreparedStatement stmt = stmt(sql);
-		List<ConsolidatedTransaction> transactions = new ArrayList<ConsolidatedTransaction>();
-		Map<String, ConsolidatedTransaction> lastTransaction = new HashMap<String, ConsolidatedTransaction>();
+		List<ShopTransaction> transactions = new ArrayList<ShopTransaction>();
+		Map<String, ShopTransaction> lastTransactionByItem = new HashMap<String, ShopTransaction>();
+		Map<ShopTransaction, Date> dateOfLastTransaction = new HashMap<ShopTransaction, Date>();
 		try {
 			int index = 1;
 			if (from != null) {
@@ -745,26 +746,26 @@ public abstract class DirbyDbDao implements DbDao {
 				int quantity = rs.getInt("quantity");
 
 				String key = player + ":" + item;
-				ConsolidatedTransaction transaction = lastTransaction.get(key);
+				ShopTransaction transaction = lastTransactionByItem.get(key);
 				if (transaction != null) {
-					long diff = transaction.getLastTransactionDate().getTime() - ts.getTime();
+					long diff = dateOfLastTransaction.get(transaction).getTime() - ts.getTime();
 					if (diff <= 1000 * 60 * 2) {
 						//if the transactions occurred within 2 minutes of the last one, then consider it part of the same, consolidated transaction
 						transaction.setAmount(transaction.getAmount() + amount);
 						transaction.setQuantity(transaction.getQuantity() + quantity);
-						transaction.setLastTransactionDate(ts);
+						dateOfLastTransaction.put(transaction, ts);
 						continue;
 					}
 				}
 
-				transaction = new ConsolidatedTransaction();
-				transaction.setFirstTransactionDate(ts);
-				transaction.setLastTransactionDate(ts);
+				transaction = new ShopTransaction();
+				transaction.setTs(ts);
 				transaction.setPlayer(player);
 				transaction.setItem(item);
 				transaction.setAmount(amount);
 				transaction.setQuantity(quantity);
-				lastTransaction.put(key, transaction);
+				lastTransactionByItem.put(key, transaction);
+				dateOfLastTransaction.put(transaction, ts);
 				transactions.add(transaction);
 			}
 		} finally {
