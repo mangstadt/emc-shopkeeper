@@ -28,19 +28,11 @@ public interface DbDao {
 	int selectDbVersion() throws SQLException;
 
 	/**
-	 * Updates the database schema version.
+	 * Sets the database schema version.
 	 * @param version the new version number
 	 * @throws SQLException
 	 */
-	void updateDbVersion(int version) throws SQLException;
-
-	/**
-	 * Sets the database schema version, inserting the necessary row in the
-	 * table.
-	 * @param version the version number
-	 * @throws SQLException
-	 */
-	void insertDbVersion(int version) throws SQLException;
+	void upsertDbVersion(int version) throws SQLException;
 
 	/**
 	 * Searches for a player, inserting the player if it doesn't exist.

@@ -43,7 +43,7 @@ public abstract class DirbyDbDao implements DbDao {
 	/**
 	 * The current version of the database schema.
 	 */
-	private static final int schemaVersion = 16;
+	static final int schemaVersion = 16;
 
 	/**
 	 * The database connection.
@@ -135,7 +135,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 				curVersion++;
 			}
-			updateDbVersion(schemaVersion);
+			upsertDbVersion(schemaVersion);
 		} catch (IOException e) {
 			rollback();
 			throw new SQLException("Error updating database schema.", e);
@@ -163,21 +163,21 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void updateDbVersion(int version) throws SQLException {
+	public void upsertDbVersion(int version) throws SQLException {
 		PreparedStatement stmt = stmt("UPDATE meta SET db_schema_version = ?");
 		try {
 			stmt.setInt(1, version);
-			stmt.execute();
+			int updated = stmt.executeUpdate();
+			if (updated > 0) {
+				return;
+			}
 		} finally {
 			closeStatements(stmt);
 		}
-	}
 
-	@Override
-	public void insertDbVersion(int version) throws SQLException {
-		InsertStatement stmt = new InsertStatement("meta");
-		stmt.setInt("db_schema_version", version);
-		stmt.execute(conn);
+		InsertStatement insertStmt = new InsertStatement("meta");
+		insertStmt.setInt("db_schema_version", version);
+		insertStmt.execute(conn);
 	}
 
 	@Override
@@ -1424,7 +1424,7 @@ public abstract class DirbyDbDao implements DbDao {
 				statement.execute(sql);
 			}
 			sql = null;
-			insertDbVersion(schemaVersion);
+			upsertDbVersion(schemaVersion);
 		} catch (IOException e) {
 			throw new SQLException("Error creating database.", e);
 		} catch (SQLException e) {
@@ -1462,5 +1462,9 @@ public abstract class DirbyDbDao implements DbDao {
 
 		sb.append(")");
 		return sb.toString();
+	}
+
+	public Connection getConnection() {
+		return conn;
 	}
 }
