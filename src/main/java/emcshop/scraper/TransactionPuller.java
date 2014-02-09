@@ -35,7 +35,7 @@ public class TransactionPuller {
 	private final Date oldestPaymentTransactionDate;
 	private final Date latestTransactionDate;
 	private final Integer rupeeBalance;
-	private final AtomicInteger currentPage;
+	private final AtomicInteger pageCounter;
 
 	private int pageCount = 0, transactionCount = 0;
 	private DownloadException thrown = null;
@@ -87,10 +87,11 @@ public class TransactionPuller {
 		latestTransactionDate = firstPage.getFirstTransactionDate();
 
 		//start threads
-		currentPage = new AtomicInteger(config.getStartAtPage());
+		pageCounter = new AtomicInteger(config.getStartAtPage());
 		for (int i = 0; i < config.getThreadCount(); i++) {
 			ScrapeThread thread = new ScrapeThread();
 			thread.setDaemon(true);
+			thread.setName(getClass().getSimpleName() + "-" + i);
 			thread.start();
 		}
 	}
@@ -245,7 +246,7 @@ public class TransactionPuller {
 			int page = 0;
 			try {
 				while (true) {
-					page = currentPage.getAndIncrement();
+					page = pageCounter.getAndIncrement();
 
 					if (config.getStopAtPage() != null && page > config.getStopAtPage()) {
 						break;
