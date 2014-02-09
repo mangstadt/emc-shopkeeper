@@ -739,9 +739,9 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private class SortComboBox extends JComboBox implements ActionListener {
-		private final String playerName = "Player name";
-		private final String bestCustomers = "Best Customers";
-		private final String bestSuppliers = "Best Suppliers";
+		private static final String playerName = "Player name";
+		private static final String bestCustomers = "Best Customers";
+		private static final String bestSuppliers = "Best Suppliers";
 		private String currentSelection;
 
 		public SortComboBox() {

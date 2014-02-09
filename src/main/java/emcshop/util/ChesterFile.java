@@ -47,13 +47,17 @@ public class ChesterFile {
 		try {
 			String version = bufReader.readLine();
 
-			String split[] = bufReader.readLine().split(" ", 3);
+			String line = bufReader.readLine();
+			if (line == null) {
+				throw new IllegalArgumentException("Player coordinates expected.");
+			}
+
+			String split[] = line.split(" ", 3);
 			double playerX = Double.parseDouble(split[0]);
 			double playerY = Double.parseDouble(split[1]);
 			double playerZ = Double.parseDouble(split[2]);
 
 			Map<String, Integer> items = new HashMap<String, Integer>();
-			String line;
 			while ((line = bufReader.readLine()) != null) {
 				if (line.isEmpty()) {
 					continue;

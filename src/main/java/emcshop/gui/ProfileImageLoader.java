@@ -319,7 +319,7 @@ public class ProfileImageLoader {
 	/**
 	 * Represents a queued download request for a profile image.
 	 */
-	private class Job {
+	private static class Job {
 		private final String playerName;
 		private final JLabel label;
 		private final int maxSize;

@@ -82,4 +82,24 @@ public class ChesterFileTest {
 
 		ChesterFile.parse(new StringReader(text));
 	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parse_no_player_coords() throws Throwable {
+		//@formatter:off
+		String text =
+		"1";
+		//@formatter:on
+
+		ChesterFile.parse(new StringReader(text));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parse_empty() throws Throwable {
+		//@formatter:off
+		String text =
+		"";
+		//@formatter:on
+
+		ChesterFile.parse(new StringReader(text));
+	}
 }

@@ -129,7 +129,7 @@ public class TransactionPage {
 
 	/**
 	 * Gets the transactions.
-	 * @return the miscellaneous transactions
+	 * @return the transactions
 	 */
 	public List<RupeeTransaction> getTransactions() {
 		return transactions;

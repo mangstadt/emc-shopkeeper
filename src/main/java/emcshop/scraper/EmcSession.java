@@ -23,7 +23,7 @@ public class EmcSession {
 	public EmcSession(String username, String sessionId, Date created) {
 		this.sessionId = sessionId;
 		this.username = username;
-		this.created = created;
+		this.created = new Date(created.getTime());
 	}
 
 	public static EmcSession login(String username, String password, boolean rememberMe) throws IOException {

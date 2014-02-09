@@ -183,7 +183,7 @@ public class Settings {
 			try {
 				created = props.getDate("session.created");
 			} catch (ParseException e) {
-				created = null;
+				created = new Date();
 			}
 			session = new EmcSession(username, sessionId, created);
 		} else {

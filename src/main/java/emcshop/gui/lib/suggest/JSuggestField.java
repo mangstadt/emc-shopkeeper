@@ -11,12 +11,12 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -61,7 +61,7 @@ public class JSuggestField extends JTextField {
 	 * Separate matcher-thread, prevents the text-field from hanging while the
 	 * suggestions are beeing prepared.
 	 */
-	private InterruptableMatcher matcher;
+	private transient InterruptableMatcher matcher;
 
 	/**
 	 * Fonts used to indicate that the text-field is processing the request,
@@ -86,7 +86,7 @@ public class JSuggestField extends JTextField {
 	/** Listeners, fire event when a selection as occured */
 	private LinkedList<ActionListener> listeners;
 
-	private SuggestMatcher suggestMatcher = new ContainsMatcher();
+	private transient SuggestMatcher suggestMatcher = new ContainsMatcher();
 
 	private boolean caseSensitive = false;
 
@@ -121,22 +121,10 @@ public class JSuggestField extends JTextField {
 				relocate();
 			}
 		});
-		owner.addWindowListener(new WindowListener() {
-			@Override
-			public void windowOpened(WindowEvent e) {
-			}
-
+		owner.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowIconified(WindowEvent e) {
 				dropDownList.setVisible(false);
-			}
-
-			@Override
-			public void windowDeiconified(WindowEvent e) {
-			}
-
-			@Override
-			public void windowDeactivated(WindowEvent e) {
 			}
 
 			@Override
@@ -147,10 +135,6 @@ public class JSuggestField extends JTextField {
 			@Override
 			public void windowClosed(WindowEvent e) {
 				dropDownList.dispose();
-			}
-
-			@Override
-			public void windowActivated(WindowEvent e) {
 			}
 		});
 		addFocusListener(new FocusListener() {
@@ -184,12 +168,8 @@ public class JSuggestField extends JTextField {
 		dropDownList.setFocusableWindowState(false);
 		dropDownList.setFocusable(false);
 		list = new JList();
-		list.addMouseListener(new MouseListener() {
+		list.addMouseListener(new MouseAdapter() {
 			private int selected;
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -202,26 +182,10 @@ public class JSuggestField extends JTextField {
 				}
 				selected = list.getSelectedIndex();
 			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-			}
 		});
 		dropDownList.add(new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
 		dropDownList.pack();
-		addKeyListener(new KeyListener() {
-			@Override
-			public void keyTyped(KeyEvent e) {
-			}
-
+		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				relocate();
@@ -233,19 +197,24 @@ public class JSuggestField extends JTextField {
 					dropDownList.setVisible(false);
 					e.consume();
 					return;
-				} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_DOWN) {
 					if (dropDownList.isVisible()) {
 						list.setSelectedIndex(list.getSelectedIndex() + 1);
 						list.ensureIndexIsVisible(list.getSelectedIndex() + 1);
 						return;
-					} else {
-						showSuggest();
 					}
-				} else if (e.getKeyCode() == KeyEvent.VK_UP) {
+					showSuggest();
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_UP) {
 					list.setSelectedIndex(list.getSelectedIndex() - 1);
 					list.ensureIndexIsVisible(list.getSelectedIndex() - 1);
 					return;
-				} else if (e.getKeyCode() == KeyEvent.VK_ENTER & list.getSelectedIndex() != -1 & suggestions.size() > 0) {
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_ENTER && list.getSelectedIndex() != -1 && suggestions.size() > 0) {
 					setText((String) list.getSelectedValue());
 					lastChosenExistingVariable = list.getSelectedValue().toString();
 					fireActionEvent();
@@ -377,7 +346,7 @@ public class JSuggestField extends JTextField {
 			location.y += getHeight();
 			dropDownList.setLocation(location);
 		} catch (IllegalComponentStateException e) {
-			return; // might happen on window creation
+			// might happen on window creation
 		}
 	}
 
@@ -407,11 +376,13 @@ public class JSuggestField extends JTextField {
 					// the words that don't match, thus narrowing
 					// the search and making it faster
 					if (caseSensitive) {
-						if (!suggestMatcher.matches(it.next(), word))
+						if (!suggestMatcher.matches(it.next(), word)) {
 							it.remove();
+						}
 					} else {
-						if (!suggestMatcher.matches(it.next().toLowerCase(), word.toLowerCase()))
+						if (!suggestMatcher.matches(it.next().toLowerCase(), word.toLowerCase())) {
 							it.remove();
+						}
 					}
 				}
 				setFont(regular);

@@ -146,7 +146,7 @@ public class PlayersPanel extends JPanel {
 
 		final JList list = new JList(new Vector<PlayerGroup>(displayedPlayers));
 		list.setCellRenderer(new ListCellRenderer() {
-			private final int profileImageSize = 32;
+			private static final int profileImageSize = 32;
 			private final Color selectedBg = new Color(192, 192, 192);
 			private final Map<String, Icon> playerIcons = new HashMap<String, Icon>();
 			private final ImageDownloadedListener onImageDownloaded = new ImageDownloadedListener() {

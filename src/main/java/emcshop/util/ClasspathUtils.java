@@ -93,24 +93,26 @@ public class ClasspathUtils {
 	static List<URI> listFilesInPackageFromJar(File jar, String packageName) throws IOException {
 		packageName = packageName.replace(".", "/");
 
-		List<URI> filesInPackage = new ArrayList<URI>();
-
 		JarFile jarFile = new JarFile(jar);
-		Enumeration<JarEntry> entries = jarFile.entries();
-		while (entries.hasMoreElements()) {
-			JarEntry entry = entries.nextElement();
+		try {
+			List<URI> filesInPackage = new ArrayList<URI>();
+			Enumeration<JarEntry> entries = jarFile.entries();
+			while (entries.hasMoreElements()) {
+				JarEntry entry = entries.nextElement();
 
-			//an entry's name looks like: "emcshop/gui/images/items/diamond.png"
-			String entryName = entry.getName();
+				//an entry's name looks like: "emcshop/gui/images/items/diamond.png"
+				String entryName = entry.getName();
 
-			if (!entry.isDirectory() && entryName.startsWith(packageName)) {
-				URI uri = jar.toURI();
-				uri = URI.create("jar:" + uri.getPath() + "!/" + entryName);
-				filesInPackage.add(uri);
+				if (!entry.isDirectory() && entryName.startsWith(packageName)) {
+					URI uri = jar.toURI();
+					uri = URI.create("jar:" + uri.getPath() + "!/" + entryName);
+					filesInPackage.add(uri);
+				}
 			}
+			return filesInPackage;
+		} finally {
+			jarFile.close();
 		}
-
-		return filesInPackage;
 	}
 
 	private ClasspathUtils() {

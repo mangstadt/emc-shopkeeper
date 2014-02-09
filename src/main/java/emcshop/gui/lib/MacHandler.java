@@ -29,7 +29,8 @@ public abstract class MacHandler {
 			try {
 				//equivalent to: applicationEventInstance.setHandled(true)
 				applicationEvent.getClass().getMethod("setHandled", boolean.class).invoke(applicationEvent, true);
-			} catch (Exception e) {
+			} catch (Throwable t) {
+				//ignore
 			}
 		}
 	}

@@ -11,11 +11,11 @@ import javax.swing.JOptionPane;
 
 @SuppressWarnings("serial")
 public abstract class ExportComboBox extends JComboBox implements ActionListener {
-	private final MainFrame owner;
+	private static final String heading = "<select format>";
+	private static final String bbCode = "BB Code";
+	private static final String csv = "CSV";
 
-	private final String heading = "<select format>";
-	private final String bbCode = "BB Code";
-	private final String csv = "CSV";
+	private final MainFrame owner;
 
 	public ExportComboBox(MainFrame owner) {
 		this.owner = owner;

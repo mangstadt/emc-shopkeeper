@@ -118,8 +118,10 @@ public class TransactionPuller {
 		try {
 			List<RupeeTransaction> transactions = queue.take();
 			if (transactions == noMoreElements) {
-				if (thrown != null) {
-					throw thrown;
+				synchronized (this) {
+					if (thrown != null) {
+						throw thrown;
+					}
 				}
 				return null;
 			}
@@ -423,7 +425,7 @@ public class TransactionPuller {
 			 * @return this
 			 */
 			public Builder stopAtDate(Date stopAtDate) {
-				this.stopAtDate = stopAtDate;
+				this.stopAtDate = new Date(stopAtDate.getTime());
 				return this;
 			}
 
