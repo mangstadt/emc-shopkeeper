@@ -510,8 +510,8 @@ public class DirbyDbDaoTest {
 		insertTransaction(date("2014-01-01 01:00:00"), appleId, notchId, -10, 1);
 		insertTransaction(date("2014-01-01 01:00:01"), diamondId, notchId, 1000, -5);
 		insertTransaction(date("2014-01-01 01:00:02"), appleId, jeb, -10, 1);
-		insertTransaction(date("2014-01-01 01:00:02"), appleId, notchId, 100, -10);
-		insertTransaction(date("2014-01-01 01:00:03"), appleId, notchId, 100, -10);
+		insertTransaction(date("2014-01-01 01:00:04"), appleId, notchId, 100, -10);
+		insertTransaction(date("2014-01-01 01:00:05"), appleId, notchId, 100, -10);
 		insertTransaction(date("2014-01-01 01:01:00"), appleId, notchId, 100, -10);
 		insertTransaction(date("2014-01-01 01:03:00"), appleId, notchId, 100, -10);
 		insertTransaction(date("2014-01-01 01:05:01"), appleId, notchId, 100, -10);
@@ -557,7 +557,90 @@ public class DirbyDbDaoTest {
 			assertEquals(100, t.getAmount());
 
 			assertFalse(it.hasNext());
+		}
 
+		//with start date
+		{
+			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), null).iterator();
+
+			ShopTransaction t = it.next();
+			assertEquals(date("2014-01-01 01:00:02"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Jeb", t.getPlayer());
+			assertEquals(1, t.getQuantity());
+			assertEquals(-10, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:00:04"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-40, t.getQuantity());
+			assertEquals(400, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:05:01"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-10, t.getQuantity());
+			assertEquals(100, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:10:00"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-10, t.getQuantity());
+			assertEquals(100, t.getAmount());
+
+			assertFalse(it.hasNext());
+		}
+
+		//with end date
+		{
+			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, date("2014-01-01 01:01:00")).iterator();
+
+			ShopTransaction t = it.next();
+			assertEquals(date("2014-01-01 01:00:00"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-29, t.getQuantity());
+			assertEquals(290, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:00:01"), t.getTs());
+			assertEquals("Diamond", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-5, t.getQuantity());
+			assertEquals(1000, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:00:02"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Jeb", t.getPlayer());
+			assertEquals(1, t.getQuantity());
+			assertEquals(-10, t.getAmount());
+
+			assertFalse(it.hasNext());
+		}
+
+		//with start and end dates
+		{
+			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), date("2014-01-01 01:01:00")).iterator();
+
+			ShopTransaction t = it.next();
+			assertEquals(date("2014-01-01 01:00:02"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Jeb", t.getPlayer());
+			assertEquals(1, t.getQuantity());
+			assertEquals(-10, t.getAmount());
+
+			t = it.next();
+			assertEquals(date("2014-01-01 01:00:04"), t.getTs());
+			assertEquals("Apple", t.getItem());
+			assertEquals("Notch", t.getPlayer());
+			assertEquals(-20, t.getQuantity());
+			assertEquals(200, t.getAmount());
+
+			assertFalse(it.hasNext());
 		}
 	}
 

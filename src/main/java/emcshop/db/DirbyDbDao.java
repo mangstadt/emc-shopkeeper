@@ -858,19 +858,6 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public String getPlayerName(int id) throws SQLException {
-		PreparedStatement stmt = stmt("SELECT name FROM players WHERE id = ?");
-
-		try {
-			stmt.setInt(1, id);
-			ResultSet rs = stmt.executeQuery();
-			return rs.next() ? rs.getString("name") : null;
-		} finally {
-			closeStatements(stmt);
-		}
-	}
-
-	@Override
 	public List<Inventory> getInventory() throws SQLException {
 		List<Inventory> inventory = new ArrayList<Inventory>();
 		PreparedStatement stmt = stmt("SELECT inventory.*, items.name AS item_name FROM inventory INNER JOIN items ON inventory.item = items.id");
