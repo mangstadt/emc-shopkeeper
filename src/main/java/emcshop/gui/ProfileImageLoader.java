@@ -333,7 +333,7 @@ public class ProfileImageLoader {
 		}
 	}
 
-	public static interface ImageDownloadedListener {
+	public interface ImageDownloadedListener {
 		/**
 		 * Called when a new, downloaded image is assigned to the label.
 		 * @param label the label
