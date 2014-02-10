@@ -480,12 +480,6 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public ShopTransaction getLatestTransaction() throws SQLException {
-		List<ShopTransaction> transactions = getTransactions(1);
-		return transactions.isEmpty() ? null : transactions.get(0);
-	}
-
-	@Override
 	public Date getLatestTransactionDate() throws SQLException {
 		Date shopTs;
 		PreparedStatement selectStmt = stmt("SELECT Max(ts) FROM transactions");
@@ -517,6 +511,7 @@ public abstract class DirbyDbDao implements DbDao {
 		return (shopTs.compareTo(paymentTs) > 0) ? shopTs : paymentTs;
 	}
 
+	@SuppressWarnings("unused")
 	private List<ShopTransaction> getTransactions(int limit) throws SQLException {
 		//@formatter:off
 		String sql =
@@ -852,7 +847,6 @@ public abstract class DirbyDbDao implements DbDao {
 				calculateFirstLastSeen(player);
 			}
 		}
-		commit();
 
 		return playerGroups;
 	}

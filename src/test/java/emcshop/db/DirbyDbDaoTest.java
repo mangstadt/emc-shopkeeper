@@ -49,7 +49,7 @@ public class DirbyDbDaoTest {
 			};
 			//@formatter:on
 
-			dao = new DirbyMemoryDbDao();
+			dao = new DirbyMemoryDbDao("test");
 			Statement stmt = dao.getConnection().createStatement();
 			for (String s : sql) {
 				stmt.execute(s);
@@ -64,12 +64,13 @@ public class DirbyDbDaoTest {
 		}
 	}
 
-	private static final Connection conn = dao.getConnection();
+	private static Connection conn = dao.getConnection();
 
 	private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@After
 	public void after() {
+		conn = dao.getConnection(); //wipe() test changes this
 		dao.rollback();
 	}
 
@@ -87,44 +88,58 @@ public class DirbyDbDaoTest {
 	@Test
 	public void selsertPlayer() throws Throwable {
 		Player player = dao.selsertPlayer("Notch");
-		assertIntEquals(notchId, player.getId());
-		assertEquals("Notch", player.getName());
-		assertEquals(date("2014-01-01 00:00:00"), player.getFirstSeen());
-		assertEquals(date("2014-01-02 12:00:00"), player.getLastSeen());
+		players().id(notchId).name("Notch").firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").test(player);
 
 		player = dao.selsertPlayer("notch");
-		assertIntEquals(notchId, player.getId());
-		assertEquals("Notch", player.getName());
-		assertEquals(date("2014-01-01 00:00:00"), player.getFirstSeen());
-		assertEquals(date("2014-01-02 12:00:00"), player.getLastSeen());
+		players().id(notchId).name("Notch").firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").test(player);
 
 		player = dao.selsertPlayer("Jeb");
-		assertNotNull(player.getId());
-		assertEquals("Jeb", player.getName());
-		assertNull(player.getFirstSeen());
-		assertNull(player.getLastSeen());
-
+		players().name("Jeb").firstSeen((Date) null).lastSeen((Date) null).test(player);
 	}
 
 	@Test
 	public void getEarliestTransactionDate() throws Throwable {
 		assertNull(dao.getEarliestTransactionDate());
 
-		transaction().ts("2014-01-05 00:00:00").insert();
-		transaction().ts("2014-01-01 00:00:00").insert();
-		transaction().ts("2014-01-10 00:00:00").insert();
+		transactions().ts("2014-01-05").insert();
+		transactions().ts("2014-01-01").insert();
+		transactions().ts("2014-01-10").insert();
 
 		Date actual = dao.getEarliestTransactionDate();
-		Date expected = date("2014-01-01 00:00:00");
+		Date expected = date("2014-01-01");
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void getLatestTransactionDate() throws Throwable {
+		assertNull(dao.getLatestTransactionDate());
+
+		transactions().ts("2014-01-05").insert();
+		transactions().ts("2014-01-10").insert();
+		transactions().ts("2014-01-01").insert();
+
+		Date actual = dao.getLatestTransactionDate();
+		Date expected = date("2014-01-10");
+		assertEquals(expected, actual);
+
+		paymentTransactions().ts(date("2014-02-01")).insert();
+
+		actual = dao.getLatestTransactionDate();
+		expected = date("2014-02-01");
+		assertEquals(expected, actual);
+
+		transactions().ts("2014-03-01").insert();
+
+		actual = dao.getLatestTransactionDate();
+		expected = date("2014-03-01");
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void getItemId() throws Throwable {
-		Integer itemId = insertItem("Item");
-		assertEquals(itemId, dao.getItemId("Item"));
-		assertEquals(itemId, dao.getItemId("item"));
-
+		int itemId = items().name("Item").insert();
+		assertIntEquals(itemId, dao.getItemId("Item"));
+		assertIntEquals(itemId, dao.getItemId("item"));
 		assertNull(dao.getItemId("does-not-exist"));
 	}
 
@@ -132,9 +147,9 @@ public class DirbyDbDaoTest {
 	public void upsertItem() throws Throwable {
 		assertEquals(appleId, dao.upsertItem("Apple"));
 
-		assertNull(dao.getItemId("Item"));
+		assertNull(items().name("Item").id());
 		int id = dao.upsertItem("Item");
-		assertIntEquals(id, dao.getItemId("Item"));
+		assertIntEquals(id, items().name("Item").id());
 	}
 
 	@Test
@@ -143,26 +158,26 @@ public class DirbyDbDaoTest {
 		expected.add("item");
 		Collections.sort(expected, String.CASE_INSENSITIVE_ORDER);
 
-		insertItem("item");
+		items().name("item").insert();
 		List<String> actual = dao.getItemNames();
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void updateTransactionItem() throws Throwable {
-		int a = insertItem("a");
-		int b = insertItem("b");
-		int c = insertItem("c");
-		int d = insertItem("d");
+		int a = items().name("a").insert();
+		int b = items().name("b").insert();
+		int c = items().name("c").insert();
+		int d = items().name("d").insert();
 
-		transaction().ts("2014-01-01 00:00:00").item(a).insert();
-		transaction().ts("2014-01-01 00:00:00").item(b).insert();
-		transaction().ts("2014-01-01 00:00:00").item(c).insert();
-		transaction().ts("2014-01-01 00:00:00").item(d).insert();
+		transactions().item(a).insert();
+		transactions().item(b).insert();
+		transactions().item(c).insert();
+		transactions().item(d).insert();
 		dao.updateTransactionItem(Arrays.asList(a, c), b);
 
 		List<Integer> actual = new ArrayList<Integer>();
-		ResultSet rs = conn.createStatement().executeQuery("SELECT item FROM transactions ORDER BY item");
+		ResultSet rs = query("SELECT item FROM transactions ORDER BY item");
 		while (rs.next()) {
 			actual.add(rs.getInt(1));
 		}
@@ -175,66 +190,66 @@ public class DirbyDbDaoTest {
 	public void updateItemName() throws Throwable {
 		dao.updateItemName(appleId, "Pear");
 
-		assertNull(dao.getItemId("Apple"));
-		assertIntEquals(appleId, dao.getItemId("Pear"));
+		assertNull(items().name("Apple").id());
+		assertIntEquals(appleId, items().name("Pear").id());
 	}
 
 	@Test
 	public void deleteItems() throws Throwable {
 		//nothing should happen if no values are passed into the method
-		int itemCount = dao.getItemNames().size();
+		Map<Integer, String> before = items().all();
 		dao.deleteItems();
-		assertEquals(itemCount, dao.getItemNames().size());
+		Map<Integer, String> after = items().all();
+		assertEquals(before, after);
 
 		dao.deleteItems(appleId, diamondId);
-		assertNull(dao.getItemId("Apple"));
-		assertNull(dao.getItemId("Diamond"));
+		assertNull(items().name("Apple").id());
+		assertNull(items().name("Diamond").id());
+		assertNotNull(items().name("Gold Sword").id());
 	}
 
 	@Test
 	public void populateItemsTable() throws Throwable {
 		//table shouldn't be touched if no items are missing
-		Map<Integer, String> before = getItemsById();
+		Map<Integer, String> before = items().all();
 		dao.populateItemsTable();
-		Map<Integer, String> after = getItemsById();
+		Map<Integer, String> after = items().all();
 		assertEquals(before, after);
 
 		dao.deleteItems(appleId);
 		dao.populateItemsTable();
-		assertNotNull(dao.getItemId("Apple"));
-		assertFalse(appleId == dao.getItemId("Apple"));
+		assertNotNull(items().name("Apple").id());
+		assertFalse(appleId == items().name("Apple").id());
 	}
 
 	@Test
 	public void removeDuplicateItems() throws Throwable {
 		int a = appleId;
-		int b = insertItem("Apple");
-		int c = insertItem("apple");
+		int b = items().name("Apple").insert();
+		int c = items().name("apple").insert();
 		int d = diamondId;
 
-		transaction().ts("2014-01-01 00:00:00").item(a).insert();
-		transaction().ts("2014-01-01 00:00:00").item(b).insert();
-		transaction().ts("2014-01-01 00:00:00").item(c).insert();
-		transaction().ts("2014-01-01 00:00:00").item(d).insert();
-		insertInventory(a, 1);
-		insertInventory(b, 2);
-		insertInventory(c, 3);
-		insertInventory(d, 4);
+		transactions().item(a).insert();
+		transactions().item(b).insert();
+		transactions().item(c).insert();
+		transactions().item(d).insert();
+
+		inventory().item(a).quantity(1).insert();
+		inventory().item(b).quantity(2).insert();
+		inventory().item(c).quantity(3).insert();
+		inventory().item(d).quantity(4).insert();
 
 		dao.removeDuplicateItems();
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT Count(*) FROM items WHERE name = 'Apple'");
+		ResultSet rs = query("SELECT Count(*) FROM items WHERE Lower(name) = 'apple'");
 		rs.next();
 		assertEquals(1, rs.getInt(1));
 
-		stmt = conn.createStatement();
-		rs = stmt.executeQuery("SELECT Count(*) FROM inventory i INNER JOIN items it ON i.item = it.id WHERE Lower(it.name) = 'apple'");
+		rs = query("SELECT Count(*) FROM inventory INNER JOIN items ON inventory.item = items.id WHERE Lower(items.name) = 'apple'");
 		rs.next();
 		assertEquals(1, rs.getInt(1));
 
-		stmt = conn.createStatement();
-		rs = stmt.executeQuery("SELECT i.quantity FROM inventory i INNER JOIN items it ON i.item = it.id WHERE Lower(it.name) = 'apple'");
+		rs = query("SELECT inventory.quantity FROM inventory INNER JOIN items ON inventory.item = items.id WHERE Lower(items.name) = 'apple'");
 		rs.next();
 		assertEquals(6, rs.getInt(1));
 	}
@@ -242,49 +257,27 @@ public class DirbyDbDaoTest {
 	@Test
 	public void insertTransaction() throws Throwable {
 		DateGenerator dg = new DateGenerator();
-		ShopTransaction transaction = new ShopTransaction();
-		transaction.setTs(dg.next());
-		transaction.setItem("apple");
-		transaction.setPlayer("notch");
-		transaction.setBalance(1000);
-		transaction.setAmount(-10);
-		transaction.setQuantity(5);
+
+		ShopTransaction transaction = transactions().ts(dg.next()).item("apple").player("notch").balance(1000).amount(-10).quantity(5).dto();
 		dao.insertTransaction(transaction, false);
 
-		transaction = new ShopTransaction();
-		transaction.setTs(dg.next());
-		transaction.setItem("Item");
-		transaction.setPlayer("Jeb");
-		transaction.setBalance(1200);
-		transaction.setAmount(200);
-		transaction.setQuantity(-7);
+		transaction = transactions().ts(dg.next()).item("Item").player("Jeb").balance(1200).amount(200).quantity(-7).dto();
 		dao.insertTransaction(transaction, false);
 
-		assertNotNull(dao.getItemId("Item"));
+		assertNotNull(items().name("Item").id());
 
-		List<String> actualNames = getPlayerNames();
+		List<String> actualNames = players().all();
 		assertEquals(2, actualNames.size());
 		assertTrue(actualNames.contains("Notch"));
 		assertTrue(actualNames.contains("Jeb"));
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT * FROM transactions ORDER BY id");
+		ResultSet rs = transactions().all();
 
 		rs.next();
-		assertEquals(dg.getGenerated(0), rs.getTimestamp("ts"));
-		assertEquals(appleId, rs.getInt("item"));
-		assertEquals(notchId, rs.getInt("player"));
-		assertEquals(1000, rs.getInt("balance"));
-		assertEquals(-10, rs.getInt("amount"));
-		assertEquals(5, rs.getInt("quantity"));
+		transactions().ts(dg.getGenerated(0)).item(appleId).player(notchId).balance(1000).amount(-10).quantity(5).test(rs);
 
 		rs.next();
-		assertEquals(dg.getGenerated(1), rs.getTimestamp("ts"));
-		assertIntEquals(dao.getItemId("Item"), rs.getInt("item"));
-		assertIntEquals(getPlayerId("Jeb"), rs.getInt("player"));
-		assertEquals(1200, rs.getInt("balance"));
-		assertEquals(200, rs.getInt("amount"));
-		assertEquals(-7, rs.getInt("quantity"));
+		transactions().ts(dg.getGenerated(1)).item(items().name("Item").id()).player(players().name("Jeb").id()).balance(1200).amount(200).quantity(-7).test(rs);
 
 		assertFalse(rs.next());
 	}
@@ -292,15 +285,10 @@ public class DirbyDbDaoTest {
 	@Test
 	public void insertTransaction_updateInventory() throws Throwable {
 		DateGenerator dg = new DateGenerator();
-		insertInventory(appleId, 100);
-		insertInventory(diamondId, 20);
+		inventory().item(appleId).quantity(100).insert();
+		inventory().item(diamondId).quantity(20).insert();
 
-		ShopTransaction transaction = new ShopTransaction();
-		transaction.setTs(dg.next());
-		transaction.setItem("apple");
-		transaction.setPlayer("notch");
-		transaction.setBalance(1000);
-		transaction.setAmount(10);
+		ShopTransaction transaction = transactions().ts(dg.next()).item("apple").player("notch").balance(1000).amount(10).dto();
 
 		transaction.setQuantity(5);
 		dao.insertTransaction(transaction, false);
@@ -311,7 +299,7 @@ public class DirbyDbDaoTest {
 		transaction.setQuantity(-15);
 		dao.insertTransaction(transaction, true);
 
-		Map<Integer, Integer> actual = getInventoryByItem();
+		Map<Integer, Integer> actual = inventory().all();
 		Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
 		expected.put(appleId, 90);
 		expected.put(diamondId, 20);
@@ -321,30 +309,20 @@ public class DirbyDbDaoTest {
 	@Test
 	public void insertPaymentTransactions() throws Throwable {
 		DateGenerator dg = new DateGenerator();
-		PaymentTransaction t1 = new PaymentTransaction();
-		t1.setAmount(1000);
-		t1.setBalance(20000);
-		t1.setPlayer("Notch");
-		t1.setTs(dg.next());
-
-		PaymentTransaction t2 = new PaymentTransaction();
-		t2.setAmount(-5000);
-		t2.setBalance(15000);
-		t2.setPlayer("Jeb");
-		t2.setTs(dg.next());
+		PaymentTransaction t1 = paymentTransactions().amount(1000).balance(20000).player("Notch").ts(dg.next()).dto();
+		PaymentTransaction t2 = paymentTransactions().amount(-5000).balance(15000).player("Jeb").ts(dg.next()).dto();
 
 		dao.insertPaymentTransactions(Arrays.asList(t1, t2));
 		assertNull(t1.getId()); //IDs are not retrieved
 		assertNull(t2.getId());
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT * FROM payment_transactions ORDER BY id");
+		ResultSet rs = paymentTransactions().all();
 
 		rs.next();
-		paymentTransaction().ts(dg.getGenerated(0)).player(notchId).balance(20000).amount(1000).transaction(null).ignore(false).test(rs);
+		paymentTransactions().ts(dg.getGenerated(0)).player(notchId).balance(20000).amount(1000).transaction(null).ignore(false).test(rs);
 
 		rs.next();
-		paymentTransaction().ts(dg.getGenerated(1)).player(getPlayerId("Jeb")).balance(15000).amount(-5000).transaction(null).ignore(false).test(rs);
+		paymentTransactions().ts(dg.getGenerated(1)).player(players().name("Jeb").id()).balance(15000).amount(-5000).transaction(null).ignore(false).test(rs);
 
 		assertFalse(rs.next());
 	}
@@ -352,37 +330,28 @@ public class DirbyDbDaoTest {
 	@Test
 	public void upsertPaymentTransaction() throws Throwable {
 		DateGenerator dg = new DateGenerator();
-		int jeb = insertPlayer("Jeb");
-		int t1 = paymentTransaction().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
-		paymentTransaction().ts(dg.next()).player(jeb).amount(-5000).balance(15000).ignore(false).transaction(null).insert();
+		int jeb = players().name("Jeb").insert();
+		int t1 = paymentTransactions().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
+		paymentTransactions().ts(dg.next()).player(jeb).amount(-5000).balance(15000).ignore(false).transaction(null).insert();
 
-		PaymentTransaction t3 = new PaymentTransaction();
-		t3.setAmount(100);
-		t3.setBalance(15100);
-		t3.setPlayer("Notch");
-		t3.setTs(dg.next());
-
-		PaymentTransaction t4 = new PaymentTransaction();
-		t4.setId(t1);
-		t4.setAmount(200);
-		t4.setBalance(20100);
+		PaymentTransaction t3 = paymentTransactions().amount(100).balance(15100).player("Notch").ts(dg.next()).dto();
+		PaymentTransaction t4 = paymentTransactions().id(t1).amount(200).balance(20100).dto();
 
 		dao.upsertPaymentTransaction(t3);
 		assertNotNull(t3.getId());
 
 		dao.upsertPaymentTransaction(t4);
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT * FROM payment_transactions ORDER BY id");
+		ResultSet rs = paymentTransactions().all();
 
 		rs.next();
-		paymentTransaction().ts(dg.getGenerated(0)).player(notchId).balance(20100).amount(200).transaction(null).ignore(false).test(rs);
+		paymentTransactions().ts(dg.getGenerated(0)).player(notchId).balance(20100).amount(200).transaction(null).ignore(false).test(rs);
 
 		rs.next();
-		paymentTransaction().ts(dg.getGenerated(1)).player(jeb).balance(15000).amount(-5000).transaction(null).ignore(false).test(rs);
+		paymentTransactions().ts(dg.getGenerated(1)).player(jeb).balance(15000).amount(-5000).transaction(null).ignore(false).test(rs);
 
 		rs.next();
-		paymentTransaction().ts(dg.getGenerated(2)).player(notchId).balance(15100).amount(100).transaction(null).ignore(false).test(rs);
+		paymentTransactions().ts(dg.getGenerated(2)).player(notchId).balance(15100).amount(100).transaction(null).ignore(false).test(rs);
 
 		assertFalse(rs.next());
 	}
@@ -390,41 +359,54 @@ public class DirbyDbDaoTest {
 	@Test
 	public void getPendingPaymentTransactions() throws Throwable {
 		DateGenerator dg = new DateGenerator();
-		int transId = transaction().ts(dg.next()).item(appleId).player(notchId).amount(500).quantity(-10).insert();
-		int t1 = paymentTransaction().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
-		int t2 = paymentTransaction().ts(dg.next()).player(notchId).amount(200).balance(30000).ignore(false).transaction(null).insert();
-		paymentTransaction().ts(dg.next()).player(notchId).amount(300).balance(40000).ignore(true).transaction(null).insert();
-		paymentTransaction().ts(dg.next()).player(notchId).amount(400).balance(50000).ignore(false).transaction(transId).insert();
-		paymentTransaction().ts(dg.next()).player(notchId).amount(500).balance(60000).ignore(true).transaction(transId).insert();
+		int transId = transactions().ts(dg.next()).item(appleId).player(notchId).amount(500).quantity(-10).insert();
+		int t1 = paymentTransactions().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
+		int t2 = paymentTransactions().ts(dg.next()).player(notchId).amount(200).balance(30000).ignore(false).transaction(null).insert();
+		paymentTransactions().ts(dg.next()).player(notchId).amount(300).balance(40000).ignore(true).transaction(null).insert();
+		paymentTransactions().ts(dg.next()).player(notchId).amount(400).balance(50000).ignore(false).transaction(transId).insert();
+		paymentTransactions().ts(dg.next()).player(notchId).amount(500).balance(60000).ignore(true).transaction(transId).insert();
 
 		Iterator<PaymentTransaction> it = dao.getPendingPaymentTransactions().iterator();
 
 		PaymentTransaction t = it.next();
-		paymentTransaction().ts(dg.getGenerated(2)).player("Notch").balance(30000).amount(200).id(t2).test(t);
+		paymentTransactions().ts(dg.getGenerated(2)).player("Notch").balance(30000).amount(200).id(t2).test(t);
 
 		t = it.next();
-		paymentTransaction().ts(dg.getGenerated(1)).player("Notch").balance(20000).amount(100).id(t1).test(t);
+		paymentTransactions().ts(dg.getGenerated(1)).player("Notch").balance(20000).amount(100).id(t1).test(t);
 
 		assertFalse(it.hasNext());
 	}
 
 	@Test
+	public void countPendingPaymentTransactions() throws Throwable {
+		int transId = transactions().insert();
+		paymentTransactions().ignore(false).transaction(null).insert();
+		paymentTransactions().ignore(false).transaction(null).insert();
+		paymentTransactions().ignore(true).transaction(null).insert();
+		paymentTransactions().ignore(false).transaction(transId).insert();
+		paymentTransactions().ignore(true).transaction(transId).insert();
+
+		int actual = dao.countPendingPaymentTransactions();
+		int expected = 2;
+		assertEquals(expected, actual);
+	}
+
+	@Test
 	public void ignorePaymentTransaction() throws Throwable {
 		DateGenerator dg = new DateGenerator();
-		int t1 = paymentTransaction().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
-		int t2 = paymentTransaction().ts(dg.next()).player(notchId).amount(200).balance(30000).ignore(true).transaction(null).insert();
+		int t1 = paymentTransactions().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
+		int t2 = paymentTransactions().ts(dg.next()).player(notchId).amount(200).balance(30000).ignore(true).transaction(null).insert();
 
 		dao.ignorePaymentTransaction(t1);
 		dao.ignorePaymentTransaction(t2);
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT * FROM payment_transactions ORDER BY id");
+		ResultSet rs = paymentTransactions().all();
 
 		rs.next();
-		paymentTransaction().ts(dg.getGenerated(0)).player(notchId).balance(20000).amount(100).transaction(null).ignore(true).test(rs);
+		paymentTransactions().ts(dg.getGenerated(0)).player(notchId).balance(20000).amount(100).transaction(null).ignore(true).test(rs);
 
 		rs.next();
-		paymentTransaction().ts(dg.getGenerated(1)).player(notchId).balance(30000).amount(200).transaction(null).ignore(true).test(rs);
+		paymentTransactions().ts(dg.getGenerated(1)).player(notchId).balance(30000).amount(200).transaction(null).ignore(true).test(rs);
 
 		assertFalse(rs.next());
 	}
@@ -432,20 +414,19 @@ public class DirbyDbDaoTest {
 	@Test
 	public void assignPaymentTransaction() throws Throwable {
 		DateGenerator dg = new DateGenerator();
-		int transId = transaction().ts(dg.next()).item(appleId).player(notchId).amount(500).quantity(-10).insert();
-		int t1 = paymentTransaction().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
-		paymentTransaction().ts(dg.next()).player(notchId).amount(200).balance(30000).ignore(false).transaction(null).insert();
+		int transId = transactions().ts(dg.next()).item(appleId).player(notchId).amount(500).quantity(-10).insert();
+		int t1 = paymentTransactions().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
+		paymentTransactions().ts(dg.next()).player(notchId).amount(200).balance(30000).ignore(false).transaction(null).insert();
 
 		dao.assignPaymentTransaction(t1, transId);
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT * FROM payment_transactions ORDER BY id");
+		ResultSet rs = paymentTransactions().all();
 
 		rs.next();
-		paymentTransaction().ts(dg.getGenerated(1)).player(notchId).balance(20000).amount(100).transaction(transId).ignore(false).test(rs);
+		paymentTransactions().ts(dg.getGenerated(1)).player(notchId).balance(20000).amount(100).transaction(transId).ignore(false).test(rs);
 
 		rs.next();
-		paymentTransaction().ts(dg.getGenerated(2)).player(notchId).balance(30000).amount(200).transaction(null).ignore(false).test(rs);
+		paymentTransactions().ts(dg.getGenerated(2)).player(notchId).balance(30000).amount(200).transaction(null).ignore(false).test(rs);
 
 		assertFalse(rs.next());
 	}
@@ -454,14 +435,14 @@ public class DirbyDbDaoTest {
 	public void getItemGroups() throws Throwable {
 		assertTrue(dao.getItemGroups(null, null).isEmpty());
 
-		int jeb = insertPlayer("Jeb");
+		int jeb = players().name("Jeb").insert();
 		DateGenerator dg = new DateGenerator();
-		transaction().ts(dg.next()).item(appleId).player(notchId).amount(-5).quantity(100).insert();
-		transaction().ts(dg.next()).item(appleId).player(notchId).amount(-20).quantity(1000).insert();
-		transaction().ts(dg.next()).item(appleId).player(notchId).amount(10).quantity(-200).insert();
-		transaction().ts(dg.next()).item(appleId).player(notchId).amount(1).quantity(-20).insert();
-		transaction().ts(dg.next()).item(appleId).player(jeb).amount(1).quantity(-20).insert();
-		transaction().ts(dg.next()).item(diamondId).player(notchId).amount(-1).quantity(50).insert();
+		transactions().ts(dg.next()).item(appleId).player(notchId).amount(-5).quantity(100).insert();
+		transactions().ts(dg.next()).item(appleId).player(notchId).amount(-20).quantity(1000).insert();
+		transactions().ts(dg.next()).item(appleId).player(notchId).amount(10).quantity(-200).insert();
+		transactions().ts(dg.next()).item(appleId).player(notchId).amount(1).quantity(-20).insert();
+		transactions().ts(dg.next()).item(appleId).player(jeb).amount(1).quantity(-20).insert();
+		transactions().ts(dg.next()).item(diamondId).player(notchId).amount(-1).quantity(50).insert();
 
 		//no date range
 		{
@@ -469,10 +450,10 @@ public class DirbyDbDaoTest {
 			assertEquals(2, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
-			assertItemGroup().item("Apple").boughtAmt(-25).boughtQty(1100).soldAmt(12).soldQty(-240).test(itemGroup);
+			itemGroup().item("Apple").boughtAmt(-25).boughtQty(1100).soldAmt(12).soldQty(-240).test(itemGroup);
 
 			itemGroup = groups.get("Diamond");
-			assertItemGroup().item("Diamond").boughtAmt(-1).boughtQty(50).soldAmt(0).soldQty(0).test(itemGroup);
+			itemGroup().item("Diamond").boughtAmt(-1).boughtQty(50).soldAmt(0).soldQty(0).test(itemGroup);
 		}
 
 		//start date (first transaction is not included)
@@ -481,10 +462,10 @@ public class DirbyDbDaoTest {
 			assertEquals(2, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
-			assertItemGroup().item("Apple").boughtAmt(-20).boughtQty(1000).soldAmt(12).soldQty(-240).test(itemGroup);
+			itemGroup().item("Apple").boughtAmt(-20).boughtQty(1000).soldAmt(12).soldQty(-240).test(itemGroup);
 
 			itemGroup = groups.get("Diamond");
-			assertItemGroup().item("Diamond").boughtAmt(-1).boughtQty(50).soldAmt(0).soldQty(0).test(itemGroup);
+			itemGroup().item("Diamond").boughtAmt(-1).boughtQty(50).soldAmt(0).soldQty(0).test(itemGroup);
 		}
 
 		//end date (last transaction is not included)
@@ -493,7 +474,7 @@ public class DirbyDbDaoTest {
 			assertEquals(1, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
-			assertItemGroup().item("Apple").boughtAmt(-25).boughtQty(1100).soldAmt(12).soldQty(-240).test(itemGroup);
+			itemGroup().item("Apple").boughtAmt(-25).boughtQty(1100).soldAmt(12).soldQty(-240).test(itemGroup);
 		}
 
 		//start and end date (first and last transactions are not included)
@@ -502,7 +483,7 @@ public class DirbyDbDaoTest {
 			assertEquals(1, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
-			assertItemGroup().item("Apple").boughtAmt(-20).boughtQty(1000).soldAmt(12).soldQty(-240).test(itemGroup);
+			itemGroup().item("Apple").boughtAmt(-20).boughtQty(1000).soldAmt(12).soldQty(-240).test(itemGroup);
 		}
 
 		//start and end date (no transactions included)
@@ -516,56 +497,36 @@ public class DirbyDbDaoTest {
 	public void getTransactionsByDate() throws Throwable {
 		assertTrue(dao.getTransactionsByDate(null, null).isEmpty());
 
-		int jeb = insertPlayer("Jeb");
-		transaction().ts("2014-01-01 01:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-01 01:00:00").item(appleId).player(notchId).amount(-10).quantity(1).insert();
-		transaction().ts("2014-01-01 01:00:01").item(diamondId).player(notchId).amount(1000).quantity(-5).insert();
-		transaction().ts("2014-01-01 01:00:02").item(appleId).player(jeb).amount(-10).quantity(1).insert();
-		transaction().ts("2014-01-01 01:00:04").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-01 01:00:05").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-01 01:01:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-01 01:03:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-01 01:05:01").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-01 01:10:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		int jeb = players().name("Jeb").insert();
+		transactions().ts("2014-01-01 01:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 01:00:00").item(appleId).player(notchId).amount(-10).quantity(1).insert();
+		transactions().ts("2014-01-01 01:00:01").item(diamondId).player(notchId).amount(1000).quantity(-5).insert();
+		transactions().ts("2014-01-01 01:00:02").item(appleId).player(jeb).amount(-10).quantity(1).insert();
+		transactions().ts("2014-01-01 01:00:04").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 01:00:05").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 01:01:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 01:03:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 01:05:01").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 01:10:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
 
 		//no date range
 		{
 			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, null).iterator();
 
 			ShopTransaction t = it.next();
-			assertEquals(date("2014-01-01 01:00:00"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-49, t.getQuantity());
-			assertEquals(490, t.getAmount());
+			transactions().ts("2014-01-01 01:00:00").item("Apple").player("Notch").amount(490).quantity(-49).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:00:01"), t.getTs());
-			assertEquals("Diamond", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-5, t.getQuantity());
-			assertEquals(1000, t.getAmount());
+			transactions().ts("2014-01-01 01:00:01").item("Diamond").player("Notch").amount(1000).quantity(-5).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:00:02"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Jeb", t.getPlayer());
-			assertEquals(1, t.getQuantity());
-			assertEquals(-10, t.getAmount());
+			transactions().ts("2014-01-01 01:00:02").item("Apple").player("Jeb").amount(-10).quantity(1).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:05:01"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-10, t.getQuantity());
-			assertEquals(100, t.getAmount());
+			transactions().ts("2014-01-01 01:05:01").item("Apple").player("Notch").amount(100).quantity(-10).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:10:00"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-10, t.getQuantity());
-			assertEquals(100, t.getAmount());
+			transactions().ts("2014-01-01 01:10:00").item("Apple").player("Notch").amount(100).quantity(-10).test(t);
 
 			assertFalse(it.hasNext());
 		}
@@ -575,32 +536,16 @@ public class DirbyDbDaoTest {
 			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), null).iterator();
 
 			ShopTransaction t = it.next();
-			assertEquals(date("2014-01-01 01:00:02"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Jeb", t.getPlayer());
-			assertEquals(1, t.getQuantity());
-			assertEquals(-10, t.getAmount());
+			transactions().ts("2014-01-01 01:00:02").item("Apple").player("Jeb").amount(-10).quantity(1).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:00:04"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-40, t.getQuantity());
-			assertEquals(400, t.getAmount());
+			transactions().ts("2014-01-01 01:00:04").item("Apple").player("Notch").amount(400).quantity(-40).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:05:01"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-10, t.getQuantity());
-			assertEquals(100, t.getAmount());
+			transactions().ts("2014-01-01 01:05:01").item("Apple").player("Notch").amount(100).quantity(-10).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:10:00"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-10, t.getQuantity());
-			assertEquals(100, t.getAmount());
+			transactions().ts("2014-01-01 01:10:00").item("Apple").player("Notch").amount(100).quantity(-10).test(t);
 
 			assertFalse(it.hasNext());
 		}
@@ -610,25 +555,13 @@ public class DirbyDbDaoTest {
 			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, date("2014-01-01 01:01:00")).iterator();
 
 			ShopTransaction t = it.next();
-			assertEquals(date("2014-01-01 01:00:00"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-29, t.getQuantity());
-			assertEquals(290, t.getAmount());
+			transactions().ts("2014-01-01 01:00:00").item("Apple").player("Notch").amount(290).quantity(-29).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:00:01"), t.getTs());
-			assertEquals("Diamond", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-5, t.getQuantity());
-			assertEquals(1000, t.getAmount());
+			transactions().ts("2014-01-01 01:00:01").item("Diamond").player("Notch").amount(1000).quantity(-5).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:00:02"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Jeb", t.getPlayer());
-			assertEquals(1, t.getQuantity());
-			assertEquals(-10, t.getAmount());
+			transactions().ts("2014-01-01 01:00:02").item("Apple").player("Jeb").amount(-10).quantity(1).test(t);
 
 			assertFalse(it.hasNext());
 		}
@@ -638,18 +571,10 @@ public class DirbyDbDaoTest {
 			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), date("2014-01-01 01:01:00")).iterator();
 
 			ShopTransaction t = it.next();
-			assertEquals(date("2014-01-01 01:00:02"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Jeb", t.getPlayer());
-			assertEquals(1, t.getQuantity());
-			assertEquals(-10, t.getAmount());
+			transactions().ts("2014-01-01 01:00:02").item("Apple").player("Jeb").amount(-10).quantity(1).test(t);
 
 			t = it.next();
-			assertEquals(date("2014-01-01 01:00:04"), t.getTs());
-			assertEquals("Apple", t.getItem());
-			assertEquals("Notch", t.getPlayer());
-			assertEquals(-20, t.getQuantity());
-			assertEquals(200, t.getAmount());
+			transactions().ts("2014-01-01 01:00:04").item("Apple").player("Notch").amount(200).quantity(-20).test(t);
 
 			assertFalse(it.hasNext());
 		}
@@ -660,11 +585,11 @@ public class DirbyDbDaoTest {
 		assertTrue(dao.getPlayerGroups(null, null).isEmpty());
 
 		DateGenerator dg = new DateGenerator();
-		int jeb = insertPlayer("Jeb");
-		transaction().ts(dg.next()).item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts(dg.next()).item(diamondId).player(notchId).amount(1000).quantity(-5).insert();
-		transaction().ts(dg.next()).item(appleId).player(jeb).amount(-10).quantity(1).insert();
-		transaction().ts(dg.next()).item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		int jeb = players().name("Jeb").insert();
+		transactions().ts(dg.next()).item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts(dg.next()).item(diamondId).player(notchId).amount(1000).quantity(-5).insert();
+		transactions().ts(dg.next()).item(appleId).player(jeb).amount(-10).quantity(1).insert();
+		transactions().ts(dg.next()).item(appleId).player(notchId).amount(100).quantity(-10).insert();
 
 		//no date range
 		{
@@ -675,32 +600,26 @@ public class DirbyDbDaoTest {
 				PlayerGroup group = groups.get("Notch");
 
 				Player player = group.getPlayer();
-				assertEquals("Notch", player.getName());
-				assertIntEquals(notchId, player.getId());
-				assertEquals(date("2014-01-01 00:00:00"), player.getFirstSeen());
-				assertEquals(date("2014-01-02 12:00:00"), player.getLastSeen());
+				players().name("Notch").id(notchId).firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(2, items.size());
 				ItemGroup ig = items.get("Apple");
-				assertItemGroup().item("Apple").boughtAmt(0).boughtQty(0).soldAmt(200).soldQty(-20).test(ig);
+				itemGroup().item("Apple").boughtAmt(0).boughtQty(0).soldAmt(200).soldQty(-20).test(ig);
 				ig = items.get("Diamond");
-				assertItemGroup().item("Diamond").boughtAmt(0).boughtQty(0).soldAmt(1000).soldQty(-5).test(ig);
+				itemGroup().item("Diamond").boughtAmt(0).boughtQty(0).soldAmt(1000).soldQty(-5).test(ig);
 			}
 
 			{
 				PlayerGroup group = groups.get("Jeb");
 
 				Player player = group.getPlayer();
-				assertEquals("Jeb", player.getName());
-				assertIntEquals(jeb, player.getId());
-				assertEquals(dg.getGenerated(2), player.getFirstSeen());
-				assertEquals(dg.getGenerated(2), player.getLastSeen());
+				players().name("Jeb").id(jeb).firstSeen(dg.getGenerated(2)).lastSeen(dg.getGenerated(2)).test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(1, items.size());
 				ItemGroup ig = items.get("Apple");
-				assertItemGroup().item("Apple").boughtAmt(-10).boughtQty(1).soldAmt(0).soldQty(0).test(ig);
+				itemGroup().item("Apple").boughtAmt(-10).boughtQty(1).soldAmt(0).soldQty(0).test(ig);
 			}
 		}
 
@@ -713,32 +632,26 @@ public class DirbyDbDaoTest {
 				PlayerGroup group = groups.get("Notch");
 
 				Player player = group.getPlayer();
-				assertEquals("Notch", player.getName());
-				assertIntEquals(notchId, player.getId());
-				assertEquals(date("2014-01-01 00:00:00"), player.getFirstSeen());
-				assertEquals(date("2014-01-02 12:00:00"), player.getLastSeen());
+				players().name("Notch").id(notchId).firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(2, items.size());
 				ItemGroup ig = items.get("Apple");
-				assertItemGroup().item("Apple").boughtAmt(0).boughtQty(0).soldAmt(100).soldQty(-10).test(ig);
+				itemGroup().item("Apple").boughtAmt(0).boughtQty(0).soldAmt(100).soldQty(-10).test(ig);
 				ig = items.get("Diamond");
-				assertItemGroup().item("Diamond").boughtAmt(0).boughtQty(0).soldAmt(1000).soldQty(-5).test(ig);
+				itemGroup().item("Diamond").boughtAmt(0).boughtQty(0).soldAmt(1000).soldQty(-5).test(ig);
 			}
 
 			{
 				PlayerGroup group = groups.get("Jeb");
 
 				Player player = group.getPlayer();
-				assertEquals("Jeb", player.getName());
-				assertIntEquals(jeb, player.getId());
-				assertEquals(dg.getGenerated(2), player.getFirstSeen());
-				assertEquals(dg.getGenerated(2), player.getLastSeen());
+				players().name("Jeb").id(jeb).firstSeen(dg.getGenerated(2)).lastSeen(dg.getGenerated(2)).test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(1, items.size());
 				ItemGroup ig = items.get("Apple");
-				assertItemGroup().item("Apple").boughtAmt(-10).boughtQty(1).soldAmt(0).soldQty(0).test(ig);
+				itemGroup().item("Apple").boughtAmt(-10).boughtQty(1).soldAmt(0).soldQty(0).test(ig);
 			}
 		}
 
@@ -751,32 +664,26 @@ public class DirbyDbDaoTest {
 				PlayerGroup group = groups.get("Notch");
 
 				Player player = group.getPlayer();
-				assertEquals("Notch", player.getName());
-				assertIntEquals(notchId, player.getId());
-				assertEquals(date("2014-01-01 00:00:00"), player.getFirstSeen());
-				assertEquals(date("2014-01-02 12:00:00"), player.getLastSeen());
+				players().name("Notch").id(notchId).firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(2, items.size());
 				ItemGroup ig = items.get("Apple");
-				assertItemGroup().item("Apple").boughtAmt(0).boughtQty(0).soldAmt(100).soldQty(-10).test(ig);
+				itemGroup().item("Apple").boughtAmt(0).boughtQty(0).soldAmt(100).soldQty(-10).test(ig);
 				ig = items.get("Diamond");
-				assertItemGroup().item("Diamond").boughtAmt(0).boughtQty(0).soldAmt(1000).soldQty(-5).test(ig);
+				itemGroup().item("Diamond").boughtAmt(0).boughtQty(0).soldAmt(1000).soldQty(-5).test(ig);
 			}
 
 			{
 				PlayerGroup group = groups.get("Jeb");
 
 				Player player = group.getPlayer();
-				assertEquals("Jeb", player.getName());
-				assertIntEquals(jeb, player.getId());
-				assertEquals(dg.getGenerated(2), player.getFirstSeen());
-				assertEquals(dg.getGenerated(2), player.getLastSeen());
+				players().name("Jeb").id(jeb).firstSeen(dg.getGenerated(2)).lastSeen(dg.getGenerated(2)).test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(1, items.size());
 				ItemGroup ig = items.get("Apple");
-				assertItemGroup().item("Apple").boughtAmt(-10).boughtQty(1).soldAmt(0).soldQty(0).test(ig);
+				itemGroup().item("Apple").boughtAmt(-10).boughtQty(1).soldAmt(0).soldQty(0).test(ig);
 			}
 		}
 
@@ -789,30 +696,24 @@ public class DirbyDbDaoTest {
 				PlayerGroup group = groups.get("Notch");
 
 				Player player = group.getPlayer();
-				assertEquals("Notch", player.getName());
-				assertIntEquals(notchId, player.getId());
-				assertEquals(date("2014-01-01 00:00:00"), player.getFirstSeen());
-				assertEquals(date("2014-01-02 12:00:00"), player.getLastSeen());
+				players().name("Notch").id(notchId).firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(1, items.size());
 				ItemGroup ig = items.get("Diamond");
-				assertItemGroup().item("Diamond").boughtAmt(0).boughtQty(0).soldAmt(1000).soldQty(-5).test(ig);
+				itemGroup().item("Diamond").boughtAmt(0).boughtQty(0).soldAmt(1000).soldQty(-5).test(ig);
 			}
 
 			{
 				PlayerGroup group = groups.get("Jeb");
 
 				Player player = group.getPlayer();
-				assertEquals("Jeb", player.getName());
-				assertIntEquals(jeb, player.getId());
-				assertEquals(dg.getGenerated(2), player.getFirstSeen());
-				assertEquals(dg.getGenerated(2), player.getLastSeen());
+				players().name("Jeb").id(jeb).firstSeen(dg.getGenerated(2)).lastSeen(dg.getGenerated(2)).test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(1, items.size());
 				ItemGroup ig = items.get("Apple");
-				assertItemGroup().item("Apple").boughtAmt(-10).boughtQty(1).soldAmt(0).soldQty(0).test(ig);
+				itemGroup().item("Apple").boughtAmt(-10).boughtQty(1).soldAmt(0).soldQty(0).test(ig);
 			}
 		}
 	}
@@ -821,8 +722,8 @@ public class DirbyDbDaoTest {
 	public void getInventory() throws Throwable {
 		assertTrue(dao.getInventory().isEmpty());
 
-		insertInventory(appleId, 5);
-		insertInventory(diamondId, 10);
+		inventory().item(appleId).quantity(5).insert();
+		inventory().item(diamondId).quantity(10).insert();
 
 		List<Inventory> inventory = dao.getInventory();
 		assertEquals(2, inventory.size());
@@ -852,98 +753,67 @@ public class DirbyDbDaoTest {
 
 	@Test
 	public void updateInventoryItem() throws Throwable {
-		int a = insertItem("a");
-		int b = insertItem("b");
-		int c = insertItem("c");
-		insertInventory(appleId, 5);
-		insertInventory(a, 1);
-		insertInventory(b, -2);
-		insertInventory(c, 3);
+		int a = items().name("a").insert();
+		int b = items().name("b").insert();
+		int c = items().name("c").insert();
+		inventory().item(appleId).quantity(5).insert();
+		inventory().item(a).quantity(1).insert();
+		inventory().item(b).quantity(-2).insert();
+		inventory().item(c).quantity(3).insert();
 
 		dao.updateInventoryItem(Arrays.asList(a, c), b);
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT item, quantity FROM inventory ORDER BY id");
-
-		rs.next();
-		assertEquals(appleId, rs.getInt("item"));
-		assertEquals(5, rs.getInt("quantity"));
-
-		rs.next();
-		assertEquals(b, rs.getInt("item"));
-		assertEquals(2, rs.getInt("quantity"));
-
-		assertFalse(rs.next());
+		Map<Integer, Integer> actual = inventory().all();
+		Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
+		expected.put(appleId, 5);
+		expected.put(b, 2);
+		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void upsertInventory() throws Throwable {
-		insertInventory(appleId, 5);
+		inventory().item(appleId).quantity(5).insert();
 
 		dao.upsertInventory("Apple", 10, false);
 		dao.upsertInventory("Apple", 1, true);
 		dao.upsertInventory("Apple", -4, true);
 		dao.upsertInventory("Diamond", 1, true);
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT item, quantity FROM inventory ORDER BY id");
-
-		rs.next();
-		assertEquals(appleId, rs.getInt("item"));
-		assertEquals(7, rs.getInt("quantity"));
-
-		rs.next();
-		assertEquals(diamondId, rs.getInt("item"));
-		assertEquals(1, rs.getInt("quantity"));
-
-		assertFalse(rs.next());
+		Map<Integer, Integer> actual = inventory().all();
+		Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
+		expected.put(appleId, 7);
+		expected.put(diamondId, 1);
+		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void deleteInventory() throws Throwable {
-		int a = insertItem("a");
-		int b = insertItem("b");
-		int c = insertItem("c");
-		int ai = insertInventory(a, 1);
-		insertInventory(b, 2);
-		int ci = insertInventory(c, 3);
+		int a = items().name("a").insert();
+		int b = items().name("b").insert();
+		int c = items().name("c").insert();
+		int ai = inventory().item(a).quantity(1).insert();
+		inventory().item(b).quantity(2).insert();
+		int ci = inventory().item(c).quantity(3).insert();
 
 		dao.deleteInventory(Arrays.asList(ai, ci));
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT item, quantity FROM inventory ORDER BY id");
-
-		rs.next();
-		assertEquals(b, rs.getInt("item"));
-		assertEquals(2, rs.getInt("quantity"));
+		Map<Integer, Integer> actual = inventory().all();
+		Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
+		expected.put(b, 2);
+		assertEquals(expected, actual);
 
 		dao.deleteInventory(Arrays.<Integer> asList());
 
-		stmt = conn.createStatement();
-		rs = stmt.executeQuery("SELECT item, quantity FROM inventory ORDER BY id");
-
-		rs.next();
-		assertEquals(b, rs.getInt("item"));
-		assertEquals(2, rs.getInt("quantity"));
+		actual = inventory().all();
+		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void updateBonusesFees() throws Throwable {
 		List<BonusFeeTransaction> transactions = new ArrayList<BonusFeeTransaction>();
-
 		dao.updateBonusesFees(transactions);
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT * FROM bonuses_fees");
-		rs.next();
-		assertNull(rs.getTimestamp("since"));
-		assertEquals(0, rs.getInt("horse"));
-		assertEquals(0, rs.getInt("lock"));
-		assertEquals(0, rs.getInt("eggify"));
-		assertEquals(0, rs.getInt("vault"));
-		assertEquals(0, rs.getInt("sign_in"));
-		assertEquals(0, rs.getInt("vote"));
-		assertFalse(rs.next());
+		bonusesFees().test();
 
 		BonusFeeTransaction t = new BonusFeeTransaction();
 		t.setAmount(400);
@@ -1006,18 +876,7 @@ public class DirbyDbDaoTest {
 		transactions.add(t);
 
 		dao.updateBonusesFees(transactions);
-
-		stmt = conn.createStatement();
-		rs = stmt.executeQuery("SELECT * FROM bonuses_fees");
-		rs.next();
-		assertNull(rs.getTimestamp("since"));
-		assertEquals(-200, rs.getInt("horse"));
-		assertEquals(-500, rs.getInt("lock"));
-		assertEquals(-200, rs.getInt("eggify"));
-		assertEquals(-20, rs.getInt("vault"));
-		assertEquals(800, rs.getInt("sign_in"));
-		assertEquals(300, rs.getInt("vote"));
-		assertFalse(rs.next());
+		bonusesFees().since(null).horse(-200).lock(-500).eggify(-200).vault(-20).signIn(800).vote(300).test();
 
 		transactions.clear();
 
@@ -1032,52 +891,32 @@ public class DirbyDbDaoTest {
 		transactions.add(t);
 
 		dao.updateBonusesFees(transactions);
-
-		stmt = conn.createStatement();
-		rs = stmt.executeQuery("SELECT * FROM bonuses_fees");
-		rs.next();
-		assertNull(rs.getTimestamp("since"));
-		assertEquals(-200, rs.getInt("horse"));
-		assertEquals(-500, rs.getInt("lock"));
-		assertEquals(-200, rs.getInt("eggify"));
-		assertEquals(-30, rs.getInt("vault"));
-		assertEquals(800, rs.getInt("sign_in"));
-		assertEquals(400, rs.getInt("vote"));
-		assertFalse(rs.next());
+		bonusesFees().since(null).horse(-200).lock(-500).eggify(-200).vault(-30).signIn(800).vote(400).test();
 	}
 
 	@Test
 	public void getBonusesFees() throws Throwable {
-		Statement stmt = conn.createStatement();
-		stmt.executeUpdate("UPDATE bonuses_fees SET since = '2014-01-01 00:00:00', horse = 1, lock = 2, eggify = 3, vault = 4, sign_in = 5, vote = 6");
-
+		BonusesFeesTester tester = bonusesFees().since(date("2014-01-01 00:00:00")).horse(1).lock(2).eggify(3).vault(4).signIn(5).vote(6);
+		tester.set();
 		BonusFee bonusFee = dao.getBonusesFees();
-		assertEquals(date("2014-01-01 00:00:00"), bonusFee.getSince());
-		assertEquals(1, bonusFee.getHorse());
-		assertEquals(2, bonusFee.getLock());
-		assertEquals(3, bonusFee.getEggify());
-		assertEquals(4, bonusFee.getVault());
-		assertEquals(5, bonusFee.getSignIn());
-		assertEquals(6, bonusFee.getVote());
+		tester.test(bonusFee);
 	}
 
 	@Test
 	public void updateBonusesFeesSince() throws Throwable {
 		DateGenerator dg = new DateGenerator();
-		dao.updateBonusesFeesSince(dg.next());
 
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT since FROM bonuses_fees");
+		dao.updateBonusesFeesSince(dg.next());
+		ResultSet rs = query("SELECT since FROM bonuses_fees");
 		rs.next();
-		assertEquals(dg.getGenerated(0).getTime(), rs.getTimestamp("since").getTime());
+		assertEquals(timestamp(dg.getGenerated(0)), rs.getTimestamp("since"));
 		assertFalse(rs.next());
 
+		//it can only be changed once, when it is null
 		dao.updateBonusesFeesSince(dg.next());
-
-		stmt = conn.createStatement();
-		rs = stmt.executeQuery("SELECT since FROM bonuses_fees");
+		rs = query("SELECT since FROM bonuses_fees");
 		rs.next();
-		assertEquals(dg.getGenerated(0).getTime(), rs.getTimestamp("since").getTime());
+		assertEquals(timestamp(dg.getGenerated(0)), rs.getTimestamp("since"));
 		assertFalse(rs.next());
 	}
 
@@ -1085,20 +924,20 @@ public class DirbyDbDaoTest {
 	public void getProfitsByDay() throws Throwable {
 		assertTrue(dao.getProfitsByDay(null, null).isEmpty());
 
-		transaction().ts("2014-01-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-01 12:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
-		transaction().ts("2014-01-01 12:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
-		transaction().ts("2014-01-01 12:00:00").item(diamondId).player(notchId).amount(10).quantity(-1).insert();
-		transaction().ts("2014-01-03 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-04 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 12:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
+		transactions().ts("2014-01-01 12:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
+		transactions().ts("2014-01-01 12:00:00").item(diamondId).player(notchId).amount(10).quantity(-1).insert();
+		transactions().ts("2014-01-03 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-04 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
 
 		//no date range
 		{
 			Map<Date, Profits> profits = dao.getProfitsByDay(null, null);
 			assertEquals(3, profits.size());
 
-			Profits p = profits.get(date("2014-01-01 00:00:00"));
+			Profits p = profits.get(date("2014-01-01"));
 			assertEquals(2, p.getCustomerTotals().size());
 			assertIntEquals(200, p.getCustomerTotals().get("apple"));
 			assertIntEquals(10, p.getCustomerTotals().get("diamond"));
@@ -1107,14 +946,14 @@ public class DirbyDbDaoTest {
 			assertEquals(210, p.getCustomerTotal());
 			assertEquals(-100, p.getSupplierTotal());
 
-			p = profits.get(date("2014-01-03 00:00:00"));
+			p = profits.get(date("2014-01-03"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
 
-			p = profits.get(date("2014-01-04 00:00:00"));
+			p = profits.get(date("2014-01-04"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
@@ -1124,17 +963,17 @@ public class DirbyDbDaoTest {
 
 		//with start date
 		{
-			Map<Date, Profits> profits = dao.getProfitsByDay(date("2014-01-03 00:00:00"), null);
+			Map<Date, Profits> profits = dao.getProfitsByDay(date("2014-01-03"), null);
 			assertEquals(2, profits.size());
 
-			Profits p = profits.get(date("2014-01-03 00:00:00"));
+			Profits p = profits.get(date("2014-01-03"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
 
-			p = profits.get(date("2014-01-04 00:00:00"));
+			p = profits.get(date("2014-01-04"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
@@ -1144,10 +983,10 @@ public class DirbyDbDaoTest {
 
 		//with end date
 		{
-			Map<Date, Profits> profits = dao.getProfitsByDay(null, date("2014-01-04 00:00:00"));
+			Map<Date, Profits> profits = dao.getProfitsByDay(null, date("2014-01-04"));
 			assertEquals(2, profits.size());
 
-			Profits p = profits.get(date("2014-01-01 00:00:00"));
+			Profits p = profits.get(date("2014-01-01"));
 			assertEquals(2, p.getCustomerTotals().size());
 			assertIntEquals(200, p.getCustomerTotals().get("apple"));
 			assertIntEquals(10, p.getCustomerTotals().get("diamond"));
@@ -1156,7 +995,7 @@ public class DirbyDbDaoTest {
 			assertEquals(210, p.getCustomerTotal());
 			assertEquals(-100, p.getSupplierTotal());
 
-			p = profits.get(date("2014-01-03 00:00:00"));
+			p = profits.get(date("2014-01-03"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
@@ -1166,10 +1005,10 @@ public class DirbyDbDaoTest {
 
 		//with start and end dates
 		{
-			Map<Date, Profits> profits = dao.getProfitsByDay(date("2014-01-03 00:00:00"), date("2014-01-04 00:00:00"));
+			Map<Date, Profits> profits = dao.getProfitsByDay(date("2014-01-03"), date("2014-01-04"));
 			assertEquals(1, profits.size());
 
-			Profits p = profits.get(date("2014-01-03 00:00:00"));
+			Profits p = profits.get(date("2014-01-03"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
@@ -1182,20 +1021,20 @@ public class DirbyDbDaoTest {
 	public void getProfitsByMonth() throws Throwable {
 		assertTrue(dao.getProfitsByMonth(null, null).isEmpty());
 
-		transaction().ts("2014-01-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-02 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-01-03 00:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
-		transaction().ts("2014-01-04 00:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
-		transaction().ts("2014-01-05 00:00:00").item(diamondId).player(notchId).amount(10).quantity(-1).insert();
-		transaction().ts("2014-02-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transaction().ts("2014-04-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-02 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-03 00:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
+		transactions().ts("2014-01-04 00:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
+		transactions().ts("2014-01-05 00:00:00").item(diamondId).player(notchId).amount(10).quantity(-1).insert();
+		transactions().ts("2014-02-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-04-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
 
 		//no date range
 		{
 			Map<Date, Profits> profits = dao.getProfitsByMonth(null, null);
 			assertEquals(3, profits.size());
 
-			Profits p = profits.get(date("2014-01-01 00:00:00"));
+			Profits p = profits.get(date("2014-01-01"));
 			assertEquals(2, p.getCustomerTotals().size());
 			assertIntEquals(200, p.getCustomerTotals().get("apple"));
 			assertIntEquals(10, p.getCustomerTotals().get("diamond"));
@@ -1204,14 +1043,14 @@ public class DirbyDbDaoTest {
 			assertEquals(210, p.getCustomerTotal());
 			assertEquals(-100, p.getSupplierTotal());
 
-			p = profits.get(date("2014-02-01 00:00:00"));
+			p = profits.get(date("2014-02-01"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
 
-			p = profits.get(date("2014-04-01 00:00:00"));
+			p = profits.get(date("2014-04-01"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
@@ -1221,17 +1060,17 @@ public class DirbyDbDaoTest {
 
 		//with start date
 		{
-			Map<Date, Profits> profits = dao.getProfitsByMonth(date("2014-02-01 00:00:00"), null);
+			Map<Date, Profits> profits = dao.getProfitsByMonth(date("2014-02-01"), null);
 			assertEquals(2, profits.size());
 
-			Profits p = profits.get(date("2014-02-01 00:00:00"));
+			Profits p = profits.get(date("2014-02-01"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
 
-			p = profits.get(date("2014-04-01 00:00:00"));
+			p = profits.get(date("2014-04-01"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
@@ -1241,10 +1080,10 @@ public class DirbyDbDaoTest {
 
 		//with end date
 		{
-			Map<Date, Profits> profits = dao.getProfitsByMonth(null, date("2014-04-01 00:00:00"));
+			Map<Date, Profits> profits = dao.getProfitsByMonth(null, date("2014-04-01"));
 			assertEquals(2, profits.size());
 
-			Profits p = profits.get(date("2014-01-01 00:00:00"));
+			Profits p = profits.get(date("2014-01-01"));
 			assertEquals(2, p.getCustomerTotals().size());
 			assertIntEquals(200, p.getCustomerTotals().get("apple"));
 			assertIntEquals(10, p.getCustomerTotals().get("diamond"));
@@ -1253,7 +1092,7 @@ public class DirbyDbDaoTest {
 			assertEquals(210, p.getCustomerTotal());
 			assertEquals(-100, p.getSupplierTotal());
 
-			p = profits.get(date("2014-02-01 00:00:00"));
+			p = profits.get(date("2014-02-01"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
@@ -1263,10 +1102,10 @@ public class DirbyDbDaoTest {
 
 		//with start and end dates
 		{
-			Map<Date, Profits> profits = dao.getProfitsByMonth(date("2014-02-01 00:00:00"), date("2014-04-01 00:00:00"));
+			Map<Date, Profits> profits = dao.getProfitsByMonth(date("2014-02-01"), date("2014-04-01"));
 			assertEquals(1, profits.size());
 
-			Profits p = profits.get(date("2014-02-01 00:00:00"));
+			Profits p = profits.get(date("2014-02-01"));
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
@@ -1275,7 +1114,110 @@ public class DirbyDbDaoTest {
 		}
 	}
 
-	private static ItemGroupTester assertItemGroup() {
+	@Test
+	public void wipe() throws Throwable {
+		DirbyDbDao dao = new DirbyMemoryDbDao("wipe-test");
+		conn = dao.getConnection();
+
+		int notch = players().name("Notch").insert();
+		int transaction = transactions().player(notch).insert();
+		paymentTransactions().transaction(transaction).insert();
+		inventory().item(appleId).insert();
+		items().name("Item").insert();
+		bonusesFees().horse(100).since(new Date()).set();
+
+		dao.wipe();
+
+		assertEquals(0, players().count());
+		assertEquals(0, transactions().count());
+		assertEquals(0, paymentTransactions().count());
+		assertEquals(0, inventory().count());
+		assertTrue(items().count() > 0);
+		assertNull(items().name("Item").id());
+		bonusesFees().test();
+	}
+
+	public static BonusesFeesTester bonusesFees() {
+		return new BonusesFeesTester();
+	}
+
+	private static class BonusesFeesTester {
+		private Date since;
+		private int horse, lock, eggify, vault, signIn, vote;
+
+		public BonusesFeesTester since(Date since) {
+			this.since = since;
+			return this;
+		}
+
+		public BonusesFeesTester horse(int horse) {
+			this.horse = horse;
+			return this;
+		}
+
+		public BonusesFeesTester lock(int lock) {
+			this.lock = lock;
+			return this;
+		}
+
+		public BonusesFeesTester eggify(int eggify) {
+			this.eggify = eggify;
+			return this;
+		}
+
+		public BonusesFeesTester vault(int vault) {
+			this.vault = vault;
+			return this;
+		}
+
+		public BonusesFeesTester signIn(int signIn) {
+			this.signIn = signIn;
+			return this;
+		}
+
+		public BonusesFeesTester vote(int vote) {
+			this.vote = vote;
+			return this;
+		}
+
+		public void test() throws SQLException {
+			ResultSet rs = query("SELECT * FROM bonuses_fees");
+			rs.next();
+			assertEquals(timestamp(since), rs.getTimestamp("since"));
+			assertEquals(horse, rs.getInt("horse"));
+			assertEquals(lock, rs.getInt("lock"));
+			assertEquals(eggify, rs.getInt("eggify"));
+			assertEquals(vault, rs.getInt("vault"));
+			assertEquals(signIn, rs.getInt("sign_in"));
+			assertEquals(vote, rs.getInt("vote"));
+			assertFalse(rs.next());
+		}
+
+		public void test(BonusFee bonusFee) {
+			assertEquals(since, bonusFee.getSince());
+			assertEquals(horse, bonusFee.getHorse());
+			assertEquals(lock, bonusFee.getLock());
+			assertEquals(eggify, bonusFee.getEggify());
+			assertEquals(vault, bonusFee.getVault());
+			assertEquals(signIn, bonusFee.getSignIn());
+			assertEquals(vote, bonusFee.getVote());
+		}
+
+		public void set() throws SQLException {
+			PreparedStatement stmt = conn.prepareStatement("UPDATE bonuses_fees SET since = ?, horse = ?, lock = ?, eggify = ?, vault = ?, sign_in = ?, vote = ?");
+			int i = 1;
+			stmt.setTimestamp(i++, timestamp(since));
+			stmt.setInt(i++, horse);
+			stmt.setInt(i++, lock);
+			stmt.setInt(i++, eggify);
+			stmt.setInt(i++, vault);
+			stmt.setInt(i++, signIn);
+			stmt.setInt(i++, vote);
+			stmt.executeUpdate();
+		}
+	}
+
+	private static ItemGroupTester itemGroup() {
 		return new ItemGroupTester();
 	}
 
@@ -1319,96 +1261,259 @@ public class DirbyDbDaoTest {
 		}
 	}
 
-	private List<String> getPlayerNames() throws SQLException {
-		List<String> names = new ArrayList<String>();
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT name FROM players");
-		while (rs.next()) {
-			names.add(rs.getString(1));
-		}
-		return names;
+	private static ItemTester items() {
+		return new ItemTester();
 	}
 
-	private Integer getPlayerId(String name) throws SQLException {
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT id FROM players WHERE name = '" + name + "'");
-		return rs.next() ? rs.getInt(1) : null;
-	}
+	private static class ItemTester {
+		private String name;
 
-	private Map<Integer, String> getItemsById() throws SQLException {
-		Map<Integer, String> map = new HashMap<Integer, String>();
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT id, name FROM items");
-		while (rs.next()) {
-			map.put(rs.getInt("id"), rs.getString("name"));
-		}
-		return map;
-	}
-
-	private Map<Integer, Integer> getInventoryByItem() throws SQLException {
-		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT item, quantity FROM inventory");
-		while (rs.next()) {
-			map.put(rs.getInt("item"), rs.getInt("quantity"));
-		}
-		return map;
-	}
-
-	private int insertPlayer(String name) throws SQLException {
-		Statement stmt = conn.createStatement();
-		stmt.executeUpdate("INSERT INTO players (name) VALUES ('" + name + "')", Statement.RETURN_GENERATED_KEYS);
-		return getKey(stmt);
-	}
-
-	private int insertItem(String name) throws SQLException {
-		Statement stmt = conn.createStatement();
-		stmt.executeUpdate("INSERT INTO items (name) VALUES ('" + name + "')", Statement.RETURN_GENERATED_KEYS);
-		return getKey(stmt);
-	}
-
-	private static TransactionInserter transaction() {
-		return new TransactionInserter();
-	}
-
-	private static class TransactionInserter {
-		private Date ts = new Date();
-		private int item = appleId, player = notchId, amount, quantity, balance;
-
-		public TransactionInserter ts(String ts) {
-			return ts(date(ts));
-		}
-
-		public TransactionInserter ts(Date ts) {
-			this.ts = ts;
+		public ItemTester name(String name) {
+			this.name = name;
 			return this;
 		}
 
-		public TransactionInserter item(int item) {
+		public int insert() throws SQLException {
+			PreparedStatement stmt = conn.prepareStatement("INSERT INTO items (name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+
+			int i = 1;
+			stmt.setString(i++, name);
+			stmt.executeUpdate();
+
+			return getKey(stmt);
+		}
+
+		public Integer id() throws SQLException {
+			PreparedStatement stmt = conn.prepareStatement("SELECT id FROM items WHERE name = ?");
+
+			int i = 1;
+			stmt.setString(i++, name);
+			ResultSet rs = stmt.executeQuery();
+			return rs.next() ? rs.getInt(1) : null;
+		}
+
+		public int count() throws SQLException {
+			ResultSet rs = query("SELECT Count(*) FROM items");
+			rs.next();
+			return rs.getInt(1);
+		}
+
+		public Map<Integer, String> all() throws SQLException {
+			Map<Integer, String> map = new HashMap<Integer, String>();
+			ResultSet rs = query("SELECT id, name FROM items");
+			while (rs.next()) {
+				map.put(rs.getInt("id"), rs.getString("name"));
+			}
+			return map;
+		}
+	}
+
+	private static PlayerTester players() {
+		return new PlayerTester();
+	}
+
+	private static class PlayerTester {
+		private Integer id;
+		private String name;
+		private Date firstSeen, lastSeen;
+
+		public PlayerTester id(Integer id) {
+			this.id = id;
+			return this;
+		}
+
+		public PlayerTester name(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public PlayerTester firstSeen(Date firstSeen) {
+			this.firstSeen = firstSeen;
+			return this;
+		}
+
+		public PlayerTester firstSeen(String firstSeen) {
+			return firstSeen(date(firstSeen));
+		}
+
+		public PlayerTester lastSeen(Date lastSeen) {
+			this.lastSeen = lastSeen;
+			return this;
+		}
+
+		public PlayerTester lastSeen(String lastSeen) {
+			return lastSeen(date(lastSeen));
+		}
+
+		public Integer id() throws SQLException {
+			PreparedStatement stmt = conn.prepareStatement("SELECT id FROM players WHERE name = ?");
+
+			int i = 1;
+			stmt.setString(i++, name);
+			ResultSet rs = stmt.executeQuery();
+			return rs.next() ? rs.getInt(1) : null;
+		}
+
+		public int insert() throws SQLException {
+			PreparedStatement stmt = conn.prepareStatement("INSERT INTO players (name, first_seen, last_seen) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+
+			int i = 1;
+			stmt.setString(i++, name);
+			stmt.setTimestamp(i++, timestamp(firstSeen));
+			stmt.setTimestamp(i++, timestamp(lastSeen));
+			stmt.executeUpdate();
+
+			return getKey(stmt);
+		}
+
+		public void test(Player player) {
+			if (id != null) {
+				assertEquals(id, player.getId());
+			}
+			assertEquals(name, player.getName());
+			assertEquals(firstSeen, player.getFirstSeen());
+			assertEquals(lastSeen, player.getLastSeen());
+		}
+
+		public int count() throws SQLException {
+			ResultSet rs = query("SELECT Count(*) FROM players");
+			rs.next();
+			return rs.getInt(1);
+		}
+
+		public List<String> all() throws SQLException {
+			List<String> players = new ArrayList<String>();
+			ResultSet rs = query("SELECT name FROM players ORDER BY id");
+			while (rs.next()) {
+				players.add(rs.getString(1));
+			}
+			return players;
+		}
+	}
+
+	private static InventoryTester inventory() {
+		return new InventoryTester();
+	}
+
+	private static class InventoryTester {
+		private int item = appleId, quantity;
+
+		public InventoryTester item(int item) {
 			this.item = item;
 			return this;
 		}
 
-		public TransactionInserter player(int player) {
-			this.player = player;
+		public InventoryTester quantity(int quantity) {
+			this.quantity = quantity;
 			return this;
 		}
 
-		public TransactionInserter amount(int amount) {
+		public int insert() throws SQLException {
+			PreparedStatement stmt = conn.prepareStatement("INSERT INTO inventory (item, quantity) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+
+			int i = 1;
+			stmt.setInt(i++, item);
+			stmt.setInt(i++, quantity);
+			stmt.executeUpdate();
+
+			return getKey(stmt);
+		}
+
+		public int count() throws SQLException {
+			ResultSet rs = query("SELECT Count(*) FROM inventory");
+			rs.next();
+			return rs.getInt(1);
+		}
+
+		public Map<Integer, Integer> all() throws SQLException {
+			Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+			ResultSet rs = query("SELECT item, quantity FROM inventory");
+			while (rs.next()) {
+				map.put(rs.getInt("item"), rs.getInt("quantity"));
+			}
+			return map;
+		}
+	}
+
+	private static TransactionTester transactions() {
+		return new TransactionTester();
+	}
+
+	private static class TransactionTester {
+		private Date ts = new Date();
+		private int item = appleId, player = notchId, amount, quantity, balance;
+		private String itemStr, playerStr;
+
+		public TransactionTester ts(String ts) {
+			return ts(date(ts));
+		}
+
+		public TransactionTester ts(Date ts) {
+			this.ts = ts;
+			return this;
+		}
+
+		public TransactionTester item(int item) {
+			this.item = item;
+			this.itemStr = null;
+			return this;
+		}
+
+		public TransactionTester item(String item) {
+			this.itemStr = item;
+			this.item = 0;
+			return this;
+		}
+
+		public TransactionTester player(int player) {
+			this.player = player;
+			this.playerStr = null;
+			return this;
+		}
+
+		public TransactionTester player(String player) {
+			this.playerStr = player;
+			this.player = 0;
+			return this;
+		}
+
+		public TransactionTester amount(int amount) {
 			this.amount = amount;
 			return this;
 		}
 
-		public TransactionInserter quantity(int quantity) {
+		public TransactionTester quantity(int quantity) {
 			this.quantity = quantity;
 			return this;
+		}
+
+		public TransactionTester balance(int balance) {
+			this.balance = balance;
+			return this;
+		}
+
+		public void test(ResultSet rs) throws SQLException {
+			assertEquals(ts, rs.getTimestamp("ts"));
+			assertEquals(item, rs.getInt("item"));
+			assertEquals(player, rs.getInt("player"));
+			assertEquals(balance, rs.getInt("balance"));
+			assertEquals(amount, rs.getInt("amount"));
+			assertEquals(quantity, rs.getInt("quantity"));
+		}
+
+		public void test(ShopTransaction transaction) {
+			assertEquals(ts, transaction.getTs());
+			assertEquals(itemStr, transaction.getItem());
+			assertEquals(playerStr, transaction.getPlayer());
+			assertEquals(quantity, transaction.getQuantity());
+			assertEquals(amount, transaction.getAmount());
 		}
 
 		public int insert() throws SQLException {
 			PreparedStatement stmt = conn.prepareStatement("INSERT INTO transactions (ts, item, player, amount, quantity, balance) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
 			int i = 1;
-			stmt.setTimestamp(i++, new Timestamp(ts.getTime()));
+			stmt.setTimestamp(i++, timestamp(ts));
 			stmt.setInt(i++, item);
 			stmt.setInt(i++, player);
 			stmt.setInt(i++, amount);
@@ -1418,9 +1523,30 @@ public class DirbyDbDaoTest {
 
 			return getKey(stmt);
 		}
+
+		public int count() throws SQLException {
+			ResultSet rs = query("SELECT Count(*) FROM transactions");
+			rs.next();
+			return rs.getInt(1);
+		}
+
+		public ResultSet all() throws SQLException {
+			return query("SELECT * FROM transactions ORDER BY id");
+		}
+
+		public ShopTransaction dto() {
+			ShopTransaction dto = new ShopTransaction();
+			dto.setTs(ts);
+			dto.setItem(itemStr);
+			dto.setPlayer(playerStr);
+			dto.setBalance(balance);
+			dto.setAmount(amount);
+			dto.setQuantity(quantity);
+			return dto;
+		}
 	}
 
-	private static PaymentTransactionTester paymentTransaction() {
+	private static PaymentTransactionTester paymentTransactions() {
 		return new PaymentTransactionTester();
 	}
 
@@ -1477,7 +1603,7 @@ public class DirbyDbDaoTest {
 			PreparedStatement stmt = conn.prepareStatement("INSERT INTO payment_transactions (ts, player, amount, balance, ignore, \"transaction\") VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
 			int i = 1;
-			stmt.setTimestamp(i++, new Timestamp(ts.getTime()));
+			stmt.setTimestamp(i++, timestamp(ts));
 			stmt.setInt(i++, player);
 			stmt.setInt(i++, amount);
 			stmt.setInt(i++, balance);
@@ -1513,17 +1639,27 @@ public class DirbyDbDaoTest {
 			assertEquals(balance, transaction.getBalance());
 			assertEquals(amount, transaction.getAmount());
 		}
-	}
 
-	private int insertInventory(int item, int quantity) throws SQLException {
-		PreparedStatement stmt = conn.prepareStatement("INSERT INTO inventory (item, quantity) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+		public int count() throws SQLException {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT Count(*) FROM payment_transactions");
+			rs.next();
+			return rs.getInt(1);
+		}
 
-		int i = 1;
-		stmt.setInt(i++, item);
-		stmt.setInt(i++, quantity);
-		stmt.executeUpdate();
+		public ResultSet all() throws SQLException {
+			return query("SELECT * FROM payment_transactions ORDER BY id");
+		}
 
-		return getKey(stmt);
+		public PaymentTransaction dto() {
+			PaymentTransaction transaction = new PaymentTransaction();
+			transaction.setId(id);
+			transaction.setTs(ts);
+			transaction.setAmount(amount);
+			transaction.setBalance(balance);
+			transaction.setPlayer(playerStr);
+			return transaction;
+		}
 	}
 
 	private static int getKey(Statement stmt) throws SQLException {
@@ -1532,7 +1668,19 @@ public class DirbyDbDaoTest {
 		return rs.getInt(1);
 	}
 
+	private static ResultSet query(String sql) throws SQLException {
+		Statement stmt = conn.createStatement();
+		return stmt.executeQuery(sql);
+	}
+
+	private static Timestamp timestamp(Date date) {
+		return (date == null) ? null : new Timestamp(date.getTime());
+	}
+
 	private static Date date(String date) {
+		if (date.length() == 10) {
+			date += " 00:00:00";
+		}
 		try {
 			return df.parse(date);
 		} catch (ParseException e) {

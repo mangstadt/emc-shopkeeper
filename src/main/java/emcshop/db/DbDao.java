@@ -160,13 +160,6 @@ public interface DbDao {
 	int countPendingPaymentTransactions() throws SQLException;
 
 	/**
-	 * Gets the latest transaction from the database.
-	 * @return the latest transaction or null if there are no transactions
-	 * @throws SQLException
-	 */
-	ShopTransaction getLatestTransaction() throws SQLException;
-
-	/**
 	 * Gets the date of the latest transaction from the database.
 	 * @return the date of the latest transaction or null if there are no
 	 * transactions

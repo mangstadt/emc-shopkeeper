@@ -7,7 +7,7 @@ import java.sql.SQLException;
  * @author Michael Angstadt
  */
 public class DirbyMemoryDbDao extends DirbyDbDao {
-	public DirbyMemoryDbDao() throws SQLException {
-		init("jdbc:derby:memory:emc-shopkeeper", true, null);
+	public DirbyMemoryDbDao(String dbName) throws SQLException {
+		init("jdbc:derby:memory:" + dbName, true, null);
 	}
 }
