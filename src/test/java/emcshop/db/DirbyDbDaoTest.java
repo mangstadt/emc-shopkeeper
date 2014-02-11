@@ -5,7 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,23 +40,18 @@ import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 
 public class DirbyDbDaoTest {
+	private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final DirbyDbDao dao;
+	private static Connection conn;
 	private static final int appleId, diamondId, notchId;
 	static {
 		LogManager.getLogManager().reset();
 
 		try {
-			//@formatter:off
-			String sql[] = {
-				"INSERT INTO players (name, first_seen, last_seen) VALUES ('Notch', '2014-01-01 00:00:00', '2014-01-02 12:00:00')"
-			};
-			//@formatter:on
-
 			dao = new DirbyMemoryDbDao("test");
-			Statement stmt = dao.getConnection().createStatement();
-			for (String s : sql) {
-				stmt.execute(s);
-			}
+			conn = dao.getConnection();
+
+			players().name("Notch").firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").insert();
 			dao.commit();
 
 			appleId = dao.getItemId("Apple");
@@ -64,25 +62,21 @@ public class DirbyDbDaoTest {
 		}
 	}
 
-	private static Connection conn = dao.getConnection();
-
-	private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
 	@After
 	public void after() {
-		conn = dao.getConnection(); //wipe() test changes this
+		conn = dao.getConnection(); //some tests use their own DAO instance
 		dao.rollback();
 	}
 
 	@Test
 	public void selectDbVersion() throws Throwable {
-		assertEquals(DirbyDbDao.schemaVersion, dao.selectDbVersion());
+		assertEquals(dao.getAppDbVersion(), dao.selectDbVersion());
 	}
 
 	@Test
 	public void upsertDbVersion() throws Throwable {
 		dao.upsertDbVersion(100);
-		assertEquals(100, dao.selectDbVersion());
+		assertIntEquals(100, meta().dbSchemaVersion());
 	}
 
 	@Test
@@ -1115,8 +1109,129 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
+	public void updateToLatestVersion() throws Throwable {
+		DirbyDbDao dao = new DirbyMemoryDbDao("updateToLatestVersion") {
+			@Override
+			Reader getMigrationScript(int currentVersion) {
+				String sql = "";
+				switch (currentVersion) {
+				case 1:
+					sql = "INSERT INTO items (name) VALUES ('Item');";
+					break;
+				case 2:
+					sql = "DELETE FROM items WHERE name = 'Apple';";
+					break;
+				}
+
+				return new StringReader(sql);
+			}
+
+			@Override
+			public int getAppDbVersion() {
+				return 3;
+			}
+		};
+		conn = dao.getConnection();
+
+		meta().dbSchemaVersion(1).set();
+		dao.commit();
+
+		DbListenerImpl listener = new DbListenerImpl();
+		dao.updateToLatestVersion(listener);
+		assertEquals(1, listener.onMigrateOldVersion);
+		assertEquals(3, listener.onMigrateNewVersion);
+
+		assertNotNull(items().name("Item").id());
+		assertNull(items().name("Apple").id());
+		assertIntEquals(3, meta().dbSchemaVersion());
+
+		dao.close();
+	}
+
+	@Test
+	public void updateToLatestVersion_sql_error() throws Throwable {
+		DirbyDbDao dao = new DirbyMemoryDbDao("updateToLatestVersion_sql_error") {
+			@Override
+			Reader getMigrationScript(int currentVersion) {
+				String sql = "";
+				switch (currentVersion) {
+				case 1:
+					sql = "INSERT INTO items (name) VALUES ('Item');";
+					break;
+				case 2:
+					sql = "bad-statement";
+					break;
+				}
+
+				return new StringReader(sql);
+			}
+
+			@Override
+			public int getAppDbVersion() {
+				return 3;
+			}
+		};
+		conn = dao.getConnection();
+
+		meta().dbSchemaVersion(1).set();
+		dao.commit();
+
+		try {
+			DbListenerImpl listener = new DbListenerImpl();
+			dao.updateToLatestVersion(listener);
+			assertEquals(1, listener.onMigrateOldVersion);
+			assertEquals(3, listener.onMigrateNewVersion);
+			fail();
+		} catch (SQLException e) {
+			//changes should be rolled-back
+			assertNull(items().name("Item").id());
+			assertNotNull(items().name("Apple").id());
+			assertIntEquals(1, meta().dbSchemaVersion());
+		}
+
+		dao.close();
+	}
+
+	@Test(expected = SQLException.class)
+	public void updateToLatestVersion_db_version_higher() throws Throwable {
+		DirbyDbDao dao = new DirbyMemoryDbDao("updateToLatestVersion_db_version_higher") {
+			@Override
+			Reader getMigrationScript(int currentVersion) {
+				throw new RuntimeException(); //should not be called
+			}
+
+			@Override
+			public int getAppDbVersion() {
+				return 3;
+			}
+		};
+		conn = dao.getConnection();
+
+		meta().dbSchemaVersion(4).set();
+		dao.commit();
+
+		DbListenerImpl listener = new DbListenerImpl();
+		dao.updateToLatestVersion(listener);
+	}
+
+	private class DbListenerImpl implements DbListener {
+		private int onCreate, onMigrateOldVersion, onMigrateNewVersion;
+
+		@Override
+		public void onCreate() {
+			onCreate++;
+		}
+
+		@Override
+		public void onMigrate(int oldVersion, int newVersion) {
+			onMigrateOldVersion = oldVersion;
+			onMigrateNewVersion = newVersion;
+		}
+	}
+
+	@Test
 	public void wipe() throws Throwable {
-		DirbyDbDao dao = new DirbyMemoryDbDao("wipe-test");
+		DirbyDbDao dao = new DirbyMemoryDbDao("wipe");
 		conn = dao.getConnection();
 
 		int notch = players().name("Notch").insert();
@@ -1135,6 +1250,33 @@ public class DirbyDbDaoTest {
 		assertTrue(items().count() > 0);
 		assertNull(items().name("Item").id());
 		bonusesFees().test();
+
+		dao.close();
+	}
+
+	private static MetaHelper meta() {
+		return new MetaHelper();
+	}
+
+	private static class MetaHelper {
+		private int dbSchemaVersion;
+
+		public MetaHelper dbSchemaVersion(int dbSchemaVersion) {
+			this.dbSchemaVersion = dbSchemaVersion;
+			return this;
+		}
+
+		public void set() throws SQLException {
+			PreparedStatement stmt = conn.prepareStatement("UPDATE meta SET db_schema_version = ?");
+			stmt.setInt(1, dbSchemaVersion);
+			stmt.executeUpdate();
+		}
+
+		public Integer dbSchemaVersion() throws SQLException {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT db_schema_version FROM meta");
+			return rs.next() ? rs.getInt(1) : null;
+		}
 	}
 
 	public static BonusesFeesTester bonusesFees() {

@@ -7,13 +7,6 @@ public interface DbListener {
 	void onCreate();
 
 	/**
-	 * Called when the database is being backed up before a migration.
-	 * @param oldVersion the existing database version
-	 * @param newVersion the new database version
-	 */
-	void onBackup(int oldVersion, int newVersion);
-
-	/**
 	 * Called when a database is being migrated to a new version.
 	 * @param oldVersion the existing database version
 	 * @param newVersion the new database version

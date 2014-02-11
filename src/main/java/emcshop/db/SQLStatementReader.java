@@ -3,10 +3,11 @@ package emcshop.db;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.sql.Statement;
 
 /**
  * Reads SQL statements one at a time from a .sql file, so they can be executed
- * via JDBC with Statement.execute().
+ * via JDBC with {@link Statement#execute()}.
  * @author Michael Angstadt
  */
 public class SQLStatementReader extends BufferedReader {

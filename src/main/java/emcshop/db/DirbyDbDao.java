@@ -2,6 +2,7 @@ package emcshop.db;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -40,20 +41,14 @@ public abstract class DirbyDbDao implements DbDao {
 	private static final Logger logger = Logger.getLogger(DirbyDbDao.class.getName());
 
 	/**
-	 * The current version of the database schema.
+	 * The current version of the database schema. Do not use this variable
+	 * directly. Use {@link #getAppDbVersion()} instead, because this method
+	 * gets overridden in unit tests.
 	 */
-	static final int schemaVersion = 16;
+	private static final int schemaVersion = 16;
 
-	/**
-	 * The database connection.
-	 */
 	protected Connection conn;
-
-	/**
-	 * The JDBC URL.
-	 */
 	protected String jdbcUrl;
-
 	private Map<Integer, Date[]> firstLastSeenDates = new HashMap<Integer, Date[]>();
 
 	/**
@@ -101,28 +96,28 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void updateToLatestVersion(DbListener listener) throws SQLException {
 		int curVersion = selectDbVersion();
-		if (curVersion == schemaVersion) {
+		int latestVersion = getAppDbVersion();
+		if (curVersion == latestVersion) {
 			//schema up to date
 			return;
 		}
 
-		if (curVersion > schemaVersion) {
+		if (curVersion > latestVersion) {
 			throw new SQLException("The version of your EMC Shopkeeper database is newer than the EMC Shopkeeper app you are running.  Please download the latest version of EMC Shopkeeper.");
 		}
 
 		if (listener != null) {
-			listener.onMigrate(curVersion, schemaVersion);
+			listener.onMigrate(curVersion, latestVersion);
 		}
 
-		logger.info("Database schema out of date.  Upgrading from version " + curVersion + " to " + schemaVersion + ".");
+		logger.info("Database schema out of date.  Upgrading from version " + curVersion + " to " + latestVersion + ".");
 		String sql = null;
 		Statement statement = conn.createStatement();
 		try {
-			while (curVersion < schemaVersion) {
+			while (curVersion < latestVersion) {
 				logger.info("Performing schema update from version " + curVersion + " to " + (curVersion + 1) + ".");
 
-				String script = "migrate-" + curVersion + "-" + (curVersion + 1) + ".sql";
-				SQLStatementReader in = new SQLStatementReader(new InputStreamReader(getClass().getResourceAsStream(script)));
+				SQLStatementReader in = new SQLStatementReader(getMigrationScript(curVersion));
 				try {
 					while ((sql = in.readStatement()) != null) {
 						statement.execute(sql);
@@ -134,7 +129,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 				curVersion++;
 			}
-			upsertDbVersion(schemaVersion);
+			upsertDbVersion(latestVersion);
 		} catch (IOException e) {
 			rollback();
 			throw new SQLException("Error updating database schema.", e);
@@ -148,6 +143,27 @@ public abstract class DirbyDbDao implements DbDao {
 			closeStatements(statement);
 		}
 		commit();
+	}
+
+	/**
+	 * Gets the SQL script for upgrading a database from one version to the
+	 * next.
+	 * @param currentVersion the version to update from
+	 * @return the SQL script
+	 */
+	Reader getMigrationScript(int currentVersion) {
+		String script = "migrate-" + currentVersion + "-" + (currentVersion + 1) + ".sql";
+		return new InputStreamReader(getClass().getResourceAsStream(script));
+	}
+
+	/**
+	 * Gets the database version that this DAO is compatible with (as opposed to
+	 * {@link #selectDbVersion()}, which retrieves the version of the database
+	 * itself).
+	 * @return the DAO's database version
+	 */
+	public int getAppDbVersion() {
+		return schemaVersion;
 	}
 
 	@Override
@@ -1337,8 +1353,8 @@ public abstract class DirbyDbDao implements DbDao {
 
 	/**
 	 * Creates the database connection.
-	 * @param createDb true to create the DB, false to connect to an existing
-	 * one
+	 * @param createDb true if the database doesn't exist and needs to be
+	 * created, false to connect to an existing database
 	 * @throws SQLException
 	 */
 	protected void createConnection(boolean createDb) throws SQLException {
@@ -1374,7 +1390,7 @@ public abstract class DirbyDbDao implements DbDao {
 				statement.execute(sql);
 			}
 			sql = null;
-			upsertDbVersion(schemaVersion);
+			upsertDbVersion(getAppDbVersion());
 		} catch (IOException e) {
 			throw new SQLException("Error creating database.", e);
 		} catch (SQLException e) {
@@ -1399,6 +1415,11 @@ public abstract class DirbyDbDao implements DbDao {
 		return conn.prepareStatement(sql);
 	}
 
+	/**
+	 * Generates a SQL "IN()" statement.
+	 * @param size the number of arguments in the "IN()" call
+	 * @return the "IN()" statement (e.g. "IN (?, ?, ?)").
+	 */
 	protected String in(int size) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("IN (");
@@ -1414,6 +1435,10 @@ public abstract class DirbyDbDao implements DbDao {
 		return sb.toString();
 	}
 
+	/**
+	 * Gets the JDBC database connection.
+	 * @return the database connection
+	 */
 	public Connection getConnection() {
 		return conn;
 	}
