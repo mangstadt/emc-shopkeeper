@@ -63,7 +63,7 @@ public interface DbDao {
 	 * @return the item ID
 	 * @throws SQLException
 	 */
-	int upsertItem(String name) throws SQLException;
+	int selsertItem(String name) throws SQLException;
 
 	/**
 	 * Gets the names of all items in the database sorted alphabetically.

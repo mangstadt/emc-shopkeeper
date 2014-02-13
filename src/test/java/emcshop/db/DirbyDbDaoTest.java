@@ -172,11 +172,11 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
-	public void upsertItem() throws Throwable {
-		assertEquals(appleId, dao.upsertItem("Apple"));
+	public void selsertItem() throws Throwable {
+		assertEquals(appleId, dao.selsertItem("Apple"));
 
 		assertNull(items().name("Item").id());
-		int id = dao.upsertItem("Item");
+		int id = dao.selsertItem("Item");
 		assertIntEquals(id, items().name("Item").id());
 	}
 

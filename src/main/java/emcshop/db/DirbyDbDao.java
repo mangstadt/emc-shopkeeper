@@ -236,7 +236,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public int upsertItem(String name) throws SQLException {
+	public int selsertItem(String name) throws SQLException {
 		Integer itemId = getItemId(name);
 		if (itemId == null) {
 			InsertStatement stmt = new InsertStatement("items");
@@ -401,7 +401,7 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException {
 		Player player = selsertPlayer(transaction.getPlayer());
-		Integer itemId = upsertItem(transaction.getItem());
+		Integer itemId = selsertItem(transaction.getItem());
 		Date ts = transaction.getTs();
 
 		//keep track of the first/last seen dates so they can be updated (in "commit()")
@@ -932,7 +932,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void upsertInventory(String item, Integer quantity, boolean add) throws SQLException {
-		int itemId = upsertItem(item);
+		int itemId = selsertItem(item);
 
 		PreparedStatement stmt = stmt("SELECT id FROM inventory WHERE item = ?");
 		Integer invId;
