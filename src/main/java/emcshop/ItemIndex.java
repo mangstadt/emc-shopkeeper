@@ -215,6 +215,28 @@ public class ItemIndex {
 	}
 
 	/**
+	 * Gets the display-to-EMC name mappings (only includes the mappings that
+	 * differ from the default, reverse of
+	 * {@link #getEmcNameToDisplayNameMapping()}).
+	 * @return
+	 */
+	public Map<String, List<String>> getDisplayNameToEmcNamesMapping() {
+		Map<String, List<String>> mappings = new HashMap<String, List<String>>();
+		for (Map.Entry<String, String> entry : emcNameToDisplayName.entrySet()) {
+			String emcName = entry.getKey();
+			String displayName = entry.getValue();
+
+			List<String> emcNames = mappings.get(displayName);
+			if (emcNames == null) {
+				emcNames = new ArrayList<String>();
+				mappings.put(displayName, emcNames);
+			}
+			emcNames.add(emcName);
+		}
+		return mappings;
+	}
+
+	/**
 	 * Gets the item image file names (only includes the images that differ from
 	 * the default).
 	 * @return the image file names

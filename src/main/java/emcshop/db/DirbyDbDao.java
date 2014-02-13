@@ -246,6 +246,7 @@ public abstract class DirbyDbDao implements DbDao {
 		return itemId;
 	}
 
+	@Override
 	public List<String> getItemNames() throws SQLException {
 		PreparedStatement stmt = stmt("SELECT name FROM items ORDER BY Lower(name)");
 		try {
@@ -257,6 +258,66 @@ public abstract class DirbyDbDao implements DbDao {
 			return names;
 		} finally {
 			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void updateItemNamesAndAliases() throws SQLException {
+		int dbVersion = selectDbVersion();
+		Map<String, List<String>> aliases = ItemIndex.instance().getDisplayNameToEmcNamesMapping();
+		for (Map.Entry<String, List<String>> entry : aliases.entrySet()) {
+			String newName = entry.getKey();
+			Integer newNameId = getItemId(newName);
+
+			List<String> oldNames = entry.getValue();
+			List<Integer> oldNameIds = new ArrayList<Integer>(oldNames.size());
+			for (String oldName : oldNames) {
+				Integer oldNameId = getItemId(oldName);
+				if (oldNameId != null) {
+					oldNameIds.add(oldNameId);
+				}
+			}
+
+			if (oldNameIds.isEmpty() && newNameId == null) {
+				//nothing needs to be changed because neither name exists
+				continue;
+			}
+
+			if (oldNameIds.isEmpty() && newNameId != null) {
+				//nothing needs to be changed because the new name is already in use
+				continue;
+			}
+			if (!oldNameIds.isEmpty() && newNameId == null) {
+				//the old name is still being used, so change it to the new name
+				newNameId = oldNameIds.get(0);
+				oldNameIds = oldNameIds.subList(1, oldNameIds.size());
+
+				//change the name in the "items" table
+				updateItemName(newNameId, newName);
+
+				if (!oldNameIds.isEmpty()) {
+					if (dbVersion >= 7) {
+						updateInventoryItem(oldNameIds, newNameId);
+					}
+					deleteItems(oldNameIds.toArray(new Integer[0]));
+				}
+				continue;
+			}
+
+			if (!oldNameIds.isEmpty() && newNameId != null) {
+				//both the old and new names exist
+				//update all transactions that use the old name with the new name, and delete the old name
+
+				updateTransactionItem(oldNameIds, newNameId);
+
+				if (dbVersion >= 7) {
+					updateInventoryItem(oldNameIds, newNameId);
+				}
+
+				deleteItems(oldNameIds.toArray(new Integer[0]));
+
+				continue;
+			}
 		}
 	}
 

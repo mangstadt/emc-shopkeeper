@@ -73,6 +73,12 @@ public interface DbDao {
 	List<String> getItemNames() throws SQLException;
 
 	/**
+	 * Syncs the list of item names and their alias with the database.
+	 * @throws SQLException
+	 */
+	void updateItemNamesAndAliases() throws SQLException;
+
+	/**
 	 * Changes the item that a transaction is associated with.
 	 * @param oldItemIds the old item ID(s)
 	 * @param newItemId the new item ID
@@ -96,7 +102,8 @@ public interface DbDao {
 	void deleteItems(Integer... ids) throws SQLException;
 
 	/**
-	 * Seeds the items table with all known items;
+	 * Seeds the items table with all known items. Only item names that don't
+	 * exist in the table are inserted.
 	 * @throws SQLException
 	 */
 	void populateItemsTable() throws SQLException;

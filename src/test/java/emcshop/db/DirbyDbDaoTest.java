@@ -237,6 +237,61 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
+	public void updateItemNamesAndAliases() throws Throwable {
+		int a = items().name("Splash Potion of Water Breathing").id();
+		int b = items().name("Potion:16397").insert();
+		int c = items().name("Potion:16429").insert();
+		int d = diamondId;
+
+		items().name("Carrot").delete();
+		int e = items().name("Carrot Item").insert();
+
+		items().name("Splash Potion of Harming II").delete();
+		items().name("Potion:16428").insert();
+		items().name("Potion:16460").insert();
+
+		transactions().item(a).insert();
+		transactions().item(b).insert();
+		transactions().item(c).insert();
+		transactions().item(d).insert();
+
+		inventory().item(a).quantity(1).insert();
+		inventory().item(b).quantity(2).insert();
+		inventory().item(c).quantity(3).insert();
+		inventory().item(d).quantity(4).insert();
+
+		dao.updateItemNamesAndAliases();
+
+		assertIntEquals(a, items().name("Splash Potion of Water Breathing").id());
+		assertNull(items().name("Potion:16397").id());
+		assertNull(items().name("Potion:16429").id());
+
+		assertNull(items().name("Carrot Item").id());
+		assertIntEquals(e, items().name("Carrot").id());
+
+		assertNull(items().name("Potion:16428").id());
+		assertNull(items().name("Potion:16460").id());
+		assertNotNull(items().name("Splash Potion of Harming II").id());
+
+		ResultSet rs = transactions().all();
+		rs.next();
+		assertEquals(a, rs.getInt("item"));
+		rs.next();
+		assertEquals(a, rs.getInt("item"));
+		rs.next();
+		assertEquals(a, rs.getInt("item"));
+		rs.next();
+		assertEquals(d, rs.getInt("item"));
+		assertFalse(rs.next());
+
+		Map<Integer, Integer> invActual = inventory().all();
+		Map<Integer, Integer> invExpected = new HashMap<Integer, Integer>();
+		invExpected.put(a, 6);
+		invExpected.put(d, 4);
+		assertEquals(invExpected, invActual);
+	}
+
+	@Test
 	public void populateItemsTable() throws Throwable {
 		//table shouldn't be touched if no items are missing
 		Map<Integer, String> before = items().all();
@@ -1513,6 +1568,12 @@ public class DirbyDbDaoTest {
 				map.put(rs.getInt("id"), rs.getString("name"));
 			}
 			return map;
+		}
+
+		public void delete() throws SQLException {
+			PreparedStatement stmt = conn.prepareStatement("DELETE FROM items WHERE name = ?");
+			stmt.setString(1, name);
+			assertTrue(stmt.executeUpdate() > 0);
 		}
 	}
 
