@@ -2,6 +2,7 @@ package emcshop.scraper;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
@@ -260,6 +262,11 @@ public class TransactionPuller {
 					} catch (ConnectException e) {
 						//one user reported getting connection errors at various points while trying to download 12k pages: http://empireminecraft.com/threads/shop-statistics.22507/page-14#post-684085
 						//if there's a connection problem, try re-creating the connection
+						logger.log(Level.WARNING, "A connection error occurred while downloading transactions.  Re-creating the connection.", e);
+						client = session.createHttpClient();
+						transactionPage = getPage(page, client);
+					} catch (SocketTimeoutException e) {
+						logger.log(Level.WARNING, "A connection error occurred while downloading transactions.  Re-creating the connection.", e);
 						client = session.createHttpClient();
 						transactionPage = getPage(page, client);
 					}
