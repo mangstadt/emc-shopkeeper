@@ -466,7 +466,6 @@ public class TransactionsTab extends JPanel {
 				try {
 					//query database
 					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(from, to).values();
-					dao.commit(); //getPlayerGroups also calculates firstSeen/lastSeen values for certain players
 
 					//reset GUI
 					tablePanel.removeAll();

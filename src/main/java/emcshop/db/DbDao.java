@@ -275,6 +275,12 @@ public interface DbDao {
 	Map<Date, Profits> getProfitsByMonth(Date from, Date to) throws SQLException;
 
 	/**
+	 * Re-calculates the "first_seen" and "last_seen" dates of all players.
+	 * @throws SQLException
+	 */
+	void calculatePlayersFirstLastSeenDates() throws SQLException;
+
+	/**
 	 * Deletes all data in the database.
 	 * @throws IOException
 	 * @throws SQLException

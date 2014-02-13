@@ -22,7 +22,7 @@ public class MigrationSprocs {
 	 * @throws SQLException
 	 */
 	public static void populateItemsTable() throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = conn();
 		DbDao dao = new DirbyEmbeddedDbDao(conn);
 
 		try {
@@ -40,7 +40,7 @@ public class MigrationSprocs {
 	 * @throws SQLException
 	 */
 	public static void updateItemNames() throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = conn();
 		DbDao dao = new DirbyEmbeddedDbDao(conn);
 
 		try {
@@ -110,11 +110,26 @@ public class MigrationSprocs {
 	}
 
 	/**
+	 * Re-calculates each player's first/last seen dates.
+	 * @throws SQLException
+	 */
+	public static void calculatePlayersFirstLastSeenDates() throws SQLException {
+		Connection conn = conn();
+		DbDao dao = new DirbyEmbeddedDbDao(conn);
+
+		try {
+			dao.calculatePlayersFirstLastSeenDates();
+		} finally {
+			conn.close();
+		}
+	}
+
+	/**
 	 * Removes duplicate item names in the "items" table.
 	 * @throws SQLException
 	 */
 	public static void removeDuplicateItemNames() throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		Connection conn = conn();
 		DbDao dao = new DirbyEmbeddedDbDao(conn);
 
 		try {
@@ -122,5 +137,18 @@ public class MigrationSprocs {
 		} finally {
 			conn.close();
 		}
+	}
+
+	/**
+	 * Creates a connection to the database.
+	 * @return the database connection
+	 * @throws SQLException
+	 */
+	private static Connection conn() throws SQLException {
+		return DriverManager.getConnection("jdbc:default:connection");
+	}
+
+	private MigrationSprocs() {
+		//hide
 	}
 }

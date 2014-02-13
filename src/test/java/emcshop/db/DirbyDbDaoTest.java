@@ -45,18 +45,18 @@ public class DirbyDbDaoTest {
 	private static Connection conn;
 	private static final int appleId, diamondId, notchId;
 	static {
+		//disable log messages
 		LogManager.getLogManager().reset();
 
 		try {
 			dao = new DirbyMemoryDbDao("test");
 			conn = dao.getConnection();
 
-			players().name("Notch").firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").insert();
+			notchId = players().name("Notch").firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").insert();
 			dao.commit();
 
-			appleId = dao.getItemId("Apple");
-			diamondId = dao.getItemId("Diamond");
-			notchId = 1;
+			appleId = items().name("Apple").id();
+			diamondId = items().name("Diamond").id();
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -89,6 +89,40 @@ public class DirbyDbDaoTest {
 
 		player = dao.selsertPlayer("Jeb");
 		players().name("Jeb").firstSeen((Date) null).lastSeen((Date) null).test(player);
+	}
+
+	@Test
+	public void calculatePlayersFirstLastSeenDates() throws Throwable {
+		int jeb = players().name("Jeb").insert();
+		int dinnerbone = players().name("Dinnerbone").insert();
+
+		transactions().ts("2014-01-01 00:00:00").player(notchId).insert();
+		transactions().ts("2014-01-02 12:00:00").player(notchId).insert();
+		transactions().ts("2014-01-03 00:00:00").player(notchId).insert();
+		transactions().ts("2014-01-04 00:00:00").player(jeb).insert();
+		transactions().ts("2014-01-05 00:00:00").player(jeb).insert();
+		transactions().ts("2014-01-06 00:00:00").player(dinnerbone).insert();
+
+		dao.calculatePlayersFirstLastSeenDates();
+
+		ResultSet rs = players().all();
+
+		rs.next();
+		assertEquals("Notch", rs.getString("name"));
+		assertEquals(date("2014-01-01 00:00:00"), date(rs.getTimestamp("first_seen")));
+		assertEquals(date("2014-01-03 00:00:00"), date(rs.getTimestamp("last_seen")));
+
+		rs.next();
+		assertEquals("Jeb", rs.getString("name"));
+		assertEquals(date("2014-01-04 00:00:00"), date(rs.getTimestamp("first_seen")));
+		assertEquals(date("2014-01-05 00:00:00"), date(rs.getTimestamp("last_seen")));
+
+		rs.next();
+		assertEquals("Dinnerbone", rs.getString("name"));
+		assertEquals(date("2014-01-06 00:00:00"), date(rs.getTimestamp("first_seen")));
+		assertEquals(date("2014-01-06 00:00:00"), date(rs.getTimestamp("last_seen")));
+
+		assertFalse(rs.next());
 	}
 
 	@Test
@@ -260,7 +294,7 @@ public class DirbyDbDaoTest {
 
 		assertNotNull(items().name("Item").id());
 
-		List<String> actualNames = players().all();
+		List<String> actualNames = players().names();
 		assertEquals(2, actualNames.size());
 		assertTrue(actualNames.contains("Notch"));
 		assertTrue(actualNames.contains("Jeb"));
@@ -277,7 +311,7 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
-	public void insertTransaction_updateInventory() throws Throwable {
+	public void insertTransaction_update_inventory() throws Throwable {
 		DateGenerator dg = new DateGenerator();
 		inventory().item(appleId).quantity(100).insert();
 		inventory().item(diamondId).quantity(20).insert();
@@ -298,6 +332,44 @@ public class DirbyDbDaoTest {
 		expected.put(appleId, 90);
 		expected.put(diamondId, 20);
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void insertTransaction_update_first_last_seen_dates() throws Throwable {
+		DirbyDbDao dao = new DirbyMemoryDbDao("insertTransaction_update_first_last_seen_dates");
+		conn = dao.getConnection();
+
+		players().name("Notch").firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 00:00:00").insert();
+		players().name("Dinnerbone").firstSeen((Date) null).lastSeen((Date) null).insert();
+
+		ShopTransaction t = transactions().ts("2014-01-03 00:00:00").player("Notch").dto();
+		dao.insertTransaction(t, false);
+		t = transactions().ts("2014-01-03 01:00:00").player("Jeb").dto();
+		dao.insertTransaction(t, false);
+		t = transactions().ts("2014-01-04 00:00:00").player("Notch").dto();
+		dao.insertTransaction(t, false);
+		t = transactions().ts("2014-01-04 01:00:00").player("Dinnerbone").dto();
+		dao.insertTransaction(t, false);
+		dao.commit(); //the update occurs when a commit happens
+
+		ResultSet rs = players().all();
+
+		rs.next();
+		assertEquals("Notch", rs.getString("name"));
+		assertEquals(date("2014-01-01 00:00:00"), date(rs.getTimestamp("first_seen")));
+		assertEquals(date("2014-01-04 00:00:00"), date(rs.getTimestamp("last_seen")));
+
+		rs.next();
+		assertEquals("Dinnerbone", rs.getString("name"));
+		assertEquals(date("2014-01-04 01:00:00"), date(rs.getTimestamp("first_seen")));
+		assertEquals(date("2014-01-04 01:00:00"), date(rs.getTimestamp("last_seen")));
+
+		rs.next();
+		assertEquals("Jeb", rs.getString("name"));
+		assertEquals(date("2014-01-03 01:00:00"), date(rs.getTimestamp("first_seen")));
+		assertEquals(date("2014-01-03 01:00:00"), date(rs.getTimestamp("last_seen")));
+
+		assertFalse(rs.next());
 	}
 
 	@Test
@@ -608,7 +680,7 @@ public class DirbyDbDaoTest {
 				PlayerGroup group = groups.get("Jeb");
 
 				Player player = group.getPlayer();
-				players().name("Jeb").id(jeb).firstSeen(dg.getGenerated(2)).lastSeen(dg.getGenerated(2)).test(player);
+				players().name("Jeb").id(jeb).firstSeen((Date) null).lastSeen((Date) null).test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(1, items.size());
@@ -640,7 +712,7 @@ public class DirbyDbDaoTest {
 				PlayerGroup group = groups.get("Jeb");
 
 				Player player = group.getPlayer();
-				players().name("Jeb").id(jeb).firstSeen(dg.getGenerated(2)).lastSeen(dg.getGenerated(2)).test(player);
+				players().name("Jeb").id(jeb).firstSeen((Date) null).lastSeen((Date) null).test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(1, items.size());
@@ -672,7 +744,7 @@ public class DirbyDbDaoTest {
 				PlayerGroup group = groups.get("Jeb");
 
 				Player player = group.getPlayer();
-				players().name("Jeb").id(jeb).firstSeen(dg.getGenerated(2)).lastSeen(dg.getGenerated(2)).test(player);
+				players().name("Jeb").id(jeb).firstSeen((Date) null).lastSeen((Date) null).test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(1, items.size());
@@ -702,7 +774,7 @@ public class DirbyDbDaoTest {
 				PlayerGroup group = groups.get("Jeb");
 
 				Player player = group.getPlayer();
-				players().name("Jeb").id(jeb).firstSeen(dg.getGenerated(2)).lastSeen(dg.getGenerated(2)).test(player);
+				players().name("Jeb").id(jeb).firstSeen((Date) null).lastSeen((Date) null).test(player);
 
 				Map<String, ItemGroup> items = group.getItems();
 				assertEquals(1, items.size());
@@ -1144,8 +1216,6 @@ public class DirbyDbDaoTest {
 		assertNotNull(items().name("Item").id());
 		assertNull(items().name("Apple").id());
 		assertIntEquals(3, meta().dbSchemaVersion());
-
-		dao.close();
 	}
 
 	@Test
@@ -1188,8 +1258,6 @@ public class DirbyDbDaoTest {
 			assertNotNull(items().name("Apple").id());
 			assertIntEquals(1, meta().dbSchemaVersion());
 		}
-
-		dao.close();
 	}
 
 	@Test(expected = SQLException.class)
@@ -1250,8 +1318,6 @@ public class DirbyDbDaoTest {
 		assertTrue(items().count() > 0);
 		assertNull(items().name("Item").id());
 		bonusesFees().test();
-
-		dao.close();
 	}
 
 	private static MetaHelper meta() {
@@ -1523,13 +1589,17 @@ public class DirbyDbDaoTest {
 			return rs.getInt(1);
 		}
 
-		public List<String> all() throws SQLException {
+		public List<String> names() throws SQLException {
 			List<String> players = new ArrayList<String>();
 			ResultSet rs = query("SELECT name FROM players ORDER BY id");
 			while (rs.next()) {
 				players.add(rs.getString(1));
 			}
 			return players;
+		}
+
+		public ResultSet all() throws SQLException {
+			return query("SELECT * FROM players ORDER BY id");
 		}
 	}
 
@@ -1584,7 +1654,7 @@ public class DirbyDbDaoTest {
 	private static class TransactionTester {
 		private Date ts = new Date();
 		private int item = appleId, player = notchId, amount, quantity, balance;
-		private String itemStr, playerStr;
+		private String itemStr = "Apple", playerStr = "Notch";
 
 		public TransactionTester ts(String ts) {
 			return ts(date(ts));
@@ -1828,6 +1898,10 @@ public class DirbyDbDaoTest {
 		} catch (ParseException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static Date date(Timestamp timestamp) {
+		return (timestamp == null) ? null : new Date(timestamp.getTime());
 	}
 
 	private static void assertIntEquals(Integer expected, int actual) {

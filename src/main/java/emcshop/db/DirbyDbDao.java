@@ -45,7 +45,7 @@ public abstract class DirbyDbDao implements DbDao {
 	 * directly. Use {@link #getAppDbVersion()} instead, because this method
 	 * gets overridden in unit tests.
 	 */
-	private static final int schemaVersion = 16;
+	private static final int schemaVersion = 17;
 
 	protected Connection conn;
 	protected String jdbcUrl;
@@ -400,42 +400,29 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException {
-		InsertStatement stmt = new InsertStatement("transactions");
-
 		Player player = selsertPlayer(transaction.getPlayer());
 		Integer itemId = upsertItem(transaction.getItem());
 		Date ts = transaction.getTs();
 
-		//keep track of the first/last seen dates so they can be updated
-		//if the player doesn't have a first seen or last seen date, then calculate it later (see "getPlayerGroups()")
-		if (player.getFirstSeen() != null && player.getLastSeen() != null) {
-			Date earliest, latest;
-			Date dates[] = firstLastSeenDates.get(player.getId());
-			if (dates == null) {
-				earliest = null;
-				latest = null;
-			} else {
-				earliest = dates[0];
-				latest = dates[1];
-			}
-
-			if (player.getFirstSeen() == null || (ts.getTime() < player.getFirstSeen().getTime())) {
-				if (earliest == null || ts.getTime() < earliest.getTime()) {
-					earliest = ts;
-				}
-			}
-
-			if (player.getLastSeen() == null || (ts.getTime() > player.getLastSeen().getTime())) {
-				if (latest == null || ts.getTime() > latest.getTime()) {
-					latest = ts;
-				}
-			}
-
-			if (earliest != null || latest != null) {
-				firstLastSeenDates.put(player.getId(), new Date[] { earliest, latest });
-			}
+		//keep track of the first/last seen dates so they can be updated (in "commit()")
+		Date dates[] = firstLastSeenDates.get(player.getId());
+		if (dates == null) {
+			dates = new Date[] { player.getFirstSeen(), player.getLastSeen() };
+			firstLastSeenDates.put(player.getId(), dates);
 		}
 
+		Date earliest = dates[0];
+		if (earliest == null || ts.getTime() < earliest.getTime()) {
+			dates[0] = ts;
+		}
+
+		Date latest = dates[1];
+		if (latest == null || ts.getTime() > latest.getTime()) {
+			dates[1] = ts;
+		}
+
+		//insert transaction
+		InsertStatement stmt = new InsertStatement("transactions");
 		stmt.setTimestamp("ts", ts);
 		stmt.setInt("player", player.getId());
 		stmt.setInt("item", itemId);
@@ -856,14 +843,6 @@ public abstract class DirbyDbDao implements DbDao {
 			closeStatements(stmt);
 		}
 
-		//calculate the first and last times the player was seen, if not already calculated
-		for (PlayerGroup playerGroup : playerGroups.values()) {
-			Player player = playerGroup.getPlayer();
-			if (player.getFirstSeen() == null || player.getLastSeen() == null) {
-				calculateFirstLastSeen(player);
-			}
-		}
-
 		return playerGroups;
 	}
 
@@ -1245,34 +1224,24 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
-	/**
-	 * Calculates a player's first/last seen dates and updates them.
-	 * @param player the player
-	 * @throws SQLException
-	 */
-	private void calculateFirstLastSeen(Player player) throws SQLException {
+	@Override
+	public void calculatePlayersFirstLastSeenDates() throws SQLException {
 		//@formatter:off
 		String sql =
-		"SELECT Min(ts) AS firstSeen, Max(ts) AS lastSeen " + 
+		"SELECT player, Min(ts) AS firstSeen, Max(ts) AS lastSeen " + 
 		"FROM transactions " +
-		"WHERE player = ?";
+		"GROUP BY player";
 		//@formatter:on
 
 		PreparedStatement stmt = stmt(sql);
 		try {
-			stmt.setInt(1, player.getId());
-
 			ResultSet rs = stmt.executeQuery();
-			if (!rs.next()) {
-				return;
+			while (rs.next()) {
+				int player = rs.getInt("player");
+				Date firstSeen = toDate(rs.getTimestamp("firstSeen"));
+				Date lastSeen = toDate(rs.getTimestamp("lastSeen"));
+				updateFirstLastSeen(player, firstSeen, lastSeen);
 			}
-
-			Date firstSeen = toDate(rs.getTimestamp("firstSeen"));
-			Date lastSeen = toDate(rs.getTimestamp("lastSeen"));
-
-			player.setFirstSeen(firstSeen);
-			player.setLastSeen(lastSeen);
-			updateFirstLastSeen(player.getId(), firstSeen, lastSeen);
 		} finally {
 			closeStatements(stmt);
 		}
@@ -1309,7 +1278,7 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 			stmt.setInt(index++, playerId);
 
-			stmt.execute();
+			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
 		}
