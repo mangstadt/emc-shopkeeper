@@ -80,6 +80,13 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
+	public void listener_onCreate() throws Throwable {
+		DbListenerImpl listener = new DbListenerImpl();
+		new DirbyMemoryDbDao("listener_onCreate", listener);
+		assertEquals(1, listener.onCreate);
+	}
+
+	@Test
 	public void selsertPlayer() throws Throwable {
 		Player player = dao.selsertPlayer("Notch");
 		players().id(notchId).name("Notch").firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 12:00:00").test(player);
@@ -192,51 +199,6 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
-	public void updateTransactionItem() throws Throwable {
-		int a = items().name("a").insert();
-		int b = items().name("b").insert();
-		int c = items().name("c").insert();
-		int d = items().name("d").insert();
-
-		transactions().item(a).insert();
-		transactions().item(b).insert();
-		transactions().item(c).insert();
-		transactions().item(d).insert();
-		dao.updateTransactionItem(Arrays.asList(a, c), b);
-
-		List<Integer> actual = new ArrayList<Integer>();
-		ResultSet rs = query("SELECT item FROM transactions ORDER BY item");
-		while (rs.next()) {
-			actual.add(rs.getInt(1));
-		}
-
-		List<Integer> expected = Arrays.asList(b, b, b, d);
-		assertEquals(expected, actual);
-	}
-
-	@Test
-	public void updateItemName() throws Throwable {
-		dao.updateItemName(appleId, "Pear");
-
-		assertNull(items().name("Apple").id());
-		assertIntEquals(appleId, items().name("Pear").id());
-	}
-
-	@Test
-	public void deleteItems() throws Throwable {
-		//nothing should happen if no values are passed into the method
-		Map<Integer, String> before = items().all();
-		dao.deleteItems();
-		Map<Integer, String> after = items().all();
-		assertEquals(before, after);
-
-		dao.deleteItems(appleId, diamondId);
-		assertNull(items().name("Apple").id());
-		assertNull(items().name("Diamond").id());
-		assertNotNull(items().name("Gold Sword").id());
-	}
-
-	@Test
 	public void updateItemNamesAndAliases() throws Throwable {
 		int a = items().name("Splash Potion of Water Breathing").id();
 		int b = items().name("Potion:16397").insert();
@@ -299,7 +261,7 @@ public class DirbyDbDaoTest {
 		Map<Integer, String> after = items().all();
 		assertEquals(before, after);
 
-		dao.deleteItems(appleId);
+		items().name("Apple").delete();
 		dao.populateItemsTable();
 		assertNotNull(items().name("Apple").id());
 		assertFalse(appleId == items().name("Apple").id());
@@ -870,25 +832,6 @@ public class DirbyDbDaoTest {
 		assertIntEquals(10, inv.getQuantity());
 
 		assertFalse(it.hasNext());
-	}
-
-	@Test
-	public void updateInventoryItem() throws Throwable {
-		int a = items().name("a").insert();
-		int b = items().name("b").insert();
-		int c = items().name("c").insert();
-		inventory().item(appleId).quantity(5).insert();
-		inventory().item(a).quantity(1).insert();
-		inventory().item(b).quantity(-2).insert();
-		inventory().item(c).quantity(3).insert();
-
-		dao.updateInventoryItem(Arrays.asList(a, c), b);
-
-		Map<Integer, Integer> actual = inventory().all();
-		Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
-		expected.put(appleId, 5);
-		expected.put(b, 2);
-		assertEquals(expected, actual);
 	}
 
 	@Test

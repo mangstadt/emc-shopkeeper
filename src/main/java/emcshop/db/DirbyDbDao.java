@@ -321,6 +321,17 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
+	private void updateItemName(Integer id, String newName) throws SQLException {
+		PreparedStatement stmt = stmt("UPDATE items SET name = ? WHERE id = ?");
+		try {
+			stmt.setString(1, newName);
+			stmt.setInt(2, id);
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
 	@Override
 	public void removeDuplicateItems() throws SQLException {
 		//get the ID(s) of each item
@@ -363,20 +374,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
-	@Override
-	public void updateItemName(Integer id, String newName) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE items SET name = ? WHERE id = ?");
-		try {
-			stmt.setString(1, newName);
-			stmt.setInt(2, id);
-			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
-		}
-	}
-
-	@Override
-	public void deleteItems(Integer... ids) throws SQLException {
+	private void deleteItems(Integer... ids) throws SQLException {
 		if (ids.length == 0) {
 			return;
 		}
@@ -440,8 +438,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
-	@Override
-	public void updateTransactionItem(List<Integer> oldItemIds, int newItemId) throws SQLException {
+	private void updateTransactionItem(List<Integer> oldItemIds, int newItemId) throws SQLException {
 		if (oldItemIds.isEmpty()) {
 			return;
 		}
@@ -940,8 +937,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
-	@Override
-	public void updateInventoryItem(List<Integer> oldItemIds, int newItemId) throws SQLException {
+	private void updateInventoryItem(List<Integer> oldItemIds, int newItemId) throws SQLException {
 		if (oldItemIds.isEmpty()) {
 			return;
 		}

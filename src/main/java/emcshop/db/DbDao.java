@@ -79,29 +79,6 @@ public interface DbDao {
 	void updateItemNamesAndAliases() throws SQLException;
 
 	/**
-	 * Changes the item that a transaction is associated with.
-	 * @param oldItemIds the old item ID(s)
-	 * @param newItemId the new item ID
-	 * @throws SQLException
-	 */
-	void updateTransactionItem(List<Integer> oldItemIds, int newItemId) throws SQLException;
-
-	/**
-	 * Changes the name of an item.
-	 * @param id the item ID
-	 * @param newName the new name
-	 * @throws SQLException
-	 */
-	void updateItemName(Integer id, String newName) throws SQLException;
-
-	/**
-	 * Deletes one or more items.
-	 * @param id the item ID(s)
-	 * @throws SQLException
-	 */
-	void deleteItems(Integer... ids) throws SQLException;
-
-	/**
 	 * Seeds the items table with all known items. Only item names that don't
 	 * exist in the table are inserted.
 	 * @throws SQLException
@@ -208,14 +185,6 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	List<Inventory> getInventory() throws SQLException;
-
-	/**
-	 * Changes the item that an inventory entry is associated with.
-	 * @param oldItemIds the old item ID(s)
-	 * @param newItemId the new item ID
-	 * @throws SQLException
-	 */
-	void updateInventoryItem(List<Integer> oldItemIds, int newItemId) throws SQLException;
 
 	/**
 	 * Updates or inserts an inventory item.
