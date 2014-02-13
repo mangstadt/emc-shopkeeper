@@ -425,7 +425,7 @@ public class TransactionPuller {
 			 * @return this
 			 */
 			public Builder stopAtDate(Date stopAtDate) {
-				this.stopAtDate = new Date(stopAtDate.getTime());
+				this.stopAtDate = (stopAtDate == null) ? null : new Date(stopAtDate.getTime());
 				return this;
 			}
 
@@ -437,7 +437,7 @@ public class TransactionPuller {
 			 * @return this
 			 */
 			public Builder stopAtPage(Integer stopAtPage) {
-				if (stopAtPage <= 0) {
+				if (stopAtPage != null && stopAtPage <= 0) {
 					throw new IllegalArgumentException("Stop page must be greater than zero.");
 				}
 				this.stopAtPage = stopAtPage;
@@ -466,7 +466,7 @@ public class TransactionPuller {
 			 * @return this
 			 */
 			public Builder maxPaymentTransactionAge(Integer maxPaymentTransactionAge) {
-				if (maxPaymentTransactionAge <= 0) {
+				if (maxPaymentTransactionAge != null && maxPaymentTransactionAge <= 0) {
 					throw new IllegalArgumentException("Max payment transaction age must be greater than zero.");
 				}
 				this.maxPaymentTransactionAge = maxPaymentTransactionAge;
