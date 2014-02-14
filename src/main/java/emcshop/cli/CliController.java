@@ -1,8 +1,8 @@
 package emcshop.cli;
 
 import static emcshop.scraper.TransactionPuller.filter;
-import static emcshop.util.NumberFormatter.formatQuantity;
 import static emcshop.util.NumberFormatter.formatRupees;
+import static emcshop.util.NumberFormatter.formatStacks;
 
 import java.io.PrintStream;
 import java.text.NumberFormat;
@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import emcshop.ItemIndex;
 import emcshop.Main;
 import emcshop.QueryExporter;
 import emcshop.db.DbDao;
@@ -205,7 +206,7 @@ public class CliController {
 		Collections.sort(sortedItemGroups, new Comparator<ItemGroup>() {
 			@Override
 			public int compare(ItemGroup left, ItemGroup right) {
-				return left.getItem().compareTo(right.getItem());
+				return left.getItem().compareToIgnoreCase(right.getItem());
 			}
 		});
 
@@ -230,59 +231,68 @@ public class CliController {
 			//generate BBCode
 			out.println(QueryExporter.generateItemsBBCode(sortedItemGroups, netTotal, from, to));
 		} else {
-			out.println("Item                |Sold                |Bought              |Net");
+			//ANSI escape codes: http://ascii-table.com/ansi-escape-sequences.php
+			final String reset = "\u001B[0m";
+			ItemIndex index = ItemIndex.instance();
+
+			out.println("Item                                   |Net Quantity       |Net Amount          ");
 			out.println("--------------------------------------------------------------------------------");
 			int totalAmount = 0;
 			for (ItemGroup itemGroup : sortedItemGroups) {
-				//TODO ANSI colors
-				//TODO String.format("%-20s | %-20s | %-20s | %-20s\n", group.getItem(), sold, bought, net);
-
-				out.print(itemGroup.getItem());
-				int spaces = 20 - itemGroup.getItem().length();
-				if (spaces > 0) {
-					out.print(StringUtils.repeat(' ', spaces));
-				}
+				out.print(fixedLength(itemGroup.getItem(), 39));
 				out.print('|');
 
-				String s;
-
-				if (itemGroup.getSoldQuantity() == 0) {
-					s = " - ";
-				} else {
-					s = formatQuantity(itemGroup.getSoldQuantity(), false) + " / " + formatRupees(itemGroup.getSoldAmount(), false);
-				}
-				out.print(s);
-				spaces = 20 - s.length();
-				if (spaces > 0) {
-					out.print(StringUtils.repeat(' ', spaces));
-				}
+				int netQuantity = itemGroup.getNetQuantity();
+				String color = getColor(netQuantity);
+				out.print(color + fixedLength(formatStacks(itemGroup.getNetQuantity(), index.getStackSize(itemGroup.getItem()), true), 19) + reset);
 				out.print('|');
 
-				if (itemGroup.getBoughtQuantity() == 0) {
-					s = " - ";
-				} else {
-					s = formatQuantity(itemGroup.getBoughtQuantity(), false) + " / " + formatRupees(itemGroup.getBoughtAmount(), false);
-				}
-				out.print(s);
-				spaces = 20 - s.length();
-				if (spaces > 0) {
-					out.print(StringUtils.repeat(' ', spaces));
-				}
-				out.print('|');
-
-				out.print(formatQuantity(itemGroup.getNetQuantity(), false));
-				out.print(" / ");
-				out.print(formatRupees(itemGroup.getNetAmount(), false));
+				int netAmount = itemGroup.getNetAmount();
+				color = getColor(netAmount);
+				out.print(color + fixedLength(formatRupees(itemGroup.getNetAmount(), true), 19) + reset);
 
 				out.println();
 
 				totalAmount += itemGroup.getNetAmount();
 			}
 
-			out.print(StringUtils.repeat(' ', 62));
-			out.print('|');
-			out.println(formatRupees(totalAmount));
+			out.print(StringUtils.repeat(' ', 53));
+			out.print("Total: ");
+			String color = getBoldColor(totalAmount);
+			out.println(color + formatRupees(totalAmount) + reset);
 		}
+	}
+
+	private static String getColor(int number) {
+		if (number > 0) {
+			return "\u001B[32m"; //green
+		}
+
+		if (number < 0) {
+			return "\u001B[31m"; //red
+		}
+
+		return "";
+	}
+
+	private static String getBoldColor(int number) {
+		if (number > 0) {
+			return "\u001B[32;1m"; //green
+		}
+
+		if (number < 0) {
+			return "\u001B[31;1m"; //red
+		}
+
+		return "";
+	}
+
+	private static String fixedLength(String value, int maxWidth) {
+		int spaces = maxWidth - value.length();
+		if (spaces > 0) {
+			return value + StringUtils.repeat(' ', spaces);
+		}
+		return value.substring(0, maxWidth);
 	}
 
 	protected static Date[] parseDateRange(String dateRangeStr) throws ParseException {
