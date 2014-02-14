@@ -45,9 +45,6 @@ You can then execute the JAR in the "target" directory by double clicking on it 
     --db=PATH
       Overrides the database location (stored in the profile by default).
 
-    --settings=PATH
-      Overrides the settings file location (stored in the profile by default).
-
     --log-level=FINEST|FINER|FINE|CONFIG|INFO|WARNING|SEVERE
       The log level to use (defaults to INFO).
 

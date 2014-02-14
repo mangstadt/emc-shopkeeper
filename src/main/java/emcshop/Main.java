@@ -161,9 +161,7 @@ public class Main {
 		}
 
 		//load settings
-		String settingsFileStr = arguments.settings();
-		File settingsFile = (settingsFileStr == null) ? new File(profileDir, "settings.properties") : new File(settingsFileStr);
-		settings = new Settings(settingsFile);
+		settings = new Settings(new File(profileDir, "settings.properties"));
 
 		//show the "choose profile" dialog
 		boolean cliMode = arguments.query() != null || arguments.update();
@@ -252,9 +250,6 @@ public class Main {
 		NEWLINE +
 		"--db=PATH" + NEWLINE +
 		"  Overrides the database location (stored in the profile by default)." + NEWLINE +
-		NEWLINE +
-		"--settings=PATH" + NEWLINE +
-		"  Overrides the settings file location (stored in the profile by default)." + NEWLINE +
 		NEWLINE +
 		"--log-level=FINEST|FINER|FINE|CONFIG|INFO|WARNING|SEVERE" + NEWLINE +
 		"  The log level to use (defaults to INFO)." + NEWLINE +

@@ -15,7 +15,6 @@ public class EmcShopArguments extends Arguments {
 		set.add("profile");
 		set.add("profile-dir");
 		set.add("db");
-		set.add("settings");
 		set.add("log-level");
 
 		set.add("update");
@@ -57,10 +56,6 @@ public class EmcShopArguments extends Arguments {
 
 	public String profile() {
 		return value(null, "profile");
-	}
-
-	public String settings() {
-		return value(null, "settings");
 	}
 
 	public String query() {
