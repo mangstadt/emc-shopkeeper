@@ -106,10 +106,6 @@ public class Settings {
 		return rupeeBalance;
 	}
 
-	public void setRupeeBalance(Integer rupeeBalance) {
-		this.rupeeBalance = rupeeBalance;
-	}
-
 	public boolean isShowProfilesOnStartup() {
 		return showProfilesOnStartup;
 	}
@@ -230,7 +226,6 @@ public class Settings {
 		}
 		props.setBoolean("session.remember", persistSession);
 		props.set("log.level", logLevel.getName());
-		props.setInteger("rupeeBalance", rupeeBalance);
 		props.setBoolean("showProfilesOnStartup", showProfilesOnStartup);
 		props.setBoolean("showQuantitiesInStacks", showQuantitiesInStacks);
 

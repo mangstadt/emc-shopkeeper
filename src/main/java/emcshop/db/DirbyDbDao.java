@@ -171,7 +171,7 @@ public abstract class DirbyDbDao implements DbDao {
 		PreparedStatement stmt = stmt("SELECT db_schema_version FROM meta");
 		try {
 			ResultSet rs = stmt.executeQuery();
-			return rs.next() ? rs.getInt("db_schema_version") : 0;
+			return rs.next() ? rs.getInt(1) : 0;
 		} finally {
 			closeStatements(stmt);
 		}
@@ -193,6 +193,28 @@ public abstract class DirbyDbDao implements DbDao {
 		InsertStatement insertStmt = new InsertStatement("meta");
 		insertStmt.setInt("db_schema_version", version);
 		insertStmt.execute(conn);
+	}
+
+	@Override
+	public int selectRupeeBalance() throws SQLException {
+		PreparedStatement stmt = stmt("SELECT rupee_balance FROM meta");
+		try {
+			ResultSet rs = stmt.executeQuery();
+			return rs.next() ? rs.getInt(1) : 0;
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void updateRupeeBalance(int rupeeBalance) throws SQLException {
+		PreparedStatement stmt = stmt("UPDATE meta SET rupee_balance = ?");
+		try {
+			stmt.setInt(1, rupeeBalance);
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
 	}
 
 	@Override

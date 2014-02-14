@@ -78,6 +78,18 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
+	public void selectRupeeBalance() throws Throwable {
+		meta().rupeeBalance(1234);
+		assertEquals(1234, dao.selectRupeeBalance());
+	}
+
+	@Test
+	public void updateRupeeBalance() throws Throwable {
+		dao.updateRupeeBalance(1234);
+		assertIntEquals(1234, meta().rupeeBalance());
+	}
+
+	@Test
 	public void listener_onCreate() throws Throwable {
 		DbListenerImpl listener = new DbListenerImpl();
 		new DirbyMemoryDbDao("listener_onCreate", listener);
@@ -1201,7 +1213,7 @@ public class DirbyDbDaoTest {
 		};
 		conn = dao.getConnection();
 
-		meta().dbSchemaVersion(1).set();
+		meta().dbSchemaVersion(1);
 		dao.commit();
 
 		DbListenerImpl listener = new DbListenerImpl();
@@ -1239,7 +1251,7 @@ public class DirbyDbDaoTest {
 		};
 		conn = dao.getConnection();
 
-		meta().dbSchemaVersion(1).set();
+		meta().dbSchemaVersion(1);
 		dao.commit();
 
 		try {
@@ -1271,7 +1283,7 @@ public class DirbyDbDaoTest {
 		};
 		conn = dao.getConnection();
 
-		meta().dbSchemaVersion(4).set();
+		meta().dbSchemaVersion(4);
 		dao.commit();
 
 		DbListenerImpl listener = new DbListenerImpl();
@@ -1321,22 +1333,29 @@ public class DirbyDbDaoTest {
 	}
 
 	private static class MetaHelper {
-		private int dbSchemaVersion;
-
-		public MetaHelper dbSchemaVersion(int dbSchemaVersion) {
-			this.dbSchemaVersion = dbSchemaVersion;
-			return this;
-		}
-
-		public void set() throws SQLException {
+		public MetaHelper dbSchemaVersion(int dbSchemaVersion) throws SQLException {
 			PreparedStatement stmt = conn.prepareStatement("UPDATE meta SET db_schema_version = ?");
 			stmt.setInt(1, dbSchemaVersion);
 			stmt.executeUpdate();
+			return this;
+		}
+
+		public MetaHelper rupeeBalance(int rupeeBalance) throws SQLException {
+			PreparedStatement stmt = conn.prepareStatement("UPDATE meta SET rupee_balance = ?");
+			stmt.setInt(1, rupeeBalance);
+			stmt.executeUpdate();
+			return this;
 		}
 
 		public Integer dbSchemaVersion() throws SQLException {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT db_schema_version FROM meta");
+			return rs.next() ? rs.getInt(1) : null;
+		}
+
+		public Integer rupeeBalance() throws SQLException {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT rupee_balance FROM meta");
 			return rs.next() ? rs.getInt(1) : null;
 		}
 	}

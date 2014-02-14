@@ -244,7 +244,6 @@ public class MainFrame extends JFrame {
 								dao.wipe();
 								settings.setLastUpdated(null);
 								settings.setPreviousUpdate(null);
-								settings.setRupeeBalance(null);
 								settings.setSession(null);
 								settings.save();
 								clearSessionMenuItem.setEnabled(false);
@@ -518,7 +517,6 @@ public class MainFrame extends JFrame {
 		}
 
 		settings.setLastUpdated(started);
-		settings.setRupeeBalance(rupeeTotal);
 		settings.save();
 
 		updateLastUpdateDate(started);
@@ -540,9 +538,11 @@ public class MainFrame extends JFrame {
 	}
 
 	private void updateRupeeBalance() {
-		Integer balance = settings.getRupeeBalance();
-		if (balance == null) {
-			balance = 0;
+		int balance;
+		try {
+			balance = dao.selectRupeeBalance();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
 		}
 
 		String balanceStr = NumberFormatter.formatRupees(balance, false);

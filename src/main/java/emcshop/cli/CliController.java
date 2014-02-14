@@ -170,11 +170,16 @@ public class CliController {
 		if (earliestParsedTransactionDate != null) {
 			dao.updateBonusesFeesSince(earliestParsedTransactionDate);
 		}
+
+		Integer rupeeBalance = puller.getRupeeBalance();
+		if (rupeeBalance != null) {
+			dao.updateRupeeBalance(rupeeBalance);
+		}
+
 		dao.commit();
 
 		settings.setPreviousUpdate(settings.getLastUpdated());
 		settings.setLastUpdated(new Date(started));
-		settings.setRupeeBalance(puller.getRupeeBalance());
 		settings.save();
 
 		long timeTaken = System.currentTimeMillis() - started;

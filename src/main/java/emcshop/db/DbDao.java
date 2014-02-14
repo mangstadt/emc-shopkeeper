@@ -35,6 +35,20 @@ public interface DbDao {
 	void upsertDbVersion(int version) throws SQLException;
 
 	/**
+	 * Gets the player's rupee balance.
+	 * @return the rupee balance
+	 * @throws SQLException
+	 */
+	int selectRupeeBalance() throws SQLException;
+
+	/**
+	 * Updates the player's rupee balance.
+	 * @param rupeeBalance the new rupee balance
+	 * @throws SQLException
+	 */
+	void updateRupeeBalance(int rupeeBalance) throws SQLException;
+
+	/**
 	 * Searches for a player, inserting the player if it doesn't exist.
 	 * @param name the player name, case in-sensitive (e.g. "notch")
 	 * @return the player

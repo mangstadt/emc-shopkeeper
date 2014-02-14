@@ -10,7 +10,10 @@
 CREATE TABLE meta(
 	--the database schema version
 	--used for updating existing databases as future versions are released
-	db_schema_version INTEGER NOT NULL
+	db_schema_version INTEGER NOT NULL,
+	
+	--the player's current rupee balance
+	rupee_balance INTEGER DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE items(

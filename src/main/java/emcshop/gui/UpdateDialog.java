@@ -224,6 +224,12 @@ public class UpdateDialog extends JDialog {
 			if (earliestParsedTransactionDate != null) {
 				dao.updateBonusesFeesSince(earliestParsedTransactionDate);
 			}
+
+			Integer rupeeBalance = puller.getRupeeBalance();
+			if (rupeeBalance != null) {
+				dao.updateRupeeBalance(rupeeBalance);
+			}
+
 			dao.commit();
 			updateComitted = true;
 		} catch (SQLException e) {
