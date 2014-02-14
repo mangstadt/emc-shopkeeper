@@ -189,7 +189,7 @@ public class TransactionPuller {
 	 * @return the page
 	 * @throws IOException if there's a problem downloading the page
 	 */
-	private TransactionPage getPage(int page, HttpClient client) throws IOException {
+	TransactionPage getPage(int page, HttpClient client) throws IOException {
 		/*
 		 * Note: The HttpClient library is used here because using
 		 * "Jsoup.connect()" doesn't always work when the application is run as

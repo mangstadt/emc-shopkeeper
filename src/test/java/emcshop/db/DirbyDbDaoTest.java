@@ -1,5 +1,8 @@
 package emcshop.db;
 
+import static emcshop.util.TestUtils.assertIntEquals;
+import static emcshop.util.TestUtils.date;
+import static emcshop.util.TestUtils.timestamp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -14,14 +17,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -38,9 +36,9 @@ import emcshop.ItemIndex;
 import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
+import emcshop.util.DateGenerator;
 
 public class DirbyDbDaoTest {
-	private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final DirbyDbDao dao;
 	private static Connection conn;
 	private static final int appleId, diamondId, notchId;
@@ -1889,48 +1887,4 @@ public class DirbyDbDaoTest {
 		return stmt.executeQuery(sql);
 	}
 
-	private static Timestamp timestamp(Date date) {
-		return (date == null) ? null : new Timestamp(date.getTime());
-	}
-
-	private static Date date(String date) {
-		if (date.length() == 10) {
-			date += " 00:00:00";
-		}
-		try {
-			return df.parse(date);
-		} catch (ParseException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private static Date date(Timestamp timestamp) {
-		return (timestamp == null) ? null : new Date(timestamp.getTime());
-	}
-
-	private static void assertIntEquals(Integer expected, int actual) {
-		assertNotNull(expected);
-		assertEquals(expected.intValue(), actual);
-	}
-
-	private static void assertIntEquals(int expected, Integer actual) {
-		assertNotNull(actual);
-		assertEquals(Integer.valueOf(expected), actual);
-	}
-
-	private static class DateGenerator {
-		private final Calendar c = Calendar.getInstance();
-		private final List<Date> generated = new ArrayList<Date>();
-
-		public Date next() {
-			c.add(Calendar.HOUR_OF_DAY, 1);
-			Date d = c.getTime();
-			generated.add(d);
-			return d;
-		}
-
-		public Date getGenerated(int index) {
-			return generated.get(index);
-		}
-	}
 }

@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -51,7 +52,13 @@ public class TransactionPage {
 
 	private final boolean loggedIn;
 	private final Integer rupeeBalance;
-	private final List<RupeeTransaction> transactions = new ArrayList<RupeeTransaction>();
+	private final List<RupeeTransaction> transactions;
+
+	TransactionPage(boolean loggedIn, Integer rupeeBalance, List<RupeeTransaction> transactions) {
+		this.loggedIn = loggedIn;
+		this.rupeeBalance = rupeeBalance;
+		this.transactions = transactions;
+	}
 
 	/**
 	 * @param document the webpage to parse
@@ -60,27 +67,28 @@ public class TransactionPage {
 		rupeeBalance = parseRupeeBalance(document);
 
 		Element containerElement = document.select("ol.sectionItems").first();
-		if (containerElement == null) {
-			loggedIn = false;
-			return;
-		}
-		loggedIn = true;
+		loggedIn = (containerElement != null);
 
-		Elements elements = containerElement.select("li.sectionItem");
-		for (Element element : elements) {
-			try {
-				String description = parseDescription(element);
-				RupeeTransaction transaction = parseTransaction(description);
+		List<RupeeTransaction> transactions = new ArrayList<RupeeTransaction>();
+		if (loggedIn) {
+			Elements elements = containerElement.select("li.sectionItem");
+			for (Element element : elements) {
+				try {
+					String description = parseDescription(element);
+					RupeeTransaction transaction = parseTransaction(description);
 
-				transaction.setTs(parseTs(element));
-				transaction.setAmount(parseAmount(element));
-				transaction.setBalance(parseBalance(element));
-				transactions.add(transaction);
-			} catch (Throwable t) {
-				//skip if any of the fields cannot be properly parsed
-				logger.log(Level.WARNING, "Problem parsing transaction from webpage.", t);
+					transaction.setTs(parseTs(element));
+					transaction.setAmount(parseAmount(element));
+					transaction.setBalance(parseBalance(element));
+					transactions.add(transaction);
+				} catch (Throwable t) {
+					//skip if any of the fields cannot be properly parsed
+					logger.log(Level.WARNING, "Problem parsing transaction from webpage.", t);
+				}
 			}
 		}
+
+		this.transactions = Collections.unmodifiableList(transactions);
 	}
 
 	public RupeeTransaction parseTransaction(String description) {
@@ -132,7 +140,7 @@ public class TransactionPage {
 	 * @return the transactions
 	 */
 	public List<RupeeTransaction> getTransactions() {
-		return transactions;
+		return new ArrayList<RupeeTransaction>(transactions);
 	}
 
 	private ShopTransaction toShopTransaction(String description) {
