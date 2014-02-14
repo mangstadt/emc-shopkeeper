@@ -382,6 +382,9 @@ public class PaymentsTab extends JPanel {
 						//user canceled the dialog
 						return;
 					}
+					if (transaction.getAmount() < 0) {
+						splitAmount *= -1;
+					}
 
 					//update the existing payment transaction
 					int origBalance = transaction.getBalance() - transaction.getAmount();
