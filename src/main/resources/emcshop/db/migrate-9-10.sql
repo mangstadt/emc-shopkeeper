@@ -9,4 +9,4 @@ CREATE TABLE bonuses_fees(
 	sign_in INT NOT NULL DEFAULT 0,
 	vote INT NOT NULL DEFAULT 0
 );
-INSERT INTO bonuses_fees (horse) VALUES (0);
+INSERT INTO bonuses_fees (since) VALUES (NULL);

@@ -1310,6 +1310,7 @@ public class DirbyDbDaoTest {
 		DirbyDbDao dao = new DirbyMemoryDbDao("wipe");
 		conn = dao.getConnection();
 
+		meta().rupeeBalance(1234);
 		int notch = players().name("Notch").insert();
 		int transaction = transactions().player(notch).insert();
 		paymentTransactions().transaction(transaction).insert();
@@ -1319,6 +1320,8 @@ public class DirbyDbDaoTest {
 
 		dao.wipe();
 
+		assertIntEquals(dao.getAppDbVersion(), meta().dbSchemaVersion());
+		assertIntEquals(0, meta().rupeeBalance());
 		assertEquals(0, players().count());
 		assertEquals(0, transactions().count());
 		assertEquals(0, paymentTransactions().count());

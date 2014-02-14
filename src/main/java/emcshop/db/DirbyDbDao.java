@@ -1241,13 +1241,14 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.execute("DELETE FROM players");
 			stmt.execute("DELETE FROM items");
 			stmt.execute("DELETE FROM bonuses_fees");
+			updateRupeeBalance(0);
 
 			stmt.execute("ALTER TABLE inventory ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE items ALTER COLUMN id RESTART WITH 1");
-			stmt.execute("INSERT INTO bonuses_fees (horse) VALUES (0)");
+			stmt.execute("INSERT INTO bonuses_fees (since) VALUES (NULL)");
 			populateItemsTable();
 
 			commit();
