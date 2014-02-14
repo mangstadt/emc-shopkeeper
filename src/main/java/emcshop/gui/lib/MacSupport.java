@@ -21,12 +21,16 @@ public class MacSupport {
 	 * @param title the title of the application
 	 * @param enablePreferences true to enable the "Preferences" menu option,
 	 * false to disable it. If enabled, you must override
-	 * MacHandler.handlePreferences() in the handler parameter
+	 * {@link MacHandler#handlePreferences()} in the handler parameter
 	 * @param dockImage the image that will appear in the dock or null for no
 	 * image.
 	 * @param handler handles the various Mac events
 	 */
 	public static void init(String title, boolean enablePreferences, Image dockImage, final MacHandler handler) {
+		if (!isMac()) {
+			return;
+		}
+
 		try {
 			//enable Mac menu bar
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -91,7 +95,7 @@ public class MacSupport {
 			 * sets the title and the dock icon image. An application with full
 			 * permissions may not throw this exception.
 			 */
-		} catch (Throwable e) {
+		} catch (Throwable t) {
 			//ignore
 		}
 	}
@@ -104,25 +108,8 @@ public class MacSupport {
 		try {
 			Class.forName("com.apple.eawt.Application");
 			return true;
-		} catch (Throwable e) {
+		} catch (Throwable t) {
 			return false;
-		}
-	}
-
-	/**
-	 * Runs initialization code specific to Mac OSX only if the application is
-	 * running on a Mac.
-	 * @param title the title of the application
-	 * @param enablePreferences true to enable the "Preferences" menu option,
-	 * false to disable it. If enabled, you must override
-	 * MacHandler.handlePreferences() in the handler parameter
-	 * @param dockImage the image that will appear in the dock or null for no
-	 * image.
-	 * @param handler handles the various Mac events
-	 */
-	public static void initIfMac(String title, boolean enablePreferences, Image dockImage, MacHandler handler) {
-		if (isMac()) {
-			init(title, enablePreferences, dockImage, handler);
 		}
 	}
 }

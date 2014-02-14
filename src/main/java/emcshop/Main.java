@@ -96,15 +96,6 @@ public class Main {
 	private static final Integer defaultStartPage = 1;
 	private static final String defaultFormat = "TABLE";
 
-	private static File profileRootDir, profileDir, dbDir;
-	private static String profile, query, format;
-	private static Integer startAtPage, stopAtPage;
-	private static boolean update;
-	private static Level logLevel;
-
-	private static Settings settings;
-	private static LogManager logManager;
-
 	private static MainFrame mainFrame;
 
 	public static void main(String[] args) throws Throwable {
@@ -135,18 +126,18 @@ public class Main {
 
 		//get profile root dir
 		String profileRootDirStr = arguments.profileDir();
-		profileRootDir = (profileRootDirStr == null) ? defaultProfileRootDir : new File(profileRootDirStr);
+		File profileRootDir = (profileRootDirStr == null) ? defaultProfileRootDir : new File(profileRootDirStr);
 
 		//get profile
 		boolean profileSpecified = true;
-		profile = arguments.profile();
+		String profile = arguments.profile();
 		if (profile == null) {
 			profileSpecified = false;
 			profile = defaultProfileName;
 		}
 
 		//create profile dir
-		profileDir = new File(profileRootDir, profile);
+		File profileDir = new File(profileRootDir, profile);
 		if (profileDir.exists()) {
 			if (!profileDir.isDirectory()) {
 				out.println("Error: Profile directory is not a directory!  Path: " + profileDir.getAbsolutePath());
@@ -161,7 +152,7 @@ public class Main {
 		}
 
 		//load settings
-		settings = new Settings(new File(profileDir, "settings.properties"));
+		Settings settings = new Settings(new File(profileDir, "settings.properties"));
 
 		//show the "choose profile" dialog
 		boolean cliMode = arguments.query() != null || arguments.update();
@@ -180,38 +171,10 @@ public class Main {
 
 		//get database dir
 		String dbDirStr = arguments.db();
-		dbDir = (dbDirStr == null) ? new File(profileDir, "db") : new File(dbDirStr);
-
-		//get update flag
-		update = arguments.update();
-		if (update) {
-			//get stop at page
-			stopAtPage = arguments.stopPage();
-			if (stopAtPage != null && stopAtPage < 1) {
-				out.println("Error: \"stop-page\" must be greater than 0.");
-				System.exit(1);
-			}
-
-			//get start at page
-			startAtPage = arguments.startPage();
-			if (startAtPage == null) {
-				startAtPage = defaultStartPage;
-			} else if (startAtPage < 1) {
-				out.println("Error: \"start-page\" must be greater than 0.");
-				System.exit(1);
-			}
-		}
-
-		//get query
-		query = arguments.query();
-		if (query != null) {
-			String format = arguments.format();
-			if (format == null) {
-				format = defaultFormat;
-			}
-		}
+		File dbDir = (dbDirStr == null) ? new File(profileDir, "db") : new File(dbDirStr);
 
 		//get log level
+		Level logLevel = null;
 		try {
 			logLevel = arguments.logLevel();
 			if (logLevel == null) {
@@ -222,12 +185,12 @@ public class Main {
 			System.exit(1);
 		}
 
-		logManager = new LogManager(logLevel, new File(profileDir, "app.log"));
+		LogManager logManager = new LogManager(logLevel, new File(profileDir, "app.log"));
 
-		if (!update && query == null) {
-			launchGui();
+		if (!arguments.update() && arguments.query() == null) {
+			launchGui(profileDir, dbDir, settings, logManager);
 		} else {
-			launchCli();
+			launchCli(dbDir, settings, arguments);
 		}
 	}
 
@@ -284,7 +247,7 @@ public class Main {
 		//@formatter:on
 	}
 
-	private static void launchCli() throws Throwable {
+	private static void launchCli(File dbDir, Settings settings, EmcShopArguments args) throws Throwable {
 		final DbDao dao = new DirbyEmbeddedDbDao(dbDir);
 		ReportSender reportSender = ReportSender.instance();
 		reportSender.setDatabaseVersion(dao.selectDbVersion());
@@ -301,20 +264,40 @@ public class Main {
 
 		CliController cli = new CliController(dao, settings);
 
-		if (update) {
+		if (args.update()) {
+			//get stop at page
+			Integer stopAtPage = args.stopPage();
+			if (stopAtPage != null && stopAtPage < 1) {
+				out.println("Error: \"stop-page\" must be greater than 0.");
+				System.exit(1);
+			}
+
+			//get start at page
+			Integer startAtPage = args.startPage();
+			if (startAtPage == null) {
+				startAtPage = defaultStartPage;
+			} else if (startAtPage < 1) {
+				out.println("Error: \"start-page\" must be greater than 0.");
+				System.exit(1);
+			}
+
 			cli.update(startAtPage, stopAtPage);
 		}
 
-		if (query != null) {
-			cli.query(query, format);
+		if (args.query() != null) {
+			String format = args.format();
+			if (format == null) {
+				format = defaultFormat;
+			}
+			cli.query(args.query(), format);
 		}
 	}
 
-	private static void launchGui() throws SQLException, IOException {
+	private static void launchGui(File profileDir, File dbDir, Settings settings, LogManager logManager) throws SQLException, IOException {
 		//run Mac OS X customizations if user is on a Mac
 		//this code must run before *anything* else graphics-related
 		Image appIcon = ImageManager.getAppIcon().getImage();
-		MacSupport.initIfMac("EMC Shopkeeper", false, appIcon, new MacHandler() {
+		MacSupport.init("EMC Shopkeeper", false, appIcon, new MacHandler() {
 			@Override
 			public void handleQuit(Object applicationEvent) {
 				mainFrame.exit();
@@ -406,7 +389,8 @@ public class Main {
 	}
 
 	/**
-	 * Estimates the time it will take to process all the transactions.
+	 * Estimates the time it will take to download a given number of transaction
+	 * pages.
 	 * @param stopPage the page to stop at
 	 * @return the estimated processing time (in milliseconds)
 	 */
