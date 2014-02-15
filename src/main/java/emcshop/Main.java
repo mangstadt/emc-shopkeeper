@@ -30,15 +30,19 @@ import emcshop.gui.AboutDialog;
 import emcshop.gui.ErrorDialog;
 import emcshop.gui.ItemSuggestField;
 import emcshop.gui.MainFrame;
-import emcshop.gui.ProfileDialog;
 import emcshop.gui.ProfileImageLoader;
 import emcshop.gui.SplashFrame;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacHandler;
 import emcshop.gui.lib.MacSupport;
+import emcshop.model.ProfileSelectorModel;
+import emcshop.model.ProfileSelectorModelImpl;
+import emcshop.presenter.ProfileSelectorPresenter;
 import emcshop.util.GuiUtils;
 import emcshop.util.Settings;
+import emcshop.view.ProfileSelectorViewImpl;
+import emcshop.view.ProfileSelectorView;
 
 public class Main {
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
@@ -157,14 +161,18 @@ public class Main {
 		//show the "choose profile" dialog
 		boolean cliMode = arguments.query() != null || arguments.update();
 		if (!cliMode && !profileSpecified && settings.isShowProfilesOnStartup()) {
-			File selectedProfileDir = ProfileDialog.show(null, profileRootDir);
-			if (selectedProfileDir == null) {
+			ProfileSelectorView view = new ProfileSelectorViewImpl(null);
+			ProfileSelectorModel model = new ProfileSelectorModelImpl(profileRootDir);
+			ProfileSelectorPresenter presenter = new ProfileSelectorPresenter(view, model);
+
+			String selectedProfile = presenter.getSelectedProfile();
+			if (selectedProfile == null) {
 				//user canceled the dialog, so quit the application
 				return;
 			}
 
 			//reset the profile dir
-			profileDir = selectedProfileDir;
+			profileDir = new File(profileRootDir, selectedProfile);
 			profile = profileDir.getName();
 			settings = new Settings(new File(profileDir, "settings.properties"));
 		}

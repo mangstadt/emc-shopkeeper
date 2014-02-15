@@ -1,5 +1,6 @@
 package emcshop.presenter;
 
+import static emcshop.util.TestUtils.fireEvents;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -155,17 +156,11 @@ public class LoginPresenterTest {
 		private final List<ActionListener> onCancel = new ArrayList<ActionListener>();
 
 		public void clickLogin() {
-			fire(onLogin);
+			fireEvents(onLogin);
 		}
 
 		public void clickCancel() {
-			fire(onCancel);
-		}
-
-		private void fire(List<ActionListener> listeners) {
-			for (ActionListener listener : listeners) {
-				listener.actionPerformed(null);
-			}
+			fireEvents(onCancel);
 		}
 
 		@Override
