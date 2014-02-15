@@ -55,13 +55,17 @@ import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
+import emcshop.model.LoginModel;
+import emcshop.model.LoginModelImpl;
+import emcshop.presenter.LoginPresenter;
 import emcshop.scraper.BadSessionException;
-import emcshop.scraper.EmcSession;
 import emcshop.scraper.TransactionPuller;
 import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
+import emcshop.view.LoginView;
+import emcshop.view.LoginViewImpl;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -397,21 +401,18 @@ public class MainFrame extends JFrame {
 	 * @return true if the user logged in, false if he canceled the dialog
 	 */
 	private boolean login() {
-		EmcSession oldSession = settings.getSession();
-		String username = (oldSession == null) ? null : oldSession.getUsername();
+		LoginView view = new LoginViewImpl(this);
+		LoginModel model = new LoginModelImpl(settings);
+		LoginPresenter presenter = new LoginPresenter(view, model);
 
-		LoginDialog.Result loginResult = LoginDialog.show(this, settings.isPersistSession(), username);
-		if (loginResult == null) {
+		if (presenter.isCanceled()) {
 			return false;
 		}
 
-		EmcSession session = loginResult.getSession();
-		settings.setSession(session);
-		settings.setPersistSession(loginResult.isRememberMe());
-		settings.save();
 		if (settings.isPersistSession()) {
 			clearSessionMenuItem.setEnabled(true);
 		}
+
 		return true;
 	}
 
