@@ -4,16 +4,16 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import emcshop.model.UnhandledErrorModel;
+import emcshop.model.IUnhandledErrorModel;
 import emcshop.model.UnhandledErrorModelImpl;
-import emcshop.view.UnhandledErrorView;
+import emcshop.view.IUnhandledErrorView;
 import emcshop.view.UnhandledErrorViewImpl;
 
 public class UnhandledErrorPresenter {
-	private final UnhandledErrorView view;
-	private final UnhandledErrorModel model;
+	private final IUnhandledErrorView view;
+	private final IUnhandledErrorModel model;
 
-	public UnhandledErrorPresenter(UnhandledErrorView view, UnhandledErrorModel model) {
+	public UnhandledErrorPresenter(IUnhandledErrorView view, IUnhandledErrorModel model) {
 		this.view = view;
 		this.model = model;
 
@@ -53,8 +53,8 @@ public class UnhandledErrorPresenter {
 	 * @param thrown the thrown exception
 	 */
 	public static void show(Window owner, String message, Throwable thrown) {
-		UnhandledErrorView view = new UnhandledErrorViewImpl(owner);
-		UnhandledErrorModel model = new UnhandledErrorModelImpl(message, thrown);
+		IUnhandledErrorView view = new UnhandledErrorViewImpl(owner);
+		IUnhandledErrorModel model = new UnhandledErrorModelImpl(message, thrown);
 		new UnhandledErrorPresenter(view, model);
 	}
 }

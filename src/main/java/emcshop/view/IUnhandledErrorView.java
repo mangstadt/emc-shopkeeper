@@ -2,7 +2,7 @@ package emcshop.view;
 
 import java.awt.event.ActionListener;
 
-public interface UnhandledErrorView {
+public interface IUnhandledErrorView {
 	/**
 	 * Adds a listener for when an error report is sent.
 	 * @param listener the listener

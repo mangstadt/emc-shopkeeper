@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import emcshop.ReportSender;
 
-public class UnhandledErrorModelImpl implements UnhandledErrorModel {
+public class UnhandledErrorModelImpl implements IUnhandledErrorModel {
 	private static final Logger logger = Logger.getLogger(UnhandledErrorModelImpl.class.getName());
 	private static final ReportSender reportSender = ReportSender.instance();
 

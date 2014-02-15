@@ -3,7 +3,7 @@ package emcshop.view;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public interface ProfileSelectorView {
+public interface IProfileSelectorView {
 	/**
 	 * Adds a listener for when the user selects a profile.
 	 * @param listener the listener

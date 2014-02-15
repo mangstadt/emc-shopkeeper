@@ -19,7 +19,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
-public class LoginViewImpl extends JDialog implements LoginView {
+public class LoginViewImpl extends JDialog implements ILoginView {
 	private final JButton login, cancel;
 	private final JTextField username;
 	private final JPasswordField password;

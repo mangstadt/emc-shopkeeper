@@ -3,16 +3,16 @@ package emcshop.presenter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import emcshop.model.ProfileSelectorModel;
-import emcshop.view.ProfileSelectorView;
+import emcshop.model.IProfileSelectorModel;
+import emcshop.view.IProfileSelectorView;
 
 public class ProfileSelectorPresenter {
-	private final ProfileSelectorView view;
-	private final ProfileSelectorModel model;
+	private final IProfileSelectorView view;
+	private final IProfileSelectorModel model;
 
 	private String profile;
 
-	public ProfileSelectorPresenter(ProfileSelectorView view, ProfileSelectorModel model) {
+	public ProfileSelectorPresenter(IProfileSelectorView view, IProfileSelectorModel model) {
 		this.view = view;
 		this.model = model;
 

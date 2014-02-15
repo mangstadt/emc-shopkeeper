@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ProfileSelectorModelImpl implements ProfileSelectorModel {
+public class ProfileSelectorModelImpl implements IProfileSelectorModel {
 	private final File profileRootDir;
 
 	/**

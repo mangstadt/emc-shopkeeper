@@ -12,15 +12,15 @@ import java.util.List;
 
 import org.junit.Test;
 
-import emcshop.model.UnhandledErrorModel;
-import emcshop.view.UnhandledErrorView;
+import emcshop.model.IUnhandledErrorModel;
+import emcshop.view.IUnhandledErrorView;
 
 public class UnhandledErrorPresenterTest {
 	@Test
 	public void init() {
-		UnhandledErrorView view = mock(UnhandledErrorView.class);
+		IUnhandledErrorView view = mock(IUnhandledErrorView.class);
 
-		UnhandledErrorModel model = mock(UnhandledErrorModel.class);
+		IUnhandledErrorModel model = mock(IUnhandledErrorModel.class);
 		when(model.getMessage()).thenReturn("Message");
 		Throwable thrown = new Throwable();
 		when(model.getThrown()).thenReturn(thrown);
@@ -37,7 +37,7 @@ public class UnhandledErrorPresenterTest {
 	public void send_error_report() {
 		UnhandledErrorViewAdapter view = spy(new UnhandledErrorViewAdapter());
 
-		UnhandledErrorModel model = mock(UnhandledErrorModel.class);
+		IUnhandledErrorModel model = mock(IUnhandledErrorModel.class);
 
 		new UnhandledErrorPresenter(view, model);
 		view.clickSendErrorReport();
@@ -50,7 +50,7 @@ public class UnhandledErrorPresenterTest {
 	public void close_window() {
 		UnhandledErrorViewAdapter view = spy(new UnhandledErrorViewAdapter());
 
-		UnhandledErrorModel model = mock(UnhandledErrorModel.class);
+		IUnhandledErrorModel model = mock(IUnhandledErrorModel.class);
 
 		new UnhandledErrorPresenter(view, model);
 		view.clickClose();
@@ -58,7 +58,7 @@ public class UnhandledErrorPresenterTest {
 		verify(view).close();
 	}
 
-	private static class UnhandledErrorViewAdapter implements UnhandledErrorView {
+	private static class UnhandledErrorViewAdapter implements IUnhandledErrorView {
 		private final List<ActionListener> onSendErrorReport = new ArrayList<ActionListener>();
 		private final List<ActionListener> onClose = new ArrayList<ActionListener>();
 

@@ -1,6 +1,6 @@
 package emcshop.model;
 
-public interface UnhandledErrorModel {
+public interface IUnhandledErrorModel {
 	/**
 	 * Gets the error message.
 	 * @return the error message

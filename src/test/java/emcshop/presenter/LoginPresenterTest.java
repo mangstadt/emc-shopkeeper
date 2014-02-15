@@ -21,18 +21,18 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import emcshop.model.LoginModel;
+import emcshop.model.ILoginModel;
 import emcshop.scraper.EmcSession;
-import emcshop.view.LoginView;
+import emcshop.view.ILoginView;
 
 public class LoginPresenterTest {
 	@Test
 	public void no_saved_session() {
-		LoginModel model = mock(LoginModel.class);
+		ILoginModel model = mock(ILoginModel.class);
 		when(model.getSavedUsername()).thenReturn(null);
 		when(model.getSavedRememberMe()).thenReturn(false);
 
-		LoginView view = mock(LoginView.class);
+		ILoginView view = mock(ILoginView.class);
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
@@ -43,11 +43,11 @@ public class LoginPresenterTest {
 
 	@Test
 	public void saved_session() {
-		LoginModel model = mock(LoginModel.class);
+		ILoginModel model = mock(ILoginModel.class);
 		when(model.getSavedUsername()).thenReturn("Notch");
 		when(model.getSavedRememberMe()).thenReturn(true);
 
-		LoginView view = mock(LoginView.class);
+		ILoginView view = mock(ILoginView.class);
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
@@ -59,7 +59,7 @@ public class LoginPresenterTest {
 	@Test
 	public void network_error() throws Throwable {
 		IOException e = new IOException();
-		LoginModel model = mock(LoginModel.class);
+		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).thenThrow(e);
 
 		LoginViewAdapter view = spy(new LoginViewAdapter());
@@ -76,7 +76,7 @@ public class LoginPresenterTest {
 
 	@Test
 	public void bad_login() throws Throwable {
-		LoginModel model = mock(LoginModel.class);
+		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(null);
 
 		LoginViewAdapter view = spy(new LoginViewAdapter());
@@ -92,7 +92,7 @@ public class LoginPresenterTest {
 
 	@Test
 	public void valid_login() throws Throwable {
-		LoginModel model = mock(LoginModel.class);
+		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("token");
 
 		LoginViewAdapter view = spy(new LoginViewAdapter());
@@ -109,7 +109,7 @@ public class LoginPresenterTest {
 
 	@Test
 	public void cancel_login() throws Throwable {
-		LoginModel model = mock(LoginModel.class);
+		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("token");
 
 		LoginViewAdapter view = spy(new LoginViewAdapter());
@@ -125,7 +125,7 @@ public class LoginPresenterTest {
 
 	@Test
 	public void cancel_login_while_logging_in() throws Throwable {
-		LoginModel model = mock(LoginModel.class);
+		ILoginModel model = mock(ILoginModel.class);
 		stub(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).toAnswer(new Answer<String>() {
 			@Override
 			public String answer(InvocationOnMock invocation) throws Throwable {
@@ -148,7 +148,7 @@ public class LoginPresenterTest {
 		assertTrue(presenter.isCanceled());
 	}
 
-	private static class LoginViewAdapter implements LoginView {
+	private static class LoginViewAdapter implements ILoginView {
 		private String username = "", password = "";
 		private boolean rememberMe;
 

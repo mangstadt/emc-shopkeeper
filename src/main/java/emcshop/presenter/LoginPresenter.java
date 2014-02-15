@@ -5,17 +5,17 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Date;
 
-import emcshop.model.LoginModel;
+import emcshop.model.ILoginModel;
 import emcshop.scraper.EmcSession;
-import emcshop.view.LoginView;
+import emcshop.view.ILoginView;
 
 public class LoginPresenter {
-	private final LoginView view;
-	private final LoginModel model;
+	private final ILoginView view;
+	private final ILoginModel model;
 
 	private boolean canceled;
 
-	public LoginPresenter(LoginView view, LoginModel model) {
+	public LoginPresenter(ILoginView view, ILoginModel model) {
 		this.view = view;
 		this.model = model;
 

@@ -2,7 +2,7 @@ package emcshop.view;
 
 import java.awt.event.ActionListener;
 
-public interface LoginView {
+public interface ILoginView {
 	/**
 	 * Adds a listener for when the credentials are entered.
 	 * @param listener the listener to add

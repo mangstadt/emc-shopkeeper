@@ -55,7 +55,7 @@ import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
-import emcshop.model.LoginModel;
+import emcshop.model.ILoginModel;
 import emcshop.model.LoginModelImpl;
 import emcshop.presenter.LoginPresenter;
 import emcshop.scraper.BadSessionException;
@@ -64,7 +64,7 @@ import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
-import emcshop.view.LoginView;
+import emcshop.view.ILoginView;
 import emcshop.view.LoginViewImpl;
 
 @SuppressWarnings("serial")
@@ -400,8 +400,8 @@ public class MainFrame extends JFrame {
 	 * @return true if the user logged in, false if he canceled the dialog
 	 */
 	private boolean login() {
-		LoginView view = new LoginViewImpl(this);
-		LoginModel model = new LoginModelImpl(settings);
+		ILoginView view = new LoginViewImpl(this);
+		ILoginModel model = new LoginModelImpl(settings);
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
 		if (presenter.isCanceled()) {

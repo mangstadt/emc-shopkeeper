@@ -17,7 +17,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
-public class ProfileSelectorViewImpl extends JDialog implements ProfileSelectorView {
+public class ProfileSelectorViewImpl extends JDialog implements IProfileSelectorView {
 	private final JComboBox profiles;
 	private final JButton ok, quit;
 

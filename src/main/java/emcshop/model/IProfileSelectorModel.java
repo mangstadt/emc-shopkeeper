@@ -2,7 +2,7 @@ package emcshop.model;
 
 import java.util.List;
 
-public interface ProfileSelectorModel {
+public interface IProfileSelectorModel {
 	/**
 	 * Gets the names of all existing profiles.
 	 * @return the profile names

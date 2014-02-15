@@ -17,15 +17,15 @@ import java.util.List;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import emcshop.model.ProfileSelectorModel;
-import emcshop.view.ProfileSelectorView;
+import emcshop.model.IProfileSelectorModel;
+import emcshop.view.IProfileSelectorView;
 
 public class ProfileSelectorPresenterTest {
 	@Test
 	public void populate_profile_names() {
-		ProfileSelectorView view = mock(ProfileSelectorView.class);
+		IProfileSelectorView view = mock(IProfileSelectorView.class);
 
-		ProfileSelectorModel model = mock(ProfileSelectorModel.class);
+		IProfileSelectorModel model = mock(IProfileSelectorModel.class);
 		List<String> profiles = Arrays.asList("one", "two", "three");
 		when(model.getAvailableProfiles()).thenReturn(profiles);
 
@@ -39,7 +39,7 @@ public class ProfileSelectorPresenterTest {
 		ProfileSelectorViewAdapter view = spy(new ProfileSelectorViewAdapter());
 		when(view.getSelectedProfile()).thenReturn("one");
 
-		ProfileSelectorModel model = mock(ProfileSelectorModel.class);
+		IProfileSelectorModel model = mock(IProfileSelectorModel.class);
 		when(model.createProfile("one")).thenReturn(true);
 
 		ProfileSelectorPresenter presenter = new ProfileSelectorPresenter(view, model);
@@ -54,7 +54,7 @@ public class ProfileSelectorPresenterTest {
 		ProfileSelectorViewAdapter view = spy(new ProfileSelectorViewAdapter());
 		when(view.getSelectedProfile()).thenReturn(null);
 
-		ProfileSelectorModel model = mock(ProfileSelectorModel.class);
+		IProfileSelectorModel model = mock(IProfileSelectorModel.class);
 		when(model.createProfile("one")).thenReturn(true);
 
 		new ProfileSelectorPresenter(view, model);
@@ -69,7 +69,7 @@ public class ProfileSelectorPresenterTest {
 		ProfileSelectorViewAdapter view = spy(new ProfileSelectorViewAdapter());
 		when(view.getSelectedProfile()).thenReturn("");
 
-		ProfileSelectorModel model = mock(ProfileSelectorModel.class);
+		IProfileSelectorModel model = mock(IProfileSelectorModel.class);
 		when(model.createProfile("one")).thenReturn(true);
 
 		new ProfileSelectorPresenter(view, model);
@@ -84,7 +84,7 @@ public class ProfileSelectorPresenterTest {
 		ProfileSelectorViewAdapter view = spy(new ProfileSelectorViewAdapter());
 		when(view.getSelectedProfile()).thenReturn("one");
 
-		ProfileSelectorModel model = mock(ProfileSelectorModel.class);
+		IProfileSelectorModel model = mock(IProfileSelectorModel.class);
 		when(model.createProfile("one")).thenReturn(false);
 
 		new ProfileSelectorPresenter(view, model);
@@ -98,7 +98,7 @@ public class ProfileSelectorPresenterTest {
 	public void cancel() {
 		ProfileSelectorViewAdapter view = spy(new ProfileSelectorViewAdapter());
 
-		ProfileSelectorModel model = mock(ProfileSelectorModel.class);
+		IProfileSelectorModel model = mock(IProfileSelectorModel.class);
 		List<String> profiles = Arrays.asList("one", "two", "three");
 		when(model.getAvailableProfiles()).thenReturn(profiles);
 
@@ -109,7 +109,7 @@ public class ProfileSelectorPresenterTest {
 		assertNull(presenter.getSelectedProfile());
 	}
 
-	private static class ProfileSelectorViewAdapter implements ProfileSelectorView {
+	private static class ProfileSelectorViewAdapter implements IProfileSelectorView {
 		private final List<ActionListener> onOk = new ArrayList<ActionListener>();
 		private final List<ActionListener> onCancel = new ArrayList<ActionListener>();
 

@@ -20,7 +20,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
-public class UnhandledErrorViewImpl extends JDialog implements UnhandledErrorView {
+public class UnhandledErrorViewImpl extends JDialog implements IUnhandledErrorView {
 	private final JTextArea displayText, stackTrace;
 	private final JLabel errorIcon;
 	private final JButton close, report;

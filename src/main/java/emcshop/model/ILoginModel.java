@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import emcshop.scraper.EmcSession;
 
-public interface LoginModel {
+public interface ILoginModel {
 	/**
 	 * Logs a user into EMC
 	 * @param username the username

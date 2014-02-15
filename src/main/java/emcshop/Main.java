@@ -35,13 +35,13 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacHandler;
 import emcshop.gui.lib.MacSupport;
-import emcshop.model.ProfileSelectorModel;
+import emcshop.model.IProfileSelectorModel;
 import emcshop.model.ProfileSelectorModelImpl;
 import emcshop.presenter.ProfileSelectorPresenter;
 import emcshop.presenter.UnhandledErrorPresenter;
 import emcshop.util.GuiUtils;
 import emcshop.util.Settings;
-import emcshop.view.ProfileSelectorView;
+import emcshop.view.IProfileSelectorView;
 import emcshop.view.ProfileSelectorViewImpl;
 
 public class Main {
@@ -161,8 +161,8 @@ public class Main {
 		//show the "choose profile" dialog
 		boolean cliMode = arguments.query() != null || arguments.update();
 		if (!cliMode && !profileSpecified && settings.isShowProfilesOnStartup()) {
-			ProfileSelectorView view = new ProfileSelectorViewImpl(null);
-			ProfileSelectorModel model = new ProfileSelectorModelImpl(profileRootDir);
+			IProfileSelectorView view = new ProfileSelectorViewImpl(null);
+			IProfileSelectorModel model = new ProfileSelectorModelImpl(profileRootDir);
 			ProfileSelectorPresenter presenter = new ProfileSelectorPresenter(view, model);
 
 			String selectedProfile = presenter.getSelectedProfile();
