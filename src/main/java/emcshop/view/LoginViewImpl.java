@@ -45,16 +45,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 				validate();
 			}
 		});
-
-		//fire all listeners attached to the login button when enter is pressed
-		GuiUtils.onKeyPress(this, KeyEvent.VK_ENTER, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				for (ActionListener listener : login.getActionListeners()) {
-					listener.actionPerformed(e);
-				}
-			}
-		});
+		GuiUtils.onKeyPress(this, KeyEvent.VK_ENTER, login);
 
 		cancel = new JButton("Cancel");
 		GuiUtils.onEscapeKeyPress(this, cancel);
@@ -98,7 +89,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	@Override
 	public void addOnCancelListener(final ActionListener listener) {
 		cancel.addActionListener(listener);
-		GuiUtils.addDialogCloseListener(this, listener);
+		GuiUtils.addCloseDialogListener(this, listener);
 	}
 
 	@Override

@@ -114,7 +114,7 @@ public class GuiUtils {
 	 * @param dialog the dialog
 	 * @param listener the listener
 	 */
-	public static void addDialogCloseListener(JDialog dialog, final ActionListener listener) {
+	public static void addCloseDialogListener(JDialog dialog, final ActionListener listener) {
 		dialog.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent arg0) {
@@ -131,6 +131,24 @@ public class GuiUtils {
 	 */
 	public static void onKeyPress(JDialog dialog, int key, ActionListener listener) {
 		dialog.getRootPane().registerKeyboardAction(listener, KeyStroke.getKeyStroke(key, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+	}
+
+	/**
+	 * Adds all the listeners of a button to a dialog, which will fire when a
+	 * key is pressed.
+	 * @param dialog the dialog
+	 * @param key the key (see constants in {@link KeyEvent})
+	 * @param button the button
+	 */
+	public static void onKeyPress(JDialog dialog, int key, final AbstractButton button) {
+		dialog.getRootPane().registerKeyboardAction(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				for (ActionListener listener : button.getActionListeners()) {
+					listener.actionPerformed(e);
+				}
+			}
+		}, KeyStroke.getKeyStroke(key, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
 
 	/**

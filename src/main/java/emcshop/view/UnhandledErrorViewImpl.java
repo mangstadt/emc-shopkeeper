@@ -79,7 +79,7 @@ public class UnhandledErrorViewImpl extends JDialog implements IUnhandledErrorVi
 	@Override
 	public void addCloseListener(ActionListener listener) {
 		close.addActionListener(listener);
-		GuiUtils.addDialogCloseListener(this, listener);
+		GuiUtils.addCloseDialogListener(this, listener);
 	}
 
 	@Override
