@@ -259,11 +259,10 @@ public class MainFrame extends JFrame {
 								inventoryTab.refresh();
 								bonusFeeTab.refresh();
 								graphsTab.clear();
-								loading.dispose();
 							} catch (Throwable e) {
-								loading.dispose();
-								ErrorDialog.show(MainFrame.this, "Problem resetting database.", e);
+								throw new RuntimeException(e);
 							} finally {
+								loading.dispose();
 								busyCursor(MainFrame.this, false);
 							}
 						}

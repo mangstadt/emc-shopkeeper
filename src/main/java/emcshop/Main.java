@@ -27,7 +27,6 @@ import emcshop.db.DbDao;
 import emcshop.db.DbListener;
 import emcshop.db.DirbyEmbeddedDbDao;
 import emcshop.gui.AboutDialog;
-import emcshop.gui.ErrorDialog;
 import emcshop.gui.ItemSuggestField;
 import emcshop.gui.MainFrame;
 import emcshop.gui.ProfileImageLoader;
@@ -39,10 +38,11 @@ import emcshop.gui.lib.MacSupport;
 import emcshop.model.ProfileSelectorModel;
 import emcshop.model.ProfileSelectorModelImpl;
 import emcshop.presenter.ProfileSelectorPresenter;
+import emcshop.presenter.UnhandledErrorPresenter;
 import emcshop.util.GuiUtils;
 import emcshop.util.Settings;
-import emcshop.view.ProfileSelectorViewImpl;
 import emcshop.view.ProfileSelectorView;
+import emcshop.view.ProfileSelectorViewImpl;
 
 public class Main {
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
@@ -325,7 +325,7 @@ public class Main {
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread thread, Throwable thrown) {
-				ErrorDialog.show(null, "An error occurred.", thrown);
+				UnhandledErrorPresenter.show(null, "An error occurred.", thrown);
 			}
 		});
 

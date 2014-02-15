@@ -440,7 +440,7 @@ public class TransactionsTab extends JPanel {
 					updateNetTotal();
 					updateCustomers();
 				} catch (SQLException e) {
-					ErrorDialog.show(owner, "An error occurred querying the database.", e);
+					throw new RuntimeException(e);
 				} finally {
 					loading.dispose();
 					busyCursor(owner, false);
@@ -497,8 +497,7 @@ public class TransactionsTab extends JPanel {
 					updateNetTotal();
 					updateCustomers();
 				} catch (SQLException e) {
-					loading.dispose();
-					ErrorDialog.show(owner, "An error occurred querying the database.", e);
+					throw new RuntimeException(e);
 				} finally {
 					loading.dispose();
 					busyCursor(owner, false);
@@ -554,7 +553,7 @@ public class TransactionsTab extends JPanel {
 					updateNetTotal();
 					updateCustomers();
 				} catch (SQLException e) {
-					ErrorDialog.show(owner, "An error occurred querying the database.", e);
+					throw new RuntimeException(e);
 				} finally {
 					loading.dispose();
 					busyCursor(owner, false);

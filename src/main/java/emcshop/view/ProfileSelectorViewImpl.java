@@ -1,10 +1,7 @@
 package emcshop.view;
 
 import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.Vector;
 
@@ -35,16 +32,7 @@ public class ProfileSelectorViewImpl extends JDialog implements ProfileSelectorV
 
 		ok = new JButton("OK");
 		quit = new JButton("Quit");
-
-		//fire all listeners attached to the quit button when escape is pressed
-		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				for (ActionListener listener : quit.getActionListeners()) {
-					listener.actionPerformed(e);
-				}
-			}
-		});
+		GuiUtils.onEscapeKeyPress(this, quit);
 
 		///////////////////////
 
@@ -69,12 +57,7 @@ public class ProfileSelectorViewImpl extends JDialog implements ProfileSelectorV
 	@Override
 	public void addCancelListener(final ActionListener listener) {
 		quit.addActionListener(listener);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				listener.actionPerformed(null);
-			}
-		});
+		GuiUtils.addDialogCloseListener(this, listener);
 	}
 
 	@Override

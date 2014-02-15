@@ -4,8 +4,6 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -59,16 +57,7 @@ public class LoginViewImpl extends JDialog implements LoginView {
 		});
 
 		cancel = new JButton("Cancel");
-
-		//fire all listeners attached to the cancel button when escape is pressed
-		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				for (ActionListener listener : cancel.getActionListeners()) {
-					listener.actionPerformed(e);
-				}
-			}
-		});
+		GuiUtils.onEscapeKeyPress(this, cancel);
 
 		messagePanel = new JPanel();
 		messagePanel.add(new JLabel(" "));
@@ -109,13 +98,7 @@ public class LoginViewImpl extends JDialog implements LoginView {
 	@Override
 	public void addOnCancelListener(final ActionListener listener) {
 		cancel.addActionListener(listener);
-
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				listener.actionPerformed(null);
-			}
-		});
+		GuiUtils.addDialogCloseListener(this, listener);
 	}
 
 	@Override

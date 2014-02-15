@@ -6,9 +6,12 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
 
+import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.KeyStroke;
@@ -86,6 +89,38 @@ public class GuiUtils {
 	 */
 	public static void onEscapeKeyPress(JDialog dialog, ActionListener listener) {
 		onKeyPress(dialog, KeyEvent.VK_ESCAPE, listener);
+	}
+
+	/**
+	 * Adds all the listeners of a button to a dialog, which will fire when the
+	 * escape key is pressed.
+	 * @param dialog the dialog
+	 * @param button the button
+	 */
+	public static void onEscapeKeyPress(JDialog dialog, final AbstractButton button) {
+		onKeyPress(dialog, KeyEvent.VK_ESCAPE, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				for (ActionListener listener : button.getActionListeners()) {
+					listener.actionPerformed(e);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Adds a listener to a dialog which is fired when the dialog window is
+	 * closed.
+	 * @param dialog the dialog
+	 * @param listener the listener
+	 */
+	public static void addDialogCloseListener(JDialog dialog, final ActionListener listener) {
+		dialog.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				listener.actionPerformed(null);
+			}
+		});
 	}
 
 	/**
