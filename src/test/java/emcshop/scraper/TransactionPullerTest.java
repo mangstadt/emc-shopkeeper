@@ -357,7 +357,7 @@ public class TransactionPullerTest {
 			private boolean threwConnectException = false, threwSocketTimeoutException = false;
 
 			@Override
-			TransactionPage getPage(int page, HttpClient client) throws IOException {
+			synchronized TransactionPage getPage(int page, HttpClient client) throws IOException {
 				if (page == 2 && !threwConnectException) {
 					threwConnectException = true;
 					throw new ConnectException();
