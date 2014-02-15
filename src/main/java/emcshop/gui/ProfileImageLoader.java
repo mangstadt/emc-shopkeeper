@@ -20,6 +20,7 @@ import javax.swing.JLabel;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -133,6 +134,11 @@ public class ProfileImageLoader {
 		}
 	}
 
+	HttpClient createHttpClient() {
+		EmcSession session = settings.getSession();
+		return (session == null) ? new DefaultHttpClient() : session.createHttpClient();
+	}
+
 	/**
 	 * Downloads the image and saves it to the cache.
 	 * @param playerName the player name
@@ -141,8 +147,7 @@ public class ProfileImageLoader {
 	 * @throws IOException
 	 */
 	private byte[] downloadImage(String playerName) throws IOException {
-		EmcSession session = settings.getSession();
-		HttpClient client = (session == null) ? new DefaultHttpClient() : session.createHttpClient();
+		HttpClient client = createHttpClient();
 
 		//download image and save to cache
 		HttpEntity entity = null;
@@ -166,8 +171,8 @@ public class ProfileImageLoader {
 			}
 
 			HttpResponse response = client.execute(request);
-			if (response.getStatusLine().getStatusCode() == 304) {
-				//"not modified" response
+			int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode == HttpStatus.SC_NOT_MODIFIED || statusCode == HttpStatus.SC_NOT_FOUND) {
 				return null;
 			}
 
@@ -175,11 +180,7 @@ public class ProfileImageLoader {
 			data = EntityUtils.toByteArray(entity);
 		} finally {
 			if (entity != null) {
-				try {
-					EntityUtils.consume(entity);
-				} catch (IOException e) {
-					//ignore
-				}
+				EntityUtils.consumeQuietly(entity);
 			}
 		}
 
