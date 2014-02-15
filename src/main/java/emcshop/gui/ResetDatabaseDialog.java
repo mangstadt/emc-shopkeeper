@@ -1,6 +1,7 @@
 package emcshop.gui;
 
-import java.awt.FlowLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,7 +11,6 @@ import java.awt.event.WindowEvent;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.gui.images.ImageManager;
@@ -39,7 +39,9 @@ public class ResetDatabaseDialog extends JDialog {
 		setModal(true);
 		setResizable(false);
 
-		JButton resetButton = new JButton("Reset");
+		JButton resetButton = new JButton("Reset Database");
+		resetButton.setForeground(new Color(128, 0, 0));
+		resetButton.setFont(new Font(getFont().getName(), Font.BOLD, getFont().getSize()));
 		resetButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -56,34 +58,28 @@ public class ResetDatabaseDialog extends JDialog {
 				dispose();
 			}
 		});
-
-		//cancel when escape is pressed
-		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				result = false;
-				dispose();
-			}
-		});
+		GuiUtils.onEscapeKeyPress(this, cancel);
 
 		JLabel warningIcon = new JLabel(ImageManager.getWarningIcon());
 
+		JLabel warningTitle = new JLabel("<html><center><h2>WARNING!</h2></center></html>");
+
 		//@formatter:off
 		JLabel text = new JLabel(
-		"<html><div width=600>" +
-		"This will delete all transactions from your hard drive.  To get them back, you will have to download them again from EMC.<br><br>" +
-		"Are you sure you want to do this?" +
+		"<html><div width=500>" +
+		"Resetting the database will delete all transaction data from this profile.  This includes payment transaction data, bonus/fee tallies, and your shop's inventory." +
 		"</div></html>");
 		//@formatter:on
 
+		////////////////
+
 		setLayout(new MigLayout());
 
-		add(warningIcon, "span 1 2");
-		add(text, "align center, wrap");
-		JPanel p = new JPanel(new FlowLayout());
-		p.add(resetButton);
-		p.add(cancel);
-		add(p, "align center");
+		add(warningTitle, "span 2, align center, wrap");
+		add(warningIcon);
+		add(text, "gapleft 20, align center, wrap");
+		add(resetButton, "span 2, split 2, align center");
+		add(cancel);
 
 		addWindowListener(new WindowAdapter() {
 			@Override
