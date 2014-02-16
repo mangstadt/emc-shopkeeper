@@ -67,7 +67,9 @@ public class ResetDatabaseDialog extends JDialog {
 		//@formatter:off
 		JLabel text = new JLabel(
 		"<html><div width=500>" +
-		"Resetting the database will delete all transaction data from this profile.  This includes payment transaction data, bonus/fee tallies, and your shop's inventory." +
+		"Resetting the database will delete all transaction data within this profile.  " +
+		"This includes shop transactions, payment transactions, bonus/fee tallies, and shop inventory.<br><br>" +
+		"Re-downloading your transaction data from Empire Minecraft will restore your shop transactions and bonus/fee tallies, but all payment transaction assignments and inventory data will not be restored." +
 		"</div></html>");
 		//@formatter:on
 
