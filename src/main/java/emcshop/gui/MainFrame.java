@@ -55,14 +55,19 @@ import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
+import emcshop.model.IUpdateModel;
+import emcshop.model.UpdateModelImpl;
 import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.LoginPresenter;
-import emcshop.scraper.BadSessionException;
+import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.TransactionPuller;
 import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
+import emcshop.view.IUpdateView;
+import emcshop.view.LoginShower;
+import emcshop.view.UpdateViewImpl;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -308,10 +313,12 @@ public class MainFrame extends JFrame {
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				//log the user in if he's not logged in
+				LoginShower loginShower = new LoginShower(settings);
+
 				if (settings.getSession() == null) {
-					if (!login()) {
-						//user canceled the dialog
+					//user hasn't logged in
+					LoginPresenter p = loginShower.show(MainFrame.this);
+					if (p.isCanceled()) {
 						return;
 					}
 				}
@@ -324,7 +331,6 @@ public class MainFrame extends JFrame {
 				}
 
 				TransactionPuller.Config.Builder pullerConfigBuilder = new TransactionPuller.Config.Builder();
-				Long estimatedTime;
 				if (latestTransactionDate == null) {
 					//it's the first update
 
@@ -338,30 +344,19 @@ public class MainFrame extends JFrame {
 
 					Integer oldestPaymentTransactionDays = presenter.getMaxPaymentTransactionAge();
 					pullerConfigBuilder.maxPaymentTransactionAge(oldestPaymentTransactionDays);
-
-					estimatedTime = (stopAtPage == null) ? null : Main.estimateUpdateTime(stopAtPage);
 				} else {
 					pullerConfigBuilder.stopAtDate(latestTransactionDate);
-					estimatedTime = null;
 				}
 				TransactionPuller.Config pullerConfig = pullerConfigBuilder.build();
 
-				boolean repeat;
-				do {
-					repeat = false;
-					try {
-						UpdateDialog.Result result = UpdateDialog.show(MainFrame.this, dao, settings.getSession(), pullerConfig, estimatedTime);
-						if (result != null) {
-							updateSuccessful(result.getStarted(), result.getRupeeBalance(), result.getTimeTaken(), result.getShopTransactions(), result.getPaymentTransactions(), result.getBonusFeeTransactions(), result.getPageCount(), result.isShowResults());
-						}
-					} catch (BadSessionException e) {
-						if (!login()) {
-							//user canceled the dialog
-							return;
-						}
-						repeat = true;
-					}
-				} while (repeat);
+				//show the update dialog
+				IUpdateView view = new UpdateViewImpl(MainFrame.this, loginShower);
+				IUpdateModel model = new UpdateModelImpl(pullerConfig, settings.getSession(), dao);
+				UpdatePresenter presenter = new UpdatePresenter(view, model);
+
+				if (!presenter.isCanceled()) {
+					updateSuccessful(presenter.getStarted(), presenter.getRupeeBalance(), presenter.getTimeTaken(), presenter.getShopTransactions(), presenter.getPaymentTransactions(), presenter.getBonusFeeTransactions(), presenter.getPageCount(), presenter.getShowResults());
+				}
 			}
 		});
 

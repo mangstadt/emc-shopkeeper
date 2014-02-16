@@ -136,6 +136,21 @@ public class UpdateModelImpl implements IUpdateModel {
 	}
 
 	@Override
+	public Date getStarted() {
+		return new Date(started);
+	}
+
+	@Override
+	public long getTimeTaken() {
+		return timeTaken;
+	}
+
+	@Override
+	public Integer getRupeeBalance() {
+		return puller.getRupeeBalance();
+	}
+
+	@Override
 	public void saveTransactions() {
 		if (transactionsCount == 0) {
 			return;
@@ -146,7 +161,7 @@ public class UpdateModelImpl implements IUpdateModel {
 				dao.updateBonusesFeesSince(earliestParsedTransactionDate);
 			}
 
-			Integer rupeeBalance = puller.getRupeeBalance();
+			Integer rupeeBalance = getRupeeBalance();
 			if (rupeeBalance != null) {
 				dao.updateRupeeBalance(rupeeBalance);
 			}
@@ -163,13 +178,21 @@ public class UpdateModelImpl implements IUpdateModel {
 		dao.rollback();
 	}
 
+	TransactionPuller createPuller() throws IOException {
+		return new TransactionPuller(session, pullerConfig);
+	}
+
 	private class DownloadThread extends Thread {
+		public DownloadThread() {
+			setName(getClass().getSimpleName());
+		}
+
 		@Override
 		public void run() {
 			try {
-				puller = new TransactionPuller(session, pullerConfig);
+				puller = createPuller();
 			} catch (BadSessionException e) {
-				GuiUtils.fireEvents(badSessionListeners);
+				GuiUtils.fireEventsLater(badSessionListeners);
 				return;
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -212,7 +235,7 @@ public class UpdateModelImpl implements IUpdateModel {
 						pagesCount++;
 					}
 
-					GuiUtils.fireEvents(pageDownloadedListeners);
+					GuiUtils.fireEventsLater(pageDownloadedListeners);
 				}
 
 				//update completed successfully
@@ -223,12 +246,12 @@ public class UpdateModelImpl implements IUpdateModel {
 					timeTaken = System.currentTimeMillis() - started;
 				}
 
-				GuiUtils.fireEvents(downloadCompleteListeners);
+				GuiUtils.fireEventsLater(downloadCompleteListeners);
 			} catch (Throwable t) {
 				//an error occurred during the update
-				timeTaken = System.currentTimeMillis() - started;
-
 				synchronized (UpdateModelImpl.this) {
+					timeTaken = System.currentTimeMillis() - started;
+
 					if (!firstUpdate || transactionsCount == 0) {
 						dao.rollback();
 						throw new RuntimeException(t);
@@ -238,7 +261,7 @@ public class UpdateModelImpl implements IUpdateModel {
 					logger.log(Level.SEVERE, "Error downloading transactions.", t);
 				}
 
-				GuiUtils.fireEvents(downloadErrorListeners);
+				GuiUtils.fireEventsLater(downloadErrorListeners);
 			}
 		}
 	}

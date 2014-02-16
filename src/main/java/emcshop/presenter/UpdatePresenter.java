@@ -2,6 +2,7 @@ package emcshop.presenter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 
 import emcshop.model.IUpdateModel;
 import emcshop.scraper.EmcSession;
@@ -10,6 +11,8 @@ import emcshop.view.IUpdateView;
 public class UpdatePresenter {
 	private final IUpdateView view;
 	private final IUpdateModel model;
+
+	private boolean canceled = false;
 
 	public UpdatePresenter(IUpdateView view, IUpdateModel model) {
 		this.view = view;
@@ -57,38 +60,18 @@ public class UpdatePresenter {
 			}
 		});
 
-		//		if (model.getSession() == null) {
-		//			//LoginPresenter p = LoginPresenter.show(owner, settings); can't unit test because it will show an actual dialog
-		//			//EmcSession session = view.showLogin(); //the view impl will 
-		//			if (session == null) {
-		//				view.close();
-		//				return;
-		//			}
-		//			model.setSession(session);
-		//		}
-		//
-		//		if (model.isFirstUpdate()) {
-		//			IFirstUpdateView firstUpdateView = view.showFirstUpdate();
-		//			if (firstUpdateView == null) {
-		//				view.close();
-		//				return;
-		//			}
-		//
-		//			model.setMaxPaymentTransactionAge(firstUpdateView.getMaxPaymentTransactionAge());
-		//			model.setStopAtPage(firstUpdateView.getStopAtPage());
-		//		}
-
 		view.setFirstUpdate(model.isFirstUpdate());
 		view.setEstimatedTime(model.getEstimatedTime());
 		view.setStopAtPage(model.getStopAtPage());
-		view.display();
 		model.startDownload();
+		view.display();
 	}
 
 	private void onBadSession() {
-		EmcSession session = view.getNewLoginCredentials();
+		EmcSession session = view.getNewSession();
 		if (session == null) {
 			view.close();
+			canceled = true;
 			return;
 		}
 		model.setSession(session);
@@ -100,6 +83,7 @@ public class UpdatePresenter {
 	private void onCancel() {
 		model.stopDownload();
 		model.discardTransactions();
+		canceled = true;
 		view.close();
 	}
 
@@ -124,6 +108,7 @@ public class UpdatePresenter {
 			model.saveTransactions();
 		} else {
 			model.discardTransactions();
+			canceled = true;
 		}
 		view.close();
 	}
@@ -131,5 +116,41 @@ public class UpdatePresenter {
 	private void onDownloadComplete() {
 		model.saveTransactions();
 		view.close();
+	}
+
+	public boolean isCanceled() {
+		return canceled;
+	}
+
+	public int getPageCount() {
+		return model.getPagesDownloaded();
+	}
+
+	public int getShopTransactions() {
+		return model.getShopTransactionsDownloaded();
+	}
+
+	public int getPaymentTransactions() {
+		return model.getPaymentTransactionsDownloaded();
+	}
+
+	public int getBonusFeeTransactions() {
+		return model.getBonusFeeTransactionsDownloaded();
+	}
+
+	public Date getStarted() {
+		return model.getStarted();
+	}
+
+	public long getTimeTaken() {
+		return model.getTimeTaken();
+	}
+
+	public boolean getShowResults() {
+		return view.getShowResults();
+	}
+
+	public Integer getRupeeBalance() {
+		return model.getRupeeBalance();
 	}
 }

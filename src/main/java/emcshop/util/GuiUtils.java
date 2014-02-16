@@ -16,6 +16,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 /**
  * Contains GUI utility methods.
@@ -170,6 +171,19 @@ public class GuiUtils {
 		for (ActionListener listener : listeners) {
 			listener.actionPerformed(null);
 		}
+	}
+
+	/**
+	 * Fires a list of events using {@link SwingUtilities#invokeLater}.
+	 * @param listeners the events to fire
+	 */
+	public static void fireEventsLater(final List<ActionListener> listeners) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				fireEvents(listeners);
+			}
+		});
 	}
 
 	private GuiUtils() {

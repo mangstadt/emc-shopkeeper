@@ -10,7 +10,7 @@ public interface IUpdateView {
 	 * Queries the user for a new session token.
 	 * @return the new session token
 	 */
-	EmcSession getNewLoginCredentials();
+	EmcSession getNewSession();
 
 	/**
 	 * Shows an error that occurred during the download.

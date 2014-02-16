@@ -47,7 +47,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	private Integer stopAtPage;
 	private TimerThread timer;
 
-	private UpdateViewImpl(Window owner, LoginShower loginShower) {
+	public UpdateViewImpl(Window owner, LoginShower loginShower) {
 		super(owner, "Updating Transactions");
 		setModal(true);
 		setUndecorated(true);
@@ -188,7 +188,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	}
 
 	@Override
-	public EmcSession getNewLoginCredentials() {
+	public EmcSession getNewSession() {
 		stopTimer();
 		LoginPresenter presenter = loginShower.show(this);
 		return presenter.isCanceled() ? null : presenter.getSession();

@@ -89,6 +89,24 @@ public interface IUpdateModel {
 	Date getOldestParsedTransactionDate();
 
 	/**
+	 * Gets the time that the download started.
+	 * @return
+	 */
+	Date getStarted();
+
+	/**
+	 * Gets the amount of time the download took.
+	 * @return the amount of time in milliseconds
+	 */
+	long getTimeTaken();
+
+	/**
+	 * Gets the player's parsed rupee balance.
+	 * @return the rupee balance or null if not found
+	 */
+	Integer getRupeeBalance();
+
+	/**
 	 * Gets the error that occurred during the update, if any.
 	 * @return the error or null if no error occured
 	 */
