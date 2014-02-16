@@ -67,7 +67,7 @@ public class ProfileSelectorViewImpl extends JDialog implements IProfileSelector
 
 	@Override
 	public String getSelectedProfile() {
-		return (String) profiles.getSelectedItem();
+		return (String) profiles.getEditor().getItem();
 	}
 
 	@Override
