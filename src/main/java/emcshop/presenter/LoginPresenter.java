@@ -93,6 +93,10 @@ public class LoginPresenter {
 		return canceled;
 	}
 
+	public EmcSession getSession() {
+		return model.getSession();
+	}
+
 	public static boolean show(Window owner, Settings settings) {
 		ILoginView view = new LoginViewImpl(owner);
 		ILoginModel model = new LoginModelImpl(settings);

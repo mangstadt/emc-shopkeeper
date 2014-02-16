@@ -1,6 +1,6 @@
 package emcshop.presenter;
 
-import static emcshop.util.TestUtils.fireEvents;
+import static emcshop.util.GuiUtils.fireEvents;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;

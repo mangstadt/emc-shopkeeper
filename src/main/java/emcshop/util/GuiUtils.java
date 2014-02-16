@@ -10,6 +10,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
@@ -159,6 +160,16 @@ public class GuiUtils {
 	public static void busyCursor(Window window, boolean busy) {
 		Cursor cursor = busy ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) : Cursor.getDefaultCursor();
 		window.setCursor(cursor);
+	}
+
+	/**
+	 * Fires a list of events.
+	 * @param listeners the events to fire
+	 */
+	public static void fireEvents(List<ActionListener> listeners) {
+		for (ActionListener listener : listeners) {
+			listener.actionPerformed(null);
+		}
 	}
 
 	private GuiUtils() {

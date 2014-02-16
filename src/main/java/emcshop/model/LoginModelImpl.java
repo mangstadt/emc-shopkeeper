@@ -41,6 +41,11 @@ public class LoginModelImpl implements ILoginModel {
 	}
 
 	@Override
+	public EmcSession getSession() {
+		return settings.getSession();
+	}
+
+	@Override
 	public void logNetworkError(IOException error) {
 		logger.log(Level.SEVERE, "An error occurred while logging the user into EMC.", error);
 	}

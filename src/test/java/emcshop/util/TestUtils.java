@@ -3,13 +3,11 @@ package emcshop.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.awt.event.ActionListener;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 public class TestUtils {
 	private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -41,11 +39,5 @@ public class TestUtils {
 
 	public static Date date(Timestamp timestamp) {
 		return (timestamp == null) ? null : new Date(timestamp.getTime());
-	}
-
-	public static void fireEvents(List<ActionListener> listeners) {
-		for (ActionListener listener : listeners) {
-			listener.actionPerformed(null);
-		}
 	}
 }

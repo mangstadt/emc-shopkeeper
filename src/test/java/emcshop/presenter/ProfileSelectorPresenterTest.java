@@ -1,6 +1,6 @@
 package emcshop.presenter;
 
-import static emcshop.util.TestUtils.fireEvents;
+import static emcshop.util.GuiUtils.fireEvents;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;

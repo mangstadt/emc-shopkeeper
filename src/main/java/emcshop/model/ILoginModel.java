@@ -35,6 +35,12 @@ public interface ILoginModel {
 	void saveSession(EmcSession session, boolean rememberMe);
 
 	/**
+	 * Gets the login session.
+	 * @return the login session
+	 */
+	EmcSession getSession();
+
+	/**
 	 * Logs a network error.
 	 * @param error the network error
 	 */
