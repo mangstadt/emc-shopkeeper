@@ -55,8 +55,7 @@ import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
-import emcshop.model.ILoginModel;
-import emcshop.model.LoginModelImpl;
+import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.LoginPresenter;
 import emcshop.scraper.BadSessionException;
 import emcshop.scraper.TransactionPuller;
@@ -64,8 +63,6 @@ import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
-import emcshop.view.ILoginView;
-import emcshop.view.LoginViewImpl;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -331,19 +328,18 @@ public class MainFrame extends JFrame {
 				if (latestTransactionDate == null) {
 					//it's the first update
 
-					FirstUpdateDialog.Result result = FirstUpdateDialog.show(MainFrame.this);
-					if (result == null) {
-						//user canceled the dialog
+					FirstUpdatePresenter presenter = FirstUpdatePresenter.show(MainFrame.this);
+					if (presenter.isCanceled()) {
 						return;
 					}
 
-					Integer stopAtPage = result.getStopAtPage();
+					Integer stopAtPage = presenter.getStopAtPage();
 					pullerConfigBuilder.stopAtPage(stopAtPage);
 
-					Integer oldestPaymentTransactionDays = result.getOldestPaymentTransactionDays();
+					Integer oldestPaymentTransactionDays = presenter.getMaxPaymentTransactionAge();
 					pullerConfigBuilder.maxPaymentTransactionAge(oldestPaymentTransactionDays);
 
-					estimatedTime = result.getEstimatedTime();
+					estimatedTime = (stopAtPage == null) ? null : Main.estimateUpdateTime(stopAtPage);
 				} else {
 					pullerConfigBuilder.stopAtDate(latestTransactionDate);
 					estimatedTime = null;
@@ -400,11 +396,8 @@ public class MainFrame extends JFrame {
 	 * @return true if the user logged in, false if he canceled the dialog
 	 */
 	private boolean login() {
-		ILoginView view = new LoginViewImpl(this);
-		ILoginModel model = new LoginModelImpl(settings);
-		LoginPresenter presenter = new LoginPresenter(view, model);
-
-		if (presenter.isCanceled()) {
+		boolean loggedIn = LoginPresenter.show(this, settings);
+		if (!loggedIn) {
 			return false;
 		}
 

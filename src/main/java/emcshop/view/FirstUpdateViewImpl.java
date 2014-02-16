@@ -1,12 +1,12 @@
-package emcshop.gui;
+package emcshop.view;
 
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -17,15 +17,12 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
-import emcshop.Main;
+import emcshop.gui.HelpLabel;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
-public class FirstUpdateDialog extends JDialog {
-	private static final int DEFAULT_STOP_PAGE = 5000;
-	private static final int DEFAULT_PAYMENT_TRANS_AGE = 7;
-
+public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 	private final JButton begin, cancel;
 
 	private final JNumberTextField stopAt;
@@ -36,59 +33,16 @@ public class FirstUpdateDialog extends JDialog {
 	private final JCheckBox paymentTransactionAgeCheckbox;
 	private final JLabel paymentTransactionAgeLabel;
 
-	private boolean cancelled;
+	private final List<ActionListener> onStopAtChanged = new ArrayList<ActionListener>();
 
-	public static Result show(Window owner) {
-		FirstUpdateDialog dialog = new FirstUpdateDialog(owner);
-		dialog.setVisible(true);
-
-		if (dialog.cancelled) {
-			return null;
-		}
-
-		Integer stopAtPage = null;
-		Long estimatedTime = null;
-		if (dialog.stopAtCheckBox.isSelected()) {
-			stopAtPage = dialog.stopAt.getInteger();
-			if (stopAtPage != null) {
-				estimatedTime = Main.estimateUpdateTime(stopAtPage);
-			}
-		}
-
-		Integer oldestPaymentTransactionDays = null;
-		if (dialog.paymentTransactionAgeCheckbox.isSelected()) {
-			oldestPaymentTransactionDays = dialog.paymentTransactionAge.getInteger();
-		}
-
-		return new Result(stopAtPage, estimatedTime, oldestPaymentTransactionDays);
-	}
-
-	public FirstUpdateDialog(Window owner) {
+	public FirstUpdateViewImpl(Window owner) {
 		super(owner, "First Update", ModalityType.APPLICATION_MODAL);
 		setResizable(false);
-		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				cancel();
-			}
-		});
 
 		begin = new JButton("Begin");
-		begin.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				cancelled = false;
-				dispose();
-			}
-		});
 
 		cancel = new JButton("Cancel");
-		cancel.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				cancel();
-			}
-		});
+		GuiUtils.onEscapeKeyPress(this, cancel);
 
 		estimate = new JLabel() {
 			private String text;
@@ -116,10 +70,8 @@ public class FirstUpdateDialog extends JDialog {
 				setText(text);
 			}
 		};
-		estimate.setText(calculateEstimateDisplay(DEFAULT_STOP_PAGE));
 
 		stopAt = new JNumberTextField();
-		stopAt.setNumber(DEFAULT_STOP_PAGE);
 		stopAt.addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
 				char c = e.getKeyChar();
@@ -130,17 +82,13 @@ public class FirstUpdateDialog extends JDialog {
 
 			@Override
 			public void keyReleased(KeyEvent arg0) {
-				Integer stopAtInt = stopAt.getInteger();
-				if (stopAtInt == null) {
-					estimate.setText("-");
-				} else {
-					estimate.setText(calculateEstimateDisplay(stopAtInt));
+				for (ActionListener listener : onStopAtChanged) {
+					listener.actionPerformed(null);
 				}
 			}
 		});
 
 		stopAtCheckBox = new JCheckBox("Stop at page:");
-		stopAtCheckBox.setSelected(true);
 		stopAtCheckBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -151,7 +99,6 @@ public class FirstUpdateDialog extends JDialog {
 		});
 
 		paymentTransactionAgeCheckbox = new JCheckBox("Ignore payment transactions older than:");
-		paymentTransactionAgeCheckbox.setSelected(true);
 		paymentTransactionAgeCheckbox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -162,7 +109,6 @@ public class FirstUpdateDialog extends JDialog {
 		});
 
 		paymentTransactionAge = new JNumberTextField();
-		paymentTransactionAge.setNumber(DEFAULT_PAYMENT_TRANS_AGE);
 
 		paymentTransactionAgeLabel = new JLabel("days");
 
@@ -181,7 +127,7 @@ public class FirstUpdateDialog extends JDialog {
 
 		add(new JLabel("<html><b>Settings:</b></html>"), "wrap");
 
-		add(new HelpLabel(null, "The higher a transaction page number is, the longer it takes for EMC to load the page.  For example, page 2000 takes much longer to load than page 20.<br><br>Therefore, it is recommended that you stop around page 5000, but you may change or disable this setting if you wish.  During the update operation, you can also click the \"Stop\" button, which will halt the update process and keep all transactions that were downloaded."), "split 4");
+		add(new HelpLabel(null, "The higher a transaction page number is, the longer it takes for the page to be downloaded.  For example, page 2000 takes longer to load than page 20.<br><br>Therefore, it is recommended that you stop around page 5000, but you may change or disable this setting if you wish.  During the update operation, you can also click the \"Stop\" button, which will halt the update process and keep all transactions that were downloaded."), "split 4");
 		add(stopAtCheckBox);
 		add(stopAt, "w 75");
 		add(estimate, "wrap");
@@ -196,46 +142,63 @@ public class FirstUpdateDialog extends JDialog {
 
 		pack();
 		setLocationRelativeTo(owner);
-
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				cancel();
-			}
-		});
 	}
 
-	private String calculateEstimateDisplay(int pages) {
-		long totalMs = Main.estimateUpdateTime(pages);
-		return DurationFormatUtils.formatDuration(totalMs, "HH:mm:ss", true);
+	@Override
+	public void addOnCancelListener(ActionListener listener) {
+		cancel.addActionListener(listener);
+		GuiUtils.addCloseDialogListener(this, listener);
 	}
 
-	private void cancel() {
-		cancelled = true;
+	@Override
+	public void addOnBeginListener(ActionListener listener) {
+		begin.addActionListener(listener);
+	}
+
+	@Override
+	public void addStopAtPageChangedListener(ActionListener listener) {
+		onStopAtChanged.add(listener);
+	}
+
+	@Override
+	public Integer getStopAtPage() {
+		return stopAtCheckBox.isSelected() ? stopAt.getInteger() : null;
+	}
+
+	@Override
+	public void setStopAtPage(Integer stopAtPage) {
+		stopAt.setNumber(stopAtPage);
+		stopAtCheckBox.setSelected(stopAtPage != null);
+
+		for (ActionListener listener : onStopAtChanged) {
+			listener.actionPerformed(null);
+		}
+	}
+
+	@Override
+	public Integer getMaxPaymentTransactionAge() {
+		return paymentTransactionAgeCheckbox.isSelected() ? paymentTransactionAge.getInteger() : null;
+	}
+
+	@Override
+	public void setMaxPaymentTransactionAge(Integer age) {
+		paymentTransactionAge.setNumber(age);
+		paymentTransactionAgeCheckbox.setSelected(age != null);
+	}
+
+	@Override
+	public void setEstimatedTime(Long estimatedTime) {
+		String text = (estimatedTime == null) ? "-" : DurationFormatUtils.formatDuration(estimatedTime, "HH:mm:ss", true);
+		estimate.setText(text);
+	}
+
+	@Override
+	public void display() {
+		setVisible(true);
+	}
+
+	@Override
+	public void close() {
 		dispose();
-	}
-
-	public static class Result {
-		private final Integer stopAtPage;
-		private final Long estimatedTime;
-		private final Integer oldestPaymentTransactionDays;
-
-		public Result(Integer stopAtPage, Long estimatedTime, Integer oldestPaymentTransactionDays) {
-			this.stopAtPage = stopAtPage;
-			this.estimatedTime = estimatedTime;
-			this.oldestPaymentTransactionDays = oldestPaymentTransactionDays;
-		}
-
-		public Integer getStopAtPage() {
-			return stopAtPage;
-		}
-
-		public Long getEstimatedTime() {
-			return estimatedTime;
-		}
-
-		public Integer getOldestPaymentTransactionDays() {
-			return oldestPaymentTransactionDays;
-		}
 	}
 }
