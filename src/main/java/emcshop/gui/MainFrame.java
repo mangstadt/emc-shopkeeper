@@ -386,23 +386,6 @@ public class MainFrame extends JFrame {
 		graphsTab = new ChartsTab(this, dao);
 	}
 
-	/**
-	 * Shows the login dialog.
-	 * @return true if the user logged in, false if he canceled the dialog
-	 */
-	private boolean login() {
-		boolean loggedIn = LoginPresenter.show(this, settings);
-		if (!loggedIn) {
-			return false;
-		}
-
-		if (settings.isPersistSession()) {
-			clearSessionMenuItem.setEnabled(true);
-		}
-
-		return true;
-	}
-
 	private void layoutWidgets() {
 		setLayout(new MigLayout("insets 5 10 10 10, fill"));
 

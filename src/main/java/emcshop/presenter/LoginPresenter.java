@@ -1,17 +1,13 @@
 package emcshop.presenter;
 
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Date;
 
 import emcshop.model.ILoginModel;
-import emcshop.model.LoginModelImpl;
 import emcshop.scraper.EmcSession;
-import emcshop.util.Settings;
 import emcshop.view.ILoginView;
-import emcshop.view.LoginViewImpl;
 
 public class LoginPresenter {
 	private final ILoginView view;
@@ -95,12 +91,5 @@ public class LoginPresenter {
 
 	public EmcSession getSession() {
 		return model.getSession();
-	}
-
-	public static boolean show(Window owner, Settings settings) {
-		ILoginView view = new LoginViewImpl(owner);
-		ILoginModel model = new LoginModelImpl(settings);
-		LoginPresenter presenter = new LoginPresenter(view, model);
-		return !presenter.isCanceled();
 	}
 }
