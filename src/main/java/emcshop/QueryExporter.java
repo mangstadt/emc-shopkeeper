@@ -274,7 +274,7 @@ public class QueryExporter {
 
 		//item table
 		DateFormat transactionDf = new SimpleDateFormat("MMM dd, HH:mm");
-		bbCode.b("Date").text("- - - - - | ").b("Player").text(" - - - - | ").b("Item").text(" - - - - - - | ").b("Quantity").text(" | ").b("Amount").nl();
+		bbCode.u("Date").text("- - - - - | ").u("Player").text(" - - - - | ").u("Item").text(" - - - - - - | ").u("Quantity").text(" | ").u("Amount").nl();
 		for (ShopTransaction transaction : transactions) {
 			Date ts = transaction.getTs();
 			bbCodeColumn(transactionDf.format(ts), 13, bbCode);
@@ -387,17 +387,18 @@ public class QueryExporter {
 
 	public static String generateInventoryBBCode(Collection<Inventory> inventory) {
 		BBCodeBuilder bbCode = new BBCodeBuilder();
+		ItemIndex index = ItemIndex.instance();
 
 		bbCode.font("courier new");
 
-		bbCode.text("- - - - - - - - Item - - - - - - | - - - - - -Remaining- - - - - -").nl();
+		bbCode.u("Item").text(" - - - - - - - - - - - - - - - - - - | ").u("Remaining").nl();
 		for (Inventory inv : inventory) {
 			String item = inv.getItem();
-			bbCodeColumn(item, 32, bbCode);
+			bbCodeColumn(item, 40, bbCode);
 			bbCode.text(" | ");
 
-			String qty = formatQuantity(inv.getQuantity(), false);
-			bbCodeColumn(qty, 32, bbCode);
+			String quantityStr = formatStacks(inv.getQuantity(), index.getStackSize(item), false);
+			bbCode.text(quantityStr);
 
 			bbCode.nl();
 		}
