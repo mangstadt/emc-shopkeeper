@@ -49,6 +49,12 @@ public class ProfileImageLoader {
 	private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<String>();
 
 	/**
+	 * The number of items on the queue, plus the number of jobs currently being
+	 * processed by the threads.
+	 */
+	volatile int jobsBeingProcessed = 0;
+
+	/**
 	 * Creates a profile image loader with 4 threads.
 	 * @param cacheDir the directory where the images are cached
 	 */
@@ -119,6 +125,7 @@ public class ProfileImageLoader {
 			if (waiting == null) {
 				//player name is not queued for download, so add it to the queue
 				try {
+					jobsBeingProcessed++;
 					downloadQueue.put(job.playerName);
 				} catch (InterruptedException e) {
 					//should never be thrown because the queue doesn't have a max size
@@ -149,18 +156,18 @@ public class ProfileImageLoader {
 	private byte[] downloadImage(String playerName) throws IOException {
 		HttpClient client = createHttpClient();
 
-		//download image and save to cache
+		//get the URL of the user's profile image
+		String imageUrl = scrapeProfileImageUrl(client, playerName);
+		if (imageUrl == null) {
+			//no image found
+			return null;
+		}
+
+		//download image
 		HttpEntity entity = null;
 		File cachedFile = getCacheFile(playerName);
 		byte[] data;
 		try {
-			//get the URL of the user's profile image
-			String imageUrl = scrapeProfileImageUrl(client, playerName);
-			if (imageUrl == null) {
-				//no image found
-				return null;
-			}
-
 			HttpGet request = new HttpGet(imageUrl);
 			if (cachedFile.exists()) {
 				DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
@@ -173,6 +180,7 @@ public class ProfileImageLoader {
 			HttpResponse response = client.execute(request);
 			int statusCode = response.getStatusLine().getStatusCode();
 			if (statusCode == HttpStatus.SC_NOT_MODIFIED || statusCode == HttpStatus.SC_NOT_FOUND) {
+				//image not modified or not found
 				return null;
 			}
 
@@ -185,13 +193,10 @@ public class ProfileImageLoader {
 		}
 
 		//save to cache
-		//synchronize in-case two threads download the same profile image and try to save it at the same time 
-		synchronized (this) {
-			try {
-				FileUtils.writeByteArrayToFile(cachedFile, data);
-			} catch (IOException e) {
-				logger.log(Level.WARNING, "Problem saving image to cache.", e);
-			}
+		try {
+			FileUtils.writeByteArrayToFile(cachedFile, data);
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Problem saving image to cache.", e);
 		}
 
 		return data;
@@ -268,7 +273,14 @@ public class ProfileImageLoader {
 	private class LoadThread extends Thread {
 		@Override
 		public void run() {
+			boolean first = true;
 			while (true) {
+				if (first) {
+					first = false;
+				} else {
+					jobsBeingProcessed--;
+				}
+
 				//get the next player name
 				String playerName;
 				try {

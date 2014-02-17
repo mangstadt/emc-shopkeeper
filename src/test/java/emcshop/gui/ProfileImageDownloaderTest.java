@@ -66,7 +66,7 @@ public class ProfileImageDownloaderTest {
 
 		ProfileImageLoader profileImageLoader = new MockProfileImageLoader(temp.getRoot(), settings);
 		profileImageLoader.load("does-not-exist", label, 16, listener);
-		Thread.sleep(500);
+		wait(profileImageLoader);
 
 		verify(label).setIcon(Mockito.any(Icon.class));
 		verify(listener, never()).onImageDownloaded(label);
@@ -83,7 +83,7 @@ public class ProfileImageDownloaderTest {
 
 		ProfileImageLoader profileImageLoader = new MockProfileImageLoader(temp.getRoot(), settings);
 		profileImageLoader.load("private", label, 16, listener);
-		Thread.sleep(500);
+		wait(profileImageLoader);
 
 		verify(label).setIcon(Mockito.any(Icon.class));
 		verify(listener, never()).onImageDownloaded(label);
@@ -102,7 +102,7 @@ public class ProfileImageDownloaderTest {
 
 		ProfileImageLoader profileImageLoader = new MockProfileImageLoader(temp.getRoot(), settings);
 		profileImageLoader.load(player, label, 16, listener);
-		Thread.sleep(5000);
+		wait(profileImageLoader);
 
 		verify(label, times(2)).setIcon(Mockito.any(Icon.class));
 		verify(listener).onImageDownloaded(label);
@@ -117,7 +117,7 @@ public class ProfileImageDownloaderTest {
 		listener = mock(ImageDownloadedListener.class);
 		label = mock(JLabel.class);
 		profileImageLoader.load(player, label, 16, listener);
-		Thread.sleep(500);
+		wait(profileImageLoader);
 
 		verify(label).setIcon(Mockito.any(Icon.class));
 		verify(listener, never()).onImageDownloaded(label);
@@ -138,7 +138,7 @@ public class ProfileImageDownloaderTest {
 
 		ProfileImageLoader profileImageLoader = new MockProfileImageLoader(temp.getRoot(), settings, NOT_MODIFIED);
 		profileImageLoader.load(player, label, 16, listener);
-		Thread.sleep(500);
+		wait(profileImageLoader);
 
 		verify(label).setIcon(Mockito.any(Icon.class));
 		verify(listener, never()).onImageDownloaded(label);
@@ -158,9 +158,9 @@ public class ProfileImageDownloaderTest {
 
 		final String player = "shavingfoam";
 
-		ProfileImageLoader p = new MockProfileImageLoader(temp.getRoot(), settings, NOT_FOUND);
-		p.load(player, label, 16, listener);
-		Thread.sleep(500);
+		ProfileImageLoader profileImageLoader = new MockProfileImageLoader(temp.getRoot(), settings, NOT_FOUND);
+		profileImageLoader.load(player, label, 16, listener);
+		wait(profileImageLoader);
 
 		verify(label).setIcon(Mockito.any(Icon.class));
 		verify(listener, never()).onImageDownloaded(label);
@@ -181,7 +181,7 @@ public class ProfileImageDownloaderTest {
 		for (int i = 0; i < 100; i++) {
 			profileImageLoader.load(player, label, 16, listener);
 		}
-		Thread.sleep(1000);
+		wait(profileImageLoader);
 
 		verify(label, atLeastOnce()).setIcon(Mockito.any(Icon.class));
 		verify(listener, atLeastOnce()).onImageDownloaded(label);
@@ -189,6 +189,12 @@ public class ProfileImageDownloaderTest {
 		byte[] expected = shavingfoamImage;
 		byte[] actual = IOUtils.toByteArray(new FileInputStream(new File(temp.getRoot(), player)));
 		assertArrayEquals(expected, actual);
+	}
+
+	private static void wait(ProfileImageLoader profileImageLoader) throws InterruptedException {
+		while (profileImageLoader.jobsBeingProcessed > 0) {
+			Thread.sleep(100);
+		}
 	}
 
 	private static HttpClient createMockClient(final StatusLine imageResponseStatus) {

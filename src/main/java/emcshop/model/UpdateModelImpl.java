@@ -193,7 +193,7 @@ public class UpdateModelImpl implements IUpdateModel {
 			try {
 				puller = createPuller();
 			} catch (BadSessionException e) {
-				GuiUtils.fireEventsLater(badSessionListeners);
+				GuiUtils.fireEvents(badSessionListeners);
 				return;
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -236,7 +236,7 @@ public class UpdateModelImpl implements IUpdateModel {
 						pagesCount++;
 					}
 
-					GuiUtils.fireEventsLater(pageDownloadedListeners);
+					GuiUtils.fireEvents(pageDownloadedListeners);
 				}
 
 				//update completed successfully
@@ -247,7 +247,7 @@ public class UpdateModelImpl implements IUpdateModel {
 					timeTaken = System.currentTimeMillis() - started;
 				}
 
-				GuiUtils.fireEventsLater(downloadCompleteListeners);
+				GuiUtils.fireEvents(downloadCompleteListeners);
 			} catch (Throwable t) {
 				//an error occurred during the update
 				synchronized (UpdateModelImpl.this) {
@@ -262,7 +262,7 @@ public class UpdateModelImpl implements IUpdateModel {
 					logger.log(Level.SEVERE, "Error downloading transactions.", t);
 				}
 
-				GuiUtils.fireEventsLater(downloadErrorListeners);
+				GuiUtils.fireEvents(downloadErrorListeners);
 			}
 		}
 	}

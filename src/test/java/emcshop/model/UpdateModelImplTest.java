@@ -424,6 +424,7 @@ public class UpdateModelImplTest {
 		model.addDownloadErrorListener(downloadErrorListener);
 
 		Thread thread = model.startDownload();
+		Thread.sleep(10); //give enough time to start processing the first page
 		model.stopDownload();
 		thread.join();
 
