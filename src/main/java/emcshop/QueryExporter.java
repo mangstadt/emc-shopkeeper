@@ -2,6 +2,7 @@ package emcshop;
 
 import static emcshop.util.NumberFormatter.formatQuantity;
 import static emcshop.util.NumberFormatter.formatRupees;
+import static emcshop.util.NumberFormatter.formatStacks;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -74,7 +75,7 @@ public class QueryExporter {
 	 * @return the BBCode string
 	 */
 	public static String generateItemsBBCode(Collection<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
 		bbCode.font("courier new");
@@ -95,57 +96,13 @@ public class QueryExporter {
 		bbCode.close().nl();
 
 		//item table
-		bbCode.text("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -").nl();
-		for (ItemGroup group : itemGroups) {
-			String item = group.getItem();
-			bbCodeColumn(item, 17, bbCode);
-			bbCode.text(" | ");
-
-			String sold;
-			if (group.getSoldQuantity() == 0) {
-				sold = StringUtils.repeat("- ", 8) + "-";
-			} else {
-				sold = formatQuantity(group.getSoldQuantity()) + " / " + formatRupees(group.getSoldAmount());
-			}
-			bbCodeColumn(sold, 17, bbCode);
-			bbCode.text(" | ");
-
-			String bought;
-			if (group.getBoughtQuantity() == 0) {
-				bought = StringUtils.repeat("- ", 8) + "-";
-			} else {
-				bought = formatQuantity(group.getBoughtQuantity()) + " / " + formatRupees(group.getBoughtAmount());
-			}
-			bbCodeColumn(bought, 17, bbCode);
-			bbCode.text(" | ");
-
-			String netQuantityStr = formatQuantity(group.getNetQuantity());
-			if (group.getNetQuantity() > 0) {
-				bbCode.color("green", netQuantityStr);
-			} else if (group.getNetQuantity() < 0) {
-				bbCode.color("red", netQuantityStr);
-			} else {
-				bbCode.text(netQuantityStr);
-			}
-
-			bbCode.text(" / ");
-
-			String netAmountStr = formatRupees(group.getNetAmount());
-			if (group.getNetAmount() > 0) {
-				bbCode.color("green", netAmountStr);
-			} else if (group.getNetAmount() < 0) {
-				bbCode.color("red", netAmountStr);
-			} else {
-				bbCode.text(netAmountStr);
-			}
-
-			bbCode.nl();
-		}
+		generateItemsTableBBCode(itemGroups, bbCode, true);
 
 		//footer and total
 		String footer = "EMC Shopkeeper v" + Main.VERSION;
 		bbCode.url(Main.URL, footer);
-		bbCode.text(StringUtils.repeat('_', 50 - footer.length()));
+		bbCode.text(" ");
+		bbCode.text(StringUtils.repeat('_', 44 - footer.length()));
 		bbCode.b(" Total").text(" | ");
 		bbCode.b();
 		String netTotalStr = formatRupees(netTotal);
@@ -161,6 +118,65 @@ public class QueryExporter {
 		bbCode.close(); //close "font"
 
 		return bbCode.toString();
+	}
+
+	private static void generateItemsTableBBCode(Collection<ItemGroup> itemGroups, BBCodeBuilder bbCode, boolean includeProjectLink) {
+		ItemIndex index = ItemIndex.instance();
+		bbCode.u("Item").text(" - - - - - - - - - - - - - - - - | ").u("Net Quantity").text(" | ").u("Net Amount").nl();
+		int totalAmount = 0;
+		for (ItemGroup group : itemGroups) {
+			String item = group.getItem();
+			totalAmount += group.getNetAmount();
+
+			bbCodeColumn(item, 36, bbCode);
+			bbCode.text(" | ");
+
+			int netQuantity = group.getNetQuantity();
+			String netQuantityStr = formatStacks(netQuantity, index.getStackSize(item));
+			if (netQuantity > 0) {
+				bbCode.color("green", netQuantityStr);
+			} else if (netQuantity < 0) {
+				bbCode.color("red", netQuantityStr);
+			} else {
+				bbCode.text(netQuantityStr);
+			}
+			bbCodeColumn("", 12 - netQuantityStr.length(), bbCode);
+			bbCode.text(" | ");
+
+			int netAmount = group.getNetAmount();
+			String netAmountStr = formatRupees(netAmount);
+			if (netAmount > 0) {
+				bbCode.color("green", netAmountStr);
+			} else if (netAmount < 0) {
+				bbCode.color("red", netAmountStr);
+			} else {
+				bbCode.text(netAmountStr);
+			}
+
+			bbCode.nl();
+		}
+
+		//footer and total
+		int padding = 45;
+		if (includeProjectLink) {
+			String footer = "EMC Shopkeeper v" + Main.VERSION;
+			bbCode.url(Main.URL, footer);
+			bbCode.text(" ");
+			padding -= footer.length() - 1;
+		}
+
+		bbCode.text(StringUtils.repeat('_', padding));
+		bbCode.b(" Total").text(" | ");
+		bbCode.b();
+		String netTotalStr = formatRupees(totalAmount);
+		if (totalAmount > 0) {
+			bbCode.color("green", netTotalStr);
+		} else if (totalAmount < 0) {
+			bbCode.color("red", netTotalStr);
+		} else {
+			bbCode.text(netTotalStr);
+		}
+		bbCode.close(); //close "b"
 	}
 
 	public static String generatePlayersCsv(List<PlayerGroup> players, Map<PlayerGroup, List<ItemGroup>> items, Date from, Date to) {
@@ -200,7 +216,7 @@ public class QueryExporter {
 	}
 
 	public static String generatePlayersBBCode(List<PlayerGroup> playerGroups, Map<PlayerGroup, List<ItemGroup>> itemGroups, Date from, Date to) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
 		bbCode.font("courier new");
@@ -218,59 +234,12 @@ public class QueryExporter {
 		} else {
 			bbCode.text(df.format(from)).text(" to ").text(df.format(to));
 		}
-		bbCode.close().nl();
+		bbCode.close().nl().nl();
 
 		for (PlayerGroup playerGroup : playerGroups) {
 			bbCode.b(playerGroup.getPlayer().getName()).nl();
-
-			//item table
-			bbCode.text("- - - -Item - - - | - - - -Sold- - - -| - - -Bought- - - -| - - - -Net- - - -").nl();
-			for (ItemGroup group : itemGroups.get(playerGroup)) {
-				String item = group.getItem();
-				bbCodeColumn(item, 17, bbCode);
-				bbCode.text(" | ");
-
-				String sold;
-				if (group.getSoldQuantity() == 0) {
-					sold = StringUtils.repeat("- ", 8) + "-";
-				} else {
-					sold = formatQuantity(group.getSoldQuantity()) + " / " + formatRupees(group.getSoldAmount());
-				}
-				bbCodeColumn(sold, 17, bbCode);
-				bbCode.text(" | ");
-
-				String bought;
-				if (group.getBoughtQuantity() == 0) {
-					bought = StringUtils.repeat("- ", 8) + "-";
-				} else {
-					bought = formatQuantity(group.getBoughtQuantity()) + " / " + formatRupees(group.getBoughtAmount());
-				}
-				bbCodeColumn(bought, 17, bbCode);
-				bbCode.text(" | ");
-
-				String netQuantityStr = formatQuantity(group.getNetQuantity());
-				if (group.getNetQuantity() > 0) {
-					bbCode.color("green", netQuantityStr);
-				} else if (group.getNetQuantity() < 0) {
-					bbCode.color("red", netQuantityStr);
-				} else {
-					bbCode.text(netQuantityStr);
-				}
-
-				bbCode.text(" / ");
-
-				String netAmountStr = formatRupees(group.getNetAmount());
-				if (group.getNetAmount() > 0) {
-					bbCode.color("green", netAmountStr);
-				} else if (group.getNetAmount() < 0) {
-					bbCode.color("red", netAmountStr);
-				} else {
-					bbCode.text(netAmountStr);
-				}
-
-				bbCode.nl();
-			}
-			bbCode.nl();
+			generateItemsTableBBCode(itemGroups.get(playerGroup), bbCode, false);
+			bbCode.nl().nl();
 		}
 
 		//footer
@@ -283,7 +252,7 @@ public class QueryExporter {
 	}
 
 	public static String generateTransactionsBBCode(Collection<ShopTransaction> transactions, int netTotal, Date from, Date to) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
 		bbCode.font("courier new");
@@ -304,17 +273,19 @@ public class QueryExporter {
 		bbCode.close().nl();
 
 		//item table
-		bbCode.text("| - - -Date- - - | - - Player- - | - - -Item - - - | - Quantity- | - -Amount - |").nl();
+		DateFormat transactionDf = new SimpleDateFormat("MMM dd, HH:mm");
+		bbCode.b("Date").text("- - - - - | ").b("Player").text(" - - - - | ").b("Item").text(" - - - - - - | ").b("Quantity").text(" | ").b("Amount").nl();
 		for (ShopTransaction transaction : transactions) {
 			Date ts = transaction.getTs();
-			bbCode.text(df.format(ts) + " | ");
+			bbCodeColumn(transactionDf.format(ts), 13, bbCode);
+			bbCode.text(" | ");
 
 			String player = transaction.getPlayer();
-			bbCodeColumn(player, 13, bbCode);
+			bbCodeColumn(player, 14, bbCode);
 			bbCode.text(" | ");
 
 			String item = transaction.getItem();
-			bbCodeColumn(item, 15, bbCode);
+			bbCodeColumn(item, 16, bbCode);
 			bbCode.text(" | ");
 
 			int quantity = transaction.getQuantity();
@@ -326,7 +297,7 @@ public class QueryExporter {
 			} else {
 				bbCode.text(quantityStr);
 			}
-			bbCodeColumn("", 11 - quantityStr.length(), bbCode);
+			bbCodeColumn("", 8 - quantityStr.length(), bbCode);
 			bbCode.text(" | ");
 
 			int amount = transaction.getAmount();
