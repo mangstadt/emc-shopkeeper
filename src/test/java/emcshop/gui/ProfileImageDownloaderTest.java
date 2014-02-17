@@ -102,7 +102,7 @@ public class ProfileImageDownloaderTest {
 
 		ProfileImageLoader profileImageLoader = new MockProfileImageLoader(temp.getRoot(), settings);
 		profileImageLoader.load(player, label, 16, listener);
-		Thread.sleep(1000);
+		Thread.sleep(5000);
 
 		verify(label, times(2)).setIcon(Mockito.any(Icon.class));
 		verify(listener).onImageDownloaded(label);
