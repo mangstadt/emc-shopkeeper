@@ -113,9 +113,10 @@ public interface IUpdateModel {
 	Throwable getDownloadError();
 
 	/**
-	 * Starts the download. This call should be non-blocking.
+	 * Starts the download. This call is non-blocking.
+	 * @return the thread that was spawned
 	 */
-	void startDownload();
+	Thread startDownload();
 
 	/**
 	 * Stops the download. This call should be non-blocking.

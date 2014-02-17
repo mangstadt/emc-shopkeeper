@@ -111,12 +111,13 @@ public class UpdateModelImpl implements IUpdateModel {
 	}
 
 	@Override
-	public void startDownload() {
+	public Thread startDownload() {
 		started = System.currentTimeMillis();
 
 		DownloadThread thread = new DownloadThread();
 		thread.setDaemon(true);
 		thread.start();
+		return thread;
 	}
 
 	@Override

@@ -359,7 +359,8 @@ public class UpdatePresenterTest {
 		}
 
 		@Override
-		public void startDownload() {
+		public Thread startDownload() {
+			return null;
 		}
 
 		@Override

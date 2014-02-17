@@ -94,8 +94,8 @@ public class UpdateModelImplTest {
 		ActionListener downloadErrorListener = mock(ActionListener.class);
 		model.addDownloadErrorListener(downloadErrorListener);
 
-		model.startDownload();
-		Thread.sleep(500);
+		Thread thread = model.startDownload();
+		thread.join();
 
 		//verify listeners
 		verify(badSessionListener).actionPerformed(null);
@@ -131,8 +131,8 @@ public class UpdateModelImplTest {
 		ActionListener downloadErrorListener = mock(ActionListener.class);
 		model.addDownloadErrorListener(downloadErrorListener);
 
-		model.startDownload();
-		Thread.sleep(500);
+		Thread thread = model.startDownload();
+		thread.join();
 
 		//verify listeners
 		verify(badSessionListener, never()).actionPerformed(null);
@@ -190,8 +190,8 @@ public class UpdateModelImplTest {
 		ActionListener downloadErrorListener = mock(ActionListener.class);
 		model.addDownloadErrorListener(downloadErrorListener);
 
-		model.startDownload();
-		Thread.sleep(500);
+		Thread thread = model.startDownload();
+		thread.join();
 
 		//verify all the transactions were inserted into the DAO
 		List<RupeeTransaction> savedTransactions = interceptTransactions.savedTransactions;
@@ -262,8 +262,8 @@ public class UpdateModelImplTest {
 		ActionListener downloadErrorListener = mock(ActionListener.class);
 		model.addDownloadErrorListener(downloadErrorListener);
 
-		model.startDownload();
-		Thread.sleep(500);
+		Thread thread = model.startDownload();
+		thread.join();
 
 		//verify all the transactions were inserted into the DAO
 		List<RupeeTransaction> savedTransactions = interceptTransactions.savedTransactions;
@@ -342,8 +342,8 @@ public class UpdateModelImplTest {
 		ActionListener downloadErrorListener = mock(ActionListener.class);
 		model.addDownloadErrorListener(downloadErrorListener);
 
-		model.startDownload();
-		Thread.sleep(500);
+		Thread thread = model.startDownload();
+		thread.join();
 
 		//verify all the transactions were inserted into the DAO
 		List<RupeeTransaction> savedTransactions = interceptTransactions.savedTransactions;
@@ -423,10 +423,9 @@ public class UpdateModelImplTest {
 		ActionListener downloadErrorListener = mock(ActionListener.class);
 		model.addDownloadErrorListener(downloadErrorListener);
 
-		model.startDownload();
-		Thread.sleep(10);
+		Thread thread = model.startDownload();
 		model.stopDownload();
-		Thread.sleep(500);
+		thread.join();
 
 		//verify all the transactions were inserted into the DAO
 		List<RupeeTransaction> savedTransactions = interceptTransactions.savedTransactions;
@@ -489,8 +488,8 @@ public class UpdateModelImplTest {
 		model.saveTransactions(); //no transactions to save
 		verify(dao, never()).commit();
 
-		model.startDownload();
-		Thread.sleep(500);
+		Thread thread = model.startDownload();
+		thread.join();
 		model.saveTransactions();
 
 		verify(dao).updateBonusesFeesSince(dg.getGenerated(2));
