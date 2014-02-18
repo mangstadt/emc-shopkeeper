@@ -41,7 +41,7 @@ public class ClickableLabel extends JLabel implements MouseListener {
 	}
 
 	private void init(String url) {
-		if (GuiUtils.desktop == null) {
+		if (!GuiUtils.canOpenWebPages()) {
 			return;
 		}
 

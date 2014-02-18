@@ -28,24 +28,16 @@ public class GuiUtils {
 	 */
 	public static final boolean linux = System.getProperty("os.name").toLowerCase().contains("linux");
 
-	public static final Desktop desktop;
-	static {
-		Desktop d = null;
-		if (Desktop.isDesktopSupported()) {
-			d = Desktop.getDesktop();
-			if (d != null && !d.isSupported(Desktop.Action.BROWSE)) {
-				d = null;
-			}
-		}
-		desktop = d;
-	}
+	//this class should not be created in a static init block because it causes AWT to initialize when the CLI is run
+	private static Desktop desktop;
+	private static boolean desktopCreated = false;
 
 	/**
 	 * Opens a webpage in the user's browser.
 	 * @param uri the URI
 	 */
 	public static void openWebPage(URI uri) throws IOException {
-		if (desktop == null) {
+		if (!canOpenWebPages()) {
 			return;
 		}
 
@@ -57,6 +49,16 @@ public class GuiUtils {
 	 * @return true if it can open web pages, false if not
 	 */
 	public static boolean canOpenWebPages() {
+		if (!desktopCreated) {
+			if (Desktop.isDesktopSupported()) {
+				desktop = Desktop.getDesktop();
+				if (desktop != null && !desktop.isSupported(Desktop.Action.BROWSE)) {
+					desktop = null;
+				}
+			}
+			desktopCreated = true;
+		}
+
 		return desktop != null;
 	}
 
