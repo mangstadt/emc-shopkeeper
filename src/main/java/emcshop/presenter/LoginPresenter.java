@@ -42,40 +42,33 @@ public class LoginPresenter {
 	}
 
 	private void onLogin() {
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				String username = view.getUsername();
-				String password = view.getPassword();
-				boolean rememberMe = view.getRememberMe();
+		String username = view.getUsername();
+		String password = view.getPassword();
+		boolean rememberMe = view.getRememberMe();
 
-				String token;
-				try {
-					token = model.login(username, password, rememberMe);
-				} catch (IOException e) {
-					model.logNetworkError(e);
-					view.networkError();
-					return;
-				}
+		String token;
+		try {
+			token = model.login(username, password, rememberMe);
+		} catch (IOException e) {
+			model.logNetworkError(e);
+			view.networkError();
+			return;
+		}
 
-				if (token == null) {
-					view.badLogin();
-					return;
-				}
+		if (token == null) {
+			view.badLogin();
+			return;
+		}
 
-				synchronized (LoginPresenter.this) {
-					if (canceled) {
-						return;
-					}
-					EmcSession session = new EmcSession(username, token, new Date());
-					model.saveSession(session, rememberMe);
-				}
-
-				view.close();
+		synchronized (this) {
+			if (canceled) {
+				return;
 			}
-		};
-		t.setDaemon(true);
-		t.start();
+			EmcSession session = new EmcSession(username, token, new Date());
+			model.saveSession(session, rememberMe);
+		}
+
+		view.close();
 	}
 
 	private void onCancel() {

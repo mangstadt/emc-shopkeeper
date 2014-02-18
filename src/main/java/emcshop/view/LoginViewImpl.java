@@ -82,8 +82,20 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	}
 
 	@Override
-	public void addOnLoginListener(ActionListener listener) {
-		login.addActionListener(listener);
+	public void addOnLoginListener(final ActionListener listener) {
+		login.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				Thread t = new Thread() {
+					@Override
+					public void run() {
+						listener.actionPerformed(e);
+					}
+				};
+				t.setDaemon(true);
+				t.start();
+			}
+		});
 	}
 
 	@Override

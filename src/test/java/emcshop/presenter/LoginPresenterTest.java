@@ -67,7 +67,6 @@ public class LoginPresenterTest {
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
 		view.clickLogin();
-		Thread.sleep(100);
 
 		verify(model).logNetworkError(e);
 		verify(view).networkError();
@@ -84,7 +83,6 @@ public class LoginPresenterTest {
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
 		view.clickLogin();
-		Thread.sleep(100);
 
 		verify(view).badLogin();
 		assertFalse(presenter.isCanceled());
@@ -100,7 +98,6 @@ public class LoginPresenterTest {
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
 		view.clickLogin();
-		Thread.sleep(100);
 
 		verify(model).saveSession(any(EmcSession.class), Mockito.anyBoolean());
 		verify(view).close();
@@ -117,7 +114,6 @@ public class LoginPresenterTest {
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
 		view.clickCancel();
-		Thread.sleep(100);
 
 		verify(view).close();
 		assertTrue(presenter.isCanceled());
@@ -129,19 +125,26 @@ public class LoginPresenterTest {
 		stub(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).toAnswer(new Answer<String>() {
 			@Override
 			public String answer(InvocationOnMock invocation) throws Throwable {
-				Thread.sleep(500); //simulate network latency
+				Thread.sleep(300); //simulate network latency
 				return "token";
 			}
 		});
 
-		LoginViewAdapter view = spy(new LoginViewAdapter());
+		final LoginViewAdapter view = spy(new LoginViewAdapter());
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
-		view.clickLogin();
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				view.clickLogin();
+			}
+		};
+		t.start();
+
 		Thread.sleep(100);
 		view.clickCancel();
-		Thread.sleep(600);
+		t.join();
 
 		verify(view).close();
 		verify(model, never()).saveSession(any(EmcSession.class), any(boolean.class));

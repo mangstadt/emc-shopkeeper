@@ -1,12 +1,9 @@
 package emcshop.presenter;
 
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import emcshop.model.FirstUpdateModelImpl;
 import emcshop.model.IFirstUpdateModel;
-import emcshop.view.FirstUpdateViewImpl;
 import emcshop.view.IFirstUpdateView;
 
 public class FirstUpdatePresenter {
@@ -42,8 +39,7 @@ public class FirstUpdatePresenter {
 			}
 		});
 
-		view.setStopAtPage(5000);
-		view.setMaxPaymentTransactionAge(7);
+		onStopAtPageChanged();
 		view.display();
 	}
 
@@ -74,11 +70,5 @@ public class FirstUpdatePresenter {
 
 	public boolean isCanceled() {
 		return canceled;
-	}
-
-	public static FirstUpdatePresenter show(Window owner) {
-		IFirstUpdateView view = new FirstUpdateViewImpl(owner);
-		IFirstUpdateModel model = new FirstUpdateModelImpl();
-		return new FirstUpdatePresenter(view, model);
 	}
 }

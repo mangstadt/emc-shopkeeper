@@ -1,11 +1,9 @@
 package emcshop.cli;
 
-import static emcshop.scraper.TransactionPuller.filter;
 import static emcshop.util.NumberFormatter.formatRupees;
 import static emcshop.util.NumberFormatter.formatStacks;
 
 import java.io.PrintStream;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,25 +16,27 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import emcshop.ItemIndex;
-import emcshop.Main;
 import emcshop.QueryExporter;
+import emcshop.cli.model.UpdateModelCli;
+import emcshop.cli.view.FirstUpdateViewCli;
+import emcshop.cli.view.LoginShower;
+import emcshop.cli.view.UpdateViewCli;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
-import emcshop.scraper.BadSessionException;
-import emcshop.scraper.BonusFeeTransaction;
+import emcshop.model.FirstUpdateModelImpl;
+import emcshop.model.IUpdateModel;
+import emcshop.presenter.FirstUpdatePresenter;
+import emcshop.presenter.LoginPresenter;
+import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.PaymentTransaction;
-import emcshop.scraper.RupeeTransaction;
-import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
 import emcshop.util.Settings;
+import emcshop.view.IUpdateView;
 
 public class CliController {
 	private static final Logger logger = Logger.getLogger(CliController.class.getName());
-	private static final String NEWLINE = System.getProperty("line.separator");
 	private static final PrintStream out = System.out;
 
 	private final DbDao dao;
@@ -51,141 +51,47 @@ public class CliController {
 		Date latestTransactionDateFromDb = dao.getLatestTransactionDate();
 		boolean firstUpdate = (latestTransactionDateFromDb == null);
 
+		//set configuration settings for puller
+		TransactionPuller.Config.Builder configBuilder = new TransactionPuller.Config.Builder();
 		if (firstUpdate) {
-			//@formatter:off
-			out.println(
-			"================================================================================" + NEWLINE +
-			"NOTE: This is the first time you are running an update.  To ensure accurate" + NEWLINE +
-			"results, it is recommended that you set MOVE PERMS to FALSE on your res for this" + NEWLINE +
-			"first update." + NEWLINE +
-			"                                /res set move false" + NEWLINE);
-			//@formatter:on
-
-			if (stopAtPage == null) {
-				//@formatter:off
-				out.println(
-				"Your entire transaction history will be parsed." + NEWLINE +
-				"This could take up to 60 MINUTES depending on its size.");
-				//@formatter:on
-			} else {
-				long time = Main.estimateUpdateTime(stopAtPage);
-				int pages = stopAtPage - startAtPage + 1;
-
-				//@formatter:off
-				out.println(
-				pages + " pages will be parsed." + NEWLINE +
-				"Estimated time: " + DurationFormatUtils.formatDuration(time, "HH:mm:ss", true));
-				//@formatter:on
-			}
-
-			out.println("--------------------------------------------------------------------------------");
-			String ready = System.console().readLine("Are you ready to start? (y/n) ");
-			if (!"y".equalsIgnoreCase(ready)) {
+			FirstUpdateViewCli view = new FirstUpdateViewCli();
+			view.setStopAtPage(stopAtPage);
+			view.setMaxPaymentTransactionAge(7);
+			FirstUpdateModelImpl model = new FirstUpdateModelImpl();
+			FirstUpdatePresenter presenter = new FirstUpdatePresenter(view, model);
+			if (presenter.isCanceled()) {
 				out.println("Goodbye.");
 				return;
 			}
-		}
 
-		TransactionPuller.Config.Builder cb = new TransactionPuller.Config.Builder();
-		if (firstUpdate) {
-			cb.maxPaymentTransactionAge(7);
-			if (stopAtPage != null) {
-				cb.stopAtPage(stopAtPage);
-			}
-			cb.startAtPage(startAtPage);
+			configBuilder.maxPaymentTransactionAge(presenter.getMaxPaymentTransactionAge());
+			configBuilder.stopAtPage(presenter.getStopAtPage());
+			configBuilder.startAtPage(startAtPage);
 		} else {
-			cb.stopAtDate(latestTransactionDateFromDb);
+			configBuilder.stopAtDate(latestTransactionDateFromDb);
 		}
-		TransactionPuller.Config config = cb.build();
+		TransactionPuller.Config config = configBuilder.build();
 
-		TransactionPuller puller = null;
+		//log user in
+		LoginShower loginShower = new LoginShower(settings);
 		EmcSession session = settings.getSession();
-		String sessionUsername = (session == null) ? null : session.getUsername();
-		boolean repeat;
-		long started;
-		do {
-			repeat = false;
-			if (session == null) {
-				out.println("Please enter your EMC login credentials.");
-				do {
-					//note: "System.console()" doesn't work from Eclipse
-					String username;
-					if (sessionUsername == null) {
-						username = System.console().readLine("Username: ");
-					} else {
-						username = System.console().readLine("Username [" + sessionUsername + "]: ");
-						if (username.isEmpty()) {
-							username = sessionUsername;
-						}
-					}
-					String password = new String(System.console().readPassword("Password: "));
-					out.println("Logging in...");
-					session = EmcSession.login(username, password, settings.isPersistSession());
-					if (session == null) {
-						out.println("Login failed.  Please try again.");
-					}
-				} while (session == null);
-				settings.setSession(session);
-				settings.save();
-			}
-
-			started = System.currentTimeMillis();
-			try {
-				puller = new TransactionPuller(session, config);
-			} catch (BadSessionException e) {
-				out.println("Your login session has expired.");
-				session = null;
-				repeat = true;
-			}
-		} while (repeat);
-
-		final NumberFormat nf = NumberFormat.getInstance();
-		int pageCount = 0, transactionCount = 0;
-		Date earliestParsedTransactionDate = null;
-		List<RupeeTransaction> transactions;
-		while ((transactions = puller.nextPage()) != null) {
-			if (!transactions.isEmpty()) {
-				RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
-				Date lastTs = last.getTs();
-				if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
-					earliestParsedTransactionDate = lastTs;
-				}
-			}
-
-			List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
-			for (ShopTransaction shopTransaction : shopTransactions) {
-				dao.insertTransaction(shopTransaction, true);
-			}
-
-			List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
-			dao.insertPaymentTransactions(paymentTransactions);
-
-			List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
-			dao.updateBonusesFees(bonusFeeTransactions);
-
-			pageCount++;
-			transactionCount += shopTransactions.size() + paymentTransactions.size() + bonusFeeTransactions.size();
-			out.print("\rPages: " + nf.format(pageCount) + " | Transactions: " + nf.format(transactionCount));
+		if (session == null) {
+			LoginPresenter presenter = loginShower.show();
+			session = presenter.getSession();
 		}
 
-		if (earliestParsedTransactionDate != null) {
-			dao.updateBonusesFeesSince(earliestParsedTransactionDate);
-		}
-
-		Integer rupeeBalance = puller.getRupeeBalance();
-		if (rupeeBalance != null) {
-			dao.updateRupeeBalance(rupeeBalance);
-		}
-
-		dao.commit();
+		//start the update
+		IUpdateView view = new UpdateViewCli(loginShower);
+		IUpdateModel model = new UpdateModelCli(config, session, dao);
+		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 		settings.setPreviousUpdate(settings.getLastUpdated());
-		settings.setLastUpdated(new Date(started));
+		settings.setLastUpdated(presenter.getStarted());
 		settings.save();
 
-		long timeTaken = System.currentTimeMillis() - started;
-		out.println("\n" + pageCount + " pages processed and " + transactionCount + " transactions saved in " + (timeTaken / 1000) + " seconds.");
-		logger.info(pageCount + " pages processed and " + transactionCount + " transactions saved in " + (timeTaken / 1000) + " seconds.");
+		int transactions = presenter.getShopTransactions() + presenter.getPaymentTransactions() + presenter.getBonusFeeTransactions();
+		out.println("\n" + presenter.getPageCount() + " pages processed and " + transactions + " transactions saved in " + (presenter.getTimeTaken() / 1000) + " seconds.");
+		logger.info(presenter.getPageCount() + " pages processed and " + transactions + " transactions saved in " + (presenter.getTimeTaken() / 1000) + " seconds.");
 	}
 
 	public void query(String query, String format) throws Throwable {

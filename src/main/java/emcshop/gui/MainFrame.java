@@ -55,6 +55,8 @@ import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
+import emcshop.model.FirstUpdateModelImpl;
+import emcshop.model.IFirstUpdateModel;
 import emcshop.model.IUpdateModel;
 import emcshop.model.UpdateModelImpl;
 import emcshop.presenter.FirstUpdatePresenter;
@@ -65,6 +67,8 @@ import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
+import emcshop.view.FirstUpdateViewImpl;
+import emcshop.view.IFirstUpdateView;
 import emcshop.view.IUpdateView;
 import emcshop.view.LoginShower;
 import emcshop.view.UpdateViewImpl;
@@ -334,7 +338,11 @@ public class MainFrame extends JFrame {
 				if (latestTransactionDate == null) {
 					//it's the first update
 
-					FirstUpdatePresenter presenter = FirstUpdatePresenter.show(MainFrame.this);
+					IFirstUpdateView view = new FirstUpdateViewImpl(MainFrame.this);
+					view.setMaxPaymentTransactionAge(7);
+					view.setStopAtPage(5000);
+					IFirstUpdateModel model = new FirstUpdateModelImpl();
+					FirstUpdatePresenter presenter = new FirstUpdatePresenter(view, model);
 					if (presenter.isCanceled()) {
 						return;
 					}
