@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -706,8 +705,8 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public Map<String, ItemGroup> getItemGroups(Date from, Date to) throws SQLException {
-		Map<String, ItemGroup> itemGroups = new TreeMap<String, ItemGroup>();
+	public Collection<ItemGroup> getItemGroups(Date from, Date to) throws SQLException {
+		Map<String, ItemGroup> itemGroups = new HashMap<String, ItemGroup>();
 
 		//@formatter:off
 		String sql =
@@ -784,7 +783,7 @@ public abstract class DirbyDbDao implements DbDao {
 			closeStatements(stmt);
 		}
 
-		return itemGroups;
+		return itemGroups.values();
 	}
 
 	public List<ShopTransaction> getTransactionsByDate(Date from, Date to) throws SQLException {
@@ -854,7 +853,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public Map<String, PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException {
+	public Collection<PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException {
 		Map<String, PlayerGroup> playerGroups = new HashMap<String, PlayerGroup>();
 
 		//@formatter:off
@@ -923,13 +922,13 @@ public abstract class DirbyDbDao implements DbDao {
 			closeStatements(stmt);
 		}
 
-		return playerGroups;
+		return playerGroups.values();
 	}
 
 	@Override
-	public List<Inventory> getInventory() throws SQLException {
-		List<Inventory> inventory = new ArrayList<Inventory>();
+	public Collection<Inventory> getInventory() throws SQLException {
 		PreparedStatement stmt = stmt("SELECT inventory.*, items.name AS item_name FROM inventory INNER JOIN items ON inventory.item = items.id");
+		Collection<Inventory> inventory = new ArrayList<Inventory>();
 
 		try {
 			ResultSet rs = stmt.executeQuery();

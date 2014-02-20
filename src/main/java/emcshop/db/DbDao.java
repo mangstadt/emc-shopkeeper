@@ -172,7 +172,7 @@ public interface DbDao {
 	 * @return the net gains/losses for each item
 	 * @throws SQLException
 	 */
-	Map<String, ItemGroup> getItemGroups(Date from, Date to) throws SQLException;
+	Collection<ItemGroup> getItemGroups(Date from, Date to) throws SQLException;
 
 	/**
 	 * Gets all transactions by date, consolidating them so consecutive
@@ -191,14 +191,14 @@ public interface DbDao {
 	 * @return the player activity
 	 * @throws SQLException
 	 */
-	Map<String, PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException;
+	Collection<PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException;
 
 	/**
 	 * Gets the player's shop inventory.
 	 * @return the inventory
 	 * @throws SQLException
 	 */
-	List<Inventory> getInventory() throws SQLException;
+	Collection<Inventory> getInventory() throws SQLException;
 
 	/**
 	 * Updates or inserts an inventory item.

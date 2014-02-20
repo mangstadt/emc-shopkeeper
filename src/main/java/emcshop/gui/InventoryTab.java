@@ -266,7 +266,7 @@ public class InventoryTab extends JPanel {
 	}
 
 	public void refresh() {
-		List<Inventory> inventory;
+		Collection<Inventory> inventory;
 		try {
 			inventory = dao.getInventory();
 		} catch (SQLException e) {
@@ -376,7 +376,7 @@ public class InventoryTab extends JPanel {
 			setColumns();
 		}
 
-		public void refresh(List<Inventory> inventory) {
+		public void refresh(Collection<Inventory> inventory) {
 			setData(inventory);
 			redraw();
 		}
@@ -387,7 +387,7 @@ public class InventoryTab extends JPanel {
 			rows.add(row);
 		}
 
-		public void setData(List<Inventory> inventory) {
+		public void setData(Collection<Inventory> inventory) {
 			Set<String> selectedItems = new HashSet<String>();
 			for (Row row : rows) {
 				if (row.selected) {

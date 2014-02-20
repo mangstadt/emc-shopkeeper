@@ -398,8 +398,7 @@ public class TransactionsTab extends JPanel {
 					final List<ItemGroup> itemGroupsList;
 					{
 						//query database
-						Map<String, ItemGroup> itemGroups = dao.getItemGroups(from, to);
-						itemGroupsList = new ArrayList<ItemGroup>(itemGroups.values());
+						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(from, to));
 
 						//sort by item name
 						Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
@@ -465,7 +464,7 @@ public class TransactionsTab extends JPanel {
 			public void run() {
 				try {
 					//query database
-					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(from, to).values();
+					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(from, to);
 
 					//reset GUI
 					tablePanel.removeAll();

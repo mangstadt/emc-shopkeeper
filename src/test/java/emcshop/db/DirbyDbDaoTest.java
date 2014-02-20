@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -539,7 +540,7 @@ public class DirbyDbDaoTest {
 
 		//no date range
 		{
-			Map<String, ItemGroup> groups = dao.getItemGroups(null, null);
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(null, null));
 			assertEquals(2, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
@@ -551,7 +552,7 @@ public class DirbyDbDaoTest {
 
 		//start date (first transaction is not included)
 		{
-			Map<String, ItemGroup> groups = dao.getItemGroups(dg.getGenerated(1), null);
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(dg.getGenerated(1), null));
 			assertEquals(2, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
@@ -563,7 +564,7 @@ public class DirbyDbDaoTest {
 
 		//end date (last transaction is not included)
 		{
-			Map<String, ItemGroup> groups = dao.getItemGroups(null, dg.getGenerated(5));
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(null, dg.getGenerated(5)));
 			assertEquals(1, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
@@ -572,7 +573,7 @@ public class DirbyDbDaoTest {
 
 		//start and end date (first and last transactions are not included)
 		{
-			Map<String, ItemGroup> groups = dao.getItemGroups(dg.getGenerated(1), dg.getGenerated(5));
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(dg.getGenerated(1), dg.getGenerated(5)));
 			assertEquals(1, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
@@ -581,7 +582,7 @@ public class DirbyDbDaoTest {
 
 		//start and end date (no transactions included)
 		{
-			Map<String, ItemGroup> groups = dao.getItemGroups(dg.next(), dg.next());
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(dg.next(), dg.next()));
 			assertEquals(0, groups.size());
 		}
 	}
@@ -686,7 +687,7 @@ public class DirbyDbDaoTest {
 
 		//no date range
 		{
-			Map<String, PlayerGroup> groups = dao.getPlayerGroups(null, null);
+			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(null, null));
 			assertEquals(2, groups.size());
 
 			{
@@ -718,7 +719,7 @@ public class DirbyDbDaoTest {
 
 		//with start date
 		{
-			Map<String, PlayerGroup> groups = dao.getPlayerGroups(dg.getGenerated(1), null);
+			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(dg.getGenerated(1), null));
 			assertEquals(2, groups.size());
 
 			{
@@ -750,7 +751,7 @@ public class DirbyDbDaoTest {
 
 		//with end date
 		{
-			Map<String, PlayerGroup> groups = dao.getPlayerGroups(null, dg.getGenerated(3));
+			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(null, dg.getGenerated(3)));
 			assertEquals(2, groups.size());
 
 			{
@@ -782,7 +783,7 @@ public class DirbyDbDaoTest {
 
 		//with start and end dates
 		{
-			Map<String, PlayerGroup> groups = dao.getPlayerGroups(dg.getGenerated(1), dg.getGenerated(3));
+			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(dg.getGenerated(1), dg.getGenerated(3)));
 			assertEquals(2, groups.size());
 
 			{
@@ -818,7 +819,7 @@ public class DirbyDbDaoTest {
 		inventory().item(appleId).quantity(5).insert();
 		inventory().item(diamondId).quantity(10).insert();
 
-		List<Inventory> inventory = dao.getInventory();
+		List<Inventory> inventory = new ArrayList<Inventory>(dao.getInventory());
 		assertEquals(2, inventory.size());
 		Collections.sort(inventory, new Comparator<Inventory>() {
 			@Override
@@ -1909,4 +1910,19 @@ public class DirbyDbDaoTest {
 		return stmt.executeQuery(sql);
 	}
 
+	private static Map<String, ItemGroup> itemMap(Collection<ItemGroup> itemGroups) {
+		Map<String, ItemGroup> map = new HashMap<String, ItemGroup>();
+		for (ItemGroup itemGroup : itemGroups) {
+			map.put(itemGroup.getItem(), itemGroup);
+		}
+		return map;
+	}
+
+	private static Map<String, PlayerGroup> playerMap(Collection<PlayerGroup> playerGroups) {
+		Map<String, PlayerGroup> map = new HashMap<String, PlayerGroup>();
+		for (PlayerGroup playerGroup : playerGroups) {
+			map.put(playerGroup.getPlayer().getName(), playerGroup);
+		}
+		return map;
+	}
 }

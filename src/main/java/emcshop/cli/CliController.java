@@ -8,11 +8,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -95,7 +95,7 @@ public class CliController {
 	}
 
 	public void query(String query, String format) throws Throwable {
-		Map<String, ItemGroup> itemGroups;
+		Collection<ItemGroup> itemGroups;
 		Date from, to;
 		if (query.isEmpty()) {
 			itemGroups = dao.getItemGroups(null, null);
@@ -108,7 +108,7 @@ public class CliController {
 		}
 
 		//sort items
-		List<ItemGroup> sortedItemGroups = new ArrayList<ItemGroup>(itemGroups.values());
+		List<ItemGroup> sortedItemGroups = new ArrayList<ItemGroup>(itemGroups);
 		Collections.sort(sortedItemGroups, new Comparator<ItemGroup>() {
 			@Override
 			public int compare(ItemGroup left, ItemGroup right) {
@@ -119,8 +119,7 @@ public class CliController {
 		if ("CSV".equalsIgnoreCase(format)) {
 			//calculate net total
 			int netTotal = 0;
-			for (Map.Entry<String, ItemGroup> entry : itemGroups.entrySet()) {
-				ItemGroup itemGroup = entry.getValue();
+			for (ItemGroup itemGroup : sortedItemGroups) {
 				netTotal += itemGroup.getNetAmount();
 			}
 
@@ -129,8 +128,7 @@ public class CliController {
 		} else if ("BBCODE".equalsIgnoreCase(format)) {
 			//calculate net total
 			int netTotal = 0;
-			for (Map.Entry<String, ItemGroup> entry : itemGroups.entrySet()) {
-				ItemGroup itemGroup = entry.getValue();
+			for (ItemGroup itemGroup : sortedItemGroups) {
 				netTotal += itemGroup.getNetAmount();
 			}
 
