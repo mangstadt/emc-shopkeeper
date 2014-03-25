@@ -181,6 +181,7 @@
 	<Item name="Haunted Candy - Spider Eye" emcNames="Spider Eye - §eHaunted Candy" />
 	<Item name="Hay Block" id="170" />
 	<Item name="Hopper" id="154" group="Iron" />
+	<Item name="Horse Egg" id="383:100" group="Spawn Eggs" />
 	<Item name="Ice" id="79" />
 	<Item name="Iron Axe" id="258" stack="1" group="Iron" />
 	<Item name="Iron Barding" id="417" stack="1" group="Iron" />
