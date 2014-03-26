@@ -7,6 +7,7 @@
 	<Item name="Acacia Sapling" id="6:4" />
 	<Item name="Acacia Slab" id="126:4" group="Wood" />
 	<Item name="Acacia Stairs" id="163" group="Wood"  />
+	<Item name="Activator Rail" id="157" group="Iron" />
 	<Item name="Allium" id="38:2" group="Flowers" />
 	<Item name="Anvil" id="145" group="Iron" />
 	<Item name="Apple" id="260" />
@@ -52,6 +53,7 @@
 	<Item name="Cactus" id="81" />
 	<Item name="Cake" id="354" stack="1" />
 	<Item name="Carrot" id="391" emcNames="Carrot Item" />
+	<Item name="Carrot Stick" id="398" />
 	<Item name="Cat Disc" id="2257" stack="1" group="Discs" />
 	<Item name="Cauldron" id="118" group="Iron" />
 	<Item name="Chain Boots" id="305" stack="1" />
@@ -67,7 +69,6 @@
 	<Item name="Circle Stone" id="98:3" group="Stone" />
 	<Item name="Clay Ball" id="337" group="Clay" />
 	<Item name="Clay Block" id="82" group="Clay" />
-	<Item name="Clock" id="347" group="Gold" />
 	<Item name="Clownfish" id="349:2" group="Fish" />
 	<Item name="Coal" id="263:0" group="Coal" />
 	<Item name="Coal Block" id="173" group="Coal" />
@@ -78,7 +79,10 @@
 	<Item name="Cobblestone Stairs" id="67" group="Stone" />
 	<Item name="Cocoa Beans" id="351:3" emcNames="Brown Dye" group="Dyes" />
 	<Item name="Compass" id="345" group="Iron" />
+	<Item name="Cooked Beef" id="364" emcNames="Steak" />
+	<Item name="Cooked Chicken" id="366" />
 	<Item name="Cooked Fish" id="350" group="Fish" />
+	<Item name="Cooked Pork" id="320" />
 	<Item name="Cooked Salmon" id="350:1" group="Fish" />
 	<Item name="Cookie" id="357" />
 	<Item name="Cow Egg" id="383:92" group="Spawn Eggs" />
@@ -109,11 +113,10 @@
 	<Item name="Diamond Leggings" id="312" stack="1" group="Diamonds" />
 	<Item name="Diamond Ore" id="56" group="Diamonds" />
 	<Item name="Diamond Pickaxe" id="278" stack="1" group="Diamonds" />
-	<Item name="Diamond Shovel" id="277" stack="1" group="Diamonds" />
+	<Item name="Diamond Shovel" id="277" stack="1" group="Diamonds" emcNames="Diamond Spade" />
 	<Item name="Diamond Sword" id="276" stack="1" group="Diamonds" />
 	<Item name="Dirt" id="3" />
 	<Item name="Dispenser" id="23" group="Stone" />
-	<Item name="Door" id="64" stack="1" group="Wood" />
 	<Item name="Dragon Egg" id="122" />
 	<Item name="Dragon Stone" emcNames="Coal - §5§lDragon Stone" />
 	<Item name="Dragon Stone Fragment" emcNames="Flint - §5Dragon Stone Fragment" />
@@ -122,6 +125,7 @@
 	<Item name="Emerald" id="388" />
 	<Item name="Emerald Block" id="133" />
 	<Item name="Emerald Ore" id="129" />
+	<Item name="Empty Map" id="395" />
 	<Item name="Enchantment Table" id="116" group="Diamonds" />
 	<Item name="End Stone" id="121" />
 	<Item name="Ender Chest" id="130" />
@@ -160,7 +164,7 @@
 	<Item name="Gold Ore" id="14" group="Gold" />
 	<Item name="Gold Pickaxe" id="285" stack="1" group="Gold" />
 	<Item name="Gold Plate" id="147" group="Gold" />
-	<Item name="Gold Shovel" id="284" stack="1" group="Gold" />
+	<Item name="Gold Shovel" id="284" stack="1" group="Gold" emcNames="Gold Spade" />
 	<Item name="Gold Sword" id="283" stack="1" group="Gold" />
 	<Item name="Golden Apple" id="322" group="Gold" />
 	<Item name="Golden Carrot" id="396" group="Gold" />
@@ -185,7 +189,7 @@
 	<Item name="Ice" id="79" />
 	<Item name="Iron Axe" id="258" stack="1" group="Iron" />
 	<Item name="Iron Barding" id="417" stack="1" group="Iron" />
-	<Item name="Iron Bars" id="101" group="Iron" />
+	<Item name="Iron Fence" id="101" group="Iron" emcNames="Iron Bars" />
 	<Item name="Iron Block" id="42" group="Iron" />
 	<Item name="Iron Boots" id="309" stack="1" group="Iron" />
 	<Item name="Iron Bucket" id="325" stack="16" group="Iron" />
@@ -198,7 +202,7 @@
 	<Item name="Iron Ore" id="15" group="Iron" />
 	<Item name="Iron Pickaxe" id="257" stack="1" group="Iron" />
 	<Item name="Iron Plate" id="148" group="Iron" />
-	<Item name="Iron Shovel" id="256" stack="1" group="Iron" />
+	<Item name="Iron Shovel" id="256" stack="1" group="Iron" emcNames="Iron Spade" />
 	<Item name="Iron Sword" id="267" stack="1" group="Iron" />
 	<Item name="Item Frame" id="389" group="Leather" />
 	<Item name="Jack O Lantern" id="91" />
@@ -245,7 +249,7 @@
 	<Item name="Mossy Cobble" id="48" group="Stone" />
 	<Item name="Mossy Stone" id="98:1" group="Stone" />
 	<Item name="Mossy Wall" id="139:1" group="Stone" />
-	<Item name="Mushroom Stew" id="282" stack="1" />
+	<Item name="Mushroom Soup" id="282" stack="1" emcNames="Mushroom Stew" />
 	<Item name="Mycel" id="110" />
 	<Item name="Name Tag" id="421" />
 	<Item name="Nethbrick" id="405" />
@@ -280,7 +284,7 @@
 	<Item name="Pine Plank" id="5:1" group="Wood" />
 	<Item name="Pine Sapling" id="6:1" />
 	<Item name="Pine Slab" id="126:1" group="Wood" />
-	<Item name="Pine Stairs" id="134" group="Wood" />
+	<Item name="Pine Stairs" id="134" group="Wood" emcNames="Spruce Stairs" />
 	<Item name="Pink Stclay" id="159:6" group="Clay" />
 	<Item name="Pink Dye" id="351:9" group="Dyes" />
 	<Item name="Pink Tulip" id="38:7" group="Flowers" />
@@ -350,7 +354,6 @@
 	<Item name="Spider Eye" id="375" />
 	<Item name="Squid Egg" id="383:94" group="Spawn Eggs" />
 	<Item name="Stal Disc" id="2263" stack="1" group="Discs" />
-	<Item name="Steak" id="364" />
 	<Item name="Stick" id="280" group="Wood" />
 	<Item name="Sticky Piston" id="29" />
 	<Item name="Stone" id="1" group="Stone" />
@@ -361,7 +364,7 @@
 	<Item name="Stone Brick Stairs" id="109" group="Stone" />
 	<Item name="Stone Hoe" id="291" stack="1" group="Stone" />
 	<Item name="Stone Pickaxe" id="274" stack="1" group="Stone" />
-	<Item name="Stone Shovel" id="273" stack="1" group="Stone" />
+	<Item name="Stone Shovel" id="273" stack="1" group="Stone" emcNames="Stone Spade" />
 	<Item name="Stone Slab" id="44:0" group="Stone" />
 	<Item name="Stone Sword" id="272" stack="1" group="Stone" />
 	<Item name="Storage Minecart" id="342" stack="1" group="Iron" />
@@ -372,12 +375,13 @@
 	<Item name="Sunflower" id="175:0" group="Flowers" />
 	<Item name="Tnt" id="46" />
 	<Item name="Torch" id="50" />
-	<Item name="Trapdoor" id="96" group="Wood" />
+	<Item name="Trap Door" id="96" group="Wood" emcNames="Trapdoor"/>
 	<Item name="Trapped Chest" id="146" group="Wood" />
 	<Item name="Tripwire Hook" id="131" group="Iron" />
 	<Item name="Villager Egg" id="383:120" group="Spawn Eggs" />
 	<Item name="Vine" id="106" />
 	<Item name="Ward Disc" id="2265" stack="1" group="Discs" />
+	<Item name="Watch" id="347" group="Gold" emcNames="Clock" />
 	<Item name="Water Bottle" id="373:0" stack="1" />
 	<Item name="Water Bucket" id="326" stack="1" group="Iron" />
 	<Item name="Water Lily" id="111" />
@@ -389,11 +393,12 @@
 	<Item name="Wither Skull" id="397:1" emcNames="Wither Head" />
 	<Item name="Wolf Egg" id="383:95" group="Spawn Eggs" />
 	<Item name="Wood Button" id="143" group="Wood" />
+	<Item name="Wood Door" id="64" stack="1" group="Wood" emcNames="Door" />
 	<Item name="Wooden Axe" id="271" stack="1" group="Wood" />
 	<Item name="Wooden Hoe" id="290" stack="1" group="Wood" />
 	<Item name="Wooden Pickaxe" id="270" stack="1" group="Wood" />
 	<Item name="Wood Plate" id="72" group="Wood" emcNames="Wooden Plate" />
-	<Item name="Wooden Shovel" id="269" stack="1" group="Wood" />
+	<Item name="Wooden Shovel" id="269" stack="1" group="Wood" emcNames="Wooden Spade" />
 	<Item name="Wooden Sword" id="268" stack="1" group="Wood" />
 	<Item name="Workbench" id="58" group="Wood" />
 	<Item name="Yellow Stclay" id="159:4" group="Clay" />
