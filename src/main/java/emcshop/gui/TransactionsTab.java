@@ -246,11 +246,6 @@ public class TransactionsTab extends JPanel {
 
 		///////////////////////////////////////
 
-		if (settings.getPreviousUpdate() == null) {
-			//user has to perform an update first for this option to work
-			showSinceLastUpdate.setVisible(false);
-		}
-
 		exportLabel.setEnabled(false);
 		export.setEnabled(false);
 		filterByItemLabel.setEnabled(false);
@@ -305,11 +300,6 @@ public class TransactionsTab extends JPanel {
 		transactionsTable = null;
 		transactionsTableScrollPane = null;
 		netTotal = 0;
-
-		if (settings.getPreviousUpdate() == null) {
-			//user has to perform an update first for this option to work
-			showSinceLastUpdate.setVisible(false);
-		}
 
 		exportLabel.setEnabled(false);
 		export.setEnabled(false);
@@ -655,7 +645,11 @@ public class TransactionsTab extends JPanel {
 	private Date[] getQueryDateRange() {
 		Date from, to;
 		if (showSinceLastUpdate.isSelected()) {
-			from = settings.getPreviousUpdate();
+			try {
+				from = dao.getSecondLatestUpdateDate();
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 			to = null;
 		} else if (entireHistory.isSelected()) {
 			from = to = null;

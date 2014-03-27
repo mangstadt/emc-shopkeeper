@@ -373,8 +373,7 @@ public class MainFrame extends JFrame {
 		updateAvailablePanel = new JPanel(new MigLayout("insets 0"));
 
 		lastUpdateDate = new JLabel();
-		Date date = settings.getLastUpdated();
-		updateLastUpdateDate(date);
+		updateLastUpdateDate();
 
 		rupeeBalance = new JLabel();
 		updateRupeeBalance();
@@ -500,6 +499,17 @@ public class MainFrame extends JFrame {
 		}
 
 		JOptionPane.showMessageDialog(this, message, "Update complete", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	private void updateLastUpdateDate() {
+		Date date;
+		try {
+			date = dao.getLatestUpdateDate();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+
+		updateLastUpdateDate(date);
 	}
 
 	private void updateLastUpdateDate(Date date) {
