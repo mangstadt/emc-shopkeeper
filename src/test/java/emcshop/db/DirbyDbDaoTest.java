@@ -78,11 +78,46 @@ public class DirbyDbDaoTest {
 		assertIntEquals(100, meta().dbSchemaVersion());
 	}
 
-	//	@Test
-	//	public void selectRupeeBalance() throws Throwable {
-	//		meta().rupeeBalance(1234);
-	//		assertEquals(1234, dao.selectRupeeBalance());
-	//	}
+	@Test
+	public void selectRupeeBalance() throws Throwable {
+		assertNull(dao.selectRupeeBalance());
+
+		DateGenerator dg = new DateGenerator();
+		updateLog().ts(dg.next()).rupeeBalance(4321).insert();
+		updateLog().ts(dg.next()).rupeeBalance(1234).insert();
+		assertIntEquals(1234, dao.selectRupeeBalance());
+	}
+
+	@Test
+	public void insertUpdateLog() throws Throwable {
+		DateGenerator dg = new DateGenerator();
+		dao.insertUpdateLog(dg.next(), 123, 1, 2, 3, 1000);
+		updateLog().ts(dg.getGenerated(0)).rupeeBalance(123).shopTransactionCount(1).paymentTransactionCount(2).bonusFeeTransactionCount(3).timeTaken(1000).test();
+	}
+
+	@Test
+	public void getLatestUpdateDate() throws Throwable {
+		assertNull(dao.getLatestUpdateDate());
+
+		DateGenerator dg = new DateGenerator();
+		updateLog().ts(dg.next()).insert();
+		assertEquals(dg.getGenerated(0), dao.getLatestUpdateDate());
+
+		updateLog().ts(dg.next()).insert();
+		assertEquals(dg.getGenerated(1), dao.getLatestUpdateDate());
+	}
+
+	@Test
+	public void getSecondLatestUpdateDate() throws Throwable {
+		assertNull(dao.getSecondLatestUpdateDate());
+
+		DateGenerator dg = new DateGenerator();
+		updateLog().ts(dg.next()).insert();
+		assertNull(dao.getSecondLatestUpdateDate());
+
+		updateLog().ts(dg.next()).insert();
+		assertEquals(dg.getGenerated(0), dao.getSecondLatestUpdateDate());
+	}
 
 	@Test
 	public void listener_onCreate() throws Throwable {
@@ -1340,6 +1375,70 @@ public class DirbyDbDaoTest {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT db_schema_version FROM meta");
 			return rs.next() ? rs.getInt(1) : null;
+		}
+	}
+
+	public static UpdateLogTester updateLog() {
+		return new UpdateLogTester();
+	}
+
+	private static class UpdateLogTester {
+		private Date ts = new Date();
+		private int rupeeBalance = 0;
+		private int shopTransactionCount = 0, paymentTransactionCount = 0, bonusFeeTransactionCount = 0;
+		private long timeTaken = 0;
+
+		public UpdateLogTester ts(Date ts) {
+			this.ts = ts;
+			return this;
+		}
+
+		public UpdateLogTester rupeeBalance(int rupeeBalance) {
+			this.rupeeBalance = rupeeBalance;
+			return this;
+		}
+
+		public UpdateLogTester shopTransactionCount(int shopTransactionCount) {
+			this.shopTransactionCount = shopTransactionCount;
+			return this;
+		}
+
+		public UpdateLogTester paymentTransactionCount(int paymentTransactionCount) {
+			this.paymentTransactionCount = paymentTransactionCount;
+			return this;
+		}
+
+		public UpdateLogTester bonusFeeTransactionCount(int bonusFeeTransactionCount) {
+			this.bonusFeeTransactionCount = bonusFeeTransactionCount;
+			return this;
+		}
+
+		public UpdateLogTester timeTaken(long timeTaken) {
+			this.timeTaken = timeTaken;
+			return this;
+		}
+
+		public int insert() throws SQLException {
+			InsertStatement stmt = new InsertStatement("update_log");
+			stmt.setTimestamp("ts", timestamp(ts));
+			stmt.setInt("rupee_balance", rupeeBalance);
+			stmt.setInt("transaction_count", shopTransactionCount);
+			stmt.setInt("payment_transaction_count", paymentTransactionCount);
+			stmt.setInt("bonus_fee_transaction_count", bonusFeeTransactionCount);
+			stmt.setInt("time_taken", (int) timeTaken);
+			return stmt.execute(conn);
+		}
+
+		public void test() throws SQLException {
+			ResultSet rs = query("SELECT * FROM update_log");
+			rs.next();
+			assertEquals(timestamp(ts), rs.getTimestamp("ts"));
+			assertEquals(rupeeBalance, rs.getInt("rupee_balance"));
+			assertEquals(shopTransactionCount, rs.getInt("transaction_count"));
+			assertEquals(paymentTransactionCount, rs.getInt("payment_transaction_count"));
+			assertEquals(bonusFeeTransactionCount, rs.getInt("bonus_fee_transaction_count"));
+			assertEquals(timeTaken, rs.getInt("time_taken"));
+			assertFalse(rs.next());
 		}
 	}
 

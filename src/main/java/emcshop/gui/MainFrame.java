@@ -463,7 +463,7 @@ public class MainFrame extends JFrame {
 			message = "No new transactions found.";
 		} else {
 			//is this the first update?
-			boolean firstUpdate = (dao.getUpdateLogCount() == 1);
+			boolean firstUpdate = (dao.getSecondLatestUpdateDate() == null);
 
 			transactionsTab.updateComplete(showResults, firstUpdate);
 			if (showResults) {

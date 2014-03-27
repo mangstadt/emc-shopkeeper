@@ -399,7 +399,7 @@ public class Main {
 		//get the player's current rupee balance
 		Integer rupeeBalance = null;
 		if (startingDbVersion == 17) {
-			rupeeBalance = dao.selectRupeeBalance();
+			rupeeBalance = dao.selectRupeeBalanceMeta();
 		} else {
 			rupeeBalance = settings.getRupeeBalance();
 			//do not save the settings file yet

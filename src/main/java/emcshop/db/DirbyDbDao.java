@@ -193,6 +193,17 @@ public abstract class DirbyDbDao implements DbDao {
 		insertStmt.setInt("db_schema_version", version);
 		insertStmt.execute(conn);
 	}
+	
+	@Override
+	public int selectRupeeBalanceMeta() throws SQLException {
+		PreparedStatement stmt = stmt("SELECT rupee_balance FROM meta");
+		try {
+			ResultSet rs = stmt.executeQuery();
+			return rs.next() ? rs.getInt(1) : 0;
+		} finally {
+			closeStatements(stmt);
+		}
+	}
 
 	@Override
 	public Integer selectRupeeBalance() throws SQLException {
@@ -1366,18 +1377,6 @@ public abstract class DirbyDbDao implements DbDao {
 		stmt.setInt("bonus_fee_transaction_count", bonusFeeTransactionCount);
 		stmt.setInt("time_taken", (int) timeTaken);
 		stmt.execute(conn);
-	}
-
-	@Override
-	public int getUpdateLogCount() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT Count(*) FROM update_log");
-		try {
-			ResultSet rs = stmt.executeQuery();
-			rs.next();
-			return rs.getInt(1);
-		} finally {
-			closeStatements(stmt);
-		}
 	}
 
 	@Override

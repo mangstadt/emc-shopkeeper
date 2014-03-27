@@ -42,6 +42,14 @@ public interface DbDao {
 	Integer selectRupeeBalance() throws SQLException;
 
 	/**
+	 * Gets the player's rupee balance from its old location in the "meta"
+	 * table.
+	 * @return the rupee balance
+	 * @throws SQLException
+	 */
+	int selectRupeeBalanceMeta() throws SQLException;
+
+	/**
 	 * Searches for a player, inserting the player if it doesn't exist.
 	 * @param name the player name, case in-sensitive (e.g. "notch")
 	 * @return the player
@@ -275,13 +283,6 @@ public interface DbDao {
 	 * @param timeTaken the time the update took in milliseconds
 	 */
 	void insertUpdateLog(Date ts, Integer rupeeBalance, int transactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, long timeTaken) throws SQLException;
-
-	/**
-	 * Gets the number of updates that have been logged.
-	 * @return the number of updates
-	 * @throws SQLException
-	 */
-	int getUpdateLogCount() throws SQLException;
 
 	/**
 	 * Gets the timestamp of the most recent update.
