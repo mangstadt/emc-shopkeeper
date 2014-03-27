@@ -263,12 +263,7 @@ public class Main {
 		reportSender.setDatabaseVersion(dao.selectDbVersion());
 
 		//move the rupee balance to the database if it's still in the settings file
-		Integer rupeeBalance = settings.getRupeeBalance();
-		if (rupeeBalance != null) {
-			dao.updateRupeeBalance(rupeeBalance);
-			dao.commit();
-			settings.save(); //removes the rupee balance from the settings file
-		}
+		moveRupeeBalanceToDb(dao, settings);
 
 		CliController cli = new CliController(dao, settings);
 
@@ -369,12 +364,7 @@ public class Main {
 		reportSender.setDatabaseVersion(dao.selectDbVersion());
 
 		//move the rupee balance to the database if it's still in the settings file
-		Integer rupeeBalance = settings.getRupeeBalance();
-		if (rupeeBalance != null) {
-			dao.updateRupeeBalance(rupeeBalance);
-			dao.commit();
-			settings.save(); //removes the rupee balance from the settings file
-		}
+		moveRupeeBalanceToDb(dao, settings);
 
 		//tweak tooltip settings
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
@@ -394,6 +384,17 @@ public class Main {
 		mainFrame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName());
 		mainFrame.setVisible(true);
 		splash.dispose();
+	}
+
+	private static void moveRupeeBalanceToDb(DbDao dao, Settings settings) throws SQLException {
+		Integer rupeeBalance = settings.getRupeeBalance();
+		if (rupeeBalance == null) {
+			return;
+		}
+
+		dao.updateRupeeBalance(rupeeBalance);
+		dao.commit();
+		settings.save(); //removes the rupee balance from the settings file
 	}
 
 	/**
