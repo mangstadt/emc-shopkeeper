@@ -494,7 +494,7 @@ public class UpdateModelImplTest {
 		model.saveTransactions();
 
 		verify(dao).updateBonusesFeesSince(dg.getGenerated(2));
-		verify(dao).updateRupeeBalance(123);
+		verify(dao).insertUpdateLog(Mockito.any(Date.class), Mockito.eq(123), Mockito.eq(1), Mockito.eq(1), Mockito.eq(0), Mockito.anyLong());
 		verify(dao).commit();
 	}
 

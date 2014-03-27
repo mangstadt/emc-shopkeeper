@@ -252,8 +252,6 @@ public class MainFrame extends JFrame {
 						public void run() {
 							try {
 								dao.wipe();
-								settings.setLastUpdated(null);
-								settings.setPreviousUpdate(null);
 								settings.setSession(null);
 								settings.save();
 								clearSessionMenuItem.setEnabled(false);
@@ -363,7 +361,11 @@ public class MainFrame extends JFrame {
 				UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 				if (!presenter.isCanceled()) {
-					updateSuccessful(presenter.getStarted(), presenter.getRupeeBalance(), presenter.getTimeTaken(), presenter.getShopTransactions(), presenter.getPaymentTransactions(), presenter.getBonusFeeTransactions(), presenter.getPageCount(), presenter.getShowResults());
+					try {
+						updateSuccessful(presenter.getStarted(), presenter.getRupeeBalance(), presenter.getTimeTaken(), presenter.getShopTransactions(), presenter.getPaymentTransactions(), presenter.getBonusFeeTransactions(), presenter.getPageCount(), presenter.getShowResults());
+					} catch (SQLException e) {
+						throw new RuntimeException(e);
+					}
 				}
 			}
 		});
@@ -439,11 +441,11 @@ public class MainFrame extends JFrame {
 			throw new RuntimeException(e);
 		}
 
-		String title = "Payments";
+		StringBuilder sb = new StringBuilder("Payments");
 		if (count > 0) {
-			title += " (" + count + ")";
+			sb.append(" (").append(count).append(")");
 		}
-		tabs.setTitleAt(1, title);
+		tabs.setTitleAt(1, sb.toString());
 	}
 
 	public void updateInventoryTab() {
@@ -452,17 +454,16 @@ public class MainFrame extends JFrame {
 
 	/**
 	 * Called after an update has completed.
+	 * @throws SQLException
 	 */
-	private void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int pageCount, boolean showResults) {
+	private void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int pageCount, boolean showResults) throws SQLException {
+		int totalTransactions = shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount;
 		String message;
-		if (shopTransactionCount == 0) {
-			message = "No new shop transactions found.";
+		if (totalTransactions == 0) {
+			message = "No new transactions found.";
 		} else {
-			boolean firstUpdate = (settings.getLastUpdated() == null && settings.getPreviousUpdate() == null);
-
-			//only set the previous update date if this update returned transactions
-			//this line of code must run before the Transactions tab is updated
-			settings.setPreviousUpdate(settings.getLastUpdated());
+			//is this the first update?
+			boolean firstUpdate = (dao.getUpdateLogCount() == 1);
 
 			transactionsTab.updateComplete(showResults, firstUpdate);
 			if (showResults) {
@@ -484,7 +485,7 @@ public class MainFrame extends JFrame {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Update complete.\n");
 			sb.append(nf.format(pageCount)).append(" pages parsed and ");
-			sb.append(nf.format(shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount)).append(" transactions parsed in ");
+			sb.append(nf.format(totalTransactions)).append(" transactions parsed in ");
 			if (components[3] > 0) {
 				sb.append(components[3]).append(" hours, ");
 			}
@@ -493,13 +494,10 @@ public class MainFrame extends JFrame {
 			}
 			sb.append(components[1]).append(" seconds.");
 			message = sb.toString();
+
+			updateLastUpdateDate(started);
+			updateRupeeBalance(rupeeTotal);
 		}
-
-		settings.setLastUpdated(started);
-		settings.save();
-
-		updateLastUpdateDate(started);
-		updateRupeeBalance();
 
 		JOptionPane.showMessageDialog(this, message, "Update complete", JOptionPane.INFORMATION_MESSAGE);
 	}
@@ -517,13 +515,20 @@ public class MainFrame extends JFrame {
 	}
 
 	private void updateRupeeBalance() {
-		int balance;
+		Integer balance;
 		try {
 			balance = dao.selectRupeeBalance();
+			if (balance == null) {
+				balance = 0;
+			}
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
 
+		updateRupeeBalance(balance);
+	}
+
+	private void updateRupeeBalance(int balance) {
 		String balanceStr = NumberFormatter.formatRupees(balance, false);
 		rupeeBalance.setText("<html><h2><b>" + balanceStr + "</b></h2></html>");
 	}

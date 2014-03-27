@@ -85,10 +85,6 @@ public class CliController {
 		IUpdateModel model = new UpdateModelCli(config, session, dao);
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
-		settings.setPreviousUpdate(settings.getLastUpdated());
-		settings.setLastUpdated(presenter.getStarted());
-		settings.save();
-
 		int transactions = presenter.getShopTransactions() + presenter.getPaymentTransactions() + presenter.getBonusFeeTransactions();
 		out.println("\n" + presenter.getPageCount() + " pages processed and " + transactions + " transactions saved in " + (presenter.getTimeTaken() / 1000) + " seconds.");
 		logger.info(presenter.getPageCount() + " pages processed and " + transactions + " transactions saved in " + (presenter.getTimeTaken() / 1000) + " seconds.");

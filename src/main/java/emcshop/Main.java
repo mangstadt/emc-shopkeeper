@@ -257,13 +257,16 @@ public class Main {
 
 	private static void launchCli(File dbDir, Settings settings, EmcShopArguments args) throws Throwable {
 		final DbDao dao = new DirbyEmbeddedDbDao(dbDir);
+
+		int startingDbVersion = dao.selectDbVersion();
+		Integer currentRupeeBalance = prepareForUpdateLogConversion(startingDbVersion, dao, settings);
+
 		ReportSender reportSender = ReportSender.instance();
-		reportSender.setDatabaseVersion(dao.selectDbVersion());
+		reportSender.setDatabaseVersion(startingDbVersion);
 		dao.updateToLatestVersion(null);
 		reportSender.setDatabaseVersion(dao.selectDbVersion());
 
-		//move the rupee balance to the database if it's still in the settings file
-		moveRupeeBalanceToDb(dao, settings);
+		finishUpdateLogConversion(currentRupeeBalance, startingDbVersion, dao, settings);
 
 		CliController cli = new CliController(dao, settings);
 
@@ -357,14 +360,16 @@ public class Main {
 			throw e;
 		}
 
+		int startingDbVersion = dao.selectDbVersion();
+		Integer currentRupeeBalance = prepareForUpdateLogConversion(startingDbVersion, dao, settings);
+
 		//update database schema
 		ReportSender reportSender = ReportSender.instance();
-		reportSender.setDatabaseVersion(dao.selectDbVersion());
+		reportSender.setDatabaseVersion(startingDbVersion);
 		dao.updateToLatestVersion(listener);
 		reportSender.setDatabaseVersion(dao.selectDbVersion());
 
-		//move the rupee balance to the database if it's still in the settings file
-		moveRupeeBalanceToDb(dao, settings);
+		finishUpdateLogConversion(currentRupeeBalance, startingDbVersion, dao, settings);
 
 		//tweak tooltip settings
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
@@ -386,15 +391,39 @@ public class Main {
 		splash.dispose();
 	}
 
-	private static void moveRupeeBalanceToDb(DbDao dao, Settings settings) throws SQLException {
-		Integer rupeeBalance = settings.getRupeeBalance();
-		if (rupeeBalance == null) {
+	private static Integer prepareForUpdateLogConversion(int startingDbVersion, DbDao dao, Settings settings) throws SQLException {
+		if (startingDbVersion > 17) {
+			return null;
+		}
+
+		//get the player's current rupee balance
+		Integer rupeeBalance = null;
+		if (startingDbVersion == 17) {
+			rupeeBalance = dao.selectRupeeBalance();
+		} else {
+			rupeeBalance = settings.getRupeeBalance();
+			//do not save the settings file yet
+		}
+		return rupeeBalance;
+	}
+
+	private static void finishUpdateLogConversion(Integer currentRupeeBalance, int startingDbVersion, DbDao dao, Settings settings) throws SQLException {
+		if (startingDbVersion > 17) {
 			return;
 		}
 
-		dao.updateRupeeBalance(rupeeBalance);
+		Date previousUpdate = settings.getPreviousUpdate();
+		if (previousUpdate != null) {
+			dao.insertUpdateLog(previousUpdate, 0, 0, 0, 0, 0);
+		}
+
+		Date lastUpdated = settings.getLastUpdated();
+		if (lastUpdated != null) {
+			dao.insertUpdateLog(lastUpdated, currentRupeeBalance, 0, 0, 0, 0);
+		}
+
 		dao.commit();
-		settings.save(); //removes the rupee balance from the settings file
+		settings.save(); //remove unused properties
 	}
 
 	/**

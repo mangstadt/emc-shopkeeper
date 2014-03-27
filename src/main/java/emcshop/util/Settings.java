@@ -62,20 +62,20 @@ public class Settings {
 		this.windowHeight = windowHeight;
 	}
 
+	/**
+	 * Removed from properties file in DB version 18.
+	 * @return
+	 */
 	public Date getLastUpdated() {
 		return lastUpdated;
 	}
 
-	public void setLastUpdated(Date lastUpdated) {
-		this.lastUpdated = lastUpdated;
-	}
-
+	/**
+	 * Removed from properties file in DB version 18.
+	 * @return
+	 */
 	public Date getPreviousUpdate() {
 		return previousUpdate;
-	}
-
-	public void setPreviousUpdate(Date lastLastUpdated) {
-		this.previousUpdate = lastLastUpdated;
 	}
 
 	public EmcSession getSession() {
@@ -102,6 +102,10 @@ public class Settings {
 		this.logLevel = logLevel;
 	}
 
+	/**
+	 * Removed from properties file in DB version 17.
+	 * @return
+	 */
 	public Integer getRupeeBalance() {
 		return rupeeBalance;
 	}
@@ -217,8 +221,6 @@ public class Settings {
 		props.setInteger("version", version);
 		props.setInteger("window.width", windowWidth);
 		props.setInteger("window.height", windowHeight);
-		props.setDate("lastUpdated", lastUpdated);
-		props.setDate("previousUpdate", previousUpdate);
 		if (session != null && persistSession) {
 			props.set("session.username", session.getUsername());
 			props.set("session.id", session.getSessionId());

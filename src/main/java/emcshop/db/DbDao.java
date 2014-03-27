@@ -39,14 +39,7 @@ public interface DbDao {
 	 * @return the rupee balance
 	 * @throws SQLException
 	 */
-	int selectRupeeBalance() throws SQLException;
-
-	/**
-	 * Updates the player's rupee balance.
-	 * @param rupeeBalance the new rupee balance
-	 * @throws SQLException
-	 */
-	void updateRupeeBalance(int rupeeBalance) throws SQLException;
+	Integer selectRupeeBalance() throws SQLException;
 
 	/**
 	 * Searches for a player, inserting the player if it doesn't exist.
@@ -269,6 +262,40 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	void calculatePlayersFirstLastSeenDates() throws SQLException;
+
+	/**
+	 * Logs an update operation.
+	 * @param ts the time the update started
+	 * @param rupeeBalance the player's rupee balance
+	 * @param transactionCount the number of transactions that were parsed
+	 * @param paymentTransactionCount the number of payment transactions that
+	 * were parsed
+	 * @param bonusFeeTransactionCount the number of bonus fee transactions that
+	 * were parsed
+	 * @param timeTaken the time the update took in milliseconds
+	 */
+	void insertUpdateLog(Date ts, Integer rupeeBalance, int transactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, long timeTaken) throws SQLException;
+
+	/**
+	 * Gets the number of updates that have been logged.
+	 * @return the number of updates
+	 * @throws SQLException
+	 */
+	int getUpdateLogCount() throws SQLException;
+
+	/**
+	 * Gets the timestamp of the most recent update.
+	 * @return the timestamp or null if the update log is empty
+	 * @throws SQLException
+	 */
+	Date getLatestUpdateDate() throws SQLException;
+
+	/**
+	 * Gets the timestamp of the second most recent update.
+	 * @return the timestamp or null if the update log is empty
+	 * @throws SQLException
+	 */
+	Date getSecondLatestUpdateDate() throws SQLException;
 
 	/**
 	 * Deletes all data in the database.

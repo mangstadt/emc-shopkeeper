@@ -195,22 +195,11 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public int selectRupeeBalance() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT rupee_balance FROM meta");
+	public Integer selectRupeeBalance() throws SQLException {
+		PreparedStatement stmt = stmt("SELECT rupee_balance FROM update_log ORDER BY ts DESC");
 		try {
 			ResultSet rs = stmt.executeQuery();
-			return rs.next() ? rs.getInt(1) : 0;
-		} finally {
-			closeStatements(stmt);
-		}
-	}
-
-	@Override
-	public void updateRupeeBalance(int rupeeBalance) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE meta SET rupee_balance = ?");
-		try {
-			stmt.setInt(1, rupeeBalance);
-			stmt.executeUpdate();
+			return rs.next() ? rs.getInt(1) : null;
 		} finally {
 			closeStatements(stmt);
 		}
@@ -1240,13 +1229,14 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.execute("DELETE FROM players");
 			stmt.execute("DELETE FROM items");
 			stmt.execute("DELETE FROM bonuses_fees");
-			updateRupeeBalance(0);
+			stmt.execute("DELETE FROM update_log");
 
 			stmt.execute("ALTER TABLE inventory ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE items ALTER COLUMN id RESTART WITH 1");
+			stmt.execute("ALTER TABLE update_log ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("INSERT INTO bonuses_fees (since) VALUES (NULL)");
 			populateItemsTable();
 
@@ -1361,6 +1351,62 @@ public abstract class DirbyDbDao implements DbDao {
 		} finally {
 			closeStatements(stmt);
 		}
+	}
+
+	@Override
+	public void insertUpdateLog(Date ts, Integer rupeeBalance, int transactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, long timeTaken) throws SQLException {
+		InsertStatement stmt = new InsertStatement("update_log");
+		stmt.setTimestamp("ts", toTimestamp(ts));
+		if (rupeeBalance == null) {
+			rupeeBalance = 0;
+		}
+		stmt.setInt("rupee_balance", rupeeBalance);
+		stmt.setInt("transaction_count", transactionCount);
+		stmt.setInt("payment_transaction_count", paymentTransactionCount);
+		stmt.setInt("bonus_fee_transaction_count", bonusFeeTransactionCount);
+		stmt.setInt("time_taken", (int) timeTaken);
+		stmt.execute(conn);
+	}
+
+	@Override
+	public int getUpdateLogCount() throws SQLException {
+		PreparedStatement stmt = stmt("SELECT Count(*) FROM update_log");
+		try {
+			ResultSet rs = stmt.executeQuery();
+			rs.next();
+			return rs.getInt(1);
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public Date getLatestUpdateDate() throws SQLException {
+		PreparedStatement stmt = stmt("SELECT Max(ts) FROM update_log");
+		try {
+			ResultSet rs = stmt.executeQuery();
+			return rs.next() ? toDate(rs.getTimestamp(1)) : null;
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public Date getSecondLatestUpdateDate() throws SQLException {
+		PreparedStatement stmt = stmt("SELECT ts FROM update_log ORDER BY ts DESC");
+		try {
+			ResultSet rs = stmt.executeQuery();
+			int count = 0;
+			while (rs.next()) {
+				count++;
+				if (count == 2) {
+					return toDate(rs.getTimestamp(1));
+				}
+			}
+		} finally {
+			closeStatements(stmt);
+		}
+		return null;
 	}
 
 	/**

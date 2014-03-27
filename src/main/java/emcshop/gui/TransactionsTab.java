@@ -335,21 +335,17 @@ public class TransactionsTab extends JPanel {
 	}
 
 	public void updateComplete(boolean showResults, boolean firstUpdate) {
-		if (firstUpdate || settings.getPreviousUpdate() != null) {
-			//user has to perform an update first for this option to work
-			showSinceLastUpdate.setVisible(true);
-		}
+		showSinceLastUpdate.setVisible(true);
 		updateSinceLastUpdateCheckbox();
+
 		if (firstUpdate) {
 			updateEntireHistoryCheckbox();
 		}
 
 		if (showResults) {
-			if (showSinceLastUpdate.isVisible()) {
-				showSinceLastUpdate.doClick();
-				if (!showSinceLastUpdate.isSelected()) {
-					showSinceLastUpdate.setSelected(true);
-				}
+			showSinceLastUpdate.doClick();
+			if (!showSinceLastUpdate.isSelected()) {
+				showSinceLastUpdate.setSelected(true);
 			}
 
 			showItems();
@@ -357,13 +353,19 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private void updateSinceLastUpdateCheckbox() {
-		String text = "since previous update";
-		Date date = settings.getPreviousUpdate();
-		if (date != null) {
-			text += " (" + df.format(date) + ")";
+		Date date;
+		try {
+			date = dao.getSecondLatestUpdateDate();
+		} catch (SQLException e) {
+			date = null;
 		}
 
-		showSinceLastUpdate.setText(text);
+		StringBuilder sb = new StringBuilder("since previous update");
+		if (date != null) {
+			sb.append(" (").append(df.format(date)).append(")");
+		}
+
+		showSinceLastUpdate.setText(sb.toString());
 	}
 
 	private void updateEntireHistoryCheckbox() {

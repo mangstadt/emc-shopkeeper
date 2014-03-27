@@ -162,10 +162,8 @@ public class UpdateModelImpl implements IUpdateModel {
 				dao.updateBonusesFeesSince(earliestParsedTransactionDate);
 			}
 
-			Integer rupeeBalance = getRupeeBalance();
-			if (rupeeBalance != null) {
-				dao.updateRupeeBalance(rupeeBalance);
-			}
+			//log the update operation
+			dao.insertUpdateLog(new Date(started), getRupeeBalance(), shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, timeTaken);
 
 			dao.commit();
 		} catch (SQLException e) {

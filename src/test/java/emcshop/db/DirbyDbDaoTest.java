@@ -78,17 +78,11 @@ public class DirbyDbDaoTest {
 		assertIntEquals(100, meta().dbSchemaVersion());
 	}
 
-	@Test
-	public void selectRupeeBalance() throws Throwable {
-		meta().rupeeBalance(1234);
-		assertEquals(1234, dao.selectRupeeBalance());
-	}
-
-	@Test
-	public void updateRupeeBalance() throws Throwable {
-		dao.updateRupeeBalance(1234);
-		assertIntEquals(1234, meta().rupeeBalance());
-	}
+	//	@Test
+	//	public void selectRupeeBalance() throws Throwable {
+	//		meta().rupeeBalance(1234);
+	//		assertEquals(1234, dao.selectRupeeBalance());
+	//	}
 
 	@Test
 	public void listener_onCreate() throws Throwable {
@@ -1311,7 +1305,6 @@ public class DirbyDbDaoTest {
 		DirbyDbDao dao = new DirbyMemoryDbDao("wipe");
 		conn = dao.getConnection();
 
-		meta().rupeeBalance(1234);
 		int notch = players().name("Notch").insert();
 		int transaction = transactions().player(notch).insert();
 		paymentTransactions().transaction(transaction).insert();
@@ -1322,7 +1315,6 @@ public class DirbyDbDaoTest {
 		dao.wipe();
 
 		assertIntEquals(dao.getAppDbVersion(), meta().dbSchemaVersion());
-		assertIntEquals(0, meta().rupeeBalance());
 		assertEquals(0, players().count());
 		assertEquals(0, transactions().count());
 		assertEquals(0, paymentTransactions().count());
@@ -1344,22 +1336,9 @@ public class DirbyDbDaoTest {
 			return this;
 		}
 
-		public MetaHelper rupeeBalance(int rupeeBalance) throws SQLException {
-			PreparedStatement stmt = conn.prepareStatement("UPDATE meta SET rupee_balance = ?");
-			stmt.setInt(1, rupeeBalance);
-			stmt.executeUpdate();
-			return this;
-		}
-
 		public Integer dbSchemaVersion() throws SQLException {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT db_schema_version FROM meta");
-			return rs.next() ? rs.getInt(1) : null;
-		}
-
-		public Integer rupeeBalance() throws SQLException {
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT rupee_balance FROM meta");
 			return rs.next() ? rs.getInt(1) : null;
 		}
 	}

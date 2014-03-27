@@ -10,10 +10,7 @@
 CREATE TABLE meta(
 	--the database schema version
 	--used for updating existing databases as future versions are released
-	db_schema_version INTEGER NOT NULL,
-	
-	--the player's current rupee balance
-	rupee_balance INTEGER DEFAULT 0 NOT NULL
+	db_schema_version INTEGER NOT NULL
 );
 
 CREATE TABLE items(
@@ -87,10 +84,21 @@ CREATE TABLE bonuses_fees(
 );
 INSERT INTO bonuses_fees (since) VALUES (NULL);
 
+CREATE TABLE update_log (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	ts TIMESTAMP NOT NULL,
+	rupee_balance INT NOT NULL,
+	transaction_count INT NOT NULL,
+	payment_transaction_count INT NOT NULL,
+	bonus_fee_transaction_count INT NOT NULL,
+	time_taken INT NOT NULL
+);
+
 CREATE INDEX ts_index ON transactions(ts);
 CREATE INDEX player_index ON transactions(player);
 CREATE INDEX item_index ON transactions(item);
 CREATE INDEX item_index2 ON inventory(item);
+CREATE INDEX update_log_ts_index ON update_log(ts);
 
 CREATE PROCEDURE UPDATE_ITEM_NAMES()
 LANGUAGE JAVA PARAMETER STYLE JAVA
