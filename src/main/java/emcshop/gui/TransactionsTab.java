@@ -346,6 +346,9 @@ public class TransactionsTab extends JPanel {
 		Date date;
 		try {
 			date = dao.getSecondLatestUpdateDate();
+			if (date == null) {
+				date = dao.getEarliestTransactionDate();
+			}
 		} catch (SQLException e) {
 			date = null;
 		}
@@ -359,11 +362,11 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private void updateEntireHistoryCheckbox() {
-		Date earliestTransactionDate = null;
+		Date earliestTransactionDate;
 		try {
 			earliestTransactionDate = dao.getEarliestTransactionDate();
 		} catch (SQLException e) {
-			//ignore
+			earliestTransactionDate = null;
 		}
 
 		String text = "entire history";
