@@ -391,6 +391,16 @@ public class Main {
 		splash.dispose();
 	}
 
+	/**
+	 * Gets the player's current rupee balance so that it can be transfered to
+	 * the "update_log" table. This must be called *before* the database is
+	 * updated.
+	 * @param startingDbVersion the current database version
+	 * @param dao
+	 * @param settings
+	 * @return the player's current rupee balance
+	 * @throws SQLException
+	 */
 	private static Integer prepareForUpdateLogConversion(int startingDbVersion, DbDao dao, Settings settings) throws SQLException {
 		if (startingDbVersion > 17) {
 			return null;
@@ -407,6 +417,16 @@ public class Main {
 		return rupeeBalance;
 	}
 
+	/**
+	 * Inits the "update_log" table. This must be called *after* the database is
+	 * updated.
+	 * @param currentRupeeBalance the player's current rupee balance
+	 * @param startingDbVersion the database version before the database was
+	 * updated
+	 * @param dao
+	 * @param settings
+	 * @throws SQLException
+	 */
 	private static void finishUpdateLogConversion(Integer currentRupeeBalance, int startingDbVersion, DbDao dao, Settings settings) throws SQLException {
 		if (startingDbVersion > 17) {
 			return;
