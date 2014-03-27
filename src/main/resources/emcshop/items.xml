@@ -220,9 +220,9 @@
 	<Item name="Leash" id="420" />
 	<Item name="Leather" id="334" group="Leather" />
 	<Item name="Leather Boots" id="301" stack="1" group="Leather" />
-	<Item name="Leather Chest" id="299" stack="1" group="Leather" />
-	<Item name="Leather Helmet" id="298" stack="1" group="Leather" />
-	<Item name="Leather Leggings" id="300" stack="1" group="Leather" />
+	<Item name="Leather Cap" id="298" stack="1" group="Leather" emcNames="Leather Helmet" />
+	<Item name="Leather Pants" id="300" stack="1" group="Leather" emcNames="Leather Leggings" />
+	<Item name="Leather Tunic" id="299" stack="1" group="Leather" emcNames="Leather Chest" />
 	<Item name="Lever" id="69" />
 	<Item name="Lghtblue Stclay" id="159:3" group="Clay" />
 	<Item name="Light Blue Dye" id="351:12" group="Dyes" />
