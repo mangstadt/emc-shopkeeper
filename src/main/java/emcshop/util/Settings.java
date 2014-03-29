@@ -25,7 +25,9 @@ public class Settings {
 	private Integer rupeeBalance;
 	private boolean showProfilesOnStartup;
 	private boolean showQuantitiesInStacks;
+	private boolean backupsEnabled;
 	private Integer backupFrequency;
+	private Integer maxBackups;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -135,6 +137,22 @@ public class Settings {
 		this.backupFrequency = backupFrequency;
 	}
 
+	public boolean getBackupsEnabled() {
+		return backupsEnabled;
+	}
+
+	public void setBackupsEnabled(boolean enabled) {
+		this.backupsEnabled = enabled;
+	}
+
+	public Integer getMaxBackups() {
+		return maxBackups;
+	}
+
+	public void setMaxBackups(Integer maxBackups) {
+		this.maxBackups = maxBackups;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowWidth = 1000;
@@ -147,7 +165,10 @@ public class Settings {
 		rupeeBalance = null;
 		showProfilesOnStartup = false;
 		showQuantitiesInStacks = false;
+
+		backupsEnabled = true;
 		backupFrequency = 7;
+		maxBackups = 10;
 	}
 
 	public void load() throws IOException {
@@ -224,11 +245,20 @@ public class Settings {
 
 		showQuantitiesInStacks = props.getBoolean("showQuantitiesInStacks", false);
 
+		backupsEnabled = props.getBoolean("backup.enabled", true);
+
 		try {
 			backupFrequency = props.getInteger("backup.frequency", 7);
 		} catch (NumberFormatException e) {
 			logger.log(Level.WARNING, "Problem parsing backup.frequency: ", e);
 			backupFrequency = 7;
+		}
+
+		try {
+			maxBackups = props.getInteger("backup.max", 10);
+		} catch (NumberFormatException e) {
+			logger.log(Level.WARNING, "Problem parsing backup.max: ", e);
+			maxBackups = 10;
 		}
 	}
 
@@ -247,7 +277,9 @@ public class Settings {
 		props.set("log.level", logLevel.getName());
 		props.setBoolean("showProfilesOnStartup", showProfilesOnStartup);
 		props.setBoolean("showQuantitiesInStacks", showQuantitiesInStacks);
+		props.setBoolean("backup.enabled", backupsEnabled);
 		props.setInteger("backup.frequency", backupFrequency);
+		props.setInteger("backup.max", maxBackups);
 
 		try {
 			props.store(file, "EMC Shopkeeper settings");

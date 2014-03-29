@@ -8,7 +8,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,20 +21,46 @@ import emcshop.util.ZipUtils.ZipListener;
  * Manages database backups.
  */
 public class BackupManager {
+	private static final int DAYS = 24 * 60 * 60 * 1000;
 	private final File dbDir, backupDir;
-	private final Integer backupFrequency;
-	private final DateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+	private final boolean backupsEnabled;
+	private final Integer backupFrequency, maxBackups;
+	private final DateFormat backupFileNameDateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+	private final Pattern backupFileNameRegex = Pattern.compile("^db-(\\d{8}T\\d{6})\\.backup\\.zip$");
 
 	/**
 	 * @param dbDir the live database directory
 	 * @param backupDir the directory where database backups are stored
-	 * @param backupFrequency how often backups should be made (in days), or
-	 * null to never backup
+	 * @param backupsEnabled true if auto backups are enabled, false if not
+	 * @param backupFrequency how often backups should be made (in days)
+	 * @param maxBackups the max number of backups to keep, or null to never
+	 * delete
 	 */
-	public BackupManager(File dbDir, File backupDir, Integer backupFrequency) {
+	public BackupManager(File dbDir, File backupDir, boolean backupsEnabled, Integer backupFrequency, Integer maxBackups) {
 		this.dbDir = dbDir;
 		this.backupDir = backupDir;
+		this.backupsEnabled = backupsEnabled;
 		this.backupFrequency = backupFrequency;
+		this.maxBackups = maxBackups;
+	}
+
+	/**
+	 * Deletes old backups.
+	 */
+	public void cleanup() {
+		if (maxBackups == null) {
+			return;
+		}
+
+		Map<Date, File> backups = getBackups();
+		List<Date> dates = new ArrayList<Date>(backups.keySet());
+		Collections.sort(dates, Collections.reverseOrder());
+
+		for (int i = maxBackups; i < dates.size(); i++) {
+			Date date = dates.get(i);
+			File file = backups.get(date);
+			file.delete();
+		}
 	}
 
 	/**
@@ -40,7 +68,7 @@ public class BackupManager {
 	 * @return true if a backup is needed, false if not
 	 */
 	public boolean shouldBackup() {
-		if (backupFrequency == null || !dbDir.exists()) {
+		if (backupsEnabled || !dbDir.exists()) {
 			return false;
 		}
 
@@ -49,10 +77,14 @@ public class BackupManager {
 			return true;
 		}
 
-		Date d = new Date(System.currentTimeMillis() - backupFrequency * 24 * 60 * 60 * 1000);
-		return latestBackup.before(d);
+		Date oldest = new Date(System.currentTimeMillis() - backupFrequency * DAYS);
+		return latestBackup.before(oldest);
 	}
 
+	/**
+	 * Gets the size of the live database.
+	 * @return the database size in bytes
+	 */
 	public long getSizeOfDatabase() {
 		return ZipUtils.getDirectorySize(dbDir);
 	}
@@ -60,15 +92,15 @@ public class BackupManager {
 	/**
 	 * Backs up the database.
 	 * @param listener
-	 * @return
 	 * @throws IOException
 	 */
 	public void backup(ZipListener listener) throws IOException {
 		backupDir.mkdirs();
-		File zip = new File(backupDir, "db-" + df.format(new Date()) + ".backup.zip");
+		File zip = new File(backupDir, "db-" + backupFileNameDateFormat.format(new Date()) + ".backup.zip");
 		try {
 			ZipUtils.zipDirectory(dbDir, zip, listener);
 		} catch (Throwable t) {
+			//delete the zip file if anything goes wrong
 			zip.delete();
 
 			if (t instanceof IOException) {
@@ -86,38 +118,43 @@ public class BackupManager {
 	 */
 	private Date getLatestBackupDate() {
 		List<Date> dates = getBackupDates();
-		return dates.isEmpty() ? null : dates.get(dates.size() - 1);
+		return dates.isEmpty() ? null : dates.get(0);
 	}
 
 	/**
-	 * Gets the dates of all backups.
+	 * Gets the dates of all backups in descending order.
 	 * @return the backup dates
 	 */
 	public List<Date> getBackupDates() {
+		Map<Date, File> backups = getBackups();
+		List<Date> dates = new ArrayList<Date>(backups.keySet());
+		Collections.sort(dates, Collections.reverseOrder());
+		return dates;
+	}
+
+	private Map<Date, File> getBackups() {
+		Map<Date, File> backups = new HashMap<Date, File>();
 		if (!backupDir.isDirectory()) {
-			return new ArrayList<Date>(0);
+			return backups;
 		}
 
-		Pattern p = Pattern.compile("^db-(\\d{8}T\\d{6})\\.backup\\.zip$");
-		List<Date> dates = new ArrayList<Date>();
 		for (File file : backupDir.listFiles()) {
-			Matcher m = p.matcher(file.getName());
+			Matcher m = backupFileNameRegex.matcher(file.getName());
 			if (!m.find()) {
 				continue;
 			}
 
 			Date date;
 			try {
-				date = df.parse(m.group(1));
+				date = backupFileNameDateFormat.parse(m.group(1));
 			} catch (ParseException e) {
 				//should never be thrown because of the regex
 				continue;
 			}
 
-			dates.add(date);
+			backups.put(date, file);
 		}
 
-		Collections.sort(dates);
-		return dates;
+		return backups;
 	}
 }

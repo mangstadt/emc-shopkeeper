@@ -322,16 +322,14 @@ public class Main {
 		splash.setVisible(true);
 
 		//create the backup manager
-		boolean backedup = false;
-		Integer backupFrequency = settings.getBackupFrequency();
-		if (backupFrequency == 0) {
-			//"0" means "do not do backups"
-			backupFrequency = null;
-		}
-		File dbBackupDir = new File(profileDir, "db-backup");
-		BackupManager backupManager = new BackupManager(dbDir, dbBackupDir, backupFrequency);
+		File dbBackupDir = new File(profileDir, "db-backups");
+		BackupManager backupManager = new BackupManager(dbDir, dbBackupDir, settings.getBackupsEnabled(), settings.getBackupFrequency(), settings.getMaxBackups());
+
+		//delete old backups
+		backupManager.cleanup();
 
 		//backup the database if a backup is due
+		boolean backedup = false;
 		if (backupManager.shouldBackup()) {
 			final long databaseSize = backupManager.getSizeOfDatabase();
 			backupManager.backup(new ZipListener() {
