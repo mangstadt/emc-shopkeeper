@@ -25,6 +25,7 @@ import emcshop.cli.CliController;
 import emcshop.cli.EmcShopArguments;
 import emcshop.db.DbDao;
 import emcshop.db.DbListener;
+import emcshop.db.DirbyDbDao;
 import emcshop.db.DirbyEmbeddedDbDao;
 import emcshop.gui.AboutDialog;
 import emcshop.gui.ItemSuggestField;
@@ -41,6 +42,7 @@ import emcshop.presenter.ProfileSelectorPresenter;
 import emcshop.presenter.UnhandledErrorPresenter;
 import emcshop.util.GuiUtils;
 import emcshop.util.Settings;
+import emcshop.util.ZipUtils.ZipListener;
 import emcshop.view.IProfileSelectorView;
 import emcshop.view.ProfileSelectorViewImpl;
 
@@ -319,6 +321,33 @@ public class Main {
 		final SplashFrame splash = new SplashFrame();
 		splash.setVisible(true);
 
+		//create the backup manager
+		boolean backedup = false;
+		Integer backupFrequency = settings.getBackupFrequency();
+		if (backupFrequency == 0) {
+			//"0" means "do not do backups"
+			backupFrequency = null;
+		}
+		File dbBackupDir = new File(profileDir, "db-backup");
+		BackupManager backupManager = new BackupManager(dbDir, dbBackupDir, backupFrequency);
+
+		//backup the database if a backup is due
+		if (backupManager.shouldBackup()) {
+			final long databaseSize = backupManager.getSizeOfDatabase();
+			backupManager.backup(new ZipListener() {
+				private long zipped = 0;
+
+				@Override
+				public void onZippedFile(File file) {
+					zipped += file.length();
+					int percent = (int) (zipped / databaseSize * 100.0);
+					splash.setMessage("Backing up database... (" + percent + "%)");
+				}
+			});
+
+			backedup = true;
+		}
+
 		//set uncaught exception handler
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
@@ -361,6 +390,30 @@ public class Main {
 		}
 
 		int startingDbVersion = dao.selectDbVersion();
+
+		//backup the database if there is a database schema change
+		if (!backedup && DirbyDbDao.schemaVersion > startingDbVersion) {
+			dao.close();
+
+			final long size = backupManager.getSizeOfDatabase();
+			backupManager.backup(new ZipListener() {
+				private long zipped = 0;
+
+				@Override
+				public void onZippedFile(File file) {
+					zipped += file.length();
+					int percent = (int) (zipped / size * 100.0);
+					splash.setMessage("Backing up database before upgrade... (" + percent + "%)");
+				}
+			});
+
+			backedup = true;
+
+			//re-connect to database
+			splash.setMessage("Restarting database...");
+			dao = new DirbyEmbeddedDbDao(dbDir, listener);
+		}
+
 		Integer currentRupeeBalance = prepareForUpdateLogConversion(startingDbVersion, dao, settings);
 
 		//update database schema

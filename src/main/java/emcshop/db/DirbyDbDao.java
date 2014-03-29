@@ -44,7 +44,7 @@ public abstract class DirbyDbDao implements DbDao {
 	 * directly. Use {@link #getAppDbVersion()} instead, because this method
 	 * gets overridden in unit tests.
 	 */
-	private static final int schemaVersion = 18;
+	public static final int schemaVersion = 18;
 
 	protected Connection conn;
 	protected String jdbcUrl;
@@ -193,7 +193,7 @@ public abstract class DirbyDbDao implements DbDao {
 		insertStmt.setInt("db_schema_version", version);
 		insertStmt.execute(conn);
 	}
-	
+
 	@Override
 	public int selectRupeeBalanceMeta() throws SQLException {
 		PreparedStatement stmt = stmt("SELECT rupee_balance FROM meta");

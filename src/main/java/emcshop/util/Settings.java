@@ -25,6 +25,7 @@ public class Settings {
 	private Integer rupeeBalance;
 	private boolean showProfilesOnStartup;
 	private boolean showQuantitiesInStacks;
+	private Integer backupFrequency;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -126,6 +127,14 @@ public class Settings {
 		this.showQuantitiesInStacks = showQuantitiesInStacks;
 	}
 
+	public Integer getBackupFrequency() {
+		return backupFrequency;
+	}
+
+	public void setBackupFrequency(Integer backupFrequency) {
+		this.backupFrequency = backupFrequency;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowWidth = 1000;
@@ -138,6 +147,7 @@ public class Settings {
 		rupeeBalance = null;
 		showProfilesOnStartup = false;
 		showQuantitiesInStacks = false;
+		backupFrequency = 7;
 	}
 
 	public void load() throws IOException {
@@ -213,6 +223,13 @@ public class Settings {
 		showProfilesOnStartup = props.getBoolean("showProfilesOnStartup", false);
 
 		showQuantitiesInStacks = props.getBoolean("showQuantitiesInStacks", false);
+
+		try {
+			backupFrequency = props.getInteger("backup.frequency", 7);
+		} catch (NumberFormatException e) {
+			logger.log(Level.WARNING, "Problem parsing backup.frequency: ", e);
+			backupFrequency = 7;
+		}
 	}
 
 	public void save() {
@@ -230,6 +247,7 @@ public class Settings {
 		props.set("log.level", logLevel.getName());
 		props.setBoolean("showProfilesOnStartup", showProfilesOnStartup);
 		props.setBoolean("showQuantitiesInStacks", showQuantitiesInStacks);
+		props.setInteger("backup.frequency", backupFrequency);
 
 		try {
 			props.store(file, "EMC Shopkeeper settings");
