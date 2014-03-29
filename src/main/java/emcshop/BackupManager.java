@@ -50,7 +50,7 @@ public class BackupManager {
 	 * Deletes old backups.
 	 */
 	public void cleanup() {
-		if (maxBackups == null) {
+		if (!backupsEnabled || maxBackups == null) {
 			return;
 		}
 
