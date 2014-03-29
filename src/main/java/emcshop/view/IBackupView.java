@@ -7,17 +7,23 @@ import java.util.List;
 public interface IBackupView {
 	void addStartBackupListener(ActionListener listener);
 
-	void addRestoreBackupListener(ActionListener listener);
+	void addStartRestoreListener(ActionListener listener);
+
+	void addDeleteBackupListener(ActionListener listener);
 
 	void addSaveSettingsListener(ActionListener listener);
 
 	void addCancelListener(ActionListener listener);
+
+	void addExitListener(ActionListener listener);
 
 	boolean getAutoBackupEnabled();
 
 	Integer getBackupFrequency();
 
 	Integer getMaxBackups();
+
+	Date getSelectedBackup();
 
 	void setAutoBackupEnabled(boolean enabled);
 
@@ -30,6 +36,8 @@ public interface IBackupView {
 	void setBackupPercentComplete(double percent);
 
 	void backupComplete();
+
+	void restoreComplete();
 
 	void invalidFrequency();
 

@@ -21,6 +21,7 @@ public class BackupModelImpl implements IBackupModel {
 	private final BackupManager backupManager;
 	private final List<ActionListener> backupCompleteListeners = new ArrayList<ActionListener>();
 	private final List<ActionListener> backupPercentCompleteListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> restoreCompleteListeners = new ArrayList<ActionListener>();
 
 	public BackupModelImpl(DbDao dao, Settings settings, BackupManager backupManager) {
 		this.dao = dao;
@@ -36,6 +37,11 @@ public class BackupModelImpl implements IBackupModel {
 	@Override
 	public void addBackupPercentCompleteListener(ActionListener listener) {
 		backupPercentCompleteListeners.add(listener);
+	}
+
+	@Override
+	public void addRestoreCompleteListener(ActionListener listener) {
+		restoreCompleteListeners.add(listener);
 	}
 
 	@Override
@@ -119,4 +125,31 @@ public class BackupModelImpl implements IBackupModel {
 		return t;
 	}
 
+	@Override
+	public Thread startRestore(final Date date) {
+		Thread t = new Thread("Restore") {
+			@Override
+			public void run() {
+				try {
+					dao.close();
+					backupManager.restore(date);
+				} catch (IOException e) {
+					//TODO display error
+					throw new RuntimeException(e);
+				} catch (SQLException e) {
+					//TODO display error
+					throw new RuntimeException(e);
+				} finally {
+					GuiUtils.fireEvents(restoreCompleteListeners);
+				}
+			}
+		};
+		t.start();
+		return t;
+	}
+
+	@Override
+	public void deleteBackup(Date date) {
+		backupManager.delete(date);
+	}
 }

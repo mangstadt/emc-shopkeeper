@@ -9,6 +9,8 @@ public interface IBackupModel {
 
 	void addBackupPercentCompleteListener(ActionListener listener);
 
+	void addRestoreCompleteListener(ActionListener listener);
+
 	boolean getAutoBackupEnabled();
 
 	Integer getBackupFrequency();
@@ -26,4 +28,8 @@ public interface IBackupModel {
 	void saveSettings();
 
 	Thread startBackup();
+
+	Thread startRestore(Date date);
+
+	void deleteBackup(Date date);
 }

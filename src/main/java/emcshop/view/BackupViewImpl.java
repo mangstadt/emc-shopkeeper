@@ -5,16 +5,22 @@ import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.AbstractListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -24,14 +30,19 @@ import emcshop.gui.HelpLabel;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.GuiUtils;
+import emcshop.util.RelativeDateFormat;
 
 @SuppressWarnings("serial")
 public class BackupViewImpl extends JDialog implements IBackupView {
-	private final JButton ok, cancel, backupNow;
+	private final JButton ok, cancel, backupNow, restore, delete;
 	private final JCheckBox enabled;
-	private final JLabel loading;
+	private final JLabel backupLoading, restoreLoading;
 	private final JNumberTextField frequency, max;
 	private final SettingsPanel settingsPanel;
+	private final JList backups;
+	private final List<ActionListener> deleteListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> restoreListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> exitListeners = new ArrayList<ActionListener>();
 
 	public BackupViewImpl(Window owner) {
 		super(owner, "Database Backup Settings", ModalityType.APPLICATION_MODAL);
@@ -62,19 +73,23 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 		backupNow.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				loading.setText("0%");
-				loading.setVisible(true);
+				backupLoading.setText("0%");
+				backupLoading.setVisible(true);
 
 				cancel.setEnabled(false);
 				ok.setEnabled(false);
 				enabled.setEnabled(false);
 				settingsPanel.setEnabled(false);
 				backupNow.setEnabled(false);
+				restore.setEnabled(false);
 			}
 		});
 
-		loading = new JLabel(ImageManager.getLoadingSmall(), SwingConstants.LEFT);
-		loading.setVisible(false);
+		backupLoading = new JLabel(ImageManager.getLoadingSmall(), SwingConstants.LEFT);
+		backupLoading.setVisible(false);
+
+		restoreLoading = new JLabel("Working...", ImageManager.getLoadingSmall(), SwingConstants.LEFT);
+		restoreLoading.setVisible(false);
 
 		enabled = new JCheckBox("Enable automatic database backups");
 		enabled.addChangeListener(new ChangeListener() {
@@ -86,12 +101,85 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 		frequency = new JNumberTextField();
 		max = new JNumberTextField();
 
+		restore = new JButton("Restore");
+		restore.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Date selected = getSelectedBackup();
+				if (selected == null) {
+					return;
+				}
+
+				int result = JOptionPane.showConfirmDialog(BackupViewImpl.this, "Are you sure you want to restore this backup?", "Confirm Restore", JOptionPane.YES_NO_OPTION);
+				if (result != JOptionPane.YES_OPTION) {
+					return;
+				}
+
+				restoreLoading.setVisible(true);
+
+				cancel.setEnabled(false);
+				ok.setEnabled(false);
+				enabled.setEnabled(false);
+				settingsPanel.setEnabled(false);
+				backupNow.setEnabled(false);
+				restore.setEnabled(false);
+				delete.setEnabled(false);
+
+				GuiUtils.fireEvents(restoreListeners);
+			}
+		});
+
+		delete = new JButton("Delete");
+		delete.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Date selected = getSelectedBackup();
+				if (selected == null) {
+					return;
+				}
+
+				int result = JOptionPane.showConfirmDialog(BackupViewImpl.this, "Are you sure you want to delete this backup?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+				if (result != JOptionPane.YES_OPTION) {
+					return;
+				}
+
+				GuiUtils.fireEvents(deleteListeners);
+			}
+		});
+
+		backups = new JList();
+		backups.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		backups.setCellRenderer(new ListCellRenderer() {
+			private final RelativeDateFormat df = new RelativeDateFormat();
+			private final Color selectedBg = new Color(192, 192, 192);
+
+			@Override
+			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
+				Date date = (Date) value;
+				JLabel label = new JLabel(df.format(date));
+				if (selected) {
+					label.setOpaque(true);
+					label.setBackground(selectedBg);
+				}
+				return label;
+			}
+		});
+
 		///////////////////////////////////////
 
 		setLayout(new MigLayout());
+
 		add(backupNow);
 		add(new JLabel("<html><div width=300>The database holds all of your transaction data, including your payment transactions and inventory.  It can be backed up incase it is corrupted in some way.</div></html>"), "span 1 2, wrap");
-		add(loading, "align center, wrap");
+		add(backupLoading, "align center, wrap");
+
+		add(new JSeparator(), "w 100%, span 2, wrap");
+
+		add(restore);
+		JScrollPane pane = new JScrollPane(backups);
+		add(pane, "span 1 3, h 100, w 100%, wrap");
+		add(delete, "wrap");
+		add(restoreLoading, "align center, wrap");
 
 		add(new JSeparator(), "w 100%, span 2, wrap");
 
@@ -113,8 +201,13 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	}
 
 	@Override
-	public void addRestoreBackupListener(ActionListener listener) {
-		//TODO
+	public void addStartRestoreListener(final ActionListener listener) {
+		restoreListeners.add(listener);
+	}
+
+	@Override
+	public void addDeleteBackupListener(final ActionListener listener) {
+		deleteListeners.add(listener);
 	}
 
 	@Override
@@ -130,6 +223,11 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	}
 
 	@Override
+	public void addExitListener(ActionListener listener) {
+		exitListeners.add(listener);
+	}
+
+	@Override
 	public boolean getAutoBackupEnabled() {
 		return enabled.isSelected();
 	}
@@ -142,6 +240,11 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	@Override
 	public Integer getMaxBackups() {
 		return max.getInteger();
+	}
+
+	@Override
+	public Date getSelectedBackup() {
+		return (Date) backups.getSelectedValue();
 	}
 
 	@Override
@@ -161,19 +264,29 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	}
 
 	@Override
-	public void setBackups(List<Date> backups) {
-		//TODO
+	public void setBackups(final List<Date> backups) {
+		this.backups.setModel(new AbstractListModel() {
+			@Override
+			public Object getElementAt(int index) {
+				return backups.get(index);
+			}
+
+			@Override
+			public int getSize() {
+				return backups.size();
+			}
+		});
 	}
 
 	@Override
 	public void setBackupPercentComplete(double percent) {
 		int percentInt = (int) percent;
-		loading.setText(percentInt + "%");
+		backupLoading.setText(percentInt + "%");
 	}
 
 	@Override
 	public void backupComplete() {
-		loading.setVisible(false);
+		backupLoading.setVisible(false);
 
 		ok.setEnabled(true);
 		cancel.setEnabled(true);
@@ -182,8 +295,28 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 			settingsPanel.setEnabled(true);
 		}
 		backupNow.setEnabled(true);
+		restore.setEnabled(true);
+		delete.setEnabled(true);
 
 		JOptionPane.showMessageDialog(this, "Backup complete.", "Backup complete", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	@Override
+	public void restoreComplete() {
+		restoreLoading.setVisible(false);
+
+		ok.setEnabled(true);
+		cancel.setEnabled(true);
+		enabled.setEnabled(true);
+		if (enabled.isSelected()) {
+			settingsPanel.setEnabled(true);
+		}
+		backupNow.setEnabled(true);
+		restore.setEnabled(true);
+		delete.setEnabled(true);
+
+		JOptionPane.showMessageDialog(this, "The database has been restored successfully.  When you click OK, EMC Shopkeeper will exit.  Please start EMC Shopkeeper again.", "Database Restore Complete", JOptionPane.INFORMATION_MESSAGE);
+		GuiUtils.fireEvents(exitListeners);
 	}
 
 	@Override

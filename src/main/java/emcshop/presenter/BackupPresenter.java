@@ -2,6 +2,7 @@ package emcshop.presenter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 
 import emcshop.model.IBackupModel;
 import emcshop.view.IBackupView;
@@ -9,6 +10,7 @@ import emcshop.view.IBackupView;
 public class BackupPresenter {
 	private final IBackupView view;
 	private final IBackupModel model;
+	private boolean exit = false;
 
 	public BackupPresenter(IBackupView view, IBackupModel model) {
 		this.view = view;
@@ -21,10 +23,17 @@ public class BackupPresenter {
 			}
 		});
 
-		view.addRestoreBackupListener(new ActionListener() {
+		view.addStartRestoreListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				onRestoreBackup();
+				onStartRestore();
+			}
+		});
+
+		view.addDeleteBackupListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				onDeleteBackup();
 			}
 		});
 
@@ -42,6 +51,13 @@ public class BackupPresenter {
 			}
 		});
 
+		view.addExitListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				onExit();
+			}
+		});
+
 		model.addBackupPercentCompleteListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -53,6 +69,13 @@ public class BackupPresenter {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				onBackupComplete();
+			}
+		});
+
+		model.addRestoreCompleteListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				onRestoreComplete();
 			}
 		});
 
@@ -73,11 +96,22 @@ public class BackupPresenter {
 	}
 
 	private void onBackupComplete() {
+		view.setBackups(model.getBackups());
 		view.backupComplete();
 	}
 
-	private void onRestoreBackup() {
-		//TODO
+	private void onStartRestore() {
+		model.startRestore(view.getSelectedBackup());
+	}
+
+	private void onRestoreComplete() {
+		view.restoreComplete();
+	}
+
+	private void onDeleteBackup() {
+		Date date = view.getSelectedBackup();
+		model.deleteBackup(date);
+		view.setBackups(model.getBackups());
 	}
 
 	private void onSaveSettings() {
@@ -103,5 +137,14 @@ public class BackupPresenter {
 
 	private void onCancel() {
 		view.close();
+	}
+
+	private void onExit() {
+		exit = true;
+		view.close();
+	}
+
+	public boolean getExit() {
+		return exit;
 	}
 }

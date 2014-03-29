@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
+
 import emcshop.util.ZipUtils;
 import emcshop.util.ZipUtils.ZipListener;
 
@@ -96,7 +98,7 @@ public class BackupManager {
 	 */
 	public void backup(ZipListener listener) throws IOException {
 		backupDir.mkdirs();
-		File zip = new File(backupDir, "db-" + backupFileNameDateFormat.format(new Date()) + ".backup.zip");
+		File zip = getBackupFile(new Date());
 		try {
 			ZipUtils.zipDirectory(dbDir, zip, listener);
 		} catch (Throwable t) {
@@ -110,6 +112,57 @@ public class BackupManager {
 				throw (RuntimeException) t;
 			}
 		}
+	}
+
+	/**
+	 * Restores a backed-up database.
+	 * @param date the date of the backup
+	 * @throws IOException
+	 */
+	public void restore(Date date) throws IOException {
+		//rename the live database directory
+		File dbDirMoved = new File(dbDir.getParent(), dbDir.getName() + ".tmp");
+		dbDir.renameTo(dbDirMoved);
+
+		File zipFile = getBackupFile(date);
+		try {
+			ZipUtils.unzip(dbDir.getParentFile(), zipFile);
+
+			//delete the old live database
+			try {
+				FileUtils.deleteDirectory(dbDirMoved);
+			} catch (IOException e) {
+				//ignore
+			}
+		} catch (Throwable t) {
+			//if an error occurs, restore the original database
+			try {
+				FileUtils.deleteDirectory(dbDir);
+			} catch (IOException e) {
+				//ignore
+			}
+			dbDirMoved.renameTo(dbDir);
+
+			if (t instanceof IOException) {
+				throw (IOException) t;
+			}
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException) t;
+			}
+		}
+	}
+
+	/**
+	 * Deletes a backup.
+	 * @param date the backup to delete
+	 */
+	public void delete(Date date) {
+		File zipFile = getBackupFile(date);
+		zipFile.delete();
+	}
+
+	private File getBackupFile(Date date) {
+		return new File(backupDir, "db-" + backupFileNameDateFormat.format(date) + ".backup.zip");
 	}
 
 	/**

@@ -207,7 +207,10 @@ public class MainFrame extends JFrame {
 				public void actionPerformed(ActionEvent arg0) {
 					IBackupView view = new BackupViewImpl(MainFrame.this);
 					IBackupModel model = new BackupModelImpl(dao, settings, backupManager);
-					new BackupPresenter(view, model);
+					BackupPresenter presenter = new BackupPresenter(view, model);
+					if (presenter.getExit()) {
+						exit();
+					}
 				}
 			});
 			tools.add(backupSettings);
