@@ -66,7 +66,18 @@ public class BackupManager {
 	public void backup(ZipListener listener) throws IOException {
 		backupDir.mkdirs();
 		File zip = new File(backupDir, "db-" + df.format(new Date()) + ".backup.zip");
-		ZipUtils.zipDirectory(dbDir, zip, listener);
+		try {
+			ZipUtils.zipDirectory(dbDir, zip, listener);
+		} catch (Throwable t) {
+			zip.delete();
+
+			if (t instanceof IOException) {
+				throw (IOException) t;
+			}
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException) t;
+			}
+		}
 	}
 
 	/**
