@@ -340,7 +340,7 @@ public class Main {
 				@Override
 				public void onZippedFile(File file) {
 					zipped += file.length();
-					int percent = (int) (zipped / databaseSize * 100.0);
+					int percent = (int) ((double) zipped / databaseSize * 100.0);
 					splash.setMessage("Backing up database... (" + percent + "%)");
 				}
 			});
