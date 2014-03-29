@@ -8,9 +8,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -30,6 +28,7 @@ import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.FilterList;
+import emcshop.util.RelativeDateFormat;
 
 /**
  * A table that displays transactions by date
@@ -117,13 +116,11 @@ public class TransactionsTable extends JTable {
 		setModel();
 
 		setDefaultRenderer(ShopTransaction.class, new TableCellRenderer() {
-			private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-			private final DateFormat tf = DateFormat.getTimeInstance(DateFormat.SHORT);
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
 			private final Column[] columns = Column.values();
 			private final ItemIndex index = ItemIndex.instance();
-			private final Calendar today = Calendar.getInstance();
+			private final RelativeDateFormat df = new RelativeDateFormat();
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -176,12 +173,6 @@ public class TransactionsTable extends JTable {
 				switch (column) {
 				case TS:
 					Date ts = transaction.getTs();
-					if (daysAgo(ts) == 0) {
-						return "Today at " + tf.format(ts);
-					}
-					if (daysAgo(ts) == 1) {
-						return "Yesterday at " + tf.format(ts);
-					}
 					return df.format(ts);
 				case PLAYER_NAME:
 					return transaction.getPlayer();
@@ -195,13 +186,6 @@ public class TransactionsTable extends JTable {
 				default:
 					return null;
 				}
-			}
-
-			private int daysAgo(Date date) {
-				Calendar c = Calendar.getInstance();
-				c.setTime(date);
-
-				return ((today.get(Calendar.YEAR) - c.get(Calendar.YEAR)) * 365) + (today.get(Calendar.DAY_OF_YEAR) - c.get(Calendar.DAY_OF_YEAR));
 			}
 		});
 
