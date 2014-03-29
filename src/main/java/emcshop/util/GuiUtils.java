@@ -170,8 +170,17 @@ public class GuiUtils {
 	 * @param listeners the events to fire
 	 */
 	public static void fireEvents(List<ActionListener> listeners) {
+		fireEvents(listeners, null);
+	}
+
+	/**
+	 * Fires a list of events.
+	 * @param listeners the events to fire
+	 * @param event the event to fire
+	 */
+	public static void fireEvents(List<ActionListener> listeners, ActionEvent event) {
 		for (ActionListener listener : listeners) {
-			listener.actionPerformed(null);
+			listener.actionPerformed(event);
 		}
 	}
 

@@ -13,6 +13,12 @@ import emcshop.scraper.ShopTransaction;
 
 public interface DbDao {
 	/**
+	 * Re-creates the database connection after {@link #close} was called.
+	 * @throws SQLException
+	 */
+	void reconnect() throws SQLException;
+
+	/**
 	 * Updates the database schema to the latest version if the schema is out of
 	 * date.
 	 * @param listener

@@ -49,16 +49,20 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import emcshop.BackupManager;
 import emcshop.LogManager;
 import emcshop.Main;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
+import emcshop.model.BackupModelImpl;
 import emcshop.model.FirstUpdateModelImpl;
+import emcshop.model.IBackupModel;
 import emcshop.model.IFirstUpdateModel;
 import emcshop.model.IUpdateModel;
 import emcshop.model.UpdateModelImpl;
+import emcshop.presenter.BackupPresenter;
 import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
@@ -67,7 +71,9 @@ import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
 import emcshop.util.TimeUtils;
+import emcshop.view.BackupViewImpl;
 import emcshop.view.FirstUpdateViewImpl;
+import emcshop.view.IBackupView;
 import emcshop.view.IFirstUpdateView;
 import emcshop.view.IUpdateView;
 import emcshop.view.LoginShower;
@@ -95,13 +101,15 @@ public class MainFrame extends JFrame {
 	private final LogManager logManager;
 	private final ProfileImageLoader profileImageLoader;
 	private final String profile;
+	private final BackupManager backupManager;
 
-	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader, String profile) throws SQLException {
+	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader, String profile, BackupManager backupManager) throws SQLException {
 		this.dao = dao;
 		this.settings = settings;
 		this.logManager = logManager;
 		this.profileImageLoader = profileImageLoader;
 		this.profile = profile;
+		this.backupManager = backupManager;
 
 		setTitle("EMC Shopkeeper v" + Main.VERSION);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -192,6 +200,17 @@ public class MainFrame extends JFrame {
 				}
 			}
 			tools.add(logLevel);
+
+			JMenuItem backupSettings = new JMenuItem("Backup Settings...");
+			backupSettings.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					IBackupView view = new BackupViewImpl(MainFrame.this);
+					IBackupModel model = new BackupModelImpl(dao, settings, backupManager);
+					new BackupPresenter(view, model);
+				}
+			});
+			tools.add(backupSettings);
 
 			tools.addSeparator();
 

@@ -93,6 +93,11 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public void reconnect() throws SQLException {
+		createConnection(false);
+	}
+
+	@Override
 	public void updateToLatestVersion(DbListener listener) throws SQLException {
 		int curVersion = selectDbVersion();
 		int latestVersion = getAppDbVersion();
@@ -1288,6 +1293,8 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void close() throws SQLException {
+		firstLastSeenDates.clear();
+
 		try {
 			logger.info("Closing database.");
 			DriverManager.getConnection("jdbc:derby:;shutdown=true");

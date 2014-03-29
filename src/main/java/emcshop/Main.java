@@ -163,6 +163,7 @@ public class Main {
 		//show the "choose profile" dialog
 		boolean cliMode = arguments.query() != null || arguments.update();
 		if (!cliMode && !profileSpecified && settings.isShowProfilesOnStartup()) {
+			//TODO enable Mac stuff here
 			IProfileSelectorView view = new ProfileSelectorViewImpl(null);
 			IProfileSelectorModel model = new ProfileSelectorModelImpl(profileRootDir);
 			ProfileSelectorPresenter presenter = new ProfileSelectorPresenter(view, model);
@@ -437,7 +438,7 @@ public class Main {
 		splash.setMessage("Loading item icons...");
 		ItemSuggestField.init(dao);
 
-		mainFrame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName());
+		mainFrame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName(), backupManager);
 		mainFrame.setVisible(true);
 		splash.dispose();
 	}
