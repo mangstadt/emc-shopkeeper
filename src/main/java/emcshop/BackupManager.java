@@ -70,7 +70,7 @@ public class BackupManager {
 	 * @return true if a backup is needed, false if not
 	 */
 	public boolean shouldBackup() {
-		if (backupsEnabled || !dbDir.exists()) {
+		if (!backupsEnabled || !dbDir.exists()) {
 			return false;
 		}
 
