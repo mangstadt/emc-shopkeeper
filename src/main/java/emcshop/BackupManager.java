@@ -35,6 +35,10 @@ public class BackupManager {
 		this.backupFrequency = backupFrequency;
 	}
 
+	/**
+	 * Determines if a backup should be performed.
+	 * @return true if a backup is needed, false if not
+	 */
 	public boolean shouldBackup() {
 		if (backupFrequency == null || !dbDir.exists()) {
 			return false;
@@ -65,11 +69,19 @@ public class BackupManager {
 		ZipUtils.zipDirectory(dbDir, zip, listener);
 	}
 
+	/**
+	 * Gets the date of the latest backup.
+	 * @return the date or null if there are no backups
+	 */
 	private Date getLatestBackupDate() {
 		List<Date> dates = getBackupDates();
 		return dates.isEmpty() ? null : dates.get(dates.size() - 1);
 	}
 
+	/**
+	 * Gets the dates of all backups.
+	 * @return the backup dates
+	 */
 	public List<Date> getBackupDates() {
 		if (!backupDir.isDirectory()) {
 			return new ArrayList<Date>(0);
