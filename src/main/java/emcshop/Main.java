@@ -36,13 +36,18 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacHandler;
 import emcshop.gui.lib.MacSupport;
+import emcshop.model.DatabaseStartupErrorModelImpl;
+import emcshop.model.IDatabaseStartupErrorModel;
 import emcshop.model.IProfileSelectorModel;
 import emcshop.model.ProfileSelectorModelImpl;
+import emcshop.presenter.DatabaseStartupErrorPresenter;
 import emcshop.presenter.ProfileSelectorPresenter;
 import emcshop.presenter.UnhandledErrorPresenter;
 import emcshop.util.GuiUtils;
 import emcshop.util.Settings;
 import emcshop.util.ZipUtils.ZipListener;
+import emcshop.view.DatabaseStartupErrorViewImpl;
+import emcshop.view.IDatabaseStartupErrorView;
 import emcshop.view.IProfileSelectorView;
 import emcshop.view.ProfileSelectorViewImpl;
 
@@ -305,8 +310,16 @@ public class Main {
 		}
 	}
 
-	private static void launchGui(File profileDir, File dbDir, Settings settings, LogManager logManager) throws SQLException, IOException {
+	private static void launchGui(File profileDir, File dbDir, Settings settings, LogManager logManager) throws Throwable {
 		initializeMac();
+
+		//set uncaught exception handler
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread thread, Throwable thrown) {
+				UnhandledErrorPresenter.show(null, "An error occurred.", thrown);
+			}
+		});
 
 		//show splash screen
 		final SplashFrame splash = new SplashFrame();
@@ -337,15 +350,7 @@ public class Main {
 			backedup = true;
 		}
 
-		//set uncaught exception handler
-		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-			@Override
-			public void uncaughtException(Thread thread, Throwable thrown) {
-				UnhandledErrorPresenter.show(null, "An error occurred.", thrown);
-			}
-		});
-
-		//init the cache
+		//initialize the cache
 		File cacheDir = new File(profileDir, "cache");
 		initCacheDir(cacheDir);
 
@@ -364,60 +369,76 @@ public class Main {
 			}
 		};
 
-		//connect to database
-		splash.setMessage("Starting database...");
-		DbDao dao;
-		try {
-			dao = new DirbyEmbeddedDbDao(dbDir, listener);
-		} catch (SQLException e) {
-			if ("XJ040".equals(e.getSQLState())) {
-				splash.dispose();
-				JOptionPane.showMessageDialog(null, "EMC Shopkeeper is already running.", "Already running", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			throw e;
-		}
-
-		int startingDbVersion = dao.selectDbVersion();
-
-		//backup the database if there is a database schema change
-		if (!backedup && DirbyDbDao.schemaVersion > startingDbVersion) {
-			dao.close();
-
-			final long size = backupManager.getSizeOfDatabase();
-			backupManager.backup(new ZipListener() {
-				private long zipped = 0;
-
-				@Override
-				public void onZippedFile(File file) {
-					zipped += file.length();
-					int percent = (int) ((double) zipped / size * 100.0);
-					splash.setMessage("Backing up database... (" + percent + "%)");
+		DbDao dao = null;
+		while (true) {
+			try {
+				//connect to database
+				splash.setMessage("Starting database...");
+				try {
+					dao = new DirbyEmbeddedDbDao(dbDir, listener);
+				} catch (SQLException e) {
+					if ("XJ040".equals(e.getSQLState())) {
+						splash.dispose();
+						JOptionPane.showMessageDialog(null, "EMC Shopkeeper is already running.", "Already running", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					throw e;
 				}
-			});
 
-			backedup = true;
+				int startingDbVersion = dao.selectDbVersion();
 
-			//re-connect to database
-			splash.setMessage("Restarting database...");
-			dao = new DirbyEmbeddedDbDao(dbDir, listener);
+				//initialize the report sender with the current database version
+				ReportSender reportSender = ReportSender.instance();
+				reportSender.setDatabaseVersion(startingDbVersion);
+
+				//backup the database if there is a database schema change
+				if (!backedup && DirbyDbDao.schemaVersion > startingDbVersion) {
+					dao.close();
+
+					final long size = backupManager.getSizeOfDatabase();
+					backupManager.backup(new ZipListener() {
+						private long zipped = 0;
+
+						@Override
+						public void onZippedFile(File file) {
+							zipped += file.length();
+							int percent = (int) ((double) zipped / size * 100.0);
+							splash.setMessage("Backing up database... (" + percent + "%)");
+						}
+					});
+
+					backedup = true;
+
+					//re-connect to the database
+					splash.setMessage("Restarting database...");
+					dao = new DirbyEmbeddedDbDao(dbDir, listener);
+				}
+
+				Integer currentRupeeBalance = prepareForUpdateLogConversion(startingDbVersion, dao, settings);
+
+				//update database schema
+				dao.updateToLatestVersion(listener);
+				reportSender.setDatabaseVersion(dao.selectDbVersion());
+
+				finishUpdateLogConversion(currentRupeeBalance, startingDbVersion, dao, settings);
+
+				break;
+			} catch (Throwable t) {
+				IDatabaseStartupErrorView view = new DatabaseStartupErrorViewImpl(splash);
+				IDatabaseStartupErrorModel model = new DatabaseStartupErrorModelImpl(dao, backupManager, t);
+				DatabaseStartupErrorPresenter presenter = new DatabaseStartupErrorPresenter(view, model);
+				if (presenter.getQuit()) {
+					splash.dispose();
+					return;
+				}
+			}
 		}
-
-		Integer currentRupeeBalance = prepareForUpdateLogConversion(startingDbVersion, dao, settings);
-
-		//update database schema
-		ReportSender reportSender = ReportSender.instance();
-		reportSender.setDatabaseVersion(startingDbVersion);
-		dao.updateToLatestVersion(listener);
-		reportSender.setDatabaseVersion(dao.selectDbVersion());
-
-		finishUpdateLogConversion(currentRupeeBalance, startingDbVersion, dao, settings);
 
 		//tweak tooltip settings
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
 		if (GuiUtils.linux) {
-			//disable tooltips on linux because of an Open JDK bug
-			//see: http://josm.openstreetmap.de/ticket/8921
+			//disable tooltips on Linux because random exceptions are thrown when tooltips are rendered
+			//this may be due to an Open JDK bug: http://josm.openstreetmap.de/ticket/8921
 			toolTipManager.setEnabled(false);
 		} else {
 			toolTipManager.setInitialDelay(0);
@@ -442,8 +463,6 @@ public class Main {
 			return;
 		}
 
-		//run Mac OS X customizations if user is on a Mac
-		//this code must run before *anything* else graphics-related
 		Image appIcon = ImageManager.getAppIcon().getImage();
 		MacSupport.init("EMC Shopkeeper", false, appIcon, new MacHandler() {
 			@Override
@@ -487,8 +506,8 @@ public class Main {
 	}
 
 	/**
-	 * Inits the "update_log" table. This must be called *after* the database is
-	 * updated.
+	 * Initializes the "update_log" table. This must be called *after* the
+	 * database is updated.
 	 * @param currentRupeeBalance the player's current rupee balance
 	 * @param startingDbVersion the database version before the database was
 	 * updated
