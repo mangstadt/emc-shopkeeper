@@ -101,6 +101,7 @@ public class Main {
 	public static final String defaultProfileName = "default";
 	private static final Integer defaultStartPage = 1;
 	private static final String defaultFormat = "TABLE";
+	private static boolean macInitialized = false;
 
 	private static MainFrame mainFrame;
 
@@ -163,7 +164,8 @@ public class Main {
 		//show the "choose profile" dialog
 		boolean cliMode = arguments.query() != null || arguments.update();
 		if (!cliMode && !profileSpecified && settings.isShowProfilesOnStartup()) {
-			//TODO enable Mac stuff here
+			initializeMac();
+
 			IProfileSelectorView view = new ProfileSelectorViewImpl(null);
 			IProfileSelectorModel model = new ProfileSelectorModelImpl(profileRootDir);
 			ProfileSelectorPresenter presenter = new ProfileSelectorPresenter(view, model);
@@ -293,30 +295,18 @@ public class Main {
 			cli.update(startAtPage, stopAtPage);
 		}
 
-		if (args.query() != null) {
+		String query = args.query();
+		if (query != null) {
 			String format = args.format();
 			if (format == null) {
 				format = defaultFormat;
 			}
-			cli.query(args.query(), format);
+			cli.query(query, format);
 		}
 	}
 
 	private static void launchGui(File profileDir, File dbDir, Settings settings, LogManager logManager) throws SQLException, IOException {
-		//run Mac OS X customizations if user is on a Mac
-		//this code must run before *anything* else graphics-related
-		Image appIcon = ImageManager.getAppIcon().getImage();
-		MacSupport.init("EMC Shopkeeper", false, appIcon, new MacHandler() {
-			@Override
-			public void handleQuit(Object applicationEvent) {
-				mainFrame.exit();
-			}
-
-			@Override
-			public void handleAbout(Object applicationEvent) {
-				AboutDialog.show(mainFrame);
-			}
-		});
+		initializeMac();
 
 		//show splash screen
 		final SplashFrame splash = new SplashFrame();
@@ -441,6 +431,33 @@ public class Main {
 		mainFrame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName(), backupManager);
 		mainFrame.setVisible(true);
 		splash.dispose();
+	}
+
+	/**
+	 * Runs Mac OS X customizations if user is on a Mac. This method must run
+	 * before anything else graphics-related.
+	 */
+	private static void initializeMac() {
+		if (macInitialized || !MacSupport.isMac()) {
+			return;
+		}
+
+		//run Mac OS X customizations if user is on a Mac
+		//this code must run before *anything* else graphics-related
+		Image appIcon = ImageManager.getAppIcon().getImage();
+		MacSupport.init("EMC Shopkeeper", false, appIcon, new MacHandler() {
+			@Override
+			public void handleQuit(Object applicationEvent) {
+				mainFrame.exit();
+			}
+
+			@Override
+			public void handleAbout(Object applicationEvent) {
+				AboutDialog.show(mainFrame);
+			}
+		});
+
+		macInitialized = true;
 	}
 
 	/**
