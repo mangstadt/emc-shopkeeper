@@ -82,6 +82,7 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 				settingsPanel.setEnabled(false);
 				backupNow.setEnabled(false);
 				restore.setEnabled(false);
+				delete.setEnabled(false);
 			}
 		});
 
