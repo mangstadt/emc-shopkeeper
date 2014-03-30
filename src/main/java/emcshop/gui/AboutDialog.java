@@ -9,7 +9,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
-import emcshop.Main;
+import emcshop.EMCShopkeeper;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.GuiUtils;
@@ -32,7 +32,7 @@ public class AboutDialog extends JDialog {
 		"<html>" +
 		"<font size=4><b>EMC Shopkeeper</b></font><br>" +
 		"by Michael Angstadt (shavingfoam)<br>" +
-		"Version: " + Main.VERSION + "<br>" +
+		"Version: " + EMCShopkeeper.VERSION + "<br>" +
 		"</html>"
 		);
 		
@@ -45,9 +45,9 @@ public class AboutDialog extends JDialog {
 
 		ClickableLabel sourceUrlLabel = new ClickableLabel(
 		"<html><center>" +
-		"<u>" + Main.URL + "</u>" +
+		"<u>" + EMCShopkeeper.URL + "</u>" +
 		"</center></html>",
-		Main.URL);
+		EMCShopkeeper.URL);
 
 		JLabel copyrightLabel = new JLabel(
 		"<html>" +

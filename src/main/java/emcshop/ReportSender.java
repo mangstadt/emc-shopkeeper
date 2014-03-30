@@ -133,7 +133,7 @@ public class ReportSender {
 			String timestamp = df.format(job.received);
 			xml.append(xml.root(), "Timestamp", timestamp);
 
-			xml.append(xml.root(), "Version", Main.VERSION);
+			xml.append(xml.root(), "Version", EMCShopkeeper.VERSION);
 
 			String dbVersionStr = (dbVersion == null) ? "null" : dbVersion.toString();
 			xml.append(xml.root(), "DatabaseVersion", dbVersionStr);

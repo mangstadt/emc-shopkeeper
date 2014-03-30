@@ -1,10 +1,10 @@
 package emcshop.model;
 
-import emcshop.Main;
+import emcshop.EMCShopkeeper;
 
 public class FirstUpdateModelImpl implements IFirstUpdateModel {
 	@Override
 	public long getEstimatedTime(Integer stopAtPage) {
-		return Main.estimateUpdateTime(stopAtPage);
+		return EMCShopkeeper.estimateUpdateTime(stopAtPage);
 	}
 }

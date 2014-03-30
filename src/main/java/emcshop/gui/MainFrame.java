@@ -51,7 +51,7 @@ import org.apache.http.util.EntityUtils;
 
 import emcshop.BackupManager;
 import emcshop.LogManager;
-import emcshop.Main;
+import emcshop.EMCShopkeeper;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
@@ -111,7 +111,7 @@ public class MainFrame extends JFrame {
 		this.profile = profile;
 		this.backupManager = backupManager;
 
-		setTitle("EMC Shopkeeper v" + Main.VERSION);
+		setTitle("EMC Shopkeeper v" + EMCShopkeeper.VERSION);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		createMenu();
@@ -231,7 +231,7 @@ public class MainFrame extends JFrame {
 			});
 			tools.add(showQuantitiesInStacks);
 
-			if (profile.equals(Main.defaultProfileName)) {
+			if (profile.equals(EMCShopkeeper.defaultProfileName)) {
 				final JCheckBoxMenuItem showProfilesOnStartup = new JCheckBoxMenuItem("Show Profiles On Startup", settings.isShowProfilesOnStartup());
 				showProfilesOnStartup.addActionListener(new ActionListener() {
 					@Override
@@ -432,7 +432,7 @@ public class MainFrame extends JFrame {
 
 		JPanel right = new JPanel(new MigLayout("insets 0"));
 
-		if (!profile.equals(Main.defaultProfileName)) {
+		if (!profile.equals(EMCShopkeeper.defaultProfileName)) {
 			right.add(new JLabel("Profile: " + profile), "align right, wrap");
 		}
 		right.add(new JLabel("<html><h2>Rupees:</h2></html>"), "split 2, gapright 10, align right");
@@ -594,7 +594,7 @@ public class MainFrame extends JFrame {
 						return;
 					}
 
-					long diff = latestRelease.getTime() - Main.BUILT.getTime();
+					long diff = latestRelease.getTime() - EMCShopkeeper.BUILT.getTime();
 					if (diff < 1000 * 60 * 10) { //give a buffer of 10 minutes because there will be a few minutes difference between the build timestamp and the commit timestamp
 						//already running the latest version
 						logger.finest("Running latest version.");

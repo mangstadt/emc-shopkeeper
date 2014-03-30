@@ -56,7 +56,7 @@ public class QueryExporter {
 			});
 			//@formatter:on
 		}
-		writer.writeNext(new String[] { "EMC Shopkeeper v" + Main.VERSION + " - " + Main.URL, "", "", "", "", "", netTotal + "" });
+		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL, "", "", "", "", "", netTotal + "" });
 
 		try {
 			writer.close();
@@ -99,8 +99,8 @@ public class QueryExporter {
 		generateItemsTableBBCode(itemGroups, bbCode, true);
 
 		//footer and total
-		String footer = "EMC Shopkeeper v" + Main.VERSION;
-		bbCode.url(Main.URL, footer);
+		String footer = "EMC Shopkeeper v" + EMCShopkeeper.VERSION;
+		bbCode.url(EMCShopkeeper.URL, footer);
 		bbCode.text(" ");
 		bbCode.text(StringUtils.repeat('_', 44 - footer.length()));
 		bbCode.b(" Total").text(" | ");
@@ -159,8 +159,8 @@ public class QueryExporter {
 		//footer and total
 		int padding = 45;
 		if (includeProjectLink) {
-			String footer = "EMC Shopkeeper v" + Main.VERSION;
-			bbCode.url(Main.URL, footer);
+			String footer = "EMC Shopkeeper v" + EMCShopkeeper.VERSION;
+			bbCode.url(EMCShopkeeper.URL, footer);
 			bbCode.text(" ");
 			padding -= footer.length() - 1;
 		}
@@ -205,7 +205,7 @@ public class QueryExporter {
 				//@formatter:on
 			}
 		}
-		writer.writeNext(new String[] { "EMC Shopkeeper v" + Main.VERSION + " - " + Main.URL });
+		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL });
 
 		try {
 			writer.close();
@@ -243,8 +243,8 @@ public class QueryExporter {
 		}
 
 		//footer
-		String footer = "EMC Shopkeeper v" + Main.VERSION;
-		bbCode.url(Main.URL, footer);
+		String footer = "EMC Shopkeeper v" + EMCShopkeeper.VERSION;
+		bbCode.url(EMCShopkeeper.URL, footer);
 
 		bbCode.close(); //close "font"
 
@@ -314,8 +314,8 @@ public class QueryExporter {
 		}
 
 		//footer and total
-		String footer = "EMC Shopkeeper v" + Main.VERSION;
-		bbCode.url(Main.URL, footer);
+		String footer = "EMC Shopkeeper v" + EMCShopkeeper.VERSION;
+		bbCode.url(EMCShopkeeper.URL, footer);
 		bbCode.text(" | ");
 		bbCode.b();
 		bbCode.text(" Total: ");
@@ -352,7 +352,7 @@ public class QueryExporter {
 			});
 			//@formatter:on
 		}
-		writer.writeNext(new String[] { "EMC Shopkeeper v" + Main.VERSION + " - " + Main.URL, "", "", "", netTotal + "" });
+		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL, "", "", "", netTotal + "" });
 
 		try {
 			writer.close();
@@ -375,7 +375,7 @@ public class QueryExporter {
 			});
 			//@formatter:on
 		}
-		writer.writeNext(new String[] { "EMC Shopkeeper v" + Main.VERSION + " - " + Main.URL });
+		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL });
 
 		try {
 			writer.close();
@@ -404,8 +404,8 @@ public class QueryExporter {
 		}
 
 		//footer and total
-		String footer = "EMC Shopkeeper v" + Main.VERSION;
-		bbCode.url(Main.URL, footer);
+		String footer = "EMC Shopkeeper v" + EMCShopkeeper.VERSION;
+		bbCode.url(EMCShopkeeper.URL, footer);
 
 		//close "font"
 		bbCode.close();

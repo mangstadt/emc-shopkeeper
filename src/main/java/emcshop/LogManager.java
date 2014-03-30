@@ -36,7 +36,7 @@ public class LogManager {
 			@Override
 			public boolean isLoggable(LogRecord record) {
 				//only log messages from this app
-				return record.getLoggerName().startsWith(Main.class.getPackage().getName());
+				return record.getLoggerName().startsWith(EMCShopkeeper.class.getPackage().getName());
 			}
 		});
 		global.addHandler(handler);

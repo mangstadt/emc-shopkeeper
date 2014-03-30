@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import emcshop.Main;
+import emcshop.EMCShopkeeper;
 import emcshop.db.DbDao;
 import emcshop.scraper.BadSessionException;
 import emcshop.scraper.BonusFeeTransaction;
@@ -77,7 +77,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	@Override
 	public Long getEstimatedTime() {
 		Integer stopAtPage = getStopAtPage();
-		return (stopAtPage == null) ? null : Main.estimateUpdateTime(stopAtPage);
+		return (stopAtPage == null) ? null : EMCShopkeeper.estimateUpdateTime(stopAtPage);
 	}
 
 	@Override
