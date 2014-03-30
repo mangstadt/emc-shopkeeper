@@ -18,7 +18,7 @@
 		<jar href="deps/commons-io-2.1.jar"/>
 		<jar href="deps/commons-lang3-3.1.jar"/>
 		<jar href="deps/commons-logging-1.1.1.jar"/>
-		<jar href="deps/derby-10.8.2.2.jar"/>
+		<jar href="deps/derby-10.10.1.1.jar"/>
 		<jar href="deps/httpclient-4.2.3.jar"/>
 		<jar href="deps/httpcore-4.2.2.jar"/>
 		<jar href="deps/jcommon-1.0.17.jar"/>
@@ -29,5 +29,5 @@
 		<jar href="deps/miglayout-swing-4.2.jar"/>
 		<jar href="deps/opencsv-2.3.jar"/>
 	</resources>
-	<application-desc main-class="emcshop.Main" />
+	<application-desc main-class="emcshop.EMCShopkeeper" />
 </jnlp>
