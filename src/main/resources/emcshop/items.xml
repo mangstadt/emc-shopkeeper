@@ -476,7 +476,7 @@
 	<Item name="Potion of Invisibility" id="373:8206,373:8238" emcNames="Potion:8206,Potion:8238" image="potion_invisibility.png" stack="1" group="Potions" />
 	<Item name="Potion of Invisibility Ext" id="373:8270" emcNames="Potion:8270" image="potion_invisibility.png" stack="1" group="Potions" />
 	<Item name="Splash Potion of Invisibility" id="373:16398,373:16430" emcNames="Potion:16398,Potion:16430" image="potion_invisibility_splash.png" stack="1" group="Potions" />
-	<Item name="Splash Potion of Invisibility Ext" id="373:16462" emcNames="Potion:16462" image="potion_invisibility_splash.png" stack="1" group="Potions" />
+	<Item name="Splash Potion of Invisibility Ext" id="373:16462,373:24654" emcNames="Potion:16462,Potion:24654" image="potion_invisibility_splash.png" stack="1" group="Potions" />
 	
 	<Item name="Potion of Water Breathing" id="373:8205,373:8237" emcNames="Potion:8205,Potion:8237" image="potion_water_breathing.png" stack="1" group="Potions" />
 	<Item name="Potion of Water Breathing Ext" id="373:8269" emcNames="Potion:8269" image="potion_water_breathing.png" stack="1" group="Potions" />
