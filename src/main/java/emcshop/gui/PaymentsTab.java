@@ -22,6 +22,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -36,6 +37,7 @@ import emcshop.db.DbDao;
 import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ButtonColumn;
+import emcshop.scraper.EMCServer;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.GuiUtils;
@@ -45,6 +47,7 @@ public class PaymentsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
 	private final ProfileImageLoader profileImageLoader;
+	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private boolean stale = true;
 
@@ -54,10 +57,11 @@ public class PaymentsTab extends JPanel {
 
 	private PaymentsTable paymentsTable;
 
-	public PaymentsTab(final MainFrame owner, final DbDao dao, final ProfileImageLoader profileImageLoader) {
+	public PaymentsTab(MainFrame owner, DbDao dao, ProfileImageLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor) {
 		this.owner = owner;
 		this.dao = dao;
 		this.profileImageLoader = profileImageLoader;
+		this.onlinePlayersMonitor = onlinePlayersMonitor;
 
 		setLayout(new MigLayout("fillx, insets 5"));
 	}
@@ -170,13 +174,16 @@ public class PaymentsTab extends JPanel {
 					PaymentTransaction transaction = (PaymentTransaction) value;
 					Column column = columns[col];
 
-					JLabel label = null;
+					JComponent component = null;
 					switch (column) {
 					case TIME:
-						label = new JLabel("<html>" + df.format(transaction.getTs()) + "</html>");
+						component = new JLabel("<html>" + df.format(transaction.getTs()) + "</html>");
 						break;
 					case PLAYER:
-						label = new JLabel("<html>" + transaction.getPlayer() + "</html>"); //add player's profile image
+						component = new JPanel(new MigLayout("insets 2"));
+						String playerName = transaction.getPlayer();
+
+						JLabel label = new JLabel("<html>" + transaction.getPlayer() + "</html>"); //add player's profile image
 						profileImageLoader.load(transaction.getPlayer(), label, 16, new ImageDownloadedListener() {
 							@Override
 							public void onImageDownloaded(JLabel label) {
@@ -184,20 +191,26 @@ public class PaymentsTab extends JPanel {
 								model.fireTableCellUpdated(row, col);
 							}
 						});
+						component.add(label);
+
+						EMCServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+						if (server != null) {
+							component.add(new JLabel(ImageManager.getOnline(server, 12)));
+						}
 						break;
 					case AMOUNT:
-						label = new JLabel("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
+						component = new JLabel("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
 						break;
 					default:
-						label = new JLabel();
+						component = new JLabel();
 					}
 
 					//set the background color of the row
 					Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-					label.setOpaque(true);
-					label.setBackground(color);
+					component.setOpaque(true);
+					component.setBackground(color);
 
-					return label;
+					return component;
 				}
 			});
 		}

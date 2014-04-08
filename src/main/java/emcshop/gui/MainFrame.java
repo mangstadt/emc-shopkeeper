@@ -413,7 +413,7 @@ public class MainFrame extends JFrame {
 		});
 
 		transactionsTab = new TransactionsTab(this, dao, profileImageLoader, onlinePlayersMonitor, settings);
-		paymentsTab = new PaymentsTab(this, dao, profileImageLoader);
+		paymentsTab = new PaymentsTab(this, dao, profileImageLoader, onlinePlayersMonitor);
 		inventoryTab = new InventoryTab(this, dao, settings.isShowQuantitiesInStacks());
 		bonusFeeTab = new BonusFeeTab(dao);
 		graphsTab = new ChartsTab(this, dao);
