@@ -56,10 +56,10 @@
 	<Item name="Carrot Stick" id="398" />
 	<Item name="Cat Disc" id="2257" stack="1" group="Discs" />
 	<Item name="Cauldron" id="118" group="Iron" />
-	<Item name="Chain Boots" id="305" stack="1" />
-	<Item name="Chain Chestplate" id="303" stack="1" />
-	<Item name="Chain Helmet" id="302" stack="1" />
-	<Item name="Chain Leggings" id="304" stack="1" />
+	<Item name="Chainmail Boots" id="305" stack="1" emcNames="Chain Boots" />
+	<Item name="Chainmail Chestplate" id="303" stack="1" emcNames="Chain Chestplate" />
+	<Item name="Chainmail Helmet" id="302" stack="1" emcNames="Chain Helmet" />
+	<Item name="Chainmail Leggings" id="304" stack="1" emcNames="Chain Leggings" />
 	<Item name="Charcoal" id="263:1" group="Wood" />
 	<Item name="Chest" id="54" group="Wood" />
 	<Item name="Chicken" id="366" />
