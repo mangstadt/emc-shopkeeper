@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -35,6 +34,7 @@ import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
+import emcshop.scraper.EMCServer;
 import emcshop.util.FilterList;
 
 /**
@@ -49,7 +49,6 @@ public class PlayersPanel extends JPanel {
 	private boolean showQuantitiesInStacks;
 
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-	private final ImageIcon online = ImageManager.getImageIcon("online-lrg.png");
 	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
 	private List<PlayerGroup> displayedPlayers;
 	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
@@ -190,8 +189,9 @@ public class PlayersPanel extends JPanel {
 				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!");
 
 				JLabel playerNameLabel = new JLabel("<html>" + playerName + "<br>" + formatRupeesWithColor(calculateNetTotal(playerGroup)) + "</html>");
-				if (onlinePlayersMonitor.isPlayerOnline(playerName)) {
-					playerNameLabel.setIcon(online);
+				EMCServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+				if (server != null) {
+					playerNameLabel.setIcon(ImageManager.getOnline(server, 16));
 					playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
 					playerNameLabel.setVerticalTextPosition(SwingConstants.TOP);
 				}
@@ -255,10 +255,11 @@ public class PlayersPanel extends JPanel {
 
 			JLabel playerName = new ClickableLabel("<html><h3><u>" + player.getName() + "</u></h3></html>", "http://u.emc.gs/" + player.getName());
 			playerName.setToolTipText("View player's profile");
-			if (onlinePlayersMonitor.isPlayerOnline(player.getName())) {
+			EMCServer server = onlinePlayersMonitor.getPlayerServer(player.getName());
+			if (server != null) {
 				header.add(playerName, "split 2");
-				
-				JLabel onlineLabel = new JLabel("<html><font size=2><i>Online", online, SwingConstants.LEFT);
+
+				JLabel onlineLabel = new JLabel("<html><font size=2><i>Connected to <b>" + server, ImageManager.getOnline(null, 16), SwingConstants.LEFT);
 				onlineLabel.setIconTextGap(2);
 				header.add(onlineLabel, "gapleft 10, wrap");
 			} else {

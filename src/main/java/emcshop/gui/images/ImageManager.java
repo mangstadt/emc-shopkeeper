@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 
 import emcshop.ItemIndex;
+import emcshop.scraper.EMCServer;
 
 /**
  * Manages the images of the application.
@@ -61,6 +62,18 @@ public class ImageManager {
 
 	public static ImageIcon getEmcLogo() {
 		return getImageIcon("emc-logo.png");
+	}
+
+	/**
+	 * Gets the "online" icon.
+	 * @param server the server that the player is logged into or null for the
+	 * generic image
+	 * @param size the size of the icon
+	 * @return the icon
+	 */
+	public static ImageIcon getOnline(EMCServer server, int size) {
+		String name = (server == null) ? "online.png" : "online-" + server.name().toLowerCase() + ".png";
+		return scale(name, size);
 	}
 
 	/**

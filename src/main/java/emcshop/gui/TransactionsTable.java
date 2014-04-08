@@ -29,6 +29,7 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.ItemIndex;
 import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
+import emcshop.scraper.EMCServer;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.FilterList;
 import emcshop.util.RelativeDateFormat;
@@ -124,7 +125,6 @@ public class TransactionsTable extends JTable {
 			private final Column[] columns = Column.values();
 			private final ItemIndex index = ItemIndex.instance();
 			private final RelativeDateFormat df = new RelativeDateFormat();
-			private final JLabel online = new JLabel(ImageManager.getImageIcon("online.png"));
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, int col) {
@@ -146,8 +146,9 @@ public class TransactionsTable extends JTable {
 					});
 					panel.add(playerLabel);
 
-					if (onlinePlayersMonitor.isPlayerOnline(playerName)) {
-						panel.add(online);
+					EMCServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+					if (server != null) {
+						panel.add(new JLabel(ImageManager.getOnline(server, 12)));
 					}
 
 					setBackground(panel, row);

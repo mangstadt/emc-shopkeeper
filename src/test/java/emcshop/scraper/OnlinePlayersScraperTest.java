@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,14 +27,12 @@ public class OnlinePlayersScraperTest {
 	public void getOnlinePlayers() throws Throwable {
 		HttpClient client = createMockClient();
 		OnlinePlayersScraper scraper = new OnlinePlayersScraper(client);
-		Set<String> actual = scraper.getOnlinePlayers();
+		Map<String, EMCServer> actual = scraper.getOnlinePlayers();
 
-		Set<String> expected = new HashSet<String>();
-		expected.add("Multiple");
-		expected.add("Names");
-		for (int i = 4; i <= 10; i++) {
-			expected.add("Test" + i);
-		}
+		Map<String, EMCServer> expected = new HashMap<String, EMCServer>();
+		expected.put("Notch", EMCServer.SMP1);
+		expected.put("Jeb", EMCServer.SMP1);
+		expected.put("Dinnerbone", EMCServer.SMP2);
 		assertEquals(expected, actual);
 
 		//10 requests should have been sent (for the 10 servers)
@@ -63,13 +61,13 @@ public class OnlinePlayersScraperTest {
 
 				String responseStr;
 				if (server == 1) {
-					responseStr = "[{\"group\":\"1\",\"name\":\"Multiple\",\"start\":\"1396985706\"}],[{\"group\":\"1\",\"name\":\"Names\",\"start\":\"1396985706\"}]";
+					responseStr = "[{\"group\":\"1\",\"name\":\"Notch\",\"start\":\"1396985706\"},{\"group\":\"1\",\"name\":\"Jeb\",\"start\":\"1396985706\"}]";
 				} else if (server == 2) {
-					responseStr = "[]";
+					responseStr = "[{\"group\":\"1\",\"name\":\"Dinnerbone\",\"start\":\"1396985706\"}]";
 				} else if (server == 3) {
 					responseStr = "invalid-JSON";
 				} else {
-					responseStr = "[{\"group\":\"1\",\"name\":\"Test" + server + "\",\"start\":\"1396985706\"}]";
+					responseStr = "[]";
 				}
 
 				HttpResponse response = mock(HttpResponse.class);

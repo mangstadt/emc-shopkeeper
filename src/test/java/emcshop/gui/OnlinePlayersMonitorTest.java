@@ -1,41 +1,47 @@
 package emcshop.gui;
 
-import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import emcshop.gui.OnlinePlayersMonitor;
+import emcshop.scraper.EMCServer;
 import emcshop.scraper.OnlinePlayersScraper;
 
 public class OnlinePlayersMonitorTest {
 	@Test
-	public void isPlayerOnline() throws Throwable {
-		List<String> players = Arrays.asList("Notch", "Jeb", "Dinnerbone");
+	public void getPlayerServer() throws Throwable {
+		Map<String, EMCServer> players = new HashMap<String, EMCServer>();
+		players.put("Notch", EMCServer.SMP1);
+		players.put("Jeb", EMCServer.SMP5);
+		players.put("Dinnebone", EMCServer.UTOPIA);
+
 		OnlinePlayersScraper scraper = Mockito.mock(OnlinePlayersScraper.class);
-		when(scraper.getOnlinePlayers()).thenReturn(new HashSet<String>(players));
+		when(scraper.getOnlinePlayers()).thenReturn(players);
 
 		OnlinePlayersMonitor monitor = new OnlinePlayersMonitor(scraper, 1000);
 
-		for (String player : players) {
-			assertFalse(monitor.isPlayerOnline(player));
-			assertFalse(monitor.isPlayerOnline(player.toUpperCase()));
+		for (String player : players.keySet()) {
+			assertNull(monitor.getPlayerServer(player));
+			assertNull(monitor.getPlayerServer(player.toUpperCase()));
 		}
 
 		Thread thread = monitor.start();
 		Thread.sleep(500);
 		thread.interrupt();
 
-		for (String player : players) {
-			assertTrue(monitor.isPlayerOnline(player));
-			assertTrue(monitor.isPlayerOnline(player.toUpperCase()));
+		for (Map.Entry<String, EMCServer> entry : players.entrySet()) {
+			String player = entry.getKey();
+
+			EMCServer expected = entry.getValue();
+			EMCServer actual = monitor.getPlayerServer(player);
+			assertEquals(expected, actual);
 		}
-		assertFalse(monitor.isPlayerOnline("Cupquake"));
+		assertNull(monitor.getPlayerServer("Cupquake"));
 	}
 }
