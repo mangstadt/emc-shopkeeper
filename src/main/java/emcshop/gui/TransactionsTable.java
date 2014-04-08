@@ -17,12 +17,15 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
+import net.miginfocom.swing.MigLayout;
 import emcshop.ItemIndex;
 import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
@@ -62,8 +65,8 @@ public class TransactionsTable extends JTable {
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 
-	public TransactionsTable(List<ShopTransaction> transactions, boolean showQuantitiesInStacks, ProfileImageLoader profileImageLoader) {
-		this(transactions, Column.TS, false, showQuantitiesInStacks, profileImageLoader);
+	public TransactionsTable(List<ShopTransaction> transactions, boolean showQuantitiesInStacks, ProfileImageLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor) {
+		this(transactions, Column.TS, false, showQuantitiesInStacks, profileImageLoader, onlinePlayersMonitor);
 	}
 
 	/**
@@ -72,7 +75,7 @@ public class TransactionsTable extends JTable {
 	 * @param sortedByAscending true if the items list is sorted ascending,
 	 * false if descending
 	 */
-	public TransactionsTable(List<ShopTransaction> transactions, Column sortedBy, boolean sortedByAscending, boolean showQuantitiesInStacks, final ProfileImageLoader profileImageLoader) {
+	public TransactionsTable(List<ShopTransaction> transactions, Column sortedBy, boolean sortedByAscending, boolean showQuantitiesInStacks, final ProfileImageLoader profileImageLoader, final OnlinePlayersMonitor onlinePlayersMonitor) {
 		this.transactions = transactions;
 		this.transactionsToDisplay = transactions;
 		prevColumnClicked = sortedBy;
@@ -121,11 +124,36 @@ public class TransactionsTable extends JTable {
 			private final Column[] columns = Column.values();
 			private final ItemIndex index = ItemIndex.instance();
 			private final RelativeDateFormat df = new RelativeDateFormat();
+			private final JLabel online = new JLabel(ImageManager.getImageIcon("online.png"));
 
 			@Override
-			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, int col) {
 				ShopTransaction transaction = (ShopTransaction) value;
-				Column column = columns[col];
+				final Column column = columns[col];
+
+				if (column == Column.PLAYER_NAME) {
+					JPanel panel = new JPanel(new MigLayout("insets 2"));
+					String playerName = transaction.getPlayer();
+
+					JLabel playerLabel = new JLabel();
+					playerLabel.setText(playerName);
+					profileImageLoader.load(playerName, playerLabel, 16, new ImageDownloadedListener() {
+						@Override
+						public void onImageDownloaded(JLabel label) {
+							AbstractTableModel model = (AbstractTableModel) getModel();
+							model.fireTableCellUpdated(row, column.ordinal());
+						}
+					});
+					panel.add(playerLabel);
+
+					if (onlinePlayersMonitor.isPlayerOnline(playerName)) {
+						panel.add(online);
+					}
+
+					setBackground(panel, row);
+
+					return panel;
+				}
 
 				JLabel label = new JLabel();
 
@@ -143,27 +171,21 @@ public class TransactionsTable extends JTable {
 				label.setText(text);
 				label.setHorizontalAlignment(alignment);
 
-				//set the background color of the row
-				Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-				label.setOpaque(true);
-				label.setBackground(color);
+				setBackground(label, row);
 
 				return label;
+			}
+
+			private void setBackground(JComponent component, int row) {
+				Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
+				component.setOpaque(true);
+				component.setBackground(color);
 			}
 
 			private ImageIcon getIcon(ShopTransaction transaction, final int row, final Column column, JLabel label) {
 				switch (column) {
 				case ITEM_NAME:
 					return ImageManager.getItemImage(transaction.getItem());
-				case PLAYER_NAME:
-					profileImageLoader.load(transaction.getPlayer(), label, 16, new ImageDownloadedListener() {
-						@Override
-						public void onImageDownloaded(JLabel label) {
-							AbstractTableModel model = (AbstractTableModel) getModel();
-							model.fireTableCellUpdated(row, column.ordinal());
-						}
-					});
-					return null;
 				default:
 					return null;
 				}
@@ -174,8 +196,6 @@ public class TransactionsTable extends JTable {
 				case TS:
 					Date ts = transaction.getTs();
 					return df.format(ts);
-				case PLAYER_NAME:
-					return transaction.getPlayer();
 				case ITEM_NAME:
 					return transaction.getItem();
 				case QUANTITY:

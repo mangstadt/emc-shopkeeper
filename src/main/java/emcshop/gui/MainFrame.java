@@ -50,8 +50,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import emcshop.BackupManager;
-import emcshop.LogManager;
 import emcshop.EMCShopkeeper;
+import emcshop.LogManager;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
@@ -100,14 +100,16 @@ public class MainFrame extends JFrame {
 	private final Settings settings;
 	private final LogManager logManager;
 	private final ProfileImageLoader profileImageLoader;
+	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private final String profile;
 	private final BackupManager backupManager;
 
-	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader, String profile, BackupManager backupManager) throws SQLException {
+	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, String profile, BackupManager backupManager) throws SQLException {
 		this.dao = dao;
 		this.settings = settings;
 		this.logManager = logManager;
 		this.profileImageLoader = profileImageLoader;
+		this.onlinePlayersMonitor = onlinePlayersMonitor;
 		this.profile = profile;
 		this.backupManager = backupManager;
 
@@ -410,7 +412,7 @@ public class MainFrame extends JFrame {
 			}
 		});
 
-		transactionsTab = new TransactionsTab(this, dao, profileImageLoader, settings);
+		transactionsTab = new TransactionsTab(this, dao, profileImageLoader, onlinePlayersMonitor, settings);
 		paymentsTab = new PaymentsTab(this, dao, profileImageLoader);
 		inventoryTab = new InventoryTab(this, dao, settings.isShowQuantitiesInStacks());
 		bonusFeeTab = new BonusFeeTab(dao);

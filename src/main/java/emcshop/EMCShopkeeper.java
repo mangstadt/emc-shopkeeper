@@ -20,6 +20,7 @@ import javax.swing.ToolTipManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import emcshop.cli.CliController;
 import emcshop.cli.EmcShopArguments;
@@ -30,6 +31,7 @@ import emcshop.db.DirbyEmbeddedDbDao;
 import emcshop.gui.AboutDialog;
 import emcshop.gui.ItemSuggestField;
 import emcshop.gui.MainFrame;
+import emcshop.gui.OnlinePlayersMonitor;
 import emcshop.gui.ProfileImageLoader;
 import emcshop.gui.SplashFrame;
 import emcshop.gui.images.ImageManager;
@@ -43,6 +45,7 @@ import emcshop.model.ProfileSelectorModelImpl;
 import emcshop.presenter.DatabaseStartupErrorPresenter;
 import emcshop.presenter.ProfileSelectorPresenter;
 import emcshop.presenter.UnhandledErrorPresenter;
+import emcshop.scraper.OnlinePlayersScraper;
 import emcshop.util.GuiUtils;
 import emcshop.util.Settings;
 import emcshop.util.ZipUtils.ZipListener;
@@ -434,6 +437,9 @@ public class EMCShopkeeper {
 			}
 		}
 
+		OnlinePlayersMonitor onlinePlayersMonitor = new OnlinePlayersMonitor(new OnlinePlayersScraper(new DefaultHttpClient()), 1000 * 60 * 5);
+		onlinePlayersMonitor.start();
+
 		//tweak tooltip settings
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
 		if (GuiUtils.linux) {
@@ -449,7 +455,7 @@ public class EMCShopkeeper {
 		splash.setMessage("Loading item icons...");
 		ItemSuggestField.init(dao);
 
-		mainFrame = new MainFrame(settings, dao, logManager, profileImageLoader, profileDir.getName(), backupManager);
+		mainFrame = new MainFrame(settings, dao, logManager, profileImageLoader, onlinePlayersMonitor, profileDir.getName(), backupManager);
 		mainFrame.setVisible(true);
 		splash.dispose();
 	}

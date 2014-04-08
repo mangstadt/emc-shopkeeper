@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -32,6 +33,7 @@ import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
+import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.FilterList;
 
@@ -43,9 +45,11 @@ import emcshop.util.FilterList;
 public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
 	private final ProfileImageLoader profileImageLoader;
+	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private boolean showQuantitiesInStacks;
 
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	private final ImageIcon online = ImageManager.getImageIcon("online-lrg.png");
 	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
 	private List<PlayerGroup> displayedPlayers;
 	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
@@ -60,7 +64,7 @@ public class PlayersPanel extends JPanel {
 	 * Creates the panel.
 	 * @param playerGroups the players to display in the table
 	 */
-	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileImageLoader profileImageLoader, boolean showQtyInStacks) {
+	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileImageLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, boolean showQtyInStacks) {
 		super(new MigLayout("fillx, insets 0"));
 
 		//add all the data to Lists so they can be sorted
@@ -71,6 +75,7 @@ public class PlayersPanel extends JPanel {
 		}
 
 		this.profileImageLoader = profileImageLoader;
+		this.onlinePlayersMonitor = onlinePlayersMonitor;
 		showQuantitiesInStacks = showQtyInStacks;
 
 		sortByPlayerName();
@@ -163,6 +168,7 @@ public class PlayersPanel extends JPanel {
 			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
 				PlayerGroup playerGroup = (PlayerGroup) value;
 				Player player = playerGroup.getPlayer();
+				String playerName = player.getName();
 
 				JPanel row = new JPanel(new MigLayout("insets 5"));
 
@@ -171,11 +177,11 @@ public class PlayersPanel extends JPanel {
 				profileImage.setVerticalAlignment(SwingConstants.CENTER);
 
 				synchronized (playerIcons) {
-					Icon icon = playerIcons.get(player.getName());
+					Icon icon = playerIcons.get(playerName);
 
 					if (icon == null) {
-						profileImage.setName(player.getName());
-						profileImageLoader.load(player.getName(), profileImage, profileImageSize, onImageDownloaded);
+						profileImage.setName(playerName);
+						profileImageLoader.load(playerName, profileImage, profileImageSize, onImageDownloaded);
 					} else {
 						profileImage.setIcon(icon);
 					}
@@ -183,7 +189,13 @@ public class PlayersPanel extends JPanel {
 
 				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!");
 
-				row.add(new JLabel("<html>" + player.getName() + "<br>" + formatRupeesWithColor(calculateNetTotal(playerGroup)) + "</html>"), "wrap");
+				JLabel playerNameLabel = new JLabel("<html>" + playerName + "<br>" + formatRupeesWithColor(calculateNetTotal(playerGroup)) + "</html>");
+				if (onlinePlayersMonitor.isPlayerOnline(playerName)) {
+					playerNameLabel.setIcon(online);
+					playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+					playerNameLabel.setVerticalTextPosition(SwingConstants.TOP);
+				}
+				row.add(playerNameLabel);
 
 				if (selected) {
 					row.setBackground(selectedBg);
@@ -242,7 +254,16 @@ public class PlayersPanel extends JPanel {
 			header.add(profileImage, "span 1 2, w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
 
 			JLabel playerName = new ClickableLabel("<html><h3><u>" + player.getName() + "</u></h3></html>", "http://u.emc.gs/" + player.getName());
-			header.add(playerName, "wrap");
+			playerName.setToolTipText("View player's profile");
+			if (onlinePlayersMonitor.isPlayerOnline(player.getName())) {
+				header.add(playerName, "split 2");
+				
+				JLabel onlineLabel = new JLabel("<html><font size=2><i>Online", online, SwingConstants.LEFT);
+				onlineLabel.setIconTextGap(2);
+				header.add(onlineLabel, "gapleft 10, wrap");
+			} else {
+				header.add(playerName, "wrap");
+			}
 
 			//@formatter:off
 			String seen =
