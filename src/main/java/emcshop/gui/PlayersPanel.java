@@ -44,7 +44,7 @@ import emcshop.util.FilterList;
 @SuppressWarnings("serial")
 public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
-	private final ProfileLoader profileImageLoader;
+	private final ProfileLoader profileLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private boolean showQuantitiesInStacks;
 
@@ -63,7 +63,7 @@ public class PlayersPanel extends JPanel {
 	 * Creates the panel.
 	 * @param playerGroups the players to display in the table
 	 */
-	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, boolean showQtyInStacks) {
+	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileLoader profileLoader, OnlinePlayersMonitor onlinePlayersMonitor, boolean showQtyInStacks) {
 		super(new MigLayout("fillx, insets 0"));
 
 		//add all the data to Lists so they can be sorted
@@ -73,7 +73,7 @@ public class PlayersPanel extends JPanel {
 			this.itemGroups.put(playerGroup, itemGroups);
 		}
 
-		this.profileImageLoader = profileImageLoader;
+		this.profileLoader = profileLoader;
 		this.onlinePlayersMonitor = onlinePlayersMonitor;
 		showQuantitiesInStacks = showQtyInStacks;
 
@@ -180,7 +180,7 @@ public class PlayersPanel extends JPanel {
 
 					if (icon == null) {
 						profileImage.setName(playerName);
-						profileImageLoader.loadPortrait(playerName, profileImage, profileImageSize, onImageDownloaded);
+						profileLoader.loadPortrait(playerName, profileImage, profileImageSize, onImageDownloaded);
 					} else {
 						profileImage.setIcon(icon);
 					}
@@ -195,7 +195,7 @@ public class PlayersPanel extends JPanel {
 					playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
 					playerNameLabel.setVerticalTextPosition(SwingConstants.TOP);
 				}
-				profileImageLoader.loadRank(playerName, playerNameLabel, null);
+				profileLoader.loadRank(playerName, playerNameLabel, null);
 				row.add(playerNameLabel, "gapbottom 0, wrap");
 
 				JLabel rupeeTotalLabel = new JLabel("<html>" + formatRupeesWithColor(calculateNetTotal(playerGroup)));
@@ -254,10 +254,12 @@ public class PlayersPanel extends JPanel {
 			JLabel profileImage = new JLabel();
 			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 			profileImage.setVerticalAlignment(SwingConstants.TOP);
-			profileImageLoader.loadPortrait(player.getName(), profileImage, profileImageSize);
+			profileLoader.loadPortrait(player.getName(), profileImage, profileImageSize);
 			header.add(profileImage, "span 1 2, w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
 
-			JLabel playerName = new ClickableLabel("<html><h3><u>" + player.getName() + "</u></h3></html>", "http://u.emc.gs/" + player.getName());
+			Color rankColor = profileLoader.getRankColor(player.getName());
+			String hex = String.format("#%02x%02x%02x", rankColor.getRed(), rankColor.getGreen(), rankColor.getBlue());
+			JLabel playerName = new ClickableLabel("<html><h3><u><font color=" + hex + ">" + player.getName(), "http://u.emc.gs/" + player.getName());
 			playerName.setToolTipText("View player's profile");
 			EMCServer server = onlinePlayersMonitor.getPlayerServer(player.getName());
 			if (server != null) {

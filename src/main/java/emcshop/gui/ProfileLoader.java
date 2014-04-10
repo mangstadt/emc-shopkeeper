@@ -41,13 +41,14 @@ public class ProfileLoader {
 	private final Map<Rank, Color> rankToColor = new EnumMap<Rank, Color>(Rank.class);
 	{
 		rankToColor.put(Rank.IRON, new Color(128, 128, 128));
-		rankToColor.put(Rank.GOLD, new Color(189, 207, 0));
-		rankToColor.put(Rank.DIAMOND, new Color(102, 211, 217));
+		rankToColor.put(Rank.GOLD, new Color(181, 181, 0));
+		rankToColor.put(Rank.DIAMOND, new Color(0, 181, 194));
 		rankToColor.put(Rank.MODERATOR, new Color(0, 64, 0));
 		rankToColor.put(Rank.SENIOR_STAFF, new Color(0, 255, 0));
 		rankToColor.put(Rank.DEVELOPER, new Color(0, 0, 128));
 		rankToColor.put(Rank.ADMIN, new Color(209, 0, 195));
 	}
+	private final Color noRankColor = Color.black;
 
 	private final File cacheDir;
 	private final Set<String> downloaded = new CaseInsensitiveHashSet();
@@ -156,23 +157,35 @@ public class ProfileLoader {
 	 * @param listener invoked when the profile page has been scraped
 	 */
 	public void loadRank(String playerName, JLabel label, ImageDownloadedListener listener) {
-		File file = getPropertiesFile(playerName);
-		if (file.exists()) {
-			try {
-				PlayerProfileProperties props = new PlayerProfileProperties(file);
-				Rank rank = props.getRank();
-				Color color = rankToColor.get(rank);
-				if (color == null) {
-					color = Color.black;
-				}
-				label.setForeground(color);
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Problem loading profile properties from cache.", e);
-			}
-		}
+		Color color = getRankColor(playerName);
+		label.setForeground(color);
 
 		Job job = new RankJob(playerName, label, listener);
 		queueJob(job);
+	}
+
+	/**
+	 * Gets the color of the player's rank.
+	 * @param playerName the player name
+	 * @return the color
+	 */
+	public Color getRankColor(String playerName) {
+		File file = getPropertiesFile(playerName);
+		if (!file.exists()) {
+			return noRankColor;
+		}
+
+		PlayerProfileProperties props;
+		try {
+			props = new PlayerProfileProperties(file);
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Problem loading profile properties from cache.", e);
+			return noRankColor;
+		}
+
+		Rank rank = props.getRank();
+		Color color = rankToColor.get(rank);
+		return (color == null) ? noRankColor : color;
 	}
 
 	private void queueJob(Job job) {
@@ -318,7 +331,7 @@ public class ProfileLoader {
 
 				ImageIcon image = (data == null) ? null : new ImageIcon(data);
 				for (Job job : waiting) {
-					if (job instanceof RankJob) {
+					if (job instanceof RankJob && profile != null) {
 						Color color = rankToColor.get(profile.getRank());
 						if (color == null) {
 							color = Color.black;
