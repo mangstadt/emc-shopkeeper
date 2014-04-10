@@ -170,22 +170,38 @@ public class ProfileLoader {
 	 * @return the color
 	 */
 	public Color getRankColor(String playerName) {
-		File file = getPropertiesFile(playerName);
-		if (!file.exists()) {
-			return noRankColor;
-		}
-
-		PlayerProfileProperties props;
-		try {
-			props = new PlayerProfileProperties(file);
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Problem loading profile properties from cache.", e);
+		PlayerProfileProperties props = loadProfileData(playerName);
+		if (props == null) {
 			return noRankColor;
 		}
 
 		Rank rank = props.getRank();
 		Color color = rankToColor.get(rank);
 		return (color == null) ? noRankColor : color;
+	}
+
+	/**
+	 * Gets the date that a player joined EMC.
+	 * @param playerName the player name
+	 * @return the join date or null if not found
+	 */
+	public Date getJoinDate(String playerName) {
+		PlayerProfileProperties props = loadProfileData(playerName);
+		return (props == null) ? null : props.getJoined();
+	}
+
+	private PlayerProfileProperties loadProfileData(String playerName) {
+		File file = getPropertiesFile(playerName);
+		if (!file.exists()) {
+			return null;
+		}
+
+		try {
+			return new PlayerProfileProperties(file);
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Problem loading profile properties from cache.", e);
+			return null;
+		}
 	}
 
 	private void queueJob(Job job) {

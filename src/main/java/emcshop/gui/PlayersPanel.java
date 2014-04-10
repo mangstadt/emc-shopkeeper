@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +49,8 @@ public class PlayersPanel extends JPanel {
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private boolean showQuantitiesInStacks;
 
-	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	private final DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
 	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
 	private List<PlayerGroup> displayedPlayers;
 	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
@@ -255,7 +257,7 @@ public class PlayersPanel extends JPanel {
 			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 			profileImage.setVerticalAlignment(SwingConstants.TOP);
 			profileLoader.loadPortrait(player.getName(), profileImage, profileImageSize);
-			header.add(profileImage, "span 1 2, w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
+			header.add(profileImage, "span 1 4, w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
 
 			Color rankColor = profileLoader.getRankColor(player.getName());
 			String hex = String.format("#%02x%02x%02x", rankColor.getRed(), rankColor.getGreen(), rankColor.getBlue());
@@ -263,25 +265,26 @@ public class PlayersPanel extends JPanel {
 			playerName.setToolTipText("View player's profile");
 			EMCServer server = onlinePlayersMonitor.getPlayerServer(player.getName());
 			if (server != null) {
-				header.add(playerName, "split 2");
+				header.add(playerName, "span 2, split 2");
 
 				JLabel onlineLabel = new JLabel("<html><font size=2><i>Connected to <b>" + server, ImageManager.getOnline(null, 16), SwingConstants.LEFT);
 				onlineLabel.setIconTextGap(2);
 				header.add(onlineLabel, "gapleft 10, wrap");
 			} else {
-				header.add(playerName, "wrap");
+				header.add(playerName, "span 2, wrap");
 			}
 
-			//@formatter:off
-			String seen =
-			"<html>" +
-				"<table>" +
-					"<tr><td>First seen:</td><td>" + df.format(player.getFirstSeen()) + "</td></tr>" +
-					"<tr><td>Last seen:</td><td>" + df.format(player.getLastSeen()) + "</td></tr>" +
-				"</table>" +
-			"</html>";
-			//@formatter:on
-			header.add(new JLabel(seen), "wrap");
+			Date joined = profileLoader.getJoinDate(player.getName());
+			if (joined != null) {
+				header.add(new JLabel("Joined:"));
+				header.add(new JLabel(dateFormat.format(joined)), "wrap");
+			}
+
+			header.add(new JLabel("First seen:"));
+			header.add(new JLabel(dateTimeFormat.format(player.getFirstSeen())), "wrap");
+
+			header.add(new JLabel("Last seen:"));
+			header.add(new JLabel(dateTimeFormat.format(player.getLastSeen())), "wrap");
 
 			tablesPanel.add(header, "wrap");
 
