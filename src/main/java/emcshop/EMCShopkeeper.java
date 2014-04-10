@@ -33,7 +33,7 @@ import emcshop.gui.AboutDialog;
 import emcshop.gui.ItemSuggestField;
 import emcshop.gui.MainFrame;
 import emcshop.gui.OnlinePlayersMonitor;
-import emcshop.gui.ProfileImageLoader;
+import emcshop.gui.ProfileLoader;
 import emcshop.gui.SplashFrame;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
@@ -361,7 +361,7 @@ public class EMCShopkeeper {
 		initCacheDir(cacheDir);
 
 		//start the profile image loader
-		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir);
+		ProfileLoader profileImageLoader = new ProfileLoader(cacheDir);
 		profileImageLoader.setHttpClientFactory(new HttpClientFactory() {
 			@Override
 			public HttpClient create() {

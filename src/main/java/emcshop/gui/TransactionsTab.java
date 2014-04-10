@@ -42,7 +42,7 @@ import emcshop.util.Settings;
 public class TransactionsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
-	private final ProfileImageLoader profileImageLoader;
+	private final ProfileLoader profileImageLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private final Settings settings;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
@@ -78,7 +78,7 @@ public class TransactionsTab extends JPanel {
 
 	private int netTotal;
 
-	public TransactionsTab(MainFrame owner, DbDao dao, ProfileImageLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, Settings settings) {
+	public TransactionsTab(MainFrame owner, DbDao dao, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, Settings settings) {
 		this.owner = owner;
 		this.dao = dao;
 		this.profileImageLoader = profileImageLoader;

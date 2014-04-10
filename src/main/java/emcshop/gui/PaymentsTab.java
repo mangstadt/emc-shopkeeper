@@ -34,7 +34,7 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 import emcshop.ItemIndex;
 import emcshop.db.DbDao;
-import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
+import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ButtonColumn;
 import emcshop.scraper.EMCServer;
@@ -46,7 +46,7 @@ import emcshop.util.GuiUtils;
 public class PaymentsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
-	private final ProfileImageLoader profileImageLoader;
+	private final ProfileLoader profileImageLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private boolean stale = true;
@@ -57,7 +57,7 @@ public class PaymentsTab extends JPanel {
 
 	private PaymentsTable paymentsTable;
 
-	public PaymentsTab(MainFrame owner, DbDao dao, ProfileImageLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor) {
+	public PaymentsTab(MainFrame owner, DbDao dao, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor) {
 		this.owner = owner;
 		this.dao = dao;
 		this.profileImageLoader = profileImageLoader;

@@ -99,12 +99,12 @@ public class MainFrame extends JFrame {
 	private final DbDao dao;
 	private final Settings settings;
 	private final LogManager logManager;
-	private final ProfileImageLoader profileImageLoader;
+	private final ProfileLoader profileImageLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private final String profile;
 	private final BackupManager backupManager;
 
-	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileImageLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, String profile, BackupManager backupManager) throws SQLException {
+	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, String profile, BackupManager backupManager) throws SQLException {
 		this.dao = dao;
 		this.settings = settings;
 		this.logManager = logManager;

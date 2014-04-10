@@ -30,17 +30,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
+import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.PlayerProfileScraper;
 import emcshop.scraper.Rank;
 import emcshop.util.HttpClientFactory;
 
-public class ProfileImageDownloaderTest {
+public class ProfileLoaderTest {
 	private final byte[] portrait;
 	{
 		try {
-			portrait = IOUtils.toByteArray(ProfileImageDownloaderTest.class.getResourceAsStream("shavingfoam.jpg"));
+			portrait = IOUtils.toByteArray(ProfileLoaderTest.class.getResourceAsStream("shavingfoam.jpg"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -75,7 +75,7 @@ public class ProfileImageDownloaderTest {
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
 		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(null);
 
-		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
+		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
@@ -97,7 +97,7 @@ public class ProfileImageDownloaderTest {
 		profile.setPrivate(true);
 		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 
-		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
+		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
@@ -121,7 +121,7 @@ public class ProfileImageDownloaderTest {
 		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
-		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
+		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
@@ -168,7 +168,7 @@ public class ProfileImageDownloaderTest {
 		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), eq(lastModified), any(HttpClient.class))).thenReturn(null);
 
-		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
+		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
@@ -196,7 +196,7 @@ public class ProfileImageDownloaderTest {
 		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
-		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
+		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
 		for (int i = 0; i < 100; i++) {
 			profileImageLoader.loadPortrait(player, label, 16, listener);
 		}
@@ -217,14 +217,14 @@ public class ProfileImageDownloaderTest {
 		assertNotNull(props.get("joined"));
 	}
 
-	private static void wait(ProfileImageLoader profileImageLoader) throws InterruptedException {
+	private static void wait(ProfileLoader profileImageLoader) throws InterruptedException {
 		while (profileImageLoader.jobsBeingProcessed > 0) {
 			Thread.sleep(100);
 		}
 	}
 
-	private ProfileImageLoader create(File cacheDir, PlayerProfileScraper scraper) {
-		ProfileImageLoader loader = new ProfileImageLoader(cacheDir);
+	private ProfileLoader create(File cacheDir, PlayerProfileScraper scraper) {
+		ProfileLoader loader = new ProfileLoader(cacheDir);
 		loader.setHttpClientFactory(new HttpClientFactory() {
 			@Override
 			public HttpClient create() {

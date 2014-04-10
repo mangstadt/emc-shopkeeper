@@ -32,7 +32,7 @@ import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.ItemsTable.Column;
-import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
+import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.EMCServer;
@@ -45,7 +45,7 @@ import emcshop.util.FilterList;
 @SuppressWarnings("serial")
 public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
-	private final ProfileImageLoader profileImageLoader;
+	private final ProfileLoader profileImageLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private boolean showQuantitiesInStacks;
 
@@ -64,7 +64,7 @@ public class PlayersPanel extends JPanel {
 	 * Creates the panel.
 	 * @param playerGroups the players to display in the table
 	 */
-	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileImageLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, boolean showQtyInStacks) {
+	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, boolean showQtyInStacks) {
 		super(new MigLayout("fillx, insets 0"));
 
 		//add all the data to Lists so they can be sorted

@@ -27,7 +27,7 @@ import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.ItemIndex;
-import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
+import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.EMCServer;
 import emcshop.scraper.ShopTransaction;
@@ -66,7 +66,7 @@ public class TransactionsTable extends JTable {
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 
-	public TransactionsTable(List<ShopTransaction> transactions, boolean showQuantitiesInStacks, ProfileImageLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor) {
+	public TransactionsTable(List<ShopTransaction> transactions, boolean showQuantitiesInStacks, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor) {
 		this(transactions, Column.TS, false, showQuantitiesInStacks, profileImageLoader, onlinePlayersMonitor);
 	}
 
@@ -76,7 +76,7 @@ public class TransactionsTable extends JTable {
 	 * @param sortedByAscending true if the items list is sorted ascending,
 	 * false if descending
 	 */
-	public TransactionsTable(List<ShopTransaction> transactions, Column sortedBy, boolean sortedByAscending, boolean showQuantitiesInStacks, final ProfileImageLoader profileImageLoader, final OnlinePlayersMonitor onlinePlayersMonitor) {
+	public TransactionsTable(List<ShopTransaction> transactions, Column sortedBy, boolean sortedByAscending, boolean showQuantitiesInStacks, final ProfileLoader profileImageLoader, final OnlinePlayersMonitor onlinePlayersMonitor) {
 		this.transactions = transactions;
 		this.transactionsToDisplay = transactions;
 		prevColumnClicked = sortedBy;

@@ -34,8 +34,8 @@ import emcshop.util.PropertiesWrapper;
  * Used for downloading player profile pictures.
  * @author Michael Angstadt
  */
-public class ProfileImageLoader {
-	private static final Logger logger = Logger.getLogger(ProfileImageLoader.class.getName());
+public class ProfileLoader {
+	private static final Logger logger = Logger.getLogger(ProfileLoader.class.getName());
 
 	private final File cacheDir;
 	private final Set<String> downloaded = new CaseInsensitiveHashSet();
@@ -61,7 +61,7 @@ public class ProfileImageLoader {
 	 * Creates a profile image loader.
 	 * @param cacheDir the directory where the images are cached
 	 */
-	public ProfileImageLoader(File cacheDir) {
+	public ProfileLoader(File cacheDir) {
 		this.cacheDir = cacheDir;
 	}
 
