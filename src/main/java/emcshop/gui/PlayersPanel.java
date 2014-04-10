@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -151,7 +150,6 @@ public class PlayersPanel extends JPanel {
 
 		final JList list = new JList(new Vector<PlayerGroup>(displayedPlayers));
 		list.setCellRenderer(new ListCellRenderer() {
-			private Color[] colors = { new Color(0, 0, 0), new Color(128, 128, 128), new Color(189, 207, 0), new Color(102, 211, 217), new Color(0, 255, 0), new Color(0, 64, 0), new Color(209, 0, 195), new Color(0, 0, 128) };
 			private static final int profileImageSize = 32;
 			private final Color selectedBg = new Color(192, 192, 192);
 			private final Map<String, Icon> playerIcons = new HashMap<String, Icon>();
@@ -188,20 +186,20 @@ public class PlayersPanel extends JPanel {
 					}
 				}
 
-				int i = new Random().nextInt(colors.length);
-				Color c = colors[i];
-				String hex = String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
+				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!, span 1 2");
 
-				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!");
-
-				JLabel playerNameLabel = new JLabel("<html><font color=" + hex + ">" + playerName + "</font><br>" + formatRupeesWithColor(calculateNetTotal(playerGroup)) + "</html>");
+				JLabel playerNameLabel = new JLabel(playerName);
 				EMCServer server = onlinePlayersMonitor.getPlayerServer(playerName);
 				if (server != null) {
 					playerNameLabel.setIcon(ImageManager.getOnline(server, 16));
 					playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
 					playerNameLabel.setVerticalTextPosition(SwingConstants.TOP);
 				}
-				row.add(playerNameLabel);
+				profileImageLoader.loadRank(playerName, playerNameLabel, null);
+				row.add(playerNameLabel, "gapbottom 0, wrap");
+
+				JLabel rupeeTotalLabel = new JLabel("<html>" + formatRupeesWithColor(calculateNetTotal(playerGroup)));
+				row.add(rupeeTotalLabel, "gaptop 0");
 
 				if (selected) {
 					row.setBackground(selectedBg);

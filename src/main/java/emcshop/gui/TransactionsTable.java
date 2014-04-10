@@ -137,13 +137,15 @@ public class TransactionsTable extends JTable {
 
 					JLabel playerLabel = new JLabel();
 					playerLabel.setText(playerName);
-					profileImageLoader.loadPortrait(playerName, playerLabel, 16, new ImageDownloadedListener() {
+					ImageDownloadedListener listener = new ImageDownloadedListener() {
 						@Override
 						public void onImageDownloaded(JLabel label) {
 							AbstractTableModel model = (AbstractTableModel) getModel();
 							model.fireTableCellUpdated(row, column.ordinal());
 						}
-					});
+					};
+					profileImageLoader.loadPortrait(playerName, playerLabel, 16, listener);
+					profileImageLoader.loadRank(playerName, playerLabel, listener);
 					panel.add(playerLabel);
 
 					EMCServer server = onlinePlayersMonitor.getPlayerServer(playerName);

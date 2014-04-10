@@ -1,5 +1,6 @@
 package emcshop.gui;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -36,6 +37,17 @@ import emcshop.util.PropertiesWrapper;
  */
 public class ProfileLoader {
 	private static final Logger logger = Logger.getLogger(ProfileLoader.class.getName());
+
+	private final Map<Rank, Color> rankToColor = new EnumMap<Rank, Color>(Rank.class);
+	{
+		rankToColor.put(Rank.IRON, new Color(128, 128, 128));
+		rankToColor.put(Rank.GOLD, new Color(189, 207, 0));
+		rankToColor.put(Rank.DIAMOND, new Color(102, 211, 217));
+		rankToColor.put(Rank.MODERATOR, new Color(0, 64, 0));
+		rankToColor.put(Rank.SENIOR_STAFF, new Color(0, 255, 0));
+		rankToColor.put(Rank.DEVELOPER, new Color(0, 0, 128));
+		rankToColor.put(Rank.ADMIN, new Color(209, 0, 195));
+	}
 
 	private final File cacheDir;
 	private final Set<String> downloaded = new CaseInsensitiveHashSet();
@@ -133,16 +145,45 @@ public class ProfileLoader {
 		image = ImageManager.scale(image, maxSize);
 		label.setIcon(image);
 
+		Job job = new PortraitJob(playerName, label, maxSize, listener);
+		queueJob(job);
+	}
+
+	/**
+	 * Colors a label depending on the given player's rank.
+	 * @param playerName the player name
+	 * @param label the label to change the color of
+	 * @param listener invoked when the profile page has been scraped
+	 */
+	public void loadRank(String playerName, JLabel label, ImageDownloadedListener listener) {
+		File file = getPropertiesFile(playerName);
+		if (file.exists()) {
+			try {
+				PlayerProfileProperties props = new PlayerProfileProperties(file);
+				Rank rank = props.getRank();
+				Color color = rankToColor.get(rank);
+				if (color == null) {
+					color = Color.black;
+				}
+				label.setForeground(color);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Problem loading profile properties from cache.", e);
+			}
+		}
+
+		Job job = new RankJob(playerName, label, listener);
+		queueJob(job);
+	}
+
+	private void queueJob(Job job) {
 		synchronized (downloaded) {
-			if (downloaded.contains(playerName)) {
+			if (downloaded.contains(job.playerName)) {
 				//the image has already been downloaded, so the cached version is the most up-to-date version of the image
 				return;
 			}
 
-			Job job = new Job(playerName, label, maxSize, listener);
-
 			//see if the image is already queued for download
-			List<Job> waiting = waitList.get(playerName);
+			List<Job> waiting = waitList.get(job.playerName);
 			if (waiting == null) {
 				//player name is not queued for download, so add it to the queue
 				try {
@@ -154,7 +195,7 @@ public class ProfileLoader {
 				}
 
 				waiting = new ArrayList<Job>();
-				waitList.put(playerName, waiting);
+				waitList.put(job.playerName, waiting);
 			}
 
 			//add job to wait list
@@ -275,15 +316,28 @@ public class ProfileLoader {
 					}
 				}
 
-				//update all the labels with the new image
-				if (data != null) {
-					ImageIcon image = new ImageIcon(data);
-					for (Job job : waiting) {
-						ImageIcon scaledImage = ImageManager.scale(image, job.maxSize);
+				ImageIcon image = (data == null) ? null : new ImageIcon(data);
+				for (Job job : waiting) {
+					if (job instanceof RankJob) {
+						Color color = rankToColor.get(profile.getRank());
+						if (color == null) {
+							color = Color.black;
+						}
+						job.label.setForeground(color);
+						if (job.listener != null) {
+							job.listener.onImageDownloaded(job.label);
+						}
+						continue;
+					}
+
+					if (job instanceof PortraitJob && image != null) {
+						PortraitJob j = (PortraitJob) job;
+						ImageIcon scaledImage = ImageManager.scale(image, j.maxSize);
 						job.label.setIcon(scaledImage);
 						if (job.listener != null) {
 							job.listener.onImageDownloaded(job.label);
 						}
+						continue;
 					}
 				}
 
@@ -307,20 +361,36 @@ public class ProfileLoader {
 		}
 	}
 
-	/**
-	 * Represents a queued download request for a profile image.
-	 */
 	private static class Job {
 		private final String playerName;
 		private final JLabel label;
-		private final int maxSize;
 		private final ImageDownloadedListener listener;
 
-		private Job(String playerName, JLabel label, int maxSize, ImageDownloadedListener listener) {
+		private Job(String playerName, JLabel label, ImageDownloadedListener listener) {
 			this.playerName = playerName;
 			this.label = label;
-			this.maxSize = maxSize;
 			this.listener = listener;
+		}
+	}
+
+	/**
+	 * Represents a queued download request for a profile image.
+	 */
+	private static class PortraitJob extends Job {
+		private final int maxSize;
+
+		private PortraitJob(String playerName, JLabel label, int maxSize, ImageDownloadedListener listener) {
+			super(playerName, label, listener);
+			this.maxSize = maxSize;
+		}
+	}
+
+	/**
+	 * Represents a queued download request for a player rank.
+	 */
+	private static class RankJob extends Job {
+		private RankJob(String playerName, JLabel label, ImageDownloadedListener listener) {
+			super(playerName, label, listener);
 		}
 	}
 
@@ -345,6 +415,14 @@ public class ProfileLoader {
 			for (Map.Entry<Rank, String> entry : rankToString.entrySet()) {
 				stringToRank.put(entry.getValue(), entry.getKey());
 			}
+		}
+
+		public PlayerProfileProperties() {
+			//empty
+		}
+
+		public PlayerProfileProperties(File file) throws IOException {
+			super(file);
 		}
 
 		public boolean isPrivate() {

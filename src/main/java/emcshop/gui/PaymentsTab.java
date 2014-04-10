@@ -183,14 +183,16 @@ public class PaymentsTab extends JPanel {
 						component = new JPanel(new MigLayout("insets 2"));
 						String playerName = transaction.getPlayer();
 
-						JLabel label = new JLabel("<html>" + transaction.getPlayer() + "</html>"); //add player's profile image
-						profileImageLoader.loadPortrait(transaction.getPlayer(), label, 16, new ImageDownloadedListener() {
+						ImageDownloadedListener listener = new ImageDownloadedListener() {
 							@Override
 							public void onImageDownloaded(JLabel label) {
 								AbstractTableModel model = (AbstractTableModel) getModel();
 								model.fireTableCellUpdated(row, col);
 							}
-						});
+						};
+						JLabel label = new JLabel("<html>" + transaction.getPlayer() + "</html>"); //add player's profile image
+						profileImageLoader.loadPortrait(transaction.getPlayer(), label, 16, listener);
+						profileImageLoader.loadRank(transaction.getPlayer(), label, listener);
 						component.add(label);
 
 						EMCServer server = onlinePlayersMonitor.getPlayerServer(playerName);
