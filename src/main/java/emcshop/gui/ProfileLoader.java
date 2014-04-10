@@ -454,10 +454,6 @@ public class ProfileLoader {
 			super(file);
 		}
 
-		public boolean isPrivate() {
-			return getBoolean("private", false);
-		}
-
 		public void setPrivate(boolean private_) {
 			setBoolean("private", private_);
 		}
