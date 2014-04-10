@@ -20,6 +20,7 @@ import javax.swing.ToolTipManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import emcshop.cli.CliController;
@@ -45,8 +46,10 @@ import emcshop.model.ProfileSelectorModelImpl;
 import emcshop.presenter.DatabaseStartupErrorPresenter;
 import emcshop.presenter.ProfileSelectorPresenter;
 import emcshop.presenter.UnhandledErrorPresenter;
+import emcshop.scraper.EmcSession;
 import emcshop.scraper.OnlinePlayersScraper;
 import emcshop.util.GuiUtils;
+import emcshop.util.HttpClientFactory;
 import emcshop.util.Settings;
 import emcshop.util.ZipUtils.ZipListener;
 import emcshop.view.DatabaseStartupErrorViewImpl;
@@ -313,7 +316,7 @@ public class EMCShopkeeper {
 		}
 	}
 
-	private static void launchGui(File profileDir, File dbDir, Settings settings, LogManager logManager) throws Throwable {
+	private static void launchGui(File profileDir, File dbDir, final Settings settings, LogManager logManager) throws Throwable {
 		initializeMac();
 
 		//set uncaught exception handler
@@ -358,7 +361,15 @@ public class EMCShopkeeper {
 		initCacheDir(cacheDir);
 
 		//start the profile image loader
-		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir, settings);
+		ProfileImageLoader profileImageLoader = new ProfileImageLoader(cacheDir);
+		profileImageLoader.setHttpClientFactory(new HttpClientFactory() {
+			@Override
+			public HttpClient create() {
+				EmcSession session = settings.getSession();
+				return (session == null) ? new DefaultHttpClient() : session.createHttpClient();
+			}
+		});
+		profileImageLoader.start();
 
 		DbListener listener = new DbListener() {
 			@Override

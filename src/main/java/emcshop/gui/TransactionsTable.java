@@ -137,7 +137,7 @@ public class TransactionsTable extends JTable {
 
 					JLabel playerLabel = new JLabel();
 					playerLabel.setText(playerName);
-					profileImageLoader.load(playerName, playerLabel, 16, new ImageDownloadedListener() {
+					profileImageLoader.loadPortrait(playerName, playerLabel, 16, new ImageDownloadedListener() {
 						@Override
 						public void onImageDownloaded(JLabel label) {
 							AbstractTableModel model = (AbstractTableModel) getModel();

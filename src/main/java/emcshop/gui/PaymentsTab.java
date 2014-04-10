@@ -184,7 +184,7 @@ public class PaymentsTab extends JPanel {
 						String playerName = transaction.getPlayer();
 
 						JLabel label = new JLabel("<html>" + transaction.getPlayer() + "</html>"); //add player's profile image
-						profileImageLoader.load(transaction.getPlayer(), label, 16, new ImageDownloadedListener() {
+						profileImageLoader.loadPortrait(transaction.getPlayer(), label, 16, new ImageDownloadedListener() {
 							@Override
 							public void onImageDownloaded(JLabel label) {
 								AbstractTableModel model = (AbstractTableModel) getModel();
