@@ -7,6 +7,7 @@ import java.util.Date;
  */
 public class PlayerProfile {
 	private String playerName;
+	private boolean private_;
 	private String portraitUrl;
 	private Rank rank;
 	private Date joined;
@@ -17,6 +18,14 @@ public class PlayerProfile {
 
 	public void setPlayerName(String playerName) {
 		this.playerName = playerName;
+	}
+
+	public boolean isPrivate() {
+		return private_;
+	}
+
+	public void setPrivate(boolean private_) {
+		this.private_ = private_;
 	}
 
 	public String getPortraitUrl() {

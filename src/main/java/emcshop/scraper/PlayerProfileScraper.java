@@ -9,9 +9,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -21,6 +23,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+/**
+ * Scrapes information from player profile pages.
+ */
 public class PlayerProfileScraper {
 	private static final Map<String, Rank> titleToRankMapping;
 	static {
@@ -51,25 +56,69 @@ public class PlayerProfileScraper {
 	 * Scrapes a player's profile page.
 	 * @param playerName the player name
 	 * @param client the HTTP client to use
-	 * @return the scraped page
+	 * @return the scraped page or null if the player does not exist
 	 * @throws IOException
 	 */
 	public PlayerProfile scrapeProfile(String playerName, HttpClient client) throws IOException {
 		Document profilePage = downloadProfilePage(playerName, client);
 
-		PlayerProfile profile = new PlayerProfile();
-
-		String player = getPlayerName(profilePage); //get the proper case of the player's name
-		if (player == null) {
-			player = playerName;
+		boolean isPrivate = isPrivate(profilePage);
+		String scrapedPlayerName = scrapePlayerName(profilePage);
+		if (!isPrivate && scrapedPlayerName == null) {
+			//user does not exist
+			return null;
 		}
-		profile.setPlayerName(player);
 
-		profile.setPortraitUrl(getPortraitUrl(profilePage));
-		profile.setRank(getRank(profilePage));
-		profile.setJoined(getJoined(profilePage));
+		PlayerProfile profile = new PlayerProfile();
+		profile.setPrivate(isPrivate);
+		if (isPrivate) {
+			profile.setPlayerName(playerName);
+			return profile;
+		}
+
+		profile.setPlayerName(scrapedPlayerName);
+		profile.setPortraitUrl(scrapePortraitUrl(profilePage));
+		profile.setRank(scrapeRank(profilePage));
+		profile.setJoined(scrapeJoined(profilePage));
 
 		return profile;
+	}
+
+	/**
+	 * Downloads the image and saves it to the cache.
+	 * @param playerName the player name
+	 * @param lastModified the value of the "If-Modified-Since" HTTP header, or
+	 * null not to add this header
+	 * @return the image data, null if the image hasn't changed, or null the
+	 * image could not be fetched
+	 * @throws IOException
+	 */
+	public byte[] downloadPortrait(PlayerProfile profile, Date lastModified, HttpClient client) throws IOException {
+		String url = profile.getPortraitUrl();
+		if (url == null) {
+			return null;
+		}
+
+		HttpGet request = new HttpGet(url);
+		if (lastModified != null) {
+			DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+			df.setTimeZone(TimeZone.getTimeZone("GMT"));
+			request.addHeader("If-Modified-Since", df.format(lastModified));
+		}
+
+		HttpResponse response = client.execute(request);
+		int statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode == HttpStatus.SC_NOT_MODIFIED || statusCode == HttpStatus.SC_NOT_FOUND) {
+			//image not modified or not found
+			return null;
+		}
+
+		HttpEntity entity = response.getEntity();
+		try {
+			return EntityUtils.toByteArray(entity);
+		} finally {
+			EntityUtils.consumeQuietly(entity);
+		}
 	}
 
 	private Document downloadProfilePage(String playerName, HttpClient client) throws IOException {
@@ -77,35 +126,33 @@ public class PlayerProfileScraper {
 		HttpResponse response = client.execute(request);
 		HttpEntity entity = response.getEntity();
 		try {
-			return Jsoup.parse(entity.getContent(), "UTF-8", "");
+			return Jsoup.parse(entity.getContent(), "UTF-8", "http://empireminecraft.com");
 		} finally {
 			EntityUtils.consume(entity);
 		}
 	}
 
-	private String getPlayerName(Document document) {
+	private boolean isPrivate(Document document) {
+		Elements elements = document.select("label[for=ctrl_0]");
+		return !elements.isEmpty();
+	}
+
+	private String scrapePlayerName(Document document) {
 		Elements elements = document.getElementsByAttributeValue("itemprop", "name");
 		return elements.isEmpty() ? null : elements.first().text();
 	}
 
-	private String getPortraitUrl(Document document) {
+	private String scrapePortraitUrl(Document document) {
 		Elements elements = document.select(".avatarScaler img");
 		if (elements.isEmpty()) { //players can choose to make their profile private
 			return null;
 		}
 
-		String src = elements.first().attr("src");
-		if (src.isEmpty()) {
-			return null;
-		}
-
-		if (!src.startsWith("http")) {
-			src = "http://empireminecraft.com/" + src;
-		}
-		return src;
+		String src = elements.first().absUrl("src");
+		return src.isEmpty() ? null : src;
 	}
 
-	private Rank getRank(Document document) {
+	private Rank scrapeRank(Document document) {
 		Elements elements = document.select(".userTitle span");
 		if (elements.isEmpty()) {
 			return null;
@@ -115,23 +162,23 @@ public class PlayerProfileScraper {
 		return titleToRankMapping.get(title);
 	}
 
-	private Date getJoined(Document document) {
+	private Date scrapeJoined(Document document) {
 		Elements elements = document.select(".infoblock .secondaryContent");
 		if (elements.isEmpty()) {
 			return null;
 		}
 
-		boolean useNext = false;
+		boolean parseNextElement = false;
 		for (Element element : elements) {
 			for (Element child : element.children()) {
 				String text = child.text();
 
 				if (text.equals("Joined:")) {
-					useNext = true;
+					parseNextElement = true;
 					continue;
 				}
 
-				if (useNext) {
+				if (parseNextElement) {
 					DateFormat df = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
 					try {
 						return df.parse(text);

@@ -1,8 +1,12 @@
 package emcshop.gui;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -10,96 +14,130 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Date;
+import java.util.Properties;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.message.BasicStatusLine;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import emcshop.gui.ProfileImageLoader.ImageDownloadedListener;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.PlayerProfileScraper;
+import emcshop.scraper.Rank;
 import emcshop.util.HttpClientFactory;
 
 public class ProfileImageDownloaderTest {
-	private static final byte[] shavingfoamImage;
-	static {
+	private final byte[] portrait;
+	{
 		try {
-			shavingfoamImage = IOUtils.toByteArray(ProfileImageDownloaderTest.class.getResourceAsStream("shavingfoam.jpg"));
+			portrait = IOUtils.toByteArray(ProfileImageDownloaderTest.class.getResourceAsStream("shavingfoam.jpg"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	private static final String shavingfoamImageUrl = "http://empireminecraft.com/data/avatars/l/12/12110.jpg?1389141773";
 
-	private static final StatusLine OK = new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), HttpStatus.SC_OK, "OK");
-	private static final StatusLine NOT_MODIFIED = new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), HttpStatus.SC_NOT_MODIFIED, "Not Modified");
-	private static final StatusLine NOT_FOUND = new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), HttpStatus.SC_NOT_FOUND, "Not Found");
+	private final PlayerProfile profile = new PlayerProfile();
+	{
+		profile.setPlayerName("shavingfoam");
+		profile.setPrivate(false);
+		profile.setRank(Rank.GOLD);
+		profile.setPortraitUrl("http://empireminecraft.com/data/avatars/l/12/12110.jpg?1389141773");
+		profile.setJoined(new Date());
+	}
+
+	private File portraitFile, propertiesFile;
 
 	@Rule
 	public final TemporaryFolder temp = new TemporaryFolder();
 
+	@Before
+	public void before() {
+		portraitFile = new File(temp.getRoot(), profile.getPlayerName());
+		propertiesFile = new File(temp.getRoot(), profile.getPlayerName() + ".properties");
+	}
+
 	@Test
-	public void non_existent_user_or_private_profile() throws Throwable {
+	public void non_existent_user() throws Throwable {
 		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
 		JLabel label = mock(JLabel.class);
-		String player = "does-not-exist";
+		String player = profile.getPlayerName();
 
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
-		PlayerProfile profile = new PlayerProfile();
-		profile.setPlayerName(player);
-		when(scraper.scrapeProfile(Mockito.eq(player), Mockito.any(HttpClient.class))).thenReturn(profile);
+		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(null);
 
 		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
-		verify(label).setIcon(Mockito.any(Icon.class));
+		verify(label).setIcon(any(Icon.class));
 		verify(listener, never()).onImageDownloaded(label);
-		assertFalse(new File(temp.getRoot(), "does-not-exist").exists());
+		assertFalse(portraitFile.exists());
+		assertFalse(propertiesFile.exists());
+	}
+
+	@Test
+	public void private_profile() throws Throwable {
+		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
+		JLabel label = mock(JLabel.class);
+		String player = profile.getPlayerName();
+
+		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
+		PlayerProfile profile = new PlayerProfile();
+		profile.setPlayerName(player);
+		profile.setPrivate(true);
+		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+
+		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
+		profileImageLoader.loadPortrait(player, label, 16, listener);
+		wait(profileImageLoader);
+
+		verify(label).setIcon(any(Icon.class));
+		verify(listener, never()).onImageDownloaded(label);
+		assertFalse(portraitFile.exists());
+
+		Properties props = new Properties();
+		props.load(new FileInputStream(propertiesFile));
+		assertEquals(1, props.size());
+		assertEquals("true", props.get("private"));
 	}
 
 	@Test
 	public void image_downloaded() throws Throwable {
 		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
 		JLabel label = mock(JLabel.class);
-		String player = "shavingfoam";
+		String player = profile.getPlayerName();
 
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
-		PlayerProfile profile = new PlayerProfile();
-		profile.setPlayerName(player);
-		profile.setPortraitUrl(shavingfoamImageUrl);
-		when(scraper.scrapeProfile(Mockito.eq(player), Mockito.any(HttpClient.class))).thenReturn(profile);
+		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
 		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
-		verify(label, times(2)).setIcon(Mockito.any(Icon.class));
+		verify(label, times(2)).setIcon(any(Icon.class));
 		verify(listener).onImageDownloaded(label);
 
-		byte[] expected = shavingfoamImage;
-		byte[] actual = IOUtils.toByteArray(new FileInputStream(new File(temp.getRoot(), player)));
+		byte[] expected = portrait;
+		byte[] actual = IOUtils.toByteArray(new FileInputStream(portraitFile));
 		assertArrayEquals(expected, actual);
+
+		Properties props = new Properties();
+		props.load(new FileInputStream(propertiesFile));
+		assertEquals(3, props.size());
+		assertEquals("false", props.get("private"));
+		assertEquals("gold", props.get("rank"));
+		assertNotNull(props.get("joined"));
 
 		//loading it again should retrieve it from the cache
 		//no HTTP calls should be made
@@ -109,70 +147,54 @@ public class ProfileImageDownloaderTest {
 		profileImageLoader.loadPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
-		verify(label).setIcon(Mockito.any(Icon.class));
+		verify(label).setIcon(any(Icon.class));
 		verify(listener, never()).onImageDownloaded(label);
+
+		//the portrait should have only been downloaded once
+		verify(scraper).downloadPortrait(any(PlayerProfile.class), any(Date.class), any(HttpClient.class));
 	}
 
 	@Test
 	public void image_not_modified() throws Throwable {
-		File file = temp.newFile("shavingfoam");
-		FileUtils.writeByteArrayToFile(file, shavingfoamImage);
+		String player = profile.getPlayerName();
+		temp.newFile(player);
+		temp.newFile(player + ".properties");
+		Date lastModified = new Date();
 
 		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
 		JLabel label = mock(JLabel.class);
-		String player = "shavingfoam";
 
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
-		PlayerProfile profile = new PlayerProfile();
-		profile.setPlayerName(player);
-		profile.setPortraitUrl(shavingfoamImageUrl);
-		when(scraper.scrapeProfile(Mockito.eq(player), Mockito.any(HttpClient.class))).thenReturn(profile);
+		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.downloadPortrait(eq(profile), eq(lastModified), any(HttpClient.class))).thenReturn(null);
 
-		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper, NOT_MODIFIED);
+		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
-		verify(label).setIcon(Mockito.any(Icon.class));
+		verify(label).setIcon(any(Icon.class));
 		verify(listener, never()).onImageDownloaded(label);
 
-		byte[] expected = shavingfoamImage;
-		byte[] actual = IOUtils.toByteArray(new FileInputStream(new File(temp.getRoot(), player)));
-		assertArrayEquals(expected, actual);
-	}
+		assertEquals(0, portraitFile.length()); //file should not have been modified
 
-	@Test
-	public void image_not_found() throws Throwable {
-		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
-		JLabel label = mock(JLabel.class);
-		String player = "shavingfoam";
-
-		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
-		PlayerProfile profile = new PlayerProfile();
-		profile.setPlayerName(player);
-		profile.setPortraitUrl(shavingfoamImageUrl);
-		when(scraper.scrapeProfile(Mockito.eq(player), Mockito.any(HttpClient.class))).thenReturn(profile);
-
-		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper, NOT_FOUND);
-		profileImageLoader.loadPortrait(player, label, 16, listener);
-		wait(profileImageLoader);
-
-		verify(label).setIcon(Mockito.any(Icon.class));
-		verify(listener, never()).onImageDownloaded(label);
-
-		assertFalse(new File(temp.getRoot(), "shavingfoam").exists());
+		//properties file should have been modified, though
+		Properties props = new Properties();
+		props.load(new FileInputStream(propertiesFile));
+		assertEquals(3, props.size());
+		assertEquals("false", props.get("private"));
+		assertEquals("gold", props.get("rank"));
+		assertNotNull(props.get("joined"));
 	}
 
 	@Test
 	public void stress_test() throws Throwable {
 		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
 		JLabel label = mock(JLabel.class);
-		String player = "shavingfoam";
+		String player = profile.getPlayerName();
 
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
-		PlayerProfile profile = new PlayerProfile();
-		profile.setPlayerName(player);
-		profile.setPortraitUrl(shavingfoamImageUrl);
-		when(scraper.scrapeProfile(Mockito.eq(player), Mockito.any(HttpClient.class))).thenReturn(profile);
+		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
 		ProfileImageLoader profileImageLoader = create(temp.getRoot(), scraper);
 		for (int i = 0; i < 100; i++) {
@@ -180,12 +202,19 @@ public class ProfileImageDownloaderTest {
 		}
 		wait(profileImageLoader);
 
-		verify(label, atLeastOnce()).setIcon(Mockito.any(Icon.class));
+		verify(label, atLeastOnce()).setIcon(any(Icon.class));
 		verify(listener, atLeastOnce()).onImageDownloaded(label);
 
-		byte[] expected = shavingfoamImage;
-		byte[] actual = IOUtils.toByteArray(new FileInputStream(new File(temp.getRoot(), player)));
+		byte[] expected = portrait;
+		byte[] actual = IOUtils.toByteArray(new FileInputStream(portraitFile));
 		assertArrayEquals(expected, actual);
+
+		Properties props = new Properties();
+		props.load(new FileInputStream(propertiesFile));
+		assertEquals(3, props.size());
+		assertEquals("false", props.get("private"));
+		assertEquals("gold", props.get("rank"));
+		assertNotNull(props.get("joined"));
 	}
 
 	private static void wait(ProfileImageLoader profileImageLoader) throws InterruptedException {
@@ -194,51 +223,12 @@ public class ProfileImageDownloaderTest {
 		}
 	}
 
-	private static HttpClient createMockClient(final StatusLine imageResponseStatus) {
-		try {
-			HttpClient client = mock(HttpClient.class);
-			when(client.execute(Mockito.any(HttpGet.class))).then(new Answer<HttpResponse>() {
-				@Override
-				public HttpResponse answer(InvocationOnMock invocation) throws Throwable {
-					HttpGet request = (HttpGet) invocation.getArguments()[0];
-					String uri = request.getURI().toString();
-
-					byte[] responseData = null;
-					StatusLine status = null;
-					if (uri.equals(shavingfoamImageUrl)) {
-						status = imageResponseStatus;
-						responseData = shavingfoamImage;
-					} else {
-						fail("Unexpected URI, check the unit test: " + uri);
-					}
-
-					HttpResponse response = mock(HttpResponse.class);
-					when(response.getStatusLine()).thenReturn(status);
-
-					HttpEntity entity = mock(HttpEntity.class);
-					when(entity.getContent()).thenReturn(new ByteArrayInputStream(responseData));
-					when(entity.getContentLength()).thenReturn((long) responseData.length);
-					when(response.getEntity()).thenReturn(entity);
-
-					return response;
-				}
-			});
-			return client;
-		} catch (Throwable t) {
-			throw new RuntimeException(t);
-		}
-	}
-
 	private ProfileImageLoader create(File cacheDir, PlayerProfileScraper scraper) {
-		return create(cacheDir, scraper, OK);
-	}
-
-	private ProfileImageLoader create(File cacheDir, PlayerProfileScraper scraper, final StatusLine imageResponseStatus) {
 		ProfileImageLoader loader = new ProfileImageLoader(cacheDir);
 		loader.setHttpClientFactory(new HttpClientFactory() {
 			@Override
 			public HttpClient create() {
-				return createMockClient(imageResponseStatus);
+				return mock(HttpClient.class);
 			}
 		});
 		loader.setProfilePageScraper(scraper);
