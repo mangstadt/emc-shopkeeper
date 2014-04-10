@@ -350,7 +350,7 @@ public class ProfileLoader {
 					if (job instanceof RankJob && profile != null) {
 						Color color = rankToColor.get(profile.getRank());
 						if (color == null) {
-							color = Color.black;
+							color = noRankColor;
 						}
 						job.label.setForeground(color);
 						if (job.listener != null) {
