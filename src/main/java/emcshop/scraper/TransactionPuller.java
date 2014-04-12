@@ -48,7 +48,7 @@ public class TransactionPuller {
 	 * @throws BadSessionException if the EMC session was invalid
 	 * @throws IOException if there was a network problem contacting EMC
 	 */
-	public TransactionPuller(EmcSession session) throws BadSessionException, IOException {
+	TransactionPuller(EmcSession session) throws BadSessionException, IOException {
 		this(session, new TransactionPullerFactory());
 	}
 
@@ -59,7 +59,7 @@ public class TransactionPuller {
 	 * @throws BadSessionException if the EMC session was invalid
 	 * @throws IOException if there was a network problem contacting EMC
 	 */
-	public TransactionPuller(EmcSession session, TransactionPullerFactory factory) throws IOException {
+	TransactionPuller(EmcSession session, TransactionPullerFactory factory) throws IOException {
 		this.session = session;
 		stopAtDate = factory.getStopAtDate();
 		stopAtPage = factory.getStopAtPage();

@@ -178,7 +178,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	}
 
 	TransactionPuller createPuller() throws IOException {
-		return new TransactionPuller(session, pullerFactory);
+		return pullerFactory.create(session);
 	}
 
 	private class DownloadThread extends Thread {
