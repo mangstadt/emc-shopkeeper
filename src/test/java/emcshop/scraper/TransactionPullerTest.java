@@ -1,12 +1,12 @@
 package emcshop.scraper;
 
+import static emcshop.util.TestUtils.gte;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.intThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,8 +21,6 @@ import java.util.Set;
 import java.util.logging.LogManager;
 
 import org.apache.http.client.HttpClient;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -453,20 +451,5 @@ public class TransactionPullerTest {
 
 		Set<RupeeTransaction> expected = new HashSet<RupeeTransaction>(Arrays.asList(pages));
 		assertEquals(expected, actual);
-	}
-
-	private static int gte(final int value) {
-		return intThat(new BaseMatcher<Integer>() {
-			@Override
-			public void describeTo(Description description) {
-				//empty
-			}
-
-			@Override
-			public boolean matches(Object obj) {
-				Integer i = (Integer) obj;
-				return i >= value;
-			}
-		});
 	}
 }

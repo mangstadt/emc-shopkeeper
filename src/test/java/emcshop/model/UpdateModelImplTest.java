@@ -1,11 +1,19 @@
 package emcshop.model;
 
 import static emcshop.util.TestUtils.assertIntEquals;
+import static emcshop.util.TestUtils.gte;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyCollection;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -20,16 +28,14 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.LogManager;
 
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.HttpClient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -40,23 +46,24 @@ import emcshop.scraper.EmcSession;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RawTransaction;
 import emcshop.scraper.RupeeTransaction;
-import emcshop.scraper.RupeeTransactions;
 import emcshop.scraper.ShopTransaction;
-import emcshop.scraper.TransactionPuller;
+import emcshop.scraper.TransactionPage;
+import emcshop.scraper.TransactionPageScraper;
 import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.DateGenerator;
 
 public class UpdateModelImplTest {
-	static {
-		//disable log messages
-		LogManager.getLogManager().reset();
-	}
-
 	private static UncaughtExceptionHandler origUncaughtExceptionHandler;
+	private static EmcSession session;
 	private UncaughtExceptionHandler uncaughtExceptionHandler;
+	private DateGenerator dg;
+	private DbDao dao;
+	private InterceptTransactionsAnswer interceptTransactions;
 
 	@BeforeClass
 	public static void beforeClass() {
+		LogManager.getLogManager().reset();
+		session = mock(EmcSession.class);
 		origUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
 	}
 
@@ -65,26 +72,29 @@ public class UpdateModelImplTest {
 		Thread.setDefaultUncaughtExceptionHandler(origUncaughtExceptionHandler);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Before
-	public void before() {
+	public void before() throws Throwable {
 		uncaughtExceptionHandler = mock(UncaughtExceptionHandler.class);
 		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
+
+		dg = new DateGenerator(Calendar.HOUR_OF_DAY, -1);
+
+		dao = mock(DbDao.class);
+		interceptTransactions = new InterceptTransactionsAnswer();
+		doAnswer(interceptTransactions).when(dao).insertTransaction(any(ShopTransaction.class), anyBoolean());
+		doAnswer(interceptTransactions).when(dao).insertPaymentTransactions(anyCollection());
+		doAnswer(interceptTransactions).when(dao).updateBonusesFees(anyList());
 	}
 
 	@Test
 	public void startDownload_bad_session() throws Throwable {
-		//create mock DAO
-		DbDao dao = mock(DbDao.class);
-
-		//create the model
-		EmcSession session = mock(EmcSession.class);
-		TransactionPullerFactory factory = new TransactionPullerFactory();
-		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
-			@Override
-			TransactionPuller createPuller() {
-				throw new BadSessionException();
-			}
-		};
+		UpdateModelImpl model;
+		{
+			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
+			when(factory.create(session)).thenThrow(new BadSessionException());
+			model = new UpdateModelImpl(factory, session, dao);
+		}
 
 		//register listeners
 		ActionListener badSessionListener = mock(ActionListener.class);
@@ -105,23 +115,17 @@ public class UpdateModelImplTest {
 		verify(downloadCompleteListener, never()).actionPerformed(null);
 		verify(downloadErrorListener, never()).actionPerformed(null);
 
-		verify(uncaughtExceptionHandler, never()).uncaughtException(Mockito.any(Thread.class), Mockito.any(Throwable.class));
+		verify(uncaughtExceptionHandler, never()).uncaughtException(any(Thread.class), any(Throwable.class));
 	}
 
 	@Test
 	public void startDownload_IOException_on_create_puller() throws Throwable {
-		//create mock DAO
-		DbDao dao = mock(DbDao.class);
-
-		//create the model
-		EmcSession session = mock(EmcSession.class);
-		TransactionPullerFactory factory = new TransactionPullerFactory();
-		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
-			@Override
-			TransactionPuller createPuller() throws IOException {
-				throw new IOException();
-			}
-		};
+		UpdateModelImpl model;
+		{
+			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
+			when(factory.create(session)).thenThrow(new IOException());
+			model = new UpdateModelImpl(factory, session, dao);
+		}
 
 		//register listeners
 		ActionListener badSessionListener = mock(ActionListener.class);
@@ -142,46 +146,25 @@ public class UpdateModelImplTest {
 		verify(downloadCompleteListener, never()).actionPerformed(null);
 		verify(downloadErrorListener, never()).actionPerformed(null);
 
-		verify(uncaughtExceptionHandler).uncaughtException(Mockito.any(Thread.class), Mockito.any(IOException.class));
+		verify(uncaughtExceptionHandler).uncaughtException(any(Thread.class), any(IOException.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void startDownload_error_during_first_update() throws Throwable {
-		DateGenerator dg = new DateGenerator(Calendar.HOUR_OF_DAY, -1);
-		final ShopTransaction t1 = new ShopTransaction();
-		t1.setTs(dg.next());
-		final RawTransaction t2 = new RawTransaction();
-		t2.setTs(dg.next());
-		final PaymentTransaction t3 = new PaymentTransaction();
-		t3.setTs(dg.next());
+		ShopTransaction t1 = shop();
+		RawTransaction t2 = raw();
+		PaymentTransaction t3 = payment();
 
-		//@formatter:off
-		List<?> pages = Arrays.asList(
-			new RupeeTransactions(Arrays.asList(t1, t2)),
-			new RupeeTransactions(Arrays.asList(t3)),
-			new IOException()
-		);
-		//@formatter:on
+		UpdateModelImpl model;
+		{
+			TransactionPageScraper scraper = scraper().page(t1, t2).page(t3).page(new IOException()).done();
 
-		//create mock DAO
-		DbDao dao = mock(DbDao.class);
-		InterceptTransactionsAnswer interceptTransactions = new InterceptTransactionsAnswer();
-		Mockito.doAnswer(interceptTransactions).when(dao).insertTransaction(Mockito.any(ShopTransaction.class), Mockito.anyBoolean());
-		Mockito.doAnswer(interceptTransactions).when(dao).insertPaymentTransactions(Mockito.anyCollection());
-		Mockito.doAnswer(interceptTransactions).when(dao).updateBonusesFees(Mockito.anyList());
-
-		final TransactionPuller puller = mockTransactionPuller(pages);
-		EmcSession session = mock(EmcSession.class);
-		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPullerFactory factory = new TransactionPullerFactory();
-		factory.setStopAtDate(null);
-		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
-			@Override
-			TransactionPuller createPuller() {
-				return puller;
-			}
-		};
+			TransactionPullerFactory factory = new TransactionPullerFactory();
+			factory.setTransactionPageScraper(scraper);
+			factory.setThreadCount(1);
+			factory.setStopAtDate(null);
+			model = new UpdateModelImpl(factory, session, dao);
+		}
 
 		//register listeners
 		ActionListener badSessionListener = mock(ActionListener.class);
@@ -215,46 +198,25 @@ public class UpdateModelImplTest {
 		assertEquals(dg.getGenerated(2), model.getOldestParsedTransactionDate());
 		assertIntEquals(123, model.getRupeeBalance());
 		assertNotNull(model.getDownloadError());
-		verify(uncaughtExceptionHandler, never()).uncaughtException(Mockito.any(Thread.class), Mockito.any(Throwable.class));
+		verify(uncaughtExceptionHandler, never()).uncaughtException(any(Thread.class), any(Throwable.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void startDownload_error() throws Throwable {
-		DateGenerator dg = new DateGenerator(Calendar.HOUR_OF_DAY, -1);
-		final ShopTransaction t1 = new ShopTransaction();
-		t1.setTs(dg.next());
-		final RawTransaction t2 = new RawTransaction();
-		t2.setTs(dg.next());
-		final PaymentTransaction t3 = new PaymentTransaction();
-		t3.setTs(dg.next());
+		ShopTransaction t1 = shop();
+		RawTransaction t2 = raw();
+		PaymentTransaction t3 = payment();
 
-		//@formatter:off
-		List<?> pages = Arrays.asList(
-			new RupeeTransactions(Arrays.asList(t1, t2)),
-			new RupeeTransactions(Arrays.asList(t3)),
-			new Throwable()
-		);
-		//@formatter:on
+		UpdateModelImpl model;
+		{
+			TransactionPageScraper scraper = scraper().page(t1, t2).page(t3).page(new IOException()).done();
 
-		//create mock DAO
-		DbDao dao = mock(DbDao.class);
-		InterceptTransactionsAnswer interceptTransactions = new InterceptTransactionsAnswer();
-		Mockito.doAnswer(interceptTransactions).when(dao).insertTransaction(Mockito.any(ShopTransaction.class), Mockito.anyBoolean());
-		Mockito.doAnswer(interceptTransactions).when(dao).insertPaymentTransactions(Mockito.anyCollection());
-		Mockito.doAnswer(interceptTransactions).when(dao).updateBonusesFees(Mockito.anyList());
-
-		final TransactionPuller puller = mockTransactionPuller(pages);
-		EmcSession session = mock(EmcSession.class);
-		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPullerFactory factory = new TransactionPullerFactory();
-		factory.setStopAtDate(new Date());
-		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
-			@Override
-			TransactionPuller createPuller() {
-				return puller;
-			}
-		};
+			TransactionPullerFactory factory = new TransactionPullerFactory();
+			factory.setTransactionPageScraper(scraper);
+			factory.setThreadCount(1);
+			factory.setStopAtDate(dg.next());
+			model = new UpdateModelImpl(factory, session, dao);
+		}
 
 		//register listeners
 		ActionListener badSessionListener = mock(ActionListener.class);
@@ -282,7 +244,7 @@ public class UpdateModelImplTest {
 		verify(downloadErrorListener, never()).actionPerformed(null);
 
 		verify(dao).rollback();
-		verify(uncaughtExceptionHandler).uncaughtException(Mockito.any(Thread.class), Mockito.any(Throwable.class));
+		verify(uncaughtExceptionHandler).uncaughtException(any(Thread.class), any(Throwable.class));
 
 		assertEquals(1, model.getShopTransactionsDownloaded());
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
@@ -293,48 +255,23 @@ public class UpdateModelImplTest {
 		assertNull(model.getDownloadError());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void startDownload_completed() throws Throwable {
-		//create fake transactions
-		DateGenerator dg = new DateGenerator(Calendar.HOUR_OF_DAY, -1);
-		final ShopTransaction t1 = new ShopTransaction();
-		t1.setTs(dg.next());
-		final RawTransaction t2 = new RawTransaction();
-		t2.setTs(dg.next());
-		final PaymentTransaction t3 = new PaymentTransaction();
-		t3.setTs(dg.next());
-		final BonusFeeTransaction t4 = new BonusFeeTransaction();
-		t4.setTs(dg.next());
-		final ShopTransaction t5 = new ShopTransaction();
-		t5.setTs(dg.next());
+		ShopTransaction t1 = shop();
+		RawTransaction t2 = raw();
+		PaymentTransaction t3 = payment();
+		BonusFeeTransaction t4 = bonusFee();
+		ShopTransaction t5 = shop();
 
-		//@formatter:off
-		List<?> pages = Arrays.asList(
-			new RupeeTransactions(Arrays.asList(t1, t2)),
-			new RupeeTransactions(Arrays.asList(t3)),
-			new RupeeTransactions(Arrays.asList(t4, t5))
-		);
-		//@formatter:on
+		UpdateModelImpl model;
+		{
+			TransactionPageScraper scraper = scraper().page(t1, t2).page(t3).page(t4, t5).done();
 
-		//create mock DAO
-		InterceptTransactionsAnswer interceptTransactions = new InterceptTransactionsAnswer();
-		DbDao dao = mock(DbDao.class);
-		Mockito.doAnswer(interceptTransactions).when(dao).insertTransaction(Mockito.any(ShopTransaction.class), Mockito.anyBoolean());
-		Mockito.doAnswer(interceptTransactions).when(dao).insertPaymentTransactions(Mockito.anyCollection());
-		Mockito.doAnswer(interceptTransactions).when(dao).updateBonusesFees(Mockito.anyList());
-
-		//create the model
-		final TransactionPuller puller = mockTransactionPuller(pages);
-		EmcSession session = mock(EmcSession.class);
-		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPullerFactory factory = new TransactionPullerFactory();
-		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
-			@Override
-			TransactionPuller createPuller() {
-				return puller;
-			}
-		};
+			TransactionPullerFactory factory = new TransactionPullerFactory();
+			factory.setTransactionPageScraper(scraper);
+			factory.setThreadCount(1);
+			model = new UpdateModelImpl(factory, session, dao);
+		}
 
 		//register listeners
 		ActionListener badSessionListener = mock(ActionListener.class);
@@ -370,52 +307,26 @@ public class UpdateModelImplTest {
 		assertEquals(dg.getGenerated(4), model.getOldestParsedTransactionDate());
 		assertIntEquals(123, model.getRupeeBalance());
 		assertNull(model.getDownloadError());
-		verify(uncaughtExceptionHandler, never()).uncaughtException(Mockito.any(Thread.class), Mockito.any(Throwable.class));
+		verify(uncaughtExceptionHandler, never()).uncaughtException(any(Thread.class), any(Throwable.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void stopDownload() throws Throwable {
-		//create fake transactions
-		DateGenerator dg = new DateGenerator(Calendar.HOUR_OF_DAY, -1);
-		final ShopTransaction t1 = new ShopTransaction();
-		t1.setTs(dg.next());
-		final RawTransaction t2 = new RawTransaction();
-		t2.setTs(dg.next());
-		final PaymentTransaction t3 = new PaymentTransaction();
-		t3.setTs(dg.next());
-		final BonusFeeTransaction t4 = new BonusFeeTransaction();
-		t4.setTs(dg.next());
-		final ShopTransaction t5 = new ShopTransaction();
-		t5.setTs(dg.next());
+		ShopTransaction t1 = shop();
+		RawTransaction t2 = raw();
+		PaymentTransaction t3 = payment();
+		BonusFeeTransaction t4 = bonusFee();
+		ShopTransaction t5 = shop();
 
-		//@formatter:off
-		List<?> pages = Arrays.asList(
-			new RupeeTransactions(Arrays.asList(t1, t2)),
-			50,
-			new RupeeTransactions(Arrays.asList(t3)),
-			new RupeeTransactions(Arrays.asList(t4, t5))
-		);
-		//@formatter:on
+		UpdateModelImpl model;
+		{
+			TransactionPageScraper scraper = scraper().page(t1, t2).pause(50).page(t3).page(t4, t5).done();
 
-		//create mock DAO
-		InterceptTransactionsAnswer interceptTransactions = new InterceptTransactionsAnswer();
-		DbDao dao = mock(DbDao.class);
-		Mockito.doAnswer(interceptTransactions).when(dao).insertTransaction(Mockito.any(ShopTransaction.class), Mockito.anyBoolean());
-		Mockito.doAnswer(interceptTransactions).when(dao).insertPaymentTransactions(Mockito.anyCollection());
-		Mockito.doAnswer(interceptTransactions).when(dao).updateBonusesFees(Mockito.anyList());
-
-		//create the model
-		final TransactionPuller puller = mockTransactionPuller(pages);
-		EmcSession session = mock(EmcSession.class);
-		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPullerFactory factory = new TransactionPullerFactory();
-		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
-			@Override
-			TransactionPuller createPuller() {
-				return puller;
-			}
-		};
+			TransactionPullerFactory factory = new TransactionPullerFactory();
+			factory.setTransactionPageScraper(scraper);
+			factory.setThreadCount(1);
+			model = new UpdateModelImpl(factory, session, dao);
+		}
 
 		//register listeners
 		ActionListener badSessionListener = mock(ActionListener.class);
@@ -443,7 +354,6 @@ public class UpdateModelImplTest {
 		verify(downloadCompleteListener, never()).actionPerformed(null);
 		verify(downloadErrorListener, never()).actionPerformed(null);
 
-		verify(puller).cancel();
 		assertEquals(1, model.getShopTransactionsDownloaded());
 		assertEquals(0, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
@@ -451,45 +361,24 @@ public class UpdateModelImplTest {
 		assertEquals(dg.getGenerated(1), model.getOldestParsedTransactionDate());
 		assertIntEquals(123, model.getRupeeBalance());
 		assertNull(model.getDownloadError());
-		verify(uncaughtExceptionHandler, never()).uncaughtException(Mockito.any(Thread.class), Mockito.any(Throwable.class));
+		verify(uncaughtExceptionHandler, never()).uncaughtException(any(Thread.class), any(Throwable.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void saveTransactions() throws Throwable {
-		DateGenerator dg = new DateGenerator(Calendar.HOUR_OF_DAY, -1);
-		final ShopTransaction t1 = new ShopTransaction();
-		t1.setTs(dg.next());
-		final RawTransaction t2 = new RawTransaction();
-		t2.setTs(dg.next());
-		final PaymentTransaction t3 = new PaymentTransaction();
-		t3.setTs(dg.next());
+		ShopTransaction t1 = shop();
+		RawTransaction t2 = raw();
+		PaymentTransaction t3 = payment();
 
-		//@formatter:off
-		List<?> pages = Arrays.asList(
-			new RupeeTransactions(Arrays.asList(t1, t2)),
-			new RupeeTransactions(Arrays.asList(t3))
-		);
-		//@formatter:on
+		UpdateModelImpl model;
+		{
+			TransactionPageScraper scraper = scraper().page(t1, t2).page(t3).done();
 
-		//create mock DAO
-		DbDao dao = mock(DbDao.class);
-		InterceptTransactionsAnswer interceptTransactions = new InterceptTransactionsAnswer();
-		Mockito.doAnswer(interceptTransactions).when(dao).insertTransaction(Mockito.any(ShopTransaction.class), Mockito.anyBoolean());
-		Mockito.doAnswer(interceptTransactions).when(dao).insertPaymentTransactions(Mockito.anyCollection());
-		Mockito.doAnswer(interceptTransactions).when(dao).updateBonusesFees(Mockito.anyList());
-
-		final TransactionPuller puller = mockTransactionPuller(pages);
-		EmcSession session = mock(EmcSession.class);
-		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPullerFactory factory = new TransactionPullerFactory();
-		factory.setStopAtDate(new Date());
-		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
-			@Override
-			TransactionPuller createPuller() {
-				return puller;
-			}
-		};
+			TransactionPullerFactory factory = new TransactionPullerFactory();
+			factory.setTransactionPageScraper(scraper);
+			factory.setThreadCount(1);
+			model = new UpdateModelImpl(factory, session, dao);
+		}
 
 		model.saveTransactions(); //no transactions to save
 		verify(dao, never()).commit();
@@ -499,36 +388,36 @@ public class UpdateModelImplTest {
 		model.saveTransactions();
 
 		verify(dao).updateBonusesFeesSince(dg.getGenerated(2));
-		verify(dao).insertUpdateLog(Mockito.any(Date.class), Mockito.eq(123), Mockito.eq(1), Mockito.eq(1), Mockito.eq(0), Mockito.anyLong());
+		verify(dao).insertUpdateLog(any(Date.class), eq(123), eq(1), eq(1), eq(0), anyLong());
 		verify(dao).commit();
 	}
 
-	private static TransactionPuller mockTransactionPuller(List<?> pages) {
-		TransactionPuller puller = mock(TransactionPuller.class);
-		final Iterator<?> it = pages.iterator();
-		when(puller.nextPage()).then(new Answer<RupeeTransactions>() {
-			@Override
-			public synchronized RupeeTransactions answer(InvocationOnMock invocation) throws Throwable {
-				do {
-					if (!it.hasNext()) {
-						return null;
-					}
+	private ShopTransaction shop() {
+		ShopTransaction t = new ShopTransaction();
+		t.setTs(dg.next());
+		return t;
+	}
 
-					Object next = it.next();
-					if (next instanceof Throwable) {
-						throw (Throwable) next;
-					}
-					if (next instanceof Integer) {
-						Thread.sleep((Integer) next);
-						continue;
-					}
-					return (RupeeTransactions) next;
-				} while (true);
-			}
-		});
-		when(puller.getRupeeBalance()).thenReturn(123);
+	private RawTransaction raw() {
+		RawTransaction t = new RawTransaction();
+		t.setTs(dg.next());
+		return t;
+	}
 
-		return puller;
+	private PaymentTransaction payment() {
+		PaymentTransaction t = new PaymentTransaction();
+		t.setTs(dg.next());
+		return t;
+	}
+
+	private BonusFeeTransaction bonusFee() {
+		BonusFeeTransaction t = new BonusFeeTransaction();
+		t.setTs(dg.next());
+		return t;
+	}
+
+	private static ScraperBuilder scraper() {
+		return new ScraperBuilder();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -546,12 +435,63 @@ public class UpdateModelImplTest {
 			}
 
 			if (arg instanceof RupeeTransaction) {
-				savedTransactions.add((RupeeTransaction) arg);
+				RupeeTransaction transaction = (RupeeTransaction) arg;
+				savedTransactions.add(transaction);
 				return null;
 			}
 
 			fail("Unexpected arguments found in test.");
 			return null;
+		}
+	}
+
+	private static class ScraperBuilder {
+		private final TransactionPageScraper scraper = mock(TransactionPageScraper.class);
+		private int pageCount = 1;
+		private TransactionPage page1;
+		private int pause = 0;
+
+		public ScraperBuilder page(RupeeTransaction... transactions) throws IOException {
+			final TransactionPage page = new TransactionPage();
+			page.setLoggedIn(true);
+			page.setTransactions(Arrays.asList(transactions));
+			page.setRupeeBalance(123);
+
+			if (pageCount == 1) {
+				page1 = page;
+			}
+
+			if (pause > 0) {
+				when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenAnswer(new Answer<TransactionPage>() {
+					private long sleep = pause; //copy the current value of "pause"
+
+					@Override
+					public TransactionPage answer(InvocationOnMock invocation) throws Throwable {
+						Thread.sleep(sleep);
+						return page;
+					}
+				});
+				pause = 0;
+			} else {
+				when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page);
+			}
+
+			return this;
+		}
+
+		public ScraperBuilder page(IOException e) throws IOException {
+			when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenThrow(e);
+			return this;
+		}
+
+		public ScraperBuilder pause(int ms) throws IOException {
+			pause = ms;
+			return this;
+		}
+
+		public TransactionPageScraper done() throws IOException {
+			when(scraper.download(gte(pageCount), any(HttpClient.class))).thenReturn(page1);
+			return scraper;
 		}
 	}
 }

@@ -177,10 +177,6 @@ public class UpdateModelImpl implements IUpdateModel {
 		dao.rollback();
 	}
 
-	TransactionPuller createPuller() throws IOException {
-		return pullerFactory.create(session);
-	}
-
 	private class DownloadThread extends Thread {
 		public DownloadThread() {
 			setName(getClass().getSimpleName());
@@ -189,7 +185,7 @@ public class UpdateModelImpl implements IUpdateModel {
 		@Override
 		public void run() {
 			try {
-				puller = createPuller();
+				puller = pullerFactory.create(session);
 			} catch (BadSessionException e) {
 				GuiUtils.fireEvents(badSessionListeners);
 				return;
