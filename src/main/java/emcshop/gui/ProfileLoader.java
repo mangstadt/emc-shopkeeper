@@ -32,13 +32,12 @@ import emcshop.util.HttpClientFactory;
 import emcshop.util.PropertiesWrapper;
 
 /**
- * Used for downloading player profile pictures.
- * @author Michael Angstadt
+ * Used for downloading player profile data.
  */
 public class ProfileLoader {
 	private static final Logger logger = Logger.getLogger(ProfileLoader.class.getName());
 
-	private final Map<Rank, Color> rankToColor = new EnumMap<Rank, Color>(Rank.class);
+	private static final Map<Rank, Color> rankToColor = new EnumMap<Rank, Color>(Rank.class);
 	{
 		rankToColor.put(Rank.IRON, new Color(128, 128, 128));
 		rankToColor.put(Rank.GOLD, new Color(181, 181, 0));
@@ -48,7 +47,7 @@ public class ProfileLoader {
 		rankToColor.put(Rank.DEVELOPER, new Color(0, 0, 128));
 		rankToColor.put(Rank.ADMIN, new Color(209, 0, 195));
 	}
-	private final Color noRankColor = Color.black;
+	private static final Color noRankColor = Color.black;
 
 	private final File cacheDir;
 	private final Set<String> downloaded = new CaseInsensitiveHashSet();
@@ -78,26 +77,52 @@ public class ProfileLoader {
 		this.cacheDir = cacheDir;
 	}
 
+	/**
+	 * Gets the number of threads that are used to download the profile pages.
+	 * @return the number of threads
+	 */
 	public int getThreads() {
 		return threads;
 	}
 
+	/**
+	 * Sets the number of threads that are used to download the profile pages.
+	 * @param threads the number of threads (defaults to 4)
+	 */
 	public void setThreads(int threads) {
 		this.threads = threads;
 	}
 
+	/**
+	 * Gets the factory used to create {@link HttpClient} objects, which are
+	 * used to download the profile pages.
+	 * @return the factory
+	 */
 	public HttpClientFactory getHttpClientFactory() {
 		return clientFactory;
 	}
 
+	/**
+	 * Sets the factory used to create {@link HttpClient} objects, which are
+	 * used to download the profile pages.
+	 * @param clientFactory the factory
+	 */
 	public void setHttpClientFactory(HttpClientFactory clientFactory) {
 		this.clientFactory = clientFactory;
 	}
 
+	/**
+	 * Gets the object used to download and scrape the profile pages.
+	 * @return the profile page scraper
+	 */
 	public PlayerProfileScraper getProfilePageScraper() {
 		return scraper;
 	}
 
+	/**
+	 * Sets the object used to download and scrape the profile pages.
+	 * @param scraper the profile page scraper
+	 */
 	public void setProfilePageScraper(PlayerProfileScraper scraper) {
 		this.scraper = scraper;
 	}
@@ -136,7 +161,10 @@ public class ProfileLoader {
 		//attempt to load the image from the cache
 		byte data[] = null;
 		try {
-			data = loadFromCache(playerName);
+			File file = getPortraitFile(playerName);
+			if (file.exists()) {
+				data = FileUtils.readFileToByteArray(file);
+			}
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
 		}
@@ -146,6 +174,7 @@ public class ProfileLoader {
 		image = ImageManager.scale(image, maxSize);
 		label.setIcon(image);
 
+		//queue the image for download if necessary
 		Job job = new PortraitJob(playerName, label, maxSize, listener);
 		queueJob(job);
 	}
@@ -160,6 +189,7 @@ public class ProfileLoader {
 		Color color = getRankColor(playerName);
 		label.setForeground(color);
 
+		//queue the profile page for download if necessary
 		Job job = new RankJob(playerName, label, listener);
 		queueJob(job);
 	}
@@ -190,6 +220,11 @@ public class ProfileLoader {
 		return (props == null) ? null : props.getJoined();
 	}
 
+	/**
+	 * Loads a player's profile data from the cache.
+	 * @param playerName the player name
+	 * @return the profile data or null if not found
+	 */
 	private PlayerProfileProperties loadProfileData(String playerName) {
 		File file = getPropertiesFile(playerName);
 		if (!file.exists()) {
@@ -202,6 +237,21 @@ public class ProfileLoader {
 			logger.log(Level.SEVERE, "Problem loading profile properties from cache.", e);
 			return null;
 		}
+	}
+
+	/**
+	 * Saves a scraped profile page information to a properties file.
+	 * @param profile the scraped data
+	 * @throws IOException
+	 */
+	private void saveProfileData(PlayerProfile profile) throws IOException {
+		PlayerProfileProperties props = new PlayerProfileProperties();
+		props.setPrivate(profile.isPrivate());
+		props.setRank(profile.getRank());
+		props.setJoined(profile.getJoined());
+
+		File file = getPropertiesFile(profile.getPlayerName());
+		props.store(file, "");
 	}
 
 	private void queueJob(Job job) {
@@ -230,27 +280,6 @@ public class ProfileLoader {
 			//add job to wait list
 			waiting.add(job);
 		}
-	}
-
-	/**
-	 * Loads a profile image from the cache.
-	 * @param playerName the player name
-	 * @return the image data or null if not found
-	 * @throws IOException
-	 */
-	private byte[] loadFromCache(String playerName) throws IOException {
-		File cacheLocation = getPortraitFile(playerName);
-		return loadFromCache(cacheLocation);
-	}
-
-	/**
-	 * Loads a profile image from the cache.
-	 * @param file the cached image
-	 * @return the image data or null if the file doesn't exist
-	 * @throws IOException
-	 */
-	private byte[] loadFromCache(File file) throws IOException {
-		return file.exists() ? FileUtils.readFileToByteArray(file) : null;
 	}
 
 	/**
@@ -345,9 +374,10 @@ public class ProfileLoader {
 					}
 				}
 
+				//update all the labels that are waiting to be updated
 				ImageIcon image = (data == null) ? null : new ImageIcon(data);
 				for (Job job : waiting) {
-					if (job instanceof RankJob && profile != null) {
+					if (profile != null && job instanceof RankJob) {
 						Color color = rankToColor.get(profile.getRank());
 						if (color == null) {
 							color = noRankColor;
@@ -359,9 +389,9 @@ public class ProfileLoader {
 						continue;
 					}
 
-					if (job instanceof PortraitJob && image != null) {
-						PortraitJob j = (PortraitJob) job;
-						ImageIcon scaledImage = ImageManager.scale(image, j.maxSize);
+					if (image != null && job instanceof PortraitJob) {
+						PortraitJob portraitJob = (PortraitJob) job;
+						ImageIcon scaledImage = ImageManager.scale(image, portraitJob.maxSize);
 						job.label.setIcon(scaledImage);
 						if (job.listener != null) {
 							job.listener.onImageDownloaded(job.label);
@@ -372,21 +402,6 @@ public class ProfileLoader {
 
 				waitList.remove(playerName);
 			}
-		}
-
-		/**
-		 * Saves a scraped profile page information to a properties file.
-		 * @param profile the scraped data
-		 * @throws IOException
-		 */
-		private void saveProfileData(PlayerProfile profile) throws IOException {
-			PlayerProfileProperties props = new PlayerProfileProperties();
-			props.setPrivate(profile.isPrivate());
-			props.setRank(profile.getRank());
-			props.setJoined(profile.getJoined());
-
-			File file = getPropertiesFile(profile.getPlayerName());
-			props.store(file, "");
 		}
 	}
 
@@ -447,7 +462,7 @@ public class ProfileLoader {
 		}
 
 		public PlayerProfileProperties() {
-			//empty
+			super();
 		}
 
 		public PlayerProfileProperties(File file) throws IOException {
