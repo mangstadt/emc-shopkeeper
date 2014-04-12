@@ -139,8 +139,8 @@ public class TransactionPage {
 	 * Gets the transactions.
 	 * @return the transactions
 	 */
-	public List<RupeeTransaction> getTransactions() {
-		return new ArrayList<RupeeTransaction>(transactions);
+	public RupeeTransactions getTransactions() {
+		return new RupeeTransactions(transactions);
 	}
 
 	private ShopTransaction toShopTransaction(String description) {

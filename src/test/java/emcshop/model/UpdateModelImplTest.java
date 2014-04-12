@@ -40,6 +40,7 @@ import emcshop.scraper.EmcSession;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RawTransaction;
 import emcshop.scraper.RupeeTransaction;
+import emcshop.scraper.RupeeTransactions;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
 import emcshop.util.DateGenerator;
@@ -156,8 +157,8 @@ public class UpdateModelImplTest {
 
 		//@formatter:off
 		List<?> pages = Arrays.asList(
-			Arrays.asList(t1, t2),
-			Arrays.asList(t3),
+			new RupeeTransactions(Arrays.asList(t1, t2)),
+			new RupeeTransactions(Arrays.asList(t3)),
 			new IOException()
 		);
 		//@formatter:on
@@ -228,8 +229,8 @@ public class UpdateModelImplTest {
 
 		//@formatter:off
 		List<?> pages = Arrays.asList(
-			Arrays.asList(t1, t2),
-			Arrays.asList(t3),
+			new RupeeTransactions(Arrays.asList(t1, t2)),
+			new RupeeTransactions(Arrays.asList(t3)),
 			new Throwable()
 		);
 		//@formatter:on
@@ -307,9 +308,9 @@ public class UpdateModelImplTest {
 
 		//@formatter:off
 		List<?> pages = Arrays.asList(
-			Arrays.asList(t1, t2),
-			Arrays.asList(t3),
-			Arrays.asList(t4, t5)
+			new RupeeTransactions(Arrays.asList(t1, t2)),
+			new RupeeTransactions(Arrays.asList(t3)),
+			new RupeeTransactions(Arrays.asList(t4, t5))
 		);
 		//@formatter:on
 
@@ -387,10 +388,10 @@ public class UpdateModelImplTest {
 
 		//@formatter:off
 		List<?> pages = Arrays.asList(
-			Arrays.asList(t1, t2),
+			new RupeeTransactions(Arrays.asList(t1, t2)),
 			50,
-			Arrays.asList(t3),
-			Arrays.asList(t4, t5)
+			new RupeeTransactions(Arrays.asList(t3)),
+			new RupeeTransactions(Arrays.asList(t4, t5))
 		);
 		//@formatter:on
 
@@ -463,8 +464,8 @@ public class UpdateModelImplTest {
 
 		//@formatter:off
 		List<?> pages = Arrays.asList(
-			Arrays.asList(t1, t2),
-			Arrays.asList(t3)
+			new RupeeTransactions(Arrays.asList(t1, t2)),
+			new RupeeTransactions(Arrays.asList(t3))
 		);
 		//@formatter:on
 
@@ -498,13 +499,12 @@ public class UpdateModelImplTest {
 		verify(dao).commit();
 	}
 
-	@SuppressWarnings("unchecked")
 	private static TransactionPuller mockTransactionPuller(List<?> pages) {
 		TransactionPuller puller = mock(TransactionPuller.class);
 		final Iterator<?> it = pages.iterator();
-		when(puller.nextPage()).then(new Answer<List<RupeeTransaction>>() {
+		when(puller.nextPage()).then(new Answer<RupeeTransactions>() {
 			@Override
-			public synchronized List<RupeeTransaction> answer(InvocationOnMock invocation) throws Throwable {
+			public synchronized RupeeTransactions answer(InvocationOnMock invocation) throws Throwable {
 				do {
 					if (!it.hasNext()) {
 						return null;
@@ -518,7 +518,7 @@ public class UpdateModelImplTest {
 						Thread.sleep((Integer) next);
 						continue;
 					}
-					return (List<RupeeTransaction>) next;
+					return (RupeeTransactions) next;
 				} while (true);
 			}
 		});
@@ -536,7 +536,7 @@ public class UpdateModelImplTest {
 			Object arg = invocation.getArguments()[0];
 
 			if (arg instanceof Collection) {
-				Collection<? extends RupeeTransaction> transactions = (Collection<? extends RupeeTransaction>) invocation.getArguments()[0];
+				Collection<? extends RupeeTransaction> transactions = (Collection<? extends RupeeTransaction>) arg;
 				savedTransactions.addAll(transactions);
 				return null;
 			}

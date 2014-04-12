@@ -1,7 +1,5 @@
 package emcshop.model;
 
-import static emcshop.scraper.TransactionPuller.filter;
-
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -18,6 +16,7 @@ import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.EmcSession;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RupeeTransaction;
+import emcshop.scraper.RupeeTransactions;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
 import emcshop.util.GuiUtils;
@@ -198,7 +197,7 @@ public class UpdateModelImpl implements IUpdateModel {
 			}
 
 			try {
-				List<RupeeTransaction> transactions;
+				RupeeTransactions transactions;
 				while ((transactions = puller.nextPage()) != null) {
 					synchronized (UpdateModelImpl.this) {
 						if (downloadStopped) {
@@ -215,17 +214,17 @@ public class UpdateModelImpl implements IUpdateModel {
 							}
 						}
 
-						List<ShopTransaction> shopTransactions = filter(transactions, ShopTransaction.class);
+						List<ShopTransaction> shopTransactions = transactions.find(ShopTransaction.class);
 						for (ShopTransaction shopTransaction : shopTransactions) {
 							dao.insertTransaction(shopTransaction, true);
 						}
 						shopTransactionsCount += shopTransactions.size();
 
-						List<PaymentTransaction> paymentTransactions = filter(transactions, PaymentTransaction.class);
+						List<PaymentTransaction> paymentTransactions = transactions.find(PaymentTransaction.class);
 						dao.insertPaymentTransactions(paymentTransactions);
 						paymentTransactionsCount += paymentTransactions.size();
 
-						List<BonusFeeTransaction> bonusFeeTransactions = filter(transactions, BonusFeeTransaction.class);
+						List<BonusFeeTransaction> bonusFeeTransactions = transactions.find(BonusFeeTransaction.class);
 						dao.updateBonusesFees(bonusFeeTransactions);
 						bonusFeeTransactionsCount += bonusFeeTransactions.size();
 

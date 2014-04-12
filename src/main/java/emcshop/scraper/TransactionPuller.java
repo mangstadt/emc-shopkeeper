@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -28,10 +27,10 @@ import org.jsoup.nodes.Document;
  */
 public class TransactionPuller {
 	private static final Logger logger = Logger.getLogger(TransactionPuller.class.getName());
-	private static final List<RupeeTransaction> noMoreElements = Arrays.asList();
+	private static final RupeeTransactions noMoreElements = new RupeeTransactions();
 
 	private final EmcSession session;
-	private final BlockingQueue<List<RupeeTransaction>> queue = new LinkedBlockingQueue<List<RupeeTransaction>>();
+	private final BlockingQueue<RupeeTransactions> queue = new LinkedBlockingQueue<RupeeTransactions>();
 	private final Config config;
 
 	private final Date oldestPaymentTransactionDate;
@@ -105,7 +104,7 @@ public class TransactionPuller {
 	 * @throws DownloadException if an error occurred while downloading or
 	 * parsing one of the pages
 	 */
-	public List<RupeeTransaction> nextPage() throws DownloadException {
+	public RupeeTransactions nextPage() throws DownloadException {
 		synchronized (this) {
 			if (queue.isEmpty()) {
 				if (thrown != null) {
@@ -118,7 +117,7 @@ public class TransactionPuller {
 		}
 
 		try {
-			List<RupeeTransaction> transactions = queue.take();
+			RupeeTransactions transactions = queue.take();
 			if (transactions == noMoreElements) {
 				synchronized (this) {
 					if (thrown != null) {
@@ -219,25 +218,6 @@ public class TransactionPuller {
 		return new TransactionPage(document);
 	}
 
-	/**
-	 * Filters out the instances of a specific sub-class of
-	 * {@link RupeeTransaction} from a list of transactions.
-	 * @param <T> the class to filter out
-	 * @param transactions the list of transactions
-	 * @param filterBy the class to filter out
-	 * @return the filtered instances
-	 */
-	public static <T extends RupeeTransaction> List<T> filter(List<RupeeTransaction> transactions, Class<T> filterBy) {
-		List<T> filtered = new ArrayList<T>();
-		for (RupeeTransaction transaction : transactions) {
-			if (transaction.getClass() == filterBy) {
-				T t = filterBy.cast(transaction);
-				filtered.add(t);
-			}
-		}
-		return filtered;
-	}
-
 	private class ScrapeThread extends Thread {
 		private HttpClient client;
 
@@ -283,22 +263,18 @@ public class TransactionPuller {
 						break;
 					}
 
-					List<RupeeTransaction> transactions = transactionPage.getTransactions();
+					RupeeTransactions transactions = transactionPage.getTransactions();
 
 					//remove old payment transactions
 					if (oldestPaymentTransactionDate != null) {
-						for (int i = 0; i < transactions.size(); i++) {
-							RupeeTransaction transaction = transactions.get(i);
-							if (!(transaction instanceof PaymentTransaction)) {
-								continue;
-							}
-
+						List<PaymentTransaction> toRemove = new ArrayList<PaymentTransaction>();
+						for (PaymentTransaction transaction : transactions.find(PaymentTransaction.class)) {
 							long ts = transaction.getTs().getTime();
 							if (ts < oldestPaymentTransactionDate.getTime()) {
-								transactions.remove(i);
-								i--;
+								toRemove.add(transaction);
 							}
 						}
+						transactions.removeAll(toRemove);
 					}
 
 					//remove any transactions that are past the "stop-at" date

@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.LogManager;
 
@@ -26,32 +25,6 @@ public class TransactionPullerTest {
 	static {
 		//disable log messages
 		LogManager.getLogManager().reset();
-	}
-
-	@Test
-	public void filter() {
-		ShopTransaction t1 = new ShopTransaction();
-		PaymentTransaction t2 = new PaymentTransaction();
-		PaymentTransaction t3 = new PaymentTransaction();
-		List<RupeeTransaction> list = Arrays.asList(t1, t2, t3);
-
-		{
-			List<ShopTransaction> actual = TransactionPuller.filter(list, ShopTransaction.class);
-			List<ShopTransaction> expected = Arrays.asList(t1);
-			assertEquals(expected, actual);
-		}
-
-		{
-			List<PaymentTransaction> actual = TransactionPuller.filter(list, PaymentTransaction.class);
-			List<PaymentTransaction> expected = Arrays.asList(t2, t3);
-			assertEquals(expected, actual);
-		}
-
-		{
-			List<RawTransaction> actual = TransactionPuller.filter(list, RawTransaction.class);
-			List<RawTransaction> expected = Arrays.asList();
-			assertEquals(expected, actual);
-		}
 	}
 
 	@Test(expected = BadSessionException.class)
@@ -130,7 +103,7 @@ public class TransactionPullerTest {
 
 		thePages = pages;
 		TransactionPuller puller = new MockTransactionPuller() {
-			private int page1Count = 0;
+			private volatile int page1Count = 0;
 
 			@Override
 			synchronized TransactionPage getPage(int page, HttpClient client) throws IOException {
@@ -318,7 +291,7 @@ public class TransactionPullerTest {
 		thePages = pages;
 		TransactionPuller puller = new MockTransactionPuller() {
 			@Override
-			TransactionPage getPage(int page, HttpClient client) throws IOException {
+			synchronized TransactionPage getPage(int page, HttpClient client) throws IOException {
 				if (page == 2) {
 					throw new IOException();
 				}
@@ -354,7 +327,7 @@ public class TransactionPullerTest {
 
 		thePages = pages;
 		TransactionPuller puller = new MockTransactionPuller() {
-			private boolean threwConnectException = false, threwSocketTimeoutException = false;
+			private volatile boolean threwConnectException = false, threwSocketTimeoutException = false;
 
 			@Override
 			synchronized TransactionPage getPage(int page, HttpClient client) throws IOException {
