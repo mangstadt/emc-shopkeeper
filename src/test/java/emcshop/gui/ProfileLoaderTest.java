@@ -73,7 +73,7 @@ public class ProfileLoaderTest {
 		String player = profile.getPlayerName();
 
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
-		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(null);
+		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(null);
 
 		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
@@ -95,7 +95,7 @@ public class ProfileLoaderTest {
 		PlayerProfile profile = new PlayerProfile();
 		profile.setPlayerName(player);
 		profile.setPrivate(true);
-		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 
 		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
@@ -118,7 +118,7 @@ public class ProfileLoaderTest {
 		String player = profile.getPlayerName();
 
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
-		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
 		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
@@ -165,7 +165,7 @@ public class ProfileLoaderTest {
 		JLabel label = mock(JLabel.class);
 
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
-		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), eq(lastModified), any(HttpClient.class))).thenReturn(null);
 
 		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
@@ -193,7 +193,7 @@ public class ProfileLoaderTest {
 		String player = profile.getPlayerName();
 
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
-		when(scraper.scrapeProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
 		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);

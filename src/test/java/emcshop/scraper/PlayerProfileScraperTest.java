@@ -29,7 +29,7 @@ public class PlayerProfileScraperTest {
 	public void scrapeProfile() throws Throwable {
 		HttpClient client = createMockClient("SHAVINGFOAM");
 		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.scrapeProfile("SHAVINGFOAM", client);
+		PlayerProfile profile = scraper.downloadProfile("SHAVINGFOAM", client);
 
 		assertEquals("shavingfoam", profile.getPlayerName());
 		assertFalse(profile.isPrivate());
@@ -42,7 +42,7 @@ public class PlayerProfileScraperTest {
 	public void scrapeProfile_player_does_not_exist() throws Throwable {
 		HttpClient client = createMockClient("does-not-exist");
 		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.scrapeProfile("does-not-exist", client);
+		PlayerProfile profile = scraper.downloadProfile("does-not-exist", client);
 
 		assertNull(profile);
 	}
@@ -51,7 +51,7 @@ public class PlayerProfileScraperTest {
 	public void scrapeProfile_private_profile() throws Throwable {
 		HttpClient client = createMockClient("private");
 		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.scrapeProfile("private", client);
+		PlayerProfile profile = scraper.downloadProfile("private", client);
 
 		assertEquals("private", profile.getPlayerName());
 		assertTrue(profile.isPrivate());
@@ -77,7 +77,7 @@ public class PlayerProfileScraperTest {
 	private void assertRank(String player, Rank expected) throws IOException {
 		HttpClient client = createMockClient(player);
 		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.scrapeProfile(player, client);
+		PlayerProfile profile = scraper.downloadProfile(player, client);
 
 		Rank actual = profile.getRank();
 		assertEquals(expected, actual);
@@ -88,7 +88,7 @@ public class PlayerProfileScraperTest {
 		String player = "no-join-date";
 		HttpClient client = createMockClient(player);
 		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.scrapeProfile(player, client);
+		PlayerProfile profile = scraper.downloadProfile(player, client);
 
 		assertNull(profile.getJoined());
 	}
@@ -98,7 +98,7 @@ public class PlayerProfileScraperTest {
 		String player = "bad-join-date";
 		HttpClient client = createMockClient(player);
 		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.scrapeProfile(player, client);
+		PlayerProfile profile = scraper.downloadProfile(player, client);
 
 		assertNull(profile.getJoined());
 	}

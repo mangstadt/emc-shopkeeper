@@ -43,27 +43,45 @@ public class PlayerProfileScraper {
 	}
 
 	/**
-	 * Scrapes a player's profile page.
+	 * Downloads and scrapes a player's profile page.
 	 * @param playerName the player name
 	 * @return the scraped page
 	 * @throws IOException
 	 */
-	public PlayerProfile scrapeProfile(String playerName) throws IOException {
-		return scrapeProfile(playerName, new DefaultHttpClient());
+	public PlayerProfile downloadProfile(String playerName) throws IOException {
+		return downloadProfile(playerName, new DefaultHttpClient());
 	}
 
 	/**
-	 * Scrapes a player's profile page.
+	 * Downloads and scrapes a player's profile page.
 	 * @param playerName the player name
 	 * @param client the HTTP client to use
 	 * @return the scraped page or null if the player does not exist
 	 * @throws IOException
 	 */
-	public PlayerProfile scrapeProfile(String playerName, HttpClient client) throws IOException {
-		Document profilePage = downloadProfilePage(playerName, client);
+	public PlayerProfile downloadProfile(String playerName, HttpClient client) throws IOException {
+		Document document;
+		HttpGet request = new HttpGet("http://u.emc.gs/" + playerName);
+		HttpResponse response = client.execute(request);
+		HttpEntity entity = response.getEntity();
+		try {
+			document = Jsoup.parse(entity.getContent(), "UTF-8", "http://empireminecraft.com");
+		} finally {
+			EntityUtils.consume(entity);
+		}
 
-		boolean isPrivate = isPrivate(profilePage);
-		String scrapedPlayerName = scrapePlayerName(profilePage);
+		return scrapeProfile(playerName, document);
+	}
+
+	/**
+	 * Scrapes a player's profile page.
+	 * @param playerName the player name
+	 * @param document the profile page
+	 * @return the scraped page or null if the player does not exist
+	 */
+	public PlayerProfile scrapeProfile(String playerName, Document document) throws IOException {
+		boolean isPrivate = isPrivate(document);
+		String scrapedPlayerName = scrapePlayerName(document);
 		if (!isPrivate && scrapedPlayerName == null) {
 			//user does not exist
 			return null;
@@ -77,15 +95,15 @@ public class PlayerProfileScraper {
 		}
 
 		profile.setPlayerName(scrapedPlayerName);
-		profile.setPortraitUrl(scrapePortraitUrl(profilePage));
-		profile.setRank(scrapeRank(profilePage));
-		profile.setJoined(scrapeJoined(profilePage));
+		profile.setPortraitUrl(scrapePortraitUrl(document));
+		profile.setRank(scrapeRank(document));
+		profile.setJoined(scrapeJoined(document));
 
 		return profile;
 	}
 
 	/**
-	 * Downloads the image and saves it to the cache.
+	 * Downloads a player's profile portrait.
 	 * @param playerName the player name
 	 * @param lastModified the value of the "If-Modified-Since" HTTP header, or
 	 * null not to add this header
@@ -118,17 +136,6 @@ public class PlayerProfileScraper {
 			return EntityUtils.toByteArray(entity);
 		} finally {
 			EntityUtils.consumeQuietly(entity);
-		}
-	}
-
-	private Document downloadProfilePage(String playerName, HttpClient client) throws IOException {
-		HttpGet request = new HttpGet("http://u.emc.gs/" + playerName);
-		HttpResponse response = client.execute(request);
-		HttpEntity entity = response.getEntity();
-		try {
-			return Jsoup.parse(entity.getContent(), "UTF-8", "http://empireminecraft.com");
-		} finally {
-			EntityUtils.consume(entity);
 		}
 	}
 

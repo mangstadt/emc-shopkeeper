@@ -326,7 +326,7 @@ public class ProfileLoader {
 				HttpClient client = clientFactory.create(); //create a new client each time so the user's login session token can be used
 				PlayerProfile profile = null;
 				try {
-					profile = scraper.scrapeProfile(playerName, client);
+					profile = scraper.downloadProfile(playerName, client);
 				} catch (IOException e) {
 					logger.log(Level.WARNING, "Problem downloading player profile page.", e);
 				}
