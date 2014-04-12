@@ -66,11 +66,19 @@ public class OnlinePlayersScraper {
 			}
 
 			//scrape the response
-			Matcher matcher = nameRegex.matcher(json);
-			while (matcher.find()) {
-				String playerName = matcher.group(1);
-				onlinePlayers.put(playerName, server);
-			}
+			onlinePlayers.putAll(scrape(server, json));
+		}
+
+		return onlinePlayers;
+	}
+
+	public Map<String, EMCServer> scrape(EMCServer server, String json) {
+		Map<String, EMCServer> onlinePlayers = new HashMap<String, EMCServer>();
+
+		Matcher matcher = nameRegex.matcher(json);
+		while (matcher.find()) {
+			String playerName = matcher.group(1);
+			onlinePlayers.put(playerName, server);
 		}
 
 		return onlinePlayers;

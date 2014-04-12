@@ -24,7 +24,7 @@ import emcshop.util.ClasspathUtils;
 /**
  * @author Michael Angstadt
  */
-public class TransactionPageTest {
+public class TransactionPageScraperTest {
 	static {
 		LogManager.getLogManager().reset();
 	}
@@ -186,8 +186,8 @@ public class TransactionPageTest {
 	}
 
 	private TransactionPage load(String file) throws IOException {
-		InputStream in = ClasspathUtils.getResourceAsStream(file, TransactionPageTest.class);
+		InputStream in = ClasspathUtils.getResourceAsStream(file, TransactionPageScraperTest.class);
 		Document document = Jsoup.parse(in, "UTF-8", "");
-		return new TransactionPage(document);
+		return new TransactionPageScraper().scrape(document);
 	}
 }

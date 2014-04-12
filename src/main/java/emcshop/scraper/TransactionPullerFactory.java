@@ -12,6 +12,7 @@ public class TransactionPullerFactory {
 	private int startAtPage = 1;
 	private Integer maxPaymentTransactionAge;
 	private int threadCount = 4;
+	private TransactionPageScraper pageScraper = new TransactionPageScraper();
 
 	/**
 	 * Gets the date at which the puller should stop parsing transactions.
@@ -110,6 +111,22 @@ public class TransactionPullerFactory {
 			throw new IllegalArgumentException("Thread count must be greater than zero.");
 		}
 		this.threadCount = threadCount;
+	}
+
+	/**
+	 * Gets the object used to download and scrape transaction pages.
+	 * @return the page scraper
+	 */
+	public TransactionPageScraper getTransactionPageScraper() {
+		return pageScraper;
+	}
+
+	/**
+	 * Sets the object used to download and scrape transaction pages.
+	 * @param pageScraper the page scraper
+	 */
+	public void setTransactionPageScraper(TransactionPageScraper pageScraper) {
+		this.pageScraper = pageScraper;
 	}
 
 	/**

@@ -13,13 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.util.EntityUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 /**
  * Downloads and parses transactions from EMC.
@@ -35,6 +29,7 @@ public class TransactionPuller {
 	private final Date stopAtDate;
 	private final Integer stopAtPage;
 	private final int threads;
+	private final TransactionPageScraper pageScraper;
 
 	private final Date oldestPaymentTransactionDate;
 	private final Date latestTransactionDate;
@@ -46,7 +41,7 @@ public class TransactionPuller {
 
 	private int deadThreads = 0;
 	private boolean cancel = false;
-	
+
 	/**
 	 * Constructs a new transaction puller.
 	 * @param session the EMC session
@@ -69,8 +64,9 @@ public class TransactionPuller {
 		stopAtDate = factory.getStopAtDate();
 		stopAtPage = factory.getStopAtPage();
 		threads = factory.getThreadCount();
+		pageScraper = factory.getTransactionPageScraper();
 
-		TransactionPage firstPage = getPage(1, session.createHttpClient());
+		TransactionPage firstPage = pageScraper.download(1, session.createHttpClient());
 
 		//is the user logged in?
 		if (!firstPage.isLoggedIn()) {
@@ -179,43 +175,6 @@ public class TransactionPuller {
 		return transactionCount;
 	}
 
-	/**
-	 * Downloads and parses a rupee transaction page.
-	 * @param page the page number
-	 * @param client the HTTP client
-	 * @return the page
-	 * @throws IOException if there's a problem downloading the page
-	 */
-	TransactionPage getPage(int page, HttpClient client) throws IOException {
-		/*
-		 * Note: The HttpClient library is used here because using
-		 * "Jsoup.connect()" doesn't always work when the application is run as
-		 * a Web Start app.
-		 * 
-		 * The login dialog was repeatedly appearing because, even though the
-		 * login was successful (a valid session cookie was generated), the
-		 * TransactionPuller would fail when it tried to get the first
-		 * transaction from the first page (i.e. when calling "isLoggedIn()").
-		 * It was failing because it was getting back the unauthenticated
-		 * version of the rupee page. It was as if jsoup wasn't sending the
-		 * session cookie with the request.
-		 * 
-		 * The issue appeared to only occur when running under Web Start. It
-		 * could not be reproduced when running via Eclipse.
-		 */
-
-		String base = "http://empireminecraft.com/rupees/transactions/";
-		String url = base + "?page=" + page;
-
-		HttpGet request = new HttpGet(url);
-		HttpResponse response = client.execute(request);
-		HttpEntity entity = response.getEntity();
-		Document document = Jsoup.parse(entity.getContent(), "UTF-8", base);
-		EntityUtils.consume(entity);
-
-		return new TransactionPage(document);
-	}
-
 	private class ScrapeThread extends Thread {
 		private HttpClient client;
 
@@ -236,17 +195,17 @@ public class TransactionPuller {
 
 					TransactionPage transactionPage = null;
 					try {
-						transactionPage = getPage(page, client);
+						transactionPage = pageScraper.download(page, client);
 					} catch (ConnectException e) {
 						//one user reported getting connection errors at various points while trying to download 12k pages: http://empireminecraft.com/threads/shop-statistics.22507/page-14#post-684085
 						//if there's a connection problem, try re-creating the connection
 						logger.log(Level.WARNING, "A connection error occurred while downloading transactions.  Re-creating the connection.", e);
 						client = session.createHttpClient();
-						transactionPage = getPage(page, client);
+						transactionPage = pageScraper.download(page, client);
 					} catch (SocketTimeoutException e) {
 						logger.log(Level.WARNING, "A connection error occurred while downloading transactions.  Re-creating the connection.", e);
 						client = session.createHttpClient();
-						transactionPage = getPage(page, client);
+						transactionPage = pageScraper.download(page, client);
 					}
 
 					//the session shouldn't expire while a download is in progress, but run a check just in case something wonky happens
