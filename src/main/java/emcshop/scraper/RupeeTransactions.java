@@ -3,6 +3,9 @@ package emcshop.scraper;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contains a list of rupee transactions.
+ */
 @SuppressWarnings("serial")
 public class RupeeTransactions extends ArrayList<RupeeTransaction> {
 	public RupeeTransactions() {
