@@ -69,7 +69,7 @@ public class TransactionPuller {
 		TransactionPage firstPage = pageScraper.download(1, session.createHttpClient());
 
 		//is the user logged in?
-		if (!firstPage.isLoggedIn()) {
+		if (firstPage == null) {
 			throw new BadSessionException();
 		}
 
@@ -209,7 +209,7 @@ public class TransactionPuller {
 					}
 
 					//the session shouldn't expire while a download is in progress, but run a check just in case something wonky happens
-					if (!transactionPage.isLoggedIn()) {
+					if (transactionPage == null) {
 						throw new BadSessionException();
 					}
 

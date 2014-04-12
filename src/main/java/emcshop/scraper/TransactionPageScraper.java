@@ -53,7 +53,7 @@ public class TransactionPageScraper {
 	/**
 	 * Downloads and parses a rupee transaction page.
 	 * @param page the page number
-	 * @return the page
+	 * @return the page or null if the session is bad
 	 * @throws IOException if there's a problem downloading the page
 	 */
 	public TransactionPage download(int page) throws IOException {
@@ -64,7 +64,7 @@ public class TransactionPageScraper {
 	 * Downloads and parses a rupee transaction page.
 	 * @param page the page number
 	 * @param client the HTTP client
-	 * @return the page
+	 * @return the page or null if the session is bad
 	 * @throws IOException if there's a problem downloading the page
 	 */
 	public TransactionPage download(int page, HttpClient client) throws IOException {
@@ -102,35 +102,34 @@ public class TransactionPageScraper {
 	/**
 	 * Scrapes a transaction page.
 	 * @param document the transaction page
-	 * @return the scraped data
+	 * @return the scraped data or null if the session is bad
 	 */
 	public TransactionPage scrape(Document document) {
+		Element containerElement = document.select("ol.sectionItems").first();
+		if (containerElement == null) {
+			return null;
+		}
+
 		TransactionPage page = new TransactionPage();
 		page.setRupeeBalance(parseRupeeBalance(document));
 
-		Element containerElement = document.select("ol.sectionItems").first();
-		boolean loggedIn = (containerElement != null);
-		page.setLoggedIn(loggedIn);
+		Elements elements = containerElement.select("li.sectionItem");
+		List<RupeeTransaction> transactions = new ArrayList<RupeeTransaction>();
+		for (Element element : elements) {
+			try {
+				String description = parseDescription(element);
+				RupeeTransaction transaction = parseTransaction(description);
 
-		if (loggedIn) {
-			Elements elements = containerElement.select("li.sectionItem");
-			List<RupeeTransaction> transactions = new ArrayList<RupeeTransaction>();
-			for (Element element : elements) {
-				try {
-					String description = parseDescription(element);
-					RupeeTransaction transaction = parseTransaction(description);
-
-					transaction.setTs(parseTs(element));
-					transaction.setAmount(parseAmount(element));
-					transaction.setBalance(parseBalance(element));
-					transactions.add(transaction);
-				} catch (Throwable t) {
-					//skip if any of the fields cannot be properly parsed
-					logger.log(Level.WARNING, "Problem parsing transaction from webpage.", t);
-				}
+				transaction.setTs(parseTs(element));
+				transaction.setAmount(parseAmount(element));
+				transaction.setBalance(parseBalance(element));
+				transactions.add(transaction);
+			} catch (Throwable t) {
+				//skip if any of the fields cannot be properly parsed
+				logger.log(Level.WARNING, "Problem parsing transaction from webpage.", t);
 			}
-			page.setTransactions(transactions);
 		}
+		page.setTransactions(transactions);
 
 		return page;
 	}

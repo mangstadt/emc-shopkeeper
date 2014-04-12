@@ -453,7 +453,6 @@ public class UpdateModelImplTest {
 
 		public ScraperBuilder page(RupeeTransaction... transactions) throws IOException {
 			final TransactionPage page = new TransactionPage();
-			page.setLoggedIn(true);
 			page.setTransactions(Arrays.asList(transactions));
 			page.setRupeeBalance(123);
 

@@ -1,7 +1,6 @@
 package emcshop.scraper;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -17,6 +16,7 @@ import java.util.logging.LogManager;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import emcshop.util.ClasspathUtils;
@@ -25,7 +25,8 @@ import emcshop.util.ClasspathUtils;
  * @author Michael Angstadt
  */
 public class TransactionPageScraperTest {
-	static {
+	@BeforeClass
+	public static void beforeClass() {
 		LogManager.getLogManager().reset();
 	}
 
@@ -33,7 +34,6 @@ public class TransactionPageScraperTest {
 	public void transactionPage() throws Exception {
 		TransactionPage page = load("transaction-page-sample.html");
 
-		assertTrue(page.isLoggedIn());
 		assertEquals(new Date(1354210000000L), page.getFirstTransactionDate());
 		assertEquals(Integer.valueOf(214308), page.getRupeeBalance());
 
@@ -158,18 +158,13 @@ public class TransactionPageScraperTest {
 	@Test
 	public void loggedOutPage() throws Exception {
 		TransactionPage page = load("transaction-page-not-logged-in.html");
-
-		assertFalse(page.isLoggedIn());
-		assertNull(page.getFirstTransactionDate());
-		assertNull(page.getRupeeBalance());
-		assertTrue(page.getTransactions().isEmpty());
+		assertNull(page);
 	}
 
 	@Test
 	public void invalidRupeeBalance() throws Exception {
 		TransactionPage page = load("transaction-page-invalid-rupee-balance.html");
 
-		assertTrue(page.isLoggedIn());
 		assertNull(page.getFirstTransactionDate());
 		assertNull(page.getRupeeBalance());
 		assertTrue(page.getTransactions().isEmpty());
@@ -179,7 +174,6 @@ public class TransactionPageScraperTest {
 	public void missingRupeeBalance() throws Exception {
 		TransactionPage page = load("transaction-page-missing-rupee-balance.html");
 
-		assertTrue(page.isLoggedIn());
 		assertNull(page.getFirstTransactionDate());
 		assertNull(page.getRupeeBalance());
 		assertTrue(page.getTransactions().isEmpty());

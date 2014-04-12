@@ -15,7 +15,6 @@ import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.LogManager;
@@ -53,17 +52,13 @@ public class TransactionPullerTest {
 
 	@Test(expected = BadSessionException.class)
 	public void not_logged_in() throws Throwable {
-		TransactionPage page1 = new TransactionPage();
-		page1.setLoggedIn(false);
-		when(scraper.download(eq(1), any(HttpClient.class))).thenReturn(page1);
-
+		when(scraper.download(eq(1), any(HttpClient.class))).thenReturn(null);
 		create(scraper);
 	}
 
 	@Test
 	public void no_rupee_balance() throws Throwable {
 		TransactionPage pageOne = new TransactionPage();
-		pageOne.setLoggedIn(true);
 		pageOne.setRupeeBalance(null);
 		when(scraper.download(eq(1), any(HttpClient.class))).thenReturn(pageOne);
 
@@ -73,29 +68,26 @@ public class TransactionPullerTest {
 
 	@Test
 	public void nextPage() throws Throwable {
-		RupeeTransaction t1 = shop(dg.next());
-		RupeeTransaction t2 = shop(dg.next());
-		RupeeTransaction t3 = shop(dg.next());
+		RupeeTransaction t1 = shop();
+		RupeeTransaction t2 = shop();
+		RupeeTransaction t3 = shop();
 		TransactionPage page1 = new TransactionPage();
-		page1.setLoggedIn(true);
 		page1.setRupeeBalance(20123);
 		page1.setTransactions(Arrays.asList(t1, t2, t3));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page1);
 
-		RupeeTransaction t4 = shop(dg.next());
-		RupeeTransaction t5 = shop(dg.next());
-		RupeeTransaction t6 = shop(dg.next());
+		RupeeTransaction t4 = shop();
+		RupeeTransaction t5 = shop();
+		RupeeTransaction t6 = shop();
 		TransactionPage page2 = new TransactionPage();
-		page2.setLoggedIn(true);
 		page2.setRupeeBalance(40123);
 		page2.setTransactions(Arrays.asList(t4, t5, t6));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page2);
 
-		RupeeTransaction t7 = shop(dg.next());
-		RupeeTransaction t8 = shop(dg.next());
-		RupeeTransaction t9 = shop(dg.next());
+		RupeeTransaction t7 = shop();
+		RupeeTransaction t8 = shop();
+		RupeeTransaction t9 = shop();
 		TransactionPage page3 = new TransactionPage();
-		page3.setLoggedIn(true);
 		page3.setRupeeBalance(40123);
 		page3.setTransactions(Arrays.asList(t7, t8, t9));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page3);
@@ -110,37 +102,33 @@ public class TransactionPullerTest {
 
 	@Test
 	public void nextPage_new_transactions_added_during_download() throws Throwable {
-		RupeeTransaction t0 = shop(dg.next());
+		RupeeTransaction t0 = shop();
 
-		RupeeTransaction t1 = shop(dg.next());
-		RupeeTransaction t2 = shop(dg.next());
-		RupeeTransaction t3 = shop(dg.next());
+		RupeeTransaction t1 = shop();
+		RupeeTransaction t2 = shop();
+		RupeeTransaction t3 = shop();
 		TransactionPage page1 = new TransactionPage();
-		page1.setLoggedIn(true);
 		page1.setRupeeBalance(20123);
 		page1.setTransactions(Arrays.asList(t1, t2, t3));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page1);
 
-		RupeeTransaction t4 = shop(dg.next());
-		RupeeTransaction t5 = shop(dg.next());
-		RupeeTransaction t6 = shop(dg.next());
+		RupeeTransaction t4 = shop();
+		RupeeTransaction t5 = shop();
+		RupeeTransaction t6 = shop();
 		TransactionPage page2 = new TransactionPage();
-		page2.setLoggedIn(true);
 		page2.setRupeeBalance(40123);
 		page2.setTransactions(Arrays.asList(t4, t5, t6));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page2);
 
-		RupeeTransaction t7 = shop(dg.next());
-		RupeeTransaction t8 = shop(dg.next());
-		RupeeTransaction t9 = shop(dg.next());
+		RupeeTransaction t7 = shop();
+		RupeeTransaction t8 = shop();
+		RupeeTransaction t9 = shop();
 		TransactionPage page3 = new TransactionPage();
-		page3.setLoggedIn(true);
 		page3.setRupeeBalance(40123);
 		page3.setTransactions(Arrays.asList(t7, t8, t9));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page3);
 
 		TransactionPage updatedPage1 = new TransactionPage();
-		updatedPage1.setLoggedIn(true);
 		updatedPage1.setRupeeBalance(40123);
 		updatedPage1.setTransactions(Arrays.asList(t0, t1, t2));
 		when(scraper.download(gte(pageCount), any(HttpClient.class))).thenReturn(updatedPage1);
@@ -152,14 +140,13 @@ public class TransactionPullerTest {
 
 	@Test
 	public void nextPage_maxPaymentTransactionAge() throws Throwable {
-		DateGenerator dg = new DateGenerator(Calendar.HOUR_OF_DAY, -10);
+		dg = new DateGenerator(Calendar.HOUR_OF_DAY, -10);
 
-		RupeeTransaction t1 = payment(dg.next());
-		RupeeTransaction t2 = shop(dg.next());
-		RupeeTransaction t3 = payment(dg.next());
-		RupeeTransaction t4 = shop(dg.next());
+		RupeeTransaction t1 = payment();
+		RupeeTransaction t2 = shop();
+		RupeeTransaction t3 = payment();
+		RupeeTransaction t4 = shop();
 		TransactionPage page1 = new TransactionPage();
-		page1.setLoggedIn(true);
 		page1.setRupeeBalance(20123);
 		page1.setTransactions(Arrays.asList(t1, t2, t3, t4));
 		when(scraper.download(anyInt(), any(HttpClient.class))).thenReturn(page1);
@@ -174,29 +161,26 @@ public class TransactionPullerTest {
 
 	@Test
 	public void nextPage_startAtPage() throws Throwable {
-		RupeeTransaction t1 = shop(dg.next());
-		RupeeTransaction t2 = shop(dg.next());
-		RupeeTransaction t3 = shop(dg.next());
+		RupeeTransaction t1 = shop();
+		RupeeTransaction t2 = shop();
+		RupeeTransaction t3 = shop();
 		TransactionPage page1 = new TransactionPage();
-		page1.setLoggedIn(true);
 		page1.setRupeeBalance(20123);
 		page1.setTransactions(Arrays.asList(t1, t2, t3));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page1);
 
-		RupeeTransaction t4 = shop(dg.next());
-		RupeeTransaction t5 = shop(dg.next());
-		RupeeTransaction t6 = shop(dg.next());
+		RupeeTransaction t4 = shop();
+		RupeeTransaction t5 = shop();
+		RupeeTransaction t6 = shop();
 		TransactionPage page2 = new TransactionPage();
-		page2.setLoggedIn(true);
 		page2.setRupeeBalance(40123);
 		page2.setTransactions(Arrays.asList(t4, t5, t6));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page2);
 
-		RupeeTransaction t7 = shop(dg.next());
-		RupeeTransaction t8 = shop(dg.next());
-		RupeeTransaction t9 = shop(dg.next());
+		RupeeTransaction t7 = shop();
+		RupeeTransaction t8 = shop();
+		RupeeTransaction t9 = shop();
 		TransactionPage page3 = new TransactionPage();
-		page3.setLoggedIn(true);
 		page3.setRupeeBalance(40123);
 		page3.setTransactions(Arrays.asList(t7, t8, t9));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page3);
@@ -213,29 +197,26 @@ public class TransactionPullerTest {
 
 	@Test
 	public void nextPage_stopAtDate() throws Throwable {
-		RupeeTransaction t1 = shop(dg.next());
-		RupeeTransaction t2 = shop(dg.next());
-		RupeeTransaction t3 = shop(dg.next());
+		RupeeTransaction t1 = shop();
+		RupeeTransaction t2 = shop();
+		RupeeTransaction t3 = shop();
 		TransactionPage page1 = new TransactionPage();
-		page1.setLoggedIn(true);
 		page1.setRupeeBalance(20123);
 		page1.setTransactions(Arrays.asList(t1, t2, t3));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page1);
 
-		RupeeTransaction t4 = shop(dg.next());
-		RupeeTransaction t5 = shop(dg.next());
-		RupeeTransaction t6 = shop(dg.next());
+		RupeeTransaction t4 = shop();
+		RupeeTransaction t5 = shop();
+		RupeeTransaction t6 = shop();
 		TransactionPage page2 = new TransactionPage();
-		page2.setLoggedIn(true);
 		page2.setRupeeBalance(40123);
 		page2.setTransactions(Arrays.asList(t4, t5, t6));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page2);
 
-		RupeeTransaction t7 = shop(dg.next());
-		RupeeTransaction t8 = shop(dg.next());
-		RupeeTransaction t9 = shop(dg.next());
+		RupeeTransaction t7 = shop();
+		RupeeTransaction t8 = shop();
+		RupeeTransaction t9 = shop();
 		TransactionPage page3 = new TransactionPage();
-		page3.setLoggedIn(true);
 		page3.setRupeeBalance(40123);
 		page3.setTransactions(Arrays.asList(t7, t8, t9));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page3);
@@ -252,29 +233,26 @@ public class TransactionPullerTest {
 
 	@Test
 	public void nextPage_stopAtPage() throws Throwable {
-		RupeeTransaction t1 = shop(dg.next());
-		RupeeTransaction t2 = shop(dg.next());
-		RupeeTransaction t3 = shop(dg.next());
+		RupeeTransaction t1 = shop();
+		RupeeTransaction t2 = shop();
+		RupeeTransaction t3 = shop();
 		TransactionPage page1 = new TransactionPage();
-		page1.setLoggedIn(true);
 		page1.setRupeeBalance(20123);
 		page1.setTransactions(Arrays.asList(t1, t2, t3));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page1);
 
-		RupeeTransaction t4 = shop(dg.next());
-		RupeeTransaction t5 = shop(dg.next());
-		RupeeTransaction t6 = shop(dg.next());
+		RupeeTransaction t4 = shop();
+		RupeeTransaction t5 = shop();
+		RupeeTransaction t6 = shop();
 		TransactionPage page2 = new TransactionPage();
-		page2.setLoggedIn(true);
 		page2.setRupeeBalance(40123);
 		page2.setTransactions(Arrays.asList(t4, t5, t6));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page2);
 
-		RupeeTransaction t7 = shop(dg.next());
-		RupeeTransaction t8 = shop(dg.next());
-		RupeeTransaction t9 = shop(dg.next());
+		RupeeTransaction t7 = shop();
+		RupeeTransaction t8 = shop();
+		RupeeTransaction t9 = shop();
 		TransactionPage page3 = new TransactionPage();
-		page3.setLoggedIn(true);
 		page3.setRupeeBalance(40123);
 		page3.setTransactions(Arrays.asList(t7, t8, t9));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page3);
@@ -291,27 +269,24 @@ public class TransactionPullerTest {
 
 	@Test(expected = DownloadException.class)
 	public void nextPage_bad_session_while_downloading() throws Throwable {
-		RupeeTransaction t1 = shop(dg.next());
-		RupeeTransaction t2 = shop(dg.next());
-		RupeeTransaction t3 = shop(dg.next());
+		RupeeTransaction t1 = shop();
+		RupeeTransaction t2 = shop();
+		RupeeTransaction t3 = shop();
 		TransactionPage page1 = new TransactionPage();
-		page1.setLoggedIn(true);
 		page1.setRupeeBalance(20123);
 		page1.setTransactions(Arrays.asList(t1, t2, t3));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page1);
 
-		RupeeTransaction t4 = shop(dg.next());
-		RupeeTransaction t5 = shop(dg.next());
-		RupeeTransaction t6 = shop(dg.next());
+		RupeeTransaction t4 = shop();
+		RupeeTransaction t5 = shop();
+		RupeeTransaction t6 = shop();
 		TransactionPage page2 = new TransactionPage();
-		page2.setLoggedIn(true);
 		page2.setRupeeBalance(40123);
 		page2.setTransactions(Arrays.asList(t4, t5, t6));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page2);
 
-		TransactionPage page = new TransactionPage();
-		page.setLoggedIn(false);
-		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page);
+		TransactionPage page3 = new TransactionPage();
+		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page3);
 
 		when(scraper.download(gte(pageCount), any(HttpClient.class))).thenReturn(page1);
 
@@ -327,18 +302,18 @@ public class TransactionPullerTest {
 
 	@Test(expected = DownloadException.class)
 	public void nextPage_IOException_while_downloading() throws Throwable {
-		RupeeTransaction t1 = shop(dg.next());
-		RupeeTransaction t2 = shop(dg.next());
-		RupeeTransaction t3 = shop(dg.next());
-		TransactionPage pageOne = new TransactionPage();
-		pageOne.setLoggedIn(true);
-		pageOne.setRupeeBalance(20123);
-		pageOne.setTransactions(Arrays.asList(t1, t2, t3));
-		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(pageOne);
+		RupeeTransaction t1 = shop();
+		RupeeTransaction t2 = shop();
+		RupeeTransaction t3 = shop();
+
+		TransactionPage page1 = new TransactionPage();
+		page1.setRupeeBalance(20123);
+		page1.setTransactions(Arrays.asList(t1, t2, t3));
+		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page1);
 
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenThrow(new IOException());
 
-		when(scraper.download(gte(pageCount), any(HttpClient.class))).thenReturn(pageOne);
+		when(scraper.download(gte(pageCount), any(HttpClient.class))).thenReturn(page1);
 
 		TransactionPuller puller = create(scraper);
 		assertEquals(Integer.valueOf(20123), puller.getRupeeBalance());
@@ -352,20 +327,19 @@ public class TransactionPullerTest {
 
 	@Test
 	public void nextPage_retry_on_connection_error_while_downloading() throws Throwable {
-		RupeeTransaction t1 = shop(dg.next());
-		RupeeTransaction t2 = shop(dg.next());
-		RupeeTransaction t3 = shop(dg.next());
-		TransactionPage pageOne = new TransactionPage();
-		pageOne.setLoggedIn(true);
-		pageOne.setRupeeBalance(20123);
-		pageOne.setTransactions(Arrays.asList(t1, t2, t3));
-		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(pageOne);
+		RupeeTransaction t1 = shop();
+		RupeeTransaction t2 = shop();
+		RupeeTransaction t3 = shop();
 
-		RupeeTransaction t4 = shop(dg.next());
-		RupeeTransaction t5 = shop(dg.next());
-		RupeeTransaction t6 = shop(dg.next());
+		TransactionPage page1 = new TransactionPage();
+		page1.setRupeeBalance(20123);
+		page1.setTransactions(Arrays.asList(t1, t2, t3));
+		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenReturn(page1);
+
+		RupeeTransaction t4 = shop();
+		RupeeTransaction t5 = shop();
+		RupeeTransaction t6 = shop();
 		final TransactionPage page2 = new TransactionPage();
-		page2.setLoggedIn(true);
 		page2.setRupeeBalance(40123);
 		page2.setTransactions(Arrays.asList(t4, t5, t6));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenAnswer(new Answer<TransactionPage>() {
@@ -381,11 +355,10 @@ public class TransactionPullerTest {
 			}
 		});
 
-		RupeeTransaction t7 = shop(dg.next());
-		RupeeTransaction t8 = shop(dg.next());
-		RupeeTransaction t9 = shop(dg.next());
+		RupeeTransaction t7 = shop();
+		RupeeTransaction t8 = shop();
+		RupeeTransaction t9 = shop();
 		final TransactionPage page3 = new TransactionPage();
-		page3.setLoggedIn(true);
 		page3.setRupeeBalance(40123);
 		page3.setTransactions(Arrays.asList(t7, t8, t9));
 		when(scraper.download(eq(pageCount++), any(HttpClient.class))).thenAnswer(new Answer<TransactionPage>() {
@@ -401,16 +374,16 @@ public class TransactionPullerTest {
 			}
 		});
 
-		when(scraper.download(gte(pageCount), any(HttpClient.class))).thenReturn(pageOne);
+		when(scraper.download(gte(pageCount), any(HttpClient.class))).thenReturn(page1);
 
 		TransactionPuller puller = create(scraper);
 		assertEquals(Integer.valueOf(20123), puller.getRupeeBalance());
 		assertPages(puller, t1, t2, t3, t4, t5, t6, t7, t8, t9);
 	}
 
-	private ShopTransaction shop(Date ts) {
+	private ShopTransaction shop() {
 		ShopTransaction transaction = new ShopTransaction();
-		transaction.setTs(ts);
+		transaction.setTs(dg.next());
 		transaction.setItem("Apple");
 		transaction.setPlayer("Notch");
 		transaction.setQuantity(1);
@@ -419,9 +392,9 @@ public class TransactionPullerTest {
 		return transaction;
 	}
 
-	private PaymentTransaction payment(Date ts) {
+	private PaymentTransaction payment() {
 		PaymentTransaction transaction = new PaymentTransaction();
-		transaction.setTs(ts);
+		transaction.setTs(dg.next());
 		transaction.setPlayer("Notch");
 		transaction.setAmount(1);
 		transaction.setBalance(1);

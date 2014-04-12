@@ -8,17 +8,8 @@ import java.util.List;
  * Contains information from a scraped rupee transaction history page.
  */
 public class TransactionPage {
-	private boolean loggedIn = false;
 	private Integer rupeeBalance;
 	private List<RupeeTransaction> transactions = new ArrayList<RupeeTransaction>();
-
-	public boolean isLoggedIn() {
-		return loggedIn;
-	}
-
-	public void setLoggedIn(boolean loggedIn) {
-		this.loggedIn = loggedIn;
-	}
 
 	public Integer getRupeeBalance() {
 		return rupeeBalance;
