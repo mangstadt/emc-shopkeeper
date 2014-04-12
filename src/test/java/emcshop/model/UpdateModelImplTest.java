@@ -43,6 +43,7 @@ import emcshop.scraper.RupeeTransaction;
 import emcshop.scraper.RupeeTransactions;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
+import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.DateGenerator;
 
 public class UpdateModelImplTest {
@@ -77,8 +78,8 @@ public class UpdateModelImplTest {
 
 		//create the model
 		EmcSession session = mock(EmcSession.class);
-		TransactionPuller.Config config = new TransactionPuller.Config.Builder().build();
-		UpdateModelImpl model = new UpdateModelImpl(config, session, dao) {
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
 			@Override
 			TransactionPuller createPuller() {
 				throw new BadSessionException();
@@ -114,8 +115,8 @@ public class UpdateModelImplTest {
 
 		//create the model
 		EmcSession session = mock(EmcSession.class);
-		TransactionPuller.Config config = new TransactionPuller.Config.Builder().build();
-		UpdateModelImpl model = new UpdateModelImpl(config, session, dao) {
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
 			@Override
 			TransactionPuller createPuller() throws IOException {
 				throw new IOException();
@@ -173,8 +174,9 @@ public class UpdateModelImplTest {
 		final TransactionPuller puller = mockTransactionPuller(pages);
 		EmcSession session = mock(EmcSession.class);
 		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPuller.Config config = new TransactionPuller.Config.Builder().stopAtDate(null).build();
-		UpdateModelImpl model = new UpdateModelImpl(config, session, dao) {
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		factory.setStopAtDate(null);
+		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
 			@Override
 			TransactionPuller createPuller() {
 				return puller;
@@ -245,8 +247,9 @@ public class UpdateModelImplTest {
 		final TransactionPuller puller = mockTransactionPuller(pages);
 		EmcSession session = mock(EmcSession.class);
 		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPuller.Config config = new TransactionPuller.Config.Builder().stopAtDate(new Date()).build();
-		UpdateModelImpl model = new UpdateModelImpl(config, session, dao) {
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		factory.setStopAtDate(new Date());
+		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
 			@Override
 			TransactionPuller createPuller() {
 				return puller;
@@ -325,8 +328,8 @@ public class UpdateModelImplTest {
 		final TransactionPuller puller = mockTransactionPuller(pages);
 		EmcSession session = mock(EmcSession.class);
 		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPuller.Config config = new TransactionPuller.Config.Builder().build();
-		UpdateModelImpl model = new UpdateModelImpl(config, session, dao) {
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
 			@Override
 			TransactionPuller createPuller() {
 				return puller;
@@ -406,8 +409,8 @@ public class UpdateModelImplTest {
 		final TransactionPuller puller = mockTransactionPuller(pages);
 		EmcSession session = mock(EmcSession.class);
 		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPuller.Config config = new TransactionPuller.Config.Builder().build();
-		UpdateModelImpl model = new UpdateModelImpl(config, session, dao) {
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
 			@Override
 			TransactionPuller createPuller() {
 				return puller;
@@ -479,8 +482,9 @@ public class UpdateModelImplTest {
 		final TransactionPuller puller = mockTransactionPuller(pages);
 		EmcSession session = mock(EmcSession.class);
 		when(session.createHttpClient()).thenReturn(new DefaultHttpClient());
-		TransactionPuller.Config config = new TransactionPuller.Config.Builder().stopAtDate(new Date()).build();
-		UpdateModelImpl model = new UpdateModelImpl(config, session, dao) {
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		factory.setStopAtDate(new Date());
+		UpdateModelImpl model = new UpdateModelImpl(factory, session, dao) {
 			@Override
 			TransactionPuller createPuller() {
 				return puller;

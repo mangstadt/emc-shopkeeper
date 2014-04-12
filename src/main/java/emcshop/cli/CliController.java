@@ -31,7 +31,7 @@ import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.TransactionPuller;
+import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.Settings;
 import emcshop.view.IUpdateView;
 
@@ -52,7 +52,7 @@ public class CliController {
 		boolean firstUpdate = (latestTransactionDateFromDb == null);
 
 		//set configuration settings for puller
-		TransactionPuller.Config.Builder configBuilder = new TransactionPuller.Config.Builder();
+		TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
 		if (firstUpdate) {
 			FirstUpdateViewCli view = new FirstUpdateViewCli();
 			view.setStopAtPage(stopAtPage);
@@ -64,13 +64,12 @@ public class CliController {
 				return;
 			}
 
-			configBuilder.maxPaymentTransactionAge(presenter.getMaxPaymentTransactionAge());
-			configBuilder.stopAtPage(presenter.getStopAtPage());
-			configBuilder.startAtPage(startAtPage);
+			pullerFactory.setMaxPaymentTransactionAge(presenter.getMaxPaymentTransactionAge());
+			pullerFactory.setStopAtPage(presenter.getStopAtPage());
+			pullerFactory.setStartAtPage(startAtPage);
 		} else {
-			configBuilder.stopAtDate(latestTransactionDateFromDb);
+			pullerFactory.setStopAtDate(latestTransactionDateFromDb);
 		}
-		TransactionPuller.Config config = configBuilder.build();
 
 		//log user in
 		LoginShower loginShower = new LoginShower(settings);
@@ -82,7 +81,7 @@ public class CliController {
 
 		//start the update
 		IUpdateView view = new UpdateViewCli(loginShower);
-		IUpdateModel model = new UpdateModelCli(config, session, dao);
+		IUpdateModel model = new UpdateModelCli(pullerFactory, session, dao);
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 		int transactions = presenter.getShopTransactions() + presenter.getPaymentTransactions() + presenter.getBonusFeeTransactions();

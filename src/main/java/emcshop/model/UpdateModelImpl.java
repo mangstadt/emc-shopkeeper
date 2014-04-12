@@ -19,13 +19,14 @@ import emcshop.scraper.RupeeTransaction;
 import emcshop.scraper.RupeeTransactions;
 import emcshop.scraper.ShopTransaction;
 import emcshop.scraper.TransactionPuller;
+import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.GuiUtils;
 
 public class UpdateModelImpl implements IUpdateModel {
 	private static final Logger logger = Logger.getLogger(UpdateModelImpl.class.getName());
 
 	private final boolean firstUpdate;
-	private final TransactionPuller.Config pullerConfig;
+	private final TransactionPullerFactory pullerFactory;
 	private EmcSession session;
 	private final DbDao dao;
 
@@ -41,9 +42,9 @@ public class UpdateModelImpl implements IUpdateModel {
 	private boolean downloadStopped = false;
 	private Throwable thrown;
 
-	public UpdateModelImpl(TransactionPuller.Config pullerConfig, EmcSession session, DbDao dao) {
-		firstUpdate = (pullerConfig.getStopAtDate() == null);
-		this.pullerConfig = pullerConfig;
+	public UpdateModelImpl(TransactionPullerFactory pullerFactory, EmcSession session, DbDao dao) {
+		firstUpdate = (pullerFactory.getStopAtDate() == null);
+		this.pullerFactory = pullerFactory;
 		this.session = session;
 		this.dao = dao;
 	}
@@ -81,7 +82,7 @@ public class UpdateModelImpl implements IUpdateModel {
 
 	@Override
 	public Integer getStopAtPage() {
-		return pullerConfig.getStopAtPage();
+		return pullerFactory.getStopAtPage();
 	}
 
 	@Override
@@ -177,7 +178,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	}
 
 	TransactionPuller createPuller() throws IOException {
-		return new TransactionPuller(session, pullerConfig);
+		return new TransactionPuller(session, pullerFactory);
 	}
 
 	private class DownloadThread extends Thread {

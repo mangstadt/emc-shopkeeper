@@ -3,11 +3,11 @@ package emcshop.cli.model;
 import emcshop.db.DbDao;
 import emcshop.model.UpdateModelImpl;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.TransactionPuller;
+import emcshop.scraper.TransactionPullerFactory;
 
 public class UpdateModelCli extends UpdateModelImpl {
-	public UpdateModelCli(TransactionPuller.Config pullerConfig, EmcSession session, DbDao dao) {
-		super(pullerConfig, session, dao);
+	public UpdateModelCli(TransactionPullerFactory pullerFactory, EmcSession session, DbDao dao) {
+		super(pullerFactory, session, dao);
 	}
 
 	@Override

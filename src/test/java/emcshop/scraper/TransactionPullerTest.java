@@ -16,7 +16,6 @@ import java.util.logging.LogManager;
 import org.apache.http.client.HttpClient;
 import org.junit.Test;
 
-import emcshop.scraper.TransactionPuller.Config;
 import emcshop.util.DateGenerator;
 
 public class TransactionPullerTest {
@@ -140,9 +139,10 @@ public class TransactionPullerTest {
 
 		pages.put(1, new TransactionPage(true, 20123, Arrays.asList(t1, t2, t3, t4)));
 
-		Config config = new Config.Builder().maxPaymentTransactionAge(1).build();
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		factory.setMaxPaymentTransactionAge(1);
 		thePages = pages;
-		TransactionPuller puller = new MockTransactionPuller(config);
+		TransactionPuller puller = new MockTransactionPuller(factory);
 
 		assertEquals(Integer.valueOf(20123), puller.getRupeeBalance());
 		assertEquals(Arrays.asList(t1, t2, t4), puller.nextPage());
@@ -170,9 +170,10 @@ public class TransactionPullerTest {
 		RupeeTransaction t9 = shop(dg.next());
 		pages.put(page++, new TransactionPage(true, 40123, Arrays.asList(t7, t8, t9)));
 
-		Config config = new Config.Builder().startAtPage(2).build();
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		factory.setStartAtPage(2);
 		thePages = pages;
-		TransactionPuller puller = new MockTransactionPuller(config);
+		TransactionPuller puller = new MockTransactionPuller(factory);
 
 		assertEquals(Integer.valueOf(20123), puller.getRupeeBalance());
 		assertEquals(Arrays.asList(t4, t5, t6), puller.nextPage());
@@ -201,9 +202,10 @@ public class TransactionPullerTest {
 		RupeeTransaction t9 = shop(dg.next());
 		pages.put(page++, new TransactionPage(true, 40123, Arrays.asList(t7, t8, t9)));
 
-		Config config = new Config.Builder().stopAtDate(dg.getGenerated(7)).build();
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		factory.setStopAtDate(dg.getGenerated(7));
 		thePages = pages;
-		TransactionPuller puller = new MockTransactionPuller(config);
+		TransactionPuller puller = new MockTransactionPuller(factory);
 
 		assertEquals(Integer.valueOf(20123), puller.getRupeeBalance());
 		assertEquals(Arrays.asList(t1, t2, t3), puller.nextPage());
@@ -233,9 +235,10 @@ public class TransactionPullerTest {
 		RupeeTransaction t9 = shop(dg.next());
 		pages.put(page++, new TransactionPage(true, 40123, Arrays.asList(t7, t8, t9)));
 
-		Config config = new Config.Builder().stopAtPage(2).build();
+		TransactionPullerFactory factory = new TransactionPullerFactory();
+		factory.setStopAtPage(2);
 		thePages = pages;
-		TransactionPuller puller = new MockTransactionPuller(config);
+		TransactionPuller puller = new MockTransactionPuller(factory);
 
 		assertEquals(Integer.valueOf(20123), puller.getRupeeBalance());
 		assertEquals(Arrays.asList(t1, t2, t3), puller.nextPage());
@@ -352,43 +355,6 @@ public class TransactionPullerTest {
 		assertNull(puller.nextPage());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void configBuilder_maxPaymentTransactionAge() {
-		new Config.Builder().maxPaymentTransactionAge(0);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void configBuilder_startAtPage() {
-		new Config.Builder().startAtPage(0);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void configBuilder_stopAtPage() {
-		new Config.Builder().stopAtPage(0);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void configBuilder_stopAtPage_less_than_startAtPAge() {
-		new Config.Builder().startAtPage(5).stopAtPage(1).build();
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void configBuilder_threadCount() {
-		new Config.Builder().threadCount(0);
-	}
-
-	@Test
-	public void configBuilder_build() {
-		DateGenerator dg = new DateGenerator();
-		Config config = new Config.Builder().maxPaymentTransactionAge(1).startAtPage(2).stopAtDate(dg.next()).stopAtPage(3).threadCount(4).build();
-
-		assertEquals(Integer.valueOf(1), config.getMaxPaymentTransactionAge());
-		assertEquals(2, config.getStartAtPage());
-		assertEquals(dg.getGenerated(0), config.getStopAtDate());
-		assertEquals(Integer.valueOf(3), config.getStopAtPage());
-		assertEquals(4, config.getThreadCount());
-	}
-
 	private ShopTransaction shop(Date ts) {
 		ShopTransaction transaction = new ShopTransaction();
 		transaction.setTs(ts);
@@ -413,11 +379,11 @@ public class TransactionPullerTest {
 
 	private static class MockTransactionPuller extends TransactionPuller {
 		public MockTransactionPuller() throws BadSessionException, IOException {
-			this(new Config.Builder().build());
+			this(new TransactionPullerFactory());
 		}
 
-		public MockTransactionPuller(Config config) throws BadSessionException, IOException {
-			super(session, config);
+		public MockTransactionPuller(TransactionPullerFactory factory) throws BadSessionException, IOException {
+			super(session, factory);
 		}
 
 		@Override

@@ -66,7 +66,7 @@ import emcshop.presenter.BackupPresenter;
 import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
-import emcshop.scraper.TransactionPuller;
+import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.Settings;
@@ -356,7 +356,7 @@ public class MainFrame extends JFrame {
 					throw new RuntimeException(e);
 				}
 
-				TransactionPuller.Config.Builder pullerConfigBuilder = new TransactionPuller.Config.Builder();
+				TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
 				if (latestTransactionDate == null) {
 					//it's the first update
 
@@ -370,18 +370,17 @@ public class MainFrame extends JFrame {
 					}
 
 					Integer stopAtPage = presenter.getStopAtPage();
-					pullerConfigBuilder.stopAtPage(stopAtPage);
+					pullerFactory.setStopAtPage(stopAtPage);
 
 					Integer oldestPaymentTransactionDays = presenter.getMaxPaymentTransactionAge();
-					pullerConfigBuilder.maxPaymentTransactionAge(oldestPaymentTransactionDays);
+					pullerFactory.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
 				} else {
-					pullerConfigBuilder.stopAtDate(latestTransactionDate);
+					pullerFactory.setStopAtDate(latestTransactionDate);
 				}
-				TransactionPuller.Config pullerConfig = pullerConfigBuilder.build();
 
 				//show the update dialog
 				IUpdateView view = new UpdateViewImpl(MainFrame.this, loginShower);
-				IUpdateModel model = new UpdateModelImpl(pullerConfig, settings.getSession(), dao);
+				IUpdateModel model = new UpdateModelImpl(pullerFactory, settings.getSession(), dao);
 				UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 				if (!presenter.isCanceled()) {

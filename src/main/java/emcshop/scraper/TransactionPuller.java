@@ -29,9 +29,12 @@ public class TransactionPuller {
 	private static final Logger logger = Logger.getLogger(TransactionPuller.class.getName());
 	private static final RupeeTransactions noMoreElements = new RupeeTransactions();
 
-	private final EmcSession session;
 	private final BlockingQueue<RupeeTransactions> queue = new LinkedBlockingQueue<RupeeTransactions>();
-	private final Config config;
+
+	private final EmcSession session;
+	private final Date stopAtDate;
+	private final Integer stopAtPage;
+	private final int threads;
 
 	private final Date oldestPaymentTransactionDate;
 	private final Date latestTransactionDate;
@@ -43,7 +46,7 @@ public class TransactionPuller {
 
 	private int deadThreads = 0;
 	private boolean cancel = false;
-
+	
 	/**
 	 * Constructs a new transaction puller.
 	 * @param session the EMC session
@@ -51,19 +54,21 @@ public class TransactionPuller {
 	 * @throws IOException if there was a network problem contacting EMC
 	 */
 	public TransactionPuller(EmcSession session) throws BadSessionException, IOException {
-		this(session, new Config.Builder().build());
+		this(session, new TransactionPullerFactory());
 	}
 
 	/**
 	 * Constructs a new transaction puller.
 	 * @param session the EMC session
-	 * @param config configuration parameters for this transaction puller
+	 * @param factory the transaction puller factory
 	 * @throws BadSessionException if the EMC session was invalid
 	 * @throws IOException if there was a network problem contacting EMC
 	 */
-	public TransactionPuller(EmcSession session, Config config) throws BadSessionException, IOException {
+	public TransactionPuller(EmcSession session, TransactionPullerFactory factory) throws IOException {
 		this.session = session;
-		this.config = config;
+		stopAtDate = factory.getStopAtDate();
+		stopAtPage = factory.getStopAtPage();
+		threads = factory.getThreadCount();
 
 		TransactionPage firstPage = getPage(1, session.createHttpClient());
 
@@ -73,9 +78,10 @@ public class TransactionPuller {
 		}
 
 		//calculate how old a payment transaction can be before it is ignored
-		if (config.getMaxPaymentTransactionAge() != null) {
+		Integer maxPaymentTransactionAge = factory.getMaxPaymentTransactionAge();
+		if (maxPaymentTransactionAge != null) {
 			Calendar c = Calendar.getInstance();
-			c.add(Calendar.DATE, -config.getMaxPaymentTransactionAge());
+			c.add(Calendar.DATE, -maxPaymentTransactionAge);
 			oldestPaymentTransactionDate = c.getTime();
 		} else {
 			oldestPaymentTransactionDate = null;
@@ -88,8 +94,8 @@ public class TransactionPuller {
 		latestTransactionDate = firstPage.getFirstTransactionDate();
 
 		//start threads
-		pageCounter = new AtomicInteger(config.getStartAtPage());
-		for (int i = 0; i < config.getThreadCount(); i++) {
+		pageCounter = new AtomicInteger(factory.getStartAtPage());
+		for (int i = 0; i < threads; i++) {
 			ScrapeThread thread = new ScrapeThread();
 			thread.setDaemon(true);
 			thread.setName(getClass().getSimpleName() + "-" + i);
@@ -110,7 +116,7 @@ public class TransactionPuller {
 				if (thrown != null) {
 					throw thrown;
 				}
-				if (deadThreads == config.getThreadCount()) {
+				if (deadThreads == threads) {
 					return null;
 				}
 			}
@@ -174,14 +180,6 @@ public class TransactionPuller {
 	}
 
 	/**
-	 * Gets the configuration object for this transaction puller.
-	 * @return the configuration object
-	 */
-	public Config getConfig() {
-		return config;
-	}
-
-	/**
 	 * Downloads and parses a rupee transaction page.
 	 * @param page the page number
 	 * @param client the HTTP client
@@ -232,7 +230,7 @@ public class TransactionPuller {
 				while (true) {
 					page = pageCounter.getAndIncrement();
 
-					if (config.getStopAtPage() != null && page > config.getStopAtPage()) {
+					if (stopAtPage != null && page > stopAtPage) {
 						break;
 					}
 
@@ -279,13 +277,13 @@ public class TransactionPuller {
 
 					//remove any transactions that are past the "stop-at" date
 					boolean done = false;
-					if (config.getStopAtDate() != null) {
+					if (stopAtDate != null) {
 						int end = -1;
 						for (int i = 0; i < transactions.size(); i++) {
 							RupeeTransaction transaction = transactions.get(i);
 							long ts = transaction.getTs().getTime();
 
-							if (ts <= config.getStopAtDate().getTime()) {
+							if (ts <= stopAtDate.getTime()) {
 								end = i;
 								break;
 							}
@@ -321,164 +319,11 @@ public class TransactionPuller {
 			} finally {
 				synchronized (TransactionPuller.this) {
 					deadThreads++;
-					if (!cancel && deadThreads == config.getThreadCount()) {
+					if (!cancel && deadThreads == threads) {
 						//this is the last thread to terminate
 						queue.add(noMoreElements);
 					}
 				}
-			}
-		}
-	}
-
-	/**
-	 * Contains initialization settings for the {@link TransactionPuller} class.
-	 * Use the {@link Config.Builder} class to construct new instances.
-	 */
-	public static class Config {
-		private final Date stopAtDate;
-		private final Integer stopAtPage;
-		private final int startAtPage;
-		private final Integer maxPaymentTransactionAge;
-		private final int threadCount;
-
-		private Config(Builder builder) {
-			stopAtDate = builder.stopAtDate;
-			stopAtPage = builder.stopAtPage;
-			startAtPage = builder.startAtPage;
-			maxPaymentTransactionAge = builder.maxPaymentTransactionAge;
-			threadCount = builder.threadCount;
-		}
-
-		/**
-		 * Gets the date at which the puller should stop parsing transactions.
-		 * @return the stop date or null for no end date
-		 */
-		public Date getStopAtDate() {
-			return stopAtDate;
-		}
-
-		/**
-		 * Gets the page at which the puller should stop parsing transactions.
-		 * @return the stop page (inclusive) or null to parse all pages
-		 */
-		public Integer getStopAtPage() {
-			return stopAtPage;
-		}
-
-		/**
-		 * Gets the page at which the puller should start parsing transactions.
-		 * @return the start page
-		 */
-		public int getStartAtPage() {
-			return startAtPage;
-		}
-
-		/**
-		 * Gets the number of number of days old a payment transaction can be
-		 * before it is ignored.
-		 * @return the number of days or null if disabled
-		 */
-		public Integer getMaxPaymentTransactionAge() {
-			return maxPaymentTransactionAge;
-		}
-
-		/**
-		 * Gets the number of background threads to spawn for downloading and
-		 * parsing the transactions.
-		 * @return the thread count
-		 */
-		public int getThreadCount() {
-			return threadCount;
-		}
-
-		/**
-		 * Creates new instances of the {@link Config} class.
-		 */
-		public static class Builder {
-			private Date stopAtDate;
-			private Integer stopAtPage;
-			private int startAtPage = 1;
-			private Integer maxPaymentTransactionAge;
-			private int threadCount = 4;
-
-			/**
-			 * Sets the date at which the puller should stop parsing
-			 * transactions (defaults to no end date).
-			 * @param stopAtDate the stop date or null for no end date
-			 * @return this
-			 */
-			public Builder stopAtDate(Date stopAtDate) {
-				this.stopAtDate = (stopAtDate == null) ? null : new Date(stopAtDate.getTime());
-				return this;
-			}
-
-			/**
-			 * Sets the page at which the puller should stop parsing
-			 * transactions (defaults to all pages).
-			 * @param stopAtPage the stop page (inclusive) or null to parse all
-			 * pages
-			 * @return this
-			 */
-			public Builder stopAtPage(Integer stopAtPage) {
-				if (stopAtPage != null && stopAtPage <= 0) {
-					throw new IllegalArgumentException("Stop page must be greater than zero.");
-				}
-				this.stopAtPage = stopAtPage;
-				return this;
-			}
-
-			/**
-			 * Sets the page at which the puller should start parsing
-			 * transactions (defaults to 1).
-			 * @param startAtPage the start page
-			 * @return this
-			 */
-			public Builder startAtPage(int startAtPage) {
-				if (startAtPage <= 0) {
-					throw new IllegalArgumentException("Start page must be greater than zero.");
-				}
-				this.startAtPage = startAtPage;
-				return this;
-			}
-
-			/**
-			 * Sets the number of number of days old a payment transaction can
-			 * be before it is ignored (disabled by default).
-			 * @param maxPaymentTransactionAge the number of days or null to
-			 * disable
-			 * @return this
-			 */
-			public Builder maxPaymentTransactionAge(Integer maxPaymentTransactionAge) {
-				if (maxPaymentTransactionAge != null && maxPaymentTransactionAge <= 0) {
-					throw new IllegalArgumentException("Max payment transaction age must be greater than zero.");
-				}
-				this.maxPaymentTransactionAge = maxPaymentTransactionAge;
-				return this;
-			}
-
-			/**
-			 * Sets the number of background threads to spawn for downloading
-			 * and parsing the transactions (defaults to 4).
-			 * @param threadCount the thread count
-			 * @return this
-			 */
-			public Builder threadCount(int threadCount) {
-				if (threadCount <= 0) {
-					throw new IllegalArgumentException("Thread count must be greater than zero.");
-				}
-				this.threadCount = threadCount;
-				return this;
-			}
-
-			/**
-			 * Builds the final {@link Config} object.
-			 * @return the config object
-			 */
-			public Config build() {
-				if (stopAtPage != null && startAtPage > stopAtPage) {
-					throw new IllegalArgumentException("Start page must come before stop page.");
-				}
-				return new Config(this);
 			}
 		}
 	}
