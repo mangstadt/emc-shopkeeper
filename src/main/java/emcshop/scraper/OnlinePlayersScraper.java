@@ -17,18 +17,18 @@ import org.apache.http.util.EntityUtils;
  * Downloads the list of online players from the EMC website.
  */
 public class OnlinePlayersScraper {
-	private static final Map<EMCServer, Integer> serverNumbers = new EnumMap<EMCServer, Integer>(EMCServer.class);
+	private static final Map<EmcServer, Integer> serverNumbers = new EnumMap<EmcServer, Integer>(EmcServer.class);
 	static {
-		serverNumbers.put(EMCServer.SMP1, 1);
-		serverNumbers.put(EMCServer.SMP2, 2);
-		serverNumbers.put(EMCServer.SMP3, 4);
-		serverNumbers.put(EMCServer.SMP4, 5);
-		serverNumbers.put(EMCServer.SMP5, 6);
-		serverNumbers.put(EMCServer.SMP6, 7);
-		serverNumbers.put(EMCServer.SMP7, 8);
-		serverNumbers.put(EMCServer.SMP8, 9);
-		serverNumbers.put(EMCServer.SMP9, 10);
-		serverNumbers.put(EMCServer.UTOPIA, 3);
+		serverNumbers.put(EmcServer.SMP1, 1);
+		serverNumbers.put(EmcServer.SMP2, 2);
+		serverNumbers.put(EmcServer.SMP3, 4);
+		serverNumbers.put(EmcServer.SMP4, 5);
+		serverNumbers.put(EmcServer.SMP5, 6);
+		serverNumbers.put(EmcServer.SMP6, 7);
+		serverNumbers.put(EmcServer.SMP7, 8);
+		serverNumbers.put(EmcServer.SMP8, 9);
+		serverNumbers.put(EmcServer.SMP9, 10);
+		serverNumbers.put(EmcServer.UTOPIA, 3);
 	}
 
 	private final HttpClient client;
@@ -47,10 +47,10 @@ public class OnlinePlayersScraper {
 	 * into (value)
 	 * @throws IOException
 	 */
-	public Map<String, EMCServer> getOnlinePlayers() throws IOException {
-		Map<String, EMCServer> onlinePlayers = new HashMap<String, EMCServer>();
+	public Map<String, EmcServer> getOnlinePlayers() throws IOException {
+		Map<String, EmcServer> onlinePlayers = new HashMap<String, EmcServer>();
 
-		for (EMCServer server : EMCServer.values()) {
+		for (EmcServer server : EmcServer.values()) {
 			//get the JSON response
 			String json;
 			HttpEntity entity = null;
@@ -72,8 +72,8 @@ public class OnlinePlayersScraper {
 		return onlinePlayers;
 	}
 
-	public Map<String, EMCServer> scrape(EMCServer server, String json) {
-		Map<String, EMCServer> onlinePlayers = new HashMap<String, EMCServer>();
+	public Map<String, EmcServer> scrape(EmcServer server, String json) {
+		Map<String, EmcServer> onlinePlayers = new HashMap<String, EmcServer>();
 
 		Matcher matcher = nameRegex.matcher(json);
 		while (matcher.find()) {

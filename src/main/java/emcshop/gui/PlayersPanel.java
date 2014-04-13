@@ -35,7 +35,7 @@ import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
-import emcshop.scraper.EMCServer;
+import emcshop.scraper.EmcServer;
 import emcshop.util.FilterList;
 
 /**
@@ -191,7 +191,7 @@ public class PlayersPanel extends JPanel {
 				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!, span 1 2");
 
 				JLabel playerNameLabel = new JLabel(playerName);
-				EMCServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+				EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
 				if (server != null) {
 					playerNameLabel.setIcon(ImageManager.getOnline(server, 16));
 					playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -263,7 +263,7 @@ public class PlayersPanel extends JPanel {
 			String hex = String.format("#%02x%02x%02x", rankColor.getRed(), rankColor.getGreen(), rankColor.getBlue());
 			JLabel playerName = new ClickableLabel("<html><h3><u><font color=" + hex + ">" + player.getName(), "http://u.emc.gs/" + player.getName());
 			playerName.setToolTipText("View player's profile");
-			EMCServer server = onlinePlayersMonitor.getPlayerServer(player.getName());
+			EmcServer server = onlinePlayersMonitor.getPlayerServer(player.getName());
 			if (server != null) {
 				header.add(playerName, "span 2, split 2");
 

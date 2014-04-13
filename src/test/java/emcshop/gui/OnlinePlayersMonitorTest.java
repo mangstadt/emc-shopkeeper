@@ -10,16 +10,16 @@ import java.util.Map;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import emcshop.scraper.EMCServer;
+import emcshop.scraper.EmcServer;
 import emcshop.scraper.OnlinePlayersScraper;
 
 public class OnlinePlayersMonitorTest {
 	@Test
 	public void getPlayerServer() throws Throwable {
-		Map<String, EMCServer> players = new HashMap<String, EMCServer>();
-		players.put("Notch", EMCServer.SMP1);
-		players.put("Jeb", EMCServer.SMP5);
-		players.put("Dinnebone", EMCServer.UTOPIA);
+		Map<String, EmcServer> players = new HashMap<String, EmcServer>();
+		players.put("Notch", EmcServer.SMP1);
+		players.put("Jeb", EmcServer.SMP5);
+		players.put("Dinnebone", EmcServer.UTOPIA);
 
 		OnlinePlayersScraper scraper = Mockito.mock(OnlinePlayersScraper.class);
 		when(scraper.getOnlinePlayers()).thenReturn(players);
@@ -35,11 +35,11 @@ public class OnlinePlayersMonitorTest {
 		Thread.sleep(500);
 		thread.interrupt();
 
-		for (Map.Entry<String, EMCServer> entry : players.entrySet()) {
+		for (Map.Entry<String, EmcServer> entry : players.entrySet()) {
 			String player = entry.getKey();
 
-			EMCServer expected = entry.getValue();
-			EMCServer actual = monitor.getPlayerServer(player);
+			EmcServer expected = entry.getValue();
+			EmcServer actual = monitor.getPlayerServer(player);
 			assertEquals(expected, actual);
 		}
 		assertNull(monitor.getPlayerServer("Cupquake"));

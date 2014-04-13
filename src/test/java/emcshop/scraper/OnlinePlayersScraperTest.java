@@ -27,12 +27,12 @@ public class OnlinePlayersScraperTest {
 	public void getOnlinePlayers() throws Throwable {
 		HttpClient client = createMockClient();
 		OnlinePlayersScraper scraper = new OnlinePlayersScraper(client);
-		Map<String, EMCServer> actual = scraper.getOnlinePlayers();
+		Map<String, EmcServer> actual = scraper.getOnlinePlayers();
 
-		Map<String, EMCServer> expected = new HashMap<String, EMCServer>();
-		expected.put("Notch", EMCServer.SMP1);
-		expected.put("Jeb", EMCServer.SMP1);
-		expected.put("Dinnerbone", EMCServer.SMP2);
+		Map<String, EmcServer> expected = new HashMap<String, EmcServer>();
+		expected.put("Notch", EmcServer.SMP1);
+		expected.put("Jeb", EmcServer.SMP1);
+		expected.put("Dinnerbone", EmcServer.SMP2);
 		assertEquals(expected, actual);
 
 		//10 requests should have been sent (for the 10 servers)

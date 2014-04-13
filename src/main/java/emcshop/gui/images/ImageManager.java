@@ -9,7 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 
 import emcshop.ItemIndex;
-import emcshop.scraper.EMCServer;
+import emcshop.scraper.EmcServer;
 
 /**
  * Manages the images of the application.
@@ -71,7 +71,7 @@ public class ImageManager {
 	 * @param size the size of the icon
 	 * @return the icon
 	 */
-	public static ImageIcon getOnline(EMCServer server, int size) {
+	public static ImageIcon getOnline(EmcServer server, int size) {
 		String name = (server == null) ? "online.png" : "online-" + server.name().toLowerCase() + ".png";
 		return scale(name, size);
 	}

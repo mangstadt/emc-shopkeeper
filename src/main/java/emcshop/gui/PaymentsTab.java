@@ -37,7 +37,7 @@ import emcshop.db.DbDao;
 import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ButtonColumn;
-import emcshop.scraper.EMCServer;
+import emcshop.scraper.EmcServer;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.GuiUtils;
@@ -195,7 +195,7 @@ public class PaymentsTab extends JPanel {
 						profileImageLoader.loadRank(transaction.getPlayer(), label, listener);
 						component.add(label);
 
-						EMCServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+						EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
 						if (server != null) {
 							component.add(new JLabel(ImageManager.getOnline(server, 12)));
 						}

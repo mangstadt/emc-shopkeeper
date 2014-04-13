@@ -29,7 +29,7 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.ItemIndex;
 import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
-import emcshop.scraper.EMCServer;
+import emcshop.scraper.EmcServer;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.FilterList;
 import emcshop.util.RelativeDateFormat;
@@ -148,7 +148,7 @@ public class TransactionsTable extends JTable {
 					profileImageLoader.loadRank(playerName, playerLabel, listener);
 					panel.add(playerLabel);
 
-					EMCServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+					EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
 					if (server != null) {
 						panel.add(new JLabel(ImageManager.getOnline(server, 12)));
 					}

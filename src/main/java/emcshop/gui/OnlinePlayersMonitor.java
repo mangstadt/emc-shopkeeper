@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import emcshop.scraper.EMCServer;
+import emcshop.scraper.EmcServer;
 import emcshop.scraper.OnlinePlayersScraper;
 
 /**
@@ -17,7 +17,7 @@ public class OnlinePlayersMonitor {
 
 	private final OnlinePlayersScraper scraper;
 	private final int refreshRate;
-	private final Map<String, EMCServer> onlinePlayers = new HashMap<String, EMCServer>();
+	private final Map<String, EmcServer> onlinePlayers = new HashMap<String, EmcServer>();
 
 	/**
 	 * @param scraper the website scraper
@@ -34,7 +34,7 @@ public class OnlinePlayersMonitor {
 	 * @param playerName the player name
 	 * @return the server or null if the player is not logged in
 	 */
-	public EMCServer getPlayerServer(String playerName) {
+	public EmcServer getPlayerServer(String playerName) {
 		playerName = playerName.toLowerCase();
 		synchronized (onlinePlayers) {
 			return onlinePlayers.get(playerName);
@@ -57,12 +57,12 @@ public class OnlinePlayersMonitor {
 		public void run() {
 			while (true) {
 				try {
-					Map<String, EMCServer> players = scraper.getOnlinePlayers();
+					Map<String, EmcServer> players = scraper.getOnlinePlayers();
 					synchronized (onlinePlayers) {
 						onlinePlayers.clear();
-						for (Map.Entry<String, EMCServer> entry : players.entrySet()) {
+						for (Map.Entry<String, EmcServer> entry : players.entrySet()) {
 							String playerName = entry.getKey();
-							EMCServer server = entry.getValue();
+							EmcServer server = entry.getValue();
 
 							onlinePlayers.put(playerName.toLowerCase(), server);
 						}
