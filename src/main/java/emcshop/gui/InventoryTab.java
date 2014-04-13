@@ -43,6 +43,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.io.FileUtils;
 
+import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.QueryExporter;
 import emcshop.db.DbDao;
@@ -52,10 +53,12 @@ import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.util.ChesterFile;
 import emcshop.util.FilterList;
 import emcshop.util.GuiUtils;
+import emcshop.util.Settings;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {
 	private static final Logger logger = Logger.getLogger(InventoryTab.class.getName());
+	private static final AppContext context = AppContext.instance();
 
 	private final MainFrame owner;
 	private final DbDao dao;
@@ -94,10 +97,10 @@ public class InventoryTab extends JPanel {
 		}
 	}
 
-	public InventoryTab(MainFrame owner, final DbDao dao, boolean showQtyInStacks) {
+	public InventoryTab(MainFrame owner) {
 		this.owner = owner;
-		this.dao = dao;
-		showQuantitiesInStacks = showQtyInStacks;
+		dao = context.get(DbDao.class);
+		showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
 
 		addEdit = new JButton("Add/Edit");
 		addEdit.addActionListener(new ActionListener() {

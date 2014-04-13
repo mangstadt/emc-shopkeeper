@@ -32,6 +32,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.db.DbDao;
 import emcshop.gui.ProfileLoader.ImageDownloadedListener;
@@ -44,6 +45,8 @@ import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class PaymentsTab extends JPanel {
+	private static final AppContext context = AppContext.instance();
+
 	private final MainFrame owner;
 	private final DbDao dao;
 	private final ProfileLoader profileImageLoader;
@@ -57,11 +60,11 @@ public class PaymentsTab extends JPanel {
 
 	private PaymentsTable paymentsTable;
 
-	public PaymentsTab(MainFrame owner, DbDao dao, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor) {
+	public PaymentsTab(MainFrame owner) {
 		this.owner = owner;
-		this.dao = dao;
-		this.profileImageLoader = profileImageLoader;
-		this.onlinePlayersMonitor = onlinePlayersMonitor;
+		dao = context.get(DbDao.class);
+		profileImageLoader = context.get(ProfileLoader.class);
+		onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 
 		setLayout(new MigLayout("fillx, insets 5"));
 	}

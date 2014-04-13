@@ -277,10 +277,7 @@ public class EMCShopkeeper {
 		int startingDbVersion = dao.selectDbVersion();
 		Integer currentRupeeBalance = prepareForUpdateLogConversion(startingDbVersion, dao, settings);
 
-		ReportSender reportSender = ReportSender.instance();
-		reportSender.setDatabaseVersion(startingDbVersion);
 		dao.updateToLatestVersion(null);
-		reportSender.setDatabaseVersion(dao.selectDbVersion());
 
 		finishUpdateLogConversion(currentRupeeBalance, startingDbVersion, dao, settings);
 
@@ -319,11 +316,12 @@ public class EMCShopkeeper {
 	private static void launchGui(File profileDir, File dbDir, final Settings settings, LogManager logManager) throws Throwable {
 		initializeMac();
 
+		final ReportSender reportSender = new ReportSender();
 		//set uncaught exception handler
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread thread, Throwable thrown) {
-				UnhandledErrorPresenter.show(null, "An error occurred.", thrown);
+				UnhandledErrorPresenter.show(null, reportSender, "An error occurred.", thrown);
 			}
 		});
 
@@ -402,7 +400,6 @@ public class EMCShopkeeper {
 				int startingDbVersion = dao.selectDbVersion();
 
 				//initialize the report sender with the current database version
-				ReportSender reportSender = ReportSender.instance();
 				reportSender.setDatabaseVersion(startingDbVersion);
 
 				//backup the database if there is a database schema change
@@ -439,7 +436,7 @@ public class EMCShopkeeper {
 				break;
 			} catch (Throwable t) {
 				IDatabaseStartupErrorView view = new DatabaseStartupErrorViewImpl(splash);
-				IDatabaseStartupErrorModel model = new DatabaseStartupErrorModelImpl(dao, backupManager, t);
+				IDatabaseStartupErrorModel model = new DatabaseStartupErrorModelImpl(dao, backupManager, reportSender, t);
 				DatabaseStartupErrorPresenter presenter = new DatabaseStartupErrorPresenter(view, model);
 				if (presenter.getQuit()) {
 					splash.dispose();
@@ -466,7 +463,9 @@ public class EMCShopkeeper {
 		splash.setMessage("Loading item icons...");
 		ItemSuggestField.init(dao);
 
-		mainFrame = new MainFrame(settings, dao, logManager, profileImageLoader, onlinePlayersMonitor, profileDir.getName(), backupManager);
+		AppContext.init(ItemIndex.instance(), settings, logManager, backupManager, profileImageLoader, dao, reportSender, onlinePlayersMonitor);
+
+		mainFrame = new MainFrame(profileDir.getName());
 		mainFrame.setVisible(true);
 		splash.dispose();
 	}

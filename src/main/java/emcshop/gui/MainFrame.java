@@ -49,9 +49,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import emcshop.AppContext;
 import emcshop.BackupManager;
 import emcshop.EMCShopkeeper;
 import emcshop.LogManager;
+import emcshop.ReportSender;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
@@ -82,6 +84,7 @@ import emcshop.view.UpdateViewImpl;
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
+	private static final AppContext context = AppContext.instance();
 
 	private JButton update;
 	private JLabel lastUpdateDate;
@@ -99,19 +102,17 @@ public class MainFrame extends JFrame {
 	private final DbDao dao;
 	private final Settings settings;
 	private final LogManager logManager;
-	private final ProfileLoader profileImageLoader;
-	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private final String profile;
 	private final BackupManager backupManager;
+	private final ReportSender reportSender;
 
-	public MainFrame(Settings settings, DbDao dao, LogManager logManager, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, String profile, BackupManager backupManager) throws SQLException {
-		this.dao = dao;
-		this.settings = settings;
-		this.logManager = logManager;
-		this.profileImageLoader = profileImageLoader;
-		this.onlinePlayersMonitor = onlinePlayersMonitor;
+	public MainFrame(String profile) throws SQLException {
 		this.profile = profile;
-		this.backupManager = backupManager;
+		dao = context.get(DbDao.class);
+		settings = context.get(Settings.class);
+		logManager = context.get(LogManager.class);
+		backupManager = context.get(BackupManager.class);
+		reportSender = context.get(ReportSender.class);
 
 		setTitle("EMC Shopkeeper v" + EMCShopkeeper.VERSION);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -380,7 +381,7 @@ public class MainFrame extends JFrame {
 
 				//show the update dialog
 				IUpdateView view = new UpdateViewImpl(MainFrame.this, loginShower);
-				IUpdateModel model = new UpdateModelImpl(pullerFactory, settings.getSession(), dao);
+				IUpdateModel model = new UpdateModelImpl(pullerFactory, settings.getSession(), dao, reportSender);
 				UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 				if (!presenter.isCanceled()) {
@@ -411,9 +412,9 @@ public class MainFrame extends JFrame {
 			}
 		});
 
-		transactionsTab = new TransactionsTab(this, dao, profileImageLoader, onlinePlayersMonitor, settings);
-		paymentsTab = new PaymentsTab(this, dao, profileImageLoader, onlinePlayersMonitor);
-		inventoryTab = new InventoryTab(this, dao, settings.isShowQuantitiesInStacks());
+		transactionsTab = new TransactionsTab(this);
+		paymentsTab = new PaymentsTab(this);
+		inventoryTab = new InventoryTab(this);
 		bonusFeeTab = new BonusFeeTab(dao);
 		graphsTab = new ChartsTab(this, dao);
 	}

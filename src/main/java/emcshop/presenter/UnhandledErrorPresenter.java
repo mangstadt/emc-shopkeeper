@@ -4,6 +4,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import emcshop.ReportSender;
 import emcshop.model.IUnhandledErrorModel;
 import emcshop.model.UnhandledErrorModelImpl;
 import emcshop.view.IUnhandledErrorView;
@@ -46,15 +47,9 @@ public class UnhandledErrorPresenter {
 		view.close();
 	}
 
-	/**
-	 * Shows the error dialog.
-	 * @param owner the owner window
-	 * @param message the message
-	 * @param thrown the thrown exception
-	 */
-	public static void show(Window owner, String message, Throwable thrown) {
+	public static void show(Window owner, ReportSender reportSender, String message, Throwable thrown) {
 		IUnhandledErrorView view = new UnhandledErrorViewImpl(owner);
-		IUnhandledErrorModel model = new UnhandledErrorModelImpl(message, thrown);
+		IUnhandledErrorModel model = new UnhandledErrorModelImpl(reportSender, message, thrown);
 		new UnhandledErrorPresenter(view, model);
 	}
 }

@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import emcshop.EMCShopkeeper;
+import emcshop.ReportSender;
 import emcshop.db.DbDao;
 import emcshop.scraper.BadSessionException;
 import emcshop.scraper.BonusFeeTransaction;
@@ -29,6 +30,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	private final TransactionPullerFactory pullerFactory;
 	private EmcSession session;
 	private final DbDao dao;
+	private final ReportSender reportSender;
 
 	private final List<ActionListener> pageDownloadedListeners = new ArrayList<ActionListener>();
 	private final List<ActionListener> badSessionListeners = new ArrayList<ActionListener>();
@@ -42,11 +44,12 @@ public class UpdateModelImpl implements IUpdateModel {
 	private boolean downloadStopped = false;
 	private Throwable thrown;
 
-	public UpdateModelImpl(TransactionPullerFactory pullerFactory, EmcSession session, DbDao dao) {
+	public UpdateModelImpl(TransactionPullerFactory pullerFactory, EmcSession session, DbDao dao, ReportSender reportSender) {
 		firstUpdate = (pullerFactory.getStopAtDate() == null);
 		this.pullerFactory = pullerFactory;
 		this.session = session;
 		this.dao = dao;
+		this.reportSender = reportSender;
 	}
 
 	@Override
@@ -175,6 +178,14 @@ public class UpdateModelImpl implements IUpdateModel {
 	@Override
 	public void discardTransactions() {
 		dao.rollback();
+	}
+
+	@Override
+	public void reportError() {
+		if (thrown == null) {
+			return;
+		}
+		reportSender.report(thrown);
 	}
 
 	private class DownloadThread extends Thread {

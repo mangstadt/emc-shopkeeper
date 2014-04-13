@@ -32,6 +32,13 @@ public class UpdatePresenter {
 			}
 		});
 
+		view.addReportErrorListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				onReportError();
+			}
+		});
+
 		model.addPageDownloadedListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -91,6 +98,10 @@ public class UpdatePresenter {
 		model.stopDownload();
 		model.saveTransactions();
 		view.close();
+	}
+
+	public void onReportError() {
+		model.reportError();
 	}
 
 	private void onPageDownloaded() {

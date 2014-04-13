@@ -7,12 +7,13 @@ import emcshop.ReportSender;
 
 public class UnhandledErrorModelImpl implements IUnhandledErrorModel {
 	private static final Logger logger = Logger.getLogger(UnhandledErrorModelImpl.class.getName());
-	private static final ReportSender reportSender = ReportSender.instance();
 
+	private final ReportSender reportSender;
 	private final String message;
 	private final Throwable thrown;
 
-	public UnhandledErrorModelImpl(String message, Throwable thrown) {
+	public UnhandledErrorModelImpl(ReportSender reportSender, String message, Throwable thrown) {
+		this.reportSender = reportSender;
 		this.message = message;
 		this.thrown = thrown;
 	}

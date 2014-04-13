@@ -132,4 +132,9 @@ public interface IUpdateModel {
 	 * Discards the transactions that have been parsed.
 	 */
 	void discardTransactions();
+
+	/**
+	 * Sends an error report if an error occured during the download.
+	 */
+	void reportError();
 }

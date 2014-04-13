@@ -33,6 +33,13 @@ public interface IUpdateView {
 	void addStopListener(ActionListener listener);
 
 	/**
+	 * Registers a listener that is called when the user wants to report an
+	 * error that occurs during the download.
+	 * @param listener
+	 */
+	void addReportErrorListener(ActionListener listener);
+
+	/**
 	 * Gets whether the user wants to see the transactions that were downloaded
 	 * when the download completes.
 	 * @return true to see the transactions, false not to

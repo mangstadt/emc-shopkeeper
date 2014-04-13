@@ -9,7 +9,9 @@ import java.awt.event.ActionListener;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -25,7 +27,6 @@ import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
-import emcshop.ReportSender;
 import emcshop.gui.images.ImageManager;
 import emcshop.presenter.LoginPresenter;
 import emcshop.scraper.EmcSession;
@@ -39,6 +40,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	private final JButton cancel, stop;
 	private final JLabel pagesLabel, shopTransactionsLabel, paymentTransactionsLabel, bonusFeeTransactionsLabel, timerLabel;
 	private final JCheckBox display;
+	private final List<ActionListener> reportErrorListeners = new ArrayList<ActionListener>();
 
 	private int pagesCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount;
 	private Date oldestTransactionDate;
@@ -113,6 +115,11 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	@Override
 	public void addStopListener(ActionListener listener) {
 		stop.addActionListener(listener);
+	}
+
+	@Override
+	public void addReportErrorListener(ActionListener listener) {
+		reportErrorListeners.add(listener);
 	}
 
 	@Override
@@ -279,7 +286,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 			report.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					ReportSender.instance().report(thrown);
+					GuiUtils.fireEvents(reportErrorListeners);
 					report.setEnabled(false);
 					report.setText("Reported");
 					JOptionPane.showMessageDialog(UpdateErrorDialog.this, "Error report sent.  Thanks!");

@@ -29,6 +29,7 @@ import net.miginfocom.swing.MigLayout;
 
 import com.michaelbaranov.microba.calendar.DatePicker;
 
+import emcshop.AppContext;
 import emcshop.QueryExporter;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
@@ -40,6 +41,8 @@ import emcshop.util.Settings;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel {
+	private static final AppContext context = AppContext.instance();
+
 	private final MainFrame owner;
 	private final DbDao dao;
 	private final ProfileLoader profileImageLoader;
@@ -78,12 +81,12 @@ public class TransactionsTab extends JPanel {
 
 	private int netTotal;
 
-	public TransactionsTab(MainFrame owner, DbDao dao, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor, Settings settings) {
+	public TransactionsTab(MainFrame owner) {
 		this.owner = owner;
-		this.dao = dao;
-		this.profileImageLoader = profileImageLoader;
-		this.onlinePlayersMonitor = onlinePlayersMonitor;
-		this.settings = settings;
+		dao = context.get(DbDao.class);
+		profileImageLoader = context.get(ProfileLoader.class);
+		onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
+		settings = context.get(Settings.class);
 
 		entireHistory = new JCheckBox();
 		entireHistory.addActionListener(new ActionListener() {

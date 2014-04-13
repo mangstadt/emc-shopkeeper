@@ -39,6 +39,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import emcshop.ReportSender;
 import emcshop.db.DbDao;
 import emcshop.scraper.BadSessionException;
 import emcshop.scraper.BonusFeeTransaction;
@@ -55,6 +56,7 @@ import emcshop.util.DateGenerator;
 public class UpdateModelImplTest {
 	private static UncaughtExceptionHandler origUncaughtExceptionHandler;
 	private static EmcSession session;
+	private static ReportSender reportSender;
 	private UncaughtExceptionHandler uncaughtExceptionHandler;
 	private DateGenerator dg;
 	private DbDao dao;
@@ -64,6 +66,7 @@ public class UpdateModelImplTest {
 	public static void beforeClass() {
 		LogManager.getLogManager().reset();
 		session = mock(EmcSession.class);
+		reportSender = mock(ReportSender.class);
 		origUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
 	}
 
@@ -93,7 +96,7 @@ public class UpdateModelImplTest {
 		{
 			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
 			when(factory.create(session)).thenThrow(new BadSessionException());
-			model = new UpdateModelImpl(factory, session, dao);
+			model = new UpdateModelImpl(factory, session, dao, reportSender);
 		}
 
 		//register listeners
@@ -124,7 +127,7 @@ public class UpdateModelImplTest {
 		{
 			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
 			when(factory.create(session)).thenThrow(new IOException());
-			model = new UpdateModelImpl(factory, session, dao);
+			model = new UpdateModelImpl(factory, session, dao, reportSender);
 		}
 
 		//register listeners
@@ -163,7 +166,8 @@ public class UpdateModelImplTest {
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
 			factory.setStopAtDate(null);
-			model = new UpdateModelImpl(factory, session, dao);
+
+			model = new UpdateModelImpl(factory, session, dao, reportSender);
 		}
 
 		//register listeners
@@ -215,7 +219,10 @@ public class UpdateModelImplTest {
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
 			factory.setStopAtDate(dg.next());
-			model = new UpdateModelImpl(factory, session, dao);
+
+			ReportSender reportSender = mock(ReportSender.class);
+
+			model = new UpdateModelImpl(factory, session, dao, reportSender);
 		}
 
 		//register listeners
@@ -270,7 +277,7 @@ public class UpdateModelImplTest {
 			TransactionPullerFactory factory = new TransactionPullerFactory();
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
-			model = new UpdateModelImpl(factory, session, dao);
+			model = new UpdateModelImpl(factory, session, dao, reportSender);
 		}
 
 		//register listeners
@@ -325,7 +332,7 @@ public class UpdateModelImplTest {
 			TransactionPullerFactory factory = new TransactionPullerFactory();
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
-			model = new UpdateModelImpl(factory, session, dao);
+			model = new UpdateModelImpl(factory, session, dao, reportSender);
 		}
 
 		//register listeners
@@ -377,7 +384,7 @@ public class UpdateModelImplTest {
 			TransactionPullerFactory factory = new TransactionPullerFactory();
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
-			model = new UpdateModelImpl(factory, session, dao);
+			model = new UpdateModelImpl(factory, session, dao, reportSender);
 		}
 
 		model.saveTransactions(); //no transactions to save

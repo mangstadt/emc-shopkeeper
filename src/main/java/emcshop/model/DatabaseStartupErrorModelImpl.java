@@ -16,10 +16,10 @@ import emcshop.util.GuiUtils;
 
 public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel {
 	private static final Logger logger = Logger.getLogger(DatabaseStartupErrorModelImpl.class.getName());
-	private static final ReportSender reportSender = ReportSender.instance();
 
 	private final DbDao dao;
 	private final BackupManager backupManager;
+	private final ReportSender reportSender;
 	private final Throwable thrown;
 	private final List<ActionListener> restoreCompleteListeners = new ArrayList<ActionListener>();
 
@@ -28,9 +28,10 @@ public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel
 	 * @param backupManager the backup manager
 	 * @param thrown the exception that was thrown
 	 */
-	public DatabaseStartupErrorModelImpl(DbDao dao, BackupManager backupManager, Throwable thrown) {
+	public DatabaseStartupErrorModelImpl(DbDao dao, BackupManager backupManager, ReportSender reportSender, Throwable thrown) {
 		this.dao = dao;
 		this.backupManager = backupManager;
+		this.reportSender = reportSender;
 		this.thrown = thrown;
 	}
 

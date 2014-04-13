@@ -173,6 +173,7 @@ public class UpdatePresenterTest {
 	private static class UpdateViewMock implements IUpdateView {
 		private final List<ActionListener> stopDownload = new ArrayList<ActionListener>();
 		private final List<ActionListener> cancelDownload = new ArrayList<ActionListener>();
+		private final List<ActionListener> reportError = new ArrayList<ActionListener>();
 
 		public void stopDownload() {
 			fireEvents(stopDownload);
@@ -190,6 +191,11 @@ public class UpdatePresenterTest {
 		@Override
 		public void addStopListener(ActionListener listener) {
 			stopDownload.add(listener);
+		}
+
+		@Override
+		public void addReportErrorListener(ActionListener listener) {
+			reportError.add(listener);
 		}
 
 		@Override
@@ -373,6 +379,10 @@ public class UpdatePresenterTest {
 
 		@Override
 		public void discardTransactions() {
+		}
+
+		@Override
+		public void reportError() {
 		}
 	}
 }

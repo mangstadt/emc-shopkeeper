@@ -45,6 +45,11 @@ public class UpdateViewCli implements IUpdateView {
 	}
 
 	@Override
+	public void addReportErrorListener(ActionListener listener) {
+		//empty
+	}
+
+	@Override
 	public boolean getShowResults() {
 		return false;
 	}

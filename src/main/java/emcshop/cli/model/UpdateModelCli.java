@@ -7,7 +7,7 @@ import emcshop.scraper.TransactionPullerFactory;
 
 public class UpdateModelCli extends UpdateModelImpl {
 	public UpdateModelCli(TransactionPullerFactory pullerFactory, EmcSession session, DbDao dao) {
-		super(pullerFactory, session, dao);
+		super(pullerFactory, session, dao, null);
 	}
 
 	@Override

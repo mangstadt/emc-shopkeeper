@@ -26,39 +26,13 @@ import emcshop.util.XmlBuilder;
  */
 public class ReportSender {
 	private static final Logger logger = Logger.getLogger(ReportSender.class.getName());
-	private static ReportSender instance;
 
 	private final String url;
 	private Integer dbVersion;
 	private final LinkedBlockingQueue<Job> queue = new LinkedBlockingQueue<Job>();
 
-	/**
-	 * Gets the singleton instance of this class.
-	 * @return the singleton object
-	 */
-	public static synchronized ReportSender instance() {
-		if (instance == null) {
-			instance = new ReportSender("http://mikeangstadt.name/emc-shopkeeper/error-report.php");
-		}
-
-		return instance;
-	}
-
-	/**
-	 * Tests this class and the PHP script.
-	 * @param args
-	 * @throws Throwable
-	 */
-	public static void main(String args[]) throws Throwable {
-		ReportSender rs = ReportSender.instance();
-
-		try {
-			Integer.parseInt("test");
-		} catch (Throwable t) {
-			rs.report(t);
-		}
-
-		System.in.read(); //stop the program from terminating
+	public ReportSender() {
+		this("http://mikeangstadt.name/emc-shopkeeper/error-report.php");
 	}
 
 	/**
