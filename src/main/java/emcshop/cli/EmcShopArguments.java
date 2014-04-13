@@ -13,7 +13,7 @@ public class EmcShopArguments {
 		OptionParser parser = new OptionParser();
 		parser.accepts("profile").withRequiredArg();
 		parser.accepts("profile-dir").withRequiredArg();
-		parser.accepts("db", "").withRequiredArg();
+		parser.accepts("db").withRequiredArg();
 		parser.accepts("log-level").withRequiredArg();
 		parser.accepts("update");
 		parser.accepts("stop-page").withRequiredArg().ofType(Integer.class);
