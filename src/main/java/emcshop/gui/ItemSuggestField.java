@@ -26,6 +26,9 @@ public class ItemSuggestField extends JSuggestField {
 	private static Vector<String> itemNames;
 	private static Map<String, JLabel> itemIconLabels;
 
+	/**
+	 * @param parent the parent window
+	 */
 	public ItemSuggestField(Window parent) {
 		super(parent, itemNames);
 		setSuggestMatcher(new ContainsMatcher());
@@ -50,14 +53,15 @@ public class ItemSuggestField extends JSuggestField {
 
 	/**
 	 * Builds the list of items that all instances of this control will use.
-	 * @param dao
-	 * @throws SQLException
+	 * @param dao the database DAO
+	 * @throws SQLException if there's a problem retrieving data from the
+	 * database
 	 */
 	public static void init(DbDao dao) throws SQLException {
 		if (itemNames != null) {
 			return;
 		}
-		
+
 		//build labels for item icons
 		List<String> itemNamesList = dao.getItemNames();
 		itemNames = new Vector<String>(itemNamesList);

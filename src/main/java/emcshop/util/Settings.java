@@ -65,18 +65,12 @@ public class Settings {
 		this.windowHeight = windowHeight;
 	}
 
-	/**
-	 * Removed from properties file in DB version 18.
-	 * @return
-	 */
+	//Removed from properties file in DB version 18.
 	public Date getLastUpdated() {
 		return lastUpdated;
 	}
 
-	/**
-	 * Removed from properties file in DB version 18.
-	 * @return
-	 */
+	//Removed from properties file in DB version 18.
 	public Date getPreviousUpdate() {
 		return previousUpdate;
 	}
@@ -105,10 +99,7 @@ public class Settings {
 		this.logLevel = logLevel;
 	}
 
-	/**
-	 * Removed from properties file in DB version 17.
-	 * @return
-	 */
+	//Removed from properties file in DB version 17.
 	public Integer getRupeeBalance() {
 		return rupeeBalance;
 	}

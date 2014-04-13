@@ -3,8 +3,8 @@ package emcshop.gui.lib;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -31,7 +31,7 @@ import javax.swing.table.TableColumnModel;
  * @see "http://tips4java.wordpress.com/2009/07/12/table-button-column/"
  */
 @SuppressWarnings("serial")
-public class ButtonColumn extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener, MouseListener {
+public class ButtonColumn extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener {
 	private JTable table;
 	private Action action;
 	private int mnemonic;
@@ -51,7 +51,7 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
 	 * @param action the Action to be invoked when the button is invoked
 	 * @param column the column to which the button renderer/editor is added
 	 */
-	public ButtonColumn(JTable table, Action action, int column) {
+	public ButtonColumn(final JTable table, Action action, int column) {
 		this.table = table;
 		this.action = action;
 
@@ -63,7 +63,30 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
 		TableColumnModel columnModel = table.getColumnModel();
 		columnModel.getColumn(column).setCellRenderer(this);
 		columnModel.getColumn(column).setCellEditor(this);
-		table.addMouseListener(this);
+
+		table.addMouseListener(new MouseAdapter() {
+			/*
+			 * When the mouse is pressed the editor is invoked. If you then then
+			 * drag the mouse to another cell before releasing it, the editor is
+			 * still active. Make sure editing is stopped when the mouse is
+			 * released.
+			 */
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (table.isEditing() && table.getCellEditor() == ButtonColumn.this) {
+					isButtonColumnEditor = true;
+				}
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (isButtonColumnEditor && table.isEditing()) {
+					table.getCellEditor().stopCellEditing();
+				}
+
+				isButtonColumnEditor = false;
+			}
+		});
 	}
 
 	/**
@@ -125,6 +148,7 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
 	//
 	//  Implement TableCellRenderer interface
 	//
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		if (value == null) {
 			renderButton.setText("");
@@ -146,6 +170,7 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
 	/*
 	 * The button has been pressed. Stop editing and invoke the custom Action
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		int row = table.convertRowIndexToModel(table.getEditingRow());
 		fireEditingStopped();
@@ -154,34 +179,5 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
 
 		ActionEvent event = new ActionEvent(table, ActionEvent.ACTION_PERFORMED, "" + row);
 		action.actionPerformed(event);
-	}
-
-	//
-	//  Implement MouseListener interface
-	//
-	/*
-	 * When the mouse is pressed the editor is invoked. If you then then drag
-	 * the mouse to another cell before releasing it, the editor is still
-	 * active. Make sure editing is stopped when the mouse is released.
-	 */
-	public void mousePressed(MouseEvent e) {
-		if (table.isEditing() && table.getCellEditor() == this)
-			isButtonColumnEditor = true;
-	}
-
-	public void mouseReleased(MouseEvent e) {
-		if (isButtonColumnEditor && table.isEditing())
-			table.getCellEditor().stopCellEditing();
-
-		isButtonColumnEditor = false;
-	}
-
-	public void mouseClicked(MouseEvent e) {
-	}
-
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	public void mouseExited(MouseEvent e) {
 	}
 }

@@ -45,7 +45,7 @@ public class OnlinePlayersScraper {
 	 * Retrieves the list of online players from the EMC website.
 	 * @return the online players (key), along with the server they are logged
 	 * into (value)
-	 * @throws IOException
+	 * @throws IOException if there's a problem downloading the list
 	 */
 	public Map<String, EmcServer> getOnlinePlayers() throws IOException {
 		Map<String, EmcServer> onlinePlayers = new HashMap<String, EmcServer>();

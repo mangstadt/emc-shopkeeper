@@ -28,6 +28,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.AppContext;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
@@ -37,6 +38,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.EmcServer;
 import emcshop.util.FilterList;
+import emcshop.util.Settings;
 
 /**
  * A panel that displays transactions grouped by player.
@@ -44,6 +46,8 @@ import emcshop.util.FilterList;
  */
 @SuppressWarnings("serial")
 public class PlayersPanel extends JPanel {
+	private static final AppContext context = AppContext.instance();
+
 	private final List<PlayerGroup> playerGroups;
 	private final ProfileLoader profileLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
@@ -62,10 +66,9 @@ public class PlayersPanel extends JPanel {
 	private MyJScrollPane tablesPanelScrollPane;
 
 	/**
-	 * Creates the panel.
-	 * @param playerGroups the players to display in the table
+	 * @param playerGroups the players to display
 	 */
-	public PlayersPanel(Collection<PlayerGroup> playerGroups, ProfileLoader profileLoader, OnlinePlayersMonitor onlinePlayersMonitor, boolean showQtyInStacks) {
+	public PlayersPanel(Collection<PlayerGroup> playerGroups) {
 		super(new MigLayout("fillx, insets 0"));
 
 		//add all the data to Lists so they can be sorted
@@ -75,9 +78,9 @@ public class PlayersPanel extends JPanel {
 			this.itemGroups.put(playerGroup, itemGroups);
 		}
 
-		this.profileLoader = profileLoader;
-		this.onlinePlayersMonitor = onlinePlayersMonitor;
-		showQuantitiesInStacks = showQtyInStacks;
+		profileLoader = context.get(ProfileLoader.class);
+		onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
+		showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
 
 		sortByPlayerName();
 	}
@@ -108,6 +111,7 @@ public class PlayersPanel extends JPanel {
 
 	/**
 	 * Filters the data by player.
+	 * @param players the players to filter by
 	 */
 	public void filterByPlayers(FilterList players) {
 		filteredPlayerNames = players;
@@ -116,6 +120,7 @@ public class PlayersPanel extends JPanel {
 
 	/**
 	 * Filters the data by item.
+	 * @param items the items to filter by
 	 */
 	public void filterByItems(FilterList items) {
 		filteredItemNames = items;

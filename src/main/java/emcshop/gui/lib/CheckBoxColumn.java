@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +27,7 @@ import javax.swing.table.TableColumnModel;
  * Adapted from {@link ButtonColumn}.
  */
 @SuppressWarnings("serial")
-public class CheckBoxColumn extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener, MouseListener {
+public class CheckBoxColumn extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener {
 	private final JTable table;
 	private final Action action;
 	private final Map<Integer, JCheckBox> editCheckboxes = new HashMap<Integer, JCheckBox>();
@@ -47,7 +47,7 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 	 * @param action the Action to be invoked when the button is invoked
 	 * @param column the column to which the button renderer/editor is added
 	 */
-	public CheckBoxColumn(JTable table, Action action, int column) {
+	public CheckBoxColumn(final JTable table, Action action, int column) {
 		this.table = table;
 		this.action = action;
 
@@ -57,7 +57,29 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 		TableColumnModel columnModel = table.getColumnModel();
 		columnModel.getColumn(column).setCellRenderer(this);
 		columnModel.getColumn(column).setCellEditor(this);
-		table.addMouseListener(this);
+		table.addMouseListener(new MouseAdapter() {
+			/*
+			 * When the mouse is pressed the editor is invoked. If you then then
+			 * drag the mouse to another cell before releasing it, the editor is
+			 * still active. Make sure editing is stopped when the mouse is
+			 * released.
+			 */
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (table.isEditing() && table.getCellEditor() == CheckBoxColumn.this) {
+					isButtonColumnEditor = true;
+				}
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (isButtonColumnEditor && table.isEditing()) {
+					table.getCellEditor().stopCellEditing();
+				}
+
+				isButtonColumnEditor = false;
+			}
+		});
 	}
 
 	/**
@@ -143,6 +165,7 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 	//
 	//  Implement TableCellRenderer interface
 	//
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		JCheckBox renderButton = getRenderCheckbox(row);
 
@@ -189,6 +212,7 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 	/*
 	 * The button has been pressed. Stop editing and invoke the custom Action
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		int row = table.convertRowIndexToModel(table.getEditingRow());
 		fireEditingStopped();
@@ -206,34 +230,5 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 
 		ActionEvent event = new ActionEvent(table, ActionEvent.ACTION_PERFORMED, row + " " + editButton.isSelected());
 		action.actionPerformed(event);
-	}
-
-	//
-	//  Implement MouseListener interface
-	//
-	/*
-	 * When the mouse is pressed the editor is invoked. If you then then drag
-	 * the mouse to another cell before releasing it, the editor is still
-	 * active. Make sure editing is stopped when the mouse is released.
-	 */
-	public void mousePressed(MouseEvent e) {
-		if (table.isEditing() && table.getCellEditor() == this)
-			isButtonColumnEditor = true;
-	}
-
-	public void mouseReleased(MouseEvent e) {
-		if (isButtonColumnEditor && table.isEditing())
-			table.getCellEditor().stopCellEditing();
-
-		isButtonColumnEditor = false;
-	}
-
-	public void mouseClicked(MouseEvent e) {
-	}
-
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	public void mouseExited(MouseEvent e) {
 	}
 }

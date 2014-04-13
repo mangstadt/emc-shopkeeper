@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -62,8 +63,8 @@ public class ShowLogDialog extends JDialog {
 		setLayout(new MigLayout());
 		add(location, "w 100:100%:100%, wrap");
 		JScrollPane scroll = new JScrollPane(log);
-		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		log.setCaretPosition(log.getDocument().getLength()); //scroll to bottom
 		add(scroll, "grow, w 100%, h 100%, wrap");
 		add(close, "align center");

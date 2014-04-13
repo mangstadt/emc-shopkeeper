@@ -4,6 +4,7 @@ import static emcshop.util.GuiUtils.fireEvents;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -16,7 +17,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import emcshop.model.IUpdateModel;
 import emcshop.scraper.EmcSession;
@@ -160,10 +160,10 @@ public class UpdatePresenterTest {
 		model.pageDownloaded();
 		model.downloadComplete();
 
-		verify(view, times(3)).setPages(Mockito.anyInt());
-		verify(view, times(3)).setShopTransactions(Mockito.anyInt());
-		verify(view, times(3)).setPaymentTransactions(Mockito.anyInt());
-		verify(view, times(3)).setBonusFeeTransactions(Mockito.anyInt());
+		verify(view, times(3)).setPages(anyInt());
+		verify(view, times(3)).setShopTransactions(anyInt());
+		verify(view, times(3)).setPaymentTransactions(anyInt());
+		verify(view, times(3)).setBonusFeeTransactions(anyInt());
 		verify(view, times(3)).setOldestParsedTransactonDate(any(Date.class));
 		verify(model).saveTransactions();
 		verify(view).close();
@@ -215,46 +215,57 @@ public class UpdatePresenterTest {
 
 		@Override
 		public void setFirstUpdate(boolean firstUpdate) {
+			//empty
 		}
 
 		@Override
 		public void setEstimatedTime(Long estimatedTime) {
+			//empty
 		}
 
 		@Override
 		public void setStopAtPage(Integer stopAtPage) {
+			//empty
 		}
 
 		@Override
 		public void setOldestParsedTransactonDate(Date date) {
+			//empty
 		}
 
 		@Override
 		public void setPages(int pages) {
+			//empty
 		}
 
 		@Override
 		public void setShopTransactions(int count) {
+			//empty
 		}
 
 		@Override
 		public void setPaymentTransactions(int count) {
+			//empty
 		}
 
 		@Override
 		public void setBonusFeeTransactions(int count) {
+			//empty
 		}
 
 		@Override
 		public void reset() {
+			//empty
 		}
 
 		@Override
 		public void display() {
+			//empty
 		}
 
 		@Override
 		public void close() {
+			//empty
 		}
 	}
 
@@ -317,6 +328,7 @@ public class UpdatePresenterTest {
 
 		@Override
 		public void setSession(EmcSession session) {
+			//empty
 		}
 
 		@Override
@@ -371,18 +383,22 @@ public class UpdatePresenterTest {
 
 		@Override
 		public void stopDownload() {
+			//empty
 		}
 
 		@Override
 		public void saveTransactions() {
+			//empty
 		}
 
 		@Override
 		public void discardTransactions() {
+			//empty
 		}
 
 		@Override
 		public void reportError() {
+			//empty
 		}
 	}
 }

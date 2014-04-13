@@ -3,6 +3,7 @@ package emcshop.presenter;
 import static emcshop.util.GuiUtils.fireEvents;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -15,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import emcshop.model.IProfileSelectorModel;
 import emcshop.view.IProfileSelectorView;
@@ -60,7 +60,7 @@ public class ProfileSelectorPresenterTest {
 		new ProfileSelectorPresenter(view, model);
 		view.clickOk();
 
-		verify(view).showValidationError(Mockito.anyString());
+		verify(view).showValidationError(anyString());
 		verify(view, never()).close();
 	}
 
@@ -75,7 +75,7 @@ public class ProfileSelectorPresenterTest {
 		new ProfileSelectorPresenter(view, model);
 		view.clickOk();
 
-		verify(view).showValidationError(Mockito.anyString());
+		verify(view).showValidationError(anyString());
 		verify(view, never()).close();
 	}
 
@@ -90,7 +90,7 @@ public class ProfileSelectorPresenterTest {
 		new ProfileSelectorPresenter(view, model);
 		view.clickOk();
 
-		verify(view).showValidationError(Mockito.anyString());
+		verify(view).showValidationError(anyString());
 		verify(view, never()).close();
 	}
 
@@ -133,6 +133,7 @@ public class ProfileSelectorPresenterTest {
 
 		@Override
 		public void setAvailableProfiles(List<String> profiles) {
+			//empty
 		}
 
 		@Override
@@ -142,14 +143,17 @@ public class ProfileSelectorPresenterTest {
 
 		@Override
 		public void showValidationError(String error) {
+			//empty
 		}
 
 		@Override
 		public void close() {
+			//empty
 		}
 
 		@Override
 		public void display() {
+			//empty
 		}
 	}
 }

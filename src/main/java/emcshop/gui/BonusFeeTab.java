@@ -238,6 +238,7 @@ public class BonusFeeTab extends JPanel {
 					return rows.get(row);
 				}
 
+				@Override
 				public Class<?> getColumnClass(int col) {
 					return Row.class;
 				}

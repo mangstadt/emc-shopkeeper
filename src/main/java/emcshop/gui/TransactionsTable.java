@@ -26,6 +26,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
@@ -33,6 +34,7 @@ import emcshop.scraper.EmcServer;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.FilterList;
 import emcshop.util.RelativeDateFormat;
+import emcshop.util.Settings;
 
 /**
  * A table that displays transactions by date
@@ -40,6 +42,8 @@ import emcshop.util.RelativeDateFormat;
  */
 @SuppressWarnings("serial")
 public class TransactionsTable extends JTable {
+	private static final AppContext context = AppContext.instance();
+
 	/**
 	 * Defines all of the columns in this table. The order in which the enums
 	 * are defined is the order that they will appear in the table.
@@ -66,8 +70,8 @@ public class TransactionsTable extends JTable {
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 
-	public TransactionsTable(List<ShopTransaction> transactions, boolean showQuantitiesInStacks, ProfileLoader profileImageLoader, OnlinePlayersMonitor onlinePlayersMonitor) {
-		this(transactions, Column.TS, false, showQuantitiesInStacks, profileImageLoader, onlinePlayersMonitor);
+	public TransactionsTable(List<ShopTransaction> transactions) {
+		this(transactions, Column.TS, false);
 	}
 
 	/**
@@ -76,12 +80,14 @@ public class TransactionsTable extends JTable {
 	 * @param sortedByAscending true if the items list is sorted ascending,
 	 * false if descending
 	 */
-	public TransactionsTable(List<ShopTransaction> transactions, Column sortedBy, boolean sortedByAscending, boolean showQuantitiesInStacks, final ProfileLoader profileImageLoader, final OnlinePlayersMonitor onlinePlayersMonitor) {
+	public TransactionsTable(List<ShopTransaction> transactions, Column sortedBy, boolean sortedByAscending) {
 		this.transactions = transactions;
 		this.transactionsToDisplay = transactions;
 		prevColumnClicked = sortedBy;
 		ascending = sortedByAscending;
-		this.showQuantitiesInStacks = showQuantitiesInStacks;
+
+		showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
+
 		sortData();
 
 		getTableHeader().setReorderingAllowed(false);
@@ -125,6 +131,8 @@ public class TransactionsTable extends JTable {
 			private final Column[] columns = Column.values();
 			private final ItemIndex index = ItemIndex.instance();
 			private final RelativeDateFormat df = new RelativeDateFormat();
+			private final ProfileLoader profileLoader = context.get(ProfileLoader.class);
+			private final OnlinePlayersMonitor onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, int col) {
@@ -144,8 +152,8 @@ public class TransactionsTable extends JTable {
 							model.fireTableCellUpdated(row, column.ordinal());
 						}
 					};
-					profileImageLoader.loadPortrait(playerName, playerLabel, 16, listener);
-					profileImageLoader.loadRank(playerName, playerLabel, listener);
+					profileLoader.loadPortrait(playerName, playerLabel, 16, listener);
+					profileLoader.loadRank(playerName, playerLabel, listener);
 					panel.add(playerLabel);
 
 					EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
@@ -201,9 +209,17 @@ public class TransactionsTable extends JTable {
 					return df.format(ts);
 				case ITEM_NAME:
 					return transaction.getItem();
-				case QUANTITY:
+				case QUANTITY: {
+					String text;
 					int quantity = transaction.getQuantity();
-					return "<html>" + (TransactionsTable.this.showQuantitiesInStacks ? formatStacksWithColor(quantity, index.getStackSize(transaction.getItem())) : formatQuantityWithColor(quantity)) + "</html>";
+					if (showQuantitiesInStacks) {
+						int stackSize = index.getStackSize(transaction.getItem());
+						text = formatStacksWithColor(quantity, stackSize);
+					} else {
+						text = formatQuantityWithColor(quantity);
+					}
+					return "<html>" + text + "</html>";
+				}
 				case AMOUNT:
 					return "<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>";
 				default:
@@ -335,6 +351,7 @@ public class TransactionsTable extends JTable {
 				return transactionsToDisplay.get(row);
 			}
 
+			@Override
 			public Class<?> getColumnClass(int c) {
 				return ShopTransaction.class;
 			}

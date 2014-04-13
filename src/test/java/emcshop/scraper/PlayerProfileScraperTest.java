@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +19,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -105,7 +105,7 @@ public class PlayerProfileScraperTest {
 
 	private static HttpClient createMockClient(final String expectedPlayerName) throws IOException {
 		HttpClient client = mock(HttpClient.class);
-		when(client.execute(Mockito.any(HttpGet.class))).then(new Answer<HttpResponse>() {
+		when(client.execute(any(HttpGet.class))).then(new Answer<HttpResponse>() {
 			@Override
 			public HttpResponse answer(InvocationOnMock invocation) throws Throwable {
 				HttpGet request = (HttpGet) invocation.getArguments()[0];

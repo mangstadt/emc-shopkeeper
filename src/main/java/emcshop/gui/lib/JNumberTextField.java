@@ -138,7 +138,9 @@ public class JNumberTextField extends JTextField {
 		return allowNegative;
 	}
 
+	@Override
 	public void setDocument(Document document) {
+		//empty
 	}
 
 	private class JNumberFieldFilter extends PlainDocument {
@@ -146,6 +148,7 @@ public class JNumberTextField extends JTextField {
 			super();
 		}
 
+		@Override
 		public void insertString(int offset, String str, AttributeSet attr) throws BadLocationException {
 			String text = getText(0, offset) + str + getText(offset, (getLength() - offset));
 

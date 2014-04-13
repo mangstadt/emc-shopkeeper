@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicTableHeaderUI;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -66,6 +67,7 @@ public abstract class GroupableColumnsTable extends JTable {
 		public ColumnGroup(TableCellRenderer renderer, String text) {
 			if (renderer == null) {
 				this.renderer = new DefaultTableCellRenderer() {
+					@Override
 					public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 						JTableHeader header = table.getTableHeader();
 						if (header != null) {
@@ -73,7 +75,7 @@ public abstract class GroupableColumnsTable extends JTable {
 							setBackground(header.getBackground());
 							setFont(header.getFont());
 						}
-						setHorizontalAlignment(JLabel.CENTER);
+						setHorizontalAlignment(SwingConstants.CENTER);
 						setText((value == null) ? "" : value.toString());
 						setBorder(UIManager.getBorder("TableHeader.cellBorder"));
 						return this;
@@ -97,15 +99,21 @@ public abstract class GroupableColumnsTable extends JTable {
 
 		/**
 		 * @param c TableColumn
-		 * @param v ColumnGroups
+		 * @param g ColumnGroups
+		 * @return the column groups
 		 */
 		public List<ColumnGroup> getColumnGroups(TableColumn c, List<ColumnGroup> g) {
 			g.add(this);
-			if (v.contains(c)) return g;
+			if (v.contains(c)) {
+				return g;
+			}
+
 			for (Object obj : v) {
 				if (obj instanceof ColumnGroup) {
 					List<ColumnGroup> groups = ((ColumnGroup) obj).getColumnGroups(c, new ArrayList<ColumnGroup>(g));
-					if (groups != null) return groups;
+					if (groups != null) {
+						return groups;
+					}
 				}
 			}
 			return null;
@@ -178,7 +186,10 @@ public abstract class GroupableColumnsTable extends JTable {
 		}
 
 		public List<ColumnGroup> getColumnGroups(TableColumn col) {
-			if (columnGroups == null) return null;
+			if (columnGroups == null) {
+				return null;
+			}
+
 			for (ColumnGroup cGroup : columnGroups) {
 				List<ColumnGroup> v_ret = cGroup.getColumnGroups(col, new ArrayList<ColumnGroup>());
 				if (v_ret != null) {
@@ -189,7 +200,10 @@ public abstract class GroupableColumnsTable extends JTable {
 		}
 
 		public void setColumnMargin() {
-			if (columnGroups == null) return;
+			if (columnGroups == null) {
+				return;
+			}
+
 			int columnMargin = getColumnModel().getColumnMargin();
 			for (ColumnGroup cGroup : columnGroups) {
 				cGroup.setColumnMargin(columnMargin);
@@ -201,8 +215,11 @@ public abstract class GroupableColumnsTable extends JTable {
 	private static class GroupableTableHeaderUI extends BasicTableHeaderUI {
 		@Override
 		public void paint(Graphics g, JComponent c) {
+			if (header.getColumnModel() == null) {
+				return;
+			}
+
 			Rectangle clipBounds = g.getClipBounds();
-			if (header.getColumnModel() == null) return;
 			((GroupableTableHeader) header).setColumnMargin();
 			int column = 0;
 			Dimension size = header.getSize();
@@ -247,13 +264,14 @@ public abstract class GroupableColumnsTable extends JTable {
 			TableCellRenderer renderer = aColumn.getHeaderRenderer();
 			//revised by Java2s.com
 			renderer = new DefaultTableCellRenderer() {
+				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 					JLabel header = new JLabel();
 					header.setForeground(table.getTableHeader().getForeground());
 					header.setBackground(table.getTableHeader().getBackground());
 					header.setFont(table.getTableHeader().getFont());
 
-					header.setHorizontalAlignment(JLabel.CENTER);
+					header.setHorizontalAlignment(SwingConstants.CENTER);
 					header.setText(value.toString());
 					header.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
 					return header;

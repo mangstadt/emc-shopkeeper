@@ -8,7 +8,7 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -48,8 +48,8 @@ public class ChangelogDialog extends JDialog {
 
 		setLayout(new MigLayout());
 		MyJScrollPane scroll = new MyJScrollPane(changelog);
-		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		add(scroll, "grow, w 100%, h 100%, wrap");
 		add(close, "align center");
 

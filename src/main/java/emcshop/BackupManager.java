@@ -93,8 +93,9 @@ public class BackupManager {
 
 	/**
 	 * Backs up the database.
-	 * @param listener
-	 * @throws IOException
+	 * @param listener invoked every time a database file is added to the ZIP
+	 * archive
+	 * @throws IOException if there's a problem backing up the database
 	 */
 	public void backup(ZipListener listener) throws IOException {
 		backupDir.mkdirs();
@@ -117,7 +118,7 @@ public class BackupManager {
 	/**
 	 * Restores a backed-up database.
 	 * @param date the date of the backup
-	 * @throws IOException
+	 * @throws IOException if there's a problem restoring the database
 	 */
 	public void restore(Date date) throws IOException {
 		//rename the live database directory

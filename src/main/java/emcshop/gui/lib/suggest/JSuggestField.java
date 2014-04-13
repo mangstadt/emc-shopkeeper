@@ -27,6 +27,7 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
 /**
@@ -183,7 +184,7 @@ public class JSuggestField extends JTextField {
 				selected = list.getSelectedIndex();
 			}
 		});
-		dropDownList.add(new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+		dropDownList.add(new JScrollPane(list, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER));
 		dropDownList.pack();
 		addKeyListener(new KeyAdapter() {
 			@Override

@@ -45,8 +45,6 @@ public class TransactionsTab extends JPanel {
 
 	private final MainFrame owner;
 	private final DbDao dao;
-	private final ProfileLoader profileImageLoader;
-	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private final Settings settings;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 
@@ -84,8 +82,6 @@ public class TransactionsTab extends JPanel {
 	public TransactionsTab(MainFrame owner) {
 		this.owner = owner;
 		dao = context.get(DbDao.class);
-		profileImageLoader = context.get(ProfileLoader.class);
-		onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 		settings = context.get(Settings.class);
 
 		entireHistory = new JCheckBox();
@@ -488,7 +484,7 @@ public class TransactionsTab extends JPanel {
 					sortByLabel.setEnabled(true);
 
 					//render table
-					playersPanel = new PlayersPanel(playerGroups, profileImageLoader, onlinePlayersMonitor, settings.isShowQuantitiesInStacks());
+					playersPanel = new PlayersPanel(playerGroups);
 					tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
@@ -542,7 +538,7 @@ public class TransactionsTab extends JPanel {
 					sortBy.setEnabled(false);
 
 					//render table
-					transactionsTable = new TransactionsTable(transactions, settings.isShowQuantitiesInStacks(), profileImageLoader, onlinePlayersMonitor);
+					transactionsTable = new TransactionsTable(transactions);
 					transactionsTable.setFillsViewportHeight(true);
 					transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
 					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");

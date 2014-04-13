@@ -26,8 +26,6 @@ public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel
 	private final List<ActionListener> restoreCompleteListeners = new ArrayList<ActionListener>();
 
 	/**
-	 * @param dao the database DAO (may be null)
-	 * @param backupManager the backup manager
 	 * @param thrown the exception that was thrown
 	 */
 	public DatabaseStartupErrorModelImpl(Throwable thrown) {

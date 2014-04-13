@@ -35,6 +35,7 @@ public class GuiUtils {
 	/**
 	 * Opens a webpage in the user's browser.
 	 * @param uri the URI
+	 * @throws IOException if there's a problem opening the web page
 	 */
 	public static void openWebPage(URI uri) throws IOException {
 		if (!canOpenWebPages()) {

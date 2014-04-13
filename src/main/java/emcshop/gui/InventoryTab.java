@@ -528,6 +528,7 @@ public class InventoryTab extends JPanel {
 					}
 				}
 
+				@Override
 				public Class<?> getColumnClass(int col) {
 					Column column = columns[col];
 					switch (column) {

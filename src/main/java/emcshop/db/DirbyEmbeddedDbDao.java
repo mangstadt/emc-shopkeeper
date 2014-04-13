@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class DirbyEmbeddedDbDao extends DirbyDbDao {
 	/**
 	 * @param databaseDir the directory the database will be saved to
-	 * @throws SQLException
+	 * @throws SQLException if there's a problem starting the database
 	 */
 	public DirbyEmbeddedDbDao(File databaseDir) throws SQLException {
 		this(databaseDir, null);
@@ -19,8 +19,9 @@ public class DirbyEmbeddedDbDao extends DirbyDbDao {
 
 	/**
 	 * @param databaseDir the directory the database will be saved to
-	 * @param listener
-	 * @throws SQLException
+	 * @param listener implement this to be notified of various points in the
+	 * startup process
+	 * @throws SQLException if there's a problem starting the database
 	 */
 	public DirbyEmbeddedDbDao(File databaseDir, DbListener listener) throws SQLException {
 		databaseDir = new File(databaseDir.getAbsolutePath());

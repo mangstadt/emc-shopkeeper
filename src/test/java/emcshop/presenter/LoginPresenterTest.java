@@ -4,6 +4,8 @@ import static emcshop.util.GuiUtils.fireEvents;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -17,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -60,7 +61,7 @@ public class LoginPresenterTest {
 	public void network_error() throws Throwable {
 		IOException e = new IOException();
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).thenThrow(e);
+		when(model.login(anyString(), anyString(), anyBoolean())).thenThrow(e);
 
 		LoginViewAdapter view = spy(new LoginViewAdapter());
 
@@ -76,7 +77,7 @@ public class LoginPresenterTest {
 	@Test
 	public void bad_login() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(null);
+		when(model.login(anyString(), anyString(), anyBoolean())).thenReturn(null);
 
 		LoginViewAdapter view = spy(new LoginViewAdapter());
 
@@ -91,7 +92,7 @@ public class LoginPresenterTest {
 	@Test
 	public void valid_login() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("token");
+		when(model.login(anyString(), anyString(), anyBoolean())).thenReturn("token");
 
 		LoginViewAdapter view = spy(new LoginViewAdapter());
 
@@ -99,7 +100,7 @@ public class LoginPresenterTest {
 
 		view.clickLogin();
 
-		verify(model).saveSession(any(EmcSession.class), Mockito.anyBoolean());
+		verify(model).saveSession(any(EmcSession.class), anyBoolean());
 		verify(view).close();
 		assertFalse(presenter.isCanceled());
 	}
@@ -107,7 +108,7 @@ public class LoginPresenterTest {
 	@Test
 	public void cancel_login() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("token");
+		when(model.login(anyString(), anyString(), anyBoolean())).thenReturn("token");
 
 		LoginViewAdapter view = spy(new LoginViewAdapter());
 
@@ -122,7 +123,7 @@ public class LoginPresenterTest {
 	@Test
 	public void cancel_login_while_logging_in() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		stub(model.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean())).toAnswer(new Answer<String>() {
+		stub(model.login(anyString(), anyString(), anyBoolean())).toAnswer(new Answer<String>() {
 			@Override
 			public String answer(InvocationOnMock invocation) throws Throwable {
 				Thread.sleep(300); //simulate network latency
@@ -203,18 +204,22 @@ public class LoginPresenterTest {
 
 		@Override
 		public void networkError() {
+			//empty
 		}
 
 		@Override
 		public void badLogin() {
+			//empty
 		}
 
 		@Override
 		public void close() {
+			//empty
 		}
 
 		@Override
 		public void display() {
+			//empty
 		}
 	}
 }

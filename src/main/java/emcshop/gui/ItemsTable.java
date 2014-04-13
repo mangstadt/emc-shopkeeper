@@ -61,6 +61,8 @@ public class ItemsTable extends GroupableColumnsTable {
 
 	/**
 	 * @param itemGroups the items to display
+	 * @param showQuantitiesInStacks true to display item quantities in stacks,
+	 * false not to
 	 */
 	public ItemsTable(List<ItemGroup> itemGroups, boolean showQuantitiesInStacks) {
 		this(itemGroups, Column.ITEM_NAME, true, showQuantitiesInStacks);
@@ -71,6 +73,8 @@ public class ItemsTable extends GroupableColumnsTable {
 	 * @param sortedBy the column that the items list is already sorted by
 	 * @param sortedByAscending true if the items list is sorted ascending,
 	 * false if descending
+	 * @param showQtyInStacks true to display item quantities in stacks, false
+	 * not to
 	 */
 	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending, boolean showQtyInStacks) {
 		this.itemGroups = itemGroups;
@@ -163,7 +167,11 @@ public class ItemsTable extends GroupableColumnsTable {
 					if (group.getSoldQuantity() == 0) {
 						return null;
 					}
-					return showQuantitiesInStacks ? formatStacks(group.getSoldQuantity(), index.getStackSize(group.getItem())) : formatQuantity(group.getSoldQuantity());
+
+					int soldQuantity = group.getSoldQuantity();
+					int stackSize = index.getStackSize(group.getItem());
+
+					return showQuantitiesInStacks ? formatStacks(soldQuantity, stackSize) : formatQuantity(soldQuantity);
 				case SOLD_AMT:
 					if (group.getSoldQuantity() == 0) {
 						return null;
@@ -180,7 +188,10 @@ public class ItemsTable extends GroupableColumnsTable {
 					}
 					return formatRupees(group.getBoughtAmount());
 				case NET_QTY:
-					return "<html>" + (showQuantitiesInStacks ? formatStacksWithColor(group.getNetQuantity(), index.getStackSize(group.getItem())) : formatQuantityWithColor(group.getNetQuantity())) + "</html>";
+					int netQuantity = group.getNetQuantity();
+					stackSize = index.getStackSize(group.getItem());
+
+					return "<html>" + (showQuantitiesInStacks ? formatStacksWithColor(netQuantity, stackSize) : formatQuantityWithColor(netQuantity)) + "</html>";
 				case NET_AMT:
 					return "<html>" + formatRupeesWithColor(group.getNetAmount()) + "</html>";
 				default:
@@ -316,6 +327,7 @@ public class ItemsTable extends GroupableColumnsTable {
 				return itemGroupsToDisplay.get(row);
 			}
 
+			@Override
 			public Class<?> getColumnClass(int c) {
 				return ItemGroup.class;
 			}

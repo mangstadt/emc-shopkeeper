@@ -1,11 +1,7 @@
 package emcshop;
 
 public class ReportSenderTest {
-	/**
-	 * Tests this class and the PHP script.
-	 * @param args
-	 * @throws Throwable
-	 */
+	//Tests this class and the PHP script.
 	public static void main(String args[]) throws Throwable {
 		ReportSender rs = new ReportSender();
 

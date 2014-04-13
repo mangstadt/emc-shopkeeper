@@ -13,7 +13,7 @@ public class MigrationSprocs {
 	/**
 	 * Ensures that the "items" table contains the names of all items. This
 	 * method is meant to be called as a stored procedure.
-	 * @throws SQLException
+	 * @throws SQLException if there's a database problem
 	 */
 	public static void populateItemsTable() throws SQLException {
 		Connection conn = conn();
@@ -30,8 +30,7 @@ public class MigrationSprocs {
 	 * Updates the names of all items that have display names which differ from
 	 * the names on the transaction page. For example, converts "Potion:8193" to
 	 * "Potion of Regeneration".
-	 * @param conn
-	 * @throws SQLException
+	 * @throws SQLException if there's a database problem
 	 */
 	public static void updateItemNames() throws SQLException {
 		Connection conn = conn();
@@ -46,7 +45,7 @@ public class MigrationSprocs {
 
 	/**
 	 * Re-calculates each player's first/last seen dates.
-	 * @throws SQLException
+	 * @throws SQLException if there's a database problem
 	 */
 	public static void calculatePlayersFirstLastSeenDates() throws SQLException {
 		Connection conn = conn();
@@ -61,7 +60,7 @@ public class MigrationSprocs {
 
 	/**
 	 * Removes duplicate item names in the "items" table.
-	 * @throws SQLException
+	 * @throws SQLException if there's a database problem
 	 */
 	public static void removeDuplicateItemNames() throws SQLException {
 		Connection conn = conn();
@@ -77,7 +76,7 @@ public class MigrationSprocs {
 	/**
 	 * Creates a connection to the database.
 	 * @return the database connection
-	 * @throws SQLException
+	 * @throws SQLException if there's a database problem
 	 */
 	private static Connection conn() throws SQLException {
 		return DriverManager.getConnection("jdbc:default:connection");

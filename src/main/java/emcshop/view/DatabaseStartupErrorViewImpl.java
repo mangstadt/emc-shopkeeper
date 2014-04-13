@@ -22,6 +22,7 @@ import javax.swing.JTextArea;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -43,7 +44,7 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 	public DatabaseStartupErrorViewImpl(Window owner) {
 		super(owner, "Error");
 		setModalityType(ModalityType.DOCUMENT_MODAL); //go on top of all windows
-		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		GuiUtils.addCloseDialogListener(this, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

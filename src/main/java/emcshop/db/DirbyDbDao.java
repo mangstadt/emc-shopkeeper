@@ -791,6 +791,7 @@ public abstract class DirbyDbDao implements DbDao {
 		return itemGroups.values();
 	}
 
+	@Override
 	public List<ShopTransaction> getTransactionsByDate(Date from, Date to) throws SQLException {
 		//@formatter:off
 		String sql =

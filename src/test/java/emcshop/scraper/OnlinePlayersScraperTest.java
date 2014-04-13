@@ -2,6 +2,7 @@ package emcshop.scraper;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,7 +19,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -36,12 +36,12 @@ public class OnlinePlayersScraperTest {
 		assertEquals(expected, actual);
 
 		//10 requests should have been sent (for the 10 servers)
-		verify(client, times(10)).execute(Mockito.any(HttpGet.class));
+		verify(client, times(10)).execute(any(HttpGet.class));
 	}
 
 	private static HttpClient createMockClient() throws Throwable {
 		HttpClient client = mock(HttpClient.class);
-		when(client.execute(Mockito.any(HttpGet.class))).then(new Answer<HttpResponse>() {
+		when(client.execute(any(HttpGet.class))).then(new Answer<HttpResponse>() {
 			private final Pattern p = Pattern.compile("http://empireminecraft.com/api/server-online-(\\d+)\\.json");
 
 			@Override

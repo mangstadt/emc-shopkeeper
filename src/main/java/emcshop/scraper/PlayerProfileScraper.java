@@ -46,7 +46,7 @@ public class PlayerProfileScraper {
 	 * Downloads and scrapes a player's profile page.
 	 * @param playerName the player name
 	 * @return the scraped page
-	 * @throws IOException
+	 * @throws IOException if there's a problem downloading the profile
 	 */
 	public PlayerProfile downloadProfile(String playerName) throws IOException {
 		return downloadProfile(playerName, new DefaultHttpClient());
@@ -57,7 +57,7 @@ public class PlayerProfileScraper {
 	 * @param playerName the player name
 	 * @param client the HTTP client to use
 	 * @return the scraped page or null if the player does not exist
-	 * @throws IOException
+	 * @throws IOException if there's a problem downloading the profile
 	 */
 	public PlayerProfile downloadProfile(String playerName, HttpClient client) throws IOException {
 		Document document;
@@ -78,6 +78,7 @@ public class PlayerProfileScraper {
 	 * @param playerName the player name
 	 * @param document the profile page
 	 * @return the scraped page or null if the player does not exist
+	 * @throws IOException if there's a problem downloading the profile
 	 */
 	public PlayerProfile scrapeProfile(String playerName, Document document) throws IOException {
 		boolean isPrivate = isPrivate(document);
@@ -104,12 +105,13 @@ public class PlayerProfileScraper {
 
 	/**
 	 * Downloads a player's profile portrait.
-	 * @param playerName the player name
+	 * @param profile the player profile
 	 * @param lastModified the value of the "If-Modified-Since" HTTP header, or
 	 * null not to add this header
+	 * @param client the HTTP client to use to download the image
 	 * @return the image data, null if the image hasn't changed, or null the
 	 * image could not be fetched
-	 * @throws IOException
+	 * @throws IOException if there's a problem downloading the profile
 	 */
 	public byte[] downloadPortrait(PlayerProfile profile, Date lastModified, HttpClient client) throws IOException {
 		String url = profile.getPortraitUrl();

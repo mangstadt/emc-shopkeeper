@@ -49,7 +49,7 @@ public class TestUtils {
 	 * Used in Mockito expressions to perform an operation if an "int" argument
 	 * is greater than or equal to the given value.
 	 * @param value the value
-	 * @return
+	 * @return the value to pass to Mockito
 	 */
 	public static int gte(final int value) {
 		return intThat(new BaseMatcher<Integer>() {

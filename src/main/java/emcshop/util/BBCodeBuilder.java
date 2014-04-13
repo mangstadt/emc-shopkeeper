@@ -113,7 +113,7 @@ public class BBCodeBuilder {
 	 * Appends a URL.
 	 * @param url the URL (e.g. "http://example.com")
 	 * @param text the display text
-	 * @return
+	 * @return this
 	 */
 	public BBCodeBuilder url(String url, String text) {
 		return open("url", url).text(text).close();

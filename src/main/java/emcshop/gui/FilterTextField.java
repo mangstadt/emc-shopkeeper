@@ -64,7 +64,7 @@ public class FilterTextField extends JTextField {
 
 	/**
 	 * Gets the clear button associated with this text box.
-	 * @return
+	 * @return the clear button
 	 */
 	public JButton getClearButton() {
 		return clearButton;

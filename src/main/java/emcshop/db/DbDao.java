@@ -287,6 +287,7 @@ public interface DbDao {
 	 * @param bonusFeeTransactionCount the number of bonus fee transactions that
 	 * were parsed
 	 * @param timeTaken the time the update took in milliseconds
+	 * @throws SQLException
 	 */
 	void insertUpdateLog(Date ts, Integer rupeeBalance, int transactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, long timeTaken) throws SQLException;
 

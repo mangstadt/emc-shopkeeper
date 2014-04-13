@@ -21,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -314,8 +315,8 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 			add(errorIcon, "split 2");
 			add(displayText, "w 100:100%:100%, gapleft 10, wrap");
 			JScrollPane scroll = new JScrollPane(stackTrace);
-			scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+			scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 			add(scroll, "grow, w 100%, h 100%, align center, wrap");
 			add(report, "align right, wrap");
 

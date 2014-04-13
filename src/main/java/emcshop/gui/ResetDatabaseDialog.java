@@ -26,6 +26,7 @@ public class ResetDatabaseDialog extends JDialog {
 
 	/**
 	 * Shows the dialog.
+	 * @param owner the parent window
 	 * @return true if the user chose to wipe the database, false if not
 	 */
 	public static boolean show(Window owner) {

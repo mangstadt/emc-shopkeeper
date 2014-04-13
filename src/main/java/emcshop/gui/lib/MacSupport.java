@@ -21,7 +21,7 @@ public class MacSupport {
 	 * @param title the title of the application
 	 * @param enablePreferences true to enable the "Preferences" menu option,
 	 * false to disable it. If enabled, you must override
-	 * {@link MacHandler#handlePreferences()} in the handler parameter
+	 * {@link MacHandler#handlePreferences} in the handler parameter
 	 * @param dockImage the image that will appear in the dock or null for no
 	 * image.
 	 * @param handler handles the various Mac events

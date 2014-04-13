@@ -22,6 +22,7 @@ import javax.swing.JSeparator;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -47,7 +48,7 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	public BackupViewImpl(Window owner) {
 		super(owner, "Database Backup Settings", ModalityType.APPLICATION_MODAL);
 		setResizable(false);
-		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		GuiUtils.addCloseDialogListener(this, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

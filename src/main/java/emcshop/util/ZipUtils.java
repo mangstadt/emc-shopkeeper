@@ -22,7 +22,7 @@ public class ZipUtils {
 	 * @param directory the directory to zip
 	 * @param zipFile the ZIP file
 	 * @param listener called every time a file is zipped
-	 * @throws IOException
+	 * @throws IOException if there's a problem creating the ZIP file
 	 */
 	public static void zipDirectory(File directory, File zipFile, ZipListener listener) throws IOException {
 		ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(zipFile));
@@ -111,7 +111,7 @@ public class ZipUtils {
 	 * Unzips a ZIP file.
 	 * @param destinationDir the directory where the ZIP file should be unzipped
 	 * @param zipFile the ZIP file
-	 * @throws IOException
+	 * @throws IOException if there's a problem extracting the ZIP file
 	 */
 	public static void unzip(File destinationDir, File zipFile) throws IOException {
 		InputStream in = new BufferedInputStream(new FileInputStream(zipFile));

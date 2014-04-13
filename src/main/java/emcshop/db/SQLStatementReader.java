@@ -7,7 +7,7 @@ import java.sql.Statement;
 
 /**
  * Reads SQL statements one at a time from a .sql file, so they can be executed
- * via JDBC with {@link Statement#execute()}.
+ * via JDBC with {@link Statement#execute}.
  * @author Michael Angstadt
  */
 public class SQLStatementReader extends BufferedReader {
@@ -18,7 +18,7 @@ public class SQLStatementReader extends BufferedReader {
 	/**
 	 * Reads the next SQL statement.
 	 * @return the next SQL statement or null if EOF
-	 * @throws IOException
+	 * @throws IOException if there's a problem reading the file
 	 */
 	public String readStatement() throws IOException {
 		StringBuilder sb = new StringBuilder();

@@ -12,7 +12,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 //@formatter:off
 /**
  * A combo box which allows items to be disabled.
- * @see http://raginggoblin.wordpress.com/2010/05/04/jcombobox-with-disabled-items/
+ * @see "http://raginggoblin.wordpress.com/2010/05/04/jcombobox-with-disabled-items/"
  */
 //@formatter:on
 @SuppressWarnings("serial")

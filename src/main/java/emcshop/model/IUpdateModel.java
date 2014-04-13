@@ -90,7 +90,7 @@ public interface IUpdateModel {
 
 	/**
 	 * Gets the time that the download started.
-	 * @return
+	 * @return the download start time
 	 */
 	Date getStarted();
 

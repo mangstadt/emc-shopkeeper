@@ -82,22 +82,27 @@ public class UnhandledErrorPresenterTest {
 
 		@Override
 		public void setMessage(String message) {
+			//empty
 		}
 
 		@Override
 		public void setThrown(Throwable thrown) {
+			//empty
 		}
 
 		@Override
 		public void errorReportSent() {
+			//empty
 		}
 
 		@Override
 		public void display() {
+			//empty
 		}
 
 		@Override
 		public void close() {
+			//empty
 		}
 	}
 }

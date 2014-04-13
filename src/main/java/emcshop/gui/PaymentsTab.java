@@ -294,6 +294,7 @@ public class PaymentsTab extends JPanel {
 					}
 				}
 
+				@Override
 				public Class<?> getColumnClass(int col) {
 					Column column = columns[col];
 					switch (column) {

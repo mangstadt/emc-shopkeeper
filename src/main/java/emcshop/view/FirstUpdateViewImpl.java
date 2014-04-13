@@ -73,6 +73,7 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 
 		stopAt = new JNumberTextField();
 		stopAt.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyTyped(KeyEvent e) {
 				char c = e.getKeyChar();
 				if ((c < '0' || c > '9') && c != KeyEvent.VK_BACK_SPACE) {

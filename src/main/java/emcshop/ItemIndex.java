@@ -49,9 +49,9 @@ public class ItemIndex {
 			InputStream in = ItemIndex.class.getResourceAsStream("items.xml");
 			try {
 				INSTANCE = new ItemIndex(in);
-			} catch (Exception e) {
-				//nothing should be thrown
-				throw new RuntimeException(e);
+			} catch (Throwable t) {
+				//nothing should be thrown because this file is on the classpath
+				throw new RuntimeException(t);
 			} finally {
 				IOUtils.closeQuietly(in);
 			}
@@ -218,7 +218,7 @@ public class ItemIndex {
 	 * Gets the display-to-EMC name mappings (only includes the mappings that
 	 * differ from the default, reverse of
 	 * {@link #getEmcNameToDisplayNameMapping()}).
-	 * @return
+	 * @return the mappings
 	 */
 	public Map<String, List<String>> getDisplayNameToEmcNamesMapping() {
 		Map<String, List<String>> mappings = new HashMap<String, List<String>>();
