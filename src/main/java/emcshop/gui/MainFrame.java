@@ -162,7 +162,7 @@ public class MainFrame extends JFrame {
 			showLog.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					ShowLogDialog.show(MainFrame.this, logManager);
+					ShowLogDialog.show(MainFrame.this);
 				}
 			});
 			tools.add(showLog);

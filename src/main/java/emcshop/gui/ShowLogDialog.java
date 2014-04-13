@@ -15,6 +15,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import emcshop.AppContext;
 import emcshop.LogManager;
 import emcshop.util.GuiUtils;
 
@@ -24,11 +25,13 @@ import emcshop.util.GuiUtils;
  */
 @SuppressWarnings("serial")
 public class ShowLogDialog extends JDialog {
-	private ShowLogDialog(Window owner, LogManager logManager) {
+	private ShowLogDialog(Window owner) {
 		super(owner, "Log");
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		GuiUtils.closeOnEscapeKeyPress(this);
+
+		LogManager logManager = AppContext.instance().get(LogManager.class);
 
 		JTextArea location = new JTextArea("Location: " + logManager.getFile().getAbsolutePath());
 		location.setLineWrap(true);
@@ -69,7 +72,7 @@ public class ShowLogDialog extends JDialog {
 		setLocationRelativeTo(owner);
 	}
 
-	public static void show(Window owner, LogManager logManager) {
-		new ShowLogDialog(owner, logManager).setVisible(true);
+	public static void show(Window owner) {
+		new ShowLogDialog(owner).setVisible(true);
 	}
 }
