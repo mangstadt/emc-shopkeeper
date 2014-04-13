@@ -87,8 +87,8 @@ public class EMCShopkeeper {
 		Properties props = new Properties();
 		try {
 			props.load(in);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		} catch (Throwable t) {
+			throw new ExceptionInInitializerError(t);
 		} finally {
 			IOUtils.closeQuietly(in);
 		}
