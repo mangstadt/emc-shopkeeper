@@ -18,6 +18,8 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.ToolTipManager;
 
+import joptsimple.OptionException;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.HttpClient;
@@ -59,7 +61,6 @@ import emcshop.view.ProfileSelectorViewImpl;
 
 public class EMCShopkeeper {
 	private static final Logger logger = Logger.getLogger(EMCShopkeeper.class.getName());
-	private static final String NEWLINE = System.getProperty("line.separator");
 	private static final PrintStream out = System.out;
 
 	/**
@@ -123,16 +124,15 @@ public class EMCShopkeeper {
 		EmcShopArguments arguments = null;
 		try {
 			arguments = new EmcShopArguments(args);
-		} catch (IllegalArgumentException e) {
-			printHelp();
-			out.println();
-			out.println("Error: The following arguments are invalid: " + e.getMessage());
+		} catch (OptionException e) {
+			out.println(e.getMessage());
 			System.exit(1);
 		}
 
 		//print help
 		if (arguments.help()) {
-			printHelp();
+			String help = arguments.printHelp(defaultProfileName, defaultProfileRootDir.getAbsolutePath(), defaultStartPage, defaultFormat);
+			out.println(help);
 			return;
 		}
 
@@ -216,59 +216,6 @@ public class EMCShopkeeper {
 		} else {
 			launchCli(dbDir, settings, arguments);
 		}
-	}
-
-	private static void printHelp() {
-		//@formatter:off
-		out.println(
-		"EMC Shopkeeper v" + VERSION + NEWLINE +
-		"by Michael Angstadt (shavingfoam)" + NEWLINE +
-		URL + NEWLINE +
-		NEWLINE +
-		"General arguments" + NEWLINE +
-		"These arguments can be used for the GUI and CLI." + NEWLINE +
-		"================================================" + NEWLINE +
-		"--profile=PROFILE" + NEWLINE +
-		"  The profile to use (defaults to \"" + defaultProfileName + "\")." + NEWLINE +
-		NEWLINE +
-		"--profile-dir=DIR" + NEWLINE +
-		"  The path to the directory that contains all the profiles" + NEWLINE +
-		"  (defaults to \"" + defaultProfileRootDir.getAbsolutePath() + "\")." + NEWLINE +
-		NEWLINE +
-		"--db=PATH" + NEWLINE +
-		"  Overrides the database location (stored in the profile by default)." + NEWLINE +
-		NEWLINE +
-		"--log-level=FINEST|FINER|FINE|CONFIG|INFO|WARNING|SEVERE" + NEWLINE +
-		"  The log level to use (defaults to INFO)." + NEWLINE +
-		NEWLINE +
-		"CLI arguments" + NEWLINE +
-		"Using one of these arguments will launch EMC Shopkeeper in CLI mode." + NEWLINE +
-		"================================================" + NEWLINE +
-		"--update" + NEWLINE +
-		"  Updates the database with the latest transactions." + NEWLINE +
-		"--start-page=PAGE" + NEWLINE +
-		"  Specifies the transaction history page number to start at during" + NEWLINE +
-		"  the first update (defaults to " + defaultStartPage + ")." + NEWLINE +
-		"--stop-page=PAGE" + NEWLINE +
-		"  Specifies the transaction history page number to stop at during" + NEWLINE +
-		"  the first update (defaults to the last page)." + NEWLINE +
-		NEWLINE +
-		"--query=QUERY" + NEWLINE +
-		"  Shows the net gains/losses of each item.  Examples:" + NEWLINE +
-		"  All data:           --query" + NEWLINE +
-		"  Today's data:       --query=\"today\"" + NEWLINE +
-		"  Three days of data: --query=\"2013-03-07 to 2013-03-09\"" + NEWLINE +
-		"  Data up to today:   --query=\"2013-03-07 to today\"" + NEWLINE +
-		"--format=TABLE|CSV|BBCODE" + NEWLINE +
-		"  Specifies how to render the queried transaction data (defaults to " + defaultFormat + ")." + NEWLINE +
-		NEWLINE +
-		"--version" + NEWLINE +
-		"  Prints the version of this program." + NEWLINE +
-		NEWLINE +
-		"--help" + NEWLINE +
-		"  Prints this help message."
-		);
-		//@formatter:on
 	}
 
 	private static void launchCli(File dbDir, Settings settings, EmcShopArguments args) throws Throwable {
