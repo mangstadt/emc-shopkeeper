@@ -1,6 +1,6 @@
 package emcshop;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,23 +9,10 @@ import java.util.List;
 public class AppContext {
 	private static AppContext INSTANCE;
 
-	private final List<Object> objects;
+	private final List<Object> objects = new ArrayList<Object>();
 
-	/**
-	 * @param objects the objects to add to the context
-	 */
-	private AppContext(Object... objects) {
-		this.objects = Arrays.asList(objects);
-	}
-
-	/**
-	 * Creates the application context.
-	 * @param objects the objects to add to the context
-	 * @return the application context
-	 */
-	public static synchronized AppContext init(Object... objects) {
-		INSTANCE = new AppContext(objects);
-		return INSTANCE;
+	AppContext() {
+		//empty
 	}
 
 	/**
@@ -33,12 +20,26 @@ public class AppContext {
 	 * @return the application context
 	 */
 	public static synchronized AppContext instance() {
+		if (INSTANCE == null) {
+			INSTANCE = new AppContext();
+		}
 		return INSTANCE;
+	}
+
+	public static synchronized void init(Object... objects) {
+		if (INSTANCE == null) {
+			INSTANCE = new AppContext();
+		}
+
+		INSTANCE.objects.clear();
+		for (Object object : objects) {
+			INSTANCE.add(object);
+		}
 	}
 
 	/**
 	 * Gets an object.
-	 * @param <T>
+	 * @param <T> the object class
 	 * @param clazz the object class
 	 * @return the object or null if not found
 	 */
@@ -49,5 +50,13 @@ public class AppContext {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Adds an object
+	 * @param object the object to add
+	 */
+	public void add(Object object) {
+		objects.add(object);
 	}
 }

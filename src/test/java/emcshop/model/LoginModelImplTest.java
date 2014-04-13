@@ -11,6 +11,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import emcshop.AppContext;
 import emcshop.scraper.EmcSession;
 import emcshop.util.Settings;
 
@@ -19,8 +20,9 @@ public class LoginModelImplTest {
 	public void getSavedUsername() {
 		Settings settings = mock(Settings.class);
 		when(settings.getSession()).thenReturn(new EmcSession("Notch", "token", new Date()));
+		AppContext.init(settings);
 
-		LoginModelImpl model = new LoginModelImpl(settings);
+		LoginModelImpl model = new LoginModelImpl();
 		assertEquals("Notch", model.getSavedUsername());
 	}
 
@@ -28,8 +30,9 @@ public class LoginModelImplTest {
 	public void getSavedUsername_none() {
 		Settings settings = mock(Settings.class);
 		when(settings.getSession()).thenReturn(null);
+		AppContext.init(settings);
 
-		LoginModelImpl model = new LoginModelImpl(settings);
+		LoginModelImpl model = new LoginModelImpl();
 		assertNull(model.getSavedUsername());
 	}
 
@@ -37,16 +40,18 @@ public class LoginModelImplTest {
 	public void getSavedRememberMe() {
 		Settings settings = mock(Settings.class);
 		when(settings.isPersistSession()).thenReturn(true);
+		AppContext.init(settings);
 
-		LoginModelImpl model = new LoginModelImpl(settings);
+		LoginModelImpl model = new LoginModelImpl();
 		assertTrue(model.getSavedRememberMe());
 	}
 
 	@Test
 	public void saveSession() {
 		Settings settings = mock(Settings.class);
+		AppContext.init(settings);
 
-		LoginModelImpl model = new LoginModelImpl(settings);
+		LoginModelImpl model = new LoginModelImpl();
 		EmcSession session = new EmcSession("Notch", "token", new Date());
 		model.saveSession(session, true);
 

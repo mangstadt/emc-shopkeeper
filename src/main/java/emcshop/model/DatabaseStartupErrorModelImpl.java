@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import emcshop.AppContext;
 import emcshop.BackupManager;
 import emcshop.ReportSender;
 import emcshop.db.DbDao;
@@ -16,6 +17,7 @@ import emcshop.util.GuiUtils;
 
 public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel {
 	private static final Logger logger = Logger.getLogger(DatabaseStartupErrorModelImpl.class.getName());
+	private static final AppContext context = AppContext.instance();
 
 	private final DbDao dao;
 	private final BackupManager backupManager;
@@ -28,11 +30,11 @@ public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel
 	 * @param backupManager the backup manager
 	 * @param thrown the exception that was thrown
 	 */
-	public DatabaseStartupErrorModelImpl(DbDao dao, BackupManager backupManager, ReportSender reportSender, Throwable thrown) {
-		this.dao = dao;
-		this.backupManager = backupManager;
-		this.reportSender = reportSender;
+	public DatabaseStartupErrorModelImpl(Throwable thrown) {
 		this.thrown = thrown;
+		dao = context.get(DbDao.class);
+		backupManager = context.get(BackupManager.class);
+		reportSender = context.get(ReportSender.class);
 	}
 
 	@Override

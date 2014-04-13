@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import emcshop.AppContext;
 import emcshop.BackupManager;
 import emcshop.db.DbDao;
 import emcshop.util.GuiUtils;
@@ -16,17 +17,20 @@ import emcshop.util.Settings;
 import emcshop.util.ZipUtils.ZipListener;
 
 public class BackupModelImpl implements IBackupModel {
+	private static final AppContext context = AppContext.instance();
+
 	private final DbDao dao;
 	private final Settings settings;
 	private final BackupManager backupManager;
+
 	private final List<ActionListener> backupCompleteListeners = new ArrayList<ActionListener>();
 	private final List<ActionListener> backupPercentCompleteListeners = new ArrayList<ActionListener>();
 	private final List<ActionListener> restoreCompleteListeners = new ArrayList<ActionListener>();
 
-	public BackupModelImpl(DbDao dao, Settings settings, BackupManager backupManager) {
-		this.dao = dao;
-		this.settings = settings;
-		this.backupManager = backupManager;
+	public BackupModelImpl() {
+		dao = context.get(DbDao.class);
+		settings = context.get(Settings.class);
+		backupManager = context.get(BackupManager.class);
 	}
 
 	@Override

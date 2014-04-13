@@ -50,10 +50,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import emcshop.AppContext;
-import emcshop.BackupManager;
 import emcshop.EMCShopkeeper;
 import emcshop.LogManager;
-import emcshop.ReportSender;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JarSignersHardLinker;
@@ -103,16 +101,12 @@ public class MainFrame extends JFrame {
 	private final Settings settings;
 	private final LogManager logManager;
 	private final String profile;
-	private final BackupManager backupManager;
-	private final ReportSender reportSender;
 
 	public MainFrame(String profile) throws SQLException {
 		this.profile = profile;
 		dao = context.get(DbDao.class);
 		settings = context.get(Settings.class);
 		logManager = context.get(LogManager.class);
-		backupManager = context.get(BackupManager.class);
-		reportSender = context.get(ReportSender.class);
 
 		setTitle("EMC Shopkeeper v" + EMCShopkeeper.VERSION);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -209,7 +203,7 @@ public class MainFrame extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					IBackupView view = new BackupViewImpl(MainFrame.this);
-					IBackupModel model = new BackupModelImpl(dao, settings, backupManager);
+					IBackupModel model = new BackupModelImpl();
 					BackupPresenter presenter = new BackupPresenter(view, model);
 					if (presenter.getExit()) {
 						exit();
@@ -340,7 +334,7 @@ public class MainFrame extends JFrame {
 		update.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				LoginShower loginShower = new LoginShower(settings);
+				LoginShower loginShower = new LoginShower();
 
 				if (settings.getSession() == null) {
 					//user hasn't logged in
@@ -381,7 +375,7 @@ public class MainFrame extends JFrame {
 
 				//show the update dialog
 				IUpdateView view = new UpdateViewImpl(MainFrame.this, loginShower);
-				IUpdateModel model = new UpdateModelImpl(pullerFactory, settings.getSession(), dao, reportSender);
+				IUpdateModel model = new UpdateModelImpl(pullerFactory, settings.getSession());
 				UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 				if (!presenter.isCanceled()) {

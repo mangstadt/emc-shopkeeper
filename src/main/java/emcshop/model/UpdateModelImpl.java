@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import emcshop.AppContext;
 import emcshop.EMCShopkeeper;
 import emcshop.ReportSender;
 import emcshop.db.DbDao;
@@ -25,6 +26,7 @@ import emcshop.util.GuiUtils;
 
 public class UpdateModelImpl implements IUpdateModel {
 	private static final Logger logger = Logger.getLogger(UpdateModelImpl.class.getName());
+	private static final AppContext context = AppContext.instance();
 
 	private final boolean firstUpdate;
 	private final TransactionPullerFactory pullerFactory;
@@ -44,12 +46,12 @@ public class UpdateModelImpl implements IUpdateModel {
 	private boolean downloadStopped = false;
 	private Throwable thrown;
 
-	public UpdateModelImpl(TransactionPullerFactory pullerFactory, EmcSession session, DbDao dao, ReportSender reportSender) {
+	public UpdateModelImpl(TransactionPullerFactory pullerFactory, EmcSession session) {
 		firstUpdate = (pullerFactory.getStopAtDate() == null);
 		this.pullerFactory = pullerFactory;
 		this.session = session;
-		this.dao = dao;
-		this.reportSender = reportSender;
+		dao = context.get(DbDao.class);
+		reportSender = context.get(ReportSender.class);
 	}
 
 	@Override

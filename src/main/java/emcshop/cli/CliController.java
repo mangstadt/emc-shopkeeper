@@ -72,7 +72,7 @@ public class CliController {
 		}
 
 		//log user in
-		LoginShower loginShower = new LoginShower(settings);
+		LoginShower loginShower = new LoginShower();
 		EmcSession session = settings.getSession();
 		if (session == null) {
 			LoginPresenter presenter = loginShower.show();

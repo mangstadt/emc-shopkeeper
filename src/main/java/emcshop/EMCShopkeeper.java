@@ -316,12 +316,17 @@ public class EMCShopkeeper {
 	private static void launchGui(File profileDir, File dbDir, final Settings settings, LogManager logManager) throws Throwable {
 		initializeMac();
 
-		final ReportSender reportSender = new ReportSender();
+		AppContext context = AppContext.instance();
+
+		//add the report sender to the app context here incase there is an error during startup
+		ReportSender reportSender = new ReportSender();
+		context.add(reportSender);
+
 		//set uncaught exception handler
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread thread, Throwable thrown) {
-				UnhandledErrorPresenter.show(null, reportSender, "An error occurred.", thrown);
+				UnhandledErrorPresenter.show(null, "An error occurred.", thrown);
 			}
 		});
 
@@ -359,15 +364,15 @@ public class EMCShopkeeper {
 		initCacheDir(cacheDir);
 
 		//start the profile image loader
-		ProfileLoader profileImageLoader = new ProfileLoader(cacheDir);
-		profileImageLoader.setHttpClientFactory(new HttpClientFactory() {
+		ProfileLoader profileLoader = new ProfileLoader(cacheDir);
+		profileLoader.setHttpClientFactory(new HttpClientFactory() {
 			@Override
 			public HttpClient create() {
 				EmcSession session = settings.getSession();
 				return (session == null) ? new DefaultHttpClient() : session.createHttpClient();
 			}
 		});
-		profileImageLoader.start();
+		profileLoader.start();
 
 		DbListener listener = new DbListener() {
 			@Override
@@ -436,7 +441,7 @@ public class EMCShopkeeper {
 				break;
 			} catch (Throwable t) {
 				IDatabaseStartupErrorView view = new DatabaseStartupErrorViewImpl(splash);
-				IDatabaseStartupErrorModel model = new DatabaseStartupErrorModelImpl(dao, backupManager, reportSender, t);
+				IDatabaseStartupErrorModel model = new DatabaseStartupErrorModelImpl(t);
 				DatabaseStartupErrorPresenter presenter = new DatabaseStartupErrorPresenter(view, model);
 				if (presenter.getQuit()) {
 					splash.dispose();
@@ -463,7 +468,13 @@ public class EMCShopkeeper {
 		splash.setMessage("Loading item icons...");
 		ItemSuggestField.init(dao);
 
-		AppContext.init(ItemIndex.instance(), settings, logManager, backupManager, profileImageLoader, dao, reportSender, onlinePlayersMonitor);
+		context.add(settings);
+		context.add(logManager);
+		context.add(backupManager);
+		context.add(profileLoader);
+		context.add(dao);
+		context.add(reportSender);
+		context.add(onlinePlayersMonitor);
 
 		mainFrame = new MainFrame(profileDir.getName());
 		mainFrame.setVisible(true);

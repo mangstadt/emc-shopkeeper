@@ -39,6 +39,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import emcshop.AppContext;
 import emcshop.ReportSender;
 import emcshop.db.DbDao;
 import emcshop.scraper.BadSessionException;
@@ -88,6 +89,8 @@ public class UpdateModelImplTest {
 		doAnswer(interceptTransactions).when(dao).insertTransaction(any(ShopTransaction.class), anyBoolean());
 		doAnswer(interceptTransactions).when(dao).insertPaymentTransactions(anyCollection());
 		doAnswer(interceptTransactions).when(dao).updateBonusesFees(anyList());
+
+		AppContext.init(reportSender, dao);
 	}
 
 	@Test
@@ -96,7 +99,7 @@ public class UpdateModelImplTest {
 		{
 			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
 			when(factory.create(session)).thenThrow(new BadSessionException());
-			model = new UpdateModelImpl(factory, session, dao, reportSender);
+			model = new UpdateModelImpl(factory, session);
 		}
 
 		//register listeners
@@ -127,7 +130,7 @@ public class UpdateModelImplTest {
 		{
 			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
 			when(factory.create(session)).thenThrow(new IOException());
-			model = new UpdateModelImpl(factory, session, dao, reportSender);
+			model = new UpdateModelImpl(factory, session);
 		}
 
 		//register listeners
@@ -167,7 +170,7 @@ public class UpdateModelImplTest {
 			factory.setThreadCount(1);
 			factory.setStopAtDate(null);
 
-			model = new UpdateModelImpl(factory, session, dao, reportSender);
+			model = new UpdateModelImpl(factory, session);
 		}
 
 		//register listeners
@@ -219,10 +222,7 @@ public class UpdateModelImplTest {
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
 			factory.setStopAtDate(dg.next());
-
-			ReportSender reportSender = mock(ReportSender.class);
-
-			model = new UpdateModelImpl(factory, session, dao, reportSender);
+			model = new UpdateModelImpl(factory, session);
 		}
 
 		//register listeners
@@ -277,7 +277,7 @@ public class UpdateModelImplTest {
 			TransactionPullerFactory factory = new TransactionPullerFactory();
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
-			model = new UpdateModelImpl(factory, session, dao, reportSender);
+			model = new UpdateModelImpl(factory, session);
 		}
 
 		//register listeners
@@ -327,12 +327,12 @@ public class UpdateModelImplTest {
 
 		UpdateModelImpl model;
 		{
-			TransactionPageScraper scraper = scraper().page(t1, t2).pause(50).page(t3).page(t4, t5).done();
+			TransactionPageScraper scraper = scraper().page(t1, t2).pause(500).page(t3).page(t4, t5).done();
 
 			TransactionPullerFactory factory = new TransactionPullerFactory();
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
-			model = new UpdateModelImpl(factory, session, dao, reportSender);
+			model = new UpdateModelImpl(factory, session);
 		}
 
 		//register listeners
@@ -346,7 +346,7 @@ public class UpdateModelImplTest {
 		model.addDownloadErrorListener(downloadErrorListener);
 
 		Thread thread = model.startDownload();
-		Thread.sleep(10); //give enough time to start processing the first page
+		Thread.sleep(100); //give enough time to start processing the first page
 		model.stopDownload();
 		thread.join();
 
@@ -384,7 +384,7 @@ public class UpdateModelImplTest {
 			TransactionPullerFactory factory = new TransactionPullerFactory();
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
-			model = new UpdateModelImpl(factory, session, dao, reportSender);
+			model = new UpdateModelImpl(factory, session);
 		}
 
 		model.saveTransactions(); //no transactions to save

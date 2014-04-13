@@ -4,17 +4,19 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import emcshop.AppContext;
 import emcshop.scraper.EmcSession;
 import emcshop.util.LoginUtils;
 import emcshop.util.Settings;
 
 public class LoginModelImpl implements ILoginModel {
 	private static final Logger logger = Logger.getLogger(LoginModelImpl.class.getName());
+	private static final AppContext context = AppContext.instance();
 
 	private final Settings settings;
 
-	public LoginModelImpl(Settings settings) {
-		this.settings = settings;
+	public LoginModelImpl() {
+		settings = context.get(Settings.class);
 	}
 
 	@Override
