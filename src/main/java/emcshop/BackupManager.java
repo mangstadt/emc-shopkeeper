@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +24,6 @@ import emcshop.util.ZipUtils.ZipListener;
  * Manages database backups.
  */
 public class BackupManager {
-	private static final int DAYS = 24 * 60 * 60 * 1000;
 	private final File dbDir, backupDir;
 	private final boolean backupsEnabled;
 	private final Integer backupFrequency, maxBackups;
@@ -79,7 +79,7 @@ public class BackupManager {
 			return true;
 		}
 
-		Date oldest = new Date(System.currentTimeMillis() - backupFrequency * DAYS);
+		Date oldest = new Date(System.currentTimeMillis() - backupFrequency * TimeUnit.DAYS.toMillis(1));
 		return latestBackup.before(oldest);
 	}
 
