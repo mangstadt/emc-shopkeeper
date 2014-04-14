@@ -21,6 +21,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import com.google.common.collect.ListMultimap;
+
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.PlayerProfileScraper;
@@ -49,8 +51,8 @@ public class ProfileLoader {
 	private static final Color noRankColor = Color.black;
 
 	private final File cacheDir;
-	private final Set<String> downloaded = new CaseInsensitiveHashSet();
-	private final CaseInsensitiveMultimap<Job> waitList = new CaseInsensitiveMultimap<Job>();
+	private final Set<String> downloaded = CaseInsensitiveHashSet.create();
+	private final ListMultimap<String, Job> waitList = CaseInsensitiveMultimap.create();
 	private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<String>();
 
 	private int threads = 4;

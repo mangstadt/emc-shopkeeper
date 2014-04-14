@@ -1,17 +1,30 @@
 package emcshop.util;
 
 import java.util.HashSet;
+import java.util.Set;
 
-@SuppressWarnings("serial")
-public class CaseInsensitiveHashSet extends HashSet<String> {
+import com.google.common.collect.ForwardingSet;
+
+public class CaseInsensitiveHashSet extends ForwardingSet<String> {
+	private final Set<String> set = new HashSet<String>();
+
+	public static Set<String> create() {
+		return new CaseInsensitiveHashSet();
+	}
+
 	@Override
 	public boolean contains(Object value) {
 		String s = (String) value;
-		return super.contains(s.toLowerCase());
+		return set.contains(s.toLowerCase());
 	}
 
 	@Override
 	public boolean add(String value) {
-		return super.add(value.toLowerCase());
+		return set.add(value.toLowerCase());
+	}
+
+	@Override
+	protected Set<String> delegate() {
+		return set;
 	}
 }
