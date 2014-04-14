@@ -62,7 +62,6 @@
 	<Item name="Chainmail Leggings" id="304" stack="1" emcNames="Chain Leggings" />
 	<Item name="Charcoal" id="263:1" group="Wood" />
 	<Item name="Chest" id="54" group="Wood" />
-	<Item name="Chicken" id="366" />
 	<Item name="Chicken Egg" id="383:93" group="Spawn Eggs" />
 	<Item name="Chirp Disc" id="2259" stack="1" group="Discs" />
 	<Item name="Chiseled Quartz" id="155:1" group="Quartz" />
@@ -80,9 +79,9 @@
 	<Item name="Cocoa Beans" id="351:3" emcNames="Brown Dye" group="Dyes" />
 	<Item name="Compass" id="345" group="Iron" />
 	<Item name="Cooked Beef" id="364" emcNames="Steak" />
-	<Item name="Cooked Chicken" id="366" />
+	<Item name="Cooked Chicken" id="366" emcNames="Chicken" />
 	<Item name="Cooked Fish" id="350" group="Fish" />
-	<Item name="Cooked Pork" id="320" />
+	<Item name="Cooked Pork" id="320" emcNames="Pork Chop" />
 	<Item name="Cooked Salmon" id="350:1" group="Fish" />
 	<Item name="Cookie" id="357" />
 	<Item name="Cow Egg" id="383:92" group="Spawn Eggs" />
@@ -273,7 +272,7 @@
 	<Item name="Orange Dye" id="351:14" group="Dyes" />
 	<Item name="Orange Tulip" id="38:5" group="Flowers" />
 	<Item name="Orange Wool" id="35:1" group="Wool" />
-	<Item name="Oxeye Daisy" id="35:8" group="Flowers" />
+	<Item name="Oxeye Daisy" id="38:8" group="Flowers" />
 	<Item name="Packed Ice" id="174" />
 	<Item name="Painting" id="321" />
 	<Item name="Paper" id="339" />
@@ -294,7 +293,6 @@
 	<Item name="Poisonous Potato" id="394" />
 	<Item name="Poppy" id="38" emcNames="Rose" group="Flowers" />
 	<Item name="Pork" id="319" />
-	<Item name="Pork Chop" id="320" />
 	<Item name="Potato" id="392" emcNames="Potato Item" />
 	<Item name="Powered Minecart" id="343" stack="1" group="Iron" />
 	<Item name="Powered Rail" id="27" group="Gold" />
