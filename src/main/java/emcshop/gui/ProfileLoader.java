@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -26,8 +25,8 @@ import emcshop.gui.images.ImageManager;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.PlayerProfileScraper;
 import emcshop.scraper.Rank;
-import emcshop.util.CaseInsensitiveHashMap;
 import emcshop.util.CaseInsensitiveHashSet;
+import emcshop.util.CaseInsensitiveMultimap;
 import emcshop.util.HttpClientFactory;
 import emcshop.util.PropertiesWrapper;
 
@@ -51,7 +50,7 @@ public class ProfileLoader {
 
 	private final File cacheDir;
 	private final Set<String> downloaded = new CaseInsensitiveHashSet();
-	private final Map<String, List<Job>> waitList = new CaseInsensitiveHashMap<List<Job>>();
+	private final CaseInsensitiveMultimap<Job> waitList = new CaseInsensitiveMultimap<Job>();
 	private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<String>();
 
 	private int threads = 4;
@@ -262,8 +261,7 @@ public class ProfileLoader {
 			}
 
 			//see if the image is already queued for download
-			List<Job> waiting = waitList.get(job.playerName);
-			if (waiting == null) {
+			if (!waitList.containsKey(job.playerName)) {
 				//player name is not queued for download, so add it to the queue
 				try {
 					jobsBeingProcessed++;
@@ -272,13 +270,10 @@ public class ProfileLoader {
 					//should never be thrown because the queue doesn't have a max size
 					logger.log(Level.SEVERE, "Queue's \"put\" operation was interrupted.", e);
 				}
-
-				waiting = new ArrayList<Job>();
-				waitList.put(job.playerName, waiting);
 			}
 
 			//add job to wait list
-			waiting.add(job);
+			waitList.put(job.playerName, job);
 		}
 	}
 
@@ -367,7 +362,7 @@ public class ProfileLoader {
 					downloaded.add(playerName);
 
 					waiting = waitList.get(playerName);
-					if (waiting == null) {
+					if (waiting.isEmpty()) {
 						//there are no labels waiting to be updated
 						//should never happen, there should always be at least 1 label waiting to be updated
 						continue;
@@ -400,7 +395,7 @@ public class ProfileLoader {
 					}
 				}
 
-				waitList.remove(playerName);
+				waitList.removeAll(playerName);
 			}
 		}
 	}

@@ -17,6 +17,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -393,7 +394,7 @@ public class ChartsTab extends JPanel {
 			String item = entry.getKey();
 			Integer amount = entry.getValue();
 
-			List<String> groups = index.getGroups(item);
+			Collection<String> groups = index.getGroups(item);
 			for (String group : groups) {
 				Integer groupAmount = groupAmounts.get(group);
 				if (groupAmount == null) {

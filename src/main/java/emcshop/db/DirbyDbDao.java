@@ -26,6 +26,10 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+
 import emcshop.ItemIndex;
 import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.PaymentTransaction;
@@ -290,12 +294,12 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void updateItemNamesAndAliases() throws SQLException {
 		int dbVersion = selectDbVersion();
-		Map<String, List<String>> aliases = ItemIndex.instance().getDisplayNameToEmcNamesMapping();
-		for (Map.Entry<String, List<String>> entry : aliases.entrySet()) {
-			String newName = entry.getKey();
+		Multimap<String, String> aliases = ItemIndex.instance().getDisplayNameToEmcNamesMapping();
+		for (String displayName : aliases.keySet()) {
+			String newName = displayName;
 			Integer newNameId = getItemId(newName);
 
-			List<String> oldNames = entry.getValue();
+			Collection<String> oldNames = aliases.get(displayName);
 			List<Integer> oldNameIds = new ArrayList<Integer>(oldNames.size());
 			for (String oldName : oldNames) {
 				Integer oldNameId = getItemId(oldName);
@@ -362,19 +366,14 @@ public abstract class DirbyDbDao implements DbDao {
 	public void removeDuplicateItems() throws SQLException {
 		//get the ID(s) of each item
 		PreparedStatement stmt = stmt("SELECT id, name FROM items");
-		Map<String, List<Integer>> itemIds = new HashMap<String, List<Integer>>();
+		ListMultimap<String, Integer> itemIds = ArrayListMultimap.create();
 		try {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				Integer id = rs.getInt("id");
 				String name = rs.getString("name").toLowerCase();
 
-				List<Integer> ids = itemIds.get(name);
-				if (ids == null) {
-					ids = new ArrayList<Integer>();
-					itemIds.put(name, ids);
-				}
-				ids.add(id);
+				itemIds.put(name, id);
 			}
 		} finally {
 			closeStatements(stmt);
@@ -383,7 +382,8 @@ public abstract class DirbyDbDao implements DbDao {
 		int dbVersion = selectDbVersion();
 
 		//update the transactions to use just one of the item rows, and delete the rest
-		for (List<Integer> ids : itemIds.values()) {
+		for (String itemName : itemIds.keySet()) {
+			List<Integer> ids = itemIds.get(itemName);
 			if (ids.size() <= 1) {
 				//there are no duplicates
 				continue;

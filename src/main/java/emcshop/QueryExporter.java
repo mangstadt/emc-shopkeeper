@@ -11,11 +11,13 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
+
+import com.google.common.collect.ListMultimap;
+
 import emcshop.db.Inventory;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
@@ -179,7 +181,7 @@ public class QueryExporter {
 		bbCode.close(); //close "b"
 	}
 
-	public static String generatePlayersCsv(List<PlayerGroup> players, Map<PlayerGroup, List<ItemGroup>> items, Date from, Date to) {
+	public static String generatePlayersCsv(List<PlayerGroup> players, ListMultimap<PlayerGroup, ItemGroup> items, Date from, Date to) {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
 		CSVWriter writer = new CSVWriter(sw);
@@ -215,7 +217,7 @@ public class QueryExporter {
 		return sw.toString();
 	}
 
-	public static String generatePlayersBBCode(List<PlayerGroup> playerGroups, Map<PlayerGroup, List<ItemGroup>> itemGroups, Date from, Date to) {
+	public static String generatePlayersBBCode(List<PlayerGroup> playerGroups, ListMultimap<PlayerGroup, ItemGroup> itemGroups, Date from, Date to) {
 		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 

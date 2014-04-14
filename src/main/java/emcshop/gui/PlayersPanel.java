@@ -28,6 +28,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import net.miginfocom.swing.MigLayout;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
 import emcshop.AppContext;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
@@ -55,9 +59,9 @@ public class PlayersPanel extends JPanel {
 
 	private final DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-	private final Map<PlayerGroup, List<ItemGroup>> itemGroups = new HashMap<PlayerGroup, List<ItemGroup>>();
+	private final ListMultimap<PlayerGroup, ItemGroup> itemGroups = ArrayListMultimap.create();
 	private List<PlayerGroup> displayedPlayers;
-	private Map<PlayerGroup, List<ItemGroup>> displayedItems;
+	private ListMultimap<PlayerGroup, ItemGroup> displayedItems;
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 	private List<ItemsTable> tables = new ArrayList<ItemsTable>();
@@ -74,8 +78,8 @@ public class PlayersPanel extends JPanel {
 		//add all the data to Lists so they can be sorted
 		this.playerGroups = new ArrayList<PlayerGroup>(playerGroups);
 		for (PlayerGroup playerGroup : playerGroups) {
-			List<ItemGroup> itemGroups = new ArrayList<ItemGroup>(playerGroup.getItems().values());
-			this.itemGroups.put(playerGroup, itemGroups);
+			Collection<ItemGroup> itemGroups = playerGroup.getItems().values();
+			this.itemGroups.putAll(playerGroup, itemGroups);
 		}
 
 		profileLoader = context.get(ProfileLoader.class);
@@ -131,7 +135,7 @@ public class PlayersPanel extends JPanel {
 		return displayedPlayers;
 	}
 
-	public Map<PlayerGroup, List<ItemGroup>> getDisplayedItems() {
+	public ListMultimap<PlayerGroup, ItemGroup> getDisplayedItems() {
 		return displayedItems;
 	}
 
@@ -355,18 +359,18 @@ public class PlayersPanel extends JPanel {
 		return filteredPlayers;
 	}
 
-	private Map<PlayerGroup, List<ItemGroup>> filterItems(List<PlayerGroup> filteredPlayers) {
+	private ListMultimap<PlayerGroup, ItemGroup> filterItems(List<PlayerGroup> filteredPlayers) {
 		if (filteredPlayerNames.isEmpty() && filteredItemNames.isEmpty()) {
 			return itemGroups;
 		}
 
 		List<PlayerGroup> removePlayers = new ArrayList<PlayerGroup>();
-		Map<PlayerGroup, List<ItemGroup>> filteredItems = new HashMap<PlayerGroup, List<ItemGroup>>();
+		ListMultimap<PlayerGroup, ItemGroup> filteredItems = ArrayListMultimap.create();
 		for (PlayerGroup playerGroup : filteredPlayers) {
-			List<ItemGroup> itemGroups;
+			Collection<ItemGroup> itemGroups;
 			if (filteredItemNames.isEmpty()) {
 				itemGroups = this.itemGroups.get(playerGroup);
-				filteredItems.put(playerGroup, itemGroups);
+				filteredItems.putAll(playerGroup, itemGroups);
 			} else {
 				itemGroups = new ArrayList<ItemGroup>();
 				for (ItemGroup itemGroup : this.itemGroups.get(playerGroup)) {
@@ -378,7 +382,7 @@ public class PlayersPanel extends JPanel {
 				if (itemGroups.isEmpty()) {
 					removePlayers.add(playerGroup);
 				} else {
-					filteredItems.put(playerGroup, itemGroups);
+					filteredItems.putAll(playerGroup, itemGroups);
 				}
 			}
 		}
@@ -388,7 +392,7 @@ public class PlayersPanel extends JPanel {
 		return filteredItems;
 	}
 
-	private void sortData(List<PlayerGroup> players, final Map<PlayerGroup, List<ItemGroup>> items) {
+	private void sortData(List<PlayerGroup> players, final ListMultimap<PlayerGroup, ItemGroup> items) {
 		switch (sort) {
 		case PLAYER:
 			//sort by player name

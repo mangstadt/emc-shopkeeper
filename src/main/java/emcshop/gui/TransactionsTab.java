@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -27,6 +26,7 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import com.google.common.collect.ListMultimap;
 import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.AppContext;
@@ -587,10 +587,8 @@ public class TransactionsTab extends JPanel {
 				netTotal += item.getNetAmount();
 			}
 		} else if (playersPanel != null) {
-			for (List<ItemGroup> playerItems : playersPanel.getDisplayedItems().values()) {
-				for (ItemGroup item : playerItems) {
-					netTotal += item.getNetAmount();
-				}
+			for (ItemGroup item : playersPanel.getDisplayedItems().values()) {
+				netTotal += item.getNetAmount();
 			}
 		} else if (transactionsTable != null) {
 			for (ShopTransaction transaction : transactionsTable.getDisplayedTransactions()) {
@@ -701,7 +699,7 @@ public class TransactionsTab extends JPanel {
 
 			if (playersPanel != null) {
 				List<PlayerGroup> players = playersPanel.getDisplayedPlayers();
-				Map<PlayerGroup, List<ItemGroup>> items = playersPanel.getDisplayedItems();
+				ListMultimap<PlayerGroup, ItemGroup> items = playersPanel.getDisplayedItems();
 				return QueryExporter.generatePlayersBBCode(players, items, from, to);
 			}
 
@@ -724,7 +722,7 @@ public class TransactionsTab extends JPanel {
 
 			if (playersPanel != null) {
 				List<PlayerGroup> players = playersPanel.getDisplayedPlayers();
-				Map<PlayerGroup, List<ItemGroup>> items = playersPanel.getDisplayedItems();
+				ListMultimap<PlayerGroup, ItemGroup> items = playersPanel.getDisplayedItems();
 				return QueryExporter.generatePlayersCsv(players, items, from, to);
 			}
 

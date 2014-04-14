@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -23,23 +21,25 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * Scrapes information from player profile pages.
  */
 public class PlayerProfileScraper {
 	private static final Map<String, Rank> titleToRankMapping;
 	static {
-		Map<String, Rank> m = new HashMap<String, Rank>();
-		m.put("Iron Supporter", Rank.IRON);
-		m.put("Gold Supporter", Rank.GOLD);
-		m.put("Diamond Supporter", Rank.DIAMOND);
-		m.put("Moderator", Rank.MODERATOR);
-		m.put("Senior Staff", Rank.SENIOR_STAFF);
-		m.put("Developer", Rank.DEVELOPER);
-		m.put("Lead Developer", Rank.ADMIN);
-		m.put("Community Manager", Rank.ADMIN);
+		ImmutableMap.Builder<String, Rank> builder = ImmutableMap.builder();
+		builder.put("Iron Supporter", Rank.IRON);
+		builder.put("Gold Supporter", Rank.GOLD);
+		builder.put("Diamond Supporter", Rank.DIAMOND);
+		builder.put("Moderator", Rank.MODERATOR);
+		builder.put("Senior Staff", Rank.SENIOR_STAFF);
+		builder.put("Developer", Rank.DEVELOPER);
+		builder.put("Lead Developer", Rank.ADMIN);
+		builder.put("Community Manager", Rank.ADMIN);
 
-		titleToRankMapping = Collections.unmodifiableMap(m);
+		titleToRankMapping = builder.build();
 	}
 
 	/**

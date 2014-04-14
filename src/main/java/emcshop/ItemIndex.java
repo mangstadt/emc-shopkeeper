@@ -2,11 +2,8 @@ package emcshop;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +21,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+
 /**
  * DAO for accessing the display names, transaction page names, and image file
  * names of all Minecraft items.
@@ -36,7 +40,7 @@ public class ItemIndex {
 	private final Map<String, String> minecraftIdToDisplayName;
 	private final Map<String, String> itemImages;
 	private final Map<String, Integer> stackSizes;
-	private final Map<String, List<String>> itemNameToGroups;
+	private final Multimap<String, String> itemNameToGroups;
 	private final Set<String> itemGroupNames;
 	private final List<String> itemNames;
 
@@ -89,13 +93,13 @@ public class ItemIndex {
 			throw new RuntimeException(e);
 		}
 
-		Map<String, String> minecraftIdToDisplayName = new HashMap<String, String>();
-		Map<String, String> emcNameToDisplayName = new HashMap<String, String>();
-		Map<String, String> itemImages = new HashMap<String, String>();
-		Map<String, List<String>> itemNameToGroups = new HashMap<String, List<String>>();
-		Map<String, Integer> stackSizes = new HashMap<String, Integer>();
-		List<String> itemNames = new ArrayList<String>();
-		Set<String> itemGroupNames = new HashSet<String>();
+		ImmutableMap.Builder<String, String> minecraftIdToDisplayName = ImmutableMap.builder();
+		ImmutableMap.Builder<String, String> emcNameToDisplayName = ImmutableMap.builder();
+		ImmutableMap.Builder<String, String> itemImages = ImmutableMap.builder();
+		ImmutableMultimap.Builder<String, String> itemNameToGroups = ImmutableMultimap.builder();
+		ImmutableMap.Builder<String, Integer> stackSizes = ImmutableMap.builder();
+		ImmutableList.Builder<String> itemNames = ImmutableList.builder();
+		ImmutableSet.Builder<String> itemGroupNames = ImmutableSet.builder();
 		for (int i = 0; i < itemNodes.getLength(); i++) {
 			Element itemNode = (Element) itemNodes.item(i);
 			String name = itemNode.getAttribute("name");
@@ -130,17 +134,17 @@ public class ItemIndex {
 			if (!groups.isEmpty()) {
 				List<String> groupsList = Arrays.asList(groups.split(","));
 				itemGroupNames.addAll(groupsList);
-				itemNameToGroups.put(name.toLowerCase(), groupsList);
+				itemNameToGroups.putAll(name.toLowerCase(), groupsList);
 			}
 		}
 
-		this.emcNameToDisplayName = Collections.unmodifiableMap(emcNameToDisplayName);
-		this.minecraftIdToDisplayName = Collections.unmodifiableMap(minecraftIdToDisplayName);
-		this.itemImages = Collections.unmodifiableMap(itemImages);
-		this.stackSizes = Collections.unmodifiableMap(stackSizes);
-		this.itemNames = Collections.unmodifiableList(itemNames);
-		this.itemGroupNames = Collections.unmodifiableSet(itemGroupNames);
-		this.itemNameToGroups = Collections.unmodifiableMap(itemNameToGroups);
+		this.emcNameToDisplayName = emcNameToDisplayName.build();
+		this.minecraftIdToDisplayName = minecraftIdToDisplayName.build();
+		this.itemImages = itemImages.build();
+		this.stackSizes = stackSizes.build();
+		this.itemNames = itemNames.build();
+		this.itemGroupNames = itemGroupNames.build();
+		this.itemNameToGroups = itemNameToGroups.build();
 	}
 
 	/**
@@ -220,18 +224,13 @@ public class ItemIndex {
 	 * {@link #getEmcNameToDisplayNameMapping()}).
 	 * @return the mappings
 	 */
-	public Map<String, List<String>> getDisplayNameToEmcNamesMapping() {
-		Map<String, List<String>> mappings = new HashMap<String, List<String>>();
+	public Multimap<String, String> getDisplayNameToEmcNamesMapping() {
+		Multimap<String, String> mappings = ArrayListMultimap.create();
 		for (Map.Entry<String, String> entry : emcNameToDisplayName.entrySet()) {
 			String emcName = entry.getKey();
 			String displayName = entry.getValue();
 
-			List<String> emcNames = mappings.get(displayName);
-			if (emcNames == null) {
-				emcNames = new ArrayList<String>();
-				mappings.put(displayName, emcNames);
-			}
-			emcNames.add(emcName);
+			mappings.put(displayName, emcName);
 		}
 		return mappings;
 	}
@@ -266,8 +265,7 @@ public class ItemIndex {
 	 * @param itemName the item name (e.g. "Oak Log")
 	 * @return the groups (e.g. "Wood")
 	 */
-	public List<String> getGroups(String itemName) {
-		List<String> groups = itemNameToGroups.get(itemName.toLowerCase());
-		return (groups == null) ? Collections.<String> emptyList() : groups;
+	public Collection<String> getGroups(String itemName) {
+		return itemNameToGroups.get(itemName.toLowerCase());
 	}
 }
