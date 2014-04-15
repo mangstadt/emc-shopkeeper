@@ -166,7 +166,7 @@ public class TransactionPageScraper {
 		}
 
 		ShopTransaction transaction = new ShopTransaction();
-		transaction.setQuantity(Integer.parseInt(m.group(1).replace(",", "")) * negate);
+		transaction.setQuantity(parseNumber(m.group(1)) * negate);
 		transaction.setItem(itemIndex.getDisplayName(m.group(2)));
 		transaction.setPlayer(m.group(3));
 		return transaction;
@@ -250,7 +250,7 @@ public class TransactionPageScraper {
 			return null;
 		}
 
-		return Integer.valueOf(m.group(1).replace(",", ""));
+		return parseNumber(m.group(1));
 	}
 
 	private String parseDescription(Element transactionElement) {
@@ -260,16 +260,16 @@ public class TransactionPageScraper {
 
 	private Date parseTs(Element transactionElement) throws ParseException {
 		Element tsElement = transactionElement.select("div.time abbr[data-time]").first();
-		if (tsElement != null) {
-			String dataTime = tsElement.attr("data-time");
-			long ts = Long.parseLong(dataTime) * 1000; //do not check for NumberFormatException (exception is caught in the constructor)
-			return new Date(ts);
-		} else {
+		if (tsElement == null) {
 			tsElement = transactionElement.select("div.time span[title]").first();
 			String tsText = tsElement.attr("title");
 			DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
 			return df.parse(tsText);
 		}
+
+		String dataTime = tsElement.attr("data-time");
+		long ts = Long.parseLong(dataTime) * 1000; //NumberFormatException is caught elsewhere
+		return new Date(ts);
 	}
 
 	private int parseAmount(Element element) {
@@ -279,7 +279,7 @@ public class TransactionPageScraper {
 		Matcher m = amountRegex.matcher(amountText);
 		m.find();
 
-		int amount = Integer.parseInt(m.group(2).replace(",", "")); //do not check for NumberFormatException (exception is caught in the constructor)
+		int amount = parseNumber(m.group(2));
 		if ("-".equals(m.group(1))) {
 			amount *= -1;
 		}
@@ -287,8 +287,13 @@ public class TransactionPageScraper {
 	}
 
 	private int parseBalance(Element element) {
-		Element balanceElement = element.select("div.balance").first(); //do not check for null (exception is caught in the constructor)
-		String balanceText = balanceElement.text().replace(",", "");
-		return Integer.parseInt(balanceText);
+		Element balanceElement = element.select("div.balance").first();
+		String balanceText = balanceElement.text();
+		return parseNumber(balanceText);
+	}
+
+	private int parseNumber(String value) {
+		value = value.replace(",", "");
+		return Integer.parseInt(value); //NumberFormatException is caught elsewhere
 	}
 }
