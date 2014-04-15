@@ -13,22 +13,27 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * Downloads the list of online players from the EMC website.
  */
 public class OnlinePlayersScraper {
-	private static final Map<EmcServer, Integer> serverNumbers = new EnumMap<EmcServer, Integer>(EmcServer.class);
+	private static final Map<EmcServer, Integer> serverNumbers;
 	static {
-		serverNumbers.put(EmcServer.SMP1, 1);
-		serverNumbers.put(EmcServer.SMP2, 2);
-		serverNumbers.put(EmcServer.SMP3, 4);
-		serverNumbers.put(EmcServer.SMP4, 5);
-		serverNumbers.put(EmcServer.SMP5, 6);
-		serverNumbers.put(EmcServer.SMP6, 7);
-		serverNumbers.put(EmcServer.SMP7, 8);
-		serverNumbers.put(EmcServer.SMP8, 9);
-		serverNumbers.put(EmcServer.SMP9, 10);
-		serverNumbers.put(EmcServer.UTOPIA, 3);
+		Map<EmcServer, Integer> m = new EnumMap<EmcServer, Integer>(EmcServer.class);
+		m.put(EmcServer.SMP1, 1);
+		m.put(EmcServer.SMP2, 2);
+		m.put(EmcServer.SMP3, 4);
+		m.put(EmcServer.SMP4, 5);
+		m.put(EmcServer.SMP5, 6);
+		m.put(EmcServer.SMP6, 7);
+		m.put(EmcServer.SMP7, 8);
+		m.put(EmcServer.SMP8, 9);
+		m.put(EmcServer.SMP9, 10);
+		m.put(EmcServer.UTOPIA, 3);
+
+		serverNumbers = ImmutableMap.copyOf(m);
 	}
 
 	private final HttpClient client;
