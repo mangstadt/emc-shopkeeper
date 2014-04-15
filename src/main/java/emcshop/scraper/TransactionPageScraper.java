@@ -47,6 +47,7 @@ public class TransactionPageScraper {
 	private static final Pattern vaultFeeRegex = Pattern.compile("^Opened cross-server vault$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern signInBonusRegex = Pattern.compile("^Daily sign-in bonus$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern voteBonusRegex = Pattern.compile("^Voted for Empire Minecraft on .*$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern mailFeeRegex = Pattern.compile("^Sent mail to .*$", Pattern.CASE_INSENSITIVE);
 
 	private static final ItemIndex itemIndex = ItemIndex.instance();
 
@@ -227,6 +228,13 @@ public class TransactionPageScraper {
 		if (m.find()) {
 			BonusFeeTransaction t = new BonusFeeTransaction();
 			t.setEggifyFee(true);
+			return t;
+		}
+
+		m = mailFeeRegex.matcher(description);
+		if (m.find()) {
+			BonusFeeTransaction t = new BonusFeeTransaction();
+			t.setMailFee(true);
 			return t;
 		}
 

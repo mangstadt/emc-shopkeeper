@@ -143,6 +143,13 @@ public class TransactionPageScraperTest {
 		bft.setEggifyFee(true);
 		expected.add(bft);
 
+		bft = new BonusFeeTransaction();
+		bft.setTs(new Date(1354226247000L));
+		bft.setAmount(-50);
+		bft.setBalance(212990);
+		bft.setMailFee(true);
+		expected.add(bft);
+
 		DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
 		rt = new RawTransaction();
 		rt.setTs(df.parse("Nov 22, 2012 at 9:54 PM"));

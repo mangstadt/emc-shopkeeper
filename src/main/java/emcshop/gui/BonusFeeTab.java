@@ -181,6 +181,7 @@ public class BonusFeeTab extends JPanel {
 			rows.add(new Row("Vault fees", bonusFee.getVault()));
 			rows.add(new Row("Sign-in bonuses", bonusFee.getSignIn()));
 			rows.add(new Row("Voting bonuses", bonusFee.getVote()));
+			rows.add(new Row("Mail fees", bonusFee.getMail()));
 
 			sortData(); //sort according to the current sorting rules
 		}

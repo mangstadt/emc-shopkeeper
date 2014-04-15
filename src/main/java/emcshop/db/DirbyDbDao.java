@@ -1089,8 +1089,8 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 
 		//tally up totals
-		int horse, lock, eggify, vault, signIn, vote;
-		horse = lock = eggify = vault = signIn = vote = 0;
+		int horse, lock, eggify, vault, signIn, vote, mail;
+		horse = lock = eggify = vault = signIn = vote = mail = 0;
 		for (BonusFeeTransaction transaction : transactions) {
 			int amount = transaction.getAmount();
 
@@ -1123,9 +1123,14 @@ public abstract class DirbyDbDao implements DbDao {
 				vote += amount;
 				continue;
 			}
+
+			if (transaction.isMailFee()) {
+				mail += amount;
+				continue;
+			}
 		}
 
-		PreparedStatement stmt = stmt("UPDATE bonuses_fees SET eggify = eggify + ?, horse = horse + ?, lock = lock + ?, sign_in = sign_in + ?, vault = vault + ?, vote = vote + ?");
+		PreparedStatement stmt = stmt("UPDATE bonuses_fees SET eggify = eggify + ?, horse = horse + ?, lock = lock + ?, sign_in = sign_in + ?, vault = vault + ?, vote = vote + ?, mail = mail + ?");
 		try {
 			int i = 1;
 			stmt.setInt(i++, eggify);
@@ -1134,6 +1139,7 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.setInt(i++, signIn);
 			stmt.setInt(i++, vault);
 			stmt.setInt(i++, vote);
+			stmt.setInt(i++, mail);
 			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
@@ -1157,6 +1163,7 @@ public abstract class DirbyDbDao implements DbDao {
 			bonusesFees.setSignIn(rs.getInt("sign_in"));
 			bonusesFees.setVault(rs.getInt("vault"));
 			bonusesFees.setVote(rs.getInt("vote"));
+			bonusesFees.setMail(rs.getInt("mail"));
 			return bonusesFees;
 		} finally {
 			closeStatements(stmt);

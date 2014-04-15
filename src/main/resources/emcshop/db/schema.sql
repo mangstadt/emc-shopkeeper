@@ -80,7 +80,8 @@ CREATE TABLE bonuses_fees(
 	eggify INT NOT NULL DEFAULT 0,
 	vault INT NOT NULL DEFAULT 0,
 	sign_in INT NOT NULL DEFAULT 0,
-	vote INT NOT NULL DEFAULT 0
+	vote INT NOT NULL DEFAULT 0,
+	mail INT NOT NULL DEFAULT 0
 );
 INSERT INTO bonuses_fees (since) VALUES (NULL);
 

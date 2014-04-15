@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class BonusFee {
 	private Date since;
-	private int horse, lock, eggify, vault, signIn, vote;
+	private int horse, lock, eggify, vault, signIn, vote, mail;
 
 	public Date getSince() {
 		return since;
@@ -60,5 +60,13 @@ public class BonusFee {
 
 	public void setVote(int vote) {
 		this.vote = vote;
+	}
+
+	public int getMail() {
+		return mail;
+	}
+
+	public void setMail(int mail) {
+		this.mail = mail;
 	}
 }

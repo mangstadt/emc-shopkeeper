@@ -5,7 +5,7 @@ package emcshop.scraper;
  * @author Michael Angstadt
  */
 public class BonusFeeTransaction extends RupeeTransaction {
-	private boolean horseFee, lockFee, eggifyFee, vaultFee, signInBonus, voteBonus;
+	private boolean horseFee, lockFee, eggifyFee, vaultFee, signInBonus, voteBonus, mailFee;
 
 	public boolean isHorseFee() {
 		return horseFee;
@@ -55,6 +55,14 @@ public class BonusFeeTransaction extends RupeeTransaction {
 		this.voteBonus = voteBonus;
 	}
 
+	public boolean isMailFee() {
+		return mailFee;
+	}
+
+	public void setMailFee(boolean mailFee) {
+		this.mailFee = mailFee;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -62,6 +70,7 @@ public class BonusFeeTransaction extends RupeeTransaction {
 		result = prime * result + (eggifyFee ? 1231 : 1237);
 		result = prime * result + (horseFee ? 1231 : 1237);
 		result = prime * result + (lockFee ? 1231 : 1237);
+		result = prime * result + (mailFee ? 1231 : 1237);
 		result = prime * result + (signInBonus ? 1231 : 1237);
 		result = prime * result + (vaultFee ? 1231 : 1237);
 		result = prime * result + (voteBonus ? 1231 : 1237);
@@ -70,25 +79,17 @@ public class BonusFeeTransaction extends RupeeTransaction {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
 		BonusFeeTransaction other = (BonusFeeTransaction) obj;
-		if (eggifyFee != other.eggifyFee)
-			return false;
-		if (horseFee != other.horseFee)
-			return false;
-		if (lockFee != other.lockFee)
-			return false;
-		if (signInBonus != other.signInBonus)
-			return false;
-		if (vaultFee != other.vaultFee)
-			return false;
-		if (voteBonus != other.voteBonus)
-			return false;
+		if (eggifyFee != other.eggifyFee) return false;
+		if (horseFee != other.horseFee) return false;
+		if (lockFee != other.lockFee) return false;
+		if (mailFee != other.mailFee) return false;
+		if (signInBonus != other.signInBonus) return false;
+		if (vaultFee != other.vaultFee) return false;
+		if (voteBonus != other.voteBonus) return false;
 		return true;
 	}
 }
