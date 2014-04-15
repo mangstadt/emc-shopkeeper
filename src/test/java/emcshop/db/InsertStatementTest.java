@@ -8,10 +8,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import org.apache.derby.jdbc.EmbeddedDriver;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,11 +22,11 @@ public class InsertStatementTest {
 	private static Connection conn;
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() throws Throwable {
 		conn = startMemoryDb();
 
 		//@formatter:off
-		conn.createStatement().execute(
+		execute(
 		"CREATE TABLE test(" +
 			"id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY," +
 			"timestampCol TIMESTAMP," +
@@ -37,8 +40,13 @@ public class InsertStatementTest {
 
 	@After
 	public void after() throws Exception {
-		conn.createStatement().execute("DELETE FROM test");
-		conn.createStatement().execute("ALTER TABLE test ALTER COLUMN id RESTART WITH 1");
+		execute("DELETE FROM test");
+		execute("ALTER TABLE test ALTER COLUMN id RESTART WITH 1");
+	}
+
+	@AfterClass
+	public static void afterClass() throws Throwable {
+		conn.close();
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -110,7 +118,8 @@ public class InsertStatementTest {
 		stmt.setString("stringCol", "value1");
 		assertEquals(Integer.valueOf(1), stmt.execute(conn));
 
-		ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM test ORDER BY id");
+		Statement statement = conn.createStatement();
+		ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY id");
 
 		rs.next();
 		assertEquals(1, rs.getInt("id"));
@@ -120,6 +129,8 @@ public class InsertStatementTest {
 		assertEquals("value1", rs.getString("stringCol"));
 
 		assertFalse(rs.next());
+
+		statement.close();
 	}
 
 	@Test
@@ -162,7 +173,8 @@ public class InsertStatementTest {
 
 		assertEquals(Integer.valueOf(1), stmt.execute(conn));
 
-		ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM test ORDER BY id");
+		Statement statement = conn.createStatement();
+		ResultSet rs = statement.executeQuery("SELECT * FROM test ORDER BY id");
 		int id = 1;
 
 		rs.next();
@@ -194,10 +206,23 @@ public class InsertStatementTest {
 		assertNull(rs.getString("stringCol"));
 
 		assertFalse(rs.next());
+
+		statement.close();
 	}
 
-	private static Connection startMemoryDb() throws ClassNotFoundException, SQLException {
+	private static Connection startMemoryDb() throws Throwable {
+		Class.forName(EmbeddedDriver.class.getName()).newInstance();
+
 		String jdbcUrl = "jdbc:derby:memory:emc-shopkeeper;create=true";
 		return DriverManager.getConnection(jdbcUrl);
+	}
+
+	private static void execute(String sql) throws SQLException {
+		Statement stmt = conn.createStatement();
+		try {
+			stmt.execute(sql);
+		} finally {
+			stmt.close();
+		}
 	}
 }

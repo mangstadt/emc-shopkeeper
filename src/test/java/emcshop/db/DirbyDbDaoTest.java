@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.logging.LogManager;
 
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import emcshop.ItemIndex;
@@ -40,10 +42,12 @@ import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateGenerator;
 
 public class DirbyDbDaoTest {
-	private static final DirbyDbDao dao;
+	private static DirbyDbDao dao;
 	private static Connection conn;
-	private static final int appleId, diamondId, notchId;
-	static {
+	private static int appleId, diamondId, notchId;
+
+	@BeforeClass
+	public static void beforeClass() {
 		//disable log messages
 		LogManager.getLogManager().reset();
 
@@ -65,6 +69,11 @@ public class DirbyDbDaoTest {
 	public void after() {
 		conn = dao.getConnection(); //some tests use their own DAO instance
 		dao.rollback();
+	}
+
+	@AfterClass
+	public static void afterClass() throws Throwable {
+		dao.close();
 	}
 
 	@Test
