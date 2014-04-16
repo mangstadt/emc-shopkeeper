@@ -122,6 +122,7 @@ public class LoginUtils {
 		if (rememberMe) {
 			params.add(new BasicNameValuePair("remember", "1"));
 		}
+		params.add(new BasicNameValuePair("cookie_check", "1"));
 		request.setEntity(new UrlEncodedFormEntity(params, Consts.UTF_8));
 
 		HttpResponse response = client.execute(request);
