@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import emcshop.ItemIndex;
 import emcshop.QueryExporter;
+import emcshop.Settings;
 import emcshop.cli.model.UpdateModelCli;
 import emcshop.cli.view.FirstUpdateViewCli;
 import emcshop.cli.view.LoginShower;
@@ -32,7 +33,6 @@ import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
 import emcshop.scraper.TransactionPullerFactory;
-import emcshop.util.Settings;
 import emcshop.view.IUpdateView;
 
 public class CliController {

@@ -12,8 +12,8 @@ import java.util.Date;
 import org.junit.Test;
 
 import emcshop.AppContext;
+import emcshop.Settings;
 import emcshop.scraper.EmcSession;
-import emcshop.util.Settings;
 
 public class LoginModelImplTest {
 	@Test

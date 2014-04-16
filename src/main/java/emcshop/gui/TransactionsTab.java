@@ -31,13 +31,13 @@ import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.AppContext;
 import emcshop.QueryExporter;
+import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.FilterList;
-import emcshop.util.Settings;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel {

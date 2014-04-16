@@ -28,13 +28,13 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
+import emcshop.Settings;
 import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.EmcServer;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.FilterList;
 import emcshop.util.RelativeDateFormat;
-import emcshop.util.Settings;
 
 /**
  * A table that displays transactions by date

@@ -1,4 +1,4 @@
-package emcshop.util;
+package emcshop;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import emcshop.scraper.EmcSession;
+import emcshop.util.PropertiesWrapper;
 
 public class Settings {
 	private static final Logger logger = Logger.getLogger(Settings.class.getName());

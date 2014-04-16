@@ -11,9 +11,9 @@ import java.util.List;
 
 import emcshop.AppContext;
 import emcshop.BackupManager;
+import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.util.GuiUtils;
-import emcshop.util.Settings;
 import emcshop.util.ZipUtils.ZipListener;
 
 public class BackupModelImpl implements IBackupModel {

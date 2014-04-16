@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import emcshop.Settings;
 import emcshop.db.DbDao;
 
 /**

@@ -46,6 +46,7 @@ import org.apache.commons.io.FileUtils;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.QueryExporter;
+import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.db.Inventory;
 import emcshop.gui.images.ImageManager;
@@ -53,7 +54,6 @@ import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.util.ChesterFile;
 import emcshop.util.FilterList;
 import emcshop.util.GuiUtils;
-import emcshop.util.Settings;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {

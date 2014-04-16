@@ -33,6 +33,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 import emcshop.AppContext;
+import emcshop.Settings;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
@@ -42,7 +43,6 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.EmcServer;
 import emcshop.util.FilterList;
-import emcshop.util.Settings;
 
 /**
  * A panel that displays transactions grouped by player.

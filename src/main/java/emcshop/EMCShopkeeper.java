@@ -52,7 +52,6 @@ import emcshop.scraper.EmcSession;
 import emcshop.scraper.OnlinePlayersScraper;
 import emcshop.util.GuiUtils;
 import emcshop.util.HttpClientFactory;
-import emcshop.util.Settings;
 import emcshop.util.ZipUtils.ZipListener;
 import emcshop.view.DatabaseStartupErrorViewImpl;
 import emcshop.view.IDatabaseStartupErrorView;
