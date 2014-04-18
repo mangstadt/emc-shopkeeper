@@ -11,7 +11,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import emcshop.Settings;
 import emcshop.db.DbDao;
 
 /**
@@ -20,7 +19,7 @@ import emcshop.db.DbDao;
 public class ClasspathUtilsTest {
 	@Test
 	public void getResourceAsStream_relative_to_ClasspathUtils() throws Exception {
-		assertNotNull(ClasspathUtils.getResourceAsStream(Settings.class.getSimpleName() + ".class"));
+		assertNotNull(ClasspathUtils.getResourceAsStream(TestUtils.class.getSimpleName() + ".class"));
 	}
 
 	@Test(expected = FileNotFoundException.class)
