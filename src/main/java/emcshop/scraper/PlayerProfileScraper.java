@@ -33,6 +33,8 @@ public class PlayerProfileScraper {
 		builder.put("Iron Supporter", Rank.IRON);
 		builder.put("Gold Supporter", Rank.GOLD);
 		builder.put("Diamond Supporter", Rank.DIAMOND);
+		builder.put("Build Team", Rank.HELPER);
+		builder.put("Contribution Team", Rank.HELPER);
 		builder.put("Moderator", Rank.MODERATOR);
 		builder.put("Senior Staff", Rank.SENIOR_STAFF);
 		builder.put("Developer", Rank.DEVELOPER);
@@ -97,7 +99,9 @@ public class PlayerProfileScraper {
 
 		profile.setPlayerName(scrapedPlayerName);
 		profile.setPortraitUrl(scrapePortraitUrl(document));
-		profile.setRank(scrapeRank(document));
+		String title = scrapeTitle(document);
+		profile.setTitle(title);
+		profile.setRank(titleToRankMapping.get(title));
 		profile.setJoined(scrapeJoined(document));
 
 		return profile;
@@ -161,14 +165,12 @@ public class PlayerProfileScraper {
 		return src.isEmpty() ? null : src;
 	}
 
-	private Rank scrapeRank(Document document) {
-		Elements elements = document.select(".userTitle span");
+	private String scrapeTitle(Document document) {
+		Elements elements = document.select(".userTitle span"); //supporting members
 		if (elements.isEmpty()) {
-			return null;
+			elements = document.select(".userTitle"); //non-supporting members
 		}
-
-		String title = elements.first().text();
-		return titleToRankMapping.get(title);
+		return elements.isEmpty() ? null : elements.first().text();
 	}
 
 	private Date scrapeJoined(Document document) {

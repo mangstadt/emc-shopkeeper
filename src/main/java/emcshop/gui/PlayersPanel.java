@@ -262,16 +262,25 @@ public class PlayersPanel extends JPanel {
 
 			JPanel header = new JPanel(new MigLayout("insets 3"));
 
+			int rows = 3;
+			String title = profileLoader.getTitle(player.getName());
+			if (title != null) {
+				rows++;
+			}
+			Date joined = profileLoader.getJoinDate(player.getName());
+			if (joined != null) {
+				rows++;
+			}
+
 			JLabel profileImage = new JLabel();
 			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 			profileImage.setVerticalAlignment(SwingConstants.TOP);
 			profileLoader.loadPortrait(player.getName(), profileImage, profileImageSize);
-			header.add(profileImage, "span 1 4, w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
+			header.add(profileImage, "span 1 " + rows + ", w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
 
-			Color rankColor = profileLoader.getRankColor(player.getName());
-			String hex = String.format("#%02x%02x%02x", rankColor.getRed(), rankColor.getGreen(), rankColor.getBlue());
-			JLabel playerName = new ClickableLabel("<html><h3><u><font color=" + hex + ">" + player.getName(), "http://u.emc.gs/" + player.getName());
+			JLabel playerName = new ClickableLabel("<html><h3><u>" + player.getName(), "http://u.emc.gs/" + player.getName());
 			playerName.setToolTipText("View player's profile");
+
 			EmcServer server = onlinePlayersMonitor.getPlayerServer(player.getName());
 			if (server != null) {
 				header.add(playerName, "span 2, split 2");
@@ -283,7 +292,14 @@ public class PlayersPanel extends JPanel {
 				header.add(playerName, "span 2, wrap");
 			}
 
-			Date joined = profileLoader.getJoinDate(player.getName());
+			if (title != null) {
+				Color rankColor = profileLoader.getRankColor(player.getName());
+				String hex = String.format("#%02x%02x%02x", rankColor.getRed(), rankColor.getGreen(), rankColor.getBlue());
+
+				JLabel playerTitle = new JLabel("<html><font color=" + hex + ">" + title);
+				header.add(playerTitle, "gaptop 0, span 2, wrap");
+			}
+
 			if (joined != null) {
 				header.add(new JLabel("Joined:"));
 				header.add(new JLabel(dateFormat.format(joined)), "wrap");

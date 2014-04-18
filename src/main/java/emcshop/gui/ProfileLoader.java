@@ -43,6 +43,7 @@ public class ProfileLoader {
 		rankToColor.put(Rank.IRON, new Color(128, 128, 128));
 		rankToColor.put(Rank.GOLD, new Color(181, 181, 0));
 		rankToColor.put(Rank.DIAMOND, new Color(0, 181, 194));
+		rankToColor.put(Rank.HELPER, new Color(224, 165, 0));
 		rankToColor.put(Rank.MODERATOR, new Color(0, 64, 0));
 		rankToColor.put(Rank.SENIOR_STAFF, new Color(0, 255, 0));
 		rankToColor.put(Rank.DEVELOPER, new Color(0, 0, 128));
@@ -222,6 +223,16 @@ public class ProfileLoader {
 	}
 
 	/**
+	 * Gets a player's title.
+	 * @param the player name
+	 * @return the title (e.g. "Diamond Supporter") or null if not found
+	 */
+	public String getTitle(String playerName) {
+		PlayerProfileProperties props = loadProfileData(playerName);
+		return (props == null) ? null : props.getTitle();
+	}
+
+	/**
 	 * Loads a player's profile data from the cache.
 	 * @param playerName the player name
 	 * @return the profile data or null if not found
@@ -249,6 +260,7 @@ public class ProfileLoader {
 		PlayerProfileProperties props = new PlayerProfileProperties();
 		props.setPrivate(profile.isPrivate());
 		props.setRank(profile.getRank());
+		props.setTitle(profile.getTitle());
 		props.setJoined(profile.getJoined());
 
 		File file = getPropertiesFile(profile.getPlayerName());
@@ -445,6 +457,7 @@ public class ProfileLoader {
 			rankToString.put(Rank.IRON, "iron");
 			rankToString.put(Rank.GOLD, "gold");
 			rankToString.put(Rank.DIAMOND, "diamond");
+			rankToString.put(Rank.HELPER, "helper");
 			rankToString.put(Rank.MODERATOR, "moderator");
 			rankToString.put(Rank.SENIOR_STAFF, "senior_staff");
 			rankToString.put(Rank.DEVELOPER, "developer");
@@ -477,6 +490,14 @@ public class ProfileLoader {
 
 		public void setRank(Rank rank) {
 			set("rank", rankToString.get(rank));
+		}
+
+		public String getTitle() {
+			return get("title");
+		}
+
+		public void setTitle(String title) {
+			set("title", title);
 		}
 
 		public Date getJoined() {

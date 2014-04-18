@@ -35,6 +35,7 @@ public class PlayerProfileScraperTest {
 		assertFalse(profile.isPrivate());
 		assertEquals("http://empireminecraft.com/data/avatars/l/12/12110.jpg?1389141773", profile.getPortraitUrl());
 		assertEquals(Rank.IRON, profile.getRank());
+		assertEquals("Iron Supporter", profile.getTitle());
 		assertEquals(df.parse("2012-02-03"), profile.getJoined());
 	}
 
@@ -57,16 +58,18 @@ public class PlayerProfileScraperTest {
 		assertTrue(profile.isPrivate());
 		assertNull(profile.getPortraitUrl());
 		assertNull(profile.getRank());
+		assertNull(profile.getTitle());
 		assertNull(profile.getJoined());
 	}
 
 	@Test
 	public void scrapeProfile_ranks() throws Throwable {
 		assertRank("non-supporter", null);
-		assertRank("contribution-team", null);
 		assertRank("iron", Rank.IRON);
 		assertRank("gold", Rank.GOLD);
 		assertRank("diamond", Rank.DIAMOND);
+		assertRank("contribution-team", Rank.HELPER);
+		assertRank("build-team", Rank.HELPER);
 		assertRank("mod", Rank.MODERATOR);
 		assertRank("staff", Rank.SENIOR_STAFF);
 		assertRank("developer", Rank.DEVELOPER);

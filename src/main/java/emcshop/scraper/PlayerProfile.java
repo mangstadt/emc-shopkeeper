@@ -11,6 +11,7 @@ public class PlayerProfile {
 	private String portraitUrl;
 	private Rank rank;
 	private Date joined;
+	private String title;
 
 	public String getPlayerName() {
 		return playerName;
@@ -50,5 +51,13 @@ public class PlayerProfile {
 
 	public void setJoined(Date joined) {
 		this.joined = joined;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 }
