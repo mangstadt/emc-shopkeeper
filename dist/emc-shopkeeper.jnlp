@@ -19,10 +19,12 @@
 		<jar href="deps/commons-lang3-3.1.jar"/>
 		<jar href="deps/commons-logging-1.1.1.jar"/>
 		<jar href="deps/derby-10.10.1.1.jar"/>
+		<jar href="deps/guava-16.0.1.jar"/>
 		<jar href="deps/httpclient-4.2.3.jar"/>
 		<jar href="deps/httpcore-4.2.2.jar"/>
 		<jar href="deps/jcommon-1.0.17.jar"/>
 		<jar href="deps/jfreechart-1.0.15.jar"/>
+		<jar href="deps/jopt-simple-4.6.jar"/>
 		<jar href="deps/jsoup-1.7.1.jar"/>
 		<jar href="deps/microba-0.4.4.3.jar"/>
 		<jar href="deps/miglayout-core-4.2.jar"/>
