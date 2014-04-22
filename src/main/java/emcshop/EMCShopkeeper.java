@@ -263,6 +263,8 @@ public class EMCShopkeeper {
 		initializeMac();
 
 		AppContext context = AppContext.instance();
+		context.add(settings);
+		context.add(logManager);
 
 		//add the report sender to the app context here incase there is an error during startup
 		ReportSender reportSender = new ReportSender();
@@ -283,6 +285,7 @@ public class EMCShopkeeper {
 		//create the backup manager
 		File dbBackupDir = new File(profileDir, "db-backups");
 		BackupManager backupManager = new BackupManager(dbDir, dbBackupDir, settings.getBackupsEnabled(), settings.getBackupFrequency(), settings.getMaxBackups());
+		context.add(backupManager);
 
 		//delete old backups
 		backupManager.cleanup();
@@ -319,6 +322,7 @@ public class EMCShopkeeper {
 			}
 		});
 		profileLoader.start();
+		context.add(profileLoader);
 
 		DbListener listener = new DbListener() {
 			@Override
@@ -395,9 +399,11 @@ public class EMCShopkeeper {
 				}
 			}
 		}
+		context.add(dao);
 
 		OnlinePlayersMonitor onlinePlayersMonitor = new OnlinePlayersMonitor(new OnlinePlayersScraper(new DefaultHttpClient()), 1000 * 60 * 5);
 		onlinePlayersMonitor.start();
+		context.add(onlinePlayersMonitor);
 
 		//tweak tooltip settings
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
@@ -413,14 +419,6 @@ public class EMCShopkeeper {
 		//pre-load the labels for the item suggest fields
 		splash.setMessage("Loading item icons...");
 		ItemSuggestField.init(dao);
-
-		context.add(settings);
-		context.add(logManager);
-		context.add(backupManager);
-		context.add(profileLoader);
-		context.add(dao);
-		context.add(reportSender);
-		context.add(onlinePlayersMonitor);
 
 		mainFrame = new MainFrame(profileDir.getName());
 		mainFrame.setVisible(true);
