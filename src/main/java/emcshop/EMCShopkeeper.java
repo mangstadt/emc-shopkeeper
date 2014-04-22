@@ -352,7 +352,13 @@ public class EMCShopkeeper {
 					throw e;
 				}
 
+				//check to see an old version of the app is being run
 				int startingDbVersion = dao.selectDbVersion();
+				if (startingDbVersion > dao.getAppDbVersion()) {
+					splash.dispose();
+					JOptionPane.showMessageDialog(null, "The version of your EMC Shopkeeper database is newer than the EMC Shopkeeper application.  Please download the latest version of EMC Shopkeeper and run that.", "Outdated version", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
 
 				//initialize the report sender with the current database version
 				reportSender.setDatabaseVersion(startingDbVersion);

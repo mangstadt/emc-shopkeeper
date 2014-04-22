@@ -111,7 +111,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 
 		if (curVersion > latestVersion) {
-			throw new SQLException("The version of your EMC Shopkeeper database is newer than the EMC Shopkeeper app you are running.  Please download the latest version of EMC Shopkeeper.");
+			throw new SQLException("Database version is newer than DAO verison.");
 		}
 
 		if (listener != null) {
@@ -164,12 +164,7 @@ public abstract class DirbyDbDao implements DbDao {
 		return new InputStreamReader(getClass().getResourceAsStream(script));
 	}
 
-	/**
-	 * Gets the database version that this DAO is compatible with (as opposed to
-	 * {@link #selectDbVersion()}, which retrieves the version of the database
-	 * itself).
-	 * @return the DAO's database version
-	 */
+	@Override
 	public int getAppDbVersion() {
 		return schemaVersion;
 	}

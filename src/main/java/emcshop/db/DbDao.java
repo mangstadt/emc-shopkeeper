@@ -27,6 +27,14 @@ public interface DbDao {
 	void updateToLatestVersion(DbListener listener) throws SQLException;
 
 	/**
+	 * Gets the database version that this DAO is compatible with (as opposed to
+	 * {@link #selectDbVersion()}, which retrieves the version of the database
+	 * itself).
+	 * @return the DAO's database version
+	 */
+	int getAppDbVersion();
+
+	/**
 	 * Gets the database schema version.
 	 * @return the version number
 	 * @throws SQLException
