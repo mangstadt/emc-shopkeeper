@@ -490,40 +490,58 @@
 	<Item name="Splash Potion of Water Breathing Ext" id="373:16461" emcNames="Potion:16461" image="potion_water_breathing_splash.png" stack="1" group="Potions" />
 	
 	<!-- Stained Glass -->
-	<Item name="Magenta Glass" id="95:2" emcNames="Magentastnglass" group="Glass" />
-	<Item name="Pink Glass" id="95:6" emcNames="Pink Stn Glass" group="Glass" />
-	<Item name="Purple Glass" id="95:10" emcNames="Purplestn Glass" group="Glass" />
-	<Item name="Cyan Glass" id="95:9" emcNames="Cyan Stn Glass" group="Glass" />
-	<Item name="Blue Glass" id="95:11" emcNames="Blue Stn Glass" group="Glass" />
-	<Item name="Light Blue Glass" id="95:3" emcNames="Ltbluestn Glass" group="Glass" />
-	<Item name="Green Glass" id="95:13" emcNames="Green Stn Glass" group="Glass" />
-	<Item name="Lime Glass" id="95:5" emcNames="Lime Stn Glass" group="Glass" />
-	<Item name="Brown Glass" id="95:12" emcNames="Brown Stn Glass" group="Glass" />
-	<Item name="Red Glass" id="95:14" emcNames="Red Stn Glass" group="Glass" />
+	<Item name="White Glass" id="95:0" emcNames="White Stn Glass" group="Glass" />
 	<Item name="Orange Glass" id="95:1" emcNames="Orangestn Glass" group="Glass" />
+	<Item name="Magenta Glass" id="95:2" emcNames="Magentastnglass" group="Glass" />
+	<Item name="Light Blue Glass" id="95:3" emcNames="Ltbluestn Glass" group="Glass" />
 	<Item name="Yellow Glass" id="95:4" emcNames="Yellowstn Glass" group="Glass" />
-	<Item name="Black Glass" id="95:15" emcNames="Black Stn Glass" group="Glass" />
+	<Item name="Lime Glass" id="95:5" emcNames="Lime Stn Glass" group="Glass" />
+	<Item name="Pink Glass" id="95:6" emcNames="Pink Stn Glass" group="Glass" />
 	<Item name="Gray Glass" id="95:7" emcNames="Gray Stn Glass" group="Glass" />
 	<Item name="Light Gray Glass" id="95:8" emcNames="Ltgraystn Glass" group="Glass" />
-	<Item name="White Glass" id="95:0" emcNames="White Stn Glass" group="Glass" />
-	
+	<Item name="Cyan Glass" id="95:9" emcNames="Cyan Stn Glass" group="Glass" />
+	<Item name="Purple Glass" id="95:10" emcNames="Purplestn Glass" group="Glass" />
+	<Item name="Blue Glass" id="95:11" emcNames="Blue Stn Glass" group="Glass" />
+	<Item name="Brown Glass" id="95:12" emcNames="Brown Stn Glass" group="Glass" />
+	<Item name="Green Glass" id="95:13" emcNames="Green Stn Glass" group="Glass" />
+	<Item name="Red Glass" id="95:14" emcNames="Red Stn Glass" group="Glass" />
+	<Item name="Black Glass" id="95:15" emcNames="Black Stn Glass" group="Glass" />
+
 	<!-- Stained Glass Panes -->
-	<Item name="Magenta Glass Pane" id="160:2" emcNames="Magentastnpane" group="Glass" />
-	<Item name="Pink Glass Pane" id="160:6" emcNames="Pink Stn Pane" group="Glass" />
-	<Item name="Purple Glass Pane" id="160:10" emcNames="Purplestn Pane" group="Glass" />
-	<Item name="Cyan Glass Pane" id="160:9" emcNames="Cyan Stn Pane" group="Glass" />
-	<Item name="Blue Glass Pane" id="160:11" emcNames="Blue Stn Pane" group="Glass" />
-	<Item name="Light Blue Glass Pane" id="160:3" emcNames="Ltbluestn Pane" group="Glass" />
-	<Item name="Green Glass Pane" id="160:13" emcNames="Green Stn Pane" group="Glass" />
-	<Item name="Lime Glass Pane" id="160:5" emcNames="Lime Stn Pane" group="Glass" />
-	<Item name="Brown Glass Pane" id="160:12" emcNames="Brown Stn Pane" group="Glass" />
-	<Item name="Red Glass Pane" id="160:14" emcNames="Red Stn Pane" group="Glass" />
+	<Item name="White Glass Pane" id="160:0" emcNames="White Stn Pane" group="Glass" />
 	<Item name="Orange Glass Pane" id="160:1" emcNames="Orangestn Pane" group="Glass" />
+	<Item name="Magenta Glass Pane" id="160:2" emcNames="Magentastnpane" group="Glass" />
+	<Item name="Light Blue Glass Pane" id="160:3" emcNames="Ltbluestn Pane" group="Glass" />
 	<Item name="Yellow Glass Pane" id="160:4" emcNames="Yellowstn Pane" group="Glass" />
-	<Item name="Black Glass Pane" id="160:15" emcNames="Black Stn Pane" group="Glass" />
+	<Item name="Lime Glass Pane" id="160:5" emcNames="Lime Stn Pane" group="Glass" />
+	<Item name="Pink Glass Pane" id="160:6" emcNames="Pink Stn Pane" group="Glass" />
 	<Item name="Gray Glass Pane" id="160:7" emcNames="Gray Stn Pane" group="Glass" />
 	<Item name="Light Gray Glass Pane" id="160:8" emcNames="Ltgraystn Pane" group="Glass" />
-	<Item name="White Glass Pane" id="160:0" emcNames="White Stn Pane" group="Glass" />
+	<Item name="Cyan Glass Pane" id="160:9" emcNames="Cyan Stn Pane" group="Glass" />
+	<Item name="Purple Glass Pane" id="160:10" emcNames="Purplestn Pane" group="Glass" />
+	<Item name="Blue Glass Pane" id="160:11" emcNames="Blue Stn Pane" group="Glass" />
+	<Item name="Brown Glass Pane" id="160:12" emcNames="Brown Stn Pane" group="Glass" />
+	<Item name="Green Glass Pane" id="160:13" emcNames="Green Stn Pane" group="Glass" />
+	<Item name="Red Glass Pane" id="160:14" emcNames="Red Stn Pane" group="Glass" />
+	<Item name="Black Glass Pane" id="160:15" emcNames="Black Stn Pane" group="Glass" />
+	
+	<!-- Carpet -->
+	<Item name="White Carpet" id="171:0" group="Wool" />
+	<Item name="Orange Carpet" id="171:1" group="Wool" />
+	<Item name="Magenta Carpet" id="171:2" group="Wool" />
+	<Item name="Light Blue Carpet" id="171:3" emcNames="Light Blue Carp" group="Wool" />
+	<Item name="Yellow Carpet" id="171:4" group="Wool" />
+	<Item name="Lime Carpet" id="171:5" group="Wool" />
+	<Item name="Pink Carpet" id="171:6" group="Wool" />
+	<Item name="Gray Carpet" id="171:7" group="Wool" />
+	<Item name="Light Gray Carpet" id="171:8" emcNames="Light Gray Carp" group="Wool" />
+	<Item name="Cyan Carpet" id="171:9" group="Wool" />
+	<Item name="Purple Carpet" id="171:10" group="Wool" />
+	<Item name="Blue Carpet" id="171:11" group="Wool" />
+	<Item name="Brown Carpet" id="171:12" group="Wool" />
+	<Item name="Green Carpet" id="171:13" group="Wool" />
+	<Item name="Red Carpet" id="171:14" group="Wool" />
+	<Item name="Black Carpet" id="171:15" group="Wool" />
 	
 	<!-- Skin-based Mob Heads -->
 	<Item name="Blaze Head" emcNames="Head - Blaze Head" />
