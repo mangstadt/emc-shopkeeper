@@ -174,6 +174,10 @@ public class PaymentsTab extends JPanel {
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
+					if (value == null) {
+						return null;
+					}
+
 					PaymentTransaction transaction = (PaymentTransaction) value;
 					Column column = columns[col];
 

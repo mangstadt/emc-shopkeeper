@@ -136,6 +136,10 @@ public class TransactionsTable extends JTable {
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, int col) {
+				if (value == null) {
+					return null;
+				}
+
 				ShopTransaction transaction = (ShopTransaction) value;
 				final Column column = columns[col];
 

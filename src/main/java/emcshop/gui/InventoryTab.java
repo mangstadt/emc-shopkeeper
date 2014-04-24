@@ -349,6 +349,10 @@ public class InventoryTab extends JPanel {
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+					if (value == null) {
+						return null;
+					}
+
 					final Row rowObj = (Row) value;
 
 					JLabel label = null;

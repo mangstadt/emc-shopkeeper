@@ -141,6 +141,10 @@ public class BonusFeeTab extends JPanel {
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+					if (value == null) {
+						return null;
+					}
+
 					Row rowObj = (Row) value;
 					Column column = columns[col];
 
