@@ -128,9 +128,7 @@ public class MainFrame extends JFrame {
 			}
 		});
 
-		if (!JarSignersHardLinker.isRunningOnWebstart()) {
-			checkForNewVersion();
-		}
+		checkForNewVersion();
 	}
 
 	private void createMenu() {
@@ -571,6 +569,10 @@ public class MainFrame extends JFrame {
 	}
 
 	private void checkForNewVersion() {
+		if (JarSignersHardLinker.isRunningOnWebstart()) {
+			return;
+		}
+
 		Thread t = new Thread() {
 			@Override
 			public void run() {
