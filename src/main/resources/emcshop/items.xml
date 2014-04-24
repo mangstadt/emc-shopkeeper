@@ -9,6 +9,7 @@
 	<Item name="Acacia Stairs" id="163" group="Wood"  />
 	<Item name="Activator Rail" id="157" group="Iron" />
 	<Item name="Allium" id="38:2" group="Flowers" />
+	<Item name="Andesite" id="1:5" />
 	<Item name="Anvil" id="145" group="Iron" />
 	<Item name="Apple" id="260" />
 	<Item name="Arrow" id="262" />
@@ -114,6 +115,7 @@
 	<Item name="Diamond Pickaxe" id="278" stack="1" group="Diamonds" />
 	<Item name="Diamond Shovel" id="277" stack="1" group="Diamonds" emcNames="Diamond Spade" />
 	<Item name="Diamond Sword" id="276" stack="1" group="Diamonds" />
+	<Item name="Diorite" id="1:3" />
 	<Item name="Dirt" id="3" />
 	<Item name="Dispenser" id="23" group="Stone" />
 	<Item name="Dragon Egg" id="122" />
@@ -167,6 +169,7 @@
 	<Item name="Gold Sword" id="283" stack="1" group="Gold" />
 	<Item name="Golden Apple" id="322" group="Gold" />
 	<Item name="Golden Carrot" id="396" group="Gold" />
+	<Item name="Granite" id="1:1" />
 	<Item name="Grass" id="2" />
 	<Item name="Gravel" id="13" />
 	<Item name="Gray Stclay" id="159:7" group="Clay" />
@@ -203,6 +206,7 @@
 	<Item name="Iron Plate" id="148" group="Iron" />
 	<Item name="Iron Shovel" id="256" stack="1" group="Iron" emcNames="Iron Spade" />
 	<Item name="Iron Sword" id="267" stack="1" group="Iron" />
+	<Item name="Iron Trapdoor" id="167" />
 	<Item name="Item Frame" id="389" group="Leather" />
 	<Item name="Jack O Lantern" id="91" />
 	<Item name="Jukebox" id="84" group="Diamonds" />
@@ -291,6 +295,9 @@
 	<Item name="Piston" id="33" />
 	<Item name="Podzol" id="3:2" />
 	<Item name="Poisonous Potato" id="394" />
+	<Item name="Polished Andesite" id="1:6" />
+	<Item name="Polished Diorite" id="1:4" />
+	<Item name="Polished Granite" id="1:2" />
 	<Item name="Poppy" id="38" emcNames="Rose" group="Flowers" />
 	<Item name="Pork" id="319" />
 	<Item name="Potato" id="392" emcNames="Potato Item" />
@@ -345,6 +352,7 @@
 	<Item name="Silver Wool" id="35:8" group="Wool" />
 	<Item name="Skull Item" id="397:0" group="Mob Heads" />
 	<Item name="Slime Ball" id="341" />
+	<Item name="Slime Block" id="165" />
 	<Item name="Smooth Sandstone" id="24:2" emcNames="Smooth Sandston" />
 	<Item name="Snow Ball" id="332" stack="16" />
 	<Item name="Snow Block" id="80" />
