@@ -1,5 +1,6 @@
 package emcshop.view;
 
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -26,6 +27,9 @@ public class ProfileSelectorViewImpl extends JDialog implements IProfileSelector
 		setTitle("Choose Profile");
 		setResizable(false);
 		setModal(true);
+
+		Image appIcon = ImageManager.getAppIcon().getImage();
+		setIconImage(appIcon);
 
 		profiles = new JComboBox();
 		profiles.setEditable(true);

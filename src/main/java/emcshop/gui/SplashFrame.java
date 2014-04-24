@@ -1,5 +1,7 @@
 package emcshop.gui;
 
+import java.awt.Image;
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JRootPane;
@@ -19,6 +21,9 @@ public class SplashFrame extends JFrame {
 		setResizable(false);
 		setUndecorated(true);
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+
+		Image appIcon = ImageManager.getAppIcon().getImage();
+		setIconImage(appIcon);
 
 		setLayout(new MigLayout("insets 5"));
 
