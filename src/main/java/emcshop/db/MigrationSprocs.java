@@ -10,12 +10,21 @@ import java.sql.SQLException;
  * @see "http://wiki.apache.org/db-derby/DerbySQLroutines"
  */
 public class MigrationSprocs {
+	//these sprocs may be called multiple times over the course of a database update
+	//however, they only need to be called once
+	private static boolean populateItemsTableCalled = false;
+	private static boolean updateItemNamesCalled = false;
+
 	/**
 	 * Ensures that the "items" table contains the names of all items. This
 	 * method is meant to be called as a stored procedure.
 	 * @throws SQLException if there's a database problem
 	 */
 	public static void populateItemsTable() throws SQLException {
+		if (populateItemsTableCalled) {
+			return;
+		}
+
 		Connection conn = conn();
 		DbDao dao = new DirbyEmbeddedDbDao(conn);
 
@@ -24,6 +33,8 @@ public class MigrationSprocs {
 		} finally {
 			conn.close();
 		}
+
+		populateItemsTableCalled = true;
 	}
 
 	/**
@@ -33,6 +44,10 @@ public class MigrationSprocs {
 	 * @throws SQLException if there's a database problem
 	 */
 	public static void updateItemNames() throws SQLException {
+		if (updateItemNamesCalled) {
+			return;
+		}
+
 		Connection conn = conn();
 		DbDao dao = new DirbyEmbeddedDbDao(conn);
 
@@ -41,6 +56,8 @@ public class MigrationSprocs {
 		} finally {
 			conn.close();
 		}
+
+		updateItemNamesCalled = true;
 	}
 
 	/**
