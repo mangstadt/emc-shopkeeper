@@ -1,14 +1,12 @@
 package emcshop.presenter;
 
-import static emcshop.util.GuiUtils.fireEvents;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Test;
 
@@ -35,12 +33,14 @@ public class UnhandledErrorPresenterTest {
 
 	@Test
 	public void send_error_report() {
-		UnhandledErrorViewAdapter view = spy(new UnhandledErrorViewAdapter());
+		IUnhandledErrorView view = mock(IUnhandledErrorView.class);
+		ListenerAnswer clickSendErrorReport = new ListenerAnswer();
+		doAnswer(clickSendErrorReport).when(view).addSendErrorReportListener(any(ActionListener.class));
 
 		IUnhandledErrorModel model = mock(IUnhandledErrorModel.class);
 
 		new UnhandledErrorPresenter(view, model);
-		view.clickSendErrorReport();
+		clickSendErrorReport.fire();
 
 		verify(model).sendErrorReport();
 		verify(view).errorReportSent();
@@ -48,61 +48,15 @@ public class UnhandledErrorPresenterTest {
 
 	@Test
 	public void close_window() {
-		UnhandledErrorViewAdapter view = spy(new UnhandledErrorViewAdapter());
+		IUnhandledErrorView view = mock(IUnhandledErrorView.class);
+		ListenerAnswer clickClose = new ListenerAnswer();
+		doAnswer(clickClose).when(view).addCloseListener(any(ActionListener.class));
 
 		IUnhandledErrorModel model = mock(IUnhandledErrorModel.class);
 
 		new UnhandledErrorPresenter(view, model);
-		view.clickClose();
+		clickClose.fire();
 
 		verify(view).close();
-	}
-
-	private static class UnhandledErrorViewAdapter implements IUnhandledErrorView {
-		private final List<ActionListener> onSendErrorReport = new ArrayList<ActionListener>();
-		private final List<ActionListener> onClose = new ArrayList<ActionListener>();
-
-		public void clickSendErrorReport() {
-			fireEvents(onSendErrorReport);
-		}
-
-		public void clickClose() {
-			fireEvents(onClose);
-		}
-
-		@Override
-		public void addSendErrorReportListener(ActionListener listener) {
-			onSendErrorReport.add(listener);
-		}
-
-		@Override
-		public void addCloseListener(ActionListener listener) {
-			onClose.add(listener);
-		}
-
-		@Override
-		public void setMessage(String message) {
-			//empty
-		}
-
-		@Override
-		public void setThrown(Throwable thrown) {
-			//empty
-		}
-
-		@Override
-		public void errorReportSent() {
-			//empty
-		}
-
-		@Override
-		public void display() {
-			//empty
-		}
-
-		@Override
-		public void close() {
-			//empty
-		}
 	}
 }

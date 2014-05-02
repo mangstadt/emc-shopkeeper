@@ -1,20 +1,17 @@
 package emcshop.presenter;
 
-import static emcshop.util.GuiUtils.fireEvents;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.junit.Test;
 
@@ -49,15 +46,17 @@ public class UpdatePresenterTest {
 
 	@Test
 	public void bad_session() {
-		EmcSession session = new EmcSession("", "", new Date());
-		UpdateModelMock model = spy(new UpdateModelMock());
+		EmcSession session = mock(EmcSession.class);
+		IUpdateModel model = mock(IUpdateModel.class);
+		ListenerAnswer badSession = new ListenerAnswer();
+		doAnswer(badSession).when(model).addBadSessionListener(any(ActionListener.class));
 
 		IUpdateView view = mock(IUpdateView.class);
 		when(view.getNewSession()).thenReturn(session);
 
 		new UpdatePresenter(view, model);
 
-		model.badSession();
+		badSession.fire();
 
 		verify(model).setSession(session);
 		verify(view).reset();
@@ -66,14 +65,16 @@ public class UpdatePresenterTest {
 
 	@Test
 	public void bad_session_login_canceled() {
-		UpdateModelMock model = spy(new UpdateModelMock());
+		IUpdateModel model = mock(IUpdateModel.class);
+		ListenerAnswer badSession = new ListenerAnswer();
+		doAnswer(badSession).when(model).addBadSessionListener(any(ActionListener.class));
 
 		IUpdateView view = mock(IUpdateView.class);
 		when(view.getNewSession()).thenReturn(null);
 
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
-		model.badSession();
+		badSession.fire();
 
 		verify(view).close();
 		assertTrue(presenter.isCanceled());
@@ -81,8 +82,10 @@ public class UpdatePresenterTest {
 
 	@Test
 	public void download_error_saveTransactions() {
+		IUpdateModel model = mock(IUpdateModel.class);
+		ListenerAnswer downloadError = new ListenerAnswer();
+		doAnswer(downloadError).when(model).addDownloadErrorListener(any(ActionListener.class));
 		Throwable thrown = new Throwable();
-		UpdateModelMock model = spy(new UpdateModelMock());
 		when(model.getDownloadError()).thenReturn(thrown);
 
 		IUpdateView view = mock(IUpdateView.class);
@@ -90,7 +93,7 @@ public class UpdatePresenterTest {
 
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
-		model.downloadError();
+		downloadError.fire();
 
 		verify(model).saveTransactions();
 		verify(view).close();
@@ -99,8 +102,10 @@ public class UpdatePresenterTest {
 
 	@Test
 	public void download_error_discardTransactions() {
+		IUpdateModel model = mock(IUpdateModel.class);
+		ListenerAnswer downloadError = new ListenerAnswer();
+		doAnswer(downloadError).when(model).addDownloadErrorListener(any(ActionListener.class));
 		Throwable thrown = new Throwable();
-		UpdateModelMock model = spy(new UpdateModelMock());
 		when(model.getDownloadError()).thenReturn(thrown);
 
 		IUpdateView view = mock(IUpdateView.class);
@@ -108,7 +113,7 @@ public class UpdatePresenterTest {
 
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
-		model.downloadError();
+		downloadError.fire();
 
 		verify(model).discardTransactions();
 		verify(view).close();
@@ -119,11 +124,13 @@ public class UpdatePresenterTest {
 	public void download_stopped() {
 		IUpdateModel model = mock(IUpdateModel.class);
 
-		UpdateViewMock view = spy(new UpdateViewMock());
+		IUpdateView view = mock(IUpdateView.class);
+		ListenerAnswer stopDownload = new ListenerAnswer();
+		doAnswer(stopDownload).when(view).addStopListener(any(ActionListener.class));
 
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
-		view.stopDownload();
+		stopDownload.fire();
 
 		verify(model).stopDownload();
 		verify(model).saveTransactions();
@@ -135,11 +142,13 @@ public class UpdatePresenterTest {
 	public void download_canceled() {
 		IUpdateModel model = mock(IUpdateModel.class);
 
-		UpdateViewMock view = spy(new UpdateViewMock());
+		IUpdateView view = mock(IUpdateView.class);
+		ListenerAnswer cancelDownload = new ListenerAnswer();
+		doAnswer(cancelDownload).when(view).addCancelListener(any(ActionListener.class));
 
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
-		view.cancelDownload();
+		cancelDownload.fire();
 
 		verify(model).stopDownload();
 		verify(model).discardTransactions();
@@ -149,16 +158,20 @@ public class UpdatePresenterTest {
 
 	@Test
 	public void download_finished() {
-		UpdateModelMock model = spy(new UpdateModelMock());
+		IUpdateModel model = mock(IUpdateModel.class);
+		ListenerAnswer pageDownloaded = new ListenerAnswer();
+		doAnswer(pageDownloaded).when(model).addPageDownloadedListener(any(ActionListener.class));
+		ListenerAnswer downloadComplete = new ListenerAnswer();
+		doAnswer(downloadComplete).when(model).addDownloadCompleteListener(any(ActionListener.class));
 
 		IUpdateView view = mock(IUpdateView.class);
 
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
-		model.pageDownloaded();
-		model.pageDownloaded();
-		model.pageDownloaded();
-		model.downloadComplete();
+		pageDownloaded.fire();
+		pageDownloaded.fire();
+		pageDownloaded.fire();
+		downloadComplete.fire();
 
 		verify(view, times(3)).setPages(anyInt());
 		verify(view, times(3)).setShopTransactions(anyInt());
@@ -168,237 +181,5 @@ public class UpdatePresenterTest {
 		verify(model).saveTransactions();
 		verify(view).close();
 		assertFalse(presenter.isCanceled());
-	}
-
-	private static class UpdateViewMock implements IUpdateView {
-		private final List<ActionListener> stopDownload = new ArrayList<ActionListener>();
-		private final List<ActionListener> cancelDownload = new ArrayList<ActionListener>();
-		private final List<ActionListener> reportError = new ArrayList<ActionListener>();
-
-		public void stopDownload() {
-			fireEvents(stopDownload);
-		}
-
-		public void cancelDownload() {
-			fireEvents(cancelDownload);
-		}
-
-		@Override
-		public void addCancelListener(ActionListener listener) {
-			cancelDownload.add(listener);
-		}
-
-		@Override
-		public void addStopListener(ActionListener listener) {
-			stopDownload.add(listener);
-		}
-
-		@Override
-		public void addReportErrorListener(ActionListener listener) {
-			reportError.add(listener);
-		}
-
-		@Override
-		public EmcSession getNewSession() {
-			return null;
-		}
-
-		@Override
-		public boolean showDownloadError(Throwable thrown) {
-			return false;
-		}
-
-		@Override
-		public boolean getShowResults() {
-			return false;
-		}
-
-		@Override
-		public void setFirstUpdate(boolean firstUpdate) {
-			//empty
-		}
-
-		@Override
-		public void setEstimatedTime(Long estimatedTime) {
-			//empty
-		}
-
-		@Override
-		public void setStopAtPage(Integer stopAtPage) {
-			//empty
-		}
-
-		@Override
-		public void setOldestParsedTransactonDate(Date date) {
-			//empty
-		}
-
-		@Override
-		public void setPages(int pages) {
-			//empty
-		}
-
-		@Override
-		public void setShopTransactions(int count) {
-			//empty
-		}
-
-		@Override
-		public void setPaymentTransactions(int count) {
-			//empty
-		}
-
-		@Override
-		public void setBonusFeeTransactions(int count) {
-			//empty
-		}
-
-		@Override
-		public void reset() {
-			//empty
-		}
-
-		@Override
-		public void display() {
-			//empty
-		}
-
-		@Override
-		public void close() {
-			//empty
-		}
-	}
-
-	private static class UpdateModelMock implements IUpdateModel {
-		private final List<ActionListener> pageDownloadedListeners = new ArrayList<ActionListener>();
-		private final List<ActionListener> badSessionListeners = new ArrayList<ActionListener>();
-		private final List<ActionListener> downloadErrorListeners = new ArrayList<ActionListener>();
-		private final List<ActionListener> downloadCompleteListeners = new ArrayList<ActionListener>();
-
-		public void badSession() {
-			fireEvents(badSessionListeners);
-		}
-
-		public void downloadError() {
-			fireEvents(downloadErrorListeners);
-		}
-
-		public void downloadComplete() {
-			fireEvents(downloadCompleteListeners);
-		}
-
-		public void pageDownloaded() {
-			fireEvents(pageDownloadedListeners);
-		}
-
-		@Override
-		public void addPageDownloadedListener(ActionListener listener) {
-			pageDownloadedListeners.add(listener);
-		}
-
-		@Override
-		public void addBadSessionListener(ActionListener listener) {
-			badSessionListeners.add(listener);
-		}
-
-		@Override
-		public void addDownloadErrorListener(ActionListener listener) {
-			downloadErrorListeners.add(listener);
-		}
-
-		@Override
-		public void addDownloadCompleteListener(ActionListener listener) {
-			downloadCompleteListeners.add(listener);
-		}
-
-		@Override
-		public boolean isFirstUpdate() {
-			return false;
-		}
-
-		@Override
-		public Long getEstimatedTime() {
-			return null;
-		}
-
-		@Override
-		public Integer getStopAtPage() {
-			return null;
-		}
-
-		@Override
-		public void setSession(EmcSession session) {
-			//empty
-		}
-
-		@Override
-		public int getPagesDownloaded() {
-			return 0;
-		}
-
-		@Override
-		public int getShopTransactionsDownloaded() {
-			return 0;
-		}
-
-		@Override
-		public int getPaymentTransactionsDownloaded() {
-			return 0;
-		}
-
-		@Override
-		public int getBonusFeeTransactionsDownloaded() {
-			return 0;
-		}
-
-		@Override
-		public Date getOldestParsedTransactionDate() {
-			return null;
-		}
-
-		@Override
-		public Date getStarted() {
-			return null;
-		}
-
-		@Override
-		public long getTimeTaken() {
-			return 0;
-		}
-
-		@Override
-		public Integer getRupeeBalance() {
-			return null;
-		}
-
-		@Override
-		public Throwable getDownloadError() {
-			return null;
-		}
-
-		@Override
-		public Thread startDownload() {
-			return null;
-		}
-
-		@Override
-		public void stopDownload() {
-			//empty
-		}
-
-		@Override
-		public void saveTransactions() {
-			//empty
-		}
-
-		@Override
-		public void discardTransactions() {
-			//empty
-		}
-
-		@Override
-		public void reportError() {
-			//empty
-		}
 	}
 }

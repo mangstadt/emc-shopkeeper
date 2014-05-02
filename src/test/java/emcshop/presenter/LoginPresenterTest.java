@@ -1,22 +1,19 @@
 package emcshop.presenter;
 
-import static emcshop.util.GuiUtils.fireEvents;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -63,11 +60,13 @@ public class LoginPresenterTest {
 		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(anyString(), anyString(), anyBoolean())).thenThrow(e);
 
-		LoginViewAdapter view = spy(new LoginViewAdapter());
+		ILoginView view = mock(ILoginView.class);
+		ListenerAnswer clickLogin = new ListenerAnswer();
+		doAnswer(clickLogin).when(view).addOnLoginListener(any(ActionListener.class));
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
-		view.clickLogin();
+		clickLogin.fire();
 
 		verify(model).logNetworkError(e);
 		verify(view).networkError();
@@ -79,11 +78,13 @@ public class LoginPresenterTest {
 		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(anyString(), anyString(), anyBoolean())).thenReturn(null);
 
-		LoginViewAdapter view = spy(new LoginViewAdapter());
+		ILoginView view = mock(ILoginView.class);
+		ListenerAnswer clickLogin = new ListenerAnswer();
+		doAnswer(clickLogin).when(view).addOnLoginListener(any(ActionListener.class));
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
-		view.clickLogin();
+		clickLogin.fire();
 
 		verify(view).badLogin();
 		assertFalse(presenter.isCanceled());
@@ -94,11 +95,13 @@ public class LoginPresenterTest {
 		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(anyString(), anyString(), anyBoolean())).thenReturn("token");
 
-		LoginViewAdapter view = spy(new LoginViewAdapter());
+		ILoginView view = mock(ILoginView.class);
+		ListenerAnswer clickLogin = new ListenerAnswer();
+		doAnswer(clickLogin).when(view).addOnLoginListener(any(ActionListener.class));
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
-		view.clickLogin();
+		clickLogin.fire();
 
 		verify(model).saveSession(any(EmcSession.class), anyBoolean());
 		verify(view).close();
@@ -110,11 +113,13 @@ public class LoginPresenterTest {
 		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(anyString(), anyString(), anyBoolean())).thenReturn("token");
 
-		LoginViewAdapter view = spy(new LoginViewAdapter());
+		ILoginView view = mock(ILoginView.class);
+		ListenerAnswer clickCancel = new ListenerAnswer();
+		doAnswer(clickCancel).when(view).addOnCancelListener(any(ActionListener.class));
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
-		view.clickCancel();
+		clickCancel.fire();
 
 		verify(view).close();
 		assertTrue(presenter.isCanceled());
@@ -131,95 +136,28 @@ public class LoginPresenterTest {
 			}
 		});
 
-		final LoginViewAdapter view = spy(new LoginViewAdapter());
+		ILoginView view = mock(ILoginView.class);
+		ListenerAnswer clickCancel = new ListenerAnswer();
+		doAnswer(clickCancel).when(view).addOnCancelListener(any(ActionListener.class));
+		final ListenerAnswer clickLogin = new ListenerAnswer();
+		doAnswer(clickLogin).when(view).addOnLoginListener(any(ActionListener.class));
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
 		Thread t = new Thread() {
 			@Override
 			public void run() {
-				view.clickLogin();
+				clickLogin.fire();
 			}
 		};
 		t.start();
 
 		Thread.sleep(100);
-		view.clickCancel();
+		clickCancel.fire();
 		t.join();
 
 		verify(view).close();
 		verify(model, never()).saveSession(any(EmcSession.class), any(boolean.class));
 		assertTrue(presenter.isCanceled());
-	}
-
-	private static class LoginViewAdapter implements ILoginView {
-		private String username = "", password = "";
-		private boolean rememberMe;
-
-		private final List<ActionListener> onLogin = new ArrayList<ActionListener>();
-		private final List<ActionListener> onCancel = new ArrayList<ActionListener>();
-
-		public void clickLogin() {
-			fireEvents(onLogin);
-		}
-
-		public void clickCancel() {
-			fireEvents(onCancel);
-		}
-
-		@Override
-		public void addOnLoginListener(ActionListener listener) {
-			onLogin.add(listener);
-		}
-
-		@Override
-		public void addOnCancelListener(ActionListener listener) {
-			onCancel.add(listener);
-		}
-
-		@Override
-		public void setUsername(String username) {
-			this.username = username;
-		}
-
-		@Override
-		public String getUsername() {
-			return username;
-		}
-
-		@Override
-		public String getPassword() {
-			return password;
-		}
-
-		@Override
-		public void setRememberMe(boolean rememberMe) {
-			this.rememberMe = rememberMe;
-		}
-
-		@Override
-		public boolean getRememberMe() {
-			return rememberMe;
-		}
-
-		@Override
-		public void networkError() {
-			//empty
-		}
-
-		@Override
-		public void badLogin() {
-			//empty
-		}
-
-		@Override
-		public void close() {
-			//empty
-		}
-
-		@Override
-		public void display() {
-			//empty
-		}
 	}
 }
