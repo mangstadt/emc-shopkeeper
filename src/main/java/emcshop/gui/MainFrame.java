@@ -3,6 +3,7 @@ package emcshop.gui;
 import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.GuiUtils.toolTipText;
 
+import java.awt.Component;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -51,6 +52,7 @@ import org.apache.http.util.EntityUtils;
 
 import emcshop.AppContext;
 import emcshop.EMCShopkeeper;
+import emcshop.ExportType;
 import emcshop.LogManager;
 import emcshop.Settings;
 import emcshop.db.DbDao;
@@ -95,7 +97,7 @@ public class MainFrame extends JFrame {
 	private InventoryTab inventoryTab;
 	private BonusFeeTab bonusFeeTab;
 	private ChartsTab graphsTab;
-	private JMenuItem clearSessionMenuItem;
+	private JMenuItem clearSessionMenuItem, export;
 
 	private final DbDao dao;
 	private final Settings settings;
@@ -138,9 +140,8 @@ public class MainFrame extends JFrame {
 
 		JMenuBar menuBar = new JMenuBar();
 
+		JMenu file = new JMenu("File");
 		if (!mac) {
-			JMenu file = new JMenu("File");
-
 			JMenuItem exit = new JMenuItem("Exit");
 			exit.addActionListener(new ActionListener() {
 				@Override
@@ -153,9 +154,8 @@ public class MainFrame extends JFrame {
 			menuBar.add(file);
 		}
 
+		JMenu tools = new JMenu("Tools");
 		{
-			JMenu tools = new JMenu("Tools");
-
 			JMenuItem showLog = new JMenuItem("Show log...");
 			showLog.addActionListener(new ActionListener() {
 				@Override
@@ -209,6 +209,34 @@ public class MainFrame extends JFrame {
 				}
 			});
 			tools.add(backupSettings);
+
+			export = new JMenu("Export");
+			{
+				for (final ExportType type : ExportType.values()) {
+					JMenuItem menuItem = new JMenuItem(type.toString());
+					menuItem.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							String text = null;
+							Component selected = tabs.getSelectedComponent();
+							if (selected == transactionsTab) {
+								text = transactionsTab.export(type);
+							} else if (selected == inventoryTab) {
+								text = inventoryTab.export(type);
+							}
+
+							if (text == null) {
+								return;
+							}
+
+							GuiUtils.copyToClipboard(text);
+							JOptionPane.showMessageDialog(MainFrame.this, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
+						}
+					});
+					export.add(menuItem);
+				}
+			}
+			tools.add(export);
 
 			tools.addSeparator();
 
@@ -297,9 +325,8 @@ public class MainFrame extends JFrame {
 			menuBar.add(tools);
 		}
 
+		JMenu help = new JMenu("Help");
 		{
-			JMenu help = new JMenu("Help");
-
 			JMenuItem changelog = new JMenuItem("Changelog");
 			changelog.addActionListener(new ActionListener() {
 				@Override
@@ -398,7 +425,19 @@ public class MainFrame extends JFrame {
 		tabs.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				if (tabs.getSelectedComponent() == paymentsTab && paymentsTab.isStale()) {
+				Component selected = tabs.getSelectedComponent();
+
+				boolean exportEnabled;
+				if (selected == transactionsTab && transactionsTab.isExportable()) {
+					exportEnabled = true;
+				} else if (selected == inventoryTab) {
+					exportEnabled = true;
+				} else {
+					exportEnabled = false;
+				}
+				setExportEnabled(exportEnabled);
+
+				if (selected == paymentsTab && paymentsTab.isStale()) {
 					paymentsTab.reset();
 				}
 			}
@@ -465,6 +504,10 @@ public class MainFrame extends JFrame {
 
 	public void updateInventoryTab() {
 		inventoryTab.refresh();
+	}
+
+	public void setExportEnabled(boolean enabled) {
+		export.setEnabled(enabled);
 	}
 
 	/**

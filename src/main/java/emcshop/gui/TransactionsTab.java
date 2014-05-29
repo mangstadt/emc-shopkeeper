@@ -30,6 +30,7 @@ import com.google.common.collect.ListMultimap;
 import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.AppContext;
+import emcshop.ExportType;
 import emcshop.QueryExporter;
 import emcshop.Settings;
 import emcshop.db.DbDao;
@@ -54,8 +55,6 @@ public class TransactionsTab extends JPanel {
 	private final DatePicker fromDatePicker, toDatePicker;
 	private final JButton showItems, showPlayers, showTransactions;
 
-	private final JLabel exportLabel;
-	private final ExportComboBox export;
 	private final JLabel filterByItemLabel;
 	private final FilterTextField filterByItem;
 	private final JLabel filterByPlayerLabel;
@@ -79,6 +78,7 @@ public class TransactionsTab extends JPanel {
 	private MyJScrollPane transactionsTableScrollPane;
 
 	private int netTotal;
+	private boolean exportable;
 
 	public TransactionsTab(MainFrame owner) {
 		this.owner = owner;
@@ -166,9 +166,6 @@ public class TransactionsTab extends JPanel {
 
 		tablePanel = new JPanel(new MigLayout("width 100%, height 100%, fillx, insets 0"));
 
-		exportLabel = new JLabel("Export:");
-		export = new ExportComboBoxImpl();
-
 		filterByItemLabel = new HelpLabel("Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
 
 		filterByItem = new FilterTextField();
@@ -221,9 +218,6 @@ public class TransactionsTab extends JPanel {
 
 		JPanel right = new JPanel(new MigLayout("fillx, insets 0"));
 
-		right.add(exportLabel, "align right");
-		right.add(export, "w 185!, wrap");
-
 		right.add(filterByItemLabel, "align right");
 		right.add(filterByItem, "split 2, w 150!");
 		right.add(filterByItem.getClearButton(), "w 25!, h 20!, wrap");
@@ -248,8 +242,8 @@ public class TransactionsTab extends JPanel {
 
 		///////////////////////////////////////
 
-		exportLabel.setEnabled(false);
-		export.setEnabled(false);
+		exportable = false;
+		owner.setExportEnabled(exportable);
 		filterByItemLabel.setEnabled(false);
 		filterByItem.setEnabled(false);
 		filterByPlayerLabel.setEnabled(false);
@@ -303,8 +297,8 @@ public class TransactionsTab extends JPanel {
 		transactionsTableScrollPane = null;
 		netTotal = 0;
 
-		exportLabel.setEnabled(false);
-		export.setEnabled(false);
+		exportable = false;
+		owner.setExportEnabled(exportable);
 		filterByItemLabel.setEnabled(false);
 		filterByItem.setEnabled(false);
 		filterByItem.setText("");
@@ -410,8 +404,8 @@ public class TransactionsTab extends JPanel {
 					transactionsTable = null;
 					transactionsTableScrollPane = null;
 
-					exportLabel.setEnabled(true);
-					export.setEnabled(true);
+					exportable = true;
+					owner.setExportEnabled(exportable);
 					filterByItemLabel.setEnabled(true);
 					filterByItem.setEnabled(true);
 					filterByItem.setText("");
@@ -464,8 +458,8 @@ public class TransactionsTab extends JPanel {
 					transactionsTable = null;
 					transactionsTableScrollPane = null;
 
-					exportLabel.setEnabled(true);
-					export.setEnabled(true);
+					exportable = true;
+					owner.setExportEnabled(exportable);
 					filterByItemLabel.setEnabled(true);
 					filterByItem.setEnabled(true);
 					filterByItem.setText("");
@@ -516,8 +510,8 @@ public class TransactionsTab extends JPanel {
 					itemsTableScrollPane = null;
 					playersPanel = null;
 
-					exportLabel.setEnabled(true);
-					export.setEnabled(true);
+					exportable = true;
+					owner.setExportEnabled(exportable);
 					filterByItemLabel.setEnabled(true);
 					filterByItem.setEnabled(true);
 					filterByItem.setText("");
@@ -674,15 +668,11 @@ public class TransactionsTab extends JPanel {
 		}
 	}
 
-	private class ExportComboBoxImpl extends ExportComboBox {
-		public ExportComboBoxImpl() {
-			super(owner);
-		}
+	public String export(ExportType type) {
+		DateRange range = getQueryDateRange();
 
-		@Override
-		public String bbCode() {
-			DateRange range = getQueryDateRange();
-
+		switch (type) {
+		case BBCODE:
 			if (itemsTable != null) {
 				return QueryExporter.generateItemsBBCode(itemsTable.getDisplayedItemGroups(), netTotal, range.getFrom(), range.getTo());
 			}
@@ -697,13 +687,9 @@ public class TransactionsTab extends JPanel {
 				return QueryExporter.generateTransactionsBBCode(transactionsTable.getDisplayedTransactions(), netTotal, range.getFrom(), range.getTo());
 			}
 
-			return null;
-		}
+			break;
 
-		@Override
-		public String csv() {
-			DateRange range = getQueryDateRange();
-
+		case CSV:
 			if (itemsTable != null) {
 				return QueryExporter.generateItemsCsv(itemsTable.getDisplayedItemGroups(), netTotal, range.getFrom(), range.getTo());
 			}
@@ -717,9 +703,13 @@ public class TransactionsTab extends JPanel {
 			if (transactionsTable != null) {
 				return QueryExporter.generateTransactionsCsv(transactionsTable.getDisplayedTransactions(), netTotal, range.getFrom(), range.getTo());
 			}
-
-			return null;
 		}
+
+		return null;
+	}
+
+	public boolean isExportable() {
+		return exportable;
 	}
 
 	private class SortComboBox extends JComboBox implements ActionListener {

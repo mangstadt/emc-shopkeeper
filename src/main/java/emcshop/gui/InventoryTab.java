@@ -44,6 +44,7 @@ import net.miginfocom.swing.MigLayout;
 import org.apache.commons.io.FileUtils;
 
 import emcshop.AppContext;
+import emcshop.ExportType;
 import emcshop.ItemIndex;
 import emcshop.QueryExporter;
 import emcshop.Settings;
@@ -71,7 +72,6 @@ public class InventoryTab extends JPanel {
 	private final JLabel quantityLabel;
 	private final QuantityTextField quantity;
 
-	private final ExportComboBox export;
 	private final JLabel filterByItemLabel;
 	private final FilterTextField filterByItem;
 
@@ -174,8 +174,6 @@ public class InventoryTab extends JPanel {
 			}
 		});
 
-		export = new ExportComboBoxImpl();
-
 		filterByItemLabel = new HelpLabel("Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
 
 		filterByItem = new FilterTextField();
@@ -198,8 +196,8 @@ public class InventoryTab extends JPanel {
 
 		leftTop.add(new JLabel("Item Name:"));
 		leftTop.add(quantityLabel, "wrap");
-		leftTop.add(item, "w 200");
-		leftTop.add(quantity, "w 75, wrap");
+		leftTop.add(item, "w 250");
+		leftTop.add(quantity, "w 100, wrap");
 		leftTop.add(addEdit, "span 2, split 2");
 		leftTop.add(delete, "wrap");
 		//leftTop.add(chester, "span 2, split 2");
@@ -215,10 +213,8 @@ public class InventoryTab extends JPanel {
 
 		JPanel leftBottom = new JPanel(new MigLayout());
 
-		leftBottom.add(new JLabel("Export:"));
 		leftBottom.add(filterByItemLabel, "wrap");
-		leftBottom.add(export);
-		leftBottom.add(filterByItem, "split 2, w 150!");
+		leftBottom.add(filterByItem, "split 2, w 250!");
 		leftBottom.add(filterByItem.getClearButton(), "w 25!, h 20!, wrap");
 
 		add(leftBottom, "growy");
@@ -557,28 +553,21 @@ public class InventoryTab extends JPanel {
 		}
 	}
 
-	private class ExportComboBoxImpl extends ExportComboBox {
-		public ExportComboBoxImpl() {
-			super(owner);
+	public String export(ExportType type) {
+		List<Inventory> inventory = new ArrayList<Inventory>();
+		for (Row row : table.displayedRows) {
+			inventory.add(row.inventory);
 		}
 
-		@Override
-		public String bbCode() {
-			return QueryExporter.generateInventoryBBCode(getInventoryObjects());
+		switch (type) {
+		case BBCODE:
+			QueryExporter.generateInventoryBBCode(inventory);
+
+		case CSV:
+			return QueryExporter.generateInventoryCsv(inventory);
 		}
 
-		@Override
-		public String csv() {
-			return QueryExporter.generateInventoryCsv(getInventoryObjects());
-		}
-
-		private List<Inventory> getInventoryObjects() {
-			List<Inventory> inventory = new ArrayList<Inventory>();
-			for (Row row : table.displayedRows) {
-				inventory.add(row.inventory);
-			}
-			return inventory;
-		}
+		return null;
 	}
 
 	private class ChesterDialog extends JDialog {

@@ -2,7 +2,10 @@ package emcshop.util;
 
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -196,6 +199,16 @@ public class GuiUtils {
 				fireEvents(listeners);
 			}
 		});
+	}
+
+	/**
+	 * Copies text to the clipboard.
+	 * @param text the text to copy to the clipboard
+	 */
+	public static void copyToClipboard(String text) {
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection stringSelection = new StringSelection(text);
+		clipboard.setContents(stringSelection, stringSelection);
 	}
 
 	private GuiUtils() {
