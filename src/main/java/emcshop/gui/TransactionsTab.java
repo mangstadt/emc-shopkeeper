@@ -37,6 +37,7 @@ import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.ShopTransaction;
+import emcshop.util.DateRange;
 import emcshop.util.FilterList;
 
 @SuppressWarnings("serial")
@@ -377,12 +378,8 @@ public class TransactionsTab extends JPanel {
 		entireHistory.setText(text);
 	}
 
-	private void showItems() {
-		Date range[] = getQueryDateRange();
-		showItems(range[0], range[1]);
-	}
-
-	public void showItems(final Date from, final Date to) {
+	public void showItems() {
+		final DateRange range = getQueryDateRange();
 		busyCursor(owner, true);
 
 		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
@@ -394,7 +391,7 @@ public class TransactionsTab extends JPanel {
 					final List<ItemGroup> itemGroupsList;
 					{
 						//query database
-						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(from, to));
+						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo()));
 
 						//sort by item name
 						Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
@@ -431,7 +428,7 @@ public class TransactionsTab extends JPanel {
 					tablePanel.add(itemsTableScrollPane, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
-					updateDateRangeLabel(from, to);
+					updateDateRangeLabel(range);
 					updateNetTotal();
 					updateCustomers();
 				} catch (SQLException e) {
@@ -446,12 +443,8 @@ public class TransactionsTab extends JPanel {
 		loading.setVisible(true);
 	}
 
-	private void showPlayers() {
-		Date range[] = getQueryDateRange();
-		showPlayers(range[0], range[1]);
-	}
-
-	public void showPlayers(final Date from, final Date to) {
+	public void showPlayers() {
+		final DateRange range = getQueryDateRange();
 		busyCursor(owner, true);
 
 		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
@@ -460,7 +453,7 @@ public class TransactionsTab extends JPanel {
 			public void run() {
 				try {
 					//query database
-					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(from, to);
+					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo());
 
 					//reset GUI
 					tablePanel.removeAll();
@@ -488,7 +481,7 @@ public class TransactionsTab extends JPanel {
 					tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
-					updateDateRangeLabel(from, to);
+					updateDateRangeLabel(range);
 					updateNetTotal();
 					updateCustomers();
 				} catch (SQLException e) {
@@ -504,11 +497,8 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private void showTransactions() {
+		final DateRange range = getQueryDateRange();
 		busyCursor(owner, true);
-
-		Date range[] = getQueryDateRange();
-		final Date from = range[0];
-		final Date to = range[1];
 
 		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
 		Thread t = new Thread() {
@@ -516,7 +506,7 @@ public class TransactionsTab extends JPanel {
 			public void run() {
 				try {
 					//query database
-					List<ShopTransaction> transactions = dao.getTransactionsByDate(from, to);
+					List<ShopTransaction> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo());
 
 					//reset GUI
 					tablePanel.removeAll();
@@ -544,7 +534,7 @@ public class TransactionsTab extends JPanel {
 					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
-					updateDateRangeLabel(from, to);
+					updateDateRangeLabel(range);
 					updateNetTotal();
 					updateCustomers();
 				} catch (SQLException e) {
@@ -559,11 +549,13 @@ public class TransactionsTab extends JPanel {
 		loading.setVisible(true);
 	}
 
-	private void updateDateRangeLabel(Date from, Date to) {
-		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	private void updateDateRangeLabel(DateRange range) {
+		Date from = range.getFrom();
+		Date to = range.getTo();
+
 		String dateRangeStr;
-		final String startFont = "<b><i><font color=navy>";
-		final String endFont = "</font></i></b>";
+		String startFont = "<b><i><font color=navy>";
+		String endFont = "</font></i></b>";
 		if (from == null && to == null) {
 			dateRangeStr = startFont + "entire history" + endFont;
 		} else if (from == null) {
@@ -644,7 +636,7 @@ public class TransactionsTab extends JPanel {
 	 * various input elements on the panel.
 	 * @return the date range
 	 */
-	private Date[] getQueryDateRange() {
+	private DateRange getQueryDateRange() {
 		Date from, to;
 		if (showSinceLastUpdate.isSelected()) {
 			try {
@@ -667,7 +659,7 @@ public class TransactionsTab extends JPanel {
 			}
 		}
 
-		return new Date[] { from, to };
+		return new DateRange(from, to);
 	}
 
 	public void setShowQuantitiesInStacks(boolean stacks) {
@@ -689,22 +681,20 @@ public class TransactionsTab extends JPanel {
 
 		@Override
 		public String bbCode() {
-			Date range[] = getQueryDateRange();
-			Date from = range[0];
-			Date to = range[1];
+			DateRange range = getQueryDateRange();
 
 			if (itemsTable != null) {
-				return QueryExporter.generateItemsBBCode(itemsTable.getDisplayedItemGroups(), netTotal, from, to);
+				return QueryExporter.generateItemsBBCode(itemsTable.getDisplayedItemGroups(), netTotal, range.getFrom(), range.getTo());
 			}
 
 			if (playersPanel != null) {
 				List<PlayerGroup> players = playersPanel.getDisplayedPlayers();
 				ListMultimap<PlayerGroup, ItemGroup> items = playersPanel.getDisplayedItems();
-				return QueryExporter.generatePlayersBBCode(players, items, from, to);
+				return QueryExporter.generatePlayersBBCode(players, items, range.getFrom(), range.getTo());
 			}
 
 			if (transactionsTable != null) {
-				return QueryExporter.generateTransactionsBBCode(transactionsTable.getDisplayedTransactions(), netTotal, from, to);
+				return QueryExporter.generateTransactionsBBCode(transactionsTable.getDisplayedTransactions(), netTotal, range.getFrom(), range.getTo());
 			}
 
 			return null;
@@ -712,22 +702,20 @@ public class TransactionsTab extends JPanel {
 
 		@Override
 		public String csv() {
-			Date range[] = getQueryDateRange();
-			Date from = range[0];
-			Date to = range[1];
+			DateRange range = getQueryDateRange();
 
 			if (itemsTable != null) {
-				return QueryExporter.generateItemsCsv(itemsTable.getDisplayedItemGroups(), netTotal, from, to);
+				return QueryExporter.generateItemsCsv(itemsTable.getDisplayedItemGroups(), netTotal, range.getFrom(), range.getTo());
 			}
 
 			if (playersPanel != null) {
 				List<PlayerGroup> players = playersPanel.getDisplayedPlayers();
 				ListMultimap<PlayerGroup, ItemGroup> items = playersPanel.getDisplayedItems();
-				return QueryExporter.generatePlayersCsv(players, items, from, to);
+				return QueryExporter.generatePlayersCsv(players, items, range.getFrom(), range.getTo());
 			}
 
 			if (transactionsTable != null) {
-				return QueryExporter.generateTransactionsCsv(transactionsTable.getDisplayedTransactions(), netTotal, from, to);
+				return QueryExporter.generateTransactionsCsv(transactionsTable.getDisplayedTransactions(), netTotal, range.getFrom(), range.getTo());
 			}
 
 			return null;
