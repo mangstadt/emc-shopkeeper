@@ -8,9 +8,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.gui.images.ImageManager;
@@ -61,16 +63,17 @@ public class ResetDatabaseDialog extends JDialog {
 		});
 		GuiUtils.onEscapeKeyPress(this, cancel);
 
-		JLabel warningIcon = new JLabel(ImageManager.getWarningIcon());
+		ImageIcon tnt = ImageManager.getImageIcon("tnt.png");
+		tnt = ImageManager.scale(tnt, 48);
 
 		JLabel warningTitle = new JLabel("<html><center><h2>WARNING!</h2></center></html>");
 
 		//@formatter:off
 		JLabel text = new JLabel(
 		"<html><div width=500>" +
-		"Resetting the database will delete all transaction data within this profile.  " +
+		"Resetting the database will delete <b><u>all transaction data within this profile</u></b>.  " +
 		"This includes shop transactions, payment transactions, bonus/fee tallies, and shop inventory.<br><br>" +
-		"Re-downloading your transaction data from Empire Minecraft will restore your shop transactions and bonus/fee tallies, but all payment transaction assignments and inventory data will not be restored." +
+		"Re-downloading your transaction data from Empire Minecraft will restore your shop transactions and bonus/fee tallies, but all payment transaction assignments and inventory data will be lost forever." +
 		"</div></html>");
 		//@formatter:on
 
@@ -78,10 +81,14 @@ public class ResetDatabaseDialog extends JDialog {
 
 		setLayout(new MigLayout());
 
-		add(warningTitle, "span 2, align center, wrap");
-		add(warningIcon);
-		add(text, "gapleft 20, align center, wrap");
-		add(resetButton, "span 2, split 2, align center");
+		JPanel title = new JPanel(new MigLayout("insets 0"));
+		title.add(new JLabel(tnt), "align right");
+		title.add(warningTitle, "gapleft 20, gapright 20, align center");
+		title.add(new JLabel(tnt));
+
+		add(title, "align center, wrap");
+		add(text, "align center, gaptop 20, wrap");
+		add(resetButton, "split 2, gaptop 20, align center");
 		add(cancel);
 
 		addWindowListener(new WindowAdapter() {
