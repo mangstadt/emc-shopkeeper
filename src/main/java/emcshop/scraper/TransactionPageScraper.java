@@ -49,6 +49,9 @@ public class TransactionPageScraper {
 	private static final Pattern voteBonusRegex = Pattern.compile("^Voted for Empire Minecraft on .*$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern mailFeeRegex = Pattern.compile("^Sent mail to .*$", Pattern.CASE_INSENSITIVE);
 
+	private static final Pattern otherShopSoldRegex = Pattern.compile("^Sold to player shop ([\\d,]+) (.*?) to (.*)$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern otherShopBoughtRegex = Pattern.compile("^Player shop purchased ([\\d,]+) (.*?) from (.*)$", Pattern.CASE_INSENSITIVE);
+
 	private static final ItemIndex itemIndex = ItemIndex.instance();
 
 	/**
@@ -151,6 +154,11 @@ public class TransactionPageScraper {
 			return transaction;
 		}
 
+		transaction = toOtherShopTransaction(description);
+		if (transaction != null) {
+			return transaction;
+		}
+
 		return toRawTransaction(description);
 	}
 
@@ -239,6 +247,25 @@ public class TransactionPageScraper {
 		}
 
 		return null;
+	}
+
+	private OtherShopTransaction toOtherShopTransaction(String description) {
+		int negate = 1;
+		Matcher m = otherShopBoughtRegex.matcher(description);
+		if (!m.find()) {
+			negate = -1;
+			m = otherShopSoldRegex.matcher(description);
+			if (!m.find()) {
+				//not an other shop transaction
+				return null;
+			}
+		}
+
+		OtherShopTransaction transaction = new OtherShopTransaction();
+		transaction.setQuantity(parseNumber(m.group(1)) * negate);
+		transaction.setItem(itemIndex.getDisplayName(m.group(2)));
+		transaction.setShopOwner(m.group(3));
+		return transaction;
 	}
 
 	private RawTransaction toRawTransaction(String description) {

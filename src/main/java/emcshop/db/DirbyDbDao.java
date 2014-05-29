@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,6 +33,7 @@ import com.google.common.collect.Multimap;
 
 import emcshop.ItemIndex;
 import emcshop.scraper.BonusFeeTransaction;
+import emcshop.scraper.OtherShopTransaction;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.ClasspathUtils;
@@ -562,35 +564,55 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public void insertOtherShopTransactions(List<OtherShopTransaction> transactions) throws SQLException {
+		for (OtherShopTransaction transaction : transactions) {
+			Player player = selsertPlayer(transaction.getShopOwner());
+			Integer itemId = selsertItem(transaction.getItem());
+			Date ts = transaction.getTs();
+
+			//insert transaction
+			InsertStatement stmt = new InsertStatement("other_shop_transactions");
+			stmt.setTimestamp("ts", ts);
+			stmt.setInt("owner", player.getId());
+			stmt.setInt("item", itemId);
+			stmt.setInt("quantity", transaction.getQuantity());
+			stmt.setInt("amount", transaction.getAmount());
+			stmt.setInt("balance", transaction.getBalance());
+
+			int id = stmt.execute(conn);
+			transaction.setId(id);
+		}
+	}
+
+	@Override
 	public Date getLatestTransactionDate() throws SQLException {
-		Date shopTs;
-		PreparedStatement selectStmt = stmt("SELECT Max(ts) FROM transactions");
-		try {
-			ResultSet rs = selectStmt.executeQuery();
-			shopTs = rs.next() ? toDate(rs.getTimestamp(1)) : null;
-		} finally {
-			closeStatements(selectStmt);
+		List<Date> dates = new ArrayList<Date>();
+		String[] tables = { "transactions", "payment_transactions", "other_shop_transactions" };
+		for (String table : tables) {
+			PreparedStatement selectStmt = stmt("SELECT Max(ts) FROM " + table);
+			try {
+				ResultSet rs = selectStmt.executeQuery();
+				if (!rs.next()) {
+					continue;
+				}
+
+				Date ts = toDate(rs.getTimestamp(1));
+				if (ts == null) {
+					continue;
+				}
+
+				dates.add(ts);
+			} finally {
+				closeStatements(selectStmt);
+			}
 		}
 
-		Date paymentTs;
-		selectStmt = stmt("SELECT Max(ts) FROM payment_transactions");
-		try {
-			ResultSet rs = selectStmt.executeQuery();
-			paymentTs = rs.next() ? toDate(rs.getTimestamp(1)) : null;
-		} finally {
-			closeStatements(selectStmt);
-		}
-
-		if (shopTs == null && paymentTs == null) {
+		if (dates.isEmpty()) {
 			return null;
 		}
-		if (shopTs != null && paymentTs == null) {
-			return shopTs;
-		}
-		if (shopTs == null && paymentTs != null) {
-			return paymentTs;
-		}
-		return (shopTs.compareTo(paymentTs) > 0) ? shopTs : paymentTs;
+
+		Collections.sort(dates, Collections.reverseOrder());
+		return dates.get(0);
 	}
 
 	@SuppressWarnings("unused")
@@ -1244,6 +1266,7 @@ public abstract class DirbyDbDao implements DbDao {
 		try {
 			stmt.execute("DELETE FROM inventory");
 			stmt.execute("DELETE FROM payment_transactions");
+			stmt.execute("DELETE FROM other_shop_transactions");
 			stmt.execute("DELETE FROM transactions");
 			stmt.execute("DELETE FROM players");
 			stmt.execute("DELETE FROM items");
@@ -1251,6 +1274,7 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.execute("DELETE FROM update_log");
 
 			stmt.execute("ALTER TABLE inventory ALTER COLUMN id RESTART WITH 1");
+			stmt.execute("ALTER TABLE other_shop_transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import emcshop.scraper.BonusFeeTransaction;
+import emcshop.scraper.OtherShopTransaction;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 
@@ -171,6 +172,13 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	int countPendingPaymentTransactions() throws SQLException;
+
+	/**
+	 * Inserts a list of other shop transactions.
+	 * @param otherShopTransactions the transactions to insert
+	 * @throws SQLException
+	 */
+	void insertOtherShopTransactions(List<OtherShopTransaction> otherShopTransactions) throws SQLException;
 
 	/**
 	 * Gets the date of the latest transaction from the database.

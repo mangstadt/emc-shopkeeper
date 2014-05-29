@@ -83,6 +83,12 @@ public interface IUpdateModel {
 	int getBonusFeeTransactionsDownloaded();
 
 	/**
+	 * Gets the number of other shop transactions that were downloaded.
+	 * @return the number of other shop transactions
+	 */
+	int getOtherShopTransactionsDownloaded();
+
+	/**
 	 * Gets the date of the oldest parsed transaction.
 	 * @return the date of the oldest transaction
 	 */

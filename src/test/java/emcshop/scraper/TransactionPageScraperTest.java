@@ -1,6 +1,7 @@
 package emcshop.scraper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -8,9 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.logging.LogManager;
 
@@ -37,14 +37,14 @@ public class TransactionPageScraperTest {
 		assertEquals(new Date(1354210000000L), page.getFirstTransactionDate());
 		assertEquals(Integer.valueOf(214308), page.getRupeeBalance());
 
-		List<RupeeTransaction> expected = new ArrayList<RupeeTransaction>();
+		Iterator<RupeeTransaction> it = page.getTransactions().iterator();
 
 		RawTransaction rt = new RawTransaction();
 		rt.setTs(new Date(1354210000000L));
 		rt.setDescription("Blah");
 		rt.setAmount(500);
 		rt.setBalance(212994);
-		expected.add(rt);
+		assertEquals(rt, it.next());
 
 		ShopTransaction st = new ShopTransaction();
 		st.setTs(new Date(1354230649000L));
@@ -53,7 +53,7 @@ public class TransactionPageScraperTest {
 		st.setItem("Leather");
 		st.setPlayer("jtc0999");
 		st.setQuantity(-1);
-		expected.add(st);
+		assertEquals(st, it.next());
 
 		st = new ShopTransaction();
 		st.setTs(new Date(1354227236000L));
@@ -62,21 +62,21 @@ public class TransactionPageScraperTest {
 		st.setItem("Brewing Stand");
 		st.setPlayer("SebaB2001");
 		st.setQuantity(-2);
-		expected.add(st);
+		assertEquals(st, it.next());
 
 		PaymentTransaction pt = new PaymentTransaction();
 		pt.setTs(new Date(1354226347000L));
 		pt.setAmount(-100);
 		pt.setBalance(212994);
 		pt.setPlayer("WeirdManaico");
-		expected.add(pt);
+		assertEquals(pt, it.next());
 
 		pt = new PaymentTransaction();
 		pt.setTs(new Date(1354226247000L));
 		pt.setAmount(6);
 		pt.setBalance(212990);
 		pt.setPlayer("ColeWalser");
-		expected.add(pt);
+		assertEquals(pt, it.next());
 
 		st = new ShopTransaction();
 		st.setTs(new Date(1354225000000L));
@@ -85,70 +85,88 @@ public class TransactionPageScraperTest {
 		st.setItem("Blue Wool");
 		st.setPlayer("longtimeshelf8");
 		st.setQuantity(8);
-		expected.add(st);
+		assertEquals(st, it.next());
 
 		BonusFeeTransaction bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
 		bft.setAmount(400);
 		bft.setBalance(212990);
 		bft.setSignInBonus(true);
-		expected.add(bft);
+		assertEquals(bft, it.next());
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
 		bft.setAmount(100);
 		bft.setBalance(212990);
 		bft.setVoteBonus(true);
-		expected.add(bft);
+		assertEquals(bft, it.next());
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
 		bft.setAmount(-100);
 		bft.setBalance(212990);
 		bft.setHorseFee(true);
-		expected.add(bft);
+		assertEquals(bft, it.next());
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
 		bft.setAmount(-1000);
 		bft.setBalance(212990);
 		bft.setLockFee(true);
-		expected.add(bft);
+		assertEquals(bft, it.next());
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
 		bft.setAmount(1000);
 		bft.setBalance(212990);
 		bft.setLockFee(true);
-		expected.add(bft);
+		assertEquals(bft, it.next());
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
 		bft.setAmount(500);
 		bft.setBalance(212990);
 		bft.setLockFee(true);
-		expected.add(bft);
+		assertEquals(bft, it.next());
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
 		bft.setAmount(-10);
 		bft.setBalance(212990);
 		bft.setVaultFee(true);
-		expected.add(bft);
+		assertEquals(bft, it.next());
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
 		bft.setAmount(-100);
 		bft.setBalance(212990);
 		bft.setEggifyFee(true);
-		expected.add(bft);
+		assertEquals(bft, it.next());
 
 		bft = new BonusFeeTransaction();
 		bft.setTs(new Date(1354226247000L));
 		bft.setAmount(-50);
 		bft.setBalance(212990);
 		bft.setMailFee(true);
-		expected.add(bft);
+		assertEquals(bft, it.next());
+
+		OtherShopTransaction ost = new OtherShopTransaction();
+		ost.setTs(new Date(1401375916000L));
+		ost.setAmount(4);
+		ost.setBalance(212990);
+		ost.setItem("Bread");
+		ost.setShopOwner("wassatthen");
+		ost.setQuantity(-8);
+		assertEquals(ost, it.next());
+
+		ost = new OtherShopTransaction();
+		ost.setTs(new Date(1401375913000L));
+		ost.setAmount(-8);
+		ost.setBalance(212990);
+		ost.setItem("Bread");
+		ost.setShopOwner("wassatthen");
+		ost.setQuantity(8);
+		assertEquals(ost, it.next());
 
 		DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
 		rt = new RawTransaction();
@@ -156,10 +174,9 @@ public class TransactionPageScraperTest {
 		rt.setDescription("Week-old transaction");
 		rt.setAmount(-100);
 		rt.setBalance(212990);
-		expected.add(rt);
+		assertEquals(rt, it.next());
 
-		List<RupeeTransaction> actual = page.getTransactions();
-		assertEquals(expected, actual);
+		assertFalse(it.hasNext());
 	}
 
 	@Test

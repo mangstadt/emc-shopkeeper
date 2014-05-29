@@ -378,7 +378,7 @@ public class MainFrame extends JFrame {
 
 				if (!presenter.isCanceled()) {
 					try {
-						updateSuccessful(presenter.getStarted(), presenter.getRupeeBalance(), presenter.getTimeTaken(), presenter.getShopTransactions(), presenter.getPaymentTransactions(), presenter.getBonusFeeTransactions(), presenter.getPageCount(), presenter.getShowResults());
+						updateSuccessful(presenter.getStarted(), presenter.getRupeeBalance(), presenter.getTimeTaken(), presenter.getShopTransactions(), presenter.getPaymentTransactions(), presenter.getBonusFeeTransactions(), presenter.getOtherShopTransactions(), presenter.getPageCount(), presenter.getShowResults());
 					} catch (SQLException e) {
 						throw new RuntimeException(e);
 					}
@@ -471,8 +471,8 @@ public class MainFrame extends JFrame {
 	 * Called after an update has completed.
 	 * @throws SQLException
 	 */
-	private void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int pageCount, boolean showResults) throws SQLException {
-		int totalTransactions = shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount;
+	private void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int otherShopTransactionCount, int pageCount, boolean showResults) throws SQLException {
+		int totalTransactions = shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount + otherShopTransactionCount;
 		String message;
 		if (totalTransactions == 0) {
 			message = "No new transactions found.";

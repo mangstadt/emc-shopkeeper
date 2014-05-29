@@ -109,6 +109,7 @@ public class UpdatePresenter {
 		view.setShopTransactions(model.getShopTransactionsDownloaded());
 		view.setPaymentTransactions(model.getPaymentTransactionsDownloaded());
 		view.setBonusFeeTransactions(model.getBonusFeeTransactionsDownloaded());
+		view.setOtherShopTransactions(model.getOtherShopTransactionsDownloaded());
 		view.setOldestParsedTransactonDate(model.getOldestParsedTransactionDate());
 	}
 
@@ -147,6 +148,10 @@ public class UpdatePresenter {
 
 	public int getBonusFeeTransactions() {
 		return model.getBonusFeeTransactionsDownloaded();
+	}
+
+	public int getOtherShopTransactions() {
+		return model.getOtherShopTransactionsDownloaded();
 	}
 
 	public Date getStarted() {
