@@ -451,13 +451,33 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Date getEarliestTransactionDate() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT Min(ts) FROM transactions");
-		try {
-			ResultSet rs = stmt.executeQuery();
-			return rs.next() ? toDate(rs.getTimestamp(1)) : null;
-		} finally {
-			closeStatements(stmt);
+		List<Date> dates = new ArrayList<Date>();
+		String[] tables = { "transactions", "payment_transactions" };
+		for (String table : tables) {
+			PreparedStatement selectStmt = stmt("SELECT Min(ts) FROM " + table);
+			try {
+				ResultSet rs = selectStmt.executeQuery();
+				if (!rs.next()) {
+					continue;
+				}
+
+				Timestamp ts = rs.getTimestamp(1);
+				if (ts == null) {
+					continue;
+				}
+
+				dates.add(toDate(ts));
+			} finally {
+				closeStatements(selectStmt);
+			}
 		}
+
+		if (dates.isEmpty()) {
+			return null;
+		}
+
+		Collections.sort(dates);
+		return dates.get(0);
 	}
 
 	private void updateTransactionItem(List<Integer> oldItemIds, int newItemId) throws SQLException {
@@ -490,20 +510,23 @@ public abstract class DirbyDbDao implements DbDao {
 		Date ts = transaction.getTs();
 
 		//keep track of the first/last seen dates so they can be updated (in "commit()")
-		Date dates[] = firstLastSeenDates.get(player.getId());
-		if (dates == null) {
-			dates = new Date[] { player.getFirstSeen(), player.getLastSeen() };
-			firstLastSeenDates.put(player.getId(), dates);
-		}
+		//don't record this if this is not a transaction from the player's own shop
+		if (player != null) {
+			Date dates[] = firstLastSeenDates.get(player.getId());
+			if (dates == null) {
+				dates = new Date[] { player.getFirstSeen(), player.getLastSeen() };
+				firstLastSeenDates.put(player.getId(), dates);
+			}
 
-		Date earliest = dates[0];
-		if (earliest == null || ts.getTime() < earliest.getTime()) {
-			dates[0] = ts;
-		}
+			Date earliest = dates[0];
+			if (earliest == null || ts.getTime() < earliest.getTime()) {
+				dates[0] = ts;
+			}
 
-		Date latest = dates[1];
-		if (latest == null || ts.getTime() > latest.getTime()) {
-			dates[1] = ts;
+			Date latest = dates[1];
+			if (latest == null || ts.getTime() > latest.getTime()) {
+				dates[1] = ts;
+			}
 		}
 
 		//insert transaction
@@ -584,12 +607,12 @@ public abstract class DirbyDbDao implements DbDao {
 					continue;
 				}
 
-				Date ts = toDate(rs.getTimestamp(1));
+				Timestamp ts = rs.getTimestamp(1);
 				if (ts == null) {
 					continue;
 				}
 
-				dates.add(ts);
+				dates.add(toDate(ts));
 			} finally {
 				closeStatements(selectStmt);
 			}
@@ -601,43 +624,6 @@ public abstract class DirbyDbDao implements DbDao {
 
 		Collections.sort(dates, Collections.reverseOrder());
 		return dates.get(0);
-	}
-
-	@SuppressWarnings("unused")
-	private List<ShopTransaction> getTransactions(int limit) throws SQLException {
-		//@formatter:off
-		String sql =
-		"SELECT t.id, t.ts, t.amount, t.balance, t.quantity, p.name AS playerName, i.name AS itemName " +
-		"FROM transactions t " +
-		"INNER JOIN players p ON t.player = p.id " +
-		"INNER JOIN items i ON t.item = i.id " +
-		"WHERE t.player IS NOT NULL " +
-		"ORDER BY t.ts DESC";
-		//@formatter:on
-
-		PreparedStatement selectStmt = stmt(sql);
-		try {
-			if (limit > 0) {
-				selectStmt.setMaxRows(limit);
-			}
-			ResultSet rs = selectStmt.executeQuery();
-			List<ShopTransaction> transactions = new ArrayList<ShopTransaction>();
-			while (rs.next()) {
-				ShopTransaction transaction = new ShopTransaction();
-				transaction.setId(rs.getInt("id"));
-				transaction.setAmount(rs.getInt("amount"));
-				transaction.setBalance(rs.getInt("balance"));
-				transaction.setItem(rs.getString("itemName"));
-				transaction.setPlayer(rs.getString("playerName"));
-				transaction.setQuantity(rs.getInt("quantity"));
-				transaction.setTs(toDate(rs.getTimestamp("ts")));
-
-				transactions.add(transaction);
-			}
-			return transactions;
-		} finally {
-			closeStatements(selectStmt);
-		}
 	}
 
 	@Override
@@ -716,7 +702,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public Collection<ItemGroup> getItemGroups(Date from, Date to) throws SQLException {
+	public Collection<ItemGroup> getItemGroups(Date from, Date to, boolean customers) throws SQLException {
 		Map<String, ItemGroup> itemGroups = new HashMap<String, ItemGroup>();
 
 		//@formatter:off
@@ -724,14 +710,16 @@ public abstract class DirbyDbDao implements DbDao {
 		"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
 		"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
 		"WHERE t.amount > 0 ";
+		//@formatter:on
+
 		if (from != null) {
 			sql += "AND ts >= ? ";
 		}
 		if (to != null) {
 			sql += "AND ts < ? ";
 		}
+
 		sql += "GROUP BY i.name";
-		//@formatter:on
 
 		PreparedStatement stmt = stmt(sql);
 		try {
@@ -760,14 +748,16 @@ public abstract class DirbyDbDao implements DbDao {
 		"SELECT Sum(t.amount) AS amountSum, Sum(t.quantity) AS quantitySum, i.name AS itemName " + 
 		"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
 		"WHERE t.amount < 0 ";
+		//@formatter:on
+
 		if (from != null) {
 			sql += "AND ts >= ? ";
 		}
 		if (to != null) {
 			sql += "AND ts < ? ";
 		}
+
 		sql += "GROUP BY i.name";
-		//@formatter:on
 
 		stmt = stmt(sql);
 		try {
@@ -798,21 +788,27 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public List<ShopTransaction> getTransactionsByDate(Date from, Date to) throws SQLException {
+	public List<ShopTransaction> getTransactionsByDate(Date from, Date to, boolean customers) throws SQLException {
 		//@formatter:off
 		String sql =
 		"SELECT t.ts, p.name AS player, i.name AS item, t.amount, t.quantity " + 
-		"FROM transactions t INNER JOIN items i ON t.item = i.id " +
-		"INNER JOIN players p ON t.player = p.id " +
-		"WHERE t.player IS NOT NULL ";
+		"FROM transactions t INNER JOIN items i ON t.item = i.id ";
+		//@formatter:on
+
+		if (customers) {
+			sql += "INNER JOIN players p ON t.player = p.id WHERE t.player IS NOT NULL ";
+		} else {
+			sql += "INNER JOIN players p ON t.shop_owner = p.id WHERE t.shop_owner IS NOT NULL ";
+		}
+
 		if (from != null) {
 			sql += "AND ts >= ? ";
 		}
 		if (to != null) {
 			sql += "AND  ts < ? ";
 		}
+
 		sql += " ORDER BY t.ts";
-		//@formatter:on
 
 		PreparedStatement stmt = stmt(sql);
 		List<ShopTransaction> transactions = new ArrayList<ShopTransaction>();
@@ -829,7 +825,9 @@ public abstract class DirbyDbDao implements DbDao {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				Date ts = toDate(rs.getTimestamp("ts"));
-				String player = rs.getString("player");
+				String playerName = rs.getString("player");
+				String player = customers ? playerName : null;
+				String owner = customers ? null : playerName;
 				String item = rs.getString("item");
 				int amount = rs.getInt("amount");
 				int quantity = rs.getInt("quantity");
@@ -850,6 +848,7 @@ public abstract class DirbyDbDao implements DbDao {
 				transaction = new ShopTransaction();
 				transaction.setTs(ts);
 				transaction.setPlayer(player);
+				transaction.setShopOwner(owner);
 				transaction.setItem(item);
 				transaction.setAmount(amount);
 				transaction.setQuantity(quantity);
@@ -865,22 +864,28 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public Collection<PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException {
+	public Collection<PlayerGroup> getPlayerGroups(Date from, Date to, boolean customers) throws SQLException {
 		Map<String, PlayerGroup> playerGroups = new HashMap<String, PlayerGroup>();
 
 		//@formatter:off
 		String sql =
 		"SELECT t.amount, t.quantity, t.player, p.name AS playerName, p.first_seen, p.last_seen, i.name AS itemName " + 
 		"FROM transactions t " +
-		"INNER JOIN items i ON t.item = i.id " +
-		"INNER JOIN players p ON t.player = p.id ";
+		"INNER JOIN items i ON t.item = i.id ";
+		//@formatter:on
+
+		if (customers) {
+			sql += "INNER JOIN players p ON t.player = p.id WHERE t.player IS NOT NULL ";
+		} else {
+			sql += "INNER JOIN players p ON t.shop_owner = p.id WHERE t.shop_owner IS NOT NULL ";
+		}
+
 		if (from != null) {
-			sql += "WHERE t.ts >= ? ";
+			sql += "AND t.ts >= ? ";
 		}
 		if (to != null) {
-			sql += ((from == null) ? "WHERE" : "AND") + " t.ts < ? ";
+			sql += "AND t.ts < ? ";
 		}
-		//@formatter:on
 
 		PreparedStatement stmt = stmt(sql);
 		try {
@@ -1200,12 +1205,19 @@ public abstract class DirbyDbDao implements DbDao {
 	private Map<Date, Profits> getProfits(Date from, Date to, boolean byDay) throws SQLException {
 		Map<Date, Profits> profits = new LinkedHashMap<Date, Profits>();
 
-		String sql = "SELECT t.ts, t.amount, i.name AS item FROM transactions t INNER JOIN items i ON t.item = i.id ";
+		//@formatter:off
+		String sql =
+		"SELECT t.ts, t.amount, i.name AS item " +
+		"FROM transactions t " +
+		"INNER JOIN items i ON t.item = i.id " +
+		"WHERE t.player IS NOT NULL ";
+		//@formatter:off
+		
 		if (from != null) {
-			sql += "WHERE t.ts >= ? ";
+			sql += "AND t.ts >= ? ";
 		}
 		if (to != null) {
-			sql += ((from == null) ? "WHERE" : "AND") + " t.ts < ? ";
+			sql += "AND t.ts < ? ";
 		}
 
 		PreparedStatement stmt = stmt(sql);
@@ -1255,7 +1267,6 @@ public abstract class DirbyDbDao implements DbDao {
 		try {
 			stmt.execute("DELETE FROM inventory");
 			stmt.execute("DELETE FROM payment_transactions");
-			stmt.execute("DELETE FROM other_shop_transactions");
 			stmt.execute("DELETE FROM transactions");
 			stmt.execute("DELETE FROM players");
 			stmt.execute("DELETE FROM items");
@@ -1263,7 +1274,6 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.execute("DELETE FROM update_log");
 
 			stmt.execute("ALTER TABLE inventory ALTER COLUMN id RESTART WITH 1");
-			stmt.execute("ALTER TABLE other_shop_transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE payment_transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE transactions ALTER COLUMN id RESTART WITH 1");
 			stmt.execute("ALTER TABLE players ALTER COLUMN id RESTART WITH 1");
@@ -1544,10 +1554,10 @@ public abstract class DirbyDbDao implements DbDao {
 			if (i > 0) {
 				sb.append(" ,");
 			}
-			sb.append("?");
+			sb.append('?');
 		}
 
-		sb.append(")");
+		sb.append(')');
 		return sb.toString();
 	}
 

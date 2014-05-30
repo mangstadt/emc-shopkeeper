@@ -93,13 +93,13 @@ public class CliController {
 		Collection<ItemGroup> itemGroups;
 		Date from, to;
 		if (query.isEmpty()) {
-			itemGroups = dao.getItemGroups(null, null);
+			itemGroups = dao.getItemGroups(null, null, true);
 			from = to = null;
 		} else {
 			Date range[] = parseDateRange(query);
 			from = range[0];
 			to = range[1];
-			itemGroups = dao.getItemGroups(from, to);
+			itemGroups = dao.getItemGroups(from, to, true);
 		}
 
 		//sort items

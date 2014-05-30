@@ -184,29 +184,34 @@ public interface DbDao {
 	 * Computes the net gains/losses for each item over a date range.
 	 * @param from the start date or null to start at the first transaction
 	 * @param to the end date or null to end at the last transaction
+	 * @param customers true to query the transactions of the player's own shop,
+	 * false to query the player's purchases from other shops
 	 * @return the net gains/losses for each item
 	 * @throws SQLException
 	 */
-	Collection<ItemGroup> getItemGroups(Date from, Date to) throws SQLException;
+	Collection<ItemGroup> getItemGroups(Date from, Date to, boolean customers) throws SQLException;
 
 	/**
 	 * Gets all transactions by date, consolidating them so consecutive
 	 * purchases are combined into a single transaction.
 	 * @param from the start date
 	 * @param to the end date
+	 * @param customers true to query the transactions of the player's own shop,
+	 * false to query the player's purchases from other shops
 	 * @return the transactions
 	 * @throws SQLException
 	 */
-	List<ShopTransaction> getTransactionsByDate(Date from, Date to) throws SQLException;
+	List<ShopTransaction> getTransactionsByDate(Date from, Date to, boolean customers) throws SQLException;
 
 	/**
 	 * Computes what each player bought/sold over a date range.
 	 * @param from the start date
 	 * @param to the end date
+	 * @param customers true to query shop customers, false to query shop owners
 	 * @return the player activity
 	 * @throws SQLException
 	 */
-	Collection<PlayerGroup> getPlayerGroups(Date from, Date to) throws SQLException;
+	Collection<PlayerGroup> getPlayerGroups(Date from, Date to, boolean customers) throws SQLException;
 
 	/**
 	 * Gets the player's shop inventory.
