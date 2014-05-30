@@ -100,11 +100,7 @@ CREATE TABLE other_shop_transactions(
 	quantity INT NOT NULL,
 	
 	--the player's rupee balance after the transaction occurred
-	balance INT NOT NULL,
-	
-	--the shop transaction that this transaction was converted to
-	--"null" if this transaction was not converted to a shop transacation
-	"transaction" INT REFERENCES transactions(id)
+	balance INT NOT NULL
 );
 
 CREATE TABLE update_log (
