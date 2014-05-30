@@ -258,7 +258,8 @@ public class UpdateModelImpl implements IUpdateModel {
 			} catch (Throwable t) {
 				//an error occurred during the update
 				synchronized (UpdateModelImpl.this) {
-					timeTaken = System.currentTimeMillis() - started;
+					stopDownload();
+					puller.cancel();
 
 					if (!firstUpdate || transactionsCount == 0) {
 						dao.rollback();
