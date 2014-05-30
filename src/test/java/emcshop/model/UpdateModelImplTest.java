@@ -45,7 +45,6 @@ import emcshop.db.DbDao;
 import emcshop.scraper.BadSessionException;
 import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.OtherShopTransaction;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RawTransaction;
 import emcshop.scraper.RupeeTransaction;
@@ -202,7 +201,6 @@ public class UpdateModelImplTest {
 		assertEquals(1, model.getShopTransactionsDownloaded());
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
-		assertEquals(0, model.getOtherShopTransactionsDownloaded());
 		assertEquals(2, model.getPagesDownloaded());
 		assertEquals(dg.getGenerated(2), model.getOldestParsedTransactionDate());
 		assertIntEquals(123, model.getRupeeBalance());
@@ -258,7 +256,6 @@ public class UpdateModelImplTest {
 		assertEquals(1, model.getShopTransactionsDownloaded());
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
-		assertEquals(0, model.getOtherShopTransactionsDownloaded());
 		assertEquals(2, model.getPagesDownloaded());
 		assertEquals(dg.getGenerated(2), model.getOldestParsedTransactionDate());
 		assertIntEquals(123, model.getRupeeBalance());
@@ -272,7 +269,6 @@ public class UpdateModelImplTest {
 		PaymentTransaction t3 = payment();
 		BonusFeeTransaction t4 = bonusFee();
 		ShopTransaction t5 = shop();
-		OtherShopTransaction t6 = otherShop(); //TODO add other shop transaction to page and test it
 
 		UpdateModelImpl model;
 		{
@@ -314,7 +310,6 @@ public class UpdateModelImplTest {
 		assertEquals(2, model.getShopTransactionsDownloaded());
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
 		assertEquals(1, model.getBonusFeeTransactionsDownloaded());
-		assertEquals(0, model.getOtherShopTransactionsDownloaded());
 		assertEquals(3, model.getPagesDownloaded());
 		assertEquals(dg.getGenerated(4), model.getOldestParsedTransactionDate());
 		assertIntEquals(123, model.getRupeeBalance());
@@ -369,7 +364,6 @@ public class UpdateModelImplTest {
 		assertEquals(1, model.getShopTransactionsDownloaded());
 		assertEquals(0, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
-		assertEquals(0, model.getOtherShopTransactionsDownloaded());
 		assertEquals(1, model.getPagesDownloaded());
 		assertEquals(dg.getGenerated(1), model.getOldestParsedTransactionDate());
 		assertIntEquals(123, model.getRupeeBalance());
@@ -425,12 +419,6 @@ public class UpdateModelImplTest {
 
 	private BonusFeeTransaction bonusFee() {
 		BonusFeeTransaction t = new BonusFeeTransaction();
-		t.setTs(dg.next());
-		return t;
-	}
-
-	private OtherShopTransaction otherShop() {
-		OtherShopTransaction t = new OtherShopTransaction();
 		t.setTs(dg.next());
 		return t;
 	}

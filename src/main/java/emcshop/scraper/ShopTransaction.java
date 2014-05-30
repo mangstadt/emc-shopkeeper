@@ -7,6 +7,7 @@ package emcshop.scraper;
 public class ShopTransaction extends RupeeTransaction {
 	private Integer id;
 	private String player;
+	private String shopOwner;
 	private String item;
 	private int quantity;
 
@@ -24,6 +25,14 @@ public class ShopTransaction extends RupeeTransaction {
 
 	public void setPlayer(String player) {
 		this.player = player;
+	}
+
+	public String getShopOwner() {
+		return shopOwner;
+	}
+
+	public void setShopOwner(String shopOwner) {
+		this.shopOwner = shopOwner;
 	}
 
 	public String getItem() {
@@ -50,6 +59,7 @@ public class ShopTransaction extends RupeeTransaction {
 		result = prime * result + ((item == null) ? 0 : item.hashCode());
 		result = prime * result + ((player == null) ? 0 : player.hashCode());
 		result = prime * result + quantity;
+		result = prime * result + ((shopOwner == null) ? 0 : shopOwner.hashCode());
 		return result;
 	}
 
@@ -78,6 +88,11 @@ public class ShopTransaction extends RupeeTransaction {
 		} else if (!player.equals(other.player))
 			return false;
 		if (quantity != other.quantity)
+			return false;
+		if (shopOwner == null) {
+			if (other.shopOwner != null)
+				return false;
+		} else if (!shopOwner.equals(other.shopOwner))
 			return false;
 		return true;
 	}

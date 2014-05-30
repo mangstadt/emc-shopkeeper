@@ -249,7 +249,7 @@ public class TransactionPageScraper {
 		return null;
 	}
 
-	private OtherShopTransaction toOtherShopTransaction(String description) {
+	private ShopTransaction toOtherShopTransaction(String description) {
 		int negate = 1;
 		Matcher m = otherShopBoughtRegex.matcher(description);
 		if (!m.find()) {
@@ -261,7 +261,7 @@ public class TransactionPageScraper {
 			}
 		}
 
-		OtherShopTransaction transaction = new OtherShopTransaction();
+		ShopTransaction transaction = new ShopTransaction();
 		transaction.setQuantity(parseNumber(m.group(1)) * negate);
 		transaction.setItem(itemIndex.getDisplayName(m.group(2)));
 		transaction.setShopOwner(m.group(3));

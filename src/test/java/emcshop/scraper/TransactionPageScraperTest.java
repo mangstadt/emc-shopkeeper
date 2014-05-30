@@ -150,23 +150,23 @@ public class TransactionPageScraperTest {
 		bft.setMailFee(true);
 		assertEquals(bft, it.next());
 
-		OtherShopTransaction ost = new OtherShopTransaction();
-		ost.setTs(new Date(1401375916000L));
-		ost.setAmount(4);
-		ost.setBalance(212990);
-		ost.setItem("Bread");
-		ost.setShopOwner("wassatthen");
-		ost.setQuantity(-8);
-		assertEquals(ost, it.next());
+		st = new ShopTransaction();
+		st.setTs(new Date(1401375916000L));
+		st.setAmount(4);
+		st.setBalance(212990);
+		st.setItem("Bread");
+		st.setShopOwner("wassatthen");
+		st.setQuantity(-8);
+		assertEquals(st, it.next());
 
-		ost = new OtherShopTransaction();
-		ost.setTs(new Date(1401375913000L));
-		ost.setAmount(-8);
-		ost.setBalance(212990);
-		ost.setItem("Bread");
-		ost.setShopOwner("wassatthen");
-		ost.setQuantity(8);
-		assertEquals(ost, it.next());
+		st = new ShopTransaction();
+		st.setTs(new Date(1401375913000L));
+		st.setAmount(-8);
+		st.setBalance(212990);
+		st.setItem("Bread");
+		st.setShopOwner("wassatthen");
+		st.setQuantity(8);
+		assertEquals(st, it.next());
 
 		DateFormat df = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm aa", Locale.US);
 		rt = new RawTransaction();

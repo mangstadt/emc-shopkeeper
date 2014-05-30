@@ -405,7 +405,7 @@ public class MainFrame extends JFrame {
 
 				if (!presenter.isCanceled()) {
 					try {
-						updateSuccessful(presenter.getStarted(), presenter.getRupeeBalance(), presenter.getTimeTaken(), presenter.getShopTransactions(), presenter.getPaymentTransactions(), presenter.getBonusFeeTransactions(), presenter.getOtherShopTransactions(), presenter.getPageCount(), presenter.getShowResults());
+						updateSuccessful(presenter.getStarted(), presenter.getRupeeBalance(), presenter.getTimeTaken(), presenter.getShopTransactions(), presenter.getPaymentTransactions(), presenter.getBonusFeeTransactions(), presenter.getPageCount(), presenter.getShowResults());
 					} catch (SQLException e) {
 						throw new RuntimeException(e);
 					}
@@ -473,8 +473,8 @@ public class MainFrame extends JFrame {
 		add(right, "wrap");
 
 		int index = 0;
-		tabs.addTab("Transactions", transactionsTab);
-		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Transactions Tab</b></font><br><br>Displays your shop transactions over a specified date range.  Transactions can be grouped by item or player."));
+		tabs.addTab("Shop Transactions", transactionsTab);
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Shop Transactions Tab</b></font><br><br>Displays the transactions that occurred when someone bought an item from your shop.  Transactions can be grouped by item or player."));
 		tabs.addTab("Payments", paymentsTab);
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Payments Tab</b></font><br><br>Displays payment transactions that are awaiting your review.  Payment transactions that are shop-related (such as buying an item in bulk) can be added to your shop transaction history.\n\nA payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."));
 		tabs.addTab("Inventory", inventoryTab);
@@ -514,8 +514,8 @@ public class MainFrame extends JFrame {
 	 * Called after an update has completed.
 	 * @throws SQLException
 	 */
-	private void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int otherShopTransactionCount, int pageCount, boolean showResults) throws SQLException {
-		int totalTransactions = shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount + otherShopTransactionCount;
+	private void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int pageCount, boolean showResults) throws SQLException {
+		int totalTransactions = shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount;
 		String message;
 		if (totalTransactions == 0) {
 			message = "No new transactions found.";

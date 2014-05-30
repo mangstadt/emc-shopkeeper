@@ -33,7 +33,6 @@ import com.google.common.collect.Multimap;
 
 import emcshop.ItemIndex;
 import emcshop.scraper.BonusFeeTransaction;
-import emcshop.scraper.OtherShopTransaction;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.ClasspathUtils;
@@ -481,7 +480,12 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException {
-		Player player = selsertPlayer(transaction.getPlayer());
+		String playerName = transaction.getPlayer();
+		Player player = (playerName == null) ? null : selsertPlayer(playerName);
+
+		String ownerName = transaction.getShopOwner();
+		Player owner = (ownerName == null) ? null : selsertPlayer(ownerName);
+
 		Integer itemId = selsertItem(transaction.getItem());
 		Date ts = transaction.getTs();
 
@@ -505,7 +509,12 @@ public abstract class DirbyDbDao implements DbDao {
 		//insert transaction
 		InsertStatement stmt = new InsertStatement("transactions");
 		stmt.setTimestamp("ts", ts);
-		stmt.setInt("player", player.getId());
+		if (player != null) {
+			stmt.setInt("player", player.getId());
+		}
+		if (owner != null) {
+			stmt.setInt("owner", owner.getId());
+		}
 		stmt.setInt("item", itemId);
 		stmt.setInt("quantity", transaction.getQuantity());
 		stmt.setInt("amount", transaction.getAmount());
@@ -513,7 +522,7 @@ public abstract class DirbyDbDao implements DbDao {
 		int id = stmt.execute(conn);
 		transaction.setId(id);
 
-		if (updateInventory) {
+		if (player != null && updateInventory) {
 			addToInventory(itemId, transaction.getQuantity());
 		}
 	}
@@ -564,30 +573,9 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void insertOtherShopTransactions(List<OtherShopTransaction> transactions) throws SQLException {
-		for (OtherShopTransaction transaction : transactions) {
-			Player player = selsertPlayer(transaction.getShopOwner());
-			Integer itemId = selsertItem(transaction.getItem());
-			Date ts = transaction.getTs();
-
-			//insert transaction
-			InsertStatement stmt = new InsertStatement("other_shop_transactions");
-			stmt.setTimestamp("ts", ts);
-			stmt.setInt("owner", player.getId());
-			stmt.setInt("item", itemId);
-			stmt.setInt("quantity", transaction.getQuantity());
-			stmt.setInt("amount", transaction.getAmount());
-			stmt.setInt("balance", transaction.getBalance());
-
-			int id = stmt.execute(conn);
-			transaction.setId(id);
-		}
-	}
-
-	@Override
 	public Date getLatestTransactionDate() throws SQLException {
 		List<Date> dates = new ArrayList<Date>();
-		String[] tables = { "transactions", "payment_transactions", "other_shop_transactions" };
+		String[] tables = { "transactions", "payment_transactions" };
 		for (String table : tables) {
 			PreparedStatement selectStmt = stmt("SELECT Max(ts) FROM " + table);
 			try {
@@ -623,6 +611,7 @@ public abstract class DirbyDbDao implements DbDao {
 		"FROM transactions t " +
 		"INNER JOIN players p ON t.player = p.id " +
 		"INNER JOIN items i ON t.item = i.id " +
+		"WHERE t.player IS NOT NULL " +
 		"ORDER BY t.ts DESC";
 		//@formatter:on
 
@@ -814,13 +803,13 @@ public abstract class DirbyDbDao implements DbDao {
 		String sql =
 		"SELECT t.ts, p.name AS player, i.name AS item, t.amount, t.quantity " + 
 		"FROM transactions t INNER JOIN items i ON t.item = i.id " +
-		"INNER JOIN players p ON t.player = p.id ";
+		"INNER JOIN players p ON t.player = p.id " +
+		"WHERE t.player IS NOT NULL ";
 		if (from != null) {
-			sql += "WHERE ts >= ? ";
+			sql += "AND ts >= ? ";
 		}
 		if (to != null) {
-			sql += (from == null) ? "WHERE" : "AND";
-			sql += " ts < ? ";
+			sql += "AND  ts < ? ";
 		}
 		sql += " ORDER BY t.ts";
 		//@formatter:on

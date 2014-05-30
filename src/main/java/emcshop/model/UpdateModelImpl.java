@@ -16,7 +16,6 @@ import emcshop.db.DbDao;
 import emcshop.scraper.BadSessionException;
 import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.OtherShopTransaction;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.RupeeTransaction;
 import emcshop.scraper.RupeeTransactions;
@@ -42,7 +41,7 @@ public class UpdateModelImpl implements IUpdateModel {
 
 	private TransactionPuller puller;
 	private long started, timeTaken;
-	private int transactionsCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, otherShopTransactionsCount, pagesCount;
+	private int transactionsCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, pagesCount;
 	private Date earliestParsedTransactionDate;
 	private boolean downloadStopped = false;
 	private Throwable thrown;
@@ -109,11 +108,6 @@ public class UpdateModelImpl implements IUpdateModel {
 	@Override
 	public int getBonusFeeTransactionsDownloaded() {
 		return bonusFeeTransactionsCount;
-	}
-
-	@Override
-	public int getOtherShopTransactionsDownloaded() {
-		return otherShopTransactionsCount;
 	}
 
 	@Override
@@ -244,11 +238,7 @@ public class UpdateModelImpl implements IUpdateModel {
 						dao.updateBonusesFees(bonusFeeTransactions);
 						bonusFeeTransactionsCount += bonusFeeTransactions.size();
 
-						List<OtherShopTransaction> otherShopTransactions = transactions.find(OtherShopTransaction.class);
-						dao.insertOtherShopTransactions(otherShopTransactions);
-						otherShopTransactionsCount += otherShopTransactions.size();
-
-						transactionsCount = shopTransactionsCount + paymentTransactionsCount + bonusFeeTransactionsCount + otherShopTransactionsCount;
+						transactionsCount = shopTransactionsCount + paymentTransactionsCount + bonusFeeTransactionsCount;
 
 						pagesCount++;
 					}
