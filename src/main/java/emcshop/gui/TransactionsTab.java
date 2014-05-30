@@ -47,7 +47,6 @@ public class TransactionsTab extends JPanel {
 
 	private final MainFrame owner;
 	private final DbDao dao;
-	private final Settings settings;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 
 	private final JCheckBox entireHistory, showSinceLastUpdate;
@@ -83,7 +82,6 @@ public class TransactionsTab extends JPanel {
 	public TransactionsTab(MainFrame owner) {
 		this.owner = owner;
 		dao = context.get(DbDao.class);
-		settings = context.get(Settings.class);
 
 		entireHistory = new JCheckBox();
 		entireHistory.addActionListener(new ActionListener() {
@@ -416,7 +414,7 @@ public class TransactionsTab extends JPanel {
 					sortBy.setEnabled(false);
 
 					//render table
-					itemsTable = new ItemsTable(itemGroupsList, settings.isShowQuantitiesInStacks());
+					itemsTable = new ItemsTable(itemGroupsList, context.get(Settings.class).isShowQuantitiesInStacks());
 					itemsTable.setFillsViewportHeight(true);
 					itemsTableScrollPane = new MyJScrollPane(itemsTable);
 					tablePanel.add(itemsTableScrollPane, "grow, w 100%, h 100%, wrap");
