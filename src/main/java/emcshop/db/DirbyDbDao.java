@@ -712,6 +712,12 @@ public abstract class DirbyDbDao implements DbDao {
 		"WHERE t.amount > 0 ";
 		//@formatter:on
 
+		if (customers) {
+			sql += "AND t.player IS NOT NULL ";
+		} else {
+			sql += "AND t.shop_owner IS NOT NULL ";
+		}
+
 		if (from != null) {
 			sql += "AND ts >= ? ";
 		}
@@ -749,6 +755,12 @@ public abstract class DirbyDbDao implements DbDao {
 		"FROM transactions t INNER JOIN items i ON t.item = i.id " + 
 		"WHERE t.amount < 0 ";
 		//@formatter:on
+
+		if (customers) {
+			sql += "AND t.player IS NOT NULL ";
+		} else {
+			sql += "AND t.shop_owner IS NOT NULL ";
+		}
 
 		if (from != null) {
 			sql += "AND ts >= ? ";

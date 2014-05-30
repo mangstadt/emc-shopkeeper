@@ -93,6 +93,7 @@ public class MainFrame extends JFrame {
 
 	private JTabbedPane tabs;
 	private TransactionsTab transactionsTab;
+	private MyTransactionsTab myTransactionsTab;
 	private PaymentsTab paymentsTab;
 	private InventoryTab inventoryTab;
 	private BonusFeeTab bonusFeeTab;
@@ -221,6 +222,8 @@ public class MainFrame extends JFrame {
 							Component selected = tabs.getSelectedComponent();
 							if (selected == transactionsTab) {
 								text = transactionsTab.export(type);
+							} else if (selected == myTransactionsTab) {
+								text = myTransactionsTab.export(type);
 							} else if (selected == inventoryTab) {
 								text = inventoryTab.export(type);
 							}
@@ -250,6 +253,7 @@ public class MainFrame extends JFrame {
 
 					inventoryTab.setShowQuantitiesInStacks(stacks);
 					transactionsTab.setShowQuantitiesInStacks(stacks);
+					myTransactionsTab.setShowQuantitiesInStacks(stacks);
 				}
 			});
 			tools.add(showQuantitiesInStacks);
@@ -303,6 +307,7 @@ public class MainFrame extends JFrame {
 								lastUpdateDate.setText("-");
 								updateRupeeBalance();
 								transactionsTab.clear();
+								myTransactionsTab.clear();
 								updatePaymentsCount();
 								paymentsTab.reset();
 								inventoryTab.refresh();
@@ -430,6 +435,8 @@ public class MainFrame extends JFrame {
 				boolean exportEnabled;
 				if (selected == transactionsTab && transactionsTab.isExportable()) {
 					exportEnabled = true;
+				} else if (selected == myTransactionsTab && myTransactionsTab.isExportable()) {
+					exportEnabled = true;
 				} else if (selected == inventoryTab) {
 					exportEnabled = true;
 				} else {
@@ -444,6 +451,7 @@ public class MainFrame extends JFrame {
 		});
 
 		transactionsTab = new TransactionsTab(this);
+		myTransactionsTab = new MyTransactionsTab(this);
 		paymentsTab = new PaymentsTab(this);
 		inventoryTab = new InventoryTab(this);
 		bonusFeeTab = new BonusFeeTab(dao);
@@ -474,15 +482,22 @@ public class MainFrame extends JFrame {
 
 		int index = 0;
 		tabs.addTab("Shop Transactions", transactionsTab);
-		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Shop Transactions Tab</b></font><br><br>Displays the transactions that occurred when someone bought an item from your shop.  Transactions can be grouped by item or player."));
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Shop Transactions</b></font><br><br>Displays the transactions that occurred when someone bought an item from your shop."));
+
+		tabs.addTab("Shop Inventory", inventoryTab);
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Shop Inventory</b></font><br><br>Allows you to define how much of each item your shop has in stock.  Your inventory is updated automatically every time you run an update."));
+
 		tabs.addTab("Payments", paymentsTab);
-		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Payments Tab</b></font><br><br>Displays payment transactions that are awaiting your review.  Payment transactions that are shop-related (such as buying an item in bulk) can be added to your shop transaction history.\n\nA payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."));
-		tabs.addTab("Inventory", inventoryTab);
-		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Inventory Tab</b></font><br><br>Allows you to define how much of each item you have in stock.  Your inventory is updated every time you download new transactions from EMC, so this tab will show you the items in your shop that are low in stock."));
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Payments</b></font><br><br>Displays payment transactions that are awaiting your review.  Payment transactions that are shop-related (such as buying an item in bulk) can be added to your shop transaction history.\n\nA payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."));
+
+		tabs.addTab("My Transactions", myTransactionsTab);
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>My Transactions</b></font><br><br>Displays the transactions that occurred when you bought an item from someone else's shop."));
+
 		tabs.addTab("Bonuses/Fees", bonusFeeTab);
-		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Bonuses/Fees Tab</b></font><br><br>Keeps a tally of the rupee bonuses and fees your account has received.  This tally is updated every time you update your transactions."));
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Bonuses/Fees</b></font><br><br>Keeps a tally of the rupee bonuses and fees your account has received.  This tally is updated every time you update your transactions."));
+
 		tabs.addTab("Charts", graphsTab);
-		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Charts Tab</b></font><br><br>Displays graphs of your shop transaction data."));
+		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Charts</b></font><br><br>Generates graphs of your shop transaction data."));
 
 		add(tabs, "span 3, h 100%, w 100%");
 	}
@@ -499,7 +514,13 @@ public class MainFrame extends JFrame {
 		if (count > 0) {
 			sb.append(" (").append(count).append(")");
 		}
-		tabs.setTitleAt(1, sb.toString());
+
+		for (int i = 0; i < tabs.getTabCount(); i++) {
+			if (paymentsTab == tabs.getComponentAt(i)) {
+				tabs.setTitleAt(i, sb.toString());
+				break;
+			}
+		}
 	}
 
 	public void updateInventoryTab() {
@@ -527,6 +548,7 @@ public class MainFrame extends JFrame {
 			if (showResults) {
 				tabs.setSelectedComponent(transactionsTab);
 			}
+			myTransactionsTab.updateComplete(firstUpdate);
 
 			updatePaymentsCount();
 			if (tabs.getSelectedComponent() == paymentsTab) {

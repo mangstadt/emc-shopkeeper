@@ -318,21 +318,12 @@ public class MyTransactionsTab extends JPanel {
 		repaint(); //the table was still visible in Linux
 	}
 
-	public void updateComplete(boolean showResults, boolean firstUpdate) {
+	public void updateComplete(boolean firstUpdate) {
 		showSinceLastUpdate.setVisible(true);
 		updateSinceLastUpdateCheckbox();
 
 		if (firstUpdate) {
 			updateEntireHistoryCheckbox();
-		}
-
-		if (showResults) {
-			showSinceLastUpdate.doClick();
-			if (!showSinceLastUpdate.isSelected()) {
-				showSinceLastUpdate.setSelected(true);
-			}
-
-			showItems();
 		}
 	}
 
@@ -470,6 +461,7 @@ public class MyTransactionsTab extends JPanel {
 
 					//render table
 					shopOwnersPanel = new PlayersPanel(shopOwnerGroups);
+					shopOwnersPanel.setShowFirstLastSeen(false);
 					tablePanel.add(shopOwnersPanel, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
@@ -520,7 +512,7 @@ public class MyTransactionsTab extends JPanel {
 					sortBy.setEnabled(false);
 
 					//render table
-					transactionsTable = new TransactionsTable(transactions);
+					transactionsTable = new TransactionsTable(transactions, false);
 					transactionsTable.setFillsViewportHeight(true);
 					transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
 					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
@@ -701,6 +693,8 @@ public class MyTransactionsTab extends JPanel {
 			if (transactionsTable != null) {
 				return QueryExporter.generateTransactionsCsv(transactionsTable.getDisplayedTransactions(), netTotal, range.getFrom(), range.getTo());
 			}
+
+			break;
 		}
 
 		return null;

@@ -520,7 +520,7 @@ public class TransactionsTab extends JPanel {
 					sortBy.setEnabled(false);
 
 					//render table
-					transactionsTable = new TransactionsTable(transactions);
+					transactionsTable = new TransactionsTable(transactions, true);
 					transactionsTable.setFillsViewportHeight(true);
 					transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
 					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");

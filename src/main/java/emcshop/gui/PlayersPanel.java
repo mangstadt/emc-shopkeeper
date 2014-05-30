@@ -55,7 +55,7 @@ public class PlayersPanel extends JPanel {
 	private final List<PlayerGroup> playerGroups;
 	private final ProfileLoader profileLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
-	private boolean showQuantitiesInStacks;
+	private boolean showQuantitiesInStacks, showFirstLastSeen = true;
 
 	private final DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
@@ -144,6 +144,10 @@ public class PlayersPanel extends JPanel {
 		for (ItemsTable table : tables) {
 			table.setShowQuantitiesInStacks(enable);
 		}
+	}
+
+	public void setShowFirstLastSeen(boolean show) {
+		this.showFirstLastSeen = show;
 	}
 
 	private void refresh() {
@@ -305,11 +309,19 @@ public class PlayersPanel extends JPanel {
 				header.add(new JLabel(dateFormat.format(joined)), "wrap");
 			}
 
-			header.add(new JLabel("First seen:"));
-			header.add(new JLabel(dateTimeFormat.format(player.getFirstSeen())), "wrap");
+			if (showFirstLastSeen) {
+				Date firstSeen = player.getFirstSeen();
+				if (firstSeen != null) {
+					header.add(new JLabel("First seen:"));
+					header.add(new JLabel(dateTimeFormat.format(firstSeen)), "wrap");
+				}
 
-			header.add(new JLabel("Last seen:"));
-			header.add(new JLabel(dateTimeFormat.format(player.getLastSeen())), "wrap");
+				Date lastSeen = player.getLastSeen();
+				if (lastSeen != null) {
+					header.add(new JLabel("Last seen:"));
+					header.add(new JLabel(dateTimeFormat.format(lastSeen)), "wrap");
+				}
+			}
 
 			tablesPanel.add(header, "wrap");
 

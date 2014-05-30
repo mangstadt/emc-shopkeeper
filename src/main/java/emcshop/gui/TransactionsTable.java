@@ -64,14 +64,15 @@ public class TransactionsTable extends JTable {
 
 	private final List<ShopTransaction> transactions;
 	private List<ShopTransaction> transactionsToDisplay;
+	private final boolean customers;
 
 	private Column prevColumnClicked;
 	private boolean ascending, showQuantitiesInStacks;
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 
-	public TransactionsTable(List<ShopTransaction> transactions) {
-		this(transactions, Column.TS, false);
+	public TransactionsTable(List<ShopTransaction> transactions, boolean customers) {
+		this(transactions, customers, Column.TS, false);
 	}
 
 	/**
@@ -80,9 +81,10 @@ public class TransactionsTable extends JTable {
 	 * @param sortedByAscending true if the items list is sorted ascending,
 	 * false if descending
 	 */
-	public TransactionsTable(List<ShopTransaction> transactions, Column sortedBy, boolean sortedByAscending) {
+	public TransactionsTable(List<ShopTransaction> transactions, final boolean customers, Column sortedBy, boolean sortedByAscending) {
 		this.transactions = transactions;
 		this.transactionsToDisplay = transactions;
+		this.customers = customers;
 		prevColumnClicked = sortedBy;
 		ascending = sortedByAscending;
 
@@ -145,7 +147,7 @@ public class TransactionsTable extends JTable {
 
 				if (column == Column.PLAYER_NAME) {
 					JPanel panel = new JPanel(new MigLayout("insets 2"));
-					String playerName = transaction.getPlayer();
+					String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
 
 					JLabel playerLabel = new JLabel();
 					playerLabel.setText(playerName);
@@ -253,7 +255,7 @@ public class TransactionsTable extends JTable {
 			transactionsToDisplay = new ArrayList<ShopTransaction>();
 			for (ShopTransaction transaction : transactions) {
 				String itemName = transaction.getItem();
-				String playerName = transaction.getPlayer();
+				String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
 				if ((filteredItemNames.isEmpty() || filteredItemNames.contains(itemName)) && (filteredPlayerNames.isEmpty() || filteredPlayerNames.contains(playerName))) {
 					transactionsToDisplay.add(transaction);
 				}
@@ -270,7 +272,8 @@ public class TransactionsTable extends JTable {
 	public List<String> getDisplayedPlayers() {
 		Set<String> players = new LinkedHashSet<String>();
 		for (ShopTransaction transaction : transactionsToDisplay) {
-			players.add(transaction.getPlayer());
+			String player = customers ? transaction.getPlayer() : transaction.getShopOwner();
+			players.add(player);
 		}
 		return new ArrayList<String>(players);
 	}
@@ -289,7 +292,11 @@ public class TransactionsTable extends JTable {
 				case TS:
 					return a.getTs().compareTo(b.getTs());
 				case PLAYER_NAME:
-					return a.getPlayer().compareToIgnoreCase(b.getPlayer());
+					if (customers) {
+						return a.getPlayer().compareToIgnoreCase(b.getPlayer());
+					} else {
+						return a.getShopOwner().compareToIgnoreCase(b.getShopOwner());
+					}
 				case ITEM_NAME:
 					return a.getItem().compareToIgnoreCase(b.getItem());
 				case AMOUNT:
@@ -337,11 +344,18 @@ public class TransactionsTable extends JTable {
 			public String getColumnName(int index) {
 				Column column = columns[index];
 
-				String text = column.getName();
+				String text;
+				if (column == Column.PLAYER_NAME && !customers) {
+					text = "Shop Owner";
+				} else {
+					text = column.getName();
+				}
+
 				if (prevColumnClicked == column) {
 					String arrow = (ascending) ? "\u25bc" : "\u25b2";
 					text = arrow + " " + text;
 				}
+
 				return text;
 			}
 

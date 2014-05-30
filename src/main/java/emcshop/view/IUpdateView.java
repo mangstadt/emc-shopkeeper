@@ -97,13 +97,6 @@ public interface IUpdateView {
 	void setBonusFeeTransactions(int count);
 
 	/**
-	 * Sets the number of other shop transactions that have been downloaded so
-	 * far.
-	 * @param count
-	 */
-	void setOtherShopTransactions(int count);
-
-	/**
 	 * Resets the dialog back to its starting state.
 	 */
 	void reset();

@@ -15,7 +15,7 @@ public class UpdateViewCli implements IUpdateView {
 	private final PrintStream out = System.out;
 	private final NumberFormat nf = NumberFormat.getInstance();
 	private final LoginShower loginShower;
-	private int pages, shopTransactions, paymentTransactions, bonusFeeTransactions, otherShopTransactions;
+	private int pages, shopTransactions, paymentTransactions, bonusFeeTransactions;
 
 	public UpdateViewCli(LoginShower loginShower) {
 		this.loginShower = loginShower;
@@ -98,14 +98,8 @@ public class UpdateViewCli implements IUpdateView {
 		updateDisplay();
 	}
 
-	@Override
-	public void setOtherShopTransactions(int count) {
-		this.otherShopTransactions = count;
-		updateDisplay();
-	}
-
 	private void updateDisplay() {
-		int transactions = shopTransactions + paymentTransactions + bonusFeeTransactions + otherShopTransactions;
+		int transactions = shopTransactions + paymentTransactions + bonusFeeTransactions;
 		out.print("\rPages: " + nf.format(pages) + " | Transactions: " + nf.format(transactions));
 	}
 

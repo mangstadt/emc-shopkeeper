@@ -39,11 +39,11 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	private final NumberFormat nf = NumberFormat.getInstance();
 	private final LoginShower loginShower;
 	private final JButton cancel, stop;
-	private final JLabel pagesLabel, shopTransactionsLabel, paymentTransactionsLabel, bonusFeeTransactionsLabel, otherShopTransactionsLabel, timerLabel;
+	private final JLabel pagesLabel, shopTransactionsLabel, paymentTransactionsLabel, bonusFeeTransactionsLabel, timerLabel;
 	private final JCheckBox display;
 	private final List<ActionListener> reportErrorListeners = new ArrayList<ActionListener>();
 
-	private int pagesCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, otherShopTransactionsCount;
+	private int pagesCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount;
 	private Date oldestTransactionDate;
 
 	private Long estimatedTime;
@@ -70,7 +70,6 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 		shopTransactionsLabel = new JLabel();
 		paymentTransactionsLabel = new JLabel();
 		bonusFeeTransactionsLabel = new JLabel();
-		otherShopTransactionsLabel = new JLabel();
 		reset();
 
 		timerLabel = new JLabel("...");
@@ -94,8 +93,6 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 		add(paymentTransactionsLabel, "wrap");
 		add(new JLabel("Bonus/Fee:"), "gapleft 30");
 		add(bonusFeeTransactionsLabel, "wrap");
-		add(new JLabel("Other Shop:"), "gapleft 30");
-		add(otherShopTransactionsLabel, "wrap");
 
 		add(new JLabel("Time:"));
 		add(timerLabel, "wrap");
@@ -191,12 +188,6 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	public void setBonusFeeTransactions(int count) {
 		bonusFeeTransactionsCount = count;
 		bonusFeeTransactionsLabel.setText(nf.format(count));
-	}
-
-	@Override
-	public void setOtherShopTransactions(int count) {
-		otherShopTransactionsCount = count;
-		otherShopTransactionsLabel.setText(nf.format(count));
 	}
 
 	@Override
@@ -329,7 +320,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 			add(scroll, "grow, w 100%, h 100%, align center, wrap");
 			add(report, "align right, wrap");
 
-			int transactionsCount = shopTransactionsCount + paymentTransactionsCount + bonusFeeTransactionsCount + otherShopTransactionsCount;
+			int transactionsCount = shopTransactionsCount + paymentTransactionsCount + bonusFeeTransactionsCount;
 			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 			//@formatter:off
 			add(new JLabel(
