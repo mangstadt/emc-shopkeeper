@@ -12,8 +12,8 @@ import java.sql.SQLException;
 public class MigrationSprocs {
 	//these sprocs may be called multiple times over the course of a database update
 	//however, they only need to be called once
-	private static boolean populateItemsTableCalled = false;
-	private static boolean updateItemNamesCalled = false;
+	static boolean populateItemsTableCalled = false;
+	static boolean updateItemNamesCalled = false;
 
 	/**
 	 * Ensures that the "items" table contains the names of all items. This

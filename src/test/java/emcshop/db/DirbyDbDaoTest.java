@@ -32,6 +32,7 @@ import java.util.logging.LogManager;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -63,6 +64,12 @@ public class DirbyDbDaoTest {
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Before
+	public void before() {
+		MigrationSprocs.populateItemsTableCalled = false;
+		MigrationSprocs.updateItemNamesCalled = false;
 	}
 
 	@After
