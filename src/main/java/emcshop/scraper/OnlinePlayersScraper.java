@@ -1,7 +1,6 @@
 package emcshop.scraper;
 
 import java.io.IOException;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -21,19 +20,19 @@ import com.google.common.collect.ImmutableMap;
 public class OnlinePlayersScraper {
 	private static final Map<EmcServer, Integer> serverNumbers;
 	static {
-		Map<EmcServer, Integer> m = new EnumMap<EmcServer, Integer>(EmcServer.class);
-		m.put(EmcServer.SMP1, 1);
-		m.put(EmcServer.SMP2, 2);
-		m.put(EmcServer.SMP3, 4);
-		m.put(EmcServer.SMP4, 5);
-		m.put(EmcServer.SMP5, 6);
-		m.put(EmcServer.SMP6, 7);
-		m.put(EmcServer.SMP7, 8);
-		m.put(EmcServer.SMP8, 9);
-		m.put(EmcServer.SMP9, 10);
-		m.put(EmcServer.UTOPIA, 3);
+		ImmutableMap.Builder<EmcServer, Integer> b = ImmutableMap.builder();
+		b.put(EmcServer.SMP1, 1);
+		b.put(EmcServer.SMP2, 2);
+		b.put(EmcServer.SMP3, 4);
+		b.put(EmcServer.SMP4, 5);
+		b.put(EmcServer.SMP5, 6);
+		b.put(EmcServer.SMP6, 7);
+		b.put(EmcServer.SMP7, 8);
+		b.put(EmcServer.SMP8, 9);
+		b.put(EmcServer.SMP9, 10);
+		b.put(EmcServer.UTOPIA, 3);
 
-		serverNumbers = ImmutableMap.copyOf(m);
+		serverNumbers = b.build();
 	}
 
 	private final HttpClient client;
