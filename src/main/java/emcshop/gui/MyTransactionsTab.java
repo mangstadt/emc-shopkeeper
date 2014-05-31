@@ -65,8 +65,8 @@ public class MyTransactionsTab extends JPanel {
 	private final JPanel tablePanel;
 	private final JLabel netTotalLabelLabel;
 	private final JLabel netTotalLabel;
-	private final JLabel customersLabel;
-	private final JLabel customers;
+	private final JLabel shopsLabel;
+	private final JLabel shops;
 
 	private ItemsTable itemsTable;
 	private MyJScrollPane itemsTableScrollPane;
@@ -192,8 +192,8 @@ public class MyTransactionsTab extends JPanel {
 		netTotalLabelLabel = new JLabel("<html><font size=5>Net Total:</font></html>");
 		netTotalLabel = new JLabel();
 
-		customersLabel = new JLabel("<html><font size=5>Customers:</font></html>");
-		customers = new JLabel();
+		shopsLabel = new JLabel("<html><font size=5>Shops:</font></html>");
+		shops = new JLabel();
 
 		///////////////////////////////////////
 
@@ -233,8 +233,8 @@ public class MyTransactionsTab extends JPanel {
 
 		add(tablePanel, "span 2, grow, h 100%, wrap");
 
-		add(customersLabel, "span 2, split 4, align right");
-		add(customers, "gapright 20");
+		add(shopsLabel, "span 2, split 4, align right");
+		add(shops, "gapright 20");
 		add(netTotalLabelLabel);
 		add(netTotalLabel);
 
@@ -249,8 +249,8 @@ public class MyTransactionsTab extends JPanel {
 		sortByLabel.setEnabled(false);
 		sortBy.setEnabled(false);
 
-		customersLabel.setVisible(false);
-		customers.setVisible(false);
+		shopsLabel.setVisible(false);
+		shops.setVisible(false);
 
 		updateNetTotal();
 		updateCustomers();
@@ -591,13 +591,13 @@ public class MyTransactionsTab extends JPanel {
 
 		//update the label text
 		if (customersCount != null) {
-			customers.setText("<html><font size=5><code>" + customersCount + "</code></font></html>");
+			shops.setText("<html><font size=5><code>" + customersCount + "</code></font></html>");
 		}
 
 		//make label visible
 		boolean visible = (customersCount != null);
-		customersLabel.setVisible(visible);
-		customers.setVisible(visible);
+		shopsLabel.setVisible(visible);
+		shops.setVisible(visible);
 	}
 
 	private boolean checkDateRange() {
