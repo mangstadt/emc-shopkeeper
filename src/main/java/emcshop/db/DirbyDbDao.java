@@ -536,7 +536,7 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.setInt("player", player.getId());
 		}
 		if (owner != null) {
-			stmt.setInt("owner", owner.getId());
+			stmt.setInt("shop_owner", owner.getId());
 		}
 		stmt.setInt("item", itemId);
 		stmt.setInt("quantity", transaction.getQuantity());
