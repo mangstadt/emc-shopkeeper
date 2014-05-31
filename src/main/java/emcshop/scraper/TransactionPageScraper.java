@@ -154,30 +154,41 @@ public class TransactionPageScraper {
 			return transaction;
 		}
 
-		transaction = toOtherShopTransaction(description);
-		if (transaction != null) {
-			return transaction;
-		}
-
 		return toRawTransaction(description);
 	}
 
 	private ShopTransaction toShopTransaction(String description) {
+		boolean playerIsCustomer = true;
 		int negate = -1;
 		Matcher m = soldRegex.matcher(description);
 		if (!m.find()) {
 			negate = 1;
+			playerIsCustomer = true;
 			m = boughtRegex.matcher(description);
 			if (!m.find()) {
-				//not a shop transaction
-				return null;
+				negate = 1;
+				playerIsCustomer = false;
+				m = otherShopBoughtRegex.matcher(description);
+				if (!m.find()) {
+					negate = -1;
+					playerIsCustomer = false;
+					m = otherShopSoldRegex.matcher(description);
+					if (!m.find()) {
+						return null;
+					}
+				}
 			}
 		}
 
 		ShopTransaction transaction = new ShopTransaction();
 		transaction.setQuantity(parseNumber(m.group(1)) * negate);
 		transaction.setItem(itemIndex.getDisplayName(m.group(2)));
-		transaction.setPlayer(m.group(3));
+		String name = m.group(3);
+		if (playerIsCustomer) {
+			transaction.setPlayer(name);
+		} else {
+			transaction.setShopOwner(name);
+		}
 		return transaction;
 	}
 
@@ -247,25 +258,6 @@ public class TransactionPageScraper {
 		}
 
 		return null;
-	}
-
-	private ShopTransaction toOtherShopTransaction(String description) {
-		int negate = 1;
-		Matcher m = otherShopBoughtRegex.matcher(description);
-		if (!m.find()) {
-			negate = -1;
-			m = otherShopSoldRegex.matcher(description);
-			if (!m.find()) {
-				//not an other shop transaction
-				return null;
-			}
-		}
-
-		ShopTransaction transaction = new ShopTransaction();
-		transaction.setQuantity(parseNumber(m.group(1)) * negate);
-		transaction.setItem(itemIndex.getDisplayName(m.group(2)));
-		transaction.setShopOwner(m.group(3));
-		return transaction;
 	}
 
 	private RawTransaction toRawTransaction(String description) {
