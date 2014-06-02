@@ -145,8 +145,15 @@ public class TransactionsTable extends JTable {
 				ShopTransaction transaction = (ShopTransaction) value;
 				final Column column = columns[col];
 
-				if (column == Column.PLAYER_NAME) {
-					JPanel panel = new JPanel(new MigLayout("insets 2"));
+				JComponent component = null;
+				switch (column) {
+				case TS:
+					Date ts = transaction.getTs();
+					component = new JLabel(df.format(ts));
+					break;
+
+				case PLAYER_NAME:
+					component = new JPanel(new MigLayout("insets 2"));
 					String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
 
 					JLabel playerLabel = new JLabel();
@@ -160,62 +167,22 @@ public class TransactionsTable extends JTable {
 					};
 					profileLoader.loadPortrait(playerName, playerLabel, 16, listener);
 					profileLoader.loadRank(playerName, playerLabel, listener);
-					panel.add(playerLabel);
+					component.add(playerLabel);
 
 					EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
 					if (server != null) {
-						panel.add(new JLabel(ImageManager.getOnline(server, 12)));
+						component.add(new JLabel(ImageManager.getOnline(server, 12)));
 					}
 
-					setBackground(panel, row);
+					break;
 
-					return panel;
-				}
-
-				JLabel label = new JLabel();
-
-				ImageIcon image = getIcon(transaction, row, column, label);
-				String text = getText(transaction, column);
-				int alignment = SwingConstants.LEFT;
-				if (text == null) {
-					text = "-";
-					alignment = SwingConstants.CENTER;
-				}
-
-				if (image != null) {
-					label.setIcon(image);
-				}
-				label.setText(text);
-				label.setHorizontalAlignment(alignment);
-
-				setBackground(label, row);
-
-				return label;
-			}
-
-			private void setBackground(JComponent component, int row) {
-				Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-				component.setOpaque(true);
-				component.setBackground(color);
-			}
-
-			private ImageIcon getIcon(ShopTransaction transaction, final int row, final Column column, JLabel label) {
-				switch (column) {
 				case ITEM_NAME:
-					return ImageManager.getItemImage(transaction.getItem());
-				default:
-					return null;
-				}
-			}
+					ImageIcon icon = ImageManager.getItemImage(transaction.getItem());
+					String name = transaction.getItem();
+					component = new JLabel(name, icon, SwingConstants.LEFT);
+					break;
 
-			public String getText(ShopTransaction transaction, Column column) {
-				switch (column) {
-				case TS:
-					Date ts = transaction.getTs();
-					return df.format(ts);
-				case ITEM_NAME:
-					return transaction.getItem();
-				case QUANTITY: {
+				case QUANTITY:
 					String text;
 					int quantity = transaction.getQuantity();
 					if (showQuantitiesInStacks) {
@@ -224,13 +191,19 @@ public class TransactionsTable extends JTable {
 					} else {
 						text = formatQuantityWithColor(quantity);
 					}
-					return "<html>" + text + "</html>";
-				}
+					component = new JLabel("<html>" + text + "</html>");
+					break;
+
 				case AMOUNT:
-					return "<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>";
-				default:
-					return null;
+					component = new JLabel("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
+					break;
 				}
+
+				Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
+				component.setOpaque(true);
+				component.setBackground(color);
+
+				return component;
 			}
 		});
 
