@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +20,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -44,7 +44,6 @@ import emcshop.gui.images.ImageManager;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
 import emcshop.util.FilterList;
-import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel {
@@ -52,12 +51,6 @@ public class TransactionsTab extends JPanel {
 
 	private final MainFrame owner;
 	private final DbDao dao;
-	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-
-	private final JRadioButton entireHistory, showSinceLastUpdate, dateRange;
-	private final JRadioButton shopTransactions, myTransactions;
-	private final DatePicker fromDatePicker, toDatePicker;
-	private final JButton showItems, showPlayers, showTransactions;
 
 	private final JLabel filterByItemLabel;
 	private final FilterTextField filterByItem;
@@ -66,7 +59,7 @@ public class TransactionsTab extends JPanel {
 	private final JLabel sortByLabel;
 	private final SortComboBox sortBy;
 
-	private final JLabel dateRangeQueried;
+	private final QueryPanel queryPanel;
 	private final JPanel tablePanel, filterPanel;
 	private final JLabel netTotalLabelLabel;
 	private final JLabel netTotalLabel;
@@ -88,86 +81,27 @@ public class TransactionsTab extends JPanel {
 		this.owner = owner;
 		dao = context.get(DbDao.class);
 
-		ButtonGroup dateRangeGroup = new ButtonGroup();
-
-		final ActionListener radioButtonListener = new ActionListener() {
+		queryPanel = new QueryPanel();
+		queryPanel.addSearchListener(new SearchListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				boolean enableDatePickers = dateRange.isSelected();
-				fromDatePicker.setEnabled(enableDatePickers);
-				toDatePicker.setEnabled(enableDatePickers);
-			}
-		};
+			public void searchPerformed(DateRange range, SearchType type, boolean shopTransactions) {
+				switch (type) {
+				case ITEMS:
+					showItems(range, shopTransactions);
+					break;
 
-		entireHistory = new JRadioButton();
-		dateRangeGroup.add(entireHistory);
-		entireHistory.addActionListener(radioButtonListener);
+				case PLAYERS:
+					showPlayers(range, shopTransactions);
+					break;
 
-		showSinceLastUpdate = new JRadioButton();
-		dateRangeGroup.add(showSinceLastUpdate);
-		showSinceLastUpdate.addActionListener(radioButtonListener);
-
-		dateRange = new JRadioButton("date range:");
-		dateRangeGroup.add(dateRange);
-		dateRange.addActionListener(radioButtonListener);
-
-		fromDatePicker = new DatePicker();
-		fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
-		fromDatePicker.setShowNoneButton(true);
-		fromDatePicker.setShowTodayButton(true);
-		fromDatePicker.setStripTime(true);
-
-		toDatePicker = new DatePicker();
-		toDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
-		toDatePicker.setShowNoneButton(true);
-		toDatePicker.setShowTodayButton(true);
-		toDatePicker.setStripTime(true);
-
-		ButtonGroup transactionTypeGroup = new ButtonGroup();
-
-		shopTransactions = new JRadioButton("Shop Transactions");
-		transactionTypeGroup.add(shopTransactions);
-		myTransactions = new JRadioButton("My Transactions");
-		transactionTypeGroup.add(myTransactions);
-		shopTransactions.setSelected(true);
-
-		showSinceLastUpdate.setSelected(true);
-		radioButtonListener.actionPerformed(null);
-
-		showItems = new JButton("By Item", ImageManager.getSearch());
-		showItems.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (!checkDateRange()) {
-					return;
+				case DATES:
+					showTransactions(range, shopTransactions);
+					break;
 				}
-				showItems();
 			}
 		});
 
-		showPlayers = new JButton("By Player", ImageManager.getSearch());
-		showPlayers.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (!checkDateRange()) {
-					return;
-				}
-				showPlayers();
-			}
-		});
-
-		showTransactions = new JButton("By Date", ImageManager.getSearch());
-		showTransactions.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (!checkDateRange()) {
-					return;
-				}
-				showTransactions();
-			}
-		});
-
-		tablePanel = new JPanel(new MigLayout("width 100%, height 100%, fillx, insets 0"));
+		tablePanel = new JPanel(new MigLayout("w 100%, h 100%, fillx, insets 0"));
 		filterPanel = new JPanel(new MigLayout("insets 0"));
 
 		filterByItemLabel = new HelpLabel("<html><font size=2>Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
@@ -193,8 +127,6 @@ public class TransactionsTab extends JPanel {
 		sortByLabel = new JLabel("<html><font size=2>Sort by:");
 		sortBy = new SortComboBox();
 
-		dateRangeQueried = new JLabel();
-
 		netTotalLabelLabel = new JLabel();
 		netTotalLabel = new JLabel();
 
@@ -205,30 +137,8 @@ public class TransactionsTab extends JPanel {
 
 		setLayout(new MigLayout("fillx, insets 5"));
 
-		JPanel datePanel = new JPanel(new MigLayout("insets 0"));
-		datePanel.setBorder(BorderFactory.createTitledBorder("Date Range"));
-		datePanel.add(entireHistory, "wrap");
-		datePanel.add(showSinceLastUpdate, "wrap");
-		datePanel.add(dateRange, "split 5");
-		datePanel.add(fromDatePicker);
-		datePanel.add(new JLabel("to"));
-		datePanel.add(toDatePicker);
-		add(datePanel, "split 2");
-
-		JPanel typePanel = new JPanel(new MigLayout("insets 0"));
-		typePanel.setBorder(BorderFactory.createTitledBorder("Transaction Type"));
-		typePanel.add(shopTransactions, "wrap");
-		typePanel.add(myTransactions);
-		add(typePanel, "growy, wrap");
-
-		add(showItems, "split 3");
-		add(showPlayers);
-		add(showTransactions, "wrap");
-
-		add(dateRangeQueried, "gaptop 10, w 100%, wrap"); //putting this label here allows the left panel to be vertically aligned to the top of the tab
-
+		add(queryPanel, "wrap");
 		add(filterPanel, "w 100%, wrap");
-
 		add(tablePanel, "span 2, grow, h 100%, wrap");
 
 		add(customersLabel, "span 2, split 4, align right");
@@ -246,8 +156,6 @@ public class TransactionsTab extends JPanel {
 
 		updateNetTotal();
 		updateCustomers();
-		updateSinceLastUpdateCheckbox();
-		updateEntireHistoryCheckbox();
 	}
 
 	private void filter() {
@@ -273,12 +181,7 @@ public class TransactionsTab extends JPanel {
 	}
 
 	public void clear() {
-		try {
-			fromDatePicker.setDate(new Date());
-			toDatePicker.setDate(new Date());
-		} catch (PropertyVetoException e) {
-			throw new RuntimeException(e);
-		}
+		queryPanel.reset();
 
 		itemsTable = null;
 		itemsTableScrollPane = null;
@@ -289,76 +192,32 @@ public class TransactionsTab extends JPanel {
 
 		exportable = false;
 		owner.setExportEnabled(exportable);
-		dateRangeQueried.setText("");
 
 		filterPanel.removeAll();
 		tablePanel.removeAll();
 
 		updateNetTotal();
 		updateCustomers();
-		updateSinceLastUpdateCheckbox();
-		updateEntireHistoryCheckbox();
 
 		validate();
 		repaint(); //the table was still visible in Linux
 	}
 
 	public void updateComplete(boolean showResults, boolean firstUpdate) {
-		showSinceLastUpdate.setVisible(true);
-		updateSinceLastUpdateCheckbox();
+		queryPanel.updateSinceLastUpdateCheckbox();
 
 		if (firstUpdate) {
-			updateEntireHistoryCheckbox();
+			queryPanel.updateEntireHistoryCheckbox();
 		}
 
 		if (showResults) {
-			showSinceLastUpdate.doClick();
-			if (!showSinceLastUpdate.isSelected()) {
-				showSinceLastUpdate.setSelected(true);
-				GuiUtils.fireEvents(Arrays.asList(showSinceLastUpdate.getActionListeners()));
-				shopTransactions.setSelected(true);
-			}
-
-			showItems();
+			queryPanel.shopTransactions.doClick();
+			queryPanel.showSinceLastUpdate.doClick();
+			queryPanel.showItems.doClick();
 		}
 	}
 
-	private void updateSinceLastUpdateCheckbox() {
-		Date date;
-		try {
-			date = dao.getSecondLatestUpdateDate();
-			if (date == null) {
-				date = dao.getEarliestTransactionDate();
-			}
-		} catch (SQLException e) {
-			date = null;
-		}
-
-		StringBuilder sb = new StringBuilder("since previous update");
-		if (date != null) {
-			sb.append(" (").append(df.format(date)).append(")");
-		}
-
-		showSinceLastUpdate.setText(sb.toString());
-	}
-
-	private void updateEntireHistoryCheckbox() {
-		Date earliestTransactionDate;
-		try {
-			earliestTransactionDate = dao.getEarliestTransactionDate();
-		} catch (SQLException e) {
-			earliestTransactionDate = null;
-		}
-
-		String text = "entire history";
-		if (earliestTransactionDate != null) {
-			text += " (since " + df.format(earliestTransactionDate) + ")";
-		}
-		entireHistory.setText(text);
-	}
-
-	public void showItems() {
-		final DateRange range = getQueryDateRange();
+	public void showItems(final DateRange range, final boolean shopTransactions) {
 		busyCursor(owner, true);
 
 		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
@@ -370,7 +229,7 @@ public class TransactionsTab extends JPanel {
 					final List<ItemGroup> itemGroupsList;
 					{
 						//query database
-						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo(), shopTransactions.isSelected()));
+						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo(), shopTransactions));
 
 						//sort by item name
 						Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
@@ -408,7 +267,6 @@ public class TransactionsTab extends JPanel {
 					tablePanel.add(itemsTableScrollPane, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
-					updateDateRangeLabel(range);
 					updateNetTotal();
 					updateCustomers();
 				} catch (SQLException e) {
@@ -424,8 +282,7 @@ public class TransactionsTab extends JPanel {
 		validate();
 	}
 
-	public void showPlayers() {
-		final DateRange range = getQueryDateRange();
+	public void showPlayers(final DateRange range, final boolean shopTransactions) {
 		busyCursor(owner, true);
 
 		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
@@ -434,7 +291,7 @@ public class TransactionsTab extends JPanel {
 			public void run() {
 				try {
 					//query database
-					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), shopTransactions.isSelected());
+					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), shopTransactions);
 
 					//reset GUI
 					filterPanel.removeAll();
@@ -466,11 +323,10 @@ public class TransactionsTab extends JPanel {
 
 					//render table
 					playersPanel = new PlayersPanel(playerGroups);
-					playersPanel.setShowFirstLastSeen(shopTransactions.isSelected());
+					playersPanel.setShowFirstLastSeen(shopTransactions);
 					tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
-					updateDateRangeLabel(range);
 					updateNetTotal();
 					updateCustomers();
 				} catch (SQLException e) {
@@ -486,8 +342,7 @@ public class TransactionsTab extends JPanel {
 		validate();
 	}
 
-	private void showTransactions() {
-		final DateRange range = getQueryDateRange();
+	private void showTransactions(final DateRange range, final boolean shopTransactions) {
 		busyCursor(owner, true);
 
 		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
@@ -496,7 +351,7 @@ public class TransactionsTab extends JPanel {
 			public void run() {
 				try {
 					//query database
-					List<ShopTransaction> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), shopTransactions.isSelected());
+					List<ShopTransaction> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), shopTransactions);
 
 					//reset GUI
 					filterPanel.removeAll();
@@ -523,13 +378,12 @@ public class TransactionsTab extends JPanel {
 					filterPanel.validate();
 
 					//render table
-					transactionsTable = new TransactionsTable(transactions, shopTransactions.isSelected());
+					transactionsTable = new TransactionsTable(transactions, shopTransactions);
 					transactionsTable.setFillsViewportHeight(true);
 					transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
 					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
-					updateDateRangeLabel(range);
 					updateNetTotal();
 					updateCustomers();
 				} catch (SQLException e) {
@@ -545,31 +399,8 @@ public class TransactionsTab extends JPanel {
 		validate();
 	}
 
-	private void updateDateRangeLabel(DateRange range) {
-		Date from = range.getFrom();
-		Date to = range.getTo();
-
-		String dateRangeStr;
-		String startFont = "<b><i><font color=navy>";
-		String endFont = "</font></i></b>";
-		if (from == null && to == null) {
-			dateRangeStr = startFont + "entire history" + endFont;
-		} else if (from == null) {
-			dateRangeStr = "up to " + startFont + df.format(to) + endFont;
-		} else if (to == null) {
-			dateRangeStr = startFont + df.format(from) + endFont + " to " + startFont + "now" + endFont;
-		} else if (from.equals(to)) {
-			dateRangeStr = startFont + df.format(from) + endFont;
-		} else {
-			dateRangeStr = startFont + df.format(from) + endFont + " to " + startFont + df.format(to) + endFont;
-		}
-
-		dateRangeQueried.setText("<html>" + dateRangeStr + "</html>");
-	}
-
 	private void updateNetTotal() {
-		String word = shopTransactions.isSelected() ? "Net Total" : "Spent";
-		netTotalLabelLabel.setText("<html><font size=5>" + word + ":</font></html>");
+		netTotalLabelLabel.setText("<html><font size=5>Net Total:</font></html>");
 
 		netTotal = 0;
 
@@ -606,7 +437,7 @@ public class TransactionsTab extends JPanel {
 
 		//update the label text
 		if (customersCount != null) {
-			String word = shopTransactions.isSelected() ? "Customers" : "Shops Visited";
+			String word = queryPanel.shopTransactions.isSelected() ? "Customers" : "Shops Visited";
 			customersLabel.setText("<html><font size=5>" + word + ":</font></html>");
 			customers.setText("<html><font size=5><code>" + customersCount + "</code></font></html>");
 		}
@@ -615,52 +446,6 @@ public class TransactionsTab extends JPanel {
 		boolean visible = (customersCount != null);
 		customersLabel.setVisible(visible);
 		customers.setVisible(visible);
-	}
-
-	private boolean checkDateRange() {
-		if (showSinceLastUpdate.isSelected() || entireHistory.isSelected()) {
-			return true;
-		}
-
-		Date from = fromDatePicker.getDate();
-		Date to = toDatePicker.getDate();
-		if (from.compareTo(to) > 0) {
-			JOptionPane.showMessageDialog(this, "Invalid date range: \"Start\" date must come before \"End\" date.", "Invalid date range", JOptionPane.INFORMATION_MESSAGE);
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Calculates the date range that the query should search over from the
-	 * various input elements on the panel.
-	 * @return the date range
-	 */
-	private DateRange getQueryDateRange() {
-		Date from, to;
-		if (showSinceLastUpdate.isSelected()) {
-			try {
-				from = dao.getSecondLatestUpdateDate();
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
-			to = null;
-		} else if (entireHistory.isSelected()) {
-			from = to = null;
-		} else {
-			from = fromDatePicker.getDate();
-
-			to = toDatePicker.getDate();
-			if (to != null) {
-				Calendar c = Calendar.getInstance();
-				c.setTime(to);
-				c.add(Calendar.DATE, 1);
-				to = c.getTime();
-			}
-		}
-
-		return new DateRange(from, to);
 	}
 
 	public void setShowQuantitiesInStacks(boolean stacks) {
@@ -676,7 +461,7 @@ public class TransactionsTab extends JPanel {
 	}
 
 	public String export(ExportType type) {
-		DateRange range = getQueryDateRange();
+		DateRange range = queryPanel.getDateRange();
 
 		switch (type) {
 		case BBCODE:
@@ -761,5 +546,341 @@ public class TransactionsTab extends JPanel {
 				busyCursor(owner, false);
 			}
 		}
+	}
+
+	private class QueryPanel extends JPanel {
+		private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+		private final DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+
+		private final JPanel fullPanel;
+		private final JRadioButton entireHistory, showSinceLastUpdate, dateRange;
+		private final JRadioButton shopTransactions, myTransactions;
+		private final DatePicker fromDatePicker, toDatePicker;
+		private final JButton compress, showItems, showPlayers, showTransactions;
+
+		private final JPanel compressedPanel;
+		private final JButton expand, showItemsSmall, showPlayersSmall, showTransactionsSmall;
+		private final JLabel description;
+
+		private final List<SearchListener> listeners = new ArrayList<SearchListener>();
+
+		public QueryPanel() {
+			ImageIcon searchIcon = ImageManager.getSearch();
+			fullPanel = new JPanel(new MigLayout("insets 0"));
+			{
+				ButtonGroup dateRangeGroup = new ButtonGroup();
+
+				final ActionListener radioButtonListener = new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						boolean enableDatePickers = dateRange.isSelected();
+						fromDatePicker.setEnabled(enableDatePickers);
+						toDatePicker.setEnabled(enableDatePickers);
+					}
+				};
+
+				entireHistory = new JRadioButton();
+				dateRangeGroup.add(entireHistory);
+				entireHistory.addActionListener(radioButtonListener);
+
+				showSinceLastUpdate = new JRadioButton();
+				dateRangeGroup.add(showSinceLastUpdate);
+				showSinceLastUpdate.addActionListener(radioButtonListener);
+
+				dateRange = new JRadioButton("date range:");
+				dateRangeGroup.add(dateRange);
+				dateRange.addActionListener(radioButtonListener);
+
+				fromDatePicker = new DatePicker();
+				fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+				fromDatePicker.setShowNoneButton(true);
+				fromDatePicker.setShowTodayButton(true);
+				fromDatePicker.setStripTime(true);
+
+				toDatePicker = new DatePicker();
+				toDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+				toDatePicker.setShowNoneButton(true);
+				toDatePicker.setShowTodayButton(true);
+				toDatePicker.setStripTime(true);
+
+				ButtonGroup transactionTypeGroup = new ButtonGroup();
+
+				shopTransactions = new JRadioButton("Shop Transactions");
+				transactionTypeGroup.add(shopTransactions);
+				myTransactions = new JRadioButton("My Transactions");
+				transactionTypeGroup.add(myTransactions);
+				shopTransactions.setSelected(true);
+
+				compress = new JButton(ImageManager.getImageIcon("up-arrow.png"));
+				compress.setToolTipText("Hide search controls.");
+				compress.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						setCompressed(true);
+					}
+				});
+
+				showItems = new JButton("By Item", searchIcon);
+				showItems.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						onSearch(SearchType.ITEMS);
+					}
+				});
+
+				showPlayers = new JButton("By Player", searchIcon);
+				showPlayers.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						onSearch(SearchType.PLAYERS);
+					}
+				});
+
+				showTransactions = new JButton("By Date", searchIcon);
+				showTransactions.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						onSearch(SearchType.DATES);
+					}
+				});
+
+				//////////////////////
+
+				JPanel datePanel = new JPanel(new MigLayout("insets 0"));
+				datePanel.setBorder(BorderFactory.createTitledBorder("Date Range"));
+				datePanel.add(entireHistory, "wrap");
+				datePanel.add(showSinceLastUpdate, "wrap");
+				datePanel.add(dateRange, "split 5");
+				datePanel.add(fromDatePicker);
+				datePanel.add(new JLabel("to"));
+				datePanel.add(toDatePicker);
+				fullPanel.add(datePanel, "split 2");
+
+				JPanel typePanel = new JPanel(new MigLayout("insets 0"));
+				typePanel.setBorder(BorderFactory.createTitledBorder("Transaction Type"));
+				typePanel.add(shopTransactions, "wrap");
+				typePanel.add(myTransactions);
+				fullPanel.add(typePanel, "growy, wrap");
+
+				fullPanel.add(compress, "w 30, split 4");
+				fullPanel.add(showItems);
+				fullPanel.add(showPlayers);
+				fullPanel.add(showTransactions, "wrap");
+			}
+
+			compressedPanel = new JPanel(new MigLayout("insets 0"));
+			{
+				expand = new JButton(ImageManager.getImageIcon("down-arrow.png"));
+				expand.setToolTipText("Show search controls.");
+				expand.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						setCompressed(false);
+					}
+				});
+
+				description = new JLabel();
+
+				showItemsSmall = new JButton("Item", searchIcon);
+				showItemsSmall.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						onSearch(SearchType.ITEMS);
+					}
+				});
+
+				showPlayersSmall = new JButton("Player", searchIcon);
+				showPlayersSmall.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						onSearch(SearchType.PLAYERS);
+					}
+				});
+
+				showTransactionsSmall = new JButton("Date", searchIcon);
+				showTransactionsSmall.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						onSearch(SearchType.DATES);
+					}
+				});
+
+				///////////////////
+
+				compressedPanel.add(expand, "w 30");
+				compressedPanel.add(description);
+				compressedPanel.add(showItemsSmall);
+				compressedPanel.add(showPlayersSmall);
+				compressedPanel.add(showTransactionsSmall);
+			}
+
+			reset();
+		}
+
+		public void reset() {
+			try {
+				fromDatePicker.setDate(new Date());
+				toDatePicker.setDate(new Date());
+			} catch (PropertyVetoException e) {
+				throw new RuntimeException(e);
+			}
+
+			showSinceLastUpdate.doClick();
+			shopTransactions.doClick();
+			description.setText("");
+			updateEntireHistoryCheckbox();
+			updateSinceLastUpdateCheckbox();
+
+			setCompressed(false);
+		}
+
+		public void addSearchListener(SearchListener listener) {
+			listeners.add(listener);
+		}
+
+		private void onSearch(SearchType type) {
+			if (!checkDateRange()) {
+				return;
+			}
+
+			DateRange range = getDateRange();
+			setDescription(type, range);
+
+			for (SearchListener listener : listeners) {
+				listener.searchPerformed(range, type, shopTransactions.isSelected());
+			}
+
+			if (getComponent(0) == fullPanel) {
+				setCompressed(true);
+			}
+		}
+
+		private void setCompressed(boolean compressed) {
+			JPanel panel = compressed ? compressedPanel : fullPanel;
+
+			removeAll();
+			add(panel);
+			validate();
+			TransactionsTab.this.validate();
+		}
+
+		private boolean checkDateRange() {
+			if (showSinceLastUpdate.isSelected() || entireHistory.isSelected()) {
+				return true;
+			}
+
+			Date from = fromDatePicker.getDate();
+			Date to = toDatePicker.getDate();
+			if (from.compareTo(to) > 0) {
+				JOptionPane.showMessageDialog(this, "Invalid date range: \"Start\" date must come before \"End\" date.", "Invalid date range", JOptionPane.INFORMATION_MESSAGE);
+				return false;
+			}
+
+			return true;
+		}
+
+		/**
+		 * Calculates the date range that the query should search over from the
+		 * various input elements on the panel.
+		 * @return the date range
+		 */
+		public DateRange getDateRange() {
+			Date from, to;
+			if (showSinceLastUpdate.isSelected()) {
+				try {
+					from = dao.getSecondLatestUpdateDate();
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
+				}
+				to = null;
+			} else if (entireHistory.isSelected()) {
+				from = to = null;
+			} else {
+				from = fromDatePicker.getDate();
+
+				to = toDatePicker.getDate();
+				if (to != null) {
+					Calendar c = Calendar.getInstance();
+					c.setTime(to);
+					c.add(Calendar.DATE, 1);
+					to = c.getTime();
+				}
+			}
+
+			return new DateRange(from, to);
+		}
+
+		private void updateEntireHistoryCheckbox() {
+			Date earliestTransactionDate;
+			try {
+				earliestTransactionDate = dao.getEarliestTransactionDate();
+			} catch (SQLException e) {
+				earliestTransactionDate = null;
+			}
+
+			String text = "entire history";
+			if (earliestTransactionDate != null) {
+				text += " (since " + dateTimeFormat.format(earliestTransactionDate) + ")";
+			}
+			entireHistory.setText(text);
+		}
+
+		private void updateSinceLastUpdateCheckbox() {
+			Date date;
+			try {
+				date = dao.getSecondLatestUpdateDate();
+				if (date == null) {
+					date = dao.getEarliestTransactionDate();
+				}
+			} catch (SQLException e) {
+				date = null;
+			}
+
+			StringBuilder sb = new StringBuilder("since previous update");
+			if (date != null) {
+				sb.append(" (").append(dateTimeFormat.format(date)).append(")");
+			}
+
+			showSinceLastUpdate.setText(sb.toString());
+		}
+
+		private void setDescription(SearchType type, DateRange range) {
+			Date from = range.getFrom();
+			Date to = range.getTo();
+
+			StringBuilder sb = new StringBuilder("<html><b><i><font color=navy>");
+
+			if (from == null && to == null) {
+				sb.append("entire history");
+			} else if (from != null && to == null) {
+				if (showSinceLastUpdate.isSelected()) {
+					sb.append("since last update (" + dateTimeFormat.format(from) + ")");
+				} else {
+					sb.append("since " + dateFormat.format(from));
+				}
+			} else if (from == null && to != null) {
+				sb.append("up to " + dateFormat.format(to));
+			} else if (from != null && to != null) {
+				Date toMod = new Date(to.getTime() - 1);
+				sb.append(dateFormat.format(from)).append(" to ").append(dateFormat.format(toMod));
+			}
+
+			sb.append(" | ");
+			if (shopTransactions.isSelected()) {
+				sb.append("Shop Transactions");
+			} else {
+				sb.append("My Transactions");
+			}
+
+			description.setText(sb.toString());
+		}
+	}
+
+	private interface SearchListener {
+		void searchPerformed(DateRange range, SearchType type, boolean shopTransactions);
+	}
+
+	private enum SearchType {
+		ITEMS, PLAYERS, DATES
 	}
 }
