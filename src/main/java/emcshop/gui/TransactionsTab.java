@@ -52,15 +52,9 @@ public class TransactionsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
 
-	private final JLabel filterByItemLabel;
-	private final FilterTextField filterByItem;
-	private final JLabel filterByPlayerLabel;
-	private final FilterTextField filterByPlayer;
-	private final JLabel sortByLabel;
-	private final SortComboBox sortBy;
-
 	private final QueryPanel queryPanel;
-	private final JPanel tablePanel, filterPanel;
+	private final FilterPanel filterPanel;
+	private final JPanel tablePanel;
 	private final JLabel netTotalLabelLabel;
 	private final JLabel netTotalLabel;
 	private final JLabel customersLabel;
@@ -77,7 +71,7 @@ public class TransactionsTab extends JPanel {
 	private int netTotal;
 	private boolean exportable;
 
-	public TransactionsTab(MainFrame owner) {
+	public TransactionsTab(final MainFrame owner) {
 		this.owner = owner;
 		dao = context.get(DbDao.class);
 
@@ -101,31 +95,52 @@ public class TransactionsTab extends JPanel {
 			}
 		});
 
+		filterPanel = new FilterPanel();
+		filterPanel.addFilterListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				filter();
+			}
+		});
+		filterPanel.addSortListener(new ActionListener() {
+			private SortItem prev;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (playersPanel == null) {
+					return;
+				}
+
+				SortItem selected = filterPanel.sortBy.getSelectedItem();
+				if (prev == selected) {
+					//the same item was selected
+					return;
+				}
+
+				busyCursor(owner, true);
+				try {
+					switch (selected) {
+					case PLAYER:
+						playersPanel.sortByPlayerName();
+						break;
+
+					case HIGHEST:
+						playersPanel.sortByCustomers();
+						break;
+
+					case LOWEST:
+						playersPanel.sortBySuppliers();
+						break;
+					}
+				} finally {
+					prev = selected;
+					busyCursor(owner, false);
+				}
+			}
+
+		});
+
 		tablePanel = new JPanel(new MigLayout("w 100%, h 100%, fillx, insets 0"));
-		filterPanel = new JPanel(new MigLayout("insets 0"));
-
-		filterByItemLabel = new HelpLabel("<html><font size=2>Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
-
-		filterByItem = new FilterTextField();
-		filterByItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				filter();
-			}
-		});
-
-		filterByPlayerLabel = new HelpLabel("<html><font size=2>Filter by player(s):", "<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar,max</code>\n\nMultiple player names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation.");
-
-		filterByPlayer = new FilterTextField();
-		filterByPlayer.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				filter();
-			}
-		});
-
-		sortByLabel = new JLabel("<html><font size=2>Sort by:");
-		sortBy = new SortComboBox();
 
 		netTotalLabelLabel = new JLabel();
 		netTotalLabel = new JLabel();
@@ -159,8 +174,8 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private void filter() {
-		FilterList items = filterByItem.getNames();
-		FilterList players = filterByPlayer.getNames();
+		FilterList items = filterPanel.filterByItem.getNames();
+		FilterList players = filterPanel.filterByPlayer.getNames();
 
 		if (itemsTable != null) {
 			itemsTable.filter(items);
@@ -254,11 +269,7 @@ public class TransactionsTab extends JPanel {
 					owner.setExportEnabled(exportable);
 
 					//render filter panel
-					filterPanel.add(filterByItemLabel);
-					filterByItem.setText("");
-					filterPanel.add(filterByItem, "w 100");
-					filterPanel.add(filterByItem.getClearButton(), "w 25!, h 20!");
-					filterPanel.validate();
+					filterPanel.setVisible(true, false, false);
 
 					//render table
 					itemsTable = new ItemsTable(itemGroupsList, context.get(Settings.class).isShowQuantitiesInStacks());
@@ -308,18 +319,7 @@ public class TransactionsTab extends JPanel {
 					owner.setExportEnabled(exportable);
 
 					//render filter panel
-					filterPanel.add(filterByItemLabel);
-					filterByItem.setText("");
-					filterPanel.add(filterByItem, "w 100");
-					filterPanel.add(filterByItem.getClearButton(), "w 25!, h 20!");
-					filterPanel.add(filterByPlayerLabel);
-					filterByPlayer.setText("");
-					filterPanel.add(filterByPlayer, "w 100");
-					filterPanel.add(filterByPlayer.getClearButton(), "w 25!, h 20!");
-					sortBy.setSelectedIndex(0);
-					filterPanel.add(sortByLabel);
-					filterPanel.add(sortBy, "w 150");
-					filterPanel.validate();
+					filterPanel.setVisible(true, true, true);
 
 					//render table
 					playersPanel = new PlayersPanel(playerGroups);
@@ -367,15 +367,7 @@ public class TransactionsTab extends JPanel {
 					owner.setExportEnabled(exportable);
 
 					//render filter panel
-					filterPanel.add(filterByItemLabel);
-					filterByItem.setText("");
-					filterPanel.add(filterByItem, "w 100");
-					filterPanel.add(filterByItem.getClearButton(), "w 25!, h 20!");
-					filterPanel.add(filterByPlayerLabel);
-					filterByPlayer.setText("");
-					filterPanel.add(filterByPlayer, "w 100");
-					filterPanel.add(filterByPlayer.getClearButton(), "w 25!, h 20!");
-					filterPanel.validate();
+					filterPanel.setVisible(true, true, false);
 
 					//render table
 					transactionsTable = new TransactionsTable(transactions, shopTransactions);
@@ -502,50 +494,6 @@ public class TransactionsTab extends JPanel {
 
 	public boolean isExportable() {
 		return exportable;
-	}
-
-	private class SortComboBox extends JComboBox implements ActionListener {
-		private static final String playerName = "Player name";
-		private static final String bestCustomers = "Highest Net Total";
-		private static final String bestSuppliers = "Lowest Net Total";
-		private String currentSelection;
-
-		public SortComboBox() {
-			addItem(playerName);
-			addItem(bestCustomers);
-			addItem(bestSuppliers);
-			addActionListener(this);
-			Font orig = getFont();
-			setFont(new Font(orig.getName(), orig.getStyle(), orig.getSize() - 2));
-
-			currentSelection = playerName;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			if (playersPanel == null) {
-				return;
-			}
-
-			String selected = (String) getSelectedItem();
-			if (selected == currentSelection) {
-				return;
-			}
-
-			busyCursor(owner, true);
-			try {
-				if (selected == playerName) {
-					playersPanel.sortByPlayerName();
-				} else if (selected == bestCustomers) {
-					playersPanel.sortByCustomers();
-				} else if (selected == bestSuppliers) {
-					playersPanel.sortBySuppliers();
-				}
-				currentSelection = selected;
-			} finally {
-				busyCursor(owner, false);
-			}
-		}
 	}
 
 	private class QueryPanel extends JPanel {
@@ -876,11 +824,95 @@ public class TransactionsTab extends JPanel {
 		}
 	}
 
-	private interface SearchListener {
+	private static interface SearchListener {
 		void searchPerformed(DateRange range, SearchType type, boolean shopTransactions);
 	}
 
-	private enum SearchType {
+	private static enum SearchType {
 		ITEMS, PLAYERS, DATES
+	}
+
+	private static class FilterPanel extends JPanel {
+		private final JLabel filterByItemLabel;
+		private final FilterTextField filterByItem;
+		private final JLabel filterByPlayerLabel;
+		private final FilterTextField filterByPlayer;
+		private final JLabel sortByLabel;
+		private final SortComboBox sortBy;
+
+		public FilterPanel() {
+			filterByItemLabel = new HelpLabel("<html><font size=2>Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
+			filterByItem = new FilterTextField();
+
+			filterByPlayerLabel = new HelpLabel("<html><font size=2>Filter by player(s):", "<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar,max</code>\n\nMultiple player names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation.");
+			filterByPlayer = new FilterTextField();
+
+			sortByLabel = new JLabel("<html><font size=2>Sort by:");
+			sortBy = new SortComboBox();
+			Font orig = sortBy.getFont();
+			sortBy.setFont(new Font(orig.getName(), orig.getStyle(), orig.getSize() - 2));
+
+			///////////////////
+
+			setLayout(new MigLayout("insets 0"));
+		}
+
+		public void setVisible(boolean item, boolean player, boolean sort) {
+			removeAll();
+
+			if (item) {
+				add(filterByItemLabel);
+				add(filterByItem, "w 150");
+				add(filterByItem.getClearButton(), "w 20, h 20");
+			}
+
+			if (player) {
+				add(filterByPlayerLabel);
+				add(filterByPlayer, "w 150");
+				add(filterByPlayer.getClearButton(), "w 20, h 20");
+			}
+
+			if (sort) {
+				add(sortByLabel);
+				add(sortBy, "w 150");
+			}
+
+			validate();
+		}
+
+		public void addFilterListener(ActionListener listener) {
+			filterByItem.addActionListener(listener);
+			filterByPlayer.addActionListener(listener);
+		}
+
+		public void addSortListener(ActionListener listener) {
+			sortBy.addActionListener(listener);
+		}
+	}
+
+	private static class SortComboBox extends JComboBox {
+		public SortComboBox() {
+			super(SortItem.values());
+		}
+
+		@Override
+		public SortItem getSelectedItem() {
+			return (SortItem) super.getSelectedItem();
+		}
+	}
+
+	private static enum SortItem {
+		PLAYER("Player Name"), HIGHEST("Highest Net Total"), LOWEST("Lowest Net Total");
+
+		private final String display;
+
+		private SortItem(String display) {
+			this.display = display;
+		}
+
+		@Override
+		public String toString() {
+			return display;
+		}
 	}
 }
