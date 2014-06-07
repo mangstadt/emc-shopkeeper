@@ -3,6 +3,7 @@ package emcshop.gui;
 import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
@@ -23,9 +24,11 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.ListCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -44,6 +47,7 @@ import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
 import emcshop.util.FilterList;
 import emcshop.util.GuiUtils;
+import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel {
@@ -66,7 +70,7 @@ public class TransactionsTab extends JPanel {
 	private final SortComboBox sortBy;
 
 	private final JLabel dateRangeQueried;
-	private final JPanel tablePanel;
+	private final JPanel tablePanel, filterPanel;
 	private final JLabel netTotalLabelLabel;
 	private final JLabel netTotalLabel;
 	private final JLabel customersLabel;
@@ -93,9 +97,7 @@ public class TransactionsTab extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				boolean enableDatePickers = dateRange.isSelected();
-				//fromDatePickerLabel.setEnabled(enableDatePickers);
 				fromDatePicker.setEnabled(enableDatePickers);
-				//toDatePickerLabel.setEnabled(enableDatePickers);
 				toDatePicker.setEnabled(enableDatePickers);
 			}
 		};
@@ -169,8 +171,9 @@ public class TransactionsTab extends JPanel {
 		});
 
 		tablePanel = new JPanel(new MigLayout("width 100%, height 100%, fillx, insets 0"));
+		filterPanel = new JPanel(new MigLayout("insets 0"));
 
-		filterByItemLabel = new HelpLabel("Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
+		filterByItemLabel = new HelpLabel("<html><font size=2>Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
 
 		filterByItem = new FilterTextField();
 		filterByItem.addActionListener(new ActionListener() {
@@ -180,7 +183,7 @@ public class TransactionsTab extends JPanel {
 			}
 		});
 
-		filterByPlayerLabel = new HelpLabel("Filter by player(s):", "<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar,max</code>\n\nMultiple player names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation.");
+		filterByPlayerLabel = new HelpLabel("<html><font size=2>Filter by player(s):", "<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar,max</code>\n\nMultiple player names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation.");
 
 		filterByPlayer = new FilterTextField();
 		filterByPlayer.addActionListener(new ActionListener() {
@@ -190,7 +193,7 @@ public class TransactionsTab extends JPanel {
 			}
 		});
 
-		sortByLabel = new JLabel("Sort by:");
+		sortByLabel = new JLabel("<html><font size=2>Sort by:");
 		sortBy = new SortComboBox();
 
 		dateRangeQueried = new JLabel();
@@ -205,8 +208,6 @@ public class TransactionsTab extends JPanel {
 
 		setLayout(new MigLayout("fillx, insets 5"));
 
-		JPanel left = new JPanel(new MigLayout("insets 0"));
-
 		JPanel datePanel = new JPanel(new MigLayout("insets 0"));
 		datePanel.setBorder(BorderFactory.createTitledBorder("Date Range"));
 		datePanel.add(entireHistory, "wrap");
@@ -215,37 +216,21 @@ public class TransactionsTab extends JPanel {
 		datePanel.add(fromDatePicker);
 		datePanel.add(new JLabel("to"));
 		datePanel.add(toDatePicker);
+		add(datePanel, "split 2");
 
 		JPanel typePanel = new JPanel(new MigLayout("insets 0"));
 		typePanel.setBorder(BorderFactory.createTitledBorder("Transaction Type"));
 		typePanel.add(shopTransactions, "wrap");
 		typePanel.add(myTransactions);
+		add(typePanel, "growy, wrap");
 
-		left.add(datePanel, "split 2");
-		left.add(typePanel, "growy, wrap");
+		add(showItems, "split 3");
+		add(showPlayers);
+		add(showTransactions, "wrap");
 
-		left.add(showItems, "split 3");
-		left.add(showPlayers);
-		left.add(showTransactions);
+		add(dateRangeQueried, "gaptop 10, w 100%, wrap"); //putting this label here allows the left panel to be vertically aligned to the top of the tab
 
-		add(left, "w 100%"); //width of 100% forces the right panel to be compact
-
-		JPanel right = new JPanel(new MigLayout("fillx, insets 0"));
-
-		right.add(filterByItemLabel, "align right");
-		right.add(filterByItem, "split 2, w 150!");
-		right.add(filterByItem.getClearButton(), "w 25!, h 20!, wrap");
-
-		right.add(filterByPlayerLabel, "align right");
-		right.add(filterByPlayer, "split 2, w 150!");
-		right.add(filterByPlayer.getClearButton(), "w 25!, h 20!, wrap");
-
-		right.add(sortByLabel, "align right");
-		right.add(sortBy, "w 185!");
-
-		add(right, "span 1 2, align right, wrap");
-
-		add(dateRangeQueried, "gaptop 20, w 100%, wrap"); //putting this label here allows the left panel to be vertically aligned to the top of the tab
+		add(filterPanel, "w 100%, wrap");
 
 		add(tablePanel, "span 2, grow, h 100%, wrap");
 
@@ -258,12 +243,6 @@ public class TransactionsTab extends JPanel {
 
 		exportable = false;
 		owner.setExportEnabled(exportable);
-		filterByItemLabel.setEnabled(false);
-		filterByItem.setEnabled(false);
-		filterByPlayerLabel.setEnabled(false);
-		filterByPlayer.setEnabled(false);
-		sortByLabel.setEnabled(false);
-		sortBy.setEnabled(false);
 
 		customersLabel.setVisible(false);
 		customers.setVisible(false);
@@ -313,16 +292,9 @@ public class TransactionsTab extends JPanel {
 
 		exportable = false;
 		owner.setExportEnabled(exportable);
-		filterByItemLabel.setEnabled(false);
-		filterByItem.setEnabled(false);
-		filterByItem.setText("");
-		filterByPlayerLabel.setEnabled(false);
-		filterByPlayer.setEnabled(false);
-		filterByPlayer.setText("");
-		sortByLabel.setEnabled(false);
-		sortBy.setEnabled(false);
 		dateRangeQueried.setText("");
 
+		filterPanel.removeAll();
 		tablePanel.removeAll();
 
 		updateNetTotal();
@@ -413,6 +385,8 @@ public class TransactionsTab extends JPanel {
 					}
 
 					//reset GUI
+					filterPanel.removeAll();
+					filterPanel.validate();
 					tablePanel.removeAll();
 					tablePanel.validate();
 
@@ -422,14 +396,13 @@ public class TransactionsTab extends JPanel {
 
 					exportable = true;
 					owner.setExportEnabled(exportable);
-					filterByItemLabel.setEnabled(true);
-					filterByItem.setEnabled(true);
+
+					//render filter panel
+					filterPanel.add(filterByItemLabel);
 					filterByItem.setText("");
-					filterByPlayerLabel.setEnabled(false);
-					filterByPlayer.setEnabled(false);
-					filterByPlayer.setText("");
-					sortByLabel.setEnabled(false);
-					sortBy.setEnabled(false);
+					filterPanel.add(filterByItem, "w 100");
+					filterPanel.add(filterByItem.getClearButton(), "w 25!, h 20!");
+					filterPanel.validate();
 
 					//render table
 					itemsTable = new ItemsTable(itemGroupsList, context.get(Settings.class).isShowQuantitiesInStacks());
@@ -451,6 +424,7 @@ public class TransactionsTab extends JPanel {
 		};
 		t.start();
 		loading.setVisible(true);
+		validate();
 	}
 
 	public void showPlayers() {
@@ -466,6 +440,8 @@ public class TransactionsTab extends JPanel {
 					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), shopTransactions.isSelected());
 
 					//reset GUI
+					filterPanel.removeAll();
+					filterPanel.validate();
 					tablePanel.removeAll();
 					tablePanel.validate();
 
@@ -476,15 +452,20 @@ public class TransactionsTab extends JPanel {
 
 					exportable = true;
 					owner.setExportEnabled(exportable);
-					filterByItemLabel.setEnabled(true);
-					filterByItem.setEnabled(true);
+
+					//render filter panel
+					filterPanel.add(filterByItemLabel);
 					filterByItem.setText("");
-					filterByPlayerLabel.setEnabled(true);
-					filterByPlayer.setEnabled(true);
+					filterPanel.add(filterByItem, "w 100");
+					filterPanel.add(filterByItem.getClearButton(), "w 25!, h 20!");
+					filterPanel.add(filterByPlayerLabel);
 					filterByPlayer.setText("");
-					sortBy.setEnabled(true);
+					filterPanel.add(filterByPlayer, "w 100");
+					filterPanel.add(filterByPlayer.getClearButton(), "w 25!, h 20!");
 					sortBy.setSelectedIndex(0);
-					sortByLabel.setEnabled(true);
+					filterPanel.add(sortByLabel);
+					filterPanel.add(sortBy, "w 150");
+					filterPanel.validate();
 
 					//render table
 					playersPanel = new PlayersPanel(playerGroups);
@@ -504,6 +485,7 @@ public class TransactionsTab extends JPanel {
 		};
 		t.start();
 		loading.setVisible(true);
+		validate();
 	}
 
 	private void showTransactions() {
@@ -519,6 +501,8 @@ public class TransactionsTab extends JPanel {
 					List<ShopTransaction> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), shopTransactions.isSelected());
 
 					//reset GUI
+					filterPanel.removeAll();
+					filterPanel.validate();
 					tablePanel.removeAll();
 					tablePanel.validate();
 
@@ -528,14 +512,17 @@ public class TransactionsTab extends JPanel {
 
 					exportable = true;
 					owner.setExportEnabled(exportable);
-					filterByItemLabel.setEnabled(true);
-					filterByItem.setEnabled(true);
+
+					//render filter panel
+					filterPanel.add(filterByItemLabel);
 					filterByItem.setText("");
-					filterByPlayerLabel.setEnabled(true);
-					filterByPlayer.setEnabled(true);
+					filterPanel.add(filterByItem, "w 100");
+					filterPanel.add(filterByItem.getClearButton(), "w 25!, h 20!");
+					filterPanel.add(filterByPlayerLabel);
 					filterByPlayer.setText("");
-					sortByLabel.setEnabled(false);
-					sortBy.setEnabled(false);
+					filterPanel.add(filterByPlayer, "w 100");
+					filterPanel.add(filterByPlayer.getClearButton(), "w 25!, h 20!");
+					filterPanel.validate();
 
 					//render table
 					transactionsTable = new TransactionsTable(transactions, true);
@@ -557,6 +544,7 @@ public class TransactionsTab extends JPanel {
 		};
 		t.start();
 		loading.setVisible(true);
+		validate();
 	}
 
 	private void updateDateRangeLabel(DateRange range) {
@@ -735,8 +723,8 @@ public class TransactionsTab extends JPanel {
 
 	private class SortComboBox extends JComboBox implements ActionListener {
 		private static final String playerName = "Player name";
-		private static final String bestCustomers = "Best Customers";
-		private static final String bestSuppliers = "Best Suppliers";
+		private static final String bestCustomers = "Highest Net Total";
+		private static final String bestSuppliers = "Lowest Net Total";
 		private String currentSelection;
 
 		public SortComboBox() {
@@ -744,6 +732,18 @@ public class TransactionsTab extends JPanel {
 			addItem(bestCustomers);
 			addItem(bestSuppliers);
 			addActionListener(this);
+
+			setRenderer(new ListCellRenderer() {
+				@Override
+				public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
+					String string = (String) value;
+					JLabel label = new JLabel("<html><font size=2>" + string);
+					label.setOpaque(true);
+					label.setBackground(UIDefaultsWrapper.getListBackground(selected));
+					return label;
+				}
+			});
+
 			currentSelection = playerName;
 		}
 

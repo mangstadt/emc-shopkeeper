@@ -248,7 +248,6 @@ public class PlayersPanel extends JPanel {
 		add(new MyJScrollPane(list), "w 450, growy");
 
 		tablesPanel = new JPanel(new MigLayout("insets 1, fillx"));
-		tablesPanel.setBackground(UIDefaultsWrapper.getListUnselected());
 		tablesPanelScrollPane = new MyJScrollPane(tablesPanel);
 		add(tablesPanelScrollPane, "grow, w 100%, h 100%");
 
