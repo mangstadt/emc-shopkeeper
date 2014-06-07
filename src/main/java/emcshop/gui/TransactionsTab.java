@@ -18,7 +18,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -41,6 +40,7 @@ import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.GroupPanel;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
 import emcshop.util.FilterList;
@@ -646,8 +646,8 @@ public class TransactionsTab extends JPanel {
 
 				//////////////////////
 
-				JPanel datePanel = new JPanel(new MigLayout("insets 0"));
-				datePanel.setBorder(BorderFactory.createTitledBorder("Date Range"));
+				JPanel datePanel = new GroupPanel("Date Range");
+				datePanel.setLayout(new MigLayout("insets 0"));
 				datePanel.add(entireHistory, "wrap");
 				datePanel.add(showSinceLastUpdate, "wrap");
 				datePanel.add(dateRange, "split 5");
@@ -656,8 +656,8 @@ public class TransactionsTab extends JPanel {
 				datePanel.add(toDatePicker);
 				fullPanel.add(datePanel, "split 2");
 
-				JPanel typePanel = new JPanel(new MigLayout("insets 0"));
-				typePanel.setBorder(BorderFactory.createTitledBorder("Transaction Type"));
+				JPanel typePanel = new GroupPanel("Transaction Type");
+				typePanel.setLayout(new MigLayout("insets 0"));
 				typePanel.add(shopTransactions, "wrap");
 				typePanel.add(myTransactions);
 				fullPanel.add(typePanel, "growy, wrap");
