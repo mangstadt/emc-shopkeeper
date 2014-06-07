@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,12 +18,14 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -40,6 +43,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
 import emcshop.util.FilterList;
+import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel {
@@ -49,8 +53,8 @@ public class TransactionsTab extends JPanel {
 	private final DbDao dao;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 
-	private final JCheckBox entireHistory, showSinceLastUpdate;
-	private final JLabel fromDatePickerLabel, toDatePickerLabel;
+	private final JRadioButton entireHistory, showSinceLastUpdate, dateRange;
+	private final JRadioButton shopTransactions, myTransactions;
 	private final DatePicker fromDatePicker, toDatePicker;
 	private final JButton showItems, showPlayers, showTransactions;
 
@@ -83,51 +87,53 @@ public class TransactionsTab extends JPanel {
 		this.owner = owner;
 		dao = context.get(DbDao.class);
 
-		entireHistory = new JCheckBox();
-		entireHistory.addActionListener(new ActionListener() {
+		ButtonGroup dateRangeGroup = new ButtonGroup();
+
+		final ActionListener radioButtonListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (entireHistory.isSelected()) {
-					showSinceLastUpdate.setSelected(false);
-				}
-
-				boolean enableDatePickers = !entireHistory.isSelected();
-				fromDatePickerLabel.setEnabled(enableDatePickers);
+				boolean enableDatePickers = dateRange.isSelected();
+				//fromDatePickerLabel.setEnabled(enableDatePickers);
 				fromDatePicker.setEnabled(enableDatePickers);
-				toDatePickerLabel.setEnabled(enableDatePickers);
+				//toDatePickerLabel.setEnabled(enableDatePickers);
 				toDatePicker.setEnabled(enableDatePickers);
 			}
-		});
+		};
 
-		showSinceLastUpdate = new JCheckBox();
-		showSinceLastUpdate.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (showSinceLastUpdate.isSelected()) {
-					entireHistory.setSelected(false);
-				}
+		entireHistory = new JRadioButton();
+		dateRangeGroup.add(entireHistory);
+		entireHistory.addActionListener(radioButtonListener);
 
-				boolean enableDatePickers = !showSinceLastUpdate.isSelected();
-				fromDatePickerLabel.setEnabled(enableDatePickers);
-				fromDatePicker.setEnabled(enableDatePickers);
-				toDatePickerLabel.setEnabled(enableDatePickers);
-				toDatePicker.setEnabled(enableDatePickers);
-			}
-		});
+		showSinceLastUpdate = new JRadioButton();
+		dateRangeGroup.add(showSinceLastUpdate);
+		showSinceLastUpdate.addActionListener(radioButtonListener);
 
-		fromDatePickerLabel = new JLabel("Start:");
+		dateRange = new JRadioButton("date range:");
+		dateRangeGroup.add(dateRange);
+		dateRange.addActionListener(radioButtonListener);
+
 		fromDatePicker = new DatePicker();
 		fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 		fromDatePicker.setShowNoneButton(true);
 		fromDatePicker.setShowTodayButton(true);
 		fromDatePicker.setStripTime(true);
 
-		toDatePickerLabel = new JLabel("End:");
 		toDatePicker = new DatePicker();
 		toDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 		toDatePicker.setShowNoneButton(true);
 		toDatePicker.setShowTodayButton(true);
 		toDatePicker.setStripTime(true);
+
+		ButtonGroup transactionTypeGroup = new ButtonGroup();
+
+		shopTransactions = new JRadioButton("Shop Transactions");
+		transactionTypeGroup.add(shopTransactions);
+		myTransactions = new JRadioButton("My Transactions");
+		transactionTypeGroup.add(myTransactions);
+		shopTransactions.setSelected(true);
+
+		showSinceLastUpdate.setSelected(true);
+		radioButtonListener.actionPerformed(null);
 
 		showItems = new JButton("By Item", ImageManager.getSearch());
 		showItems.addActionListener(new ActionListener() {
@@ -189,10 +195,10 @@ public class TransactionsTab extends JPanel {
 
 		dateRangeQueried = new JLabel();
 
-		netTotalLabelLabel = new JLabel("<html><font size=5>Net Total:</font></html>");
+		netTotalLabelLabel = new JLabel();
 		netTotalLabel = new JLabel();
 
-		customersLabel = new JLabel("<html><font size=5>Customers:</font></html>");
+		customersLabel = new JLabel();
 		customers = new JLabel();
 
 		///////////////////////////////////////
@@ -201,12 +207,22 @@ public class TransactionsTab extends JPanel {
 
 		JPanel left = new JPanel(new MigLayout("insets 0"));
 
-		left.add(entireHistory, "wrap");
-		left.add(showSinceLastUpdate, "wrap");
-		left.add(fromDatePickerLabel, "split 4");
-		left.add(fromDatePicker);
-		left.add(toDatePickerLabel);
-		left.add(toDatePicker, "wrap");
+		JPanel datePanel = new JPanel(new MigLayout("insets 0"));
+		datePanel.setBorder(BorderFactory.createTitledBorder("Date Range"));
+		datePanel.add(entireHistory, "wrap");
+		datePanel.add(showSinceLastUpdate, "wrap");
+		datePanel.add(dateRange, "split 5");
+		datePanel.add(fromDatePicker);
+		datePanel.add(new JLabel("to"));
+		datePanel.add(toDatePicker);
+
+		JPanel typePanel = new JPanel(new MigLayout("insets 0"));
+		typePanel.setBorder(BorderFactory.createTitledBorder("Transaction Type"));
+		typePanel.add(shopTransactions, "wrap");
+		typePanel.add(myTransactions);
+
+		left.add(datePanel, "split 2");
+		left.add(typePanel, "growy, wrap");
 
 		left.add(showItems, "split 3");
 		left.add(showPlayers);
@@ -330,6 +346,8 @@ public class TransactionsTab extends JPanel {
 			showSinceLastUpdate.doClick();
 			if (!showSinceLastUpdate.isSelected()) {
 				showSinceLastUpdate.setSelected(true);
+				GuiUtils.fireEvents(Arrays.asList(showSinceLastUpdate.getActionListeners()));
+				shopTransactions.setSelected(true);
 			}
 
 			showItems();
@@ -383,7 +401,7 @@ public class TransactionsTab extends JPanel {
 					final List<ItemGroup> itemGroupsList;
 					{
 						//query database
-						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo(), true));
+						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo(), shopTransactions.isSelected()));
 
 						//sort by item name
 						Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
@@ -445,7 +463,7 @@ public class TransactionsTab extends JPanel {
 			public void run() {
 				try {
 					//query database
-					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), true);
+					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), shopTransactions.isSelected());
 
 					//reset GUI
 					tablePanel.removeAll();
@@ -498,7 +516,7 @@ public class TransactionsTab extends JPanel {
 			public void run() {
 				try {
 					//query database
-					List<ShopTransaction> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), true);
+					List<ShopTransaction> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), shopTransactions.isSelected());
 
 					//reset GUI
 					tablePanel.removeAll();
@@ -564,6 +582,9 @@ public class TransactionsTab extends JPanel {
 	}
 
 	private void updateNetTotal() {
+		String word = shopTransactions.isSelected() ? "Net Total" : "Spent";
+		netTotalLabelLabel.setText("<html><font size=5>" + word + ":</font></html>");
+
 		netTotal = 0;
 
 		if (itemsTable != null) {
@@ -599,6 +620,8 @@ public class TransactionsTab extends JPanel {
 
 		//update the label text
 		if (customersCount != null) {
+			String word = shopTransactions.isSelected() ? "Customers" : "Shops Visited";
+			customersLabel.setText("<html><font size=5>" + word + ":</font></html>");
 			customers.setText("<html><font size=5><code>" + customersCount + "</code></font></html>");
 		}
 
