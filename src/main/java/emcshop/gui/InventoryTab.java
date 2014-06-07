@@ -33,7 +33,6 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
@@ -50,6 +49,8 @@ import emcshop.QueryExporter;
 import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.db.Inventory;
+import emcshop.gui.FilterPanel.ExportListener;
+import emcshop.gui.FilterPanel.FilterListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.util.ChesterFile;
@@ -65,15 +66,13 @@ public class InventoryTab extends JPanel {
 	private final DbDao dao;
 	private final ItemIndex index = ItemIndex.instance();
 
+	private final FilterPanel filterPanel;
 	private final JButton addEdit;
 	private final JButton delete;
 	private final JButton chester;
 	private final ItemSuggestField item;
 	private final JLabel quantityLabel;
 	private final QuantityTextField quantity;
-
-	private final JLabel filterByItemLabel;
-	private final FilterTextField filterByItem;
 
 	private InventoryTable table;
 	private boolean showQuantitiesInStacks;
@@ -102,12 +101,30 @@ public class InventoryTab extends JPanel {
 		dao = context.get(DbDao.class);
 		showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
 
+		filterPanel = new FilterPanel();
+		filterPanel.setVisible(true, false, false);
+		filterPanel.addFilterListener(new FilterListener() {
+			@Override
+			public void filterPerformed(FilterList items, FilterList players) {
+				table.filter(items);
+				tableScrollPane.scrollToTop();
+			}
+		});
+		filterPanel.addExportListener(new ExportListener() {
+			@Override
+			public void exportPerformed(ExportType type) {
+				String text = export(type);
+				GuiUtils.copyToClipboard(text);
+				JOptionPane.showMessageDialog(InventoryTab.this, "Copied to clipboard.");
+			}
+		});
+
 		addEdit = new JButton("Add/Edit");
 		addEdit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				addItem();
-				filterByItem.setText("");
+				filterPanel.clear();
 			}
 		});
 
@@ -127,7 +144,7 @@ public class InventoryTab extends JPanel {
 					dao.deleteInventory(toDelete);
 					dao.commit();
 					refresh();
-					filterByItem.setText("");
+					filterPanel.clear();
 				} catch (SQLException e) {
 					dao.rollback();
 					throw new RuntimeException(e);
@@ -174,18 +191,6 @@ public class InventoryTab extends JPanel {
 			}
 		});
 
-		filterByItemLabel = new HelpLabel("Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
-
-		filterByItem = new FilterTextField();
-		filterByItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				FilterList filterList = filterByItem.getNames();
-				table.filter(filterList);
-				tableScrollPane.scrollToTop();
-			}
-		});
-
 		table = new InventoryTable(Column.REMAINING, true);
 
 		///////////////////////
@@ -196,28 +201,20 @@ public class InventoryTab extends JPanel {
 
 		leftTop.add(new JLabel("Item Name:"));
 		leftTop.add(quantityLabel, "wrap");
-		leftTop.add(item, "w 250");
-		leftTop.add(quantity, "w 100, wrap");
+		leftTop.add(item, "w 350");
+		leftTop.add(quantity, "w 150, wrap");
 		leftTop.add(addEdit, "span 2, split 2");
 		leftTop.add(delete, "wrap");
 		//leftTop.add(chester, "span 2, split 2");
 		//leftTop.add(chesterUrl);
 
-		add(leftTop);
+		add(leftTop, "span 1 2, w 400!, growy");
+
+		add(filterPanel, "wrap");
 
 		tableScrollPane = new MyJScrollPane(table);
-		add(tableScrollPane, "span 1 3, grow, w 100%, h 100%, wrap");
+		add(tableScrollPane, "grow, w 100%, h 100%, wrap");
 		table.setColumns();
-
-		add(new JSeparator(), "w 200!, align center, wrap");
-
-		JPanel leftBottom = new JPanel(new MigLayout());
-
-		leftBottom.add(filterByItemLabel, "wrap");
-		leftBottom.add(filterByItem, "split 2, w 250!");
-		leftBottom.add(filterByItem.getClearButton(), "w 25!, h 20!, wrap");
-
-		add(leftBottom, "growy");
 
 		refresh();
 	}
@@ -273,7 +270,7 @@ public class InventoryTab extends JPanel {
 		}
 
 		table.refresh(inventory);
-		filterByItem.setText("");
+		filterPanel.clear();
 	}
 
 	private class Row {
@@ -423,8 +420,8 @@ public class InventoryTab extends JPanel {
 						displayedRows.add(row);
 					}
 				}
-				redraw();
 			}
+			redraw();
 		}
 
 		private void sortData() {

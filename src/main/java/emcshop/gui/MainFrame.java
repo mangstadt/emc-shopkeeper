@@ -52,7 +52,6 @@ import org.apache.http.util.EntityUtils;
 
 import emcshop.AppContext;
 import emcshop.EMCShopkeeper;
-import emcshop.ExportType;
 import emcshop.LogManager;
 import emcshop.Settings;
 import emcshop.db.DbDao;
@@ -97,7 +96,7 @@ public class MainFrame extends JFrame {
 	private InventoryTab inventoryTab;
 	private BonusFeeTab bonusFeeTab;
 	private ChartsTab graphsTab;
-	private JMenuItem clearSessionMenuItem, export;
+	private JMenuItem clearSessionMenuItem;
 
 	private final DbDao dao;
 	private final Settings settings;
@@ -209,34 +208,6 @@ public class MainFrame extends JFrame {
 				}
 			});
 			tools.add(backupSettings);
-
-			export = new JMenu("Export");
-			{
-				for (final ExportType type : ExportType.values()) {
-					JMenuItem menuItem = new JMenuItem(type.toString());
-					menuItem.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent arg0) {
-							String text = null;
-							Component selected = tabs.getSelectedComponent();
-							if (selected == transactionsTab) {
-								text = transactionsTab.export(type);
-							} else if (selected == inventoryTab) {
-								text = inventoryTab.export(type);
-							}
-
-							if (text == null) {
-								return;
-							}
-
-							GuiUtils.copyToClipboard(text);
-							JOptionPane.showMessageDialog(MainFrame.this, "Copied to clipboard.", "Copied", JOptionPane.INFORMATION_MESSAGE);
-						}
-					});
-					export.add(menuItem);
-				}
-			}
-			tools.add(export);
 
 			tools.addSeparator();
 
@@ -427,16 +398,6 @@ public class MainFrame extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				Component selected = tabs.getSelectedComponent();
 
-				boolean exportEnabled;
-				if (selected == transactionsTab && transactionsTab.isExportable()) {
-					exportEnabled = true;
-				} else if (selected == inventoryTab) {
-					exportEnabled = true;
-				} else {
-					exportEnabled = false;
-				}
-				setExportEnabled(exportEnabled);
-
 				if (selected == paymentsTab && paymentsTab.isStale()) {
 					paymentsTab.reset();
 				}
@@ -514,10 +475,6 @@ public class MainFrame extends JFrame {
 
 	public void updateInventoryTab() {
 		inventoryTab.refresh();
-	}
-
-	public void setExportEnabled(boolean enabled) {
-		export.setEnabled(enabled);
 	}
 
 	/**
