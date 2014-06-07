@@ -540,9 +540,9 @@ public class TransactionsTab extends JPanel {
 
 				ButtonGroup transactionTypeGroup = new ButtonGroup();
 
-				shopTransactions = new JRadioButton("Shop Transactions");
+				shopTransactions = new JRadioButton("My Shop");
 				transactionTypeGroup.add(shopTransactions);
-				myTransactions = new JRadioButton("My Transactions");
+				myTransactions = new JRadioButton("Other Shops");
 				transactionTypeGroup.add(myTransactions);
 				shopTransactions.setSelected(true);
 
