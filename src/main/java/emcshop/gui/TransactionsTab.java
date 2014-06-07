@@ -3,7 +3,7 @@ package emcshop.gui;
 import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
-import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
@@ -24,11 +24,9 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.ListCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -47,7 +45,6 @@ import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
 import emcshop.util.FilterList;
 import emcshop.util.GuiUtils;
-import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel {
@@ -469,6 +466,7 @@ public class TransactionsTab extends JPanel {
 
 					//render table
 					playersPanel = new PlayersPanel(playerGroups);
+					playersPanel.setShowFirstLastSeen(shopTransactions.isSelected());
 					tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
@@ -525,7 +523,7 @@ public class TransactionsTab extends JPanel {
 					filterPanel.validate();
 
 					//render table
-					transactionsTable = new TransactionsTable(transactions, true);
+					transactionsTable = new TransactionsTable(transactions, shopTransactions.isSelected());
 					transactionsTable.setFillsViewportHeight(true);
 					transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
 					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
@@ -732,17 +730,8 @@ public class TransactionsTab extends JPanel {
 			addItem(bestCustomers);
 			addItem(bestSuppliers);
 			addActionListener(this);
-
-			setRenderer(new ListCellRenderer() {
-				@Override
-				public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
-					String string = (String) value;
-					JLabel label = new JLabel("<html><font size=2>" + string);
-					label.setOpaque(true);
-					label.setBackground(UIDefaultsWrapper.getListBackground(selected));
-					return label;
-				}
-			});
+			Font orig = getFont();
+			setFont(new Font(orig.getName(), orig.getStyle(), orig.getSize() - 2));
 
 			currentSelection = playerName;
 		}

@@ -1,5 +1,6 @@
 package emcshop.gui;
 
+import static emcshop.util.NumberFormatter.formatRupees;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
@@ -185,6 +186,7 @@ public class PlayersPanel extends JPanel {
 				String playerName = player.getName();
 
 				JPanel row = new JPanel(new MigLayout("insets 5"));
+				UIDefaultsWrapper.assignListFormats(row, selected);
 
 				JLabel profileImage = new JLabel();
 				profileImage.setHorizontalAlignment(SwingConstants.CENTER);
@@ -204,19 +206,28 @@ public class PlayersPanel extends JPanel {
 				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!, span 1 2");
 
 				JLabel playerNameLabel = new JLabel(playerName);
-				EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
-				if (server != null) {
-					playerNameLabel.setIcon(ImageManager.getOnline(server, 16));
-					playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-					playerNameLabel.setVerticalTextPosition(SwingConstants.TOP);
+				if (selected) {
+					playerNameLabel.setForeground(UIDefaultsWrapper.getListForegroundSelected());
+				} else {
+					EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+					if (server != null) {
+						playerNameLabel.setIcon(ImageManager.getOnline(server, 16));
+						playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+						playerNameLabel.setVerticalTextPosition(SwingConstants.TOP);
+					}
+					profileLoader.loadRank(playerName, playerNameLabel, null);
 				}
-				profileLoader.loadRank(playerName, playerNameLabel, null);
 				row.add(playerNameLabel, "gapbottom 0, wrap");
 
-				JLabel rupeeTotalLabel = new JLabel("<html>" + formatRupeesWithColor(calculateNetTotal(playerGroup)));
+				int netTotal = calculateNetTotal(playerGroup);
+				JLabel rupeeTotalLabel;
+				if (selected) {
+					rupeeTotalLabel = new JLabel(formatRupees(netTotal));
+					rupeeTotalLabel.setForeground(UIDefaultsWrapper.getListForegroundSelected());
+				} else {
+					rupeeTotalLabel = new JLabel("<html>" + formatRupeesWithColor(netTotal));
+				}
 				row.add(rupeeTotalLabel, "gaptop 0");
-
-				row.setBackground(UIDefaultsWrapper.getListBackground(selected));
 
 				return row;
 			}

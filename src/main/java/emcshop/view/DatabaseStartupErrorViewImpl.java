@@ -116,8 +116,7 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
 				Date date = (Date) value;
 				JLabel label = new JLabel(df.format(date));
-				label.setOpaque(true);
-				label.setBackground(UIDefaultsWrapper.getListBackground(selected));
+				UIDefaultsWrapper.assignListFormats(label, selected);
 				return label;
 			}
 		});
