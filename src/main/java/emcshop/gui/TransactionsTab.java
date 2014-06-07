@@ -6,6 +6,8 @@ import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -18,6 +20,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -25,6 +29,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 
 import net.miginfocom.swing.MigLayout;
@@ -44,6 +49,7 @@ import emcshop.gui.lib.GroupPanel;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
 import emcshop.util.FilterList;
+import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel {
@@ -107,37 +113,23 @@ public class TransactionsTab extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (playersPanel == null) {
-					return;
-				}
-
 				SortItem selected = filterPanel.sortBy.getSelectedItem();
 				if (prev == selected) {
 					//the same item was selected
 					return;
 				}
 
-				busyCursor(owner, true);
-				try {
-					switch (selected) {
-					case PLAYER:
-						playersPanel.sortByPlayerName();
-						break;
-
-					case HIGHEST:
-						playersPanel.sortByCustomers();
-						break;
-
-					case LOWEST:
-						playersPanel.sortBySuppliers();
-						break;
-					}
-				} finally {
-					prev = selected;
-					busyCursor(owner, false);
-				}
+				sort(selected);
+				prev = selected;
 			}
-
+		});
+		filterPanel.addExportListener(new ExportListener() {
+			@Override
+			public void onExportPerformed(ExportType type) {
+				String text = export(type);
+				GuiUtils.copyToClipboard(text);
+				JOptionPane.showMessageDialog(TransactionsTab.this, "Copied to clipboard.");
+			}
 		});
 
 		tablePanel = new JPanel(new MigLayout("w 100%, h 100%, fillx, insets 0"));
@@ -193,6 +185,31 @@ public class TransactionsTab extends JPanel {
 
 		updateNetTotal();
 		updateCustomers();
+	}
+
+	private void sort(SortItem selected) {
+		if (playersPanel == null) {
+			return;
+		}
+
+		busyCursor(owner, true);
+		try {
+			switch (selected) {
+			case PLAYER:
+				playersPanel.sortByPlayerName();
+				break;
+
+			case HIGHEST:
+				playersPanel.sortByCustomers();
+				break;
+
+			case LOWEST:
+				playersPanel.sortBySuppliers();
+				break;
+			}
+		} finally {
+			busyCursor(owner, false);
+		}
 	}
 
 	public void clear() {
@@ -839,6 +856,10 @@ public class TransactionsTab extends JPanel {
 		private final FilterTextField filterByPlayer;
 		private final JLabel sortByLabel;
 		private final SortComboBox sortBy;
+		private final JButton export;
+		private final JPopupMenu exportMenu;
+
+		private final List<ExportListener> exportListeners = new ArrayList<ExportListener>();
 
 		public FilterPanel() {
 			filterByItemLabel = new HelpLabel("<html><font size=2>Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
@@ -851,6 +872,33 @@ public class TransactionsTab extends JPanel {
 			sortBy = new SortComboBox();
 			Font orig = sortBy.getFont();
 			sortBy.setFont(new Font(orig.getName(), orig.getStyle(), orig.getSize() - 2));
+
+			exportMenu = new JPopupMenu();
+			for (final ExportType type : ExportType.values()) {
+				AbstractAction action = new AbstractAction() {
+					@Override
+					public String toString() {
+						return type.toString();
+					}
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						for (ExportListener listener : exportListeners) {
+							listener.onExportPerformed(type);
+						}
+					}
+				};
+				action.putValue(Action.NAME, type.toString());
+				exportMenu.add(action);
+			}
+
+			export = new JButton("<html><font size=2>Export \u00bb");
+			export.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mousePressed(MouseEvent event) {
+					exportMenu.show(export, event.getX(), event.getY());
+				}
+			});
 
 			///////////////////
 
@@ -877,6 +925,8 @@ public class TransactionsTab extends JPanel {
 				add(sortBy, "w 150");
 			}
 
+			add(export);
+
 			validate();
 		}
 
@@ -888,6 +938,14 @@ public class TransactionsTab extends JPanel {
 		public void addSortListener(ActionListener listener) {
 			sortBy.addActionListener(listener);
 		}
+
+		public void addExportListener(ExportListener listener) {
+			exportListeners.add(listener);
+		}
+	}
+
+	private static interface ExportListener {
+		void onExportPerformed(ExportType type);
 	}
 
 	private static class SortComboBox extends JComboBox {
