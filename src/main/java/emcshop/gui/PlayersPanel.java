@@ -43,6 +43,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.EmcServer;
 import emcshop.util.FilterList;
+import emcshop.util.UIDefaultsWrapper;
 
 /**
  * A panel that displays transactions grouped by player.
@@ -166,7 +167,6 @@ public class PlayersPanel extends JPanel {
 		final JList list = new JList(new Vector<PlayerGroup>(displayedPlayers));
 		list.setCellRenderer(new ListCellRenderer() {
 			private static final int profileImageSize = 32;
-			private final Color selectedBg = new Color(192, 192, 192);
 			private final Map<String, Icon> playerIcons = new HashMap<String, Icon>();
 			private final ImageDownloadedListener onImageDownloaded = new ImageDownloadedListener() {
 				@Override
@@ -216,9 +216,7 @@ public class PlayersPanel extends JPanel {
 				JLabel rupeeTotalLabel = new JLabel("<html>" + formatRupeesWithColor(calculateNetTotal(playerGroup)));
 				row.add(rupeeTotalLabel, "gaptop 0");
 
-				if (selected) {
-					row.setBackground(selectedBg);
-				}
+				row.setBackground(UIDefaultsWrapper.getListBackground(selected));
 
 				return row;
 			}
@@ -250,6 +248,7 @@ public class PlayersPanel extends JPanel {
 		add(new MyJScrollPane(list), "w 450, growy");
 
 		tablesPanel = new JPanel(new MigLayout("insets 1, fillx"));
+		tablesPanel.setBackground(UIDefaultsWrapper.getListUnselected());
 		tablesPanelScrollPane = new MyJScrollPane(tablesPanel);
 		add(tablesPanelScrollPane, "grow, w 100%, h 100%");
 
@@ -265,6 +264,7 @@ public class PlayersPanel extends JPanel {
 			Player player = playerGroup.getPlayer();
 
 			JPanel header = new JPanel(new MigLayout("insets 3"));
+			header.setOpaque(false);
 
 			int rows = 3;
 			String title = profileLoader.getTitle(player.getName());

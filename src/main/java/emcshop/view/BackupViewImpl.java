@@ -32,6 +32,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
+import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
 public class BackupViewImpl extends JDialog implements IBackupView {
@@ -153,16 +154,13 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 		backups.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		backups.setCellRenderer(new ListCellRenderer() {
 			private final RelativeDateFormat df = new RelativeDateFormat();
-			private final Color selectedBg = new Color(192, 192, 192);
 
 			@Override
 			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
 				Date date = (Date) value;
 				JLabel label = new JLabel(df.format(date));
-				if (selected) {
-					label.setOpaque(true);
-					label.setBackground(selectedBg);
-				}
+				label.setOpaque(true);
+				label.setBackground(UIDefaultsWrapper.getListBackground(selected));
 				return label;
 			}
 		});

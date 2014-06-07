@@ -1,6 +1,5 @@
 package emcshop.gui;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Window;
 import java.sql.SQLException;
@@ -19,10 +18,10 @@ import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.suggest.ContainsMatcher;
 import emcshop.gui.lib.suggest.JSuggestField;
+import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
 public class ItemSuggestField extends JSuggestField {
-	private static final Color selectedItemBgColor = new Color(192, 192, 192);
 	private static Vector<String> itemNames;
 	private static Map<String, JLabel> itemIconLabels;
 
@@ -42,10 +41,8 @@ public class ItemSuggestField extends JSuggestField {
 					label = new JLabel(itemName, image, SwingConstants.LEFT);
 				}
 
-				label.setOpaque(isSelected);
-				if (isSelected) {
-					label.setBackground(selectedItemBgColor);
-				}
+				label.setOpaque(true);
+				label.setBackground(UIDefaultsWrapper.getListBackground(isSelected));
 				return label;
 			}
 		});

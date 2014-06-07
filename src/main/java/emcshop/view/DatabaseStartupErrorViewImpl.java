@@ -1,6 +1,5 @@
 package emcshop.view;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Window;
@@ -32,6 +31,7 @@ import emcshop.gui.MyJScrollPane;
 import emcshop.gui.images.ImageManager;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
+import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
 public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseStartupErrorView {
@@ -111,16 +111,13 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 		backups.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		backups.setCellRenderer(new ListCellRenderer() {
 			private final RelativeDateFormat df = new RelativeDateFormat();
-			private final Color selectedBg = new Color(192, 192, 192);
 
 			@Override
 			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
 				Date date = (Date) value;
 				JLabel label = new JLabel(df.format(date));
-				if (selected) {
-					label.setOpaque(true);
-					label.setBackground(selectedBg);
-				}
+				label.setOpaque(true);
+				label.setBackground(UIDefaultsWrapper.getListBackground(selected));
 				return label;
 			}
 		});
