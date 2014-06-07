@@ -15,10 +15,11 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.ExportType;
-import emcshop.util.FilterList;
+import emcshop.gui.images.ImageManager;
 
 /**
  * A small toolbar that goes above tables, that allows the table data to be
@@ -189,6 +190,121 @@ public class FilterPanel extends JPanel {
 		@Override
 		public String toString() {
 			return display;
+		}
+	}
+
+	private static class FilterTextField extends JTextField {
+		private final JButton clearButton;
+		{
+			clearButton = new JButton(ImageManager.getClearIcon());
+			clearButton.setToolTipText("Clear");
+			clearButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if (getText().isEmpty()) {
+						return;
+					}
+					setText("");
+					fireActionEvent();
+				}
+			});
+		}
+
+		/**
+		 * Splits the player/item names that are comma-delimited.
+		 * @return the names
+		 */
+		public FilterList getNames() {
+			FilterList list = new FilterList();
+			String keywords[] = getText().trim().split("\\s*,\\s*");
+			for (String keyword : keywords) {
+				if (keyword.isEmpty()) {
+					continue;
+				}
+
+				boolean wholeMatch = false;
+				if (keyword.startsWith("\"") && keyword.endsWith("\"")) {
+					keyword = keyword.substring(1, keyword.length() - 1); //remove double quotes
+					wholeMatch = true;
+				}
+
+				list.add(keyword, wholeMatch);
+			}
+			return list;
+		}
+
+		/**
+		 * Simulates pressing "enter" on the text field.
+		 */
+		public void fireActionEvent() {
+			for (ActionListener listener : listenerList.getListeners(ActionListener.class)) {
+				listener.actionPerformed(null);
+			}
+		}
+
+		/**
+		 * Gets the clear button associated with this text box.
+		 * @return the clear button
+		 */
+		public JButton getClearButton() {
+			return clearButton;
+		}
+
+		@Override
+		public void setEnabled(boolean enabled) {
+			super.setEnabled(enabled);
+			clearButton.setEnabled(enabled);
+		}
+	}
+
+	/**
+	 * Represents a filter keyword list.
+	 */
+	public static class FilterList {
+		private final List<String> keywords = new ArrayList<String>();
+		private final List<Boolean> wholeMatches = new ArrayList<Boolean>();
+
+		/**
+		 * Adds a keyword to the list
+		 * @param keyword the keyword
+		 * @param wholeMatch true for a whole match, false for a partial match
+		 */
+		public void add(String keyword, boolean wholeMatch) {
+			keywords.add(keyword.toLowerCase());
+			wholeMatches.add(wholeMatch);
+		}
+
+		/**
+		 * Determines if the list is empty.
+		 * @return true if it's empty, false if not
+		 */
+		public boolean isEmpty() {
+			return keywords.isEmpty();
+		}
+
+		/**
+		 * Determines if some text is matched by this filter list.
+		 * @param text the text
+		 * @return true if it matches, false if not
+		 */
+		public boolean contains(String text) {
+			text = text.toLowerCase();
+			for (int i = 0; i < keywords.size(); i++) {
+				String keyword = keywords.get(i);
+				Boolean wholeMatch = wholeMatches.get(i);
+
+				if (wholeMatch) {
+					if (text.equals(keyword)) {
+						return true;
+					}
+				} else {
+					if (text.contains(keyword)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 	}
 }

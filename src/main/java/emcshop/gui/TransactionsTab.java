@@ -38,6 +38,7 @@ import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.FilterPanel.ExportListener;
+import emcshop.gui.FilterPanel.FilterList;
 import emcshop.gui.FilterPanel.FilterListener;
 import emcshop.gui.FilterPanel.SortItem;
 import emcshop.gui.FilterPanel.SortListener;
@@ -45,7 +46,6 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
-import emcshop.util.FilterList;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")

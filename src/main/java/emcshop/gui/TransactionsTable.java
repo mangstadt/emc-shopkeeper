@@ -29,11 +29,11 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.Settings;
+import emcshop.gui.FilterPanel.FilterList;
 import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.EmcServer;
 import emcshop.scraper.ShopTransaction;
-import emcshop.util.FilterList;
 import emcshop.util.RelativeDateFormat;
 
 /**

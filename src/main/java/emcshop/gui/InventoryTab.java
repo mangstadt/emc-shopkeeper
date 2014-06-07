@@ -50,11 +50,11 @@ import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.db.Inventory;
 import emcshop.gui.FilterPanel.ExportListener;
+import emcshop.gui.FilterPanel.FilterList;
 import emcshop.gui.FilterPanel.FilterListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.util.ChesterFile;
-import emcshop.util.FilterList;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")

@@ -38,12 +38,12 @@ import emcshop.Settings;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
+import emcshop.gui.FilterPanel.FilterList;
 import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.ProfileLoader.ImageDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.EmcServer;
-import emcshop.util.FilterList;
 import emcshop.util.UIDefaultsWrapper;
 
 /**
