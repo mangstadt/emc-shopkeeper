@@ -590,8 +590,10 @@ public class TransactionsTab extends JPanel {
 
 				JPanel typePanel = new GroupPanel("Transaction Type");
 				typePanel.setLayout(new MigLayout("insets 0"));
-				typePanel.add(shopTransactions, "wrap");
+				typePanel.add(shopTransactions);
+				typePanel.add(new HelpLabel(null, "Shows the transactions that occurred when players bought/sold items to/from your shop."), "wrap");
 				typePanel.add(myTransactions);
+				typePanel.add(new HelpLabel(null, "Shows the transactions that occurred when you bought/sold items to/from someone else's shop."), "wrap");
 				fullPanel.add(typePanel, "growy, wrap");
 
 				fullPanel.add(compress, "w 30, split 4");
