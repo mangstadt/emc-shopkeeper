@@ -206,15 +206,15 @@ public class PlayersPanel extends JPanel {
 				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!, span 1 2");
 
 				JLabel playerNameLabel = new JLabel(playerName);
+				EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+				if (server != null) {
+					playerNameLabel.setIcon(ImageManager.getOnline(server, 16));
+					playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+					playerNameLabel.setVerticalTextPosition(SwingConstants.TOP);
+				}
 				if (selected) {
 					playerNameLabel.setForeground(UIDefaultsWrapper.getListForegroundSelected());
 				} else {
-					EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
-					if (server != null) {
-						playerNameLabel.setIcon(ImageManager.getOnline(server, 16));
-						playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-						playerNameLabel.setVerticalTextPosition(SwingConstants.TOP);
-					}
 					profileLoader.loadRank(playerName, playerNameLabel, null);
 				}
 				row.add(playerNameLabel, "gapbottom 0, wrap");
