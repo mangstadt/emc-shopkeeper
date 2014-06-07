@@ -497,7 +497,10 @@ public class TransactionsTab extends JPanel {
 		private final List<SearchListener> listeners = new ArrayList<SearchListener>();
 
 		public QueryPanel() {
-			ImageIcon searchIcon = ImageManager.getSearch();
+			ImageIcon searchItems = ImageManager.getImageIcon("search-items.png");
+			ImageIcon searchPlayers = ImageManager.getImageIcon("search-players.png");
+			ImageIcon searchDate = ImageManager.getImageIcon("search-date.png");
+
 			fullPanel = new JPanel(new MigLayout("insets 0"));
 			{
 				ButtonGroup dateRangeGroup = new ButtonGroup();
@@ -552,7 +555,7 @@ public class TransactionsTab extends JPanel {
 					}
 				});
 
-				showItems = new JButton("By Item", searchIcon);
+				showItems = new JButton("By Item", searchItems);
 				showItems.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -560,7 +563,7 @@ public class TransactionsTab extends JPanel {
 					}
 				});
 
-				showPlayers = new JButton("By Player", searchIcon);
+				showPlayers = new JButton("By Player", searchPlayers);
 				showPlayers.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -568,7 +571,7 @@ public class TransactionsTab extends JPanel {
 					}
 				});
 
-				showTransactions = new JButton("By Date", searchIcon);
+				showTransactions = new JButton("By Date", searchDate);
 				showTransactions.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -615,7 +618,7 @@ public class TransactionsTab extends JPanel {
 
 				description = new JLabel();
 
-				showItemsSmall = new JButton("Item", searchIcon);
+				showItemsSmall = new JButton("Item", searchItems);
 				showItemsSmall.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -623,7 +626,7 @@ public class TransactionsTab extends JPanel {
 					}
 				});
 
-				showPlayersSmall = new JButton("Player", searchIcon);
+				showPlayersSmall = new JButton("Player", searchPlayers);
 				showPlayersSmall.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -631,7 +634,7 @@ public class TransactionsTab extends JPanel {
 					}
 				});
 
-				showTransactionsSmall = new JButton("Date", searchIcon);
+				showTransactionsSmall = new JButton("Date", searchDate);
 				showTransactionsSmall.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
