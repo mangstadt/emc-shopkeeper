@@ -201,14 +201,14 @@ public class InventoryTab extends JPanel {
 
 		leftTop.add(new JLabel("Item Name:"));
 		leftTop.add(quantityLabel, "wrap");
-		leftTop.add(item, "w 350");
+		leftTop.add(item, "w 300");
 		leftTop.add(quantity, "w 150, wrap");
 		leftTop.add(addEdit, "span 2, split 2");
 		leftTop.add(delete, "wrap");
 		//leftTop.add(chester, "span 2, split 2");
 		//leftTop.add(chesterUrl);
 
-		add(leftTop, "span 1 2, w 400!, growy");
+		add(leftTop, "span 1 2, w 300!, growy");
 
 		add(filterPanel, "wrap");
 
