@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.gui.HelpLabel;
 import emcshop.gui.images.ImageManager;
 import emcshop.util.GuiUtils;
 
@@ -38,10 +39,13 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 			public void actionPerformed(ActionEvent e) {
 				messagePanel.removeAll();
 				messagePanel.add(loading);
+
 				login.setEnabled(false);
 				username.setEnabled(false);
 				password.setEnabled(false);
 				rememberMe.setEnabled(false);
+
+				pack();
 				validate();
 			}
 		});
@@ -51,7 +55,6 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		GuiUtils.onEscapeKeyPress(this, cancel);
 
 		messagePanel = new JPanel();
-		messagePanel.add(new JLabel(" "));
 		username = new JTextField();
 		password = new JPasswordField();
 		loading = new JLabel("Logging in...", ImageManager.getLoadingSmall(), SwingConstants.CENTER);
@@ -61,7 +64,9 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 
 		setLayout(new MigLayout());
 
-		add(new JLabel("<html><center><b>Please enter your </b><code>empireminecraft.com</code><b><br>login credentials.</b></center></html>"), "align center, wrap");
+		add(new JLabel(ImageManager.getImageIcon("emc-logo.png")), "align center, wrap");
+
+		add(new HelpLabel("<html><b>Please enter your login credentials.", "Your login credentials to the EMC website are required in order to download your rupee transactions.  EMC Shopkeeper does not save or steal your password."), "align center, wrap");
 
 		add(messagePanel, "align center, wrap");
 
@@ -99,7 +104,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	}
 
 	@Override
-	public void addOnCancelListener(final ActionListener listener) {
+	public void addOnCancelListener(ActionListener listener) {
 		cancel.addActionListener(listener);
 		GuiUtils.addCloseDialogListener(this, listener);
 	}
@@ -145,14 +150,16 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	}
 
 	private void showError(String text) {
+		messagePanel.removeAll();
+
 		JLabel error = new JLabel("<html><font color=red>" + text + "</font></html>");
 		messagePanel.add(error);
 
 		login.setEnabled(true);
-		messagePanel.remove(loading);
 		username.setEnabled(true);
 		password.setEnabled(true);
 		rememberMe.setEnabled(true);
+
 		validate();
 	}
 
