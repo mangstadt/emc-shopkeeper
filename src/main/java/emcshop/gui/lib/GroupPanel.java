@@ -16,7 +16,9 @@ public class GroupPanel extends JPanel {
 	public GroupPanel(String title) {
 		TitledBorder border = BorderFactory.createTitledBorder(title);
 		Font font = border.getTitleFont();
-		border.setTitleFont(new Font(font.getName(), Font.BOLD, font.getSize()));
+		if (font != null) {
+			border.setTitleFont(new Font(font.getName(), Font.BOLD, font.getSize()));
+		}
 
 		setBorder(border);
 		setLayout(new MigLayout("insets 5"));
