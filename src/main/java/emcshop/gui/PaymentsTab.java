@@ -42,6 +42,7 @@ import emcshop.scraper.EmcServer;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.GuiUtils;
+import emcshop.util.RelativeDateFormat;
 
 @SuppressWarnings("serial")
 public class PaymentsTab extends JPanel {
@@ -51,7 +52,6 @@ public class PaymentsTab extends JPanel {
 	private final DbDao dao;
 	private final ProfileLoader profileImageLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
-	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private boolean stale = true;
 
 	private final Icon deleteIcon = ImageManager.getImageIcon("delete.png");
@@ -171,6 +171,7 @@ public class PaymentsTab extends JPanel {
 
 			setDefaultRenderer(PaymentTransaction.class, new TableCellRenderer() {
 				private final Column columns[] = Column.values();
+				private final RelativeDateFormat df = new RelativeDateFormat();
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
@@ -184,7 +185,7 @@ public class PaymentsTab extends JPanel {
 					JComponent component = null;
 					switch (column) {
 					case TIME:
-						component = new JLabel("<html>" + df.format(transaction.getTs()) + "</html>");
+						component = new JLabel(df.format(transaction.getTs()));
 						break;
 					case PLAYER:
 						component = new JPanel(new MigLayout("insets 2"));
@@ -197,7 +198,7 @@ public class PaymentsTab extends JPanel {
 								model.fireTableCellUpdated(row, col);
 							}
 						};
-						JLabel label = new JLabel("<html>" + transaction.getPlayer() + "</html>"); //add player's profile image
+						JLabel label = new JLabel(transaction.getPlayer()); //add player's profile image
 						profileImageLoader.loadPortrait(transaction.getPlayer(), label, 16, listener);
 						profileImageLoader.loadRank(transaction.getPlayer(), label, listener);
 						component.add(label);
