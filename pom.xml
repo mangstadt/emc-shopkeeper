@@ -3,7 +3,7 @@
 	<groupId>com.github.emc-shopkeeper</groupId>
 	<artifactId>emc-shopkeeper</artifactId>
 	<packaging>jar</packaging>
-	<version>0.4.17-SNAPSHOT</version>
+	<version>0.4.17</version>
 	<name>EMC Shopkeeper</name>
 	<url>http://github.com/mangstadt/emc-shopkeeper</url>
 
@@ -86,11 +86,6 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>16.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>2.3</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
