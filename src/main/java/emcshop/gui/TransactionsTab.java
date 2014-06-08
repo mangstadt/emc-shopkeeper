@@ -570,7 +570,6 @@ public class TransactionsTab extends JPanel {
 				//////////////////////
 
 				JPanel datePanel = new GroupPanel("Date Range");
-				datePanel.setLayout(new MigLayout("insets 0"));
 				datePanel.add(entireHistory, "wrap");
 				datePanel.add(showSinceLastUpdate, "wrap");
 				datePanel.add(dateRange, "split 5");
@@ -580,7 +579,6 @@ public class TransactionsTab extends JPanel {
 				fullPanel.add(datePanel, "split 2");
 
 				JPanel typePanel = new GroupPanel("Transaction Type");
-				typePanel.setLayout(new MigLayout("insets 0"));
 				typePanel.add(shopTransactions);
 				typePanel.add(new HelpLabel(null, "Shows the transactions that occurred when players bought/sold items to/from your shop."), "wrap");
 				typePanel.add(myTransactions);
