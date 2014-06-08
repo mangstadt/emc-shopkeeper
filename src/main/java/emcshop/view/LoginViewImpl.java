@@ -1,5 +1,7 @@
 package emcshop.view;
 
+import static emcshop.util.GuiUtils.shake;
+
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -161,6 +163,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		rememberMe.setEnabled(true);
 
 		validate();
+		shake(this);
 	}
 
 	@Override

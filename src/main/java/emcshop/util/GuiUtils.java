@@ -2,6 +2,7 @@ package emcshop.util;
 
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
@@ -20,6 +21,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 /**
  * Contains GUI utility methods.
@@ -209,6 +211,47 @@ public class GuiUtils {
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection stringSelection = new StringSelection(text);
 		clipboard.setContents(stringSelection, stringSelection);
+	}
+
+	/**
+	 * "Shakes" a dialog box, like Mac OSX does when you enter a wrong password.
+	 * @param dialog the dialog to shake
+	 */
+	public static void shake(final JDialog dialog) {
+		final int SHAKE_DISTANCE = 20;
+		final double SHAKE_CYCLE = 50;
+		final int SHAKE_DURATION = 200;
+		final int SHAKE_UPDATE = 5;
+		final double TWO_PI = Math.PI * 2.0;
+
+		final Point naturalLocation = dialog.getLocation();
+		final long startTime = System.currentTimeMillis();
+
+		final Timer shakeTimer = new Timer(SHAKE_UPDATE, null);
+		shakeTimer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// calculate elapsed time
+				long elapsed = System.currentTimeMillis() - startTime;
+				// use sin to calculate an x-offset
+				double waveOffset = (elapsed % SHAKE_CYCLE) / SHAKE_CYCLE;
+				double angle = waveOffset * TWO_PI;
+
+				// offset the x-location by an amount 
+				// proportional to the sine, up to
+				// shake_distance
+				int shakenX = (int) ((Math.sin(angle) * SHAKE_DISTANCE) + naturalLocation.x);
+				dialog.setLocation(shakenX, naturalLocation.y);
+				dialog.repaint();
+
+				// should we stop timer?
+				if (elapsed >= SHAKE_DURATION) {
+					shakeTimer.stop();
+					dialog.setLocation(naturalLocation);
+					dialog.repaint();
+				}
+			}
+		});
+		shakeTimer.start();
 	}
 
 	private GuiUtils() {
