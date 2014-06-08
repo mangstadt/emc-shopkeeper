@@ -5,8 +5,11 @@ import static emcshop.util.GuiUtils.toolTipText;
 
 import java.awt.Component;
 import java.awt.Image;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -56,6 +59,7 @@ import emcshop.LogManager;
 import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.InfiniteProgressPanel;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
 import emcshop.model.BackupModelImpl;
@@ -85,6 +89,9 @@ public class MainFrame extends JFrame {
 	private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
 	private static final AppContext context = AppContext.instance();
 
+	private final InfiniteProgressPanel progressPanel;
+	private final KeyEventDispatcher ignoreKeyEvents;
+
 	private JButton update;
 	private JLabel lastUpdateDate;
 	private JLabel rupeeBalance;
@@ -112,6 +119,15 @@ public class MainFrame extends JFrame {
 		setTitle("EMC Shopkeeper v" + EMCShopkeeper.VERSION);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
+		progressPanel = new InfiniteProgressPanel();
+		setGlassPane(progressPanel);
+		ignoreKeyEvents = new KeyEventDispatcher() {
+			@Override
+			public boolean dispatchKeyEvent(KeyEvent event) {
+				return true;
+			}
+		};
+
 		createMenu();
 		createWidgets();
 		layoutWidgets();
@@ -130,6 +146,28 @@ public class MainFrame extends JFrame {
 		});
 
 		checkForNewVersion();
+	}
+
+	/**
+	 * Shows a loading screen.
+	 * @param caption the caption to display
+	 */
+	public void startProgress(String caption) {
+		getJMenuBar().setEnabled(false);
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(ignoreKeyEvents);
+		busyCursor(this, true);
+		progressPanel.setText(caption);
+		progressPanel.start();
+	}
+
+	/**
+	 * Hides the loading screen.
+	 */
+	public void stopProgress() {
+		progressPanel.stop();
+		busyCursor(this, false);
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(ignoreKeyEvents);
+		getJMenuBar().setEnabled(true);
 	}
 
 	private void createMenu() {
@@ -261,8 +299,7 @@ public class MainFrame extends JFrame {
 						return;
 					}
 
-					final LoadingDialog loading = new LoadingDialog(MainFrame.this, "Resetting database", "Resetting database...");
-					busyCursor(MainFrame.this, true);
+					startProgress("Resetting Database...");
 					Thread t = new Thread() {
 						@Override
 						public void run() {
@@ -282,13 +319,11 @@ public class MainFrame extends JFrame {
 							} catch (Throwable e) {
 								throw new RuntimeException(e);
 							} finally {
-								loading.dispose();
-								busyCursor(MainFrame.this, false);
+								stopProgress();
 							}
 						}
 					};
 					t.start();
-					loading.setVisible(true);
 				}
 			});
 			tools.add(resetDb);

@@ -1,6 +1,5 @@
 package emcshop.gui;
 
-import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.BasicStroke;
@@ -339,9 +338,7 @@ public class ChartsTab extends JPanel {
 	}
 
 	private void showProfits(final Date from, final Date to) {
-		busyCursor(owner, true);
-
-		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
+		owner.startProgress("Querying...");
 		Thread t = new Thread() {
 			@Override
 			public void run() {
@@ -355,13 +352,11 @@ public class ChartsTab extends JPanel {
 				} catch (SQLException e) {
 					throw new RuntimeException(e);
 				} finally {
-					loading.dispose();
-					busyCursor(owner, false);
+					owner.stopProgress();
 				}
 			}
 		};
 		t.start();
-		loading.setVisible(true);
 	}
 
 	private void refreshChart() {

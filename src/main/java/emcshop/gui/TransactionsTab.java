@@ -230,9 +230,7 @@ public class TransactionsTab extends JPanel {
 	}
 
 	public void showItems(final DateRange range, final boolean shopTransactions) {
-		busyCursor(owner, true);
-
-		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
+		owner.startProgress("Querying...");
 		Thread t = new Thread() {
 			@Override
 			public void run() {
@@ -277,20 +275,16 @@ public class TransactionsTab extends JPanel {
 				} catch (SQLException e) {
 					throw new RuntimeException(e);
 				} finally {
-					loading.dispose();
-					busyCursor(owner, false);
+					owner.stopProgress();
+					validate();
 				}
 			}
 		};
 		t.start();
-		loading.setVisible(true);
-		validate();
 	}
 
 	public void showPlayers(final DateRange range, final boolean shopTransactions) {
-		busyCursor(owner, true);
-
-		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
+		owner.startProgress("Querying...");
 		Thread t = new Thread() {
 			@Override
 			public void run() {
@@ -323,20 +317,16 @@ public class TransactionsTab extends JPanel {
 				} catch (SQLException e) {
 					throw new RuntimeException(e);
 				} finally {
-					loading.dispose();
-					busyCursor(owner, false);
+					owner.stopProgress();
+					validate();
 				}
 			}
 		};
 		t.start();
-		loading.setVisible(true);
-		validate();
 	}
 
 	private void showTransactions(final DateRange range, final boolean shopTransactions) {
-		busyCursor(owner, true);
-
-		final LoadingDialog loading = new LoadingDialog(owner, "Loading", "Querying . . .");
+		owner.startProgress("Querying...");
 		Thread t = new Thread() {
 			@Override
 			public void run() {
@@ -369,14 +359,12 @@ public class TransactionsTab extends JPanel {
 				} catch (SQLException e) {
 					throw new RuntimeException(e);
 				} finally {
-					loading.dispose();
-					busyCursor(owner, false);
+					owner.stopProgress();
+					validate();
 				}
 			}
 		};
 		t.start();
-		loading.setVisible(true);
-		validate();
 	}
 
 	private void updateNetTotal() {
