@@ -792,9 +792,9 @@ public class TransactionsTab extends JPanel {
 
 			sb.append(" | ");
 			if (shopTransactions.isSelected()) {
-				sb.append("Shop Transactions");
+				sb.append("My Shop");
 			} else {
-				sb.append("My Transactions");
+				sb.append("Other Shops");
 			}
 
 			description.setText(sb.toString());
