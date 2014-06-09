@@ -41,9 +41,7 @@ public class ItemSuggestField extends JSuggestField {
 					label = new JLabel(itemName, image, SwingConstants.LEFT);
 				}
 
-				label.setOpaque(true);
-				label.setForeground(UIDefaultsWrapper.getListForeground(isSelected));
-				label.setBackground(UIDefaultsWrapper.getListBackground(isSelected));
+				UIDefaultsWrapper.assignListFormats(label, isSelected);
 				return label;
 			}
 		});
