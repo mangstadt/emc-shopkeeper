@@ -558,8 +558,7 @@ public class InventoryTab extends JPanel {
 
 		switch (type) {
 		case BBCODE:
-			QueryExporter.generateInventoryBBCode(inventory);
-
+			return QueryExporter.generateInventoryBBCode(inventory);
 		case CSV:
 			return QueryExporter.generateInventoryCsv(inventory);
 		}
