@@ -30,7 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import emcshop.gui.ProfileLoader.ImageDownloadedListener;
+import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.PlayerProfileScraper;
 import emcshop.scraper.Rank;
@@ -68,7 +68,7 @@ public class ProfileLoaderTest {
 
 	@Test
 	public void non_existent_user() throws Throwable {
-		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
+		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
 		JLabel label = mock(JLabel.class);
 		String player = profile.getPlayerName();
 
@@ -80,14 +80,14 @@ public class ProfileLoaderTest {
 		wait(profileImageLoader);
 
 		verify(label).setIcon(any(Icon.class));
-		verify(listener, never()).onImageDownloaded(label);
+		verify(listener, never()).onProfileDownloaded(label);
 		assertFalse(portraitFile.exists());
 		assertFalse(propertiesFile.exists());
 	}
 
 	@Test
 	public void private_profile() throws Throwable {
-		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
+		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
 		JLabel label = mock(JLabel.class);
 		String player = profile.getPlayerName();
 
@@ -102,7 +102,7 @@ public class ProfileLoaderTest {
 		wait(profileImageLoader);
 
 		verify(label).setIcon(any(Icon.class));
-		verify(listener, never()).onImageDownloaded(label);
+		verify(listener, never()).onProfileDownloaded(label);
 		assertFalse(portraitFile.exists());
 
 		Properties props = new Properties();
@@ -113,7 +113,7 @@ public class ProfileLoaderTest {
 
 	@Test
 	public void image_downloaded() throws Throwable {
-		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
+		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
 		JLabel label = mock(JLabel.class);
 		String player = profile.getPlayerName();
 
@@ -126,7 +126,7 @@ public class ProfileLoaderTest {
 		wait(profileImageLoader);
 
 		verify(label, times(2)).setIcon(any(Icon.class));
-		verify(listener).onImageDownloaded(label);
+		verify(listener).onProfileDownloaded(label);
 
 		byte[] expected = portrait;
 		byte[] actual = IOUtils.toByteArray(new FileInputStream(portraitFile));
@@ -142,13 +142,13 @@ public class ProfileLoaderTest {
 		//loading it again should retrieve it from the cache
 		//no HTTP calls should be made
 
-		listener = mock(ImageDownloadedListener.class);
+		listener = mock(ProfileDownloadedListener.class);
 		label = mock(JLabel.class);
 		profileImageLoader.loadPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
 		verify(label).setIcon(any(Icon.class));
-		verify(listener, never()).onImageDownloaded(label);
+		verify(listener, never()).onProfileDownloaded(label);
 
 		//the portrait should have only been downloaded once
 		verify(scraper).downloadPortrait(any(PlayerProfile.class), any(Date.class), any(HttpClient.class));
@@ -161,7 +161,7 @@ public class ProfileLoaderTest {
 		temp.newFile(player + ".properties");
 		Date lastModified = new Date();
 
-		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
+		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
 		JLabel label = mock(JLabel.class);
 
 		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
@@ -173,7 +173,7 @@ public class ProfileLoaderTest {
 		wait(profileImageLoader);
 
 		verify(label).setIcon(any(Icon.class));
-		verify(listener, never()).onImageDownloaded(label);
+		verify(listener, never()).onProfileDownloaded(label);
 
 		assertEquals(0, portraitFile.length()); //file should not have been modified
 
@@ -188,7 +188,7 @@ public class ProfileLoaderTest {
 
 	@Test
 	public void stress_test() throws Throwable {
-		ImageDownloadedListener listener = mock(ImageDownloadedListener.class);
+		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
 		JLabel label = mock(JLabel.class);
 		String player = profile.getPlayerName();
 
@@ -203,7 +203,7 @@ public class ProfileLoaderTest {
 		wait(profileImageLoader);
 
 		verify(label, atLeastOnce()).setIcon(any(Icon.class));
-		verify(listener, atLeastOnce()).onImageDownloaded(label);
+		verify(listener, atLeastOnce()).onProfileDownloaded(label);
 
 		byte[] expected = portrait;
 		byte[] actual = IOUtils.toByteArray(new FileInputStream(portraitFile));

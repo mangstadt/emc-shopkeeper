@@ -24,6 +24,14 @@ public class UIDefaultsWrapper {
 	}
 
 	/**
+	 * Gets the foreground color of labels.
+	 * @return the foreground color
+	 */
+	public static Color getLabelForeground() {
+		return defaults.getColor("Label.foreground");
+	}
+
+	/**
 	 * Gets the foreground color for selected list items.
 	 * @return the foreground color
 	 */

@@ -40,7 +40,7 @@ import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.gui.FilterPanel.FilterList;
 import emcshop.gui.ItemsTable.Column;
-import emcshop.gui.ProfileLoader.ImageDownloadedListener;
+import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.EmcServer;
@@ -169,9 +169,9 @@ public class PlayersPanel extends JPanel {
 		list.setCellRenderer(new ListCellRenderer() {
 			private static final int profileImageSize = 32;
 			private final Map<String, Icon> playerIcons = new HashMap<String, Icon>();
-			private final ImageDownloadedListener onImageDownloaded = new ImageDownloadedListener() {
+			private final ProfileDownloadedListener onImageDownloaded = new ProfileDownloadedListener() {
 				@Override
-				public void onImageDownloaded(JLabel label) {
+				public void onProfileDownloaded(JLabel label) {
 					synchronized (playerIcons) {
 						playerIcons.put(label.getName(), label.getIcon());
 						list.repaint();

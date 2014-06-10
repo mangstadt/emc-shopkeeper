@@ -17,6 +17,7 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
@@ -95,6 +96,8 @@ public class BonusFeeTab extends JPanel {
 	}
 
 	private class BonusFeeTable extends JTable {
+		private final Column columns[] = Column.values();
+
 		private Column prevColumnClicked;
 		private boolean ascending;
 		private List<Row> rows = new ArrayList<Row>();
@@ -137,7 +140,12 @@ public class BonusFeeTab extends JPanel {
 			setDefaultRenderer(Row.class, new TableCellRenderer() {
 				private final Color evenRowColor = new Color(255, 255, 255);
 				private final Color oddRowColor = new Color(240, 240, 240);
-				private final Column columns[] = Column.values();
+
+				private final JLabel label = new JLabel();
+				{
+					label.setOpaque(true);
+					label.setBorder(new EmptyBorder(4, 4, 4, 4));
+				}
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -148,21 +156,18 @@ public class BonusFeeTab extends JPanel {
 					Row rowObj = (Row) value;
 					Column column = columns[col];
 
-					JLabel label = null;
 					switch (column) {
 					case DESCRIPTION:
-						label = new JLabel(rowObj.description);
+						label.setText(rowObj.description);
 						break;
+
 					case TOTAL:
-						label = new JLabel("<html>" + formatRupeesWithColor(rowObj.total) + "</html>");
+						label.setText("<html>" + formatRupeesWithColor(rowObj.total) + "</html>");
 						break;
-					default:
-						label = new JLabel();
 					}
 
 					//set the background color of the row
 					Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-					label.setOpaque(true);
 					label.setBackground(color);
 
 					return label;
@@ -214,8 +219,6 @@ public class BonusFeeTab extends JPanel {
 
 		private void setModel() {
 			setModel(new AbstractTableModel() {
-				private final Column columns[] = Column.values();
-
 				@Override
 				public int getColumnCount() {
 					return columns.length;

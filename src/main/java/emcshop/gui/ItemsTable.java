@@ -20,6 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
@@ -53,6 +54,7 @@ public class ItemsTable extends GroupableColumnsTable {
 		}
 	}
 
+	private final Column columns[] = Column.values();
 	private final List<ItemGroup> itemGroups;
 	private List<ItemGroup> itemGroupsToDisplay;
 
@@ -90,8 +92,6 @@ public class ItemsTable extends GroupableColumnsTable {
 		setRowHeight(24);
 
 		getTableHeader().addMouseListener(new MouseAdapter() {
-			private final Column columns[] = Column.values();
-
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
@@ -121,9 +121,12 @@ public class ItemsTable extends GroupableColumnsTable {
 		setDefaultRenderer(ItemGroup.class, new TableCellRenderer() {
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
-			private final JLabel label = new JLabel();
-			private final Column[] columns = Column.values();
 			private final ItemIndex index = ItemIndex.instance();
+			private final JLabel label = new JLabel();
+			{
+				label.setOpaque(true);
+				label.setBorder(new EmptyBorder(4, 4, 4, 4));
+			}
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -148,7 +151,6 @@ public class ItemsTable extends GroupableColumnsTable {
 
 				//set the background color of the row
 				Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-				label.setOpaque(true);
 				label.setBackground(color);
 
 				return label;
@@ -261,8 +263,15 @@ public class ItemsTable extends GroupableColumnsTable {
 
 	public void setShowQuantitiesInStacks(boolean enable) {
 		showQuantitiesInStacks = enable;
+
+		//re-render the "quantity" columns
 		AbstractTableModel model = (AbstractTableModel) getModel();
-		model.fireTableDataChanged();
+		int cols[] = { Column.SOLD_QTY.ordinal(), Column.BOUGHT_QTY.ordinal(), Column.NET_QTY.ordinal() };
+		for (int col : cols) {
+			for (int row = 0; row < model.getRowCount(); row++) {
+				model.fireTableCellUpdated(row, col);
+			}
+		}
 	}
 
 	private void redraw() {

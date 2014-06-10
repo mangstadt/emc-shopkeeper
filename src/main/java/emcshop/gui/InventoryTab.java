@@ -37,8 +37,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -58,6 +60,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.CheckBoxColumn;
 import emcshop.util.ChesterFile;
 import emcshop.util.GuiUtils;
+import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel {
@@ -289,15 +292,17 @@ public class InventoryTab extends JPanel {
 	}
 
 	private class InventoryTable extends JTable {
+		private final Column columns[] = Column.values();
+
 		private Column prevColumnClicked;
 		private boolean ascending;
 		private CheckBoxColumn checkboxes;
 		private List<Row> rows = new ArrayList<Row>();
 		private List<Row> displayedRows = rows;
 
-		public InventoryTable(Column sortBy, boolean asc) {
+		public InventoryTable(Column sortBy, boolean ascending) {
 			prevColumnClicked = sortBy;
-			this.ascending = asc;
+			this.ascending = ascending;
 
 			getTableHeader().setReorderingAllowed(false);
 			setColumnSelectionAllowed(false);
@@ -305,10 +310,33 @@ public class InventoryTab extends JPanel {
 			setCellSelectionEnabled(false);
 			setRowHeight(24);
 
+			addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					int col = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
+					int row = convertRowIndexToModel(rowAtPoint(e.getPoint()));
+					if (col < 0 || row < 0) {
+						return;
+					}
+
+					Column column = columns[col];
+					if (column == Column.REMAINING || column == Column.CHECKBOX) {
+						return;
+					}
+
+					boolean checked = !displayedRows.get(row).selected;
+					checkboxes.setCheckboxSelected(row, checked);
+					displayedRows.get(row).selected = checked;
+
+					AbstractTableModel model = (AbstractTableModel) getModel();
+					model.fireTableRowsUpdated(row, row);
+
+					redraw();
+				}
+			});
+
 			//allow columns to be sorted by clicking on the headers
 			getTableHeader().addMouseListener(new MouseAdapter() {
-				private final Column columns[] = Column.values();
-
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
@@ -319,18 +347,18 @@ public class InventoryTab extends JPanel {
 					Column column = columns[index];
 
 					if (column == prevColumnClicked) {
-						ascending = !ascending;
+						InventoryTable.this.ascending = !InventoryTable.this.ascending;
 					} else {
 						prevColumnClicked = column;
-						ascending = true;
+						InventoryTable.this.ascending = true;
 					}
 
 					//select all checkboxes
 					if (column == Column.CHECKBOX) {
 						AbstractTableModel model = (AbstractTableModel) getModel();
 						for (int i = 0; i < displayedRows.size(); i++) {
-							checkboxes.setCheckboxSelected(i, ascending);
-							displayedRows.get(i).selected = ascending;
+							checkboxes.setCheckboxSelected(i, InventoryTable.this.ascending);
+							displayedRows.get(i).selected = InventoryTable.this.ascending;
 							model.fireTableCellUpdated(i, Column.CHECKBOX.ordinal());
 						}
 						return;
@@ -344,6 +372,11 @@ public class InventoryTab extends JPanel {
 			setDefaultRenderer(Row.class, new TableCellRenderer() {
 				private final Color evenRowColor = new Color(255, 255, 255);
 				private final Color oddRowColor = new Color(240, 240, 240);
+				private final JLabel label = new JLabel();
+				{
+					label.setOpaque(true);
+					label.setBorder(new EmptyBorder(4, 4, 4, 4));
+				}
 
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -351,29 +384,46 @@ public class InventoryTab extends JPanel {
 						return null;
 					}
 
-					final Row rowObj = (Row) value;
-
-					JLabel label = null;
+					Row rowObj = (Row) value;
 					Inventory inv = rowObj.inventory;
+					Column column = columns[col];
+					resetComponent();
 
-					if (col == Column.ITEM_NAME.ordinal()) {
+					switch (column) {
+					case CHECKBOX:
+						//shouldn't be called
+						return null;
+
+					case ITEM_NAME:
 						if (rowObj.idUnknown) {
-							label = new JLabel("<html><font color=red>unknown ID: " + inv.getItem() + "</font></html>");
+							label.setText("<html><font color=red>unknown ID: " + inv.getItem() + "</font></html>");
 						} else {
 							ImageIcon img = ImageManager.getItemImage(inv.getItem());
-							label = new JLabel(inv.getItem(), img, SwingConstants.LEFT);
+							label.setText(inv.getItem());
+							label.setIcon(img);
 						}
-					} else if (col == Column.REMAINING.ordinal()) {
+						break;
+
+					case REMAINING:
 						String text = showQuantitiesInStacks ? formatStacks(inv.getQuantity(), index.getStackSize(inv.getItem()), false) : formatQuantity(inv.getQuantity(), false);
-						label = new JLabel(text);
+						label.setText(text);
+						break;
 					}
 
 					//set the background color of the row
-					Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-					label.setOpaque(true);
-					label.setBackground(color);
+					if (rowObj.selected) {
+						UIDefaultsWrapper.assignListFormats(label, rowObj.selected);
+					} else {
+						Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
+						label.setForeground(UIDefaultsWrapper.getLabelForeground());
+						label.setBackground(color);
+					}
 
 					return label;
+				}
+
+				private void resetComponent() {
+					label.setIcon(null);
 				}
 			});
 
@@ -489,14 +539,20 @@ public class InventoryTab extends JPanel {
 				model.fireTableCellUpdated(i, Column.CHECKBOX.ordinal());
 			}
 
-			columnModel.getColumn(Column.CHECKBOX.ordinal()).setMaxWidth(30);
-			columnModel.getColumn(Column.ITEM_NAME.ordinal()).setMinWidth(200);
+			TableColumn checkboxColumn = columnModel.getColumn(Column.CHECKBOX.ordinal());
+			checkboxColumn.setMinWidth(30);
+			checkboxColumn.setMaxWidth(30);
+			checkboxColumn.setResizable(false);
+
+			TableColumn itemNameColumn = columnModel.getColumn(Column.ITEM_NAME.ordinal());
+			itemNameColumn.setPreferredWidth(200);
+
+			TableColumn remainingColumn = columnModel.getColumn(Column.REMAINING.ordinal());
+			remainingColumn.setPreferredWidth(50);
 		}
 
 		private void setModel() {
 			setModel(new AbstractTableModel() {
-				private final Column columns[] = Column.values();
-
 				@Override
 				public int getColumnCount() {
 					return columns.length;
@@ -551,7 +607,35 @@ public class InventoryTab extends JPanel {
 						return false;
 					}
 				}
+
+				//				@Override
+				//				public void setValueAt(Object value, int row, int col) {
+				//					Column column = columns[col];
+				//					if (column == Column.REMAINING) {
+				//						int quantity = Integer.parseInt(value.toString());
+				//						displayedRows.get(row).inventory.setQuantity(quantity);
+				//						fireTableCellUpdated(row, col);
+				//					}
+				//				}
 			});
+
+			//			getModel().addTableModelListener(new TableModelListener() {
+			//				@Override
+			//				public void tableChanged(TableModelEvent event) {
+			//					int col = event.getColumn();
+			//					if (col < 0) {
+			//						return;
+			//					}
+			//
+			//					Column column = columns[event.getColumn()];
+			//					if (column == Column.REMAINING) {
+			//						int row = event.getFirstRow();
+			//						AbstractTableModel model = (AbstractTableModel) getModel();
+			//						Row rowObj = (Row) model.getValueAt(row, col);
+			//						//TODO update database because user changed value
+			//					}
+			//				}
+			//			});
 		}
 	}
 

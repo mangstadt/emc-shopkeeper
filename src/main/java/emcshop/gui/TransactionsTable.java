@@ -21,7 +21,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
@@ -30,7 +30,7 @@ import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.Settings;
 import emcshop.gui.FilterPanel.FilterList;
-import emcshop.gui.ProfileLoader.ImageDownloadedListener;
+import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.EmcServer;
 import emcshop.scraper.ShopTransaction;
@@ -62,6 +62,7 @@ public class TransactionsTable extends JTable {
 		}
 	}
 
+	private final Column[] columns = Column.values();
 	private final List<ShopTransaction> transactions;
 	private List<ShopTransaction> transactionsToDisplay;
 	private final boolean customers;
@@ -99,8 +100,6 @@ public class TransactionsTable extends JTable {
 		setRowHeight(24);
 
 		getTableHeader().addMouseListener(new MouseAdapter() {
-			private final Column columns[] = Column.values();
-
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
@@ -130,59 +129,88 @@ public class TransactionsTable extends JTable {
 		setDefaultRenderer(ShopTransaction.class, new TableCellRenderer() {
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
-			private final Column[] columns = Column.values();
 			private final ItemIndex index = ItemIndex.instance();
 			private final RelativeDateFormat df = new RelativeDateFormat();
 			private final ProfileLoader profileLoader = context.get(ProfileLoader.class);
 			private final OnlinePlayersMonitor onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 
+			private final JLabel label = new JLabel();
+			{
+				label.setOpaque(true);
+				label.setBorder(new EmptyBorder(4, 4, 4, 4));
+			}
+
+			private final JLabel playerLabel = new JLabel();
+			private final JLabel serverLabel = new JLabel();
+			private final JPanel playerPanel = new JPanel(new MigLayout("insets 2"));
+			{
+				playerPanel.setOpaque(true);
+				playerPanel.add(playerLabel);
+				playerPanel.add(serverLabel);
+			}
+
 			@Override
-			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, int col) {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
 				if (value == null) {
 					return null;
 				}
 
 				ShopTransaction transaction = (ShopTransaction) value;
-				final Column column = columns[col];
+				Column column = columns[col];
+				resetComponents();
 
 				JComponent component = null;
 				switch (column) {
 				case TS:
+					component = label;
+
 					Date ts = transaction.getTs();
-					component = new JLabel(df.format(ts));
+					label.setText(df.format(ts));
 					break;
 
 				case PLAYER_NAME:
-					component = new JPanel(new MigLayout("insets 2"));
-					String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
+					component = playerPanel;
 
-					JLabel playerLabel = new JLabel();
+					String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
 					playerLabel.setText(playerName);
-					ImageDownloadedListener listener = new ImageDownloadedListener() {
-						@Override
-						public void onImageDownloaded(JLabel label) {
-							AbstractTableModel model = (AbstractTableModel) getModel();
-							model.fireTableCellUpdated(row, column.ordinal());
-						}
-					};
-					profileLoader.loadPortrait(playerName, playerLabel, 16, listener);
-					profileLoader.loadRank(playerName, playerLabel, listener);
-					component.add(playerLabel);
+
+					ImageIcon portrait = profileLoader.getPortraitFromCache(playerName);
+					if (portrait == null) {
+						portrait = ImageManager.getUnknown();
+					}
+					portrait = ImageManager.scale(portrait, 16);
+					playerLabel.setIcon(portrait);
+
+					if (!profileLoader.wasDownloaded(playerName)) {
+						profileLoader.queueProfileForDownload(playerName, new ProfileDownloadedListener() {
+							@Override
+							public void onProfileDownloaded(JLabel label) {
+								//re-render the cell when the profile is downloaded
+								AbstractTableModel model = (AbstractTableModel) getModel();
+								model.fireTableCellUpdated(row, col);
+							}
+						});
+					}
 
 					EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
 					if (server != null) {
-						component.add(new JLabel(ImageManager.getOnline(server, 12)));
+						serverLabel.setIcon(ImageManager.getOnline(server, 12));
 					}
-
 					break;
 
 				case ITEM_NAME:
-					ImageIcon icon = ImageManager.getItemImage(transaction.getItem());
+					component = label;
+
 					String name = transaction.getItem();
-					component = new JLabel(name, icon, SwingConstants.LEFT);
+					label.setText(name);
+
+					ImageIcon icon = ImageManager.getItemImage(transaction.getItem());
+					label.setIcon(icon);
 					break;
 
 				case QUANTITY:
+					component = label;
+
 					String text;
 					int quantity = transaction.getQuantity();
 					if (showQuantitiesInStacks) {
@@ -191,19 +219,25 @@ public class TransactionsTable extends JTable {
 					} else {
 						text = formatQuantityWithColor(quantity);
 					}
-					component = new JLabel("<html>" + text + "</html>");
+					label.setText("<html>" + text + "</html>");
 					break;
 
 				case AMOUNT:
-					component = new JLabel("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
+					component = label;
+
+					label.setText("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
 					break;
 				}
 
 				Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-				component.setOpaque(true);
 				component.setBackground(color);
 
 				return component;
+			}
+
+			private void resetComponents() {
+				label.setIcon(null);
+				serverLabel.setIcon(null);
 			}
 		});
 
@@ -284,8 +318,13 @@ public class TransactionsTable extends JTable {
 
 	public void setShowQuantitiesInStacks(boolean enable) {
 		showQuantitiesInStacks = enable;
+
+		//re-render the "quantity" column
 		AbstractTableModel model = (AbstractTableModel) getModel();
-		model.fireTableDataChanged();
+		int col = Column.QUANTITY.ordinal();
+		for (int row = 0; row < model.getRowCount(); row++) {
+			model.fireTableCellUpdated(row, col);
+		}
 	}
 
 	private void redraw() {
