@@ -212,7 +212,9 @@ public class ProfileLoader {
 	 */
 	public void loadRank(String playerName, JLabel label, ProfileDownloadedListener listener) {
 		Color color = getRankColor(playerName);
-		label.setForeground(color);
+		if (color != null) {
+			label.setForeground(color);
+		}
 
 		//queue the profile page for download if necessary
 		Job job = new RankJob(playerName, label, listener);
@@ -222,17 +224,17 @@ public class ProfileLoader {
 	/**
 	 * Gets the color of the player's rank.
 	 * @param playerName the player name
-	 * @return the color
+	 * @return the color or null if the player has no rank or null if the player
+	 * is unknown
 	 */
 	public Color getRankColor(String playerName) {
 		PlayerProfileProperties props = loadProfileData(playerName);
 		if (props == null) {
-			return noRankColor;
+			return null;
 		}
 
 		Rank rank = props.getRank();
-		Color color = rankToColor.get(rank);
-		return (color == null) ? noRankColor : color;
+		return rankToColor.get(rank);
 	}
 
 	/**

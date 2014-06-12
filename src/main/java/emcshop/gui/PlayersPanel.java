@@ -307,10 +307,16 @@ public class PlayersPanel extends JPanel {
 			}
 
 			if (title != null) {
+				String text;
 				Color rankColor = profileLoader.getRankColor(player.getName());
-				String hex = String.format("#%02x%02x%02x", rankColor.getRed(), rankColor.getGreen(), rankColor.getBlue());
+				if (rankColor == null) {
+					text = title;
+				} else {
+					String hex = String.format("#%02x%02x%02x", rankColor.getRed(), rankColor.getGreen(), rankColor.getBlue());
+					text = "<html><font color=" + hex + ">" + title;
+				}
 
-				JLabel playerTitle = new JLabel("<html><font color=" + hex + ">" + title);
+				JLabel playerTitle = new JLabel(text);
 				header.add(playerTitle, "gaptop 0, span 2, wrap");
 			}
 

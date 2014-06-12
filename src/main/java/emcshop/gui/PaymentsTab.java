@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -43,9 +42,7 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.db.DbDao;
-import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
-import emcshop.scraper.EmcServer;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.GuiUtils;
@@ -58,8 +55,6 @@ public class PaymentsTab extends JPanel {
 
 	private final MainFrame owner;
 	private final DbDao dao = context.get(DbDao.class);
-	private final ProfileLoader profileLoader = context.get(ProfileLoader.class);
-	private final OnlinePlayersMonitor onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 	private boolean stale = true;
 
 	private JButton delete;
@@ -247,20 +242,7 @@ public class PaymentsTab extends JPanel {
 				label.setBorder(new EmptyBorder(4, 4, 4, 4));
 			}
 
-			private final JLabel playerLabel = new JLabel();
-			private final JLabel serverLabel = new JLabel();
-			private final JPanel playerPanel = new JPanel(new MigLayout("insets 2")) {
-				@Override
-				public void setForeground(Color color) {
-					playerLabel.setForeground(color);
-					super.setForeground(color);
-				}
-			};
-			{
-				playerPanel.setOpaque(true);
-				playerPanel.add(playerLabel);
-				playerPanel.add(serverLabel);
-			}
+			private final PlayerCellPanel playerPanel = new PlayerCellPanel();
 
 			private final JButton assignButton = new JButton(ImageManager.getImageIcon("assign.png"));
 			private final JButton splitButton = new JButton(ImageManager.getImageIcon("split.png"));
@@ -280,12 +262,10 @@ public class PaymentsTab extends JPanel {
 				switch (column) {
 				case SPLIT:
 					component = splitButton;
-
 					break;
 
 				case ASSIGN:
 					component = assignButton;
-
 					break;
 
 				case CHECKBOX:
@@ -304,31 +284,7 @@ public class PaymentsTab extends JPanel {
 					component = playerPanel;
 
 					String playerName = transaction.getPlayer();
-					playerLabel.setText(playerName);
-
-					ImageIcon portrait = profileLoader.getPortraitFromCache(playerName);
-					if (portrait == null) {
-						portrait = ImageManager.getUnknown();
-					}
-					portrait = ImageManager.scale(portrait, 16);
-					playerLabel.setIcon(portrait);
-
-					playerLabel.setForeground(profileLoader.getRankColor(playerName));
-
-					if (!profileLoader.wasDownloaded(playerName)) {
-						profileLoader.queueProfileForDownload(playerName, new ProfileDownloadedListener() {
-							@Override
-							public void onProfileDownloaded(JLabel label) {
-								//re-render the cell when the profile is downloaded
-								model.fireTableCellUpdated(row, col);
-							}
-						});
-					}
-
-					EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
-					if (server != null) {
-						serverLabel.setIcon(ImageManager.getOnline(server, 12));
-					}
+					playerPanel.setPlayer(playerName, row, col, model);
 					break;
 
 				case AMOUNT:
@@ -356,8 +312,6 @@ public class PaymentsTab extends JPanel {
 
 			private void resetComponents() {
 				label.setForeground(UIDefaultsWrapper.getLabelForeground());
-				playerPanel.setForeground(UIDefaultsWrapper.getLabelForeground());
-				serverLabel.setIcon(null);
 			}
 		}
 

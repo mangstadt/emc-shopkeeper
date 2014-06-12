@@ -17,7 +17,6 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
@@ -28,14 +27,11 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.Settings;
 import emcshop.gui.FilterPanel.FilterList;
-import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
-import emcshop.scraper.EmcServer;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.UIDefaultsWrapper;
@@ -240,8 +236,6 @@ public class TransactionsTable extends JTable {
 		private final Color oddRowColor = new Color(240, 240, 240);
 		private final ItemIndex index = ItemIndex.instance();
 		private final RelativeDateFormat df = new RelativeDateFormat();
-		private final ProfileLoader profileLoader = context.get(ProfileLoader.class);
-		private final OnlinePlayersMonitor onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 
 		private final JLabel label = new JLabel();
 		{
@@ -249,21 +243,7 @@ public class TransactionsTable extends JTable {
 			label.setBorder(new EmptyBorder(4, 4, 4, 4));
 		}
 
-		private final JLabel playerLabel = new JLabel();
-		private final JLabel serverLabel = new JLabel();
-		private final JPanel playerPanel = new JPanel(new MigLayout("insets 2")) {
-			{
-				setOpaque(true);
-				add(playerLabel);
-				add(serverLabel);
-			}
-
-			@Override
-			public void setForeground(Color color) {
-				playerLabel.setForeground(color);
-				super.setForeground(color);
-			}
-		};
+		private final PlayerCellPanel playerPanel = new PlayerCellPanel();
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
@@ -288,31 +268,7 @@ public class TransactionsTable extends JTable {
 				component = playerPanel;
 
 				String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
-				playerLabel.setText(playerName);
-
-				ImageIcon portrait = profileLoader.getPortraitFromCache(playerName);
-				if (portrait == null) {
-					portrait = ImageManager.getUnknown();
-				}
-				portrait = ImageManager.scale(portrait, 16);
-				playerLabel.setIcon(portrait);
-
-				playerLabel.setForeground(profileLoader.getRankColor(playerName));
-
-				if (!profileLoader.wasDownloaded(playerName)) {
-					profileLoader.queueProfileForDownload(playerName, new ProfileDownloadedListener() {
-						@Override
-						public void onProfileDownloaded(JLabel label) {
-							//re-render the cell when the profile is downloaded
-							model.fireTableCellUpdated(row, col);
-						}
-					});
-				}
-
-				EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
-				if (server != null) {
-					serverLabel.setIcon(ImageManager.getOnline(server, 12));
-				}
+				playerPanel.setPlayer(playerName, row, col, model);
 				break;
 
 			case ITEM_NAME:
@@ -355,8 +311,6 @@ public class TransactionsTable extends JTable {
 		private void resetComponents() {
 			label.setIcon(null);
 			label.setForeground(UIDefaultsWrapper.getLabelForeground());
-			playerPanel.setForeground(UIDefaultsWrapper.getLabelForeground());
-			serverLabel.setIcon(null);
 		}
 	}
 
