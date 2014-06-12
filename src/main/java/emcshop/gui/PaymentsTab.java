@@ -313,12 +313,13 @@ public class PaymentsTab extends JPanel {
 					portrait = ImageManager.scale(portrait, 16);
 					playerLabel.setIcon(portrait);
 
+					playerLabel.setForeground(profileLoader.getRankColor(playerName));
+
 					if (!profileLoader.wasDownloaded(playerName)) {
 						profileLoader.queueProfileForDownload(playerName, new ProfileDownloadedListener() {
 							@Override
 							public void onProfileDownloaded(JLabel label) {
 								//re-render the cell when the profile is downloaded
-								AbstractTableModel model = (AbstractTableModel) getModel();
 								model.fireTableCellUpdated(row, col);
 							}
 						});
