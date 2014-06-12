@@ -7,6 +7,7 @@ import static emcshop.util.NumberFormatter.getQuantityColor;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +22,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -46,7 +46,6 @@ import emcshop.ItemIndex;
 import emcshop.db.DbDao;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
-import emcshop.gui.lib.ButtonColumn;
 import emcshop.scraper.EmcServer;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
@@ -63,6 +62,8 @@ public class PaymentsTab extends JPanel {
 	private final ProfileLoader profileLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private boolean stale = true;
+
+	private JButton delete;
 	private PaymentsTable paymentsTable;
 
 	public PaymentsTab(MainFrame owner) {
@@ -84,6 +85,43 @@ public class PaymentsTab extends JPanel {
 			if (pendingPayments.isEmpty()) {
 				add(new JLabel("No payment transactions found."), "align center");
 			} else {
+				delete = new JButton("Delete");
+				delete.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						List<Row> selected = paymentsTable.getSelected();
+						if (selected.isEmpty()) {
+							return;
+						}
+
+						int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to delete the selected payment transactions?", "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+						if (result != JOptionPane.YES_OPTION) {
+							return;
+						}
+
+						//update database
+						try {
+							for (Row row : selected) {
+								dao.ignorePaymentTransaction(row.transaction.getId());
+							}
+							dao.commit();
+						} catch (SQLException e) {
+							dao.rollback();
+							throw new RuntimeException(e);
+						}
+
+						//update table
+						paymentsTable.model.data.removeAll(selected);
+						paymentsTable.model.fireTableDataChanged();
+
+						owner.updatePaymentsCount();
+					}
+
+				});
+				Font orig = delete.getFont();
+				delete.setFont(new Font(orig.getName(), orig.getStyle(), orig.getSize() - 2));
+				add(delete, "wrap");
+
 				paymentsTable = new PaymentsTable(pendingPayments);
 				MyJScrollPane scrollPane = new MyJScrollPane(paymentsTable);
 				add(scrollPane, "grow, w 100%, h 100%, wrap");
@@ -153,6 +191,19 @@ public class PaymentsTab extends JPanel {
 			setColumns();
 
 			setSelectionModel();
+		}
+
+		public List<Row> getSelected() {
+			int rows = getRowCount();
+			List<Row> selected = new ArrayList<Row>();
+			for (int i = 0; i < rows; i++) {
+				int modelRow = convertRowIndexToModel(i);
+				Row row = model.data.get(modelRow);
+				if (row.selected) {
+					selected.add(row);
+				}
+			}
+			return selected;
 		}
 
 		private TableRowSorter<Model> createRowSorter() {
@@ -318,8 +369,6 @@ public class PaymentsTab extends JPanel {
 		}
 
 		private class Model extends AbstractTableModel {
-			private final Icon assignIcon = ImageManager.getImageIcon("assign.png");
-			private final Icon splitIcon = ImageManager.getImageIcon("split.png");
 			private final List<Row> data;
 
 			public Model(List<PaymentTransaction> data) {
@@ -348,40 +397,17 @@ public class PaymentsTab extends JPanel {
 
 			@Override
 			public Object getValueAt(int row, int col) {
-				Column column = columns[col];
-				switch (column) {
-				case ASSIGN:
-					return assignIcon;
-				case SPLIT:
-					return splitIcon;
-				default:
-					return data.get(row);
-				}
+				return data.get(row);
 			}
 
 			@Override
 			public Class<?> getColumnClass(int col) {
-				Column column = columns[col];
-				switch (column) {
-				case ASSIGN:
-				case SPLIT:
-					return Icon.class;
-				default:
-					return Row.class;
-				}
+				return Row.class;
 			}
 
 			@Override
 			public boolean isCellEditable(int row, int col) {
-				Column column = columns[col];
-				switch (column) {
-				case ASSIGN:
-				case SPLIT:
-					//allows the buttons to be clicked
-					return true;
-				default:
-					return false;
-				}
+				return false;
 			}
 		}
 
@@ -396,32 +422,30 @@ public class PaymentsTab extends JPanel {
 					}
 
 					int row = convertRowIndexToModel(rowView);
-					Row rowObj = model.data.get(row);
-					rowObj.selected = !rowObj.selected;
+					int col = convertColumnIndexToModel(colView);
+					Column column = columns[col];
 
-					//re-render table row
-					model.fireTableRowsUpdated(row, row);
+					switch (column) {
+					case SPLIT:
+						splitRow(row);
+						break;
+
+					case ASSIGN:
+						assignRow(row);
+						break;
+
+					default:
+						Row rowObj = model.data.get(row);
+						rowObj.selected = !rowObj.selected;
+
+						//re-render table row
+						model.fireTableRowsUpdated(row, row);
+					}
 				}
 			});
 		}
 
 		private void setColumns() {
-			new ButtonColumn(this, new AbstractAction() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					int row = Integer.valueOf(event.getActionCommand());
-					assignRow(row);
-				}
-			}, Column.ASSIGN.ordinal());
-
-			new ButtonColumn(this, new AbstractAction() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					int row = Integer.valueOf(event.getActionCommand());
-					splitRow(row);
-				}
-			}, Column.SPLIT.ordinal());
-
 			TableColumn deleteColumn = columnModel.getColumn(Column.CHECKBOX.ordinal());
 			deleteColumn.setMaxWidth(50);
 			deleteColumn.setResizable(false);
@@ -436,28 +460,6 @@ public class PaymentsTab extends JPanel {
 
 			getTableHeader().setReorderingAllowed(false);
 		}
-
-		//		private void deleteRow(int row) {
-		//			int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to delete this payment transaction?", "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-		//			if (result != JOptionPane.YES_OPTION) {
-		//				return;
-		//			}
-		//
-		//			PaymentTransaction transaction = model.data.get(row);
-		//
-		//			try {
-		//				dao.ignorePaymentTransaction(transaction.getId());
-		//				dao.commit();
-		//			} catch (SQLException e) {
-		//				dao.rollback();
-		//				throw new RuntimeException(e);
-		//			}
-		//
-		//			owner.updatePaymentsCount();
-		//
-		//			model.data.remove(row);
-		//			model.fireTableRowsDeleted(row, row);
-		//		}
 
 		private void assignRow(int row) {
 			PaymentTransaction transaction = model.data.get(row).transaction;
