@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.ImageIcon;
@@ -178,6 +179,10 @@ public class InventoryTab extends JPanel {
 				}
 
 				Collection<Inventory> items = dialog.getItems();
+				if (items.isEmpty()) {
+					return;
+				}
+
 				try {
 					for (Inventory item : items) {
 						dao.upsertInventory(item);
@@ -209,6 +214,7 @@ public class InventoryTab extends JPanel {
 		});
 
 		table = new InventoryTable();
+		table.setSortKeys(new RowSorter.SortKey(Column.REMAINING.ordinal(), SortOrder.ASCENDING), new RowSorter.SortKey(Column.ITEM_NAME.ordinal(), SortOrder.ASCENDING));
 
 		///////////////////////
 
@@ -252,6 +258,15 @@ public class InventoryTab extends JPanel {
 		quantity.setText("");
 		item.requestFocusInWindow();
 		refresh();
+
+		for (int i = 0; i < table.model.getRowCount(); i++) {
+			Row row = table.model.data.get(i);
+			if (row.inventory.getItem().equalsIgnoreCase(itemStr)) {
+				row.justInserted = true;
+				table.model.fireTableRowsUpdated(i, i);
+				break;
+			}
+		}
 	}
 
 	private void upsertItem(String item, QuantityTextField textField) {
@@ -293,6 +308,7 @@ public class InventoryTab extends JPanel {
 		private final Inventory inventory;
 		private boolean selected = false;
 		private boolean idUnknown = false;
+		private boolean justInserted = false;
 
 		public Row(Inventory inventory) {
 			this.inventory = inventory;
@@ -321,6 +337,10 @@ public class InventoryTab extends JPanel {
 			setSelectionModel();
 		}
 
+		public void setSortKeys(RowSorter.SortKey... sortKeys) {
+			rowSorter.setSortKeys(Arrays.asList(sortKeys));
+		}
+
 		public List<Row> getSelected() {
 			int rows = getRowCount();
 			List<Row> selected = new ArrayList<Row>();
@@ -334,11 +354,23 @@ public class InventoryTab extends JPanel {
 			return selected;
 		}
 
-		public void add(Inventory inventory, boolean idUnknown) {
-			Row row = new Row(inventory);
-			row.idUnknown = idUnknown;
-			model.data.add(row);
-			model.fireTableRowsInserted(model.getRowCount() - 1, model.getRowCount() - 1);
+		public void addAll(List<Row> rows) {
+			for (int i = 0; i < model.getRowCount(); i++) {
+				Row row = model.data.get(i);
+				if (row.justInserted) {
+					row.justInserted = false;
+					model.fireTableRowsUpdated(i, i);
+				}
+			}
+
+			for (Row row : rows) {
+				row.justInserted = true;
+			}
+
+			int from = (model.getRowCount() == 0) ? 0 : model.getRowCount() - 1;
+			model.data.addAll(rows);
+			int to = model.getRowCount() - 1;
+			model.fireTableRowsInserted(from, to);
 		}
 
 		public void setData(Collection<Inventory> inventory) {
@@ -441,12 +473,22 @@ public class InventoryTab extends JPanel {
 					quantity = inv.getQuantity() + quantity;
 				}
 				inv.setQuantity(quantity);
+
+				rowObj.justInserted = true;
+				for (int i = 0; i < getRowCount(); i++) {
+					Row r = data.get(i);
+					if (r.justInserted) {
+						r.justInserted = false;
+						fireTableRowsUpdated(i, i);
+					}
+				}
 			}
 		}
 
 		private class InventoryTableRenderer implements TableCellRenderer {
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
+			private final Color insertedColor = new Color(255, 255, 192);
 			private final JLabel label = new JLabel();
 			{
 				label.setOpaque(true);
@@ -480,7 +522,10 @@ public class InventoryTab extends JPanel {
 					component = label;
 
 					if (rowObj.idUnknown) {
-						label.setText("<html><font color=red>unknown ID: " + inv.getItem() + "</font></html>");
+						label.setText("unknown ID: " + inv.getItem());
+						if (!rowObj.selected) {
+							label.setForeground(Color.RED);
+						}
 					} else {
 						ImageIcon img = ImageManager.getItemImage(inv.getItem());
 						label.setText(inv.getItem());
@@ -499,6 +544,9 @@ public class InventoryTab extends JPanel {
 				//set the background color of the row
 				if (rowObj.selected) {
 					UIDefaultsWrapper.assignListFormats(component, true);
+				} else if (rowObj.justInserted) {
+					component.setForeground(UIDefaultsWrapper.getLabelForeground());
+					component.setBackground(insertedColor);
 				} else {
 					Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
 					component.setForeground(UIDefaultsWrapper.getLabelForeground());
@@ -529,7 +577,7 @@ public class InventoryTab extends JPanel {
 					return one.inventory.getQuantity().compareTo(two.inventory.getQuantity());
 				}
 			});
-			rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.REMAINING.ordinal(), SortOrder.ASCENDING), new RowSorter.SortKey(Column.ITEM_NAME.ordinal(), SortOrder.ASCENDING)));
+			rowSorter.setSortsOnUpdates(false);
 
 			return rowSorter;
 		}
@@ -552,12 +600,13 @@ public class InventoryTab extends JPanel {
 			addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent event) {
-					int col = convertColumnIndexToModel(columnAtPoint(event.getPoint()));
-					int row = convertRowIndexToModel(rowAtPoint(event.getPoint()));
-					if (col < 0 || row < 0) {
+					int colView = columnAtPoint(event.getPoint());
+					int rowView = rowAtPoint(event.getPoint());
+					if (colView < 0 || rowView < 0) {
 						return;
 					}
 
+					int row = convertRowIndexToModel(rowView);
 					Row rowObj = model.data.get(row);
 					rowObj.selected = !rowObj.selected;
 
@@ -727,6 +776,7 @@ public class InventoryTab extends JPanel {
 
 			for (Row row : table.model.data) {
 				if (row.idUnknown) {
+					//skip unknown items
 					continue;
 				}
 
@@ -762,6 +812,7 @@ public class InventoryTab extends JPanel {
 			public void run() {
 				File dir = new File(FileUtils.getUserDirectory(), ".chester");
 				ItemIndex index = ItemIndex.instance();
+				Pattern idRegex = Pattern.compile("[\\d]+(:[\\d]+)?");
 				while (running) {
 					try {
 						Thread.sleep(100);
@@ -783,13 +834,14 @@ public class InventoryTab extends JPanel {
 
 							try {
 								ChesterFile chesterFile = ChesterFile.parse(file);
+								List<Row> rows = new ArrayList<Row>();
 								for (Map.Entry<String, Integer> entry : chesterFile.getItems().entrySet()) {
 									String id = entry.getKey();
 									Integer quantity = entry.getValue();
 
 									String name;
 									boolean idUnknown;
-									if (id.matches("[\\d:]+")) {
+									if (idRegex.matcher(id).matches()) {
 										name = index.getDisplayNameFromMinecraftId(id);
 										idUnknown = (name == null);
 										if (idUnknown) {
@@ -804,9 +856,12 @@ public class InventoryTab extends JPanel {
 									Inventory item = new Inventory();
 									item.setItem(name);
 									item.setQuantity(quantity);
-									table.add(item, idUnknown);
+
+									Row row = new Row(item);
+									row.idUnknown = idUnknown;
+									rows.add(row);
 								}
-								table.model.fireTableDataChanged();
+								table.addAll(rows);
 							} catch (Throwable t) {
 								logger.log(Level.SEVERE, "Problem reading Chester file.", t);
 							}

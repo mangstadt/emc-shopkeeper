@@ -66,6 +66,10 @@ public class ChesterFile {
 
 				split = line.split(" ", 2);
 				String id = split[0];
+				if (id.contains("-")) {
+					//it's an item name
+					id = id.replace('-', ' ');
+				}
 				int quantity = Integer.parseInt(split[1]);
 				items.put(id, quantity);
 			}

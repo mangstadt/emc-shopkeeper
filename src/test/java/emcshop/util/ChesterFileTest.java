@@ -16,7 +16,8 @@ public class ChesterFileTest {
 		"1\n" +
 		"10 20 30\n" +
 		"19 64\n" +
-		"5:3 12\n";
+		"5:3 12\n" +
+		"Zombie-Virus 5\n";
 		//@formatter:on
 
 		ChesterFile file = ChesterFile.parse(new StringReader(text));
@@ -28,6 +29,7 @@ public class ChesterFileTest {
 		Map<String, Integer> expectedItems = new HashMap<String, Integer>();
 		expectedItems.put("19", 64);
 		expectedItems.put("5:3", 12);
+		expectedItems.put("Zombie Virus", 5);
 		assertEquals(expectedItems, file.getItems());
 	}
 
