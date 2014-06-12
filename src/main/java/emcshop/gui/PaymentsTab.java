@@ -439,7 +439,7 @@ public class PaymentsTab extends JPanel {
 
 		private void setColumns() {
 			TableColumn deleteColumn = columnModel.getColumn(Column.CHECKBOX.ordinal());
-			deleteColumn.setMaxWidth(50);
+			deleteColumn.setMaxWidth(30);
 			deleteColumn.setResizable(false);
 
 			TableColumn assignColumn = columnModel.getColumn(Column.ASSIGN.ordinal());

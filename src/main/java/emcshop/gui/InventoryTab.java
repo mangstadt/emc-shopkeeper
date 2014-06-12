@@ -584,7 +584,6 @@ public class InventoryTab extends JPanel {
 
 		private void setColumns() {
 			TableColumn checkboxColumn = columnModel.getColumn(Column.CHECKBOX.ordinal());
-			checkboxColumn.setMinWidth(30);
 			checkboxColumn.setMaxWidth(30);
 			checkboxColumn.setResizable(false);
 
