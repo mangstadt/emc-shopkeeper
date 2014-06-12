@@ -4,12 +4,10 @@ import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -17,9 +15,12 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.db.BonusFee;
@@ -82,10 +83,10 @@ public class BonusFeeTab extends JPanel {
 		Date sinceDate = bonusFee.getSince();
 		since.setText("<html><b><i><font color=navy>" + ((sinceDate == null) ? "never" : df.format(sinceDate)) + "</font></i></b></html>");
 
-		table.refresh(bonusFee);
+		table.setData(bonusFee);
 	}
 
-	private class Row {
+	private static class Row {
 		private final String description;
 		private final int total;
 
@@ -97,45 +98,14 @@ public class BonusFeeTab extends JPanel {
 
 	private class BonusFeeTable extends JTable {
 		private final Column columns[] = Column.values();
-
-		private Column prevColumnClicked;
-		private boolean ascending;
-		private List<Row> rows = new ArrayList<Row>();
+		private final Model model;
 
 		public BonusFeeTable() {
-			prevColumnClicked = Column.DESCRIPTION;
-			ascending = true;
-
 			getTableHeader().setReorderingAllowed(false);
 			setColumnSelectionAllowed(false);
 			setRowSelectionAllowed(false);
 			setCellSelectionEnabled(false);
 			setRowHeight(24);
-
-			//allow columns to be sorted by clicking on the headers
-			getTableHeader().addMouseListener(new MouseAdapter() {
-				private final Column columns[] = Column.values();
-
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
-					if (index < 0) {
-						return;
-					}
-
-					Column column = columns[index];
-
-					if (column == prevColumnClicked) {
-						ascending = !ascending;
-					} else {
-						prevColumnClicked = column;
-						ascending = true;
-					}
-
-					sortData();
-					redraw();
-				}
-			});
 
 			setDefaultRenderer(Row.class, new TableCellRenderer() {
 				private final Color evenRowColor = new Color(255, 255, 255);
@@ -174,93 +144,78 @@ public class BonusFeeTab extends JPanel {
 				}
 			});
 
-			setModel();
+			model = new Model();
+			setModel(model);
+
+			setRowSorter(createRowSorter());
 		}
 
-		public void refresh(BonusFee bonusFee) {
-			setData(bonusFee);
-			redraw();
+		private TableRowSorter<Model> createRowSorter() {
+			TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
+
+			rowSorter.setComparator(Column.DESCRIPTION.ordinal(), new Comparator<Row>() {
+				@Override
+				public int compare(Row one, Row two) {
+					return one.description.compareToIgnoreCase(two.description);
+				}
+			});
+			rowSorter.setComparator(Column.TOTAL.ordinal(), new Comparator<Row>() {
+				@Override
+				public int compare(Row one, Row two) {
+					return one.total - two.total;
+				}
+			});
+			rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.DESCRIPTION.ordinal(), SortOrder.ASCENDING)));
+			rowSorter.setSortsOnUpdates(true);
+
+			return rowSorter;
 		}
 
 		private void setData(BonusFee bonusFee) {
-			rows.clear();
-			rows.add(new Row("Horse Summoning", bonusFee.getHorse()));
-			rows.add(new Row("Chest Locking", bonusFee.getLock()));
-			rows.add(new Row("Eggifying animals", bonusFee.getEggify()));
-			rows.add(new Row("Vault fees", bonusFee.getVault()));
-			rows.add(new Row("Sign-in bonuses", bonusFee.getSignIn()));
-			rows.add(new Row("Voting bonuses", bonusFee.getVote()));
-			rows.add(new Row("Mail fees", bonusFee.getMail()));
-
-			sortData(); //sort according to the current sorting rules
+			model.data.clear();
+			model.data.add(new Row("Horse Summoning", bonusFee.getHorse()));
+			model.data.add(new Row("Chest Locking", bonusFee.getLock()));
+			model.data.add(new Row("Eggifying animals", bonusFee.getEggify()));
+			model.data.add(new Row("Vault fees", bonusFee.getVault()));
+			model.data.add(new Row("Sign-in bonuses", bonusFee.getSignIn()));
+			model.data.add(new Row("Voting bonuses", bonusFee.getVote()));
+			model.data.add(new Row("Mail fees", bonusFee.getMail()));
+			model.fireTableDataChanged();
 		}
 
-		private void sortData() {
-			Collections.sort(rows, new Comparator<Row>() {
-				@Override
-				public int compare(Row a, Row b) {
-					if (!ascending) {
-						Row temp = a;
-						a = b;
-						b = temp;
-					}
+		private class Model extends AbstractTableModel {
+			private final List<Row> data = new ArrayList<Row>();
 
-					switch (prevColumnClicked) {
-					case DESCRIPTION:
-						return a.description.compareToIgnoreCase(b.description);
-					case TOTAL:
-						return a.total - b.total;
-					default:
-						return 0;
-					}
-				}
-			});
-		}
+			@Override
+			public int getColumnCount() {
+				return columns.length;
+			}
 
-		private void setModel() {
-			setModel(new AbstractTableModel() {
-				@Override
-				public int getColumnCount() {
-					return columns.length;
-				}
+			@Override
+			public String getColumnName(int index) {
+				Column column = columns[index];
+				return column.getName();
+			}
 
-				@Override
-				public String getColumnName(int index) {
-					Column column = columns[index];
+			@Override
+			public int getRowCount() {
+				return data.size();
+			}
 
-					String text = column.getName();
-					if (prevColumnClicked == column) {
-						String arrow = (ascending) ? "\u25bc" : "\u25b2";
-						text = arrow + " " + text;
-					}
-					return text;
-				}
+			@Override
+			public Object getValueAt(int row, int col) {
+				return data.get(row);
+			}
 
-				@Override
-				public int getRowCount() {
-					return rows.size();
-				}
+			@Override
+			public Class<?> getColumnClass(int col) {
+				return Row.class;
+			}
 
-				@Override
-				public Object getValueAt(int row, int col) {
-					return rows.get(row);
-				}
-
-				@Override
-				public Class<?> getColumnClass(int col) {
-					return Row.class;
-				}
-
-				@Override
-				public boolean isCellEditable(int row, int col) {
-					return false;
-				}
-			});
-		}
-
-		private void redraw() {
-			AbstractTableModel model = (AbstractTableModel) getModel();
-			model.fireTableStructureChanged();
+			@Override
+			public boolean isCellEditable(int row, int col) {
+				return false;
+			}
 		}
 	}
 }
