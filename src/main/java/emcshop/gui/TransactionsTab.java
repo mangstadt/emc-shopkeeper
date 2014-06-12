@@ -400,7 +400,7 @@ public class TransactionsTab extends JPanel {
 			customersCount = playersPanel.getDisplayedPlayers().size();
 		}
 		if (transactionsTable != null) {
-			customersCount = transactionsTable.getDisplayedPlayers().size();
+			customersCount = transactionsTable.getDisplayedPlayersCount();
 		}
 
 		//update the label text

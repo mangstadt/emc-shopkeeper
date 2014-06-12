@@ -6,13 +6,11 @@ import static emcshop.util.NumberFormatter.formatStacksWithColor;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,9 +19,14 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableRowSorter;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
@@ -35,6 +38,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.scraper.EmcServer;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.RelativeDateFormat;
+import emcshop.util.UIDefaultsWrapper;
 
 /**
  * A table that displays transactions by date
@@ -63,185 +67,123 @@ public class TransactionsTable extends JTable {
 	}
 
 	private final Column[] columns = Column.values();
-	private final List<ShopTransaction> transactions;
-	private List<ShopTransaction> transactionsToDisplay;
+	private final Model model;
+	private final TableRowSorter<Model> rowSorter;
 	private final boolean customers;
 
-	private Column prevColumnClicked;
-	private boolean ascending, showQuantitiesInStacks;
+	private boolean showQuantitiesInStacks;
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 
 	public TransactionsTable(List<ShopTransaction> transactions, boolean customers) {
-		this(transactions, customers, Column.TS, false);
+		this.customers = customers;
+		this.showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
+
+		setRowHeight(24);
+		setDefaultRenderer(ShopTransaction.class, new Renderer());
+
+		model = new Model(transactions);
+		setModel(model);
+
+		rowSorter = createRowSorter();
+		setRowSorter(rowSorter);
+
+		setColumns();
+
+		setSelectionModel();
 	}
 
-	/**
-	 * @param transactions the transactions to display
-	 * @param sortedBy the column that the items list is already sorted by
-	 * @param sortedByAscending true if the items list is sorted ascending,
-	 * false if descending
-	 */
-	public TransactionsTable(List<ShopTransaction> transactions, final boolean customers, Column sortedBy, boolean sortedByAscending) {
-		this.transactions = transactions;
-		this.transactionsToDisplay = transactions;
-		this.customers = customers;
-		prevColumnClicked = sortedBy;
-		ascending = sortedByAscending;
+	public List<ShopTransaction> getDisplayedTransactions() {
+		List<ShopTransaction> transactions = new ArrayList<ShopTransaction>(getRowCount());
+		for (int row = 0; row < getRowCount(); row++) {
+			int rowModel = convertRowIndexToModel(row);
+			ShopTransaction transaction = model.transactions.get(rowModel);
+			transactions.add(transaction);
+		}
+		return transactions;
+	}
 
-		showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
+	public int getDisplayedPlayersCount() {
+		Set<String> players = new HashSet<String>();
+		for (ShopTransaction transaction : getDisplayedTransactions()) {
+			String player = customers ? transaction.getPlayer() : transaction.getShopOwner();
+			players.add(player);
+		}
+		return players.size();
+	}
 
-		sortData();
+	private TableColumn getTableColumn(Column column) {
+		return columnModel.getColumn(column.ordinal());
+	}
 
+	private void setColumns() {
 		getTableHeader().setReorderingAllowed(false);
+
+		TableColumn tsColumn = getTableColumn(Column.TS);
+		tsColumn.setPreferredWidth(200);
+		tsColumn.setMinWidth(150);
+
+		TableColumn playerNameColumn = getTableColumn(Column.PLAYER_NAME);
+		playerNameColumn.setPreferredWidth(300);
+
+		TableColumn itemNameColumn = getTableColumn(Column.ITEM_NAME);
+		itemNameColumn.setPreferredWidth(300);
+
+		TableColumn quantityColumn = getTableColumn(Column.QUANTITY);
+		quantityColumn.setPreferredWidth(150);
+		quantityColumn.setMinWidth(100);
+
+		TableColumn amountColumn = getTableColumn(Column.AMOUNT);
+		amountColumn.setPreferredWidth(150);
+		amountColumn.setMinWidth(100);
+	}
+
+	private void setSelectionModel() {
 		setColumnSelectionAllowed(false);
 		setRowSelectionAllowed(false);
 		setCellSelectionEnabled(false);
-		setRowHeight(24);
+	}
 
-		getTableHeader().addMouseListener(new MouseAdapter() {
+	private TableRowSorter<Model> createRowSorter() {
+		TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
+
+		rowSorter.setComparator(Column.TS.ordinal(), new Comparator<ShopTransaction>() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
-				int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
-				if (index < 0) {
-					return;
-				}
-
-				Column column = columns[index];
-				if (column == prevColumnClicked) {
-					ascending = !ascending;
-				} else {
-					prevColumnClicked = column;
-					if (column == Column.AMOUNT || column == Column.TS) {
-						ascending = false;
-					} else {
-						ascending = true;
-					}
-				}
-
-				sortData();
-				redraw();
+			public int compare(ShopTransaction one, ShopTransaction two) {
+				return one.getTs().compareTo(two.getTs());
 			}
 		});
-
-		setModel();
-
-		setDefaultRenderer(ShopTransaction.class, new TableCellRenderer() {
-			private final Color evenRowColor = new Color(255, 255, 255);
-			private final Color oddRowColor = new Color(240, 240, 240);
-			private final ItemIndex index = ItemIndex.instance();
-			private final RelativeDateFormat df = new RelativeDateFormat();
-			private final ProfileLoader profileLoader = context.get(ProfileLoader.class);
-			private final OnlinePlayersMonitor onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
-
-			private final JLabel label = new JLabel();
-			{
-				label.setOpaque(true);
-				label.setBorder(new EmptyBorder(4, 4, 4, 4));
-			}
-
-			private final JLabel playerLabel = new JLabel();
-			private final JLabel serverLabel = new JLabel();
-			private final JPanel playerPanel = new JPanel(new MigLayout("insets 2"));
-			{
-				playerPanel.setOpaque(true);
-				playerPanel.add(playerLabel);
-				playerPanel.add(serverLabel);
-			}
-
+		rowSorter.setComparator(Column.PLAYER_NAME.ordinal(), new Comparator<ShopTransaction>() {
 			@Override
-			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
-				if (value == null) {
-					return null;
+			public int compare(ShopTransaction one, ShopTransaction two) {
+				if (customers) {
+					return one.getPlayer().compareToIgnoreCase(two.getPlayer());
 				}
-
-				ShopTransaction transaction = (ShopTransaction) value;
-				Column column = columns[col];
-				resetComponents();
-
-				JComponent component = null;
-				switch (column) {
-				case TS:
-					component = label;
-
-					Date ts = transaction.getTs();
-					label.setText(df.format(ts));
-					break;
-
-				case PLAYER_NAME:
-					component = playerPanel;
-
-					String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
-					playerLabel.setText(playerName);
-
-					ImageIcon portrait = profileLoader.getPortraitFromCache(playerName);
-					if (portrait == null) {
-						portrait = ImageManager.getUnknown();
-					}
-					portrait = ImageManager.scale(portrait, 16);
-					playerLabel.setIcon(portrait);
-
-					if (!profileLoader.wasDownloaded(playerName)) {
-						profileLoader.queueProfileForDownload(playerName, new ProfileDownloadedListener() {
-							@Override
-							public void onProfileDownloaded(JLabel label) {
-								//re-render the cell when the profile is downloaded
-								AbstractTableModel model = (AbstractTableModel) getModel();
-								model.fireTableCellUpdated(row, col);
-							}
-						});
-					}
-
-					EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
-					if (server != null) {
-						serverLabel.setIcon(ImageManager.getOnline(server, 12));
-					}
-					break;
-
-				case ITEM_NAME:
-					component = label;
-
-					String name = transaction.getItem();
-					label.setText(name);
-
-					ImageIcon icon = ImageManager.getItemImage(transaction.getItem());
-					label.setIcon(icon);
-					break;
-
-				case QUANTITY:
-					component = label;
-
-					String text;
-					int quantity = transaction.getQuantity();
-					if (showQuantitiesInStacks) {
-						int stackSize = index.getStackSize(transaction.getItem());
-						text = formatStacksWithColor(quantity, stackSize);
-					} else {
-						text = formatQuantityWithColor(quantity);
-					}
-					label.setText("<html>" + text + "</html>");
-					break;
-
-				case AMOUNT:
-					component = label;
-
-					label.setText("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
-					break;
-				}
-
-				Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-				component.setBackground(color);
-
-				return component;
-			}
-
-			private void resetComponents() {
-				label.setIcon(null);
-				serverLabel.setIcon(null);
+				return one.getShopOwner().compareToIgnoreCase(two.getShopOwner());
 			}
 		});
+		rowSorter.setComparator(Column.ITEM_NAME.ordinal(), new Comparator<ShopTransaction>() {
+			@Override
+			public int compare(ShopTransaction one, ShopTransaction two) {
+				return one.getItem().compareToIgnoreCase(two.getItem());
+			}
+		});
+		rowSorter.setComparator(Column.QUANTITY.ordinal(), new Comparator<ShopTransaction>() {
+			@Override
+			public int compare(ShopTransaction one, ShopTransaction two) {
+				return one.getQuantity() - two.getQuantity();
+			}
+		});
+		rowSorter.setComparator(Column.AMOUNT.ordinal(), new Comparator<ShopTransaction>() {
+			@Override
+			public int compare(ShopTransaction one, ShopTransaction two) {
+				return one.getAmount() - two.getAmount();
+			}
+		});
+		rowSorter.setSortsOnUpdates(true);
+		rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.TS.ordinal(), SortOrder.DESCENDING)));
 
-		setColumns();
+		return rowSorter;
 	}
 
 	public void filterByItem(FilterList filterList) {
@@ -254,142 +196,211 @@ public class TransactionsTable extends JTable {
 		filter();
 	}
 
-	private void filter() {
+	public void filter() {
 		if (filteredItemNames.isEmpty() && filteredPlayerNames.isEmpty()) {
-			transactionsToDisplay = transactions;
-			sortData();
-		} else {
-			transactionsToDisplay = new ArrayList<ShopTransaction>();
-			for (ShopTransaction transaction : transactions) {
-				String itemName = transaction.getItem();
-				String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
-				if ((filteredItemNames.isEmpty() || filteredItemNames.contains(itemName)) && (filteredPlayerNames.isEmpty() || filteredPlayerNames.contains(playerName))) {
-					transactionsToDisplay.add(transaction);
-				}
-			}
+			rowSorter.setRowFilter(null);
+			return;
 		}
 
-		redraw();
-	}
-
-	public List<ShopTransaction> getDisplayedTransactions() {
-		return transactionsToDisplay;
-	}
-
-	public List<String> getDisplayedPlayers() {
-		Set<String> players = new LinkedHashSet<String>();
-		for (ShopTransaction transaction : transactionsToDisplay) {
-			String player = customers ? transaction.getPlayer() : transaction.getShopOwner();
-			players.add(player);
-		}
-		return new ArrayList<String>(players);
-	}
-
-	private void sortData() {
-		Collections.sort(transactionsToDisplay, new Comparator<ShopTransaction>() {
+		RowFilter<Model, Integer> filter = new RowFilter<Model, Integer>() {
 			@Override
-			public int compare(ShopTransaction a, ShopTransaction b) {
-				if (!ascending) {
-					ShopTransaction temp = a;
-					a = b;
-					b = temp;
+			public boolean include(RowFilter.Entry<? extends Model, ? extends Integer> entry) {
+				int row = entry.getIdentifier();
+				ShopTransaction transaction = model.transactions.get(row);
+
+				boolean item = (filteredItemNames.isEmpty() || filteredItemNames.contains(transaction.getItem()));
+
+				boolean player;
+				if (filteredPlayerNames.isEmpty()) {
+					player = true;
+				} else {
+					String name = customers ? transaction.getPlayer() : transaction.getShopOwner();
+					player = filteredPlayerNames.contains(name);
 				}
 
-				switch (prevColumnClicked) {
-				case TS:
-					return a.getTs().compareTo(b.getTs());
-				case PLAYER_NAME:
-					if (customers) {
-						return a.getPlayer().compareToIgnoreCase(b.getPlayer());
-					} else {
-						return a.getShopOwner().compareToIgnoreCase(b.getShopOwner());
-					}
-				case ITEM_NAME:
-					return a.getItem().compareToIgnoreCase(b.getItem());
-				case AMOUNT:
-					return a.getAmount() - b.getAmount();
-				case QUANTITY:
-					return a.getQuantity() - b.getQuantity();
-				}
-				return 0;
+				return item && player;
 			}
-		});
+
+		};
+		rowSorter.setRowFilter(filter);
 	}
 
 	public void setShowQuantitiesInStacks(boolean enable) {
 		showQuantitiesInStacks = enable;
 
 		//re-render the "quantity" column
-		AbstractTableModel model = (AbstractTableModel) getModel();
 		int col = Column.QUANTITY.ordinal();
 		for (int row = 0; row < model.getRowCount(); row++) {
 			model.fireTableCellUpdated(row, col);
 		}
 	}
 
-	private void redraw() {
-		//updates the table's data
-		//AbstractTableModel model = (AbstractTableModel) getModel();
-		//model.fireTableDataChanged();
+	private class Renderer implements TableCellRenderer {
+		private final Color evenRowColor = new Color(255, 255, 255);
+		private final Color oddRowColor = new Color(240, 240, 240);
+		private final ItemIndex index = ItemIndex.instance();
+		private final RelativeDateFormat df = new RelativeDateFormat();
+		private final ProfileLoader profileLoader = context.get(ProfileLoader.class);
+		private final OnlinePlayersMonitor onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 
-		//doing these things will update the table data and update the column header text
-		setModel();
-		setColumns();
-	}
+		private final JLabel label = new JLabel();
+		{
+			label.setOpaque(true);
+			label.setBorder(new EmptyBorder(4, 4, 4, 4));
+		}
 
-	private void setColumns() {
-		//set the width of "item name" column so the name isn't snipped
-		//columnModel.getColumn(Column.ITEM_NAME.ordinal()).setMinWidth(200);
-		//columnModel.getColumn(Column.PLAYER_NAME.ordinal()).setMinWidth(200);
-	}
-
-	private void setModel() {
-		setModel(new AbstractTableModel() {
-			private final Column columns[] = Column.values();
-
-			@Override
-			public int getColumnCount() {
-				return columns.length;
+		private final JLabel playerLabel = new JLabel();
+		private final JLabel serverLabel = new JLabel();
+		private final JPanel playerPanel = new JPanel(new MigLayout("insets 2")) {
+			{
+				setOpaque(true);
+				add(playerLabel);
+				add(serverLabel);
 			}
 
 			@Override
-			public String getColumnName(int index) {
-				Column column = columns[index];
+			public void setForeground(Color color) {
+				playerLabel.setForeground(color);
+				super.setForeground(color);
+			}
+		};
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
+			if (value == null) {
+				return null;
+			}
+
+			ShopTransaction transaction = (ShopTransaction) value;
+			Column column = columns[col];
+			resetComponents();
+
+			JComponent component = null;
+			switch (column) {
+			case TS:
+				component = label;
+
+				Date ts = transaction.getTs();
+				label.setText(df.format(ts));
+				break;
+
+			case PLAYER_NAME:
+				component = playerPanel;
+
+				String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
+				playerLabel.setText(playerName);
+
+				ImageIcon portrait = profileLoader.getPortraitFromCache(playerName);
+				if (portrait == null) {
+					portrait = ImageManager.getUnknown();
+				}
+				portrait = ImageManager.scale(portrait, 16);
+				playerLabel.setIcon(portrait);
+
+				playerLabel.setForeground(profileLoader.getRankColor(playerName));
+
+				if (!profileLoader.wasDownloaded(playerName)) {
+					profileLoader.queueProfileForDownload(playerName, new ProfileDownloadedListener() {
+						@Override
+						public void onProfileDownloaded(JLabel label) {
+							//re-render the cell when the profile is downloaded
+							model.fireTableCellUpdated(row, col);
+						}
+					});
+				}
+
+				EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+				if (server != null) {
+					serverLabel.setIcon(ImageManager.getOnline(server, 12));
+				}
+				break;
+
+			case ITEM_NAME:
+				component = label;
+
+				String name = transaction.getItem();
+				label.setText(name);
+
+				ImageIcon icon = ImageManager.getItemImage(transaction.getItem());
+				label.setIcon(icon);
+				break;
+
+			case QUANTITY:
+				component = label;
 
 				String text;
-				if (column == Column.PLAYER_NAME && !customers) {
-					text = "Shop Owner";
+				int quantity = transaction.getQuantity();
+				if (showQuantitiesInStacks) {
+					int stackSize = index.getStackSize(transaction.getItem());
+					text = formatStacksWithColor(quantity, stackSize);
 				} else {
-					text = column.getName();
+					text = formatQuantityWithColor(quantity);
 				}
+				label.setText("<html>" + text + "</html>");
+				break;
 
-				if (prevColumnClicked == column) {
-					String arrow = (ascending) ? "\u25bc" : "\u25b2";
-					text = arrow + " " + text;
-				}
+			case AMOUNT:
+				component = label;
 
-				return text;
+				label.setText("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
+				break;
 			}
 
-			@Override
-			public int getRowCount() {
-				return transactionsToDisplay.size();
-			}
+			Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
+			component.setBackground(color);
 
-			@Override
-			public Object getValueAt(int row, int col) {
-				return transactionsToDisplay.get(row);
-			}
+			return component;
+		}
 
-			@Override
-			public Class<?> getColumnClass(int c) {
-				return ShopTransaction.class;
-			}
+		private void resetComponents() {
+			label.setIcon(null);
+			label.setForeground(UIDefaultsWrapper.getLabelForeground());
+			playerPanel.setForeground(UIDefaultsWrapper.getLabelForeground());
+			serverLabel.setIcon(null);
+		}
+	}
 
-			@Override
-			public boolean isCellEditable(int row, int col) {
-				return false;
+	private class Model extends AbstractTableModel {
+		private final List<ShopTransaction> transactions;
+
+		public Model(List<ShopTransaction> transactions) {
+			this.transactions = transactions;
+		}
+
+		@Override
+		public int getColumnCount() {
+			return columns.length;
+		}
+
+		@Override
+		public String getColumnName(int index) {
+			Column column = columns[index];
+
+			if (column == Column.PLAYER_NAME && !customers) {
+				return "Shop Owner";
+			} else {
+				return column.getName();
 			}
-		});
+		}
+
+		@Override
+		public int getRowCount() {
+			return transactions.size();
+		}
+
+		@Override
+		public Object getValueAt(int row, int col) {
+			return transactions.get(row);
+		}
+
+		@Override
+		public Class<?> getColumnClass(int c) {
+			return ShopTransaction.class;
+		}
+
+		@Override
+		public boolean isCellEditable(int row, int col) {
+			return false;
+		}
 	}
 }
