@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -26,6 +28,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -41,6 +44,7 @@ import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
@@ -140,39 +144,25 @@ public class InventoryTab extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				List<Row> selected = table.getSelected();
-				List<Integer> toDelete = new ArrayList<Integer>(selected.size());
+				if (selected.isEmpty()) {
+					return;
+				}
+
+				List<Integer> selectedIds = new ArrayList<Integer>(selected.size());
 				for (Row row : selected) {
-					toDelete.add(row.inventory.getId());
+					selectedIds.add(row.inventory.getId());
 				}
 
 				try {
-					dao.deleteInventory(toDelete);
+					dao.deleteInventory(selectedIds);
 					dao.commit();
 				} catch (SQLException e) {
 					dao.rollback();
 					throw new RuntimeException(e);
 				}
 
-				refresh();
-
-				//				int selectedRows[] = table.getSelectedRows();
-				//				List<Integer> toDelete = new ArrayList<Integer>(selectedRows.length);
-				//				for (int row : selectedRows) {
-				//					int rowModel = table.convertRowIndexToModel(row);
-				//					Row rowObj = table.model.data.get(rowModel);
-				//					Integer id = rowObj.inventory.getId();
-				//					toDelete.add(id);
-				//				}
-				//
-				//				try {
-				//					dao.deleteInventory(toDelete);
-				//					dao.commit();
-				//				} catch (SQLException e) {
-				//					dao.rollback();
-				//					throw new RuntimeException(e);
-				//				}
-				//
-				//				refresh();
+				table.model.data.removeAll(selected);
+				table.model.fireTableDataChanged();
 			}
 		});
 
@@ -250,44 +240,40 @@ public class InventoryTab extends JPanel {
 			return;
 		}
 
-		//parse the quantity
-		//e.g. "5/23" means "5 stacks plus 23 more"
-		//e.g. "5/" means "5 stacks"
-		//e.g. "5" means "5 items"
-		//e.g. "+1/" means "add 1 stack to the existing quantity"
-		Integer quantityValue;
-		boolean add;
 		try {
-			add = quantity.isAdd();
-			quantityValue = quantity.getQuantity(index.getStackSize(itemStr));
+			upsertItem(itemStr, quantity);
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
 			quantity.requestFocusInWindow();
 			return;
 		}
 
+		item.setText("");
+		quantity.setText("");
+		item.requestFocusInWindow();
+		refresh();
+	}
+
+	private void upsertItem(String item, QuantityTextField textField) {
+		boolean add = quantity.isAdd();
+		int quantity = textField.getQuantity(index.getStackSize(item));
+
 		try {
-			dao.upsertInventory(itemStr, quantityValue, add);
+			dao.upsertInventory(item, quantity, add);
 			dao.commit();
 		} catch (SQLException e) {
 			dao.rollback();
 			throw new RuntimeException(e);
 		}
-		refresh();
-
-		item.setText("");
-		quantity.setText("");
-		item.requestFocusInWindow();
 	}
 
 	public void setShowQuantitiesInStacks(boolean enable) {
 		showQuantitiesInStacks = enable;
 
 		//re-render the "quantity" column
-		table.model.fireTableDataChanged();
-		//		for (int row = 0; row < table.model.getRowCount(); row++) {
-		//			table.model.fireTableCellUpdated(row, Column.REMAINING.ordinal());
-		//		}
+		for (int row = 0; row < table.model.getRowCount(); row++) {
+			table.model.fireTableCellUpdated(row, Column.REMAINING.ordinal());
+		}
 	}
 
 	public void refresh() {
@@ -303,7 +289,7 @@ public class InventoryTab extends JPanel {
 		table.filter(new FilterList());
 	}
 
-	private class Row {
+	private static class Row {
 		private final Inventory inventory;
 		private boolean selected = false;
 		private boolean idUnknown = false;
@@ -339,8 +325,8 @@ public class InventoryTab extends JPanel {
 			int rows = getRowCount();
 			List<Row> selected = new ArrayList<Row>();
 			for (int i = 0; i < rows; i++) {
-				int modelRow = table.convertRowIndexToModel(i);
-				Row row = table.model.data.get(modelRow);
+				int modelRow = convertRowIndexToModel(i);
+				Row row = model.data.get(modelRow);
 				if (row.selected) {
 					selected.add(row);
 				}
@@ -352,12 +338,11 @@ public class InventoryTab extends JPanel {
 			Row row = new Row(inventory);
 			row.idUnknown = idUnknown;
 			model.data.add(row);
-			model.fireTableDataChanged();
+			model.fireTableRowsInserted(model.getRowCount() - 1, model.getRowCount() - 1);
 		}
 
 		public void setData(Collection<Inventory> inventory) {
 			model.setData(inventory);
-			rowSorter.sort();
 		}
 
 		public void filter(final FilterList filterList) {
@@ -389,6 +374,7 @@ public class InventoryTab extends JPanel {
 					Row row = new Row(inv);
 					this.data.add(row);
 				}
+				fireTableDataChanged();
 			}
 
 			@Override
@@ -421,7 +407,7 @@ public class InventoryTab extends JPanel {
 			public boolean isCellEditable(int row, int col) {
 				Column column = columns[col];
 				switch (column) {
-				case CHECKBOX:
+				case REMAINING:
 					return true;
 				default:
 					return false;
@@ -431,11 +417,30 @@ public class InventoryTab extends JPanel {
 			@Override
 			public void setValueAt(Object value, int row, int col) {
 				Column column = columns[col];
-
-				if (column != Column.CHECKBOX) {
-					data.set(col, (Row) value);
-					fireTableCellUpdated(row, col);
+				if (column != Column.REMAINING) {
+					return;
 				}
+
+				QuantityTextField textField = (QuantityTextField) value;
+				Row rowObj = data.get(row);
+				Inventory inv = rowObj.inventory;
+
+				//update database
+				String item = inv.getItem();
+				try {
+					upsertItem(item, textField);
+				} catch (NumberFormatException e) {
+					JOptionPane.showMessageDialog(InventoryTab.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				//update Inventory object
+				int quantity = textField.getQuantity(index.getStackSize(item));
+				boolean add = textField.isAdd();
+				if (add) {
+					quantity = inv.getQuantity() + quantity;
+				}
+				inv.setQuantity(quantity);
 			}
 		}
 
@@ -461,7 +466,7 @@ public class InventoryTab extends JPanel {
 				Row rowObj = (Row) value;
 				Inventory inv = rowObj.inventory;
 				Column column = columns[col];
-				resetComponent();
+				resetComponents();
 
 				JComponent component = null;
 				switch (column) {
@@ -503,7 +508,7 @@ public class InventoryTab extends JPanel {
 				return component;
 			}
 
-			private void resetComponent() {
+			private void resetComponents() {
 				label.setIcon(null);
 			}
 		}
@@ -540,6 +545,7 @@ public class InventoryTab extends JPanel {
 
 			TableColumn remainingColumn = columnModel.getColumn(Column.REMAINING.ordinal());
 			remainingColumn.setPreferredWidth(50);
+			remainingColumn.setCellEditor(new RemainingEditor());
 		}
 
 		private void setSelectionModel() {
@@ -554,9 +560,60 @@ public class InventoryTab extends JPanel {
 
 					Row rowObj = model.data.get(row);
 					rowObj.selected = !rowObj.selected;
-					table.model.fireTableDataChanged();
+
+					//re-render table row
+					model.fireTableRowsUpdated(row, row);
 				}
 			});
+		}
+
+		private class RemainingEditor extends AbstractCellEditor implements TableCellEditor {
+			private final QuantityTextField textField = new QuantityTextField();
+			{
+				textField.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						fireEditingStopped();
+					}
+				});
+
+				//select all the text when the textbox gains focus
+				textField.addFocusListener(new FocusListener() {
+					@Override
+					public void focusGained(FocusEvent event) {
+						textField.selectAll();
+					}
+
+					@Override
+					public void focusLost(FocusEvent event) {
+						//empty
+					}
+				});
+			}
+
+			@Override
+			public Object getCellEditorValue() {
+				return textField;
+			}
+
+			@Override
+			public Component getTableCellEditorComponent(JTable table, Object value, boolean selected, int row, int col) {
+				if (value == null) {
+					return null;
+				}
+
+				Column column = columns[col];
+				if (column != Column.REMAINING) {
+					return null;
+				}
+
+				Row rowObj = (Row) value;
+				Inventory inv = rowObj.inventory;
+				Integer stackSize = showQuantitiesInStacks ? index.getStackSize(inv.getItem()) : null;
+				textField.setQuantity(inv.getQuantity(), stackSize);
+
+				return textField;
+			}
 		}
 	}
 

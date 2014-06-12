@@ -1,5 +1,7 @@
 package emcshop.gui;
 
+import static emcshop.util.NumberFormatter.formatStacks;
+
 import javax.swing.JTextField;
 
 /**
@@ -26,6 +28,27 @@ public class QuantityTextField extends JTextField {
 
 		int remainder = split[1].isEmpty() ? 0 : Integer.valueOf(split[1]);
 		return Integer.valueOf(split[0]) * stackSize + remainder;
+	}
+
+	/**
+	 * Sets the value of this quantity field.
+	 * @param quantity the quantity or null to empty the field
+	 * @param stackSize the size of a stack (will cause the value to be
+	 * displayed using "stack" formatting), or null to format the value as a
+	 * regular integer
+	 */
+	public void setQuantity(Integer quantity, Integer stackSize) {
+		if (quantity == null) {
+			setText("");
+			return;
+		}
+
+		if (stackSize == null) {
+			setText(quantity.toString());
+			return;
+		}
+
+		setText(formatStacks(quantity, stackSize, false));
 	}
 
 	/**
