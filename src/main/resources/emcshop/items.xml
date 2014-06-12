@@ -458,9 +458,9 @@
 	<Item name="Splash Potion of Night Vision Ext" id="373:16454" emcNames="Potion:16454" image="potion_night_vision_splash.png" stack="1" group="Potions" />
 
 	<Item name="Potion of Weakness" id="373:8200,373:8232" emcNames="Potion:8200,Potion:8232" image="potion_weakness.png" stack="1" group="Potions" />
-	<Item name="Potion of Weakness Ext" id="373:8264" emcNames="Potion:8264,Potion:24648" image="potion_weakness.png" stack="1" group="Potions" />
+	<Item name="Potion of Weakness Ext" id="373:8264" emcNames="Potion:8264" image="potion_weakness.png" stack="1" group="Potions" />
 	<Item name="Splash Potion of Weakness" id="373:16392,373:16424" emcNames="Potion:16392,Potion:16424" image="potion_weakness_splash.png" stack="1" group="Potions" />
-	<Item name="Splash Potion of Weakness Ext" id="373:16456" emcNames="Potion:16456" image="potion_weakness_splash.png" stack="1" group="Potions" />
+	<Item name="Splash Potion of Weakness Ext" id="373:16456" emcNames="Potion:16456,Potion:24648" image="potion_weakness_splash.png" stack="1" group="Potions" />
 
 	<Item name="Potion of Strength" id="373:8201" emcNames="Potion:8201" image="potion_strength.png" stack="1" group="Potions" />
 	<Item name="Potion of Strength II" id="373:8233" emcNames="Potion:8233" image="potion_strength.png" stack="1" group="Potions" />
@@ -470,9 +470,9 @@
 	<Item name="Splash Potion of Strength Ext" id="373:16457" emcNames="Potion:16457" image="potion_strength_splash.png" stack="1" group="Potions" />
 	
 	<Item name="Potion of Slowness" id="373:8202,373:8234" emcNames="Potion:8202,Potion:8234" image="potion_slowness.png" stack="1" group="Potions" />
-	<Item name="Potion of Slowness Ext" id="373:8266" emcNames="Potion:8266,Potion:24650" image="potion_slowness.png" stack="1" group="Potions" />
+	<Item name="Potion of Slowness Ext" id="373:8266" emcNames="Potion:8266" image="potion_slowness.png" stack="1" group="Potions" />
 	<Item name="Splash Potion of Slowness" id="373:16394,373:16426" emcNames="Potion:16394,Potion:16426" image="potion_slowness_splash.png" stack="1" group="Potions" />
-	<Item name="Splash Potion of Slowness Ext" id="373:16458" emcNames="Potion:16458" image="potion_slowness_splash.png" stack="1" group="Potions" />
+	<Item name="Splash Potion of Slowness Ext" id="373:16458" emcNames="Potion:16458,Potion:24650" image="potion_slowness_splash.png" stack="1" group="Potions" />
 	
 	<Item name="Potion of Harming" id="373:8204" emcNames="Potion:8204" image="potion_harming.png" stack="1" group="Potions" />
 	<Item name="Potion of Harming II" id="373:8236,373:8268" emcNames="Potion:8236,Potion:8268" image="potion_harming.png" stack="1" group="Potions" />
