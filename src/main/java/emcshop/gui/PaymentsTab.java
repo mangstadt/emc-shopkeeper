@@ -1,17 +1,22 @@
 package emcshop.gui;
 
 import static emcshop.util.GuiUtils.busyCursor;
+import static emcshop.util.NumberFormatter.formatRupees;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
+import static emcshop.util.NumberFormatter.getQuantityColor;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -21,6 +26,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -46,6 +52,7 @@ import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
+import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
 public class PaymentsTab extends JPanel {
@@ -105,7 +112,7 @@ public class PaymentsTab extends JPanel {
 	 * are defined is the order that they will appear in the table.
 	 */
 	private enum Column {
-		DELETE("Delete"), SPLIT("Split"), ASSIGN("Assign"), TIME("Time"), PLAYER("Player"), AMOUNT("Amount");
+		CHECKBOX(""), SPLIT("Split"), ASSIGN("Assign"), TIME("Time"), PLAYER("Player"), AMOUNT("Amount");
 
 		private final String name;
 
@@ -118,6 +125,15 @@ public class PaymentsTab extends JPanel {
 		}
 	}
 
+	private static class Row {
+		private final PaymentTransaction transaction;
+		private boolean selected = false;
+
+		public Row(PaymentTransaction transaction) {
+			this.transaction = transaction;
+		}
+	}
+
 	private class PaymentsTable extends JTable {
 		private final Column columns[] = Column.values();
 		private final Model model;
@@ -126,7 +142,7 @@ public class PaymentsTab extends JPanel {
 		public PaymentsTable(List<PaymentTransaction> rows) {
 			setRowHeight(24);
 
-			setDefaultRenderer(PaymentTransaction.class, new Renderer());
+			setDefaultRenderer(Row.class, new Renderer());
 
 			model = new Model(rows);
 			setModel(model);
@@ -142,25 +158,25 @@ public class PaymentsTab extends JPanel {
 		private TableRowSorter<Model> createRowSorter() {
 			TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
 
-			rowSorter.setSortable(Column.ASSIGN.ordinal(), false);
-			rowSorter.setSortable(Column.DELETE.ordinal(), false);
+			rowSorter.setSortable(Column.CHECKBOX.ordinal(), false);
 			rowSorter.setSortable(Column.SPLIT.ordinal(), false);
-			rowSorter.setComparator(Column.PLAYER.ordinal(), new Comparator<PaymentTransaction>() {
+			rowSorter.setSortable(Column.ASSIGN.ordinal(), false);
+			rowSorter.setComparator(Column.TIME.ordinal(), new Comparator<Row>() {
 				@Override
-				public int compare(PaymentTransaction one, PaymentTransaction two) {
-					return one.getPlayer().compareToIgnoreCase(two.getPlayer());
+				public int compare(Row one, Row two) {
+					return one.transaction.getTs().compareTo(two.transaction.getTs());
 				}
 			});
-			rowSorter.setComparator(Column.TIME.ordinal(), new Comparator<PaymentTransaction>() {
+			rowSorter.setComparator(Column.PLAYER.ordinal(), new Comparator<Row>() {
 				@Override
-				public int compare(PaymentTransaction one, PaymentTransaction two) {
-					return one.getTs().compareTo(two.getTs());
+				public int compare(Row one, Row two) {
+					return one.transaction.getPlayer().compareToIgnoreCase(two.transaction.getPlayer());
 				}
 			});
-			rowSorter.setComparator(Column.AMOUNT.ordinal(), new Comparator<PaymentTransaction>() {
+			rowSorter.setComparator(Column.AMOUNT.ordinal(), new Comparator<Row>() {
 				@Override
-				public int compare(PaymentTransaction one, PaymentTransaction two) {
-					return one.getAmount() - two.getAmount();
+				public int compare(Row one, Row two) {
+					return one.transaction.getAmount() - two.transaction.getAmount();
 				}
 			});
 			rowSorter.setSortsOnUpdates(true);
@@ -174,6 +190,11 @@ public class PaymentsTab extends JPanel {
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
 
+			private final JCheckBox checkbox = new JCheckBox();
+			{
+				checkbox.setOpaque(true);
+			}
+
 			private final JLabel label = new JLabel();
 			{
 				label.setOpaque(true);
@@ -182,12 +203,22 @@ public class PaymentsTab extends JPanel {
 
 			private final JLabel playerLabel = new JLabel();
 			private final JLabel serverLabel = new JLabel();
-			private final JPanel playerPanel = new JPanel(new MigLayout("insets 2"));
+			private final JPanel playerPanel = new JPanel(new MigLayout("insets 2")) {
+				@Override
+				public void setForeground(Color color) {
+					playerLabel.setForeground(color);
+					super.setForeground(color);
+				}
+			};
 			{
 				playerPanel.setOpaque(true);
 				playerPanel.add(playerLabel);
 				playerPanel.add(serverLabel);
 			}
+
+			private final JButton button = new JButton();
+			private final Icon assignIcon = ImageManager.getImageIcon("assign.png");
+			private final Icon splitIcon = ImageManager.getImageIcon("split.png");
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
@@ -195,12 +226,31 @@ public class PaymentsTab extends JPanel {
 					return null;
 				}
 
-				PaymentTransaction transaction = (PaymentTransaction) value;
+				Row rowObj = (Row) value;
+				PaymentTransaction transaction = rowObj.transaction;
 				Column column = columns[col];
 				resetComponents();
 
-				Component component = null;
+				JComponent component = null;
 				switch (column) {
+				case SPLIT:
+					component = button;
+
+					button.setIcon(splitIcon);
+					break;
+
+				case ASSIGN:
+					component = button;
+
+					button.setIcon(assignIcon);
+					break;
+
+				case CHECKBOX:
+					component = checkbox;
+
+					checkbox.setSelected(rowObj.selected);
+					break;
+
 				case TIME:
 					component = label;
 
@@ -240,35 +290,44 @@ public class PaymentsTab extends JPanel {
 				case AMOUNT:
 					component = label;
 
-					label.setText("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
-					break;
-				default:
-					component = label;
-
-					label.setText("");
+					int amount = transaction.getAmount();
+					Color color = getQuantityColor(amount);
+					if (color != null) {
+						label.setForeground(color);
+					}
+					label.setText(formatRupees(transaction.getAmount()));
 					break;
 				}
 
 				//set the background color of the row
-				Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-				component.setBackground(color);
+				if (rowObj.selected) {
+					UIDefaultsWrapper.assignListFormats(component, true);
+				} else {
+					Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
+					component.setBackground(color);
+				}
 
 				return component;
 			}
 
 			private void resetComponents() {
+				label.setForeground(UIDefaultsWrapper.getLabelForeground());
+				playerPanel.setForeground(UIDefaultsWrapper.getLabelForeground());
 				serverLabel.setIcon(null);
 			}
 		}
 
 		private class Model extends AbstractTableModel {
-			private final Icon deleteIcon = ImageManager.getImageIcon("delete.png");
 			private final Icon assignIcon = ImageManager.getImageIcon("assign.png");
 			private final Icon splitIcon = ImageManager.getImageIcon("split.png");
-			private final List<PaymentTransaction> data;
+			private final List<Row> data;
 
 			public Model(List<PaymentTransaction> data) {
-				this.data = data;
+				this.data = new ArrayList<Row>(data.size());
+				for (PaymentTransaction transaction : data) {
+					Row row = new Row(transaction);
+					this.data.add(row);
+				}
 			}
 
 			@Override
@@ -291,8 +350,6 @@ public class PaymentsTab extends JPanel {
 			public Object getValueAt(int row, int col) {
 				Column column = columns[col];
 				switch (column) {
-				case DELETE:
-					return deleteIcon;
 				case ASSIGN:
 					return assignIcon;
 				case SPLIT:
@@ -306,12 +363,11 @@ public class PaymentsTab extends JPanel {
 			public Class<?> getColumnClass(int col) {
 				Column column = columns[col];
 				switch (column) {
-				case DELETE:
 				case ASSIGN:
 				case SPLIT:
 					return Icon.class;
 				default:
-					return PaymentTransaction.class;
+					return Row.class;
 				}
 			}
 
@@ -319,7 +375,6 @@ public class PaymentsTab extends JPanel {
 			public boolean isCellEditable(int row, int col) {
 				Column column = columns[col];
 				switch (column) {
-				case DELETE:
 				case ASSIGN:
 				case SPLIT:
 					//allows the buttons to be clicked
@@ -331,20 +386,26 @@ public class PaymentsTab extends JPanel {
 		}
 
 		private void setSelectionModel() {
-			setColumnSelectionAllowed(false);
-			setRowSelectionAllowed(false);
-			setCellSelectionEnabled(false);
+			addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent event) {
+					int colView = columnAtPoint(event.getPoint());
+					int rowView = rowAtPoint(event.getPoint());
+					if (colView < 0 || rowView < 0) {
+						return;
+					}
+
+					int row = convertRowIndexToModel(rowView);
+					Row rowObj = model.data.get(row);
+					rowObj.selected = !rowObj.selected;
+
+					//re-render table row
+					model.fireTableRowsUpdated(row, row);
+				}
+			});
 		}
 
 		private void setColumns() {
-			new ButtonColumn(this, new AbstractAction() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					int row = Integer.valueOf(event.getActionCommand());
-					deleteRow(row);
-				}
-			}, Column.DELETE.ordinal());
-
 			new ButtonColumn(this, new AbstractAction() {
 				@Override
 				public void actionPerformed(ActionEvent event) {
@@ -361,7 +422,7 @@ public class PaymentsTab extends JPanel {
 				}
 			}, Column.SPLIT.ordinal());
 
-			TableColumn deleteColumn = columnModel.getColumn(Column.DELETE.ordinal());
+			TableColumn deleteColumn = columnModel.getColumn(Column.CHECKBOX.ordinal());
 			deleteColumn.setMaxWidth(50);
 			deleteColumn.setResizable(false);
 
@@ -376,30 +437,30 @@ public class PaymentsTab extends JPanel {
 			getTableHeader().setReorderingAllowed(false);
 		}
 
-		private void deleteRow(int row) {
-			int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to delete this payment transaction?", "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-			if (result != JOptionPane.YES_OPTION) {
-				return;
-			}
-
-			PaymentTransaction transaction = model.data.get(row);
-
-			try {
-				dao.ignorePaymentTransaction(transaction.getId());
-				dao.commit();
-			} catch (SQLException e) {
-				dao.rollback();
-				throw new RuntimeException(e);
-			}
-
-			owner.updatePaymentsCount();
-
-			model.data.remove(row);
-			model.fireTableRowsDeleted(row, row);
-		}
+		//		private void deleteRow(int row) {
+		//			int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to delete this payment transaction?", "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+		//			if (result != JOptionPane.YES_OPTION) {
+		//				return;
+		//			}
+		//
+		//			PaymentTransaction transaction = model.data.get(row);
+		//
+		//			try {
+		//				dao.ignorePaymentTransaction(transaction.getId());
+		//				dao.commit();
+		//			} catch (SQLException e) {
+		//				dao.rollback();
+		//				throw new RuntimeException(e);
+		//			}
+		//
+		//			owner.updatePaymentsCount();
+		//
+		//			model.data.remove(row);
+		//			model.fireTableRowsDeleted(row, row);
+		//		}
 
 		private void assignRow(int row) {
-			PaymentTransaction transaction = model.data.get(row);
+			PaymentTransaction transaction = model.data.get(row).transaction;
 
 			AssignDialog.Result result = AssignDialog.show(owner, transaction);
 			if (result == null) {
@@ -437,7 +498,7 @@ public class PaymentsTab extends JPanel {
 		}
 
 		public void splitRow(int row) {
-			PaymentTransaction transaction = model.data.get(row);
+			PaymentTransaction transaction = model.data.get(row).transaction;
 
 			Integer splitAmount = showSplitDialog(transaction);
 			if (splitAmount == null) {
@@ -472,7 +533,7 @@ public class PaymentsTab extends JPanel {
 			owner.updatePaymentsCount();
 
 			int insertIndex = row + 1;
-			model.data.add(insertIndex, splitTransaction);
+			model.data.add(insertIndex, new Row(splitTransaction));
 			model.fireTableRowsInserted(insertIndex, insertIndex);
 		}
 	}

@@ -1,5 +1,6 @@
 package emcshop.util;
 
+import java.awt.Color;
 import java.text.NumberFormat;
 
 /**
@@ -123,6 +124,19 @@ public class NumberFormatter {
 	public static String formatStacksWithColor(int quantity, int stackSize) {
 		String text = formatStacks(quantity, stackSize);
 		return colorize(text, quantity);
+	}
+
+	/**
+	 * Gets the color used for a numeric value.
+	 * @param value the value
+	 * @return the color or null if the value is zero
+	 */
+	public static Color getQuantityColor(int value) {
+		if (value == 0) {
+			return null;
+		}
+
+		return (value < 0) ? Color.red : new Color(0, 128, 0);
 	}
 
 	private static String colorize(String text, int number) {
