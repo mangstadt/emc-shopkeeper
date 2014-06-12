@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -58,9 +57,9 @@ public class PaymentsTab extends JPanel {
 	private static final AppContext context = AppContext.instance();
 
 	private final MainFrame owner;
-	private final DbDao dao;
-	private final ProfileLoader profileLoader;
-	private final OnlinePlayersMonitor onlinePlayersMonitor;
+	private final DbDao dao = context.get(DbDao.class);
+	private final ProfileLoader profileLoader = context.get(ProfileLoader.class);
+	private final OnlinePlayersMonitor onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 	private boolean stale = true;
 
 	private JButton delete;
@@ -68,10 +67,6 @@ public class PaymentsTab extends JPanel {
 
 	public PaymentsTab(MainFrame owner) {
 		this.owner = owner;
-		dao = context.get(DbDao.class);
-		profileLoader = context.get(ProfileLoader.class);
-		onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
-
 		setLayout(new MigLayout("fillx, insets 5"));
 	}
 
@@ -267,9 +262,8 @@ public class PaymentsTab extends JPanel {
 				playerPanel.add(serverLabel);
 			}
 
-			private final JButton button = new JButton();
-			private final Icon assignIcon = ImageManager.getImageIcon("assign.png");
-			private final Icon splitIcon = ImageManager.getImageIcon("split.png");
+			private final JButton assignButton = new JButton(ImageManager.getImageIcon("assign.png"));
+			private final JButton splitButton = new JButton(ImageManager.getImageIcon("split.png"));
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
@@ -285,15 +279,13 @@ public class PaymentsTab extends JPanel {
 				JComponent component = null;
 				switch (column) {
 				case SPLIT:
-					component = button;
+					component = splitButton;
 
-					button.setIcon(splitIcon);
 					break;
 
 				case ASSIGN:
-					component = button;
+					component = assignButton;
 
-					button.setIcon(assignIcon);
 					break;
 
 				case CHECKBOX:
