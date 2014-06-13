@@ -107,6 +107,9 @@ public class PaymentsTab extends JPanel {
 						paymentsTable.model.data.removeAll(selected);
 						paymentsTable.model.fireTableDataChanged();
 
+						boolean enabled = paymentsTable.getSelectedCount() > 0;
+						delete.setEnabled(enabled);
+
 						owner.updatePaymentsCount();
 					}
 
@@ -189,11 +192,8 @@ public class PaymentsTab extends JPanel {
 		}
 
 		public List<Row> getSelected() {
-			int rows = getRowCount();
 			List<Row> selected = new ArrayList<Row>();
-			for (int i = 0; i < rows; i++) {
-				int modelRow = convertRowIndexToModel(i);
-				Row row = model.data.get(modelRow);
+			for (Row row : model.data) {
 				if (row.selected) {
 					selected.add(row);
 				}
@@ -373,38 +373,58 @@ public class PaymentsTab extends JPanel {
 			}
 		}
 
+		private void clickCell(int rowView, int colView) {
+			int row = convertRowIndexToModel(rowView);
+			int col = convertColumnIndexToModel(colView);
+			Column column = columns[col];
+
+			switch (column) {
+			case SPLIT:
+				splitRow(row);
+				break;
+
+			case ASSIGN:
+				assignRow(row);
+				break;
+
+			default:
+				Row rowObj = model.data.get(row);
+				rowObj.selected = !rowObj.selected;
+
+				//re-render table row
+				model.fireTableRowsUpdated(row, row);
+			}
+
+			boolean enable = getSelectedCount() > 0;
+			delete.setEnabled(enable);
+		}
+
 		private void setSelectionModel() {
 			addMouseListener(new MouseAdapter() {
+				private int mousePressedCol, mousePressedRow;
+
 				@Override
-				public void mouseClicked(MouseEvent event) {
+				public void mousePressed(MouseEvent event) {
 					int colView = columnAtPoint(event.getPoint());
 					int rowView = rowAtPoint(event.getPoint());
 					if (colView < 0 || rowView < 0) {
 						return;
 					}
 
-					int row = convertRowIndexToModel(rowView);
-					int col = convertColumnIndexToModel(colView);
-					Column column = columns[col];
+					mousePressedCol = colView;
+					mousePressedRow = rowView;
+				}
 
-					switch (column) {
-					case SPLIT:
-						splitRow(row);
-						break;
+				@Override
+				public void mouseReleased(MouseEvent event) {
+					int colView = columnAtPoint(event.getPoint());
+					int rowView = rowAtPoint(event.getPoint());
+					if (colView < 0 || rowView < 0) {
+						return;
+					}
 
-					case ASSIGN:
-						assignRow(row);
-						break;
-
-					default:
-						Row rowObj = model.data.get(row);
-						rowObj.selected = !rowObj.selected;
-
-						boolean enable = getSelectedCount() > 0;
-						delete.setEnabled(enable);
-
-						//re-render table row
-						model.fireTableRowsUpdated(row, row);
+					if (colView == mousePressedCol && rowView == mousePressedRow) {
+						clickCell(rowView, colView);
 					}
 				}
 			});
@@ -477,7 +497,7 @@ public class PaymentsTab extends JPanel {
 			model.fireTableRowsDeleted(row, row);
 		}
 
-		public void splitRow(int row) {
+		private void splitRow(int row) {
 			PaymentTransaction transaction = model.data.get(row).transaction;
 
 			Integer splitAmount = showSplitDialog(transaction);
