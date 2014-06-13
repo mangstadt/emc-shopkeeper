@@ -75,7 +75,10 @@ public class PaymentsTab extends JPanel {
 			if (pendingPayments.isEmpty()) {
 				add(new JLabel("No payment transactions found."), "align center");
 			} else {
+				JPanel inner = new JPanel(new MigLayout("insets 0"));
+
 				delete = new JButton("Delete");
+				delete.setEnabled(false);
 				delete.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent event) {
@@ -110,11 +113,13 @@ public class PaymentsTab extends JPanel {
 				});
 				Font orig = delete.getFont();
 				delete.setFont(new Font(orig.getName(), orig.getStyle(), orig.getSize() - 2));
-				add(delete, "wrap");
+				inner.add(delete, "wrap");
 
 				paymentsTable = new PaymentsTable(pendingPayments);
 				MyJScrollPane scrollPane = new MyJScrollPane(paymentsTable);
-				add(scrollPane, "grow, w 100%, h 100%, wrap");
+				inner.add(scrollPane, "h 100%, w 100%");
+
+				add(inner, "align center, w :650:650, h 100%");
 			}
 
 			validate();
@@ -194,6 +199,16 @@ public class PaymentsTab extends JPanel {
 				}
 			}
 			return selected;
+		}
+
+		public int getSelectedCount() {
+			int count = 0;
+			for (Row row : model.data) {
+				if (row.selected) {
+					count++;
+				}
+			}
+			return count;
 		}
 
 		private TableRowSorter<Model> createRowSorter() {
@@ -385,6 +400,9 @@ public class PaymentsTab extends JPanel {
 						Row rowObj = model.data.get(row);
 						rowObj.selected = !rowObj.selected;
 
+						boolean enable = getSelectedCount() > 0;
+						delete.setEnabled(enable);
+
 						//re-render table row
 						model.fireTableRowsUpdated(row, row);
 					}
@@ -392,18 +410,31 @@ public class PaymentsTab extends JPanel {
 			});
 		}
 
+		private TableColumn getColumn(Column column) {
+			return columnModel.getColumn(column.ordinal());
+		}
+
 		private void setColumns() {
-			TableColumn deleteColumn = columnModel.getColumn(Column.CHECKBOX.ordinal());
+			TableColumn deleteColumn = getColumn(Column.CHECKBOX);
 			deleteColumn.setMaxWidth(30);
 			deleteColumn.setResizable(false);
 
-			TableColumn assignColumn = columnModel.getColumn(Column.ASSIGN.ordinal());
+			TableColumn assignColumn = getColumn(Column.ASSIGN);
 			assignColumn.setMaxWidth(50);
 			assignColumn.setResizable(false);
 
-			TableColumn splitColumn = columnModel.getColumn(Column.SPLIT.ordinal());
+			TableColumn splitColumn = getColumn(Column.SPLIT);
 			splitColumn.setMaxWidth(50);
 			splitColumn.setResizable(false);
+
+			TableColumn timeColumn = getColumn(Column.TIME);
+			timeColumn.setPreferredWidth(200);
+
+			TableColumn playerColumn = getColumn(Column.PLAYER);
+			playerColumn.setPreferredWidth(200);
+
+			TableColumn amountColumn = getColumn(Column.AMOUNT);
+			amountColumn.setPreferredWidth(100);
 
 			getTableHeader().setReorderingAllowed(false);
 		}
