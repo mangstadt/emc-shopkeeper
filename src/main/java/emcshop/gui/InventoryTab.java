@@ -595,22 +595,48 @@ public class InventoryTab extends JPanel {
 			remainingColumn.setCellEditor(new RemainingEditor());
 		}
 
+		private void clickCell(int rowView, int colView) {
+			int col = convertColumnIndexToModel(colView);
+			Column column = columns[col];
+			if (column == Column.REMAINING) {
+				return;
+			}
+
+			int row = convertRowIndexToModel(rowView);
+			Row rowObj = model.data.get(row);
+			rowObj.selected = !rowObj.selected;
+
+			//re-render table row
+			model.fireTableRowsUpdated(row, row);
+		}
+
 		private void setSelectionModel() {
 			addMouseListener(new MouseAdapter() {
+				private int mousePressedCol, mousePressedRow;
+
 				@Override
-				public void mouseClicked(MouseEvent event) {
+				public void mousePressed(MouseEvent event) {
 					int colView = columnAtPoint(event.getPoint());
 					int rowView = rowAtPoint(event.getPoint());
 					if (colView < 0 || rowView < 0) {
 						return;
 					}
 
-					int row = convertRowIndexToModel(rowView);
-					Row rowObj = model.data.get(row);
-					rowObj.selected = !rowObj.selected;
+					mousePressedCol = colView;
+					mousePressedRow = rowView;
+				}
 
-					//re-render table row
-					model.fireTableRowsUpdated(row, row);
+				@Override
+				public void mouseReleased(MouseEvent event) {
+					int colView = columnAtPoint(event.getPoint());
+					int rowView = rowAtPoint(event.getPoint());
+					if (colView < 0 || rowView < 0) {
+						return;
+					}
+
+					if (colView == mousePressedCol && rowView == mousePressedRow) {
+						clickCell(rowView, colView);
+					}
 				}
 			});
 		}
