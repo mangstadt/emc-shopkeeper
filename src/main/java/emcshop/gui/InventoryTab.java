@@ -224,11 +224,11 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 		leftTop.add(new JLabel("Item Name:"));
 		leftTop.add(quantityLabel, "wrap");
-		leftTop.add(item, "w 300");
-		leftTop.add(quantity, "w 150, wrap");
+		leftTop.add(item, "w 200::");
+		leftTop.add(quantity, "w 50::, wrap");
 		leftTop.add(addEdit, "span 2");
 
-		add(leftTop, "span 1 2, w 300!, growy");
+		add(leftTop, "span 1 2, w 300:300:, growy");
 
 		add(filterPanel, "wrap");
 
