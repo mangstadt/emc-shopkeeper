@@ -6,10 +6,13 @@ import static emcshop.util.NumberFormatter.formatStacks;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -21,24 +24,30 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.ListCellRenderer;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
@@ -57,6 +66,7 @@ import org.apache.commons.io.FileUtils;
 import emcshop.AppContext;
 import emcshop.ExportType;
 import emcshop.ItemIndex;
+import emcshop.ItemIndex.CategoryInfo;
 import emcshop.QueryExporter;
 import emcshop.Settings;
 import emcshop.db.DbDao;
@@ -74,11 +84,15 @@ public class InventoryTab extends JPanel {
 	private static final Logger logger = Logger.getLogger(InventoryTab.class.getName());
 	private static final AppContext context = AppContext.instance();
 
+	private final CategoryInfo ALL = new CategoryInfo(-1, "ALL", null);
+	private final CategoryInfo MISC = new CategoryInfo(-1, "misc", null);
+
 	private final MainFrame owner;
 	private final DbDao dao;
 	private final ItemIndex index = ItemIndex.instance();
 
 	private final FilterPanel filterPanel;
+	private final CategoryComboBox category;
 	private final JButton addEdit;
 	private final JButton delete;
 	private final JButton chester;
@@ -112,6 +126,8 @@ public class InventoryTab extends JPanel {
 		this.owner = owner;
 		dao = context.get(DbDao.class);
 		showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
+
+		category = new CategoryComboBox();
 
 		filterPanel = new FilterPanel();
 		filterPanel.setVisible(true, false, false);
@@ -231,6 +247,8 @@ public class InventoryTab extends JPanel {
 
 		add(leftTop, "span 1 2, w 300!, growy");
 
+		filterPanel.add(new JLabel("<html><font size=2>Category:"), filterPanel.getComponentCount() - 1);
+		filterPanel.add(category, "w 150", filterPanel.getComponentCount() - 1);
 		add(filterPanel, "wrap");
 
 		tableScrollPane = new MyJScrollPane(table);
@@ -301,7 +319,11 @@ public class InventoryTab extends JPanel {
 
 		table.setData(inventory);
 		filterPanel.clear();
-		table.filter(new FilterList());
+		category.setSelectedItem(ALL);
+
+		table.filterItems = new FilterList();
+		table.filterCategory = ALL;
+		table.filter();
 	}
 
 	private static class Row {
@@ -319,6 +341,9 @@ public class InventoryTab extends JPanel {
 		private final Column columns[] = Column.values();
 		private final InventoryTableModel model;
 		private final TableRowSorter<InventoryTableModel> rowSorter;
+
+		private FilterList filterItems = new FilterList();
+		private CategoryInfo filterCategory = ALL;
 
 		public InventoryTable() {
 			getTableHeader().setReorderingAllowed(false);
@@ -377,8 +402,18 @@ public class InventoryTab extends JPanel {
 			model.setData(inventory);
 		}
 
-		public void filter(final FilterList filterList) {
-			if (filterList.isEmpty()) {
+		public void filter(FilterList filterList) {
+			filterItems = filterList;
+			filter();
+		}
+
+		public void filter(CategoryInfo category) {
+			filterCategory = category;
+			filter();
+		}
+
+		private void filter() {
+			if (filterItems.isEmpty() && filterCategory == ALL) {
 				rowSorter.setRowFilter(null);
 				return;
 			}
@@ -388,9 +423,29 @@ public class InventoryTab extends JPanel {
 				public boolean include(RowFilter.Entry<? extends InventoryTableModel, ? extends Integer> entry) {
 					int row = entry.getIdentifier();
 					Row rowObj = entry.getModel().data.get(row);
-
 					String itemName = rowObj.inventory.getItem();
-					return filterList.contains(itemName);
+
+					boolean item = (filterItems.isEmpty() || filterItems.contains(itemName));
+					if (!item) {
+						return false;
+					}
+
+					if (filterCategory == ALL) {
+						return true;
+					}
+
+					CategoryInfo categories[] = index.getItemCategories(itemName);
+					if (filterCategory == MISC && categories.length == 0) {
+						return true;
+					}
+
+					for (CategoryInfo c : categories) {
+						if (c == filterCategory) {
+							return true;
+						}
+					}
+
+					return false;
 				}
 
 			};
@@ -708,6 +763,80 @@ public class InventoryTab extends JPanel {
 		}
 
 		return null;
+	}
+
+	private class CategoryComboBox extends JComboBox implements ItemListener {
+		public CategoryComboBox() {
+			Set<CategoryInfo> categoriesSet = index.getCategories();
+
+			List<CategoryInfo> categories = new ArrayList<CategoryInfo>(categoriesSet);
+			Collections.sort(categories, new Comparator<CategoryInfo>() {
+				@Override
+				public int compare(CategoryInfo a, CategoryInfo b) {
+					return a.getName().compareToIgnoreCase(b.getName());
+				}
+			});
+			categories.add(0, ALL);
+			categories.add(MISC);
+
+			setModel(new DefaultComboBoxModel(categories.toArray()));
+			setEditable(false);
+
+			addItemListener(this);
+
+			Font orig = getFont();
+			setFont(new Font(orig.getName(), orig.getStyle(), orig.getSize() - 2));
+
+			setRenderer(new ListCellRenderer() {
+				private final Font orig;
+				private final Font bold;
+				private final JLabel label = new JLabel();
+				{
+					label.setOpaque(true);
+					label.setBorder(new EmptyBorder(4, 4, 4, 4));
+
+					Font font = label.getFont();
+					orig = new Font(font.getName(), font.getStyle(), font.getSize() - 2);
+					label.setFont(orig);
+
+					bold = new Font(orig.getName(), Font.BOLD, orig.getSize());
+				}
+
+				@Override
+				public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
+					if (value == null) {
+						return null;
+					}
+
+					CategoryInfo category = (CategoryInfo) value;
+					label.setText(category.getName());
+
+					ImageIcon icon = category.getIcon();
+					if (icon != null) {
+						icon = ImageManager.scale(icon, 16);
+					}
+					label.setIcon(icon);
+
+					Font font = (category == ALL || category == MISC) ? bold : orig;
+					label.setFont(font);
+
+					UIDefaultsWrapper.assignListFormats(label, selected);
+
+					return label;
+				}
+			});
+		}
+
+		@Override
+		public void itemStateChanged(ItemEvent event) {
+			CategoryInfo selected = getSelectedItem();
+			table.filter(selected);
+		}
+
+		@Override
+		public CategoryInfo getSelectedItem() {
+			return (CategoryInfo) super.getSelectedItem();
+		}
 	}
 
 	private class ChesterDialog extends JDialog {

@@ -2,12 +2,16 @@ package emcshop;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.ImageIcon;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -22,11 +26,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+
+import emcshop.gui.images.ImageManager;
 
 /**
  * DAO for accessing the display names, transaction page names, and image file
@@ -36,13 +40,12 @@ import com.google.common.collect.Multimap;
 public class ItemIndex {
 	private static ItemIndex INSTANCE;
 
-	private final Map<String, String> emcNameToDisplayName;
-	private final Map<String, String> minecraftIdToDisplayName;
-	private final Map<String, String> itemImages;
-	private final Map<String, Integer> stackSizes;
-	private final Multimap<String, String> itemNameToGroups;
-	private final Set<String> itemGroupNames;
-	private final List<String> itemNames;
+	private final Map<String, ItemInfo> byName;
+	private final Map<String, ItemInfo> byEmcName;
+	private final Map<String, ItemInfo> byId;
+
+	private final Set<String> groups;
+	private final Set<CategoryInfo> categories;
 
 	/**
 	 * Gets the singleton instance of this class.
@@ -84,67 +87,104 @@ public class ItemIndex {
 			throw new RuntimeException(e);
 		}
 
-		NodeList itemNodes;
-		try {
-			XPath xpath = XPathFactory.newInstance().newXPath();
-			itemNodes = (NodeList) xpath.evaluate("/Items/Item", xml, XPathConstants.NODESET);
-		} catch (XPathExpressionException e) {
-			//should never be thrown
-			throw new RuntimeException(e);
+		XPath xpath = XPathFactory.newInstance().newXPath();
+
+		//parse categories
+		Map<Integer, CategoryInfo> categoriesById = new HashMap<Integer, CategoryInfo>();
+		{
+			NodeList categoryNodes;
+			try {
+				categoryNodes = (NodeList) xpath.evaluate("/Items/Categories/Category", xml, XPathConstants.NODESET);
+			} catch (XPathExpressionException e) {
+				//should never be thrown
+				throw new RuntimeException(e);
+			}
+
+			ImmutableSet.Builder<CategoryInfo> categories = ImmutableSet.builder();
+			for (int i = 0; i < categoryNodes.getLength(); i++) {
+				Element categoryElement = (Element) categoryNodes.item(i);
+
+				CategoryInfo category = parseCategory(categoryElement);
+				categories.add(category);
+				categoriesById.put(category.id, category);
+			}
+			this.categories = categories.build();
 		}
 
-		ImmutableMap.Builder<String, String> minecraftIdToDisplayName = ImmutableMap.builder();
-		ImmutableMap.Builder<String, String> emcNameToDisplayName = ImmutableMap.builder();
-		ImmutableMap.Builder<String, String> itemImages = ImmutableMap.builder();
-		ImmutableMultimap.Builder<String, String> itemNameToGroups = ImmutableMultimap.builder();
-		ImmutableMap.Builder<String, Integer> stackSizes = ImmutableMap.builder();
-		ImmutableList.Builder<String> itemNames = ImmutableList.builder();
-		ImmutableSet.Builder<String> itemGroupNames = ImmutableSet.builder();
-		for (int i = 0; i < itemNodes.getLength(); i++) {
-			Element itemNode = (Element) itemNodes.item(i);
-			String name = itemNode.getAttribute("name");
+		//parse items
+		{
+			NodeList itemNodes;
+			try {
+				itemNodes = (NodeList) xpath.evaluate("/Items/Item", xml, XPathConstants.NODESET);
+			} catch (XPathExpressionException e) {
+				//should never be thrown
+				throw new RuntimeException(e);
+			}
 
-			itemNames.add(name);
+			ImmutableMap.Builder<String, ItemInfo> byName = ImmutableMap.builder();
+			ImmutableMap.Builder<String, ItemInfo> byEmcName = ImmutableMap.builder();
+			ImmutableMap.Builder<String, ItemInfo> byId = ImmutableMap.builder();
+			ImmutableSet.Builder<String> groups = ImmutableSet.builder();
+			for (int i = 0; i < itemNodes.getLength(); i++) {
+				Element itemElement = (Element) itemNodes.item(i);
+				ItemInfo info = parseItem(itemElement, categoriesById);
 
-			String emcNames = itemNode.getAttribute("emcNames");
-			if (!emcNames.isEmpty()) {
-				for (String emcName : emcNames.split(",")) {
-					emcNameToDisplayName.put(emcName, name);
+				byName.put(info.name.toLowerCase(), info);
+
+				for (String emcName : info.emcNames) {
+					byEmcName.put(emcName.toLowerCase(), info);
+				}
+
+				for (String id : info.ids) {
+					byId.put(id, info);
 				}
 			}
 
-			String ids = itemNode.getAttribute("id");
-			if (!ids.isEmpty()) {
-				for (String id : ids.split(",")) {
-					minecraftIdToDisplayName.put(id, name);
-				}
-			}
+			this.byName = byName.build();
+			this.byEmcName = byEmcName.build();
+			this.byId = byId.build();
+			this.groups = groups.build();
+		}
+	}
 
-			String image = itemNode.getAttribute("image");
-			if (!image.isEmpty()) {
-				itemImages.put(name, image);
-			}
+	private CategoryInfo parseCategory(Element element) {
+		String name = element.getAttribute("name");
+		int id = Integer.parseInt(element.getAttribute("id"));
 
-			String stackSize = itemNode.getAttribute("stack");
-			if (!stackSize.isEmpty()) {
-				stackSizes.put(name.toLowerCase(), Integer.valueOf(stackSize));
-			}
+		String iconStr = element.getAttribute("icon");
+		ImageIcon icon = iconStr.isEmpty() ? null : ImageManager.getImageIcon("items/" + iconStr);
 
-			String groups = itemNode.getAttribute("group");
-			if (!groups.isEmpty()) {
-				List<String> groupsList = Arrays.asList(groups.split(","));
-				itemGroupNames.addAll(groupsList);
-				itemNameToGroups.putAll(name.toLowerCase(), groupsList);
-			}
+		return new CategoryInfo(id, name, icon);
+	}
+
+	private ItemInfo parseItem(Element element, Map<Integer, CategoryInfo> categoriesById) {
+		String name = element.getAttribute("name");
+
+		String value = element.getAttribute("emcNames");
+		String emcNames[] = value.isEmpty() ? new String[0] : value.split("\\s*,\\s*");
+
+		value = element.getAttribute("id");
+		String ids[] = value.isEmpty() ? new String[0] : value.split("\\s*,\\s*");
+
+		value = element.getAttribute("image");
+		String image = value.isEmpty() ? name.toLowerCase().replace(' ', '_') + ".png" : value;
+
+		value = element.getAttribute("stack");
+		int stackSize = value.isEmpty() ? 64 : Integer.valueOf(value);
+
+		value = element.getAttribute("group");
+		String groups[] = value.isEmpty() ? new String[0] : value.split("\\s*,\\s*");
+
+		value = element.getAttribute("categories");
+		String categoriesStr[] = value.isEmpty() ? new String[0] : value.split("\\s*,\\s*");
+		CategoryInfo[] categories = new CategoryInfo[categoriesStr.length];
+		for (int i = 0; i < categoriesStr.length; i++) {
+			int id = Integer.parseInt(categoriesStr[i]);
+			categories[i] = categoriesById.get(id);
+
 		}
 
-		this.emcNameToDisplayName = emcNameToDisplayName.build();
-		this.minecraftIdToDisplayName = minecraftIdToDisplayName.build();
-		this.itemImages = itemImages.build();
-		this.stackSizes = stackSizes.build();
-		this.itemNames = itemNames.build();
-		this.itemGroupNames = itemGroupNames.build();
-		this.itemNameToGroups = itemNameToGroups.build();
+		return new ItemInfo(name, emcNames, ids, image, stackSize, groups, categories);
 	}
 
 	/**
@@ -154,8 +194,8 @@ public class ItemIndex {
 	 * transaction history name if no mapping exists
 	 */
 	public String getDisplayName(String emcName) {
-		String displayName = emcNameToDisplayName.get(emcName);
-		return (displayName == null) ? emcName : displayName;
+		ItemInfo item = byEmcName.get(emcName.toLowerCase());
+		return (item == null) ? emcName : item.name;
 	}
 
 	/**
@@ -164,22 +204,22 @@ public class ItemIndex {
 	 * @return the display name or null if the ID was not recognized
 	 */
 	public String getDisplayNameFromMinecraftId(String id) {
-		String displayName = minecraftIdToDisplayName.get(id);
-		if (displayName != null) {
-			return displayName;
+		ItemInfo item = byId.get(id);
+		if (item != null) {
+			return item.name;
 		}
 
 		if (!id.contains(":")) {
-			displayName = minecraftIdToDisplayName.get(id + ":0");
-			if (displayName != null) {
-				return displayName;
+			item = byId.get(id + ":0");
+			if (item != null) {
+				return item.name;
 			}
 		}
 
 		if (id.endsWith(":0")) {
-			displayName = minecraftIdToDisplayName.get(id.substring(0, id.length() - 2));
-			if (displayName != null) {
-				return displayName;
+			item = byId.get(id.substring(0, id.length() - 2));
+			if (item != null) {
+				return item.name;
 			}
 		}
 
@@ -192,11 +232,11 @@ public class ItemIndex {
 	 * @return the item's image file name
 	 */
 	public String getImageFileName(String displayName) {
-		String image = itemImages.get(displayName);
-		if (image == null) {
-			image = displayName.toLowerCase().replace(" ", "_") + ".png";
+		ItemInfo item = byName.get(displayName.toLowerCase());
+		if (item == null) {
+			return displayName.toLowerCase().replace(" ", "_") + ".png";
 		}
-		return image;
+		return item.image;
 	}
 
 	/**
@@ -204,18 +244,9 @@ public class ItemIndex {
 	 * @param displayName the item name
 	 * @return the stack size (e.g. "64")
 	 */
-	public Integer getStackSize(String displayName) {
-		Integer stackSize = stackSizes.get(displayName.toLowerCase());
-		return (stackSize == null) ? 64 : stackSize;
-	}
-
-	/**
-	 * Gets the EMC-to-display name mappings (only includes the mappings that
-	 * differ from the default).
-	 * @return the mappings
-	 */
-	public Map<String, String> getEmcNameToDisplayNameMapping() {
-		return emcNameToDisplayName;
+	public int getStackSize(String displayName) {
+		ItemInfo item = byName.get(displayName.toLowerCase());
+		return (item == null) ? 64 : item.stackSize;
 	}
 
 	/**
@@ -226,22 +257,12 @@ public class ItemIndex {
 	 */
 	public Multimap<String, String> getDisplayNameToEmcNamesMapping() {
 		Multimap<String, String> mappings = ArrayListMultimap.create();
-		for (Map.Entry<String, String> entry : emcNameToDisplayName.entrySet()) {
-			String emcName = entry.getKey();
-			String displayName = entry.getValue();
-
-			mappings.put(displayName, emcName);
+		for (ItemInfo item : byName.values()) {
+			for (String emcName : item.emcNames) {
+				mappings.put(item.name, emcName);
+			}
 		}
 		return mappings;
-	}
-
-	/**
-	 * Gets the item image file names (only includes the images that differ from
-	 * the default).
-	 * @return the image file names
-	 */
-	public Map<String, String> getItemImages() {
-		return itemImages;
 	}
 
 	/**
@@ -249,7 +270,13 @@ public class ItemIndex {
 	 * @return the item names
 	 */
 	public List<String> getItemNames() {
-		return itemNames;
+		List<String> names = new ArrayList<String>(byName.size());
+		for (ItemInfo item : byName.values()) {
+			names.add(item.name);
+		}
+
+		Collections.sort(names);
+		return names;
 	}
 
 	/**
@@ -257,7 +284,24 @@ public class ItemIndex {
 	 * @return the item group names
 	 */
 	public Set<String> getItemGroupNames() {
-		return itemGroupNames;
+		return groups;
+	}
+
+	/**
+	 * Gets all item categories.
+	 * @return the item categories
+	 */
+	public Set<CategoryInfo> getCategories() {
+		return categories;
+	}
+
+	public CategoryInfo[] getItemCategories(String itemName) {
+		ItemInfo item = byName.get(itemName.toLowerCase());
+		if (item == null) {
+			return new CategoryInfo[0];
+		}
+
+		return item.categories;
 	}
 
 	/**
@@ -266,6 +310,51 @@ public class ItemIndex {
 	 * @return the groups (e.g. "Wood")
 	 */
 	public Collection<String> getGroups(String itemName) {
-		return itemNameToGroups.get(itemName.toLowerCase());
+		ItemInfo item = byName.get(itemName.toLowerCase());
+		return Arrays.asList(item.groups);
+	}
+
+	private static class ItemInfo {
+		private final String name;
+		private final String emcNames[];
+		private final String ids[];
+		private final String image;
+		private final int stackSize;
+		private final String[] groups;
+		private final CategoryInfo[] categories;
+
+		public ItemInfo(String name, String[] emcNames, String[] ids, String image, int stackSize, String[] groups, CategoryInfo[] categories) {
+			this.name = name;
+			this.emcNames = emcNames;
+			this.ids = ids;
+			this.image = image;
+			this.stackSize = stackSize;
+			this.groups = groups;
+			this.categories = categories;
+		}
+	}
+
+	public static class CategoryInfo {
+		private final int id;
+		private final String name;
+		private final ImageIcon icon;
+
+		public CategoryInfo(int id, String name, ImageIcon icon) {
+			this.id = id;
+			this.name = name;
+			this.icon = icon;
+		}
+
+		public int getId() {
+			return id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public ImageIcon getIcon() {
+			return icon;
+		}
 	}
 }

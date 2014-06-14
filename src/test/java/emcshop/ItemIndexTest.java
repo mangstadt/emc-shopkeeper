@@ -73,8 +73,8 @@ public class ItemIndexTest {
 
 	@Test
 	public void getStackSize() {
-		assertEquals(Integer.valueOf(16), index.getStackSize("Ender Pearl"));
-		assertEquals(Integer.valueOf(64), index.getStackSize("Diamond"));
-		assertEquals(Integer.valueOf(64), index.getStackSize("unknown"));
+		assertEquals(16, index.getStackSize("Ender Pearl"));
+		assertEquals(64, index.getStackSize("Diamond"));
+		assertEquals(64, index.getStackSize("unknown"));
 	}
 }
