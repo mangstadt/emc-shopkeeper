@@ -417,6 +417,10 @@ public class InventoryTab extends JPanel {
 				rowSorter.setRowFilter(null);
 				return;
 			}
+			
+			for (Row row : model.data){
+				row.selected = false;
+			}
 
 			RowFilter<InventoryTableModel, Integer> filter = new RowFilter<InventoryTableModel, Integer>() {
 				@Override
