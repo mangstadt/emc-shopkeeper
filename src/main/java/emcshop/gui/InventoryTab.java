@@ -854,7 +854,6 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			add(filterByItemLabel);
 			add(filterByItem, "w 120");
-			add(filterByItem.getClearButton(), "w 20, h 20");
 
 			add(categoryLabel);
 			add(category);

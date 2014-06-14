@@ -850,13 +850,11 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			if (item) {
 				add(filterByItemLabel);
 				add(filterByItem, "w 120");
-				add(filterByItem.getClearButton(), "w 20, h 20");
 			}
 
 			if (player) {
 				add(filterByPlayerLabel);
 				add(filterByPlayer, "w 120");
-				add(filterByPlayer.getClearButton(), "w 20, h 20");
 			}
 
 			if (sort) {
