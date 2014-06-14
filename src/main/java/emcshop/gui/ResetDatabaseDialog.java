@@ -1,7 +1,8 @@
 package emcshop.gui;
 
+import static emcshop.util.GuiUtils.boldFont;
+
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -44,7 +45,7 @@ public class ResetDatabaseDialog extends JDialog {
 
 		JButton resetButton = new JButton("Reset Database");
 		resetButton.setForeground(new Color(128, 0, 0));
-		resetButton.setFont(new Font(getFont().getName(), Font.BOLD, getFont().getSize()));
+		boldFont(resetButton);
 		resetButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {

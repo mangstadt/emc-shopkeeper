@@ -30,7 +30,6 @@ import javax.swing.table.TableRowSorter;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.Settings;
-import emcshop.gui.FilterPanel.FilterList;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.RelativeDateFormat;
@@ -204,17 +203,16 @@ public class TransactionsTable extends JTable {
 				int row = entry.getIdentifier();
 				ShopTransaction transaction = model.transactions.get(row);
 
-				boolean item = (filteredItemNames.isEmpty() || filteredItemNames.contains(transaction.getItem()));
-
-				boolean player;
-				if (filteredPlayerNames.isEmpty()) {
-					player = true;
-				} else {
-					String name = customers ? transaction.getPlayer() : transaction.getShopOwner();
-					player = filteredPlayerNames.contains(name);
+				if (!filteredItemNames.isFiltered(transaction.getItem())) {
+					return false;
 				}
 
-				return item && player;
+				if (filteredPlayerNames.isEmpty()) {
+					return true;
+				}
+
+				String name = customers ? transaction.getPlayer() : transaction.getShopOwner();
+				return filteredPlayerNames.isFiltered(name);
 			}
 
 		};

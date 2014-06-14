@@ -38,7 +38,6 @@ import emcshop.Settings;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
-import emcshop.gui.FilterPanel.FilterList;
 import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
@@ -396,7 +395,7 @@ public class PlayersPanel extends JPanel {
 		List<PlayerGroup> filteredPlayers = new LinkedList<PlayerGroup>();
 		for (PlayerGroup playerGroup : playerGroups) {
 			String playerName = playerGroup.getPlayer().getName();
-			if (filteredPlayerNames.contains(playerName)) {
+			if (filteredPlayerNames.isFiltered(playerName)) {
 				filteredPlayers.add(playerGroup);
 			}
 		}
@@ -419,7 +418,7 @@ public class PlayersPanel extends JPanel {
 				itemGroups = new ArrayList<ItemGroup>();
 				for (ItemGroup itemGroup : this.itemGroups.get(playerGroup)) {
 					String itemName = itemGroup.getItem();
-					if (filteredItemNames.contains(itemName)) {
+					if (filteredItemNames.isFiltered(itemName)) {
 						itemGroups.add(itemGroup);
 					}
 				}

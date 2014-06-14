@@ -1,13 +1,13 @@
 package emcshop.gui;
 
 import static emcshop.util.GuiUtils.busyCursor;
+import static emcshop.util.GuiUtils.shrinkFont;
 import static emcshop.util.NumberFormatter.formatRupees;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 import static emcshop.util.NumberFormatter.getQuantityColor;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -114,8 +114,7 @@ public class PaymentsTab extends JPanel {
 					}
 
 				});
-				Font orig = delete.getFont();
-				delete.setFont(new Font(orig.getName(), orig.getStyle(), orig.getSize() - 2));
+				shrinkFont(delete);
 				inner.add(delete, "wrap");
 
 				paymentsTable = new PaymentsTable(pendingPayments);

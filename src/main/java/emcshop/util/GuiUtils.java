@@ -1,7 +1,9 @@
 package emcshop.util;
 
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -252,6 +254,34 @@ public class GuiUtils {
 			}
 		});
 		shakeTimer.start();
+	}
+
+	/**
+	 * Shrinks the font of a component.
+	 * @param component the component
+	 */
+	public static void shrinkFont(Component component) {
+		Font font = component.getFont();
+		if (font == null) {
+			return;
+		}
+
+		Font smaller = new Font(font.getName(), font.getStyle(), font.getSize() - 2);
+		component.setFont(smaller);
+	}
+
+	/**
+	 * Adds bold styling to the font of a component.
+	 * @param component the component
+	 */
+	public static void boldFont(Component component) {
+		Font font = component.getFont();
+		if (font == null) {
+			return;
+		}
+
+		Font bold = new Font(font.getName(), Font.BOLD, font.getSize());
+		component.setFont(bold);
 	}
 
 	private GuiUtils() {

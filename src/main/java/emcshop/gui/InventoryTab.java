@@ -1,5 +1,6 @@
 package emcshop.gui;
 
+import static emcshop.util.GuiUtils.shrinkFont;
 import static emcshop.util.GuiUtils.toolTipText;
 import static emcshop.util.NumberFormatter.formatQuantity;
 import static emcshop.util.NumberFormatter.formatStacks;
@@ -71,16 +72,14 @@ import emcshop.QueryExporter;
 import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.db.Inventory;
-import emcshop.gui.FilterPanel.ExportListener;
-import emcshop.gui.FilterPanel.FilterList;
-import emcshop.gui.FilterPanel.FilterListener;
+import emcshop.gui.ExportButton.ExportListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.util.ChesterFile;
 import emcshop.util.GuiUtils;
 import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
-public class InventoryTab extends JPanel {
+public class InventoryTab extends JPanel implements ExportListener {
 	private static final Logger logger = Logger.getLogger(InventoryTab.class.getName());
 	private static final AppContext context = AppContext.instance();
 
@@ -92,9 +91,7 @@ public class InventoryTab extends JPanel {
 	private final ItemIndex index = ItemIndex.instance();
 
 	private final FilterPanel filterPanel;
-	private final CategoryComboBox category;
 	private final JButton addEdit;
-	private final JButton delete;
 	private final JButton chester;
 	private final ItemSuggestField item;
 	private final JLabel quantityLabel;
@@ -127,37 +124,15 @@ public class InventoryTab extends JPanel {
 		dao = context.get(DbDao.class);
 		showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
 
-		category = new CategoryComboBox();
-
-		filterPanel = new FilterPanel();
-		filterPanel.setVisible(true, false, false);
+		filterPanel = new FilterPanel(this);
 		filterPanel.addFilterListener(new FilterListener() {
 			@Override
-			public void filterPerformed(FilterList items, FilterList players) {
-				table.filter(items);
+			public void filterPerformed(FilterList items, CategoryInfo category) {
+				table.filter(items, category);
 				tableScrollPane.scrollToTop();
 			}
 		});
-		filterPanel.addExportListener(new ExportListener() {
-			@Override
-			public void exportPerformed(ExportType type) {
-				String text = export(type);
-				GuiUtils.copyToClipboard(text);
-				JOptionPane.showMessageDialog(InventoryTab.this, "Copied to clipboard.");
-			}
-		});
-
-		addEdit = new JButton("Add/Edit");
-		addEdit.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				addItem();
-				filterPanel.clear();
-			}
-		});
-
-		delete = new JButton("Delete");
-		delete.addActionListener(new ActionListener() {
+		filterPanel.addDeleteListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				List<Row> selected = table.getSelected();
@@ -180,6 +155,17 @@ public class InventoryTab extends JPanel {
 
 				table.model.data.removeAll(selected);
 				table.model.fireTableDataChanged();
+				filterPanel.setDeleteEnabled(false);
+			}
+		});
+		filterPanel.setDeleteEnabled(false);
+
+		addEdit = new JButton("Add/Edit");
+		addEdit.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				addItem();
+				filterPanel.clear();
 			}
 		});
 
@@ -212,8 +198,6 @@ public class InventoryTab extends JPanel {
 			}
 		});
 
-		//ClickableLabel chesterUrl = new ClickableLabel("<html><font color=navy><u>Download Chester</u></font></html>", "http://github.com/mangstadt/chester");
-
 		item = new ItemSuggestField(owner);
 
 		quantityLabel = new HelpLabel("Qty:", "In addition to specifying the exact number of items, you can also specify the quantity in stacks.\n\n<b>Examples</b>:\n\"264\" (264 items total)\n\"4/10\" (4 stacks, plus 10 more)\n\"4/\" (4 stacks)\n\"+1/\" (add 1 stack to the existing amount)\n\"-1/\" (subtract 1 stack from the existing amount)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16 (like Signs) and others are not stackable at all (like armor)!");
@@ -242,13 +226,10 @@ public class InventoryTab extends JPanel {
 		leftTop.add(quantityLabel, "wrap");
 		leftTop.add(item, "w 300");
 		leftTop.add(quantity, "w 150, wrap");
-		leftTop.add(addEdit, "span 2, split 2");
-		leftTop.add(delete, "wrap");
+		leftTop.add(addEdit, "span 2");
 
 		add(leftTop, "span 1 2, w 300!, growy");
 
-		filterPanel.add(new JLabel("<html><font size=2>Category:"), filterPanel.getComponentCount() - 1);
-		filterPanel.add(category, "w 150", filterPanel.getComponentCount() - 1);
 		add(filterPanel, "wrap");
 
 		tableScrollPane = new MyJScrollPane(table);
@@ -304,8 +285,9 @@ public class InventoryTab extends JPanel {
 		showQuantitiesInStacks = enable;
 
 		//re-render the "quantity" column
+		int col = Column.REMAINING.ordinal();
 		for (int row = 0; row < table.model.getRowCount(); row++) {
-			table.model.fireTableCellUpdated(row, Column.REMAINING.ordinal());
+			table.model.fireTableCellUpdated(row, col);
 		}
 	}
 
@@ -319,11 +301,7 @@ public class InventoryTab extends JPanel {
 
 		table.setData(inventory);
 		filterPanel.clear();
-		category.setSelectedItem(ALL);
-
-		table.filterItems = new FilterList();
-		table.filterCategory = ALL;
-		table.filter();
+		table.filter(new FilterList(), ALL);
 	}
 
 	private static class Row {
@@ -341,9 +319,6 @@ public class InventoryTab extends JPanel {
 		private final Column columns[] = Column.values();
 		private final InventoryTableModel model;
 		private final TableRowSorter<InventoryTableModel> rowSorter;
-
-		private FilterList filterItems = new FilterList();
-		private CategoryInfo filterCategory = ALL;
 
 		public InventoryTable() {
 			getTableHeader().setReorderingAllowed(false);
@@ -402,25 +377,16 @@ public class InventoryTab extends JPanel {
 			model.setData(inventory);
 		}
 
-		public void filter(FilterList filterList) {
-			filterItems = filterList;
-			filter();
-		}
-
-		public void filter(CategoryInfo category) {
-			filterCategory = category;
-			filter();
-		}
-
-		private void filter() {
+		private void filter(final FilterList filterItems, final CategoryInfo filterCategory) {
 			if (filterItems.isEmpty() && filterCategory == ALL) {
 				rowSorter.setRowFilter(null);
 				return;
 			}
-			
-			for (Row row : model.data){
+
+			for (Row row : model.data) {
 				row.selected = false;
 			}
+			filterPanel.setDeleteEnabled(false);
 
 			RowFilter<InventoryTableModel, Integer> filter = new RowFilter<InventoryTableModel, Integer>() {
 				@Override
@@ -429,8 +395,7 @@ public class InventoryTab extends JPanel {
 					Row rowObj = entry.getModel().data.get(row);
 					String itemName = rowObj.inventory.getItem();
 
-					boolean item = (filterItems.isEmpty() || filterItems.contains(itemName));
-					if (!item) {
+					if (!filterItems.isFiltered(itemName)) {
 						return false;
 					}
 
@@ -667,6 +632,17 @@ public class InventoryTab extends JPanel {
 
 			//re-render table row
 			model.fireTableRowsUpdated(row, row);
+
+			filterPanel.setDeleteEnabled(isOneRowSelected());
+		}
+
+		public boolean isOneRowSelected() {
+			for (Row row : model.data) {
+				if (row.selected) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private void setSelectionModel() {
@@ -750,7 +726,8 @@ public class InventoryTab extends JPanel {
 		}
 	}
 
-	public String export(ExportType type) {
+	@Override
+	public String exportData(ExportType type) {
 		int rows = table.getRowCount();
 		List<Inventory> inventory = new ArrayList<Inventory>(rows);
 		for (int i = 0; i < rows; i++) {
@@ -769,10 +746,11 @@ public class InventoryTab extends JPanel {
 		return null;
 	}
 
-	private class CategoryComboBox extends JComboBox implements ItemListener {
+	private class CategoryComboBox extends JComboBox {
 		public CategoryComboBox() {
 			Set<CategoryInfo> categoriesSet = index.getCategories();
 
+			//sort alphabetically
 			List<CategoryInfo> categories = new ArrayList<CategoryInfo>(categoriesSet);
 			Collections.sort(categories, new Comparator<CategoryInfo>() {
 				@Override
@@ -780,16 +758,15 @@ public class InventoryTab extends JPanel {
 					return a.getName().compareToIgnoreCase(b.getName());
 				}
 			});
+
+			//add "all" and "misc" items
 			categories.add(0, ALL);
 			categories.add(MISC);
 
 			setModel(new DefaultComboBoxModel(categories.toArray()));
 			setEditable(false);
 
-			addItemListener(this);
-
-			Font orig = getFont();
-			setFont(new Font(orig.getName(), orig.getStyle(), orig.getSize() - 2));
+			shrinkFont(this);
 
 			setRenderer(new ListCellRenderer() {
 				private final Font orig;
@@ -799,10 +776,8 @@ public class InventoryTab extends JPanel {
 					label.setOpaque(true);
 					label.setBorder(new EmptyBorder(4, 4, 4, 4));
 
-					Font font = label.getFont();
-					orig = new Font(font.getName(), font.getStyle(), font.getSize() - 2);
-					label.setFont(orig);
-
+					shrinkFont(label);
+					orig = label.getFont();
 					bold = new Font(orig.getName(), Font.BOLD, orig.getSize());
 				}
 
@@ -832,15 +807,87 @@ public class InventoryTab extends JPanel {
 		}
 
 		@Override
-		public void itemStateChanged(ItemEvent event) {
-			CategoryInfo selected = getSelectedItem();
-			table.filter(selected);
-		}
-
-		@Override
 		public CategoryInfo getSelectedItem() {
 			return (CategoryInfo) super.getSelectedItem();
 		}
+	}
+
+	private class FilterPanel extends JPanel {
+		private final JButton delete;
+		private final JLabel filterByItemLabel;
+		private final FilterTextField filterByItem;
+		private final JLabel categoryLabel;
+		private final CategoryComboBox category;
+		private final ExportButton export;
+
+		private final List<FilterListener> filterListeners = new ArrayList<FilterListener>();
+
+		public FilterPanel(ExportListener exportListener) {
+			delete = new JButton("Delete");
+
+			filterByItemLabel = new HelpLabel("<html><font size=2>Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
+			filterByItem = new FilterTextField();
+			filterByItem.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					fireFilterListeners();
+				}
+			});
+
+			categoryLabel = new JLabel("<html><font size=2>Category:");
+			category = new CategoryComboBox();
+			category.addItemListener(new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent event) {
+					fireFilterListeners();
+				}
+			});
+
+			export = new ExportButton(owner, exportListener);
+
+			///////////////////
+
+			setLayout(new MigLayout("insets 0"));
+
+			shrinkFont(delete);
+			add(delete);
+
+			add(filterByItemLabel);
+			add(filterByItem, "w 120");
+			add(filterByItem.getClearButton(), "w 20, h 20");
+
+			add(categoryLabel);
+			add(category);
+
+			add(export);
+		}
+
+		private void fireFilterListeners() {
+			for (FilterListener listener : filterListeners) {
+				listener.filterPerformed(filterByItem.getNames(), category.getSelectedItem());
+			}
+		}
+
+		public void addFilterListener(FilterListener listener) {
+			filterListeners.add(listener);
+		}
+
+		public void addDeleteListener(ActionListener listener) {
+			delete.addActionListener(listener);
+		}
+
+		public void setDeleteEnabled(boolean enabled) {
+			delete.setEnabled(enabled);
+		}
+
+		public void clear() {
+			filterByItem.setText("");
+			category.setSelectedItem(ALL);
+		}
+	}
+
+	private interface FilterListener {
+		void filterPerformed(FilterList items, CategoryInfo category);
 	}
 
 	private class ChesterDialog extends JDialog {

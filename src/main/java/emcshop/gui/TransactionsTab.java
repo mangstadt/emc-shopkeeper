@@ -1,6 +1,7 @@
 package emcshop.gui;
 
 import static emcshop.util.GuiUtils.busyCursor;
+import static emcshop.util.GuiUtils.shrinkFont;
 import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.event.ActionEvent;
@@ -20,6 +21,7 @@ import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -37,23 +39,18 @@ import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
-import emcshop.gui.FilterPanel.ExportListener;
-import emcshop.gui.FilterPanel.FilterList;
-import emcshop.gui.FilterPanel.FilterListener;
-import emcshop.gui.FilterPanel.SortItem;
-import emcshop.gui.FilterPanel.SortListener;
+import emcshop.gui.ExportButton.ExportListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
-import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
-public class TransactionsTab extends JPanel {
+public class TransactionsTab extends JPanel implements ExportListener {
 	private static final AppContext context = AppContext.instance();
 
+	private final DbDao dao = context.get(DbDao.class);
 	private final MainFrame owner;
-	private final DbDao dao;
 
 	private final QueryPanel queryPanel;
 	private final FilterPanel filterPanel;
@@ -73,9 +70,8 @@ public class TransactionsTab extends JPanel {
 
 	private int netTotal;
 
-	public TransactionsTab(final MainFrame owner) {
+	public TransactionsTab(MainFrame owner) {
 		this.owner = owner;
-		dao = context.get(DbDao.class);
 
 		queryPanel = new QueryPanel();
 		queryPanel.addSearchListener(new SearchListener() {
@@ -99,7 +95,7 @@ public class TransactionsTab extends JPanel {
 			}
 		});
 
-		filterPanel = new FilterPanel();
+		filterPanel = new FilterPanel(this);
 		filterPanel.addFilterListener(new FilterListener() {
 			@Override
 			public void filterPerformed(FilterList items, FilterList players) {
@@ -110,14 +106,6 @@ public class TransactionsTab extends JPanel {
 			@Override
 			public void sortPerformed(SortItem sort) {
 				sort(sort);
-			}
-		});
-		filterPanel.addExportListener(new ExportListener() {
-			@Override
-			public void exportPerformed(ExportType type) {
-				String text = export(type);
-				GuiUtils.copyToClipboard(text);
-				JOptionPane.showMessageDialog(TransactionsTab.this, "Copied to clipboard.");
 			}
 		});
 
@@ -428,7 +416,8 @@ public class TransactionsTab extends JPanel {
 		}
 	}
 
-	public String export(ExportType type) {
+	@Override
+	public String exportData(ExportType type) {
 		DateRange range = queryPanel.getDateRange();
 
 		switch (type) {
@@ -799,11 +788,141 @@ public class TransactionsTab extends JPanel {
 		}
 	}
 
-	private static interface SearchListener {
-		void searchPerformed(DateRange range, SearchType type, boolean shopTransactions);
+	public class FilterPanel extends JPanel {
+		private final JLabel filterByItemLabel;
+		private final FilterTextField filterByItem;
+		private final JLabel filterByPlayerLabel;
+		private final FilterTextField filterByPlayer;
+		private final JLabel sortByLabel;
+		private final SortComboBox sortBy;
+		private final ExportButton export;
+
+		private final List<FilterListener> filterListeners = new ArrayList<FilterListener>();
+		private final List<SortListener> sortListeners = new ArrayList<SortListener>();
+
+		public FilterPanel(ExportListener listener) {
+			ActionListener filterAction = new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					for (FilterListener listener : filterListeners) {
+						listener.filterPerformed(filterByItem.getNames(), filterByPlayer.getNames());
+					}
+				}
+			};
+
+			filterByItemLabel = new HelpLabel("<html><font size=2>Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
+			filterByItem = new FilterTextField();
+			filterByItem.addActionListener(filterAction);
+
+			filterByPlayerLabel = new HelpLabel("<html><font size=2>Filter by player(s):", "<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar,max</code>\n\nMultiple player names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation.");
+			filterByPlayer = new FilterTextField();
+			filterByPlayer.addActionListener(filterAction);
+
+			sortByLabel = new JLabel("<html><font size=2>Sort by:");
+			sortBy = new SortComboBox();
+			shrinkFont(sortBy);
+			sortBy.addActionListener(new ActionListener() {
+				private SortItem prev;
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					SortItem selected = sortBy.getSelectedItem();
+					if (prev == selected) {
+						//the same item was selected
+						return;
+					}
+
+					for (SortListener listener : sortListeners) {
+						listener.sortPerformed(selected);
+					}
+					prev = selected;
+				}
+			});
+
+			export = new ExportButton(owner, listener);
+
+			setLayout(new MigLayout("insets 0"));
+		}
+
+		public void setVisible(boolean item, boolean player, boolean sort) {
+			removeAll();
+
+			if (item) {
+				add(filterByItemLabel);
+				add(filterByItem, "w 120");
+				add(filterByItem.getClearButton(), "w 20, h 20");
+			}
+
+			if (player) {
+				add(filterByPlayerLabel);
+				add(filterByPlayer, "w 120");
+				add(filterByPlayer.getClearButton(), "w 20, h 20");
+			}
+
+			if (sort) {
+				add(sortByLabel);
+				add(sortBy, "w 120");
+			}
+
+			add(export);
+
+			validate();
+		}
+
+		public void addFilterListener(FilterListener listener) {
+			filterListeners.add(listener);
+		}
+
+		public void addSortListener(SortListener listener) {
+			sortListeners.add(listener);
+		}
+
+		public void clear() {
+			filterByItem.setText("");
+			filterByPlayer.setText("");
+			sortBy.setSelectedIndex(0);
+		}
+	}
+
+	private static class SortComboBox extends JComboBox {
+		public SortComboBox() {
+			super(SortItem.values());
+		}
+
+		@Override
+		public SortItem getSelectedItem() {
+			return (SortItem) super.getSelectedItem();
+		}
+	}
+
+	private static enum SortItem {
+		PLAYER("Player Name"), HIGHEST("Highest Net Total"), LOWEST("Lowest Net Total");
+
+		private final String display;
+
+		private SortItem(String display) {
+			this.display = display;
+		}
+
+		@Override
+		public String toString() {
+			return display;
+		}
 	}
 
 	private static enum SearchType {
 		ITEMS, PLAYERS, DATES
+	}
+
+	private interface SearchListener {
+		void searchPerformed(DateRange range, SearchType type, boolean shopTransactions);
+	}
+
+	private interface FilterListener {
+		void filterPerformed(FilterList items, FilterList players);
+	}
+
+	private interface SortListener {
+		void sortPerformed(SortItem sort);
 	}
 }

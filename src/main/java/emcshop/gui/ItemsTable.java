@@ -26,7 +26,6 @@ import javax.swing.table.TableCellRenderer;
 
 import emcshop.ItemIndex;
 import emcshop.db.ItemGroup;
-import emcshop.gui.FilterPanel.FilterList;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupableColumnsTable;
 
@@ -217,7 +216,7 @@ public class ItemsTable extends GroupableColumnsTable {
 			itemGroupsToDisplay = new ArrayList<ItemGroup>();
 			for (ItemGroup itemGroup : itemGroups) {
 				String itemName = itemGroup.getItem();
-				if (filterList.contains(itemName)) {
+				if (filterList.isFiltered(itemName)) {
 					itemGroupsToDisplay.add(itemGroup);
 				}
 			}
