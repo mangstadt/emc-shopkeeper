@@ -38,7 +38,7 @@
 	<Item name="Baked Potato" id="393" categories="7" />
 	<Item name="Bat Egg" id="383:65" group="Spawn Eggs" categories="0" />
 	<Item name="Beacon" id="138" />
-	<Item name="Bed" id="355" />
+	<Item name="Bed" id="355" stack="1" />
 	<Item name="Birch Leaves" id="18:2" categories="17" />
 	<Item name="Birch Log" id="17:2" group="Wood" categories="17" />
 	<Item name="Birch Plank" id="5:2" group="Wood" categories="17" />
@@ -75,9 +75,9 @@
 	<Item name="Cactus" id="81" categories="6" />
 	<Item name="Cake" id="354" stack="1" categories="7" />
 	<Item name="Carrot" id="391" emcNames="Carrot Item" categories="0,6,7" />
-	<Item name="Carrot Stick" id="398" categories="0,16" />
+	<Item name="Carrot Stick" id="398" stacks="1" categories="0,16" />
 	<Item name="Cat Disc" id="2257" stack="1" group="Discs" categories="3" />
-	<Item name="Cauldron" id="118" group="Iron" categories="4" />
+	<Item name="Cauldron" id="118" group="Iron" categories="16" />
 	<Item name="Chainmail Boots" id="305" stack="1" emcNames="Chain Boots" categories="16" />
 	<Item name="Chainmail Chestplate" id="303" stack="1" emcNames="Chain Chestplate" categories="16" />
 	<Item name="Chainmail Helmet" id="302" stack="1" emcNames="Chain Helmet" categories="16" />
@@ -165,8 +165,8 @@
 	<Item name="Flint" id="318" />
 	<Item name="Flint And Steel" id="259" stack="1" categories="16" />
 	<Item name="Flower Pot" id="390" emcNames="Flower Pot Item" group="Clay" categories="2,6" />
-	<Item name="Furnace" id="61" group="Stone" />
-	<Item name="Ghast Tear" id="370" categories="10,12" />
+	<Item name="Furnace" id="61" group="Stone" categories="16" />
+	<Item name="Ghast Tear" id="370" categories="9,10,12" />
 	<Item name="Glass" id="20" group="Glass" categories="8" />
 	<Item name="Glass Bottle" id="374" group="Glass" categories="12" />
 	<Item name="Glass Pane" id="102" group="Glass" categories="8" />
@@ -182,7 +182,7 @@
 	<Item name="Gold Hoe" id="294" stack="1" group="Gold" categories="6,16" />
 	<Item name="Gold Ingot" id="266" group="Gold" categories="11" />
 	<Item name="Gold Leggings" id="316" stack="1" group="Gold" categories="16" />
-	<Item name="Gold Nugget" id="371" group="Gold" categories="11" />
+	<Item name="Gold Nugget" id="371" group="Gold" categories="9,11" />
 	<Item name="Gold Ore" id="14" group="Gold" categories="11" />
 	<Item name="Gold Pickaxe" id="285" stack="1" group="Gold" categories="16" />
 	<Item name="Gold Plate" id="147" group="Gold" categories="13" />
@@ -262,7 +262,7 @@
 	<Item name="Magenta Wool" id="35:2" group="Wool" categories="18" />
 	<Item name="Magma Cream" id="378" categories="9,10,12" />
 	<Item name="Mall Disc" id="2261" stack="1" group="Discs" categories="3" />
-	<Item name="Map" id="358" />
+	<Item name="Map" id="358" stack="1" />
 	<Item name="Mellohi Disc" id="2262" stack="1" group="Discs" categories="3" />
 	<Item name="Melon" id="360" categories="7" />
 	<Item name="Melon Block" id="103" categories="6" />
@@ -402,7 +402,7 @@
 	<Item name="Sunflower" id="175:0" group="Flowers" categories="6" />
 	<Item name="Tnt" id="46" categories="13" />
 	<Item name="Torch" id="50" />
-	<Item name="Trap Door" id="96" group="Wood" emcNames="Trapdoor" categories="13,16" />
+	<Item name="Trap Door" id="96" group="Wood" emcNames="Trapdoor" categories="13,17" />
 	<Item name="Trapped Chest" id="146" group="Wood" categories="13" />
 	<Item name="Tripwire Hook" id="131" group="Iron" categories="13" />
 	<Item name="Villager Egg" id="383:120" group="Spawn Eggs" categories="0" />
@@ -420,7 +420,7 @@
 	<Item name="Wither Skull" id="397:1" emcNames="Wither Head" categories="9,10" />
 	<Item name="Wolf Egg" id="383:95" group="Spawn Eggs" categories="0" />
 	<Item name="Wood Button" id="143" group="Wood" categories="13" />
-	<Item name="Wood Door" id="64" stack="1" group="Wood" emcNames="Door" categories="13,16" />
+	<Item name="Wood Door" id="64" stack="1" group="Wood" emcNames="Door" categories="13,17" />
 	<Item name="Wooden Axe" id="271" stack="1" group="Wood" categories="16" />
 	<Item name="Wooden Hoe" id="290" stack="1" group="Wood" categories="6,16" />
 	<Item name="Wooden Pickaxe" id="270" stack="1" group="Wood" categories="16" />
