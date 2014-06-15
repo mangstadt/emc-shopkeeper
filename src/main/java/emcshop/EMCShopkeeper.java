@@ -188,7 +188,6 @@ public class EMCShopkeeper {
 
 			//reset the profile dir
 			profileDir = new File(profileRootDir, selectedProfile);
-			profile = profileDir.getName();
 			settings = new Settings(new File(profileDir, "settings.properties"));
 		}
 

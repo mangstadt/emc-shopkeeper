@@ -96,7 +96,7 @@ public class BonusFeeTab extends JPanel {
 		}
 	}
 
-	private class BonusFeeTable extends JTable {
+	private static class BonusFeeTable extends JTable {
 		private final Column columns[] = Column.values();
 		private final Model model;
 
