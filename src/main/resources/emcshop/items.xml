@@ -397,7 +397,7 @@
 	<Item name="Stone Sword" id="272" stack="1" group="Stone" categories="16" />
 	<Item name="Storage Minecart" id="342" stack="1" group="Iron" categories="15" />
 	<Item name="Strad Disc" id="2264" stack="1" group="Discs" categories="3" />
-	<Item name="String" id="287" categories="9" />
+	<Item name="String" id="287" categories="9,13" />
 	<Item name="Sugar" categories="0,12" id="353" />
 	<Item name="Sugar Cane" id="338" categories="6" />
 	<Item name="Sunflower" id="175:0" group="Flowers" categories="6" />
