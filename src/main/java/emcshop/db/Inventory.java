@@ -5,7 +5,7 @@ public class Inventory {
 	private Integer itemId;
 	private String item;
 	private Integer quantity;
-	private Integer lowInStockThreshold;
+	private Integer lowInStockThreshold = 0;
 
 	public Integer getId() {
 		return id;

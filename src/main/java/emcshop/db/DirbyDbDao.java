@@ -1039,7 +1039,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void upsertInventory(String item, Integer quantity, boolean add) throws SQLException {
+	public int upsertInventory(String item, Integer quantity, boolean add) throws SQLException {
 		int itemId = selsertItem(item);
 
 		PreparedStatement stmt = stmt("SELECT id FROM inventory WHERE item = ?");
@@ -1056,8 +1056,7 @@ public abstract class DirbyDbDao implements DbDao {
 			InsertStatement stmt2 = new InsertStatement("inventory");
 			stmt2.setInt("item", itemId);
 			stmt2.setInt("quantity", quantity);
-			stmt2.execute(conn);
-			return;
+			return stmt2.execute(conn);
 		}
 
 		String sql;
@@ -1075,14 +1074,18 @@ public abstract class DirbyDbDao implements DbDao {
 		} finally {
 			closeStatements(stmt2);
 		}
+
+		return invId;
 	}
 
 	@Override
-	public void updateInventoryLowThreshold(int id, int threshold) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE inventory SET low_threshold = ? WHERE id = ?");
+	public void updateInventoryLowThreshold(String item, int threshold) throws SQLException {
+		int itemId = selsertItem(item);
+
+		PreparedStatement stmt = stmt("UPDATE inventory SET low_threshold = ? WHERE item = ?");
 		try {
 			stmt.setInt(1, threshold);
-			stmt.setInt(2, id);
+			stmt.setInt(2, itemId);
 			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);

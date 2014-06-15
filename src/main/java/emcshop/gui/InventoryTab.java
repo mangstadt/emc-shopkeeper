@@ -178,7 +178,6 @@ public class InventoryTab extends JPanel implements ExportListener {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				addItem();
-				filterPanel.clear();
 			}
 		});
 
@@ -254,58 +253,72 @@ public class InventoryTab extends JPanel implements ExportListener {
 	}
 
 	private void addItem() {
+		//check for field to be populated
 		String itemStr = item.getText();
 		String quantityStr = quantity.getText();
 		if (itemStr.isEmpty() || quantityStr.isEmpty()) {
 			return;
 		}
 
+		//get quantity value
+		boolean add = quantity.isAdd();
+		int qty;
 		try {
-			upsertItem(itemStr, quantity);
+			qty = quantity.getQuantity(index.getStackSize(itemStr));
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
 			quantity.requestFocusInWindow();
 			return;
 		}
 
-		item.setText("");
-		quantity.setText("");
-		item.requestFocusInWindow();
-		refresh();
+		//update database
+		int inventoryId;
+		try {
+			inventoryId = dao.upsertInventory(itemStr, qty, add);
+			dao.commit();
+		} catch (SQLException e) {
+			dao.rollback();
+			throw new RuntimeException(e);
+		}
 
+		//find the table row that corresponds with the updated record
+		int rowIndex = -1;
 		for (int i = 0; i < table.model.getRowCount(); i++) {
 			Row row = table.model.data.get(i);
-			if (row.inventory.getItem().equalsIgnoreCase(itemStr)) {
-				row.justInserted = true;
-				table.model.fireTableRowsUpdated(i, i);
+			if (row.inventory.getId() == inventoryId) {
+				rowIndex = i;
 				break;
 			}
 		}
-	}
 
-	private void upsertItem(String item, QuantityTextField textField) {
-		boolean add = quantity.isAdd();
-		int quantity = textField.getQuantity(index.getStackSize(item));
+		table.resetJustInserted();
 
-		try {
-			dao.upsertInventory(item, quantity, add);
-			dao.commit();
-		} catch (SQLException e) {
-			dao.rollback();
-			throw new RuntimeException(e);
+		if (rowIndex == -1) {
+			//no row found, so insert a new one
+
+			Inventory inventory = new Inventory();
+			inventory.setId(inventoryId);
+			inventory.setItem(itemStr);
+			inventory.setQuantity(qty);
+
+			Row newRow = new Row(inventory);
+			newRow.justInserted = true;
+			table.model.data.add(newRow);
+			table.model.fireTableRowsInserted(table.model.getRowCount() - 1, table.model.getRowCount() - 1);
+		} else {
+			//update row with new data
+			Row row = table.model.data.get(rowIndex);
+			if (add) {
+				qty = row.inventory.getQuantity() + qty;
+			}
+			row.inventory.setQuantity(qty);
+			row.justInserted = true;
+			table.model.fireTableRowsUpdated(rowIndex, rowIndex);
 		}
-	}
 
-	private void updateThreshold(int id, String item, QuantityTextField textField) {
-		int threshold = textField.getQuantity(index.getStackSize(item));
-
-		try {
-			dao.updateInventoryLowThreshold(id, threshold);
-			dao.commit();
-		} catch (SQLException e) {
-			dao.rollback();
-			throw new RuntimeException(e);
-		}
+		item.setText("");
+		quantity.setText("");
+		item.requestFocusInWindow();
 	}
 
 	public void setShowQuantitiesInStacks(boolean enable) {
@@ -366,6 +379,16 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 		public void setSortKeys(RowSorter.SortKey... sortKeys) {
 			rowSorter.setSortKeys(Arrays.asList(sortKeys));
+		}
+
+		public void resetJustInserted() {
+			for (int i = 0; i < model.data.size(); i++) {
+				Row row = model.data.get(i);
+				if (row.justInserted) {
+					row.justInserted = false;
+					model.fireTableRowsUpdated(i, i);
+				}
+			}
 		}
 
 		public List<Row> getSelected() {
@@ -512,44 +535,57 @@ public class InventoryTab extends JPanel implements ExportListener {
 				Column column = columns[col];
 				switch (column) {
 				case REMAINING:
-					//update database
+					//get quantity value
+					boolean add = textField.isAdd();
+					int quantity;
 					try {
-						upsertItem(item, textField);
+						quantity = textField.getQuantity(index.getStackSize(item));
 					} catch (NumberFormatException e) {
 						JOptionPane.showMessageDialog(InventoryTab.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 
-					//update Inventory object
-					int quantity = textField.getQuantity(index.getStackSize(item));
-					boolean add = textField.isAdd();
+					//update database
+					try {
+						dao.upsertInventory(item, quantity, add);
+						dao.commit();
+					} catch (SQLException e) {
+						dao.rollback();
+						throw new RuntimeException(e);
+					}
+
+					//update row with new data
+					resetJustInserted();
 					if (add) {
 						quantity = inv.getQuantity() + quantity;
 					}
 					inv.setQuantity(quantity);
-
 					rowObj.justInserted = true;
-					for (int i = 0; i < getRowCount(); i++) {
-						Row r = data.get(i);
-						if (r.justInserted) {
-							r.justInserted = false;
-							fireTableRowsUpdated(i, i);
-						}
-					}
 					break;
 
 				case LOW_THRESHOLD:
-					//update database
+					//get threshold
+					int threshold;
 					try {
-						updateThreshold(inv.getId(), item, textField);
+						threshold = textField.getQuantity(index.getStackSize(item));
 					} catch (NumberFormatException e) {
 						JOptionPane.showMessageDialog(InventoryTab.this, "Invalid threshold value.", "Error", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 
-					//update Inventory object
-					int threshold = textField.getQuantity(index.getStackSize(item));
+					//update database
+					try {
+						dao.updateInventoryLowThreshold(item, threshold);
+						dao.commit();
+					} catch (SQLException e) {
+						dao.rollback();
+						throw new RuntimeException(e);
+					}
+
+					//update row with new data
+					resetJustInserted();
 					inv.setLowInStockThreshold(threshold);
+					rowObj.justInserted = true;
 					break;
 
 				default:
@@ -697,9 +733,9 @@ public class InventoryTab extends JPanel implements ExportListener {
 			remainingColumn.setPreferredWidth(50);
 			remainingColumn.setCellEditor(new QuantityEditor());
 
-			TableColumn warnColumn = columnModel.getColumn(Column.LOW_THRESHOLD.ordinal());
-			warnColumn.setPreferredWidth(50);
-			warnColumn.setCellEditor(new QuantityEditor());
+			TableColumn lowThresholdColumn = columnModel.getColumn(Column.LOW_THRESHOLD.ordinal());
+			lowThresholdColumn.setPreferredWidth(50);
+			lowThresholdColumn.setCellEditor(new QuantityEditor());
 		}
 
 		private void clickCell(int rowView, int colView) {
@@ -764,7 +800,6 @@ public class InventoryTab extends JPanel implements ExportListener {
 					@Override
 					public void actionPerformed(ActionEvent event) {
 						fireEditingStopped();
-						filterPanel.fireFilterListeners();
 					}
 				});
 

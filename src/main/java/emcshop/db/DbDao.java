@@ -233,17 +233,18 @@ public interface DbDao {
 	 * @param quantity the new quantity
 	 * @param add true to add the given quantity to the existing total, false to
 	 * overwrite it
+	 * @return the ID of the updated record
 	 * @throws SQLException
 	 */
-	void upsertInventory(String item, Integer quantity, boolean add) throws SQLException;
+	int upsertInventory(String item, Integer quantity, boolean add) throws SQLException;
 
 	/**
 	 * Updates the "low in stock" threshold for an inventory item.
-	 * @param id the inventory item ID
+	 * @param item the item name
 	 * @param threshold the new threshold
 	 * @throws SQLException
 	 */
-	void updateInventoryLowThreshold(int id, int threshold) throws SQLException;
+	void updateInventoryLowThreshold(String item, int threshold) throws SQLException;
 
 	/**
 	 * Deletes one or more inventory items.
