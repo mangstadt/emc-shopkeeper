@@ -375,6 +375,8 @@ public class MainFrame extends JFrame {
 					}
 				}
 
+				clearSessionMenuItem.setEnabled(true);
+
 				Date latestTransactionDate;
 				try {
 					latestTransactionDate = dao.getLatestTransactionDate();
