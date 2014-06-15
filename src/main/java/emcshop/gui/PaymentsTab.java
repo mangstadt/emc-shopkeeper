@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -32,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -258,8 +260,8 @@ public class PaymentsTab extends JPanel {
 
 			private final PlayerCellPanel playerPanel = new PlayerCellPanel();
 
-			private final JButton assignButton = new JButton(ImageManager.getImageIcon("assign.png"));
-			private final JButton splitButton = new JButton(ImageManager.getImageIcon("split.png"));
+			private final ImageIcon assignIcon = ImageManager.getImageIcon("assign.png");
+			private final ImageIcon splitIcon = ImageManager.getImageIcon("split.png");
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
@@ -275,11 +277,17 @@ public class PaymentsTab extends JPanel {
 				JComponent component = null;
 				switch (column) {
 				case SPLIT:
-					component = splitButton;
+					component = label;
+
+					label.setIcon(splitIcon);
+					label.setHorizontalAlignment(SwingConstants.CENTER);
 					break;
 
 				case ASSIGN:
-					component = assignButton;
+					component = label;
+
+					label.setIcon(assignIcon);
+					label.setHorizontalAlignment(SwingConstants.CENTER);
 					break;
 
 				case CHECKBOX:
@@ -326,6 +334,9 @@ public class PaymentsTab extends JPanel {
 
 			private void resetComponents() {
 				label.setForeground(UIDefaultsWrapper.getLabelForeground());
+				label.setIcon(null);
+				label.setText(null);
+				label.setHorizontalAlignment(SwingConstants.LEFT);
 			}
 		}
 
