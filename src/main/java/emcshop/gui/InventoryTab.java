@@ -93,11 +93,13 @@ public class InventoryTab extends JPanel implements ExportListener {
 	private final ItemIndex index = ItemIndex.instance();
 
 	private final FilterPanel filterPanel;
-	private final JButton addEdit;
+	private final JButton addItem;
 	private final JButton chester;
 	private final ItemSuggestField item;
 	private final JLabel quantityLabel;
 	private final QuantityTextField quantity;
+	private final JLabel lowThresholdLabel;
+	private final QuantityTextField lowThreshold;
 
 	private InventoryTable table;
 	private boolean showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
@@ -131,7 +133,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 		//			}
 		//
 		//			for (Inventory inv : dao.getInventory()) {
-		//				dao.updateInventoryLowThreshold(inv.getId(), r.nextInt(64));
+		//				dao.updateInventoryLowThreshold(inv.getItem(), r.nextInt(64));
 		//			}
 		//			dao.commit();
 		//		} catch (Exception e) {
@@ -173,8 +175,8 @@ public class InventoryTab extends JPanel implements ExportListener {
 		});
 		filterPanel.setDeleteEnabled(false);
 
-		addEdit = new JButton("Add");
-		addEdit.addActionListener(new ActionListener() {
+		addItem = new JButton("Add");
+		addItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				addItem();
@@ -225,6 +227,19 @@ public class InventoryTab extends JPanel implements ExportListener {
 			}
 		});
 
+		lowThresholdLabel = new HelpLabel("Theshold:", "This number defines when an item will be considered \"low in stock\".");
+
+		lowThreshold = new QuantityTextField();
+		lowThreshold.addKeyListener(new KeyAdapter() {
+			//do not use "addActionListener()" because this ends up causing a "key released" event to fire while the item name field is focused
+			@Override
+			public void keyReleased(KeyEvent event) {
+				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+					addItem();
+				}
+			}
+		});
+
 		table = new InventoryTable();
 		table.setSortKeys(new RowSorter.SortKey(Column.REMAINING.ordinal(), SortOrder.ASCENDING), new RowSorter.SortKey(Column.ITEM_NAME.ordinal(), SortOrder.ASCENDING));
 
@@ -236,10 +251,12 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 		JPanel addPanel = new GroupPanel("Add Item");
 		addPanel.add(new JLabel("Item Name:"));
-		addPanel.add(item, "w 200::");
+		addPanel.add(item, "w :150:150");
 		addPanel.add(quantityLabel);
-		addPanel.add(quantity, "w 75::");
-		addPanel.add(addEdit);
+		addPanel.add(quantity, "w :70:70");
+		addPanel.add(lowThresholdLabel);
+		addPanel.add(lowThreshold, "w :70:70");
+		addPanel.add(addItem);
 		outterPanel.add(addPanel, "wrap");
 
 		outterPanel.add(filterPanel, "wrap");
@@ -261,13 +278,24 @@ public class InventoryTab extends JPanel implements ExportListener {
 		}
 
 		//get quantity value
+		int stackSize = index.getStackSize(itemStr);
 		boolean add = quantity.isAdd();
 		int qty;
 		try {
-			qty = quantity.getQuantity(index.getStackSize(itemStr));
+			qty = quantity.getQuantity(stackSize);
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
 			quantity.requestFocusInWindow();
+			return;
+		}
+
+		//get threshold value
+		Integer threshold;
+		try {
+			threshold = lowThreshold.getQuantity(stackSize);
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(this, "Invalid threshold value.", "Error", JOptionPane.ERROR_MESSAGE);
+			lowThreshold.requestFocusInWindow();
 			return;
 		}
 
@@ -275,6 +303,9 @@ public class InventoryTab extends JPanel implements ExportListener {
 		int inventoryId;
 		try {
 			inventoryId = dao.upsertInventory(itemStr, qty, add);
+			if (threshold != null) {
+				dao.updateInventoryLowThreshold(itemStr, threshold);
+			}
 			dao.commit();
 		} catch (SQLException e) {
 			dao.rollback();
@@ -300,6 +331,9 @@ public class InventoryTab extends JPanel implements ExportListener {
 			inventory.setId(inventoryId);
 			inventory.setItem(itemStr);
 			inventory.setQuantity(qty);
+			if (threshold != null) {
+				inventory.setLowInStockThreshold(threshold);
+			}
 
 			Row newRow = new Row(inventory);
 			newRow.justInserted = true;
@@ -312,12 +346,16 @@ public class InventoryTab extends JPanel implements ExportListener {
 				qty = row.inventory.getQuantity() + qty;
 			}
 			row.inventory.setQuantity(qty);
+			if (threshold != null) {
+				row.inventory.setLowInStockThreshold(threshold);
+			}
 			row.justInserted = true;
 			table.model.fireTableRowsUpdated(rowIndex, rowIndex);
 		}
 
 		item.setText("");
 		quantity.setText("");
+		//don't clear threshold
 		item.requestFocusInWindow();
 	}
 
@@ -545,6 +583,11 @@ public class InventoryTab extends JPanel implements ExportListener {
 						return;
 					}
 
+					//value didn't change
+					if (quantity == inv.getQuantity()) {
+						return;
+					}
+
 					//update database
 					try {
 						dao.upsertInventory(item, quantity, add);
@@ -570,6 +613,11 @@ public class InventoryTab extends JPanel implements ExportListener {
 						threshold = textField.getQuantity(index.getStackSize(item));
 					} catch (NumberFormatException e) {
 						JOptionPane.showMessageDialog(InventoryTab.this, "Invalid threshold value.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+
+					//value didn't change
+					if (threshold == inv.getLowInStockThreshold()) {
 						return;
 					}
 

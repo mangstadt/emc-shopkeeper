@@ -12,11 +12,15 @@ public class QuantityTextField extends JTextField {
 	/**
 	 * Gets the quantity value.
 	 * @param stackSize the size of a stack (e.g. "64")
-	 * @return the quantity value
+	 * @return the quantity value or null if the text field is empty
 	 * @throws NumberFormatException if the text is not in the correct format
 	 */
 	public Integer getQuantity(int stackSize) throws NumberFormatException {
 		String text = getText();
+		if (text.isEmpty()) {
+			return null;
+		}
+
 		if (text.startsWith("+")) {
 			text = text.substring(1);
 		}
