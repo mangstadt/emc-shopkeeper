@@ -6,6 +6,8 @@ import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -592,6 +594,12 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				});
 
 				description = new JLabel();
+				description.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						setCompressed(false);
+					}
+				});
 
 				showItemsSmall = new JButton("Item", searchItems);
 				showItemsSmall.addActionListener(new ActionListener() {
