@@ -85,6 +85,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 	private final CategoryInfo ALL = new CategoryInfo(-1, "ALL", null);
 	private final CategoryInfo MISC = new CategoryInfo(-1, "misc", null);
+	private final CategoryInfo LOW = new CategoryInfo(-1, "low in stock", null);
 
 	private final MainFrame owner;
 	private final DbDao dao;
@@ -106,7 +107,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 	 * are defined is the order that they will appear in the table.
 	 */
 	private enum Column {
-		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Remaining");
+		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Remaining"), WARN("Low Threshold");
 
 		private final String name;
 
@@ -155,7 +156,6 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 				table.model.data.removeAll(selected);
 				table.model.fireTableDataChanged();
-				filterPanel.setDeleteEnabled(false);
 			}
 		});
 		filterPanel.setDeleteEnabled(false);
@@ -274,6 +274,18 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 		try {
 			dao.upsertInventory(item, quantity, add);
+			dao.commit();
+		} catch (SQLException e) {
+			dao.rollback();
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void updateThreshold(int id, String item, QuantityTextField textField) {
+		int threshold = textField.getQuantity(index.getStackSize(item));
+
+		try {
+			dao.updateInventoryLowThreshold(id, threshold);
 			dao.commit();
 		} catch (SQLException e) {
 			dao.rollback();
@@ -403,6 +415,10 @@ public class InventoryTab extends JPanel implements ExportListener {
 						return true;
 					}
 
+					if (filterCategory == LOW) {
+						return rowObj.inventory.getQuantity() <= rowObj.inventory.getLowInStockThreshold();
+					}
+
 					CategoryInfo categories[] = index.getItemCategories(itemName);
 					if (filterCategory == MISC && categories.length == 0) {
 						return true;
@@ -464,6 +480,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 				Column column = columns[col];
 				switch (column) {
 				case REMAINING:
+				case WARN:
 					return true;
 				default:
 					return false;
@@ -472,40 +489,69 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			@Override
 			public void setValueAt(Object value, int row, int col) {
-				Column column = columns[col];
-				if (column != Column.REMAINING) {
-					return;
-				}
-
 				QuantityTextField textField = (QuantityTextField) value;
 				Row rowObj = data.get(row);
 				Inventory inv = rowObj.inventory;
-
-				//update database
 				String item = inv.getItem();
-				try {
-					upsertItem(item, textField);
-				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(InventoryTab.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
 
-				//update Inventory object
-				int quantity = textField.getQuantity(index.getStackSize(item));
-				boolean add = textField.isAdd();
-				if (add) {
-					quantity = inv.getQuantity() + quantity;
-				}
-				inv.setQuantity(quantity);
-
-				rowObj.justInserted = true;
-				for (int i = 0; i < getRowCount(); i++) {
-					Row r = data.get(i);
-					if (r.justInserted) {
-						r.justInserted = false;
-						fireTableRowsUpdated(i, i);
+				Column column = columns[col];
+				switch (column) {
+				case REMAINING:
+					//update database
+					try {
+						upsertItem(item, textField);
+					} catch (NumberFormatException e) {
+						JOptionPane.showMessageDialog(InventoryTab.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
 					}
+
+					//update Inventory object
+					int quantity = textField.getQuantity(index.getStackSize(item));
+					boolean add = textField.isAdd();
+					if (add) {
+						quantity = inv.getQuantity() + quantity;
+					}
+					inv.setQuantity(quantity);
+
+					rowObj.justInserted = true;
+					for (int i = 0; i < getRowCount(); i++) {
+						Row r = data.get(i);
+						if (r.justInserted) {
+							r.justInserted = false;
+							fireTableRowsUpdated(i, i);
+						}
+					}
+					break;
+
+				case WARN:
+					//update database
+					try {
+						updateThreshold(inv.getId(), item, textField);
+					} catch (NumberFormatException e) {
+						JOptionPane.showMessageDialog(InventoryTab.this, "Invalid threshold value.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+
+					//update Inventory object
+					int threshold = textField.getQuantity(index.getStackSize(item));
+					inv.setLowInStockThreshold(threshold);
+					break;
+
+				default:
+					break;
 				}
+			}
+
+			@Override
+			public void fireTableRowsUpdated(int firstRow, int lastRow) {
+				super.fireTableRowsUpdated(firstRow, lastRow);
+				filterPanel.setDeleteEnabled(isOneRowSelected());
+			}
+
+			@Override
+			public void fireTableDataChanged() {
+				super.fireTableDataChanged();
+				filterPanel.setDeleteEnabled(isOneRowSelected());
 			}
 		}
 
@@ -513,6 +559,8 @@ public class InventoryTab extends JPanel implements ExportListener {
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
 			private final Color insertedColor = new Color(255, 255, 192);
+			private final Color lowInStockColor = new Color(255, 192, 192);
+
 			private final JLabel label = new JLabel();
 			{
 				label.setOpaque(true);
@@ -563,6 +611,13 @@ public class InventoryTab extends JPanel implements ExportListener {
 					String text = showQuantitiesInStacks ? formatStacks(inv.getQuantity(), index.getStackSize(inv.getItem()), false) : formatQuantity(inv.getQuantity(), false);
 					label.setText(text);
 					break;
+
+				case WARN:
+					component = label;
+
+					text = showQuantitiesInStacks ? formatStacks(inv.getLowInStockThreshold(), index.getStackSize(inv.getItem()), false) : formatQuantity(inv.getLowInStockThreshold(), false);
+					label.setText(text);
+					break;
 				}
 
 				//set the background color of the row
@@ -571,6 +626,9 @@ public class InventoryTab extends JPanel implements ExportListener {
 				} else if (rowObj.justInserted) {
 					component.setForeground(UIDefaultsWrapper.getLabelForeground());
 					component.setBackground(insertedColor);
+				} else if (inv.getQuantity() <= inv.getLowInStockThreshold()) {
+					component.setForeground(UIDefaultsWrapper.getLabelForeground());
+					component.setBackground(lowInStockColor);
 				} else {
 					Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
 					component.setForeground(UIDefaultsWrapper.getLabelForeground());
@@ -601,6 +659,12 @@ public class InventoryTab extends JPanel implements ExportListener {
 					return one.inventory.getQuantity().compareTo(two.inventory.getQuantity());
 				}
 			});
+			rowSorter.setComparator(Column.WARN.ordinal(), new Comparator<Row>() {
+				@Override
+				public int compare(Row one, Row two) {
+					return one.inventory.getLowInStockThreshold().compareTo(two.inventory.getLowInStockThreshold());
+				}
+			});
 			rowSorter.setSortsOnUpdates(false);
 
 			return rowSorter;
@@ -616,13 +680,17 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			TableColumn remainingColumn = columnModel.getColumn(Column.REMAINING.ordinal());
 			remainingColumn.setPreferredWidth(50);
-			remainingColumn.setCellEditor(new RemainingEditor());
+			remainingColumn.setCellEditor(new QuantityEditor());
+
+			TableColumn warnColumn = columnModel.getColumn(Column.WARN.ordinal());
+			warnColumn.setPreferredWidth(50);
+			warnColumn.setCellEditor(new QuantityEditor());
 		}
 
 		private void clickCell(int rowView, int colView) {
 			int col = convertColumnIndexToModel(colView);
 			Column column = columns[col];
-			if (column == Column.REMAINING) {
+			if (column == Column.REMAINING || column == Column.WARN) {
 				return;
 			}
 
@@ -632,8 +700,6 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			//re-render table row
 			model.fireTableRowsUpdated(row, row);
-
-			filterPanel.setDeleteEnabled(isOneRowSelected());
 		}
 
 		public boolean isOneRowSelected() {
@@ -676,13 +742,14 @@ public class InventoryTab extends JPanel implements ExportListener {
 			});
 		}
 
-		private class RemainingEditor extends AbstractCellEditor implements TableCellEditor {
+		private class QuantityEditor extends AbstractCellEditor implements TableCellEditor {
 			private final QuantityTextField textField = new QuantityTextField();
 			{
 				textField.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent event) {
 						fireEditingStopped();
+						filterPanel.fireFilterListeners();
 					}
 				});
 
@@ -711,15 +778,23 @@ public class InventoryTab extends JPanel implements ExportListener {
 					return null;
 				}
 
-				Column column = columns[col];
-				if (column != Column.REMAINING) {
-					return null;
-				}
-
 				Row rowObj = (Row) value;
 				Inventory inv = rowObj.inventory;
 				Integer stackSize = showQuantitiesInStacks ? index.getStackSize(inv.getItem()) : null;
-				textField.setQuantity(inv.getQuantity(), stackSize);
+
+				Column column = columns[col];
+				switch (column) {
+				case REMAINING:
+					textField.setQuantity(inv.getQuantity(), stackSize);
+					break;
+
+				case WARN:
+					textField.setQuantity(inv.getLowInStockThreshold(), stackSize);
+					break;
+
+				default:
+					return null;
+				}
 
 				return textField;
 			}
@@ -761,12 +836,11 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			//add "all" and "misc" items
 			categories.add(0, ALL);
+			categories.add(1, LOW);
 			categories.add(MISC);
 
 			setModel(new DefaultComboBoxModel(categories.toArray()));
 			setEditable(false);
-
-			shrinkFont(this);
 
 			setRenderer(new ListCellRenderer() {
 				private final Font orig;
@@ -796,7 +870,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 					}
 					label.setIcon(icon);
 
-					Font font = (category == ALL || category == MISC) ? bold : orig;
+					Font font = (category == ALL || category == MISC || category == LOW) ? bold : orig;
 					label.setFont(font);
 
 					UIDefaultsWrapper.assignListFormats(label, selected);
@@ -856,6 +930,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 			add(filterByItem, "w 120");
 
 			add(categoryLabel);
+			shrinkFont(category);
 			add(category);
 
 			add(export);

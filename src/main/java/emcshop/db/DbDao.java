@@ -238,6 +238,14 @@ public interface DbDao {
 	void upsertInventory(String item, Integer quantity, boolean add) throws SQLException;
 
 	/**
+	 * Updates the "low in stock" threshold for an inventory item.
+	 * @param id the inventory item ID
+	 * @param threshold the new threshold
+	 * @throws SQLException
+	 */
+	void updateInventoryLowThreshold(int id, int threshold) throws SQLException;
+
+	/**
 	 * Deletes one or more inventory items.
 	 * @param ids the inventory IDs to delete
 	 * @throws SQLException

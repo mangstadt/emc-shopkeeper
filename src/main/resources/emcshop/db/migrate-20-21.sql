@@ -1,0 +1,1 @@
+ALTER TABLE inventory ADD low_threshold INT DEFAULT 0 NOT NULL;

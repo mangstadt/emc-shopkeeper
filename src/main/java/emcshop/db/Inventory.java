@@ -5,6 +5,7 @@ public class Inventory {
 	private Integer itemId;
 	private String item;
 	private Integer quantity;
+	private Integer lowInStockThreshold;
 
 	public Integer getId() {
 		return id;
@@ -36,5 +37,13 @@ public class Inventory {
 
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
+	}
+
+	public Integer getLowInStockThreshold() {
+		return lowInStockThreshold;
+	}
+
+	public void setLowInStockThreshold(Integer threshold) {
+		this.lowInStockThreshold = threshold;
 	}
 }

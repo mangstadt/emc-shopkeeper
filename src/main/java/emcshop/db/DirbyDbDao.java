@@ -49,7 +49,7 @@ public abstract class DirbyDbDao implements DbDao {
 	 * directly. Use {@link #getAppDbVersion()} instead, because this method
 	 * gets overridden in unit tests.
 	 */
-	public static final int schemaVersion = 20;
+	public static final int schemaVersion = 21;
 
 	protected Connection conn;
 	protected String jdbcUrl;
@@ -967,6 +967,7 @@ public abstract class DirbyDbDao implements DbDao {
 				inv.setItemId(rs.getInt("item"));
 				inv.setItem(rs.getString("item_name"));
 				inv.setQuantity(rs.getInt("quantity"));
+				inv.setLowInStockThreshold(rs.getInt("low_threshold"));
 				inventory.add(inv);
 			}
 			return inventory;
@@ -1056,22 +1057,35 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt2.setInt("item", itemId);
 			stmt2.setInt("quantity", quantity);
 			stmt2.execute(conn);
-		} else {
-			String sql;
-			if (add) {
-				sql = "UPDATE inventory SET quantity = quantity + ? WHERE id = ?";
-			} else {
-				sql = "UPDATE inventory SET quantity = ? WHERE id = ?";
-			}
+			return;
+		}
 
-			PreparedStatement stmt2 = stmt(sql);
-			try {
-				stmt2.setInt(1, quantity);
-				stmt2.setInt(2, invId);
-				stmt2.executeUpdate();
-			} finally {
-				closeStatements(stmt2);
-			}
+		String sql;
+		if (add) {
+			sql = "UPDATE inventory SET quantity = quantity + ? WHERE id = ?";
+		} else {
+			sql = "UPDATE inventory SET quantity = ? WHERE id = ?";
+		}
+
+		PreparedStatement stmt2 = stmt(sql);
+		try {
+			stmt2.setInt(1, quantity);
+			stmt2.setInt(2, invId);
+			stmt2.executeUpdate();
+		} finally {
+			closeStatements(stmt2);
+		}
+	}
+
+	@Override
+	public void updateInventoryLowThreshold(int id, int threshold) throws SQLException {
+		PreparedStatement stmt = stmt("UPDATE inventory SET low_threshold = ? WHERE id = ?");
+		try {
+			stmt.setInt(1, threshold);
+			stmt.setInt(2, id);
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
 		}
 	}
 
