@@ -74,6 +74,7 @@ import emcshop.db.DbDao;
 import emcshop.db.Inventory;
 import emcshop.gui.ExportButton.ExportListener;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.GroupPanel;
 import emcshop.util.ChesterFile;
 import emcshop.util.GuiUtils;
 import emcshop.util.UIDefaultsWrapper;
@@ -88,7 +89,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 	private final CategoryInfo LOW = new CategoryInfo(-1, "low in stock", null);
 
 	private final MainFrame owner;
-	private final DbDao dao;
+	private final DbDao dao = context.get(DbDao.class);
 	private final ItemIndex index = ItemIndex.instance();
 
 	private final FilterPanel filterPanel;
@@ -99,7 +100,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 	private final QuantityTextField quantity;
 
 	private InventoryTable table;
-	private boolean showQuantitiesInStacks;
+	private boolean showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
 	private MyJScrollPane tableScrollPane;
 
 	/**
@@ -107,7 +108,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 	 * are defined is the order that they will appear in the table.
 	 */
 	private enum Column {
-		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Remaining"), WARN("Low Threshold");
+		CHECKBOX(""), ITEM_NAME("Item Name"), REMAINING("Remaining"), LOW_THRESHOLD("Low Threshold");
 
 		private final String name;
 
@@ -122,8 +123,20 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 	public InventoryTab(MainFrame owner) {
 		this.owner = owner;
-		dao = context.get(DbDao.class);
-		showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
+
+		//		try {
+		//			Random r = new Random();
+		//			for (String item : index.getItemNames()) {
+		//				dao.upsertInventory(item, r.nextInt(512), false);
+		//			}
+		//
+		//			for (Inventory inv : dao.getInventory()) {
+		//				dao.updateInventoryLowThreshold(inv.getId(), r.nextInt(64));
+		//			}
+		//			dao.commit();
+		//		} catch (Exception e) {
+		//
+		//		}
 
 		filterPanel = new FilterPanel(this);
 		filterPanel.addFilterListener(new FilterListener() {
@@ -160,7 +173,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 		});
 		filterPanel.setDeleteEnabled(false);
 
-		addEdit = new JButton("Add/Edit");
+		addEdit = new JButton("Add");
 		addEdit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -220,20 +233,22 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 		setLayout(new MigLayout("fillx, insets 5"));
 
-		JPanel leftTop = new JPanel(new MigLayout());
+		JPanel outterPanel = new JPanel(new MigLayout("insets 0"));
 
-		leftTop.add(new JLabel("Item Name:"));
-		leftTop.add(quantityLabel, "wrap");
-		leftTop.add(item, "w 200::");
-		leftTop.add(quantity, "w 50::, wrap");
-		leftTop.add(addEdit, "span 2");
+		JPanel addPanel = new GroupPanel("Add Item");
+		addPanel.add(new JLabel("Item Name:"));
+		addPanel.add(item, "w 200::");
+		addPanel.add(quantityLabel);
+		addPanel.add(quantity, "w 75::");
+		addPanel.add(addEdit);
+		outterPanel.add(addPanel, "wrap");
 
-		add(leftTop, "span 1 2, w 300:300:, growy");
-
-		add(filterPanel, "wrap");
+		outterPanel.add(filterPanel, "wrap");
 
 		tableScrollPane = new MyJScrollPane(table);
-		add(tableScrollPane, "grow, w 100%, h 100%, wrap");
+		outterPanel.add(tableScrollPane, "w 100%, h 100%");
+
+		add(outterPanel, "h 100%, align center");
 
 		refresh();
 	}
@@ -480,7 +495,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 				Column column = columns[col];
 				switch (column) {
 				case REMAINING:
-				case WARN:
+				case LOW_THRESHOLD:
 					return true;
 				default:
 					return false;
@@ -523,7 +538,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 					}
 					break;
 
-				case WARN:
+				case LOW_THRESHOLD:
 					//update database
 					try {
 						updateThreshold(inv.getId(), item, textField);
@@ -612,7 +627,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 					label.setText(text);
 					break;
 
-				case WARN:
+				case LOW_THRESHOLD:
 					component = label;
 
 					text = showQuantitiesInStacks ? formatStacks(inv.getLowInStockThreshold(), index.getStackSize(inv.getItem()), false) : formatQuantity(inv.getLowInStockThreshold(), false);
@@ -659,7 +674,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 					return one.inventory.getQuantity().compareTo(two.inventory.getQuantity());
 				}
 			});
-			rowSorter.setComparator(Column.WARN.ordinal(), new Comparator<Row>() {
+			rowSorter.setComparator(Column.LOW_THRESHOLD.ordinal(), new Comparator<Row>() {
 				@Override
 				public int compare(Row one, Row two) {
 					return one.inventory.getLowInStockThreshold().compareTo(two.inventory.getLowInStockThreshold());
@@ -682,7 +697,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 			remainingColumn.setPreferredWidth(50);
 			remainingColumn.setCellEditor(new QuantityEditor());
 
-			TableColumn warnColumn = columnModel.getColumn(Column.WARN.ordinal());
+			TableColumn warnColumn = columnModel.getColumn(Column.LOW_THRESHOLD.ordinal());
 			warnColumn.setPreferredWidth(50);
 			warnColumn.setCellEditor(new QuantityEditor());
 		}
@@ -690,7 +705,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 		private void clickCell(int rowView, int colView) {
 			int col = convertColumnIndexToModel(colView);
 			Column column = columns[col];
-			if (column == Column.REMAINING || column == Column.WARN) {
+			if (column == Column.REMAINING || column == Column.LOW_THRESHOLD) {
 				return;
 			}
 
@@ -788,7 +803,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 					textField.setQuantity(inv.getQuantity(), stackSize);
 					break;
 
-				case WARN:
+				case LOW_THRESHOLD:
 					textField.setQuantity(inv.getLowInStockThreshold(), stackSize);
 					break;
 
