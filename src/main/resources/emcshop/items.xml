@@ -75,7 +75,7 @@
 	<Item name="Cactus" id="81" categories="6" />
 	<Item name="Cake" id="354" stack="1" categories="7" />
 	<Item name="Carrot" id="391" emcNames="Carrot Item" categories="0,6,7" />
-	<Item name="Carrot Stick" id="398" stacks="1" categories="0,16" />
+	<Item name="Carrot Stick" id="398" stack="1" categories="0,16" />
 	<Item name="Cat Disc" id="2257" stack="1" group="Discs" categories="3" />
 	<Item name="Cauldron" id="118" group="Iron" categories="16" />
 	<Item name="Chainmail Boots" id="305" stack="1" emcNames="Chain Boots" categories="16" />
