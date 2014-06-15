@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,7 +27,6 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	private final JPasswordField password;
 	private final JLabel loading;
 	private final JPanel messagePanel;
-	private final JCheckBox rememberMe;
 
 	public LoginViewImpl(final Window owner) {
 		super(owner, "Login");
@@ -45,7 +43,6 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 				login.setEnabled(false);
 				username.setEnabled(false);
 				password.setEnabled(false);
-				rememberMe.setEnabled(false);
 
 				pack();
 				validate();
@@ -60,7 +57,6 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		username = new JTextField();
 		password = new JPasswordField();
 		loading = new JLabel("Logging in...", ImageManager.getLoadingSmall(), SwingConstants.CENTER);
-		rememberMe = new JCheckBox("Remember me");
 
 		///////////////////////
 
@@ -78,8 +74,6 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		p.add(new JLabel("Password:"), "align right");
 		p.add(password, "w 150, wrap");
 		add(p, "align center, wrap");
-
-		add(rememberMe, "align center, wrap");
 
 		add(login, "split 2, align center");
 		add(cancel);
@@ -131,12 +125,12 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 
 	@Override
 	public boolean getRememberMe() {
-		return rememberMe.isSelected();
+		return true;
 	}
 
 	@Override
 	public void setRememberMe(boolean rememberMe) {
-		this.rememberMe.setSelected(rememberMe);
+		//empty
 	}
 
 	@Override
@@ -160,7 +154,6 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		login.setEnabled(true);
 		username.setEnabled(true);
 		password.setEnabled(true);
-		rememberMe.setEnabled(true);
 
 		validate();
 		shake(this);
