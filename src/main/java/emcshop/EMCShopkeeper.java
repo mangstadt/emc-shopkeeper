@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import joptsimple.OptionException;
@@ -272,8 +273,13 @@ public class EMCShopkeeper {
 		//set uncaught exception handler
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
-			public void uncaughtException(Thread thread, Throwable thrown) {
-				UnhandledErrorPresenter.show(null, "An error occurred.", thrown);
+			public void uncaughtException(Thread thread, final Throwable thrown) {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						UnhandledErrorPresenter.show(null, "An error occurred.", thrown);
+					}
+				});
 			}
 		});
 
