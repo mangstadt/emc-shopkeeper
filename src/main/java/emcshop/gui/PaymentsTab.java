@@ -307,18 +307,20 @@ public class PaymentsTab extends JPanel {
 				case PLAYER:
 					component = playerPanel;
 
-					String playerName = transaction.getPlayer();
+					final String playerName = transaction.getPlayer();
 					playerPanel.setPlayer(playerName, new ProfileDownloadedListener() {
 						@Override
 						public void onProfileDownloaded(JLabel label) {
-							//re-render the cell when the profile is downloaded
-							//find the row index again, incase a row above it was inserted or deleted since the profile was downloaded
+							//re-render all cells with this player name when the profile is downloaded
 							SwingUtilities.invokeLater(new Runnable() {
 								@Override
 								public void run() {
-									int index = model.data.indexOf(rowObj);
-									if (index >= 0) {
-										model.fireTableCellUpdated(index, col);
+									for (int i = 0; i < model.getRowCount(); i++) {
+										Row r = model.data.get(i);
+										String name = r.transaction.getPlayer();
+										if (playerName.equalsIgnoreCase(name)) {
+											model.fireTableCellUpdated(i, col);
+										}
 									}
 								}
 							});

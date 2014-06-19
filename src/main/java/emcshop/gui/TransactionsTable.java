@@ -267,15 +267,21 @@ public class TransactionsTable extends JTable {
 			case PLAYER_NAME:
 				component = playerPanel;
 
-				String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
+				final String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
 				playerPanel.setPlayer(playerName, new ProfileDownloadedListener() {
 					@Override
 					public void onProfileDownloaded(JLabel label) {
-						//re-render the cell when the profile is downloaded
+						//re-render all cells with this player when the profile is downloaded
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
 							public void run() {
-								model.fireTableCellUpdated(row, col);
+								for (int i = 0; i < model.getRowCount(); i++) {
+									ShopTransaction t = model.transactions.get(i);
+									String name = customers ? t.getPlayer() : t.getShopOwner();
+									if (playerName.equalsIgnoreCase(name)) {
+										model.fireTableCellUpdated(i, col);
+									}
+								}
 							}
 						});
 					}
