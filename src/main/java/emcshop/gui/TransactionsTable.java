@@ -21,6 +21,7 @@ import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -30,6 +31,7 @@ import javax.swing.table.TableRowSorter;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.Settings;
+import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.RelativeDateFormat;
@@ -249,7 +251,7 @@ public class TransactionsTable extends JTable {
 				return null;
 			}
 
-			ShopTransaction transaction = (ShopTransaction) value;
+			final ShopTransaction transaction = (ShopTransaction) value;
 			Column column = columns[col];
 			resetComponents();
 
@@ -266,7 +268,18 @@ public class TransactionsTable extends JTable {
 				component = playerPanel;
 
 				String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
-				playerPanel.setPlayer(playerName, row, col, model);
+				playerPanel.setPlayer(playerName, new ProfileDownloadedListener() {
+					@Override
+					public void onProfileDownloaded(JLabel label) {
+						//re-render the cell when the profile is downloaded
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								model.fireTableCellUpdated(row, col);
+							}
+						});
+					}
+				});
 				break;
 
 			case ITEM_NAME:

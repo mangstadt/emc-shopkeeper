@@ -5,7 +5,6 @@ import java.awt.Color;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.table.AbstractTableModel;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
@@ -37,7 +36,7 @@ public class PlayerCellPanel extends JPanel {
 		add(serverLabel);
 	}
 
-	public void setPlayer(String playerName, final int row, final int col, final AbstractTableModel model) {
+	public void setPlayer(String playerName, ProfileDownloadedListener listener) {
 		playerLabel.setText(playerName);
 
 		ImageIcon portrait = profileLoader.getPortraitFromCache(playerName);
@@ -58,13 +57,7 @@ public class PlayerCellPanel extends JPanel {
 		serverLabel.setIcon(icon);
 
 		if (!profileLoader.wasDownloaded(playerName)) {
-			profileLoader.queueProfileForDownload(playerName, new ProfileDownloadedListener() {
-				@Override
-				public void onProfileDownloaded(JLabel label) {
-					//re-render the cell when the profile is downloaded
-					model.fireTableCellUpdated(row, col);
-				}
-			});
+			profileLoader.queueProfileForDownload(playerName, listener);
 		}
 	}
 

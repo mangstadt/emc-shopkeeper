@@ -34,6 +34,7 @@ import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -44,6 +45,7 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.db.DbDao;
+import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
@@ -264,12 +266,12 @@ public class PaymentsTab extends JPanel {
 			private final ImageIcon splitIcon = ImageManager.getImageIcon("split.png");
 
 			@Override
-			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, final int col) {
 				if (value == null) {
 					return null;
 				}
 
-				Row rowObj = (Row) value;
+				final Row rowObj = (Row) value;
 				PaymentTransaction transaction = rowObj.transaction;
 				Column column = columns[col];
 				resetComponents();
@@ -306,7 +308,22 @@ public class PaymentsTab extends JPanel {
 					component = playerPanel;
 
 					String playerName = transaction.getPlayer();
-					playerPanel.setPlayer(playerName, row, col, model);
+					playerPanel.setPlayer(playerName, new ProfileDownloadedListener() {
+						@Override
+						public void onProfileDownloaded(JLabel label) {
+							//re-render the cell when the profile is downloaded
+							//find the row index again, incase a row above it was inserted or deleted since the profile was downloaded
+							SwingUtilities.invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									int index = model.data.indexOf(rowObj);
+									if (index >= 0) {
+										model.fireTableCellUpdated(index, col);
+									}
+								}
+							});
+						}
+					});
 					break;
 
 				case AMOUNT:
