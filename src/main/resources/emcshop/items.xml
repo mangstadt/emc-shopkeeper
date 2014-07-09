@@ -143,7 +143,7 @@
 	<Item name="Dragon Stone" emcNames="Coal - §5§lDragon Stone" categories="5" />
 	<Item name="Dragon Stone Fragment" emcNames="Flint - §5Dragon Stone Fragment" categories="5" />
 	<Item name="Dropper" id="158" group="Stone" categories="13" />
-	<Item name="Egg" id="344" stack="1" categories="9" />
+	<Item name="Egg" id="344" stack="16" categories="9" />
 	<Item name="Emerald" id="388" categories="11" />
 	<Item name="Emerald Block" id="133" categories="11" />
 	<Item name="Emerald Ore" id="129" categories="11" />
