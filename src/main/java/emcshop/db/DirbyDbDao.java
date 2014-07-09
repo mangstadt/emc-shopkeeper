@@ -567,6 +567,17 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
+	public void deletePaymentTransaction(PaymentTransaction transaction) throws SQLException {
+		PreparedStatement stmt = stmt("DELETE FROM payment_transactions WHERE id = ?");
+		try {
+			stmt.setInt(1, transaction.getId());
+			stmt.executeUpdate();
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
 	public void upsertPaymentTransaction(PaymentTransaction transaction) throws SQLException {
 		if (transaction.getId() == null) {
 			Player player = selsertPlayer(transaction.getPlayer());

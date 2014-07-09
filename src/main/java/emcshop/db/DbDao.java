@@ -137,6 +137,13 @@ public interface DbDao {
 	void insertPaymentTransactions(Collection<PaymentTransaction> transactions) throws SQLException;
 
 	/**
+	 * Deletes a payment transaction.
+	 * @param transaction the transaction to delete
+	 * @throws SQLException
+	 */
+	void deletePaymentTransaction(PaymentTransaction transaction) throws SQLException;
+
+	/**
 	 * Updates or inserts a payment transaction.
 	 * @param transaction the payment transaction
 	 * @throws SQLException

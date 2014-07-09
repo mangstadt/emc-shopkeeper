@@ -61,7 +61,7 @@ public class PaymentsTab extends JPanel {
 	private final DbDao dao = context.get(DbDao.class);
 	private boolean stale = true;
 
-	private JButton delete;
+	private JButton delete, merge;
 	private PaymentsTable paymentsTable;
 
 	public PaymentsTab(MainFrame owner) {
@@ -111,15 +111,81 @@ public class PaymentsTab extends JPanel {
 						paymentsTable.model.data.removeAll(selected);
 						paymentsTable.model.fireTableDataChanged();
 
-						boolean enabled = paymentsTable.getSelectedCount() > 0;
-						delete.setEnabled(enabled);
+						delete.setEnabled(false);
 
 						owner.updatePaymentsCount();
 					}
 
 				});
 				shrinkFont(delete);
-				inner.add(delete, "wrap");
+				inner.add(delete, "split 2");
+
+				merge = new JButton("Merge");
+				merge.setEnabled(false);
+				merge.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						//at least two rows must be selected
+						List<Row> selected = paymentsTable.getSelected();
+						if (selected.size() < 2) {
+							return;
+						}
+
+						//are all the player names the same?
+						String name = null;
+						for (Row row : selected) {
+							if (name == null) {
+								name = row.transaction.getPlayer();
+							} else if (!name.equalsIgnoreCase(row.transaction.getPlayer())) {
+								return;
+							}
+						}
+
+						int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to merge these payment transactions?", "Confirm Merge", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+						if (result != JOptionPane.YES_OPTION) {
+							return;
+						}
+
+						Row latest = null;
+						int amountTotal = 0;
+						for (Row row : selected) {
+							amountTotal += row.transaction.getAmount();
+							if (latest == null || row.transaction.getTs().after(latest.transaction.getTs())) {
+								latest = row;
+							}
+						}
+						latest.transaction.setAmount(amountTotal);
+
+						List<Row> toDelete = new ArrayList<Row>(selected);
+						toDelete.remove(latest);
+
+						try {
+							//update the merged transaction
+							dao.upsertPaymentTransaction(latest.transaction);
+
+							//delete the other transactions
+							for (Row row : toDelete) {
+								dao.deletePaymentTransaction(row.transaction);
+							}
+
+							dao.commit();
+						} catch (SQLException e) {
+							dao.rollback();
+							throw new RuntimeException(e);
+						}
+
+						//update table
+						latest.selected = false;
+						paymentsTable.model.data.removeAll(toDelete);
+						paymentsTable.model.fireTableDataChanged();
+
+						merge.setEnabled(false);
+
+						owner.updatePaymentsCount();
+					}
+				});
+				shrinkFont(merge);
+				inner.add(merge, "wrap");
 
 				paymentsTable = new PaymentsTable(pendingPayments);
 				MyJScrollPane scrollPane = new MyJScrollPane(paymentsTable);
@@ -202,16 +268,6 @@ public class PaymentsTab extends JPanel {
 				}
 			}
 			return selected;
-		}
-
-		public int getSelectedCount() {
-			int count = 0;
-			for (Row row : model.data) {
-				if (row.selected) {
-					count++;
-				}
-			}
-			return count;
 		}
 
 		private TableRowSorter<Model> createRowSorter() {
@@ -424,8 +480,28 @@ public class PaymentsTab extends JPanel {
 				model.fireTableRowsUpdated(row, row);
 			}
 
-			boolean enable = getSelectedCount() > 0;
-			delete.setEnabled(enable);
+			List<Row> selected = getSelected();
+
+			boolean enableMerge = true;
+			if (selected.size() < 2) {
+				//at least two rows must be selected
+				enableMerge = false;
+			} else {
+				//are all the player names the same?
+				String name = null;
+				for (Row r : selected) {
+					if (name == null) {
+						name = r.transaction.getPlayer();
+					} else if (!name.equalsIgnoreCase(r.transaction.getPlayer())) {
+						enableMerge = false;
+						break;
+					}
+				}
+			}
+			merge.setEnabled(enableMerge);
+
+			boolean enableDelete = !selected.isEmpty();
+			delete.setEnabled(enableDelete);
 		}
 
 		private void setSelectionModel() {
