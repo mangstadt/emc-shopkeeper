@@ -8,11 +8,13 @@ import static emcshop.util.NumberFormatter.getQuantityColor;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
@@ -258,6 +260,31 @@ public class PaymentsTab extends JPanel {
 			setColumns();
 
 			setSelectionModel();
+
+			//change to the "hand" cursor when the user mouses-over the "split" or "assign" columns
+			addMouseMotionListener(new MouseMotionAdapter() {
+				@Override
+				public void mouseMoved(MouseEvent event) {
+					int index = convertColumnIndexToModel(columnAtPoint(event.getPoint()));
+					if (index < 0) {
+						return;
+					}
+
+					Cursor cursor;
+					Column column = columns[index];
+					switch (column) {
+					case SPLIT:
+					case ASSIGN:
+						cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+						break;
+					default:
+						cursor = Cursor.getDefaultCursor();
+						break;
+					}
+
+					setCursor(cursor);
+				}
+			});
 		}
 
 		public List<Row> getSelected() {
