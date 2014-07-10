@@ -180,7 +180,6 @@ public class PaymentsTab extends JPanel {
 						}
 
 						//update table
-						latest.selected = false;
 						paymentsTable.model.data.removeAll(toDelete);
 						paymentsTable.model.fireTableDataChanged();
 
