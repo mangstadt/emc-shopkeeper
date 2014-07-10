@@ -36,6 +36,20 @@ public class PlayerCellPanel extends JPanel {
 		add(serverLabel);
 	}
 
+	public void setPlayer(final String playerName) {
+		setPlayer(playerName, new ProfileDownloadedListener() {
+			@Override
+			public void onProfileDownloaded(JLabel label) {
+				ImageIcon portrait = profileLoader.getPortraitFromCache(playerName);
+				if (portrait == null) {
+					portrait = ImageManager.getUnknown();
+				}
+				portrait = ImageManager.scale(portrait, 16);
+				playerLabel.setIcon(portrait);
+			}
+		});
+	}
+
 	public void setPlayer(String playerName, ProfileDownloadedListener listener) {
 		playerLabel.setText(playerName);
 

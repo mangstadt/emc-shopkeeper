@@ -12,13 +12,14 @@ import java.awt.Cursor;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -27,6 +28,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -49,6 +51,7 @@ import emcshop.ItemIndex;
 import emcshop.db.DbDao;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
+import emcshop.gui.lib.GroupPanel;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.GuiUtils;
@@ -601,7 +604,12 @@ public class PaymentsTab extends JPanel {
 
 			ShopTransaction shopTransaction = new ShopTransaction();
 			shopTransaction.setTs(transaction.getTs());
-			shopTransaction.setPlayer(transaction.getPlayer());
+			String player = transaction.getPlayer();
+			if (result.isMyShop()) {
+				shopTransaction.setPlayer(player);
+			} else {
+				shopTransaction.setShopOwner(player);
+			}
 			shopTransaction.setAmount(transaction.getAmount());
 			shopTransaction.setBalance(transaction.getBalance());
 			shopTransaction.setItem(result.getItemName());
@@ -613,8 +621,10 @@ public class PaymentsTab extends JPanel {
 			}
 			shopTransaction.setQuantity(quantity);
 
+			boolean updateInventory = result.isMyShop() && result.isUpdateInventory();
+
 			try {
-				dao.insertTransaction(shopTransaction, result.isUpdateInventory());
+				dao.insertTransaction(shopTransaction, updateInventory);
 				dao.assignPaymentTransaction(transaction.getId(), shopTransaction.getId());
 				dao.commit();
 			} catch (SQLException e) {
@@ -697,11 +707,13 @@ public class PaymentsTab extends JPanel {
 	}
 
 	private static class AssignDialog extends JDialog {
-		private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+		private final RelativeDateFormat df = new RelativeDateFormat();
 		private final ItemSuggestField item;
 		private final QuantityTextField quantity;
 		private final JButton ok, cancel;
 		private final JCheckBox updateInventory;
+		private final JLabel updateInventoryHelp;
+		private final TransactionTypeComboBox transactionType;
 		private boolean canceled = false;
 
 		public AssignDialog(Window owner, final PaymentTransaction paymentTransaction) {
@@ -734,7 +746,7 @@ public class PaymentsTab extends JPanel {
 				}
 			});
 
-			ok = new JButton("Ok");
+			ok = new JButton("OK");
 			ok.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
@@ -770,6 +782,17 @@ public class PaymentsTab extends JPanel {
 			});
 
 			updateInventory = new JCheckBox("Apply to Inventory", true);
+			updateInventoryHelp = new HelpLabel("", "Check this box to apply this transaction to your shop's inventory.");
+
+			transactionType = new TransactionTypeComboBox();
+			transactionType.addItemListener(new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					boolean visible = transactionType.isMyShopSelected();
+					updateInventory.setVisible(visible);
+					updateInventoryHelp.setVisible(visible);
+				}
+			});
 
 			JLabel quantityLabel = new HelpLabel("Qty:", "In addition to specifying the exact number of items, you can also specify the quantity in stacks.\n\n<b>Examples</b>:\n\"264\" (264 items total)\n\"4/10\" (4 stacks, plus 10 more)\n\"4/\" (4 stacks)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16 (like Signs) and others are not stackable at all (like armor)!");
 
@@ -777,15 +800,18 @@ public class PaymentsTab extends JPanel {
 
 			setLayout(new MigLayout());
 
-			JPanel top = new JPanel(new MigLayout("insets 0"));
-
-			top.add(new JLabel("Time:"));
-			top.add(new JLabel("Player:"));
-			top.add(new JLabel("Amount:"), "wrap");
+			JPanel top = new GroupPanel("");
+			top.setBackground(UIDefaultsWrapper.getListBackgroundUnselected());
+			top.add(new JLabel("<html><b>Time:"));
+			top.add(new JLabel("<html><b>Player:"));
+			top.add(new JLabel("<html><b>Amount:"), "wrap");
 
 			top.add(new JLabel(df.format(paymentTransaction.getTs())), "gapright 10");
-			top.add(new JLabel(paymentTransaction.getPlayer()), "gapright 10");
-			top.add(new JLabel("<html>" + formatRupeesWithColor(paymentTransaction.getAmount()) + "</html>"));
+			PlayerCellPanel p = new PlayerCellPanel();
+			p.setPlayer(paymentTransaction.getPlayer());
+			p.setOpaque(false);
+			top.add(p, "gapright 10");
+			top.add(new JLabel("<html>" + formatRupeesWithColor(paymentTransaction.getAmount())));
 
 			add(top, "wrap");
 
@@ -793,12 +819,16 @@ public class PaymentsTab extends JPanel {
 
 			bottom.add(new JLabel("Item:"));
 			bottom.add(quantityLabel, "wrap");
-			bottom.add(item, "w 175");
-			bottom.add(quantity, "w 100, wrap");
-			add(bottom, "gaptop 20, wrap");
+			bottom.add(item, "w 70%");
+			bottom.add(quantity, "w 75:30%:, wrap");
+			add(bottom, "gaptop 20, w 100%, wrap");
 
-			add(new HelpLabel("", "Check this box to apply this transaction to your shop's inventory."), "split 2");
-			add(updateInventory, "wrap");
+			JPanel bottom2 = new JPanel(new MigLayout("insets 0"));
+			bottom2.add(new JLabel("Transaction Type:"), "wrap");
+			bottom2.add(transactionType, "split 3");
+			bottom2.add(updateInventory);
+			bottom2.add(updateInventoryHelp);
+			add(bottom2, "wrap");
 
 			add(ok, "split 2, align center");
 			add(cancel);
@@ -823,17 +853,18 @@ public class PaymentsTab extends JPanel {
 			int quantity = dialog.quantity.getQuantity(ItemIndex.instance().getStackSize(itemName));
 			quantity = Math.abs(quantity); //incase the user enters a negative value
 
-			return new Result(itemName, quantity, dialog.updateInventory.isSelected());
+			return new Result(itemName, quantity, dialog.transactionType.isMyShopSelected(), dialog.updateInventory.isSelected());
 		}
 
 		public static class Result {
 			private final String itemName;
 			private final Integer quantity;
-			private final boolean updateInventory;
+			private final boolean myShop, updateInventory;
 
-			public Result(String itemName, Integer quantity, boolean updateInventory) {
+			public Result(String itemName, Integer quantity, boolean myShop, boolean updateInventory) {
 				this.itemName = itemName;
 				this.quantity = quantity;
+				this.myShop = myShop;
 				this.updateInventory = updateInventory;
 			}
 
@@ -845,8 +876,25 @@ public class PaymentsTab extends JPanel {
 				return quantity;
 			}
 
+			public boolean isMyShop() {
+				return myShop;
+			}
+
 			public boolean isUpdateInventory() {
 				return updateInventory;
+			}
+		}
+
+		private static class TransactionTypeComboBox extends JComboBox {
+			private static final String MY_SHOP = "My Shop";
+			private static final String OTHER_SHOP = "Other Shop";
+
+			public TransactionTypeComboBox() {
+				super(new String[] { MY_SHOP, OTHER_SHOP });
+			}
+
+			public boolean isMyShopSelected() {
+				return getSelectedItem() == MY_SHOP;
 			}
 		}
 	}
