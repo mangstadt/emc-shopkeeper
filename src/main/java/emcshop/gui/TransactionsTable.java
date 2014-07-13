@@ -33,6 +33,7 @@ import emcshop.ItemIndex;
 import emcshop.Settings;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
+import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.UIDefaultsWrapper;
@@ -270,7 +271,7 @@ public class TransactionsTable extends JTable {
 				final String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
 				playerPanel.setPlayer(playerName, new ProfileDownloadedListener() {
 					@Override
-					public void onProfileDownloaded(JLabel label) {
+					public void onProfileDownloaded(PlayerProfile profile) {
 						//re-render all cells with this player when the profile is downloaded
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override

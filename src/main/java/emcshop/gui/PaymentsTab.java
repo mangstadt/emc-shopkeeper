@@ -53,6 +53,7 @@ import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.scraper.PaymentTransaction;
+import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
@@ -395,7 +396,7 @@ public class PaymentsTab extends JPanel {
 					final String playerName = transaction.getPlayer();
 					playerPanel.setPlayer(playerName, new ProfileDownloadedListener() {
 						@Override
-						public void onProfileDownloaded(JLabel label) {
+						public void onProfileDownloaded(PlayerProfile profile) {
 							//re-render all cells with this player name when the profile is downloaded
 							SwingUtilities.invokeLater(new Runnable() {
 								@Override
@@ -441,6 +442,8 @@ public class PaymentsTab extends JPanel {
 				label.setIcon(null);
 				label.setText(null);
 				label.setHorizontalAlignment(SwingConstants.LEFT);
+
+				playerPanel.setForeground(UIDefaultsWrapper.getLabelForeground());
 			}
 		}
 

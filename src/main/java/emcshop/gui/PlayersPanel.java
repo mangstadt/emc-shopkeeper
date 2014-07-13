@@ -12,13 +12,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -43,6 +40,8 @@ import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.EmcServer;
+import emcshop.scraper.PlayerProfile;
+import emcshop.scraper.Rank;
 import emcshop.util.UIDefaultsWrapper;
 
 /**
@@ -167,12 +166,10 @@ public class PlayersPanel extends JPanel {
 		final JList list = new JList(new Vector<PlayerGroup>(displayedPlayers));
 		list.setCellRenderer(new ListCellRenderer() {
 			private static final int profileImageSize = 32;
-			private final Map<String, Icon> playerIcons = new HashMap<String, Icon>();
 			private final ProfileDownloadedListener onImageDownloaded = new ProfileDownloadedListener() {
 				@Override
-				public void onProfileDownloaded(JLabel label) {
-					synchronized (playerIcons) {
-						playerIcons.put(label.getName(), label.getIcon());
+				public void onProfileDownloaded(PlayerProfile profile) {
+					synchronized (this) {
 						list.repaint();
 					}
 				}
@@ -191,15 +188,8 @@ public class PlayersPanel extends JPanel {
 				profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 				profileImage.setVerticalAlignment(SwingConstants.CENTER);
 
-				synchronized (playerIcons) {
-					Icon icon = playerIcons.get(playerName);
-
-					if (icon == null) {
-						profileImage.setName(playerName);
-						profileLoader.loadPortrait(playerName, profileImage, profileImageSize, onImageDownloaded);
-					} else {
-						profileImage.setIcon(icon);
-					}
+				synchronized (this) {
+					profileLoader.getPortrait(playerName, profileImage, profileImageSize, onImageDownloaded);
 				}
 
 				row.add(profileImage, "w " + profileImageSize + "!, h " + profileImageSize + "!, span 1 2");
@@ -214,7 +204,18 @@ public class PlayersPanel extends JPanel {
 				if (selected) {
 					playerNameLabel.setForeground(UIDefaultsWrapper.getListForegroundSelected());
 				} else {
-					profileLoader.loadRank(playerName, playerNameLabel, null);
+					Color color = null;
+					PlayerProfile profile = profileLoader.getProfile(playerName, null);
+					if (profile != null) {
+						Rank rank = profile.getRank();
+						if (rank != null) {
+							color = profileLoader.getRankColor(rank);
+						}
+					}
+
+					if (color != null) {
+						playerNameLabel.setForeground(color);
+					}
 				}
 				row.add(playerNameLabel, "gapbottom 0, wrap");
 
@@ -276,19 +277,26 @@ public class PlayersPanel extends JPanel {
 			header.setOpaque(false);
 
 			int rows = 3;
-			String title = profileLoader.getTitle(player.getName());
-			if (title != null) {
-				rows++;
-			}
-			Date joined = profileLoader.getJoinDate(player.getName());
-			if (joined != null) {
-				rows++;
+
+			String title = null;
+			Date joined = null;
+			PlayerProfile profile = profileLoader.getProfile(player.getName(), null);
+			if (profile != null) {
+				title = profile.getTitle();
+				if (title != null) {
+					rows++;
+				}
+
+				joined = profile.getJoined();
+				if (joined != null) {
+					rows++;
+				}
 			}
 
 			JLabel profileImage = new JLabel();
 			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 			profileImage.setVerticalAlignment(SwingConstants.TOP);
-			profileLoader.loadPortrait(player.getName(), profileImage, profileImageSize);
+			profileLoader.getPortrait(player.getName(), profileImage, profileImageSize);
 			header.add(profileImage, "span 1 " + rows + ", w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
 
 			JLabel playerName = new ClickableLabel("<html><h3><u>" + player.getName(), "http://u.emc.gs/" + player.getName());
@@ -306,16 +314,16 @@ public class PlayersPanel extends JPanel {
 			}
 
 			if (title != null) {
-				String text;
-				Color rankColor = profileLoader.getRankColor(player.getName());
-				if (rankColor == null) {
-					text = title;
-				} else {
-					String hex = String.format("#%02x%02x%02x", rankColor.getRed(), rankColor.getGreen(), rankColor.getBlue());
-					text = "<html><font color=" + hex + ">" + title;
+				Color color = null;
+				Rank rank = profile.getRank();
+				if (rank != null) {
+					color = profileLoader.getRankColor(rank);
 				}
 
-				JLabel playerTitle = new JLabel(text);
+				JLabel playerTitle = new JLabel(title);
+				if (color != null) {
+					playerTitle.setForeground(color);
+				}
 				header.add(playerTitle, "gaptop 0, span 2, wrap");
 			}
 

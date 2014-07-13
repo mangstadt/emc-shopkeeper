@@ -11,6 +11,8 @@ import emcshop.AppContext;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.EmcServer;
+import emcshop.scraper.PlayerProfile;
+import emcshop.scraper.Rank;
 import emcshop.util.UIDefaultsWrapper;
 
 /**
@@ -39,13 +41,8 @@ public class PlayerCellPanel extends JPanel {
 	public void setPlayer(final String playerName) {
 		setPlayer(playerName, new ProfileDownloadedListener() {
 			@Override
-			public void onProfileDownloaded(JLabel label) {
-				ImageIcon portrait = profileLoader.getPortraitFromCache(playerName);
-				if (portrait == null) {
-					portrait = ImageManager.getUnknown();
-				}
-				portrait = ImageManager.scale(portrait, 16);
-				playerLabel.setIcon(portrait);
+			public void onProfileDownloaded(PlayerProfile profile) {
+				profileLoader.getPortrait(playerName, playerLabel, 16);
 			}
 		});
 	}
@@ -53,26 +50,24 @@ public class PlayerCellPanel extends JPanel {
 	public void setPlayer(String playerName, ProfileDownloadedListener listener) {
 		playerLabel.setText(playerName);
 
-		ImageIcon portrait = profileLoader.getPortraitFromCache(playerName);
-		if (portrait == null) {
-			portrait = ImageManager.getUnknown();
-		}
-		portrait = ImageManager.scale(portrait, 16);
-		playerLabel.setIcon(portrait);
+		profileLoader.getPortrait(playerName, playerLabel, 16, listener);
 
-		Color rank = profileLoader.getRankColor(playerName);
-		if (rank == null) {
-			rank = UIDefaultsWrapper.getLabelForeground();
+		PlayerProfile profile = profileLoader.getProfile(playerName, listener);
+		if (profile != null) {
+			Color color = null;
+			Rank rank = profile.getRank();
+			if (rank != null) {
+				color = profileLoader.getRankColor(rank);
+			}
+			if (color == null) {
+				color = UIDefaultsWrapper.getLabelForeground();
+			}
+			playerLabel.setForeground(color);
 		}
-		playerLabel.setForeground(rank);
 
 		EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
 		ImageIcon icon = (server == null) ? null : ImageManager.getOnline(server, 12);
 		serverLabel.setIcon(icon);
-
-		if (!profileLoader.wasDownloaded(playerName)) {
-			profileLoader.queueProfileForDownload(playerName, listener);
-		}
 	}
 
 	@Override

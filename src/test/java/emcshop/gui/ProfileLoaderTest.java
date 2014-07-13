@@ -10,7 +10,6 @@ import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +55,10 @@ public class ProfileLoaderTest {
 	}
 
 	private File portraitFile, propertiesFile;
+	private ProfileDownloadedListener listener;
+	private JLabel label;
+	private PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
+	private ProfileLoader profileImageLoader;
 
 	@Rule
 	public final TemporaryFolder temp = new TemporaryFolder();
@@ -64,69 +67,62 @@ public class ProfileLoaderTest {
 	public void before() {
 		portraitFile = new File(temp.getRoot(), profile.getPlayerName());
 		propertiesFile = new File(temp.getRoot(), profile.getPlayerName() + ".properties");
+
+		listener = mock(ProfileDownloadedListener.class);
+		label = mock(JLabel.class);
+		scraper = mock(PlayerProfileScraper.class);
+		profileImageLoader = create(temp.getRoot(), scraper);
 	}
 
 	@Test
 	public void non_existent_user() throws Throwable {
-		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
-		JLabel label = mock(JLabel.class);
 		String player = profile.getPlayerName();
 
-		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
 		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(null);
 
-		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
-		profileImageLoader.loadPortrait(player, label, 16, listener);
+		profileImageLoader.getPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
 		verify(label).setIcon(any(Icon.class));
-		verify(listener, never()).onProfileDownloaded(label);
+		verify(listener, never()).onProfileDownloaded(any(PlayerProfile.class));
 		assertFalse(portraitFile.exists());
 		assertFalse(propertiesFile.exists());
 	}
 
 	@Test
 	public void private_profile() throws Throwable {
-		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
-		JLabel label = mock(JLabel.class);
 		String player = profile.getPlayerName();
 
-		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
 		PlayerProfile profile = new PlayerProfile();
 		profile.setPlayerName(player);
 		profile.setPrivate(true);
 		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 
-		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
-		profileImageLoader.loadPortrait(player, label, 16, listener);
+		profileImageLoader.getPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
 		verify(label).setIcon(any(Icon.class));
-		verify(listener, never()).onProfileDownloaded(label);
+		verify(listener).onProfileDownloaded(profile);
 		assertFalse(portraitFile.exists());
 
 		Properties props = new Properties();
 		props.load(new FileInputStream(propertiesFile));
-		assertEquals(1, props.size());
+		assertEquals(2, props.size());
 		assertEquals("true", props.get("private"));
 	}
 
 	@Test
 	public void image_downloaded() throws Throwable {
-		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
-		JLabel label = mock(JLabel.class);
 		String player = profile.getPlayerName();
 
-		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
 		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
-		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
-		profileImageLoader.loadPortrait(player, label, 16, listener);
+		profileImageLoader.getPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
-		verify(label, times(2)).setIcon(any(Icon.class));
-		verify(listener).onProfileDownloaded(label);
+		verify(label).setIcon(any(Icon.class));
+		verify(listener).onProfileDownloaded(profile);
 
 		byte[] expected = portrait;
 		byte[] actual = IOUtils.toByteArray(new FileInputStream(portraitFile));
@@ -134,7 +130,7 @@ public class ProfileLoaderTest {
 
 		Properties props = new Properties();
 		props.load(new FileInputStream(propertiesFile));
-		assertEquals(3, props.size());
+		assertEquals(4, props.size());
 		assertEquals("false", props.get("private"));
 		assertEquals("gold", props.get("rank"));
 		assertNotNull(props.get("joined"));
@@ -144,11 +140,11 @@ public class ProfileLoaderTest {
 
 		listener = mock(ProfileDownloadedListener.class);
 		label = mock(JLabel.class);
-		profileImageLoader.loadPortrait(player, label, 16, listener);
+		profileImageLoader.getPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
 		verify(label).setIcon(any(Icon.class));
-		verify(listener, never()).onProfileDownloaded(label);
+		verify(listener, never()).onProfileDownloaded(any(PlayerProfile.class));
 
 		//the portrait should have only been downloaded once
 		verify(scraper).downloadPortrait(any(PlayerProfile.class), any(Date.class), any(HttpClient.class));
@@ -161,26 +157,21 @@ public class ProfileLoaderTest {
 		temp.newFile(player + ".properties");
 		Date lastModified = new Date();
 
-		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
-		JLabel label = mock(JLabel.class);
-
-		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
 		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), eq(lastModified), any(HttpClient.class))).thenReturn(null);
 
-		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
-		profileImageLoader.loadPortrait(player, label, 16, listener);
+		profileImageLoader.getPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
 
 		verify(label).setIcon(any(Icon.class));
-		verify(listener, never()).onProfileDownloaded(label);
+		verify(listener).onProfileDownloaded(profile);
 
 		assertEquals(0, portraitFile.length()); //file should not have been modified
 
 		//properties file should have been modified, though
 		Properties props = new Properties();
 		props.load(new FileInputStream(propertiesFile));
-		assertEquals(3, props.size());
+		assertEquals(4, props.size());
 		assertEquals("false", props.get("private"));
 		assertEquals("gold", props.get("rank"));
 		assertNotNull(props.get("joined"));
@@ -188,22 +179,18 @@ public class ProfileLoaderTest {
 
 	@Test
 	public void stress_test() throws Throwable {
-		ProfileDownloadedListener listener = mock(ProfileDownloadedListener.class);
-		JLabel label = mock(JLabel.class);
 		String player = profile.getPlayerName();
 
-		PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
 		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
-		ProfileLoader profileImageLoader = create(temp.getRoot(), scraper);
 		for (int i = 0; i < 100; i++) {
-			profileImageLoader.loadPortrait(player, label, 16, listener);
+			profileImageLoader.getPortrait(player, label, 16, listener);
 		}
 		wait(profileImageLoader);
 
 		verify(label, atLeastOnce()).setIcon(any(Icon.class));
-		verify(listener, atLeastOnce()).onProfileDownloaded(label);
+		verify(listener, atLeastOnce()).onProfileDownloaded(profile);
 
 		byte[] expected = portrait;
 		byte[] actual = IOUtils.toByteArray(new FileInputStream(portraitFile));
@@ -211,7 +198,7 @@ public class ProfileLoaderTest {
 
 		Properties props = new Properties();
 		props.load(new FileInputStream(propertiesFile));
-		assertEquals(3, props.size());
+		assertEquals(4, props.size());
 		assertEquals("false", props.get("private"));
 		assertEquals("gold", props.get("rank"));
 		assertNotNull(props.get("joined"));
