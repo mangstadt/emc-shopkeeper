@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -258,7 +259,7 @@ public class PlayersPanel extends JPanel {
 		});
 		add(new MyJScrollPane(list), "w 450, growy");
 
-		tablesPanel = new JPanel(new MigLayout("insets 1, fillx"));
+		tablesPanel = new JPanel(new MigLayout("insets 3, fillx"));
 		tablesPanelScrollPane = new MyJScrollPane(tablesPanel);
 		add(tablesPanelScrollPane, "grow, w 100%, h 100%");
 
@@ -269,118 +270,10 @@ public class PlayersPanel extends JPanel {
 		tablesPanel.removeAll();
 		tables.clear();
 
-		final int profileImageSize = 64;
 		for (PlayerGroup playerGroup : playerGroups) {
-			Player player = playerGroup.getPlayer();
-
-			JPanel header = new JPanel(new MigLayout("insets 3"));
-			header.setOpaque(false);
-
-			int rows = 3;
-
-			String title = null;
-			Date joined = null;
-			PlayerProfile profile = profileLoader.getProfile(player.getName(), null);
-			if (profile != null) {
-				title = profile.getTitle();
-				if (title != null) {
-					rows++;
-				}
-
-				joined = profile.getJoined();
-				if (joined != null) {
-					rows++;
-				}
-			}
-
-			JLabel profileImage = new JLabel();
-			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
-			profileImage.setVerticalAlignment(SwingConstants.TOP);
-			profileLoader.getPortrait(player.getName(), profileImage, profileImageSize);
-			header.add(profileImage, "span 1 " + rows + ", w " + profileImageSize + "!, h " + profileImageSize + "!, gapright 10");
-
-			JLabel playerName = new ClickableLabel("<html><h3><u>" + player.getName(), "http://u.emc.gs/" + player.getName());
-			playerName.setToolTipText("View player's profile");
-
-			EmcServer server = onlinePlayersMonitor.getPlayerServer(player.getName());
-			if (server != null) {
-				header.add(playerName, "span 2, split 2");
-
-				JLabel onlineLabel = new JLabel("<html><font size=2><i>Connected to <b>" + server, ImageManager.getOnline(null, 16), SwingConstants.LEFT);
-				onlineLabel.setIconTextGap(2);
-				header.add(onlineLabel, "gapleft 10, wrap");
-			} else {
-				header.add(playerName, "span 2, wrap");
-			}
-
-			if (title != null) {
-				Color color = null;
-				Rank rank = profile.getRank();
-				if (rank != null) {
-					color = profileLoader.getRankColor(rank);
-				}
-
-				JLabel playerTitle = new JLabel(title);
-				if (color != null) {
-					playerTitle.setForeground(color);
-				}
-				header.add(playerTitle, "gaptop 0, span 2, wrap");
-			}
-
-			if (joined != null) {
-				header.add(new JLabel("Joined:"));
-				header.add(new JLabel(dateFormat.format(joined)), "wrap");
-			}
-
-			if (showFirstLastSeen) {
-				Date firstSeen = player.getFirstSeen();
-				if (firstSeen != null) {
-					header.add(new JLabel("First seen:"));
-					header.add(new JLabel(dateTimeFormat.format(firstSeen)), "wrap");
-				}
-
-				Date lastSeen = player.getLastSeen();
-				if (lastSeen != null) {
-					header.add(new JLabel("Last seen:"));
-					header.add(new JLabel(dateTimeFormat.format(lastSeen)), "wrap");
-				}
-			}
-
-			tablesPanel.add(header, "wrap");
-
-			Column column = null;
-			boolean ascending = true;
-			switch (sort) {
-			case PLAYER:
-				column = Column.ITEM_NAME;
-				ascending = true;
-				break;
-			case SUPPLIER:
-				column = Column.NET_AMT;
-				ascending = true;
-				break;
-			case CUSTOMER:
-				column = Column.NET_AMT;
-				ascending = false;
-				break;
-			}
-
-			ItemsTable table = new ItemsTable(displayedItems.get(playerGroup), column, ascending, showQuantitiesInStacks);
-			tablesPanel.add(table.getTableHeader(), "growx, wrap");
-			tablesPanel.add(table, "growx, wrap");
-			tables.add(table);
-
-			JLabel netAmount;
-			{
-				int amount = calculateNetTotal(playerGroup);
-
-				StringBuilder sb = new StringBuilder();
-				sb.append("<html><code><b>");
-				sb.append(formatRupeesWithColor(amount));
-				sb.append("</b></code></html>");
-				netAmount = new JLabel(sb.toString());
-			}
-			tablesPanel.add(netAmount, "align right, span 2, wrap");
+			PlayerDisplayPanel panel = new PlayerDisplayPanel(playerGroup);
+			tables.add(panel.itemsTable);
+			tablesPanel.add(panel, "growx, wrap");
 		}
 
 		tablesPanel.validate();
@@ -522,6 +415,142 @@ public class PlayersPanel extends JPanel {
 				});
 			}
 			break;
+		}
+	}
+
+	private class PlayerDisplayPanel extends JPanel {
+		private final int profileImageSize = 64;
+		private final ItemsTable itemsTable;
+
+		public PlayerDisplayPanel(PlayerGroup playerGroup) {
+			super(new MigLayout("insets 0"));
+			setOpaque(false);
+
+			Player player = playerGroup.getPlayer();
+			String playerName = player.getName();
+
+			JPanel header = new JPanel(new MigLayout("insets 5"));
+			{
+				header.setOpaque(false);
+
+				int rows = 3;
+
+				String title = null;
+				Date joined = null;
+				PlayerProfile profile = profileLoader.getProfile(playerName, null);
+				if (profile != null) {
+					title = profile.getTitle();
+					if (title != null) {
+						rows++;
+					}
+
+					joined = profile.getJoined();
+					if (joined != null) {
+						rows++;
+					}
+				}
+
+				final JLabel profileImage = new JLabel();
+				{
+					profileImage.setHorizontalAlignment(SwingConstants.CENTER);
+					profileImage.setVerticalAlignment(SwingConstants.TOP);
+					profileLoader.getPortrait(playerName, profileImage, profileImageSize, new ProfileDownloadedListener() {
+						@Override
+						public void onProfileDownloaded(PlayerProfile profile) {
+							profileLoader.getPortrait(profile.getPlayerName(), profileImage, profileImageSize);
+						}
+					});
+				}
+				header.add(profileImage, "span 1 " + rows + ", gapright 10, growy");
+
+				JLabel playerNameLabel = new ClickableLabel("<html><h3><u>" + playerName, "http://u.emc.gs/" + playerName);
+				playerNameLabel.setBorder(new EmptyBorder(-10, 0, -10, 0));
+				playerNameLabel.setToolTipText("View player's profile");
+
+				EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+				if (server != null) {
+					header.add(playerNameLabel, "span 2, split 2");
+
+					JLabel onlineLabel = new JLabel("<html><font size=2><i>Connected to <b>" + server, ImageManager.getOnline(null, 16), SwingConstants.LEFT);
+					onlineLabel.setIconTextGap(2);
+					header.add(onlineLabel, "gapleft 10, wrap");
+				} else {
+					header.add(playerNameLabel, "span 2, wrap");
+				}
+
+				if (title != null) {
+					Color color = null;
+					Rank rank = profile.getRank();
+					if (rank != null) {
+						color = profileLoader.getRankColor(rank);
+					}
+
+					JLabel playerTitle = new JLabel(title);
+					if (color != null) {
+						playerTitle.setForeground(color);
+					}
+					header.add(playerTitle, "gaptop 0, span 2, wrap");
+				}
+
+				if (joined != null) {
+					header.add(new JLabel("Joined:"));
+					header.add(new JLabel(dateFormat.format(joined)), "wrap");
+				}
+
+				if (showFirstLastSeen) {
+					Date firstSeen = player.getFirstSeen();
+					if (firstSeen != null) {
+						header.add(new JLabel("First seen:"));
+						header.add(new JLabel(dateTimeFormat.format(firstSeen)), "wrap");
+					}
+
+					Date lastSeen = player.getLastSeen();
+					if (lastSeen != null) {
+						header.add(new JLabel("Last seen:"));
+						header.add(new JLabel(dateTimeFormat.format(lastSeen)), "wrap");
+					}
+				}
+			}
+			add(header, "wrap");
+
+			{
+				Column column;
+				boolean ascending;
+				switch (sort) {
+				case PLAYER:
+					column = Column.ITEM_NAME;
+					ascending = true;
+					break;
+				case SUPPLIER:
+					column = Column.NET_AMT;
+					ascending = true;
+					break;
+				case CUSTOMER:
+					column = Column.NET_AMT;
+					ascending = false;
+					break;
+				default:
+					column = null;
+					ascending = true;
+					break;
+				}
+
+				itemsTable = new ItemsTable(displayedItems.get(playerGroup), column, ascending, showQuantitiesInStacks);
+			}
+			add(itemsTable.getTableHeader(), "w 100%, wrap");
+			add(itemsTable, "w 100%, wrap");
+
+			JLabel netAmount;
+			{
+				int amount = calculateNetTotal(playerGroup);
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("<html><code><b>Total: ");
+				sb.append(formatRupeesWithColor(amount));
+				sb.append("</b></code></html>");
+				netAmount = new JLabel(sb.toString());
+			}
+			add(netAmount, "align right, span 2, wrap");
 		}
 	}
 
