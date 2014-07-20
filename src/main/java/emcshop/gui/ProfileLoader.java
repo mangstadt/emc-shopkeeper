@@ -21,6 +21,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ListMultimap;
 
 import emcshop.gui.images.ImageManager;
@@ -30,6 +32,7 @@ import emcshop.scraper.Rank;
 import emcshop.util.CaseInsensitiveHashSet;
 import emcshop.util.CaseInsensitiveMultimap;
 import emcshop.util.HttpClientFactory;
+import emcshop.util.ImageCache;
 import emcshop.util.PropertiesWrapper;
 
 /**
@@ -200,7 +203,7 @@ public class ProfileLoader {
 		}
 		image = new ImageIcon(data);
 		image = ImageManager.scale(image, maxSize);
-		portraitCache.set(playerName, maxSize, image);
+		portraitCache.put(playerName, maxSize, image);
 		return image;
 	}
 
@@ -377,17 +380,7 @@ public class ProfileLoader {
 		void onProfileDownloaded(PlayerProfile profile);
 	}
 
-	private static class PortraitCache {
-		private final Map<String, ImageIcon> cache = new HashMap<String, ImageIcon>();
-
-		public synchronized ImageIcon get(String player, int maxSize) {
-			return cache.get(key(player.toLowerCase(), maxSize));
-		}
-
-		public synchronized void set(String player, int maxSize, ImageIcon image) {
-			cache.put(key(player.toLowerCase(), maxSize), image);
-		}
-
+	private static class PortraitCache extends ImageCache {
 		public ImageIcon unknown(int maxSize) {
 			ImageIcon image = get("(unknown)", maxSize);
 			if (image != null) {
@@ -395,12 +388,8 @@ public class ProfileLoader {
 			}
 
 			image = ImageManager.scale(ImageManager.getUnknown(), maxSize);
-			set("(unknown)", maxSize, image);
+			put("(unknown)", maxSize, image);
 			return image;
-		}
-
-		private String key(String player, int maxSize) {
-			return player.toLowerCase() + "|" + maxSize;
 		}
 	}
 
@@ -421,23 +410,21 @@ public class ProfileLoader {
 	}
 
 	private class PlayerProfileSerializer {
-		private final Map<Rank, String> rankToString = new EnumMap<Rank, String>(Rank.class);
+		private final BiMap<Rank, String> rankToString;
+		private final BiMap<String, Rank> stringToRank;
 		{
-			rankToString.put(Rank.IRON, "iron");
-			rankToString.put(Rank.GOLD, "gold");
-			rankToString.put(Rank.DIAMOND, "diamond");
-			rankToString.put(Rank.HELPER, "helper");
-			rankToString.put(Rank.MODERATOR, "moderator");
-			rankToString.put(Rank.SENIOR_STAFF, "senior_staff");
-			rankToString.put(Rank.DEVELOPER, "developer");
-			rankToString.put(Rank.ADMIN, "admin");
-		}
+			ImmutableBiMap.Builder<Rank, String> builder = ImmutableBiMap.builder();
+			builder.put(Rank.IRON, "iron");
+			builder.put(Rank.GOLD, "gold");
+			builder.put(Rank.DIAMOND, "diamond");
+			builder.put(Rank.HELPER, "helper");
+			builder.put(Rank.MODERATOR, "moderator");
+			builder.put(Rank.SENIOR_STAFF, "senior_staff");
+			builder.put(Rank.DEVELOPER, "developer");
+			builder.put(Rank.ADMIN, "admin");
 
-		private final Map<String, Rank> stringToRank = new HashMap<String, Rank>();
-		{
-			for (Map.Entry<Rank, String> entry : rankToString.entrySet()) {
-				stringToRank.put(entry.getValue(), entry.getKey());
-			}
+			rankToString = builder.build();
+			stringToRank = rankToString.inverse();
 		}
 
 		public PlayerProfile load(String playerName) throws IOException {
@@ -461,7 +448,7 @@ public class ProfileLoader {
 
 			String rankStr = properties.get("rank");
 			if (rankStr != null) {
-				profile.setRank(stringToRank.get(rankStr));
+				profile.setRank(stringToRank.get(rankStr.toLowerCase()));
 			}
 
 			profile.setTitle(properties.get("title"));

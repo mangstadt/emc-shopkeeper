@@ -1,8 +1,6 @@
 package emcshop.gui.images;
 
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -10,13 +8,14 @@ import javax.swing.UIManager;
 
 import emcshop.ItemIndex;
 import emcshop.scraper.EmcServer;
+import emcshop.util.ImageCache;
 
 /**
  * Manages the images of the application.
  * @author Michael Angstadt
  */
 public class ImageManager {
-	private static final Map<String, ImageIcon> itemIconCache = new HashMap<String, ImageIcon>();
+	private static final ImageCache imageCache = new ImageCache();
 	private static final ItemIndex itemIndex = ItemIndex.instance();
 
 	public static Icon getErrorIcon() {
@@ -73,7 +72,12 @@ public class ImageManager {
 	 */
 	public static ImageIcon getOnline(EmcServer server, int size) {
 		String name = (server == null) ? "online.png" : "online-" + server.name().toLowerCase() + ".png";
-		return scale(name, size);
+		ImageIcon image = imageCache.get(name, size);
+		if (image == null) {
+			image = scale(name, size);
+			imageCache.put(name, size, image);
+		}
+		return image;
 	}
 
 	/**
@@ -83,7 +87,7 @@ public class ImageManager {
 	 */
 	public static ImageIcon getItemImage(String item) {
 		String imageFileName = itemIndex.getImageFileName(item);
-		ImageIcon image = itemIconCache.get(imageFileName);
+		ImageIcon image = imageCache.get(imageFileName, 16);
 		if (image == null) {
 			image = getImageIcon("items/" + imageFileName);
 			if (image == null) {
@@ -91,7 +95,7 @@ public class ImageManager {
 			} else {
 				image = scale(image, 16);
 			}
-			itemIconCache.put(item, image);
+			imageCache.put(item, 16, image);
 		}
 		return image;
 	}
