@@ -1,8 +1,8 @@
 package emcshop.gui.lib;
 
 import java.awt.Cursor;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
@@ -18,7 +18,7 @@ import emcshop.util.GuiUtils;
  * @author Michael Angstadt
  */
 @SuppressWarnings("serial")
-public class ClickableLabel extends JLabel implements MouseListener {
+public class ClickableLabel extends JLabel {
 	private static final Logger logger = Logger.getLogger(ClickableLabel.class.getName());
 	private URI uri;
 
@@ -54,35 +54,15 @@ public class ClickableLabel extends JLabel implements MouseListener {
 
 		//only set these things if the user's computer supports opening a browser window
 		setCursor(new Cursor(Cursor.HAND_CURSOR));
-		addMouseListener(this);
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		try {
-			GuiUtils.openWebPage(uri);
-		} catch (IOException e) {
-			logger.log(Level.WARNING, "Problem opening webpage.", e);
-		}
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		//empty
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		//empty
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		//empty
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		//empty
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent event) {
+				try {
+					GuiUtils.openWebPage(uri);
+				} catch (IOException e) {
+					logger.log(Level.WARNING, "Problem opening webpage.", e);
+				}
+			}
+		});
 	}
 }
