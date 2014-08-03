@@ -52,12 +52,17 @@ import emcshop.db.DbDao;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupPanel;
+import emcshop.model.ChatLogViewerModelImpl;
+import emcshop.model.IChatLogViewerModel;
+import emcshop.presenter.ChatLogViewerPresenter;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.UIDefaultsWrapper;
+import emcshop.view.ChatLogViewerViewImpl;
+import emcshop.view.IChatLogViewerView;
 
 @SuppressWarnings("serial")
 public class PaymentsTab extends JPanel {
@@ -196,7 +201,7 @@ public class PaymentsTab extends JPanel {
 				MyJScrollPane scrollPane = new MyJScrollPane(paymentsTable);
 				inner.add(scrollPane, "h 100%, w 100%");
 
-				add(inner, "align center, w :650:650, h 100%");
+				add(inner, "align center, w :700:700, h 100%");
 			}
 
 			validate();
@@ -222,7 +227,7 @@ public class PaymentsTab extends JPanel {
 	 * are defined is the order that they will appear in the table.
 	 */
 	private enum Column {
-		CHECKBOX(""), SPLIT("Split"), ASSIGN("Assign"), TIME("Time"), PLAYER("Player"), AMOUNT("Amount");
+		CHECKBOX(""), SPLIT("Split"), ASSIGN("Assign"), CHAT_LOG("Log"), TIME("Time"), PLAYER("Player"), AMOUNT("Amount");
 
 		private final String name;
 
@@ -278,6 +283,7 @@ public class PaymentsTab extends JPanel {
 					switch (column) {
 					case SPLIT:
 					case ASSIGN:
+					case CHAT_LOG:
 						cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 						break;
 					default:
@@ -306,6 +312,7 @@ public class PaymentsTab extends JPanel {
 			rowSorter.setSortable(Column.CHECKBOX.ordinal(), false);
 			rowSorter.setSortable(Column.SPLIT.ordinal(), false);
 			rowSorter.setSortable(Column.ASSIGN.ordinal(), false);
+			rowSorter.setSortable(Column.CHAT_LOG.ordinal(), false);
 			rowSorter.setComparator(Column.TIME.ordinal(), new Comparator<Row>() {
 				@Override
 				public int compare(Row one, Row two) {
@@ -350,6 +357,7 @@ public class PaymentsTab extends JPanel {
 
 			private final ImageIcon assignIcon = ImageManager.getImageIcon("assign.png");
 			private final ImageIcon splitIcon = ImageManager.getImageIcon("split.png");
+			private final ImageIcon chatIcon = ImageManager.getImageIcon("chat.png");
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, final int col) {
@@ -375,6 +383,13 @@ public class PaymentsTab extends JPanel {
 					component = label;
 
 					label.setIcon(assignIcon);
+					label.setHorizontalAlignment(SwingConstants.CENTER);
+					break;
+
+				case CHAT_LOG:
+					component = label;
+
+					label.setIcon(chatIcon);
 					label.setHorizontalAlignment(SwingConstants.CENTER);
 					break;
 
@@ -504,6 +519,10 @@ public class PaymentsTab extends JPanel {
 				assignRow(row);
 				break;
 
+			case CHAT_LOG:
+				showChatLog(row);
+				break;
+
 			default:
 				Row rowObj = model.data.get(row);
 				rowObj.selected = !rowObj.selected;
@@ -583,6 +602,10 @@ public class PaymentsTab extends JPanel {
 			TableColumn splitColumn = getColumn(Column.SPLIT);
 			splitColumn.setMaxWidth(50);
 			splitColumn.setResizable(false);
+
+			TableColumn chatColumn = getColumn(Column.CHAT_LOG);
+			chatColumn.setMaxWidth(50);
+			chatColumn.setResizable(false);
 
 			TableColumn timeColumn = getColumn(Column.TIME);
 			timeColumn.setPreferredWidth(200);
@@ -679,6 +702,13 @@ public class PaymentsTab extends JPanel {
 			int insertIndex = row + 1;
 			model.data.add(insertIndex, new Row(splitTransaction));
 			model.fireTableRowsInserted(insertIndex, insertIndex);
+		}
+
+		private void showChatLog(int row) {
+			PaymentTransaction transaction = model.data.get(row).transaction;
+			IChatLogViewerView view = new ChatLogViewerViewImpl(owner);
+			IChatLogViewerModel model = new ChatLogViewerModelImpl(transaction);
+			new ChatLogViewerPresenter(view, model);
 		}
 	}
 

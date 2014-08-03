@@ -1,5 +1,7 @@
 package emcshop;
 
+import static emcshop.util.MinecraftUtils.getDefaultMinecraftFolder;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -29,6 +31,7 @@ public class Settings {
 	private boolean backupsEnabled;
 	private Integer backupFrequency;
 	private Integer maxBackups;
+	private File chatLogDir;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -145,6 +148,14 @@ public class Settings {
 		this.maxBackups = maxBackups;
 	}
 
+	public File getChatLogDir() {
+		return chatLogDir;
+	}
+
+	public void setChatLogDir(File chatLogDir) {
+		this.chatLogDir = chatLogDir;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowWidth = 1000;
@@ -161,6 +172,12 @@ public class Settings {
 		backupsEnabled = true;
 		backupFrequency = 7;
 		maxBackups = 10;
+
+		File minecraft = getDefaultMinecraftFolder();
+		if (minecraft == null) {
+			minecraft = new File("");
+		}
+		chatLogDir = new File(minecraft, "logs");
 	}
 
 	public void load() throws IOException {
@@ -252,6 +269,17 @@ public class Settings {
 			logger.log(Level.WARNING, "Problem parsing backup.max: ", e);
 			maxBackups = 10;
 		}
+
+		String value = props.get("chatLogDir");
+		if (value == null) {
+			File minecraft = getDefaultMinecraftFolder();
+			if (minecraft == null) {
+				minecraft = new File("");
+			}
+			chatLogDir = new File(minecraft, "logs");
+		} else {
+			chatLogDir = new File(value);
+		}
 	}
 
 	public void save() {
@@ -277,6 +305,10 @@ public class Settings {
 			props.store(file, "EMC Shopkeeper settings");
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Problem saving settings file.", e);
+		}
+
+		if (chatLogDir != null) {
+			props.set("chatLogDir", chatLogDir.getAbsolutePath());
 		}
 	}
 }
