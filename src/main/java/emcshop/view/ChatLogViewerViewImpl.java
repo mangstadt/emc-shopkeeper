@@ -1,5 +1,6 @@
 package emcshop.view;
 
+import static emcshop.util.GuiUtils.shrinkFont;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml3;
 
 import java.awt.Window;
@@ -13,14 +14,20 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -36,10 +43,12 @@ import emcshop.util.Listeners;
 public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView {
 	private PaymentTransaction paymentTransaction;
 	private String currentPlayer;
+	private List<ChatMessage> chatMessages;
 
 	private final JTextField logDir;
 	private final JButton loadLogDir, prevDay, nextDay;
 	private final DatePicker datePicker;
+	private final FilterPanel filterPanel;
 	private final JEditorPane messages;
 
 	private final Listeners dateChangedListeners = new Listeners();
@@ -111,6 +120,20 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			}
 		});
 
+		filterPanel = new FilterPanel();
+		filterPanel.addSearchListener(new SearchListener() {
+			@Override
+			public void searchPerformed(String keyword) {
+				updateMessages();
+			}
+		});
+		filterPanel.addShortViewListener(new ShortViewListener() {
+			@Override
+			public void valueChanged(boolean shortView) {
+				updateMessages();
+			}
+		});
+
 		messages = new JEditorPane();
 		messages.setEditable(false);
 		messages.setContentType("text/html");
@@ -126,6 +149,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		add(datePicker);
 		add(prevDay);
 		add(nextDay, "wrap");
+
+		add(filterPanel, "wrap");
 
 		MyJScrollPane scroll = new MyJScrollPane(messages);
 		add(scroll, "grow, w 100%, h 100%");
@@ -187,7 +212,31 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 	@Override
 	public void setChatMessages(List<ChatMessage> chatMessages) {
-		if (chatMessages.isEmpty()) {
+		this.chatMessages = chatMessages;
+		updateMessages();
+	}
+
+	@Override
+	public void showError(String message) {
+		JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+	}
+
+	@Override
+	public void display() {
+		setVisible(true);
+	}
+
+	@Override
+	public void close() {
+		dispose();
+	}
+
+	private final Pattern chatRegex = Pattern.compile("^([TSLR]|From|To) ");
+	private final Pattern gaveRupeesRegex = Pattern.compile("^You paid ([\\d,]+) rupees to (.*)");
+	private final Pattern receivedRupeesRegex = Pattern.compile("^You just received ([\\d,]+) rupees from .*");
+
+	private void updateMessages() {
+		if (chatMessages == null || chatMessages.isEmpty()) {
 			messages.setText("<html><div align=\"center\"><b>No log entries for this date.");
 			return;
 		}
@@ -197,13 +246,82 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		int caretPosition = 0;
 		int totalTextLength = 0;
 		List<Integer> lineLengths = new ArrayList<Integer>(chatMessages.size());
+		boolean shortView = filterPanel.showShortView.isSelected();
+
 		for (ChatMessage chatMessage : chatMessages) {
-			Date date = chatMessage.getDate();
 			String message = chatMessage.getMessage();
+			Date date = chatMessage.getDate();
 
-			boolean highlight = (paymentTransaction != null && paymentTransaction.getTs().equals(date));
+			String escapedMessage = escapeHtml3(message);
 
+			//color payment transactions
+			boolean isPaymentTransaction = false;
+			Matcher m = gaveRupeesRegex.matcher(escapedMessage);
+			if (m.find()) {
+				isPaymentTransaction = true;
+				escapedMessage = escapedMessage.replace(m.group(1), "<span style=\"color:red\"><b>" + m.group(1) + "</b></span>");
+			}
+			m = receivedRupeesRegex.matcher(escapedMessage);
+			if (m.find()) {
+				isPaymentTransaction = true;
+				escapedMessage = escapedMessage.replace(m.group(1), "<span style=\"color:green\"><b>" + m.group(1) + "</b></span>");
+			}
+
+			//make the current player's name red
+			if (currentPlayer != null) {
+				String currentPlayer = escapeHtml3(this.currentPlayer);
+				escapedMessage = escapedMessage.replace(currentPlayer, "<span style=\"color:red\">" + currentPlayer + "</span>");
+			}
+
+			//highlight the search term
+			String search = filterPanel.search.getText().trim();
+			if (search.isEmpty()) {
+				search = null;
+			}
+			if (search != null) {
+				search = escapeHtml3(search);
+				escapedMessage = escapedMessage.replace(search, "<span style=\"background-color:yellow\">" + search + "</span>");
+			}
+
+			//color the chat message
+			boolean isChat = chatRegex.matcher(message).find();
+			if (isChat) {
+				if (escapedMessage.startsWith("To") || escapedMessage.startsWith("From")) {
+					escapedMessage = "<span style=\"color:purple\">" + escapedMessage + "</span>";
+				} else {
+					String color;
+					char channel = escapedMessage.charAt(0);
+					switch (channel) {
+					case 'T':
+						color = "green";
+						break;
+
+					case 'S':
+						color = "cyan";
+						break;
+
+					case 'L':
+						color = "yellow";
+						break;
+
+					case 'R':
+						color = "blue";
+						break;
+
+					default:
+						color = null;
+						break;
+					}
+
+					if (color != null) {
+						escapedMessage = "<span style=\"color:" + color + "\"><b>" + channel + "</b></span>" + escapedMessage.substring(1);
+					}
+				}
+			}
+
+			//highlight the selected payment transaction
 			//TODO http://stackoverflow.com/questions/9388264/jeditorpane-with-inline-image
+			boolean highlight = (isPaymentTransaction && paymentTransaction != null && paymentTransaction.getTs().equals(date));
 			if (highlight) {
 				//set caret position so the highlighted text is in the middle
 				if (!lineLengths.isEmpty()) {
@@ -226,19 +344,41 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				sb.append("<span style=\"background-color:yellow\">");
 			}
 
-			String escapedMessage = escapeHtml3(message);
-			if (currentPlayer != null) {
-				escapedMessage = escapedMessage.replace(currentPlayer, "<span style=\"color:red\">" + currentPlayer + "</span>");
+			//grey out hidden messages
+			boolean hide = (!isChat && !isPaymentTransaction && shortView);
+			if (hide) {
+				sb.append("<span style=\"color:#cccccc\">");
 			}
 
 			sb.append('[').append(df.format(date)).append("] ");
 			sb.append(escapedMessage);
 
+			if (hide) {
+				sb.append("</span>");
+			}
 			if (highlight) {
 				sb.append("</span>");
 			}
 
 			sb.append("<br>");
+
+			//set caret position so the highlighted text is in the middle
+			if (search == null && highlight && !lineLengths.isEmpty()) {
+				caretPosition = totalTextLength;
+
+				int from = lineLengths.size() - 1;
+				int to = lineLengths.size() - 5;
+				if (to < 0) {
+					to = 0;
+				}
+				for (int i = from; i >= to; i--) {
+					caretPosition -= lineLengths.get(i);
+				}
+
+				if (caretPosition < 0) {
+					caretPosition = 0;
+				}
+			}
 
 			int lineLength = message.length() + 12;
 			totalTextLength += lineLength;
@@ -249,18 +389,89 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		messages.setCaretPosition(caretPosition);
 	}
 
-	@Override
-	public void showError(String message) {
-		JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+	private class FilterPanel extends JPanel {
+		private final JLabel searchLabel;
+		private final JTextField search;
+		private final JButton searchButton;
+
+		private final JCheckBox showShortView;
+
+		private final List<SearchListener> searchListeners = new ArrayList<SearchListener>();
+		private final List<ShortViewListener> shortViewListeners = new ArrayList<ShortViewListener>();
+
+		public FilterPanel() {
+			searchLabel = new JLabel("<html><font size=2>Search:");
+			searchButton = new JButton("Search");
+			searchButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					String keyword = search.getText().trim();
+					if (keyword.isEmpty()) {
+						return;
+					}
+
+					for (SearchListener listener : searchListeners) {
+						listener.searchPerformed(keyword);
+					}
+				}
+			});
+			shrinkFont(searchButton);
+
+			search = new JTextField();
+			search.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					searchButton.doClick();
+				}
+			});
+
+			showShortView = new JCheckBox("Only show chats and payment transactions");
+			showShortView.addChangeListener(new ChangeListener() {
+				@Override
+				public void stateChanged(ChangeEvent arg0) {
+					for (ShortViewListener listener : shortViewListeners) {
+						listener.valueChanged(showShortView.isSelected());
+					}
+				}
+			});
+			shrinkFont(showShortView);
+
+			////////////////////////////////////////
+
+			setLayout(new MigLayout("insets 0"));
+
+			add(searchLabel);
+			add(search, "w 150");
+			add(searchButton);
+			add(showShortView);
+		}
+
+		public void addSearchListener(SearchListener listener) {
+			searchListeners.add(listener);
+		}
+
+		public void addShortViewListener(ShortViewListener listener) {
+			shortViewListeners.add(listener);
+		}
+
+		public void clear() {
+			search.setText("");
+		}
+
+		@Override
+		public void setEnabled(boolean enabled) {
+			super.setEnabled(enabled);
+			search.setEnabled(enabled);
+			searchButton.setEnabled(enabled);
+			showShortView.setEnabled(enabled);
+		}
 	}
 
-	@Override
-	public void display() {
-		setVisible(true);
+	private interface SearchListener {
+		void searchPerformed(String keyword);
 	}
 
-	@Override
-	public void close() {
-		dispose();
+	private interface ShortViewListener {
+		void valueChanged(boolean shortView);
 	}
 }
