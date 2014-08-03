@@ -10,6 +10,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -36,10 +37,11 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 	private PaymentTransaction paymentTransaction;
 
 	private final JTextField logDir;
-	private final JButton loadLogDir;
+	private final JButton loadLogDir, prevDay, nextDay;
 	private final DatePicker datePicker;
 	private final JEditorPane messages;
 
+	private final Listeners dateChangedListeners = new Listeners();
 	private final Listeners closeListeners = new Listeners();
 
 	public ChatLogViewerViewImpl(Window owner) {
@@ -78,6 +80,36 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		datePicker.setShowTodayButton(true);
 		datePicker.setStripTime(true);
 
+		prevDay = new JButton("<");
+		prevDay.setToolTipText("Previous day");
+		prevDay.addActionListener(new ActionListener() {
+			private final Calendar c = Calendar.getInstance();
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				c.setTime(datePicker.getDate());
+				c.add(Calendar.DATE, -1);
+				setDate(c.getTime());
+
+				dateChangedListeners.fire();
+			}
+		});
+
+		nextDay = new JButton(">");
+		prevDay.setToolTipText("Next day");
+		nextDay.addActionListener(new ActionListener() {
+			private final Calendar c = Calendar.getInstance();
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				c.setTime(datePicker.getDate());
+				c.add(Calendar.DATE, 1);
+				setDate(c.getTime());
+
+				dateChangedListeners.fire();
+			}
+		});
+
 		messages = new JEditorPane();
 		messages.setEditable(false);
 		messages.setContentType("text/html");
@@ -89,8 +121,10 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		add(logDir, "w 100%, split 2");
 		add(loadLogDir, "wrap");
 
-		add(new JLabel("Date:"), "split 2");
-		add(datePicker, "wrap");
+		add(new JLabel("Date:"), "split 4");
+		add(datePicker);
+		add(prevDay);
+		add(nextDay, "wrap");
 
 		MyJScrollPane scroll = new MyJScrollPane(messages);
 		add(scroll, "grow, w 100%, h 100%");
@@ -101,6 +135,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 	@Override
 	public void addDateChangedListener(ActionListener listener) {
+		dateChangedListeners.add(listener);
 		datePicker.addActionListener(listener);
 	}
 
@@ -149,11 +184,11 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
 		DateFormat df = new SimpleDateFormat("HH:mm:ss");
 		int caretPosition = 0;
+		int totalTextLength = 0;
 		List<Integer> lineLengths = new ArrayList<Integer>(chatMessages.size());
 		for (ChatMessage chatMessage : chatMessages) {
 			Date date = chatMessage.getDate();
 			String message = chatMessage.getMessage();
-			int prevLength = sb.length();
 
 			boolean highlight = (paymentTransaction != null && paymentTransaction.getTs().equals(date));
 
@@ -161,10 +196,10 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			if (highlight) {
 				//set caret position so the highlighted text is in the middle
 				if (!lineLengths.isEmpty()) {
-					caretPosition = sb.length();
+					caretPosition = totalTextLength;
 
 					int from = lineLengths.size() - 1;
-					int to = lineLengths.size() - 12;
+					int to = lineLengths.size() - 5;
 					if (to < 0) {
 						to = 0;
 					}
@@ -187,10 +222,11 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				sb.append("</span>");
 			}
 
-			lineLengths.add(sb.length() - prevLength);
-
 			sb.append("<br>");
 
+			int lineLength = message.length() + 12;
+			totalTextLength += lineLength;
+			lineLengths.add(lineLength);
 		}
 
 		messages.setText(sb.toString());
