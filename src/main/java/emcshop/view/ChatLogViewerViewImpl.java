@@ -187,6 +187,11 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 	@Override
 	public void setChatMessages(List<ChatMessage> chatMessages) {
+		if (chatMessages.isEmpty()) {
+			messages.setText("<html><div align=\"center\"><b>No log entries for this date.");
+			return;
+		}
+
 		StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
 		DateFormat df = new SimpleDateFormat("HH:mm:ss");
 		int caretPosition = 0;
