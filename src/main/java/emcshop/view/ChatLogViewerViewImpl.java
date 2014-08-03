@@ -18,7 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
@@ -26,8 +25,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -124,12 +121,6 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		filterPanel.addSearchListener(new SearchListener() {
 			@Override
 			public void searchPerformed(String keyword) {
-				updateMessages();
-			}
-		});
-		filterPanel.addShortViewListener(new ShortViewListener() {
-			@Override
-			public void valueChanged(boolean shortView) {
 				updateMessages();
 			}
 		});
@@ -246,7 +237,6 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		int caretPosition = 0;
 		int totalTextLength = 0;
 		List<Integer> lineLengths = new ArrayList<Integer>(chatMessages.size());
-		boolean shortView = filterPanel.showShortView.isSelected();
 
 		for (ChatMessage chatMessage : chatMessages) {
 			String message = chatMessage.getMessage();
@@ -297,11 +287,11 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 						break;
 
 					case 'S':
-						color = "cyan";
+						color = "#00ffff";
 						break;
 
 					case 'L':
-						color = "yellow";
+						color = "#00cccc";
 						break;
 
 					case 'R':
@@ -345,7 +335,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			}
 
 			//grey out hidden messages
-			boolean hide = (!isChat && !isPaymentTransaction && shortView);
+			boolean hide = (!isChat && !isPaymentTransaction);
 			if (hide) {
 				sb.append("<span style=\"color:#cccccc\">");
 			}
@@ -394,10 +384,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		private final JTextField search;
 		private final JButton searchButton;
 
-		private final JCheckBox showShortView;
-
 		private final List<SearchListener> searchListeners = new ArrayList<SearchListener>();
-		private final List<ShortViewListener> shortViewListeners = new ArrayList<ShortViewListener>();
 
 		public FilterPanel() {
 			searchLabel = new JLabel("<html><font size=2>Search:");
@@ -425,17 +412,6 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				}
 			});
 
-			showShortView = new JCheckBox("Only show chats and payment transactions");
-			showShortView.addChangeListener(new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent arg0) {
-					for (ShortViewListener listener : shortViewListeners) {
-						listener.valueChanged(showShortView.isSelected());
-					}
-				}
-			});
-			shrinkFont(showShortView);
-
 			////////////////////////////////////////
 
 			setLayout(new MigLayout("insets 0"));
@@ -443,19 +419,10 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			add(searchLabel);
 			add(search, "w 150");
 			add(searchButton);
-			add(showShortView);
 		}
 
 		public void addSearchListener(SearchListener listener) {
 			searchListeners.add(listener);
-		}
-
-		public void addShortViewListener(ShortViewListener listener) {
-			shortViewListeners.add(listener);
-		}
-
-		public void clear() {
-			search.setText("");
 		}
 
 		@Override
@@ -463,15 +430,10 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			super.setEnabled(enabled);
 			search.setEnabled(enabled);
 			searchButton.setEnabled(enabled);
-			showShortView.setEnabled(enabled);
 		}
 	}
 
 	private interface SearchListener {
 		void searchPerformed(String keyword);
-	}
-
-	private interface ShortViewListener {
-		void valueChanged(boolean shortView);
 	}
 }
