@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -72,7 +73,12 @@ public class ChatLogParser {
 		//parse log files
 		List<ChatMessage> messages = new ArrayList<ChatMessage>();
 		for (File file : logFiles.values()) {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file)), "UTF-8"));
+			InputStream in = new FileInputStream(file);
+			if (file.getName().endsWith(".gz")) {
+				in = new GZIPInputStream(in);
+			}
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+
 			try {
 				Calendar cal = Calendar.getInstance();
 				Pattern lineRegex = Pattern.compile("^\\[(\\d\\d):(\\d\\d):(\\d\\d)\\].*?\\[CHAT\\](.*)");
