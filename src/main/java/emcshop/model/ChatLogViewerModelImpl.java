@@ -9,6 +9,7 @@ import emcshop.AppContext;
 import emcshop.Settings;
 import emcshop.chat.ChatLogParser;
 import emcshop.chat.ChatMessage;
+import emcshop.scraper.EmcSession;
 import emcshop.scraper.PaymentTransaction;
 
 public class ChatLogViewerModelImpl implements IChatLogViewerModel {
@@ -47,5 +48,11 @@ public class ChatLogViewerModelImpl implements IChatLogViewerModel {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public String getCurrentPlayer() {
+		EmcSession session = settings.getSession();
+		return (session == null) ? null : session.getUsername();
 	}
 }

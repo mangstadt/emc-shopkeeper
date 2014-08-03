@@ -27,6 +27,8 @@ public interface IChatLogViewerView {
 
 	void setChatMessages(List<ChatMessage> chatMessages);
 
+	void setCurrentPlayer(String currentPlayer);
+
 	void showError(String string);
 
 	void display();

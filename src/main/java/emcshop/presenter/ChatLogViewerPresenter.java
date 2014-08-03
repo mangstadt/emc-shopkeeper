@@ -39,6 +39,7 @@ public class ChatLogViewerPresenter {
 		});
 
 		view.setLogDirectory(model.getLogDirectory());
+		view.setCurrentPlayer(model.getCurrentPlayer());
 
 		PaymentTransaction paymentTransaction = model.getPaymentTransaction();
 		view.setPaymentTransaction(paymentTransaction);

@@ -35,6 +35,7 @@ import emcshop.util.Listeners;
 @SuppressWarnings("serial")
 public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView {
 	private PaymentTransaction paymentTransaction;
+	private String currentPlayer;
 
 	private final JTextField logDir;
 	private final JButton loadLogDir, prevDay, nextDay;
@@ -180,6 +181,11 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 	}
 
 	@Override
+	public void setCurrentPlayer(String currentPlayer) {
+		this.currentPlayer = currentPlayer;
+	}
+
+	@Override
 	public void setChatMessages(List<ChatMessage> chatMessages) {
 		StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
 		DateFormat df = new SimpleDateFormat("HH:mm:ss");
@@ -215,8 +221,13 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				sb.append("<span style=\"background-color:yellow\">");
 			}
 
+			String escapedMessage = escapeHtml3(message);
+			if (currentPlayer != null) {
+				escapedMessage = escapedMessage.replace(currentPlayer, "<span style=\"color:red\">" + currentPlayer + "</span>");
+			}
+
 			sb.append('[').append(df.format(date)).append("] ");
-			sb.append(escapeHtml3(message));
+			sb.append(escapedMessage);
 
 			if (highlight) {
 				sb.append("</span>");

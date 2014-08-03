@@ -15,4 +15,6 @@ public interface IChatLogViewerModel {
 	PaymentTransaction getPaymentTransaction();
 
 	List<ChatMessage> getChatMessages(Date date);
+
+	String getCurrentPlayer();
 }
