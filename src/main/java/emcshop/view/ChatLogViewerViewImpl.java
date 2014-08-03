@@ -12,8 +12,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,13 +43,12 @@ import emcshop.util.Listeners;
 public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView {
 	private PaymentTransaction paymentTransaction;
 	private String currentPlayer;
-	private List<ChatMessage> chatMessages;
 
 	private final JTextField logDir;
 	private final JButton loadLogDir, prevDay, nextDay;
 	private final DatePicker datePicker;
 	private final FilterPanel filterPanel;
-	private final JEditorPane messages;
+	private final ChatLogEditorPane messages;
 
 	private final Listeners dateChangedListeners = new Listeners();
 	private final Listeners closeListeners = new Listeners();
@@ -121,13 +123,12 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		filterPanel.addSearchListener(new SearchListener() {
 			@Override
 			public void searchPerformed(String keyword) {
-				updateMessages();
+				messages.update();
 			}
 		});
 
-		messages = new JEditorPane();
+		messages = new ChatLogEditorPane();
 		messages.setEditable(false);
-		messages.setContentType("text/html");
 
 		//////////////////////////////////////////////////
 
@@ -203,8 +204,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 	@Override
 	public void setChatMessages(List<ChatMessage> chatMessages) {
-		this.chatMessages = chatMessages;
-		updateMessages();
+		messages.setChatMessages(chatMessages, paymentTransaction);
 	}
 
 	@Override
@@ -222,161 +222,155 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		dispose();
 	}
 
-	private final Pattern chatRegex = Pattern.compile("^([TSLR]|From|To) ");
-	private final Pattern gaveRupeesRegex = Pattern.compile("^You paid ([\\d,]+) rupees to (.*)");
-	private final Pattern receivedRupeesRegex = Pattern.compile("^You just received ([\\d,]+) rupees from .*");
-
-	private void updateMessages() {
-		if (chatMessages == null || chatMessages.isEmpty()) {
-			messages.setText("<html><div align=\"center\"><b>No log entries for this date.");
-			return;
+	private class ChatLogEditorPane extends JEditorPane {
+		private final DateFormat df = new SimpleDateFormat("HH:mm:ss");
+		private final Pattern chatRegex = Pattern.compile("^([TSLR]|From|To) ");
+		private final Pattern gaveRupeesRegex = Pattern.compile("^You paid ([\\d,]+) rupees to (.*)");
+		private final Pattern receivedRupeesRegex = Pattern.compile("^You just received ([\\d,]+) rupees from (.*)");
+		private final Map<String, String> channelColors = new HashMap<String, String>();
+		{
+			channelColors.put("T", "green");
+			channelColors.put("L", "#cccc00");
+			channelColors.put("S", "#00cccc");
+			channelColors.put("R", "blue");
 		}
 
-		StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
-		DateFormat df = new SimpleDateFormat("HH:mm:ss");
-		int caretPosition = 0;
-		int totalTextLength = 0;
-		List<Integer> lineLengths = new ArrayList<Integer>(chatMessages.size());
+		private PaymentTransaction paymentTransaction;
+		private List<ChatMessage> chatMessages = Collections.emptyList();
+		private List<Integer> lineLengths;
 
-		for (ChatMessage chatMessage : chatMessages) {
-			String message = chatMessage.getMessage();
-			Date date = chatMessage.getDate();
+		public ChatLogEditorPane() {
+			setContentType("text/html");
+		}
 
-			String escapedMessage = escapeHtml3(message);
+		public void setChatMessages(List<ChatMessage> chatMessages, PaymentTransaction paymentTransaction) {
+			this.chatMessages = chatMessages;
+			this.paymentTransaction = paymentTransaction;
+			update();
+		}
 
-			//color payment transactions
-			boolean isPaymentTransaction = false;
-			Matcher m = gaveRupeesRegex.matcher(escapedMessage);
-			if (m.find()) {
-				isPaymentTransaction = true;
-				escapedMessage = escapedMessage.replace(m.group(1), "<span style=\"color:red\"><b>" + m.group(1) + "</b></span>");
-			}
-			m = receivedRupeesRegex.matcher(escapedMessage);
-			if (m.find()) {
-				isPaymentTransaction = true;
-				escapedMessage = escapedMessage.replace(m.group(1), "<span style=\"color:green\"><b>" + m.group(1) + "</b></span>");
+		public void update() {
+			if (chatMessages.isEmpty()) {
+				setText("<html><div align=\"center\"><b>No log entries for this date.");
+				return;
 			}
 
-			//make the current player's name red
-			if (currentPlayer != null) {
-				String currentPlayer = escapeHtml3(this.currentPlayer);
-				escapedMessage = escapedMessage.replace(currentPlayer, "<span style=\"color:red\">" + currentPlayer + "</span>");
-			}
+			int caretPosition = 0;
+			int totalTextLength = 0;
+			lineLengths = new ArrayList<Integer>(chatMessages.size());
 
-			//highlight the search term
-			String search = filterPanel.search.getText().trim();
-			if (search.isEmpty()) {
-				search = null;
-			}
-			if (search != null) {
-				search = escapeHtml3(search);
-				escapedMessage = escapedMessage.replace(search, "<span style=\"background-color:yellow\">" + search + "</span>");
-			}
+			StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
+			for (ChatMessage chatMessage : chatMessages) {
+				String message = chatMessage.getMessage();
+				Date date = chatMessage.getDate();
 
-			//color the chat message
-			boolean isChat = chatRegex.matcher(message).find();
-			if (isChat) {
-				if (escapedMessage.startsWith("To") || escapedMessage.startsWith("From")) {
-					escapedMessage = "<span style=\"color:purple\">" + escapedMessage + "</span>";
+				String escapedMessage = escapeHtml3(message);
+
+				//color payment transactions
+				boolean isPaymentTransaction = false;
+				String paymentTransactionPlayer = null;
+				Matcher m = gaveRupeesRegex.matcher(escapedMessage);
+				if (m.find()) {
+					isPaymentTransaction = true;
+					escapedMessage = escapedMessage.replace(m.group(1), "<span style=\"color:red\"><b>" + m.group(1) + "</b></span>");
+					paymentTransactionPlayer = m.group(2);
+				}
+				m = receivedRupeesRegex.matcher(escapedMessage);
+				if (m.find()) {
+					isPaymentTransaction = true;
+					escapedMessage = escapedMessage.replace(m.group(1), "<span style=\"color:green\"><b>" + m.group(1) + "</b></span>");
+					paymentTransactionPlayer = m.group(2);
+				}
+
+				//make the current player's name red
+				if (currentPlayer != null) {
+					String player = escapeHtml3(currentPlayer);
+					escapedMessage = escapedMessage.replace(player, "<span style=\"color:red\">" + player + "</span>");
+				}
+
+				//highlight the search term
+				String search = filterPanel.search.getText().trim();
+				if (search.isEmpty()) {
+					search = null;
+				}
+				if (search != null) {
+					search = escapeHtml3(search);
+					escapedMessage = escapedMessage.replace(search, "<span style=\"background-color:yellow\">" + search + "</span>");
+				}
+
+				//color the chat message
+				boolean isChat = chatRegex.matcher(message).find();
+				if (isChat) {
+					if (escapedMessage.startsWith("To") || escapedMessage.startsWith("From")) {
+						escapedMessage = "<span style=\"color:purple\">" + escapedMessage + "</span>";
+					} else {
+						char channel = escapedMessage.charAt(0);
+						String color = channelColors.get(channel + "");
+						if (color != null) {
+							escapedMessage = "<span style=\"color:" + color + "\"><b>" + channel + "</b></span>" + escapedMessage.substring(1);
+						}
+					}
+				}
+
+				//highlight the selected payment transaction
+				//TODO http://stackoverflow.com/questions/9388264/jeditorpane-with-inline-image
+				boolean highlight;
+				if (paymentTransaction != null && isPaymentTransaction) {
+					long diff = Math.abs(paymentTransaction.getTs().getTime() - date.getTime());
+					highlight = (diff < 1000 * 60 && paymentTransaction.getPlayer().equalsIgnoreCase(paymentTransactionPlayer));
 				} else {
-					String color;
-					char channel = escapedMessage.charAt(0);
-					switch (channel) {
-					case 'T':
-						color = "green";
-						break;
-
-					case 'S':
-						color = "#00ffff";
-						break;
-
-					case 'L':
-						color = "#00cccc";
-						break;
-
-					case 'R':
-						color = "blue";
-						break;
-
-					default:
-						color = null;
-						break;
-					}
-
-					if (color != null) {
-						escapedMessage = "<span style=\"color:" + color + "\"><b>" + channel + "</b></span>" + escapedMessage.substring(1);
-					}
+					highlight = false;
 				}
-			}
 
-			//highlight the selected payment transaction
-			//TODO http://stackoverflow.com/questions/9388264/jeditorpane-with-inline-image
-			boolean highlight = (isPaymentTransaction && paymentTransaction != null && paymentTransaction.getTs().equals(date));
-			if (highlight) {
+				if (highlight) {
+					sb.append("<span style=\"background-color:yellow\">");
+				}
+
+				//grey out hidden messages
+				boolean hide = (!isChat && !isPaymentTransaction);
+				if (hide) {
+					sb.append("<span style=\"color:#cccccc\">");
+				}
+
+				sb.append('[').append(df.format(date)).append("] ");
+				sb.append(escapedMessage);
+
+				if (hide) {
+					sb.append("</span>");
+				}
+				if (highlight) {
+					sb.append("</span>");
+				}
+
+				sb.append("<br>");
+
 				//set caret position so the highlighted text is in the middle
-				if (!lineLengths.isEmpty()) {
-					caretPosition = totalTextLength;
+				if (highlight && !lineLengths.isEmpty()) {
+					caretPosition = totalTextLength + 400;
+					//caretPosition = sb.length();
 
-					int from = lineLengths.size() - 1;
-					int to = lineLengths.size() - 5;
-					if (to < 0) {
-						to = 0;
-					}
-					for (int i = from; i >= to; i--) {
-						caretPosition -= lineLengths.get(i);
-					}
-
-					if (caretPosition < 0) {
-						caretPosition = 0;
-					}
+					//					int from = lineLengths.size() - 1;
+					//					int to = lineLengths.size() - 5;
+					//					if (to < 0) {
+					//						to = 0;
+					//					}
+					//					for (int i = from; i >= to; i--) {
+					//						caretPosition -= lineLengths.get(i);
+					//					}
+					//
+					//					if (caretPosition < 0) {
+					//						caretPosition = 0;
+					//					}
 				}
 
-				sb.append("<span style=\"background-color:yellow\">");
+				int lineLength = message.length() + 12;
+				totalTextLength += lineLength;
+				lineLengths.add(lineLength);
 			}
 
-			//grey out hidden messages
-			boolean hide = (!isChat && !isPaymentTransaction);
-			if (hide) {
-				sb.append("<span style=\"color:#cccccc\">");
-			}
-
-			sb.append('[').append(df.format(date)).append("] ");
-			sb.append(escapedMessage);
-
-			if (hide) {
-				sb.append("</span>");
-			}
-			if (highlight) {
-				sb.append("</span>");
-			}
-
-			sb.append("<br>");
-
-			//set caret position so the highlighted text is in the middle
-			if (search == null && highlight && !lineLengths.isEmpty()) {
-				caretPosition = totalTextLength;
-
-				int from = lineLengths.size() - 1;
-				int to = lineLengths.size() - 5;
-				if (to < 0) {
-					to = 0;
-				}
-				for (int i = from; i >= to; i--) {
-					caretPosition -= lineLengths.get(i);
-				}
-
-				if (caretPosition < 0) {
-					caretPosition = 0;
-				}
-			}
-
-			int lineLength = message.length() + 12;
-			totalTextLength += lineLength;
-			lineLengths.add(lineLength);
+			setText(sb.toString());
+			setCaretPosition(caretPosition);
 		}
-
-		messages.setText(sb.toString());
-		messages.setCaretPosition(caretPosition);
 	}
 
 	private class FilterPanel extends JPanel {
@@ -392,7 +386,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			searchButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					String keyword = search.getText().trim();
+					String keyword = search.getText();
 					if (keyword.isEmpty()) {
 						return;
 					}
