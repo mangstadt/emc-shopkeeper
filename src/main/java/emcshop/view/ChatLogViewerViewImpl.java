@@ -224,16 +224,30 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 	private class ChatLogEditorPane extends JEditorPane {
 		private final DateFormat df = new SimpleDateFormat("HH:mm:ss");
-		private final Pattern chatRegex = Pattern.compile("^([TSLR]|From|To) ");
-		private final Pattern gaveRupeesRegex = Pattern.compile("^You paid ([\\d,]+) rupees to (.*)");
-		private final Pattern receivedRupeesRegex = Pattern.compile("^You just received ([\\d,]+) rupees from (.*)");
 		private final Map<String, String> channelColors = new HashMap<String, String>();
 		{
 			channelColors.put("T", "green");
 			channelColors.put("L", "#cccc00");
 			channelColors.put("S", "#00cccc");
 			channelColors.put("R", "blue");
+			channelColors.put("G", "#009999");
 		}
+		private final Pattern chatRegex;
+		{
+			StringBuilder sb = new StringBuilder("^(");
+
+			sb.append('[');
+			for (String channel : channelColors.keySet()) {
+				sb.append(channel);
+			}
+			sb.append(']');
+
+			sb.append("|From|To) ");
+
+			chatRegex = Pattern.compile(sb.toString());
+		}
+		private final Pattern gaveRupeesRegex = Pattern.compile("^You paid ([\\d,]+) rupees to (.*)");
+		private final Pattern receivedRupeesRegex = Pattern.compile("^You just received ([\\d,]+) rupees from (.*)");
 
 		private PaymentTransaction paymentTransaction;
 		private List<ChatMessage> chatMessages = Collections.emptyList();
