@@ -423,7 +423,7 @@ public class PlayersPanel extends JPanel {
 		private final ItemsTable itemsTable;
 
 		public PlayerDisplayPanel(PlayerGroup playerGroup) {
-			super(new MigLayout("insets 0"));
+			super(new MigLayout("fillx, insets 0"));
 			setOpaque(false);
 
 			Player player = playerGroup.getPlayer();
@@ -537,8 +537,8 @@ public class PlayersPanel extends JPanel {
 
 				itemsTable = new ItemsTable(displayedItems.get(playerGroup), column, ascending, showQuantitiesInStacks);
 			}
-			add(itemsTable.getTableHeader(), "w 100%, wrap");
-			add(itemsTable, "w 100%, wrap");
+			add(itemsTable.getTableHeader(), "growx, wrap");
+			add(itemsTable, "growx, wrap");
 
 			JLabel netAmount;
 			{
