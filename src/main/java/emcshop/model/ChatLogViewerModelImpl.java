@@ -19,6 +19,10 @@ public class ChatLogViewerModelImpl implements IChatLogViewerModel {
 	private final PaymentTransaction paymentTransaction;
 	private ChatLogParser parser;
 
+	public ChatLogViewerModelImpl() {
+		this(null);
+	}
+
 	public ChatLogViewerModelImpl(PaymentTransaction paymentTransaction) {
 		this.paymentTransaction = paymentTransaction;
 		parser = new ChatLogParser(getLogDirectory());

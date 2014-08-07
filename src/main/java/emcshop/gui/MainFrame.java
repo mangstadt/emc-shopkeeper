@@ -63,12 +63,15 @@ import emcshop.gui.lib.InfiniteProgressPanel;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacSupport;
 import emcshop.model.BackupModelImpl;
+import emcshop.model.ChatLogViewerModelImpl;
 import emcshop.model.FirstUpdateModelImpl;
 import emcshop.model.IBackupModel;
+import emcshop.model.IChatLogViewerModel;
 import emcshop.model.IFirstUpdateModel;
 import emcshop.model.IUpdateModel;
 import emcshop.model.UpdateModelImpl;
 import emcshop.presenter.BackupPresenter;
+import emcshop.presenter.ChatLogViewerPresenter;
 import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
@@ -77,8 +80,10 @@ import emcshop.util.GuiUtils;
 import emcshop.util.NumberFormatter;
 import emcshop.util.TimeUtils;
 import emcshop.view.BackupViewImpl;
+import emcshop.view.ChatLogViewerViewImpl;
 import emcshop.view.FirstUpdateViewImpl;
 import emcshop.view.IBackupView;
+import emcshop.view.IChatLogViewerView;
 import emcshop.view.IFirstUpdateView;
 import emcshop.view.IUpdateView;
 import emcshop.view.LoginShower;
@@ -246,6 +251,17 @@ public class MainFrame extends JFrame {
 				}
 			});
 			tools.add(backupSettings);
+
+			JMenuItem chatLogViewer = new JMenuItem("Chat Log Viewer...");
+			chatLogViewer.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					IChatLogViewerView view = new ChatLogViewerViewImpl(MainFrame.this);
+					IChatLogViewerModel model = new ChatLogViewerModelImpl();
+					new ChatLogViewerPresenter(view, model);
+				}
+			});
+			tools.add(chatLogViewer);
 
 			tools.addSeparator();
 
