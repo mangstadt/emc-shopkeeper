@@ -57,10 +57,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 	private final QueryPanel queryPanel;
 	private final FilterPanel filterPanel;
 	private final JPanel tablePanel;
-	private final JLabel netTotalLabelLabel;
-	private final JLabel netTotalLabel;
-	private final JLabel customersLabel;
-	private final JLabel customers;
+	private final StatsPanel statsPanel;
 
 	private ItemsTable itemsTable;
 	private MyJScrollPane itemsTableScrollPane;
@@ -113,11 +110,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 		tablePanel = new JPanel(new MigLayout("w 100%, h 100%, fillx, insets 0"));
 
-		netTotalLabelLabel = new JLabel();
-		netTotalLabel = new JLabel();
-
-		customersLabel = new JLabel();
-		customers = new JLabel();
+		statsPanel = new StatsPanel();
 
 		///////////////////////////////////////
 
@@ -125,17 +118,10 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 		add(queryPanel, "wrap");
 		add(filterPanel, "w 100%, wrap");
-		add(tablePanel, "span 2, grow, h 100%, wrap");
-
-		add(customersLabel, "span 2, split 4, align right");
-		add(customers, "gapright 20");
-		add(netTotalLabelLabel);
-		add(netTotalLabel);
+		add(tablePanel, "grow, h 100%, wrap");
+		add(statsPanel, "align right");
 
 		///////////////////////////////////////
-
-		customersLabel.setVisible(false);
-		customers.setVisible(false);
 
 		updateNetTotal();
 		updateCustomers();
@@ -358,52 +344,53 @@ public class TransactionsTab extends JPanel implements ExportListener {
 	}
 
 	private void updateNetTotal() {
-		netTotalLabelLabel.setText("<html><font size=5>Net Total:</font></html>");
-
+		int gained = 0, lost = 0;
 		netTotal = 0;
 
 		if (itemsTable != null) {
 			for (ItemGroup item : itemsTable.getDisplayedItemGroups()) {
+				gained += item.getSoldAmount();
+				lost += item.getBoughtAmount();
 				netTotal += item.getNetAmount();
 			}
 		} else if (playersPanel != null) {
 			for (ItemGroup item : playersPanel.getDisplayedItems().values()) {
+				gained += item.getSoldAmount();
+				lost += item.getBoughtAmount();
 				netTotal += item.getNetAmount();
 			}
 		} else if (transactionsTable != null) {
 			for (ShopTransaction transaction : transactionsTable.getDisplayedTransactions()) {
+				int amount = transaction.getAmount();
+				if (amount > 0) {
+					gained += amount;
+				} else {
+					lost += amount;
+				}
 				netTotal += transaction.getAmount();
 			}
 		}
 
-		StringBuilder sb = new StringBuilder();
-		sb.append("<html><font size=5><code>");
-		sb.append(formatRupeesWithColor(netTotal));
-		sb.append("</code></font></html>");
-		netTotalLabel.setText(sb.toString());
+		statsPanel.setGained(gained);
+		statsPanel.setLost(lost);
+		statsPanel.setNetTotal(netTotal);
 	}
 
 	private void updateCustomers() {
 		//get the number of customers being displayed
-		Integer customersCount = null;
+		Integer customers = null;
 		if (playersPanel != null) {
-			customersCount = playersPanel.getDisplayedPlayers().size();
+			customers = playersPanel.getDisplayedPlayers().size();
 		}
 		if (transactionsTable != null) {
-			customersCount = transactionsTable.getDisplayedPlayersCount();
+			customers = transactionsTable.getDisplayedPlayersCount();
 		}
 
-		//update the label text
-		if (customersCount != null) {
-			String word = queryPanel.shopTransactions.isSelected() ? "Customers" : "Shops Visited";
-			customersLabel.setText("<html><font size=5>" + word + ":</font></html>");
-			customers.setText("<html><font size=5><code>" + customersCount + "</code></font></html>");
+		if (queryPanel.shopTransactions.isSelected()) {
+			statsPanel.setCustomers(customers);
+		} else {
+			statsPanel.setShopsVisited(customers);
 		}
-
-		//make label visible
-		boolean visible = (customersCount != null);
-		customersLabel.setVisible(visible);
-		customers.setVisible(visible);
 	}
 
 	public void setShowQuantitiesInStacks(boolean stacks) {
@@ -930,5 +917,74 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 	private interface SortListener {
 		void sortPerformed(SortItem sort);
+	}
+
+	private class StatsPanel extends JPanel {
+		private final JLabel netTotalLabel, gainedLabel, lostLabel;
+		private final JLabel customersLabel;
+		private final JLabel customers;
+
+		public StatsPanel() {
+			netTotalLabel = new JLabel();
+			gainedLabel = new JLabel();
+			lostLabel = new JLabel();
+
+			customersLabel = new JLabel();
+			customers = new JLabel();
+			customersLabel.setVisible(false);
+			customers.setVisible(false);
+
+			///////////////////////////////////////
+			setLayout(new MigLayout("insets 0"));
+
+			add(customersLabel, "span 1 2");
+			add(customers, "span 1 2, gapright 20");
+
+			add(new JLabel("Gained:"), "align right");
+			add(gainedLabel, "gapright 10");
+
+			add(new JLabel("<html><font size=5>Net Total:"), "span 1 2");
+			add(netTotalLabel, "span 1 2, wrap");
+
+			add(new JLabel("Lost:"), "align right");
+			add(lostLabel);
+
+		}
+
+		public void setGained(int gained) {
+			gainedLabel.setText("<html><code>" + formatRupeesWithColor(gained));
+		}
+
+		public void setLost(int lost) {
+			lostLabel.setText("<html><code>" + formatRupeesWithColor(lost));
+		}
+
+		public void setNetTotal(int netTotal) {
+			netTotalLabel.setText("<html><font size=5><code>" + formatRupeesWithColor(netTotal));
+		}
+
+		public void setCustomers(Integer customers) {
+			boolean show = (customers != null);
+
+			if (show) {
+				customersLabel.setText("<html><font size=5>Customers:");
+				this.customers.setText("<html><font size=5><code>" + customers);
+			}
+
+			customersLabel.setVisible(show);
+			this.customers.setVisible(show);
+		}
+
+		public void setShopsVisited(Integer shopsVisited) {
+			boolean show = (customers != null);
+
+			if (show) {
+				customersLabel.setText("<html><font size=5>Shops Visited:");
+				customers.setText("<html><font size=5><code>" + shopsVisited);
+			}
+
+			customersLabel.setVisible(show);
+			this.customers.setVisible(show);
+		}
 	}
 }
