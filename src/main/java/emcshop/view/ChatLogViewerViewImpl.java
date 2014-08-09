@@ -251,7 +251,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 		private PaymentTransaction paymentTransaction;
 		private List<ChatMessage> chatMessages = Collections.emptyList();
-		private List<Integer> lineLengths;
+		private List<Integer> linePositions;
 
 		public ChatLogEditorPane() {
 			setContentType("text/html");
@@ -269,15 +269,20 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				return;
 			}
 
-			int caretPosition = 0;
-			int totalTextLength = 0;
-			lineLengths = new ArrayList<Integer>(chatMessages.size());
+			int jumpToLine = 0;
+			int pos = 1;
 			String search = filterPanel.search.getText().trim();
 			search = escapeHtml3(search);
 
+			linePositions = new ArrayList<Integer>();
 			StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
 			for (ChatMessage chatMessage : chatMessages) {
+				linePositions.add(pos);
+
 				String message = chatMessage.getMessage();
+				message = message.trim();
+				message = message.replaceAll("\\s{2,}", " ");
+
 				Date date = chatMessage.getDate();
 
 				String escapedMessage = escapeHtml3(message);
@@ -343,8 +348,9 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 					sb.append("<span style=\"color:#cccccc\">");
 				}
 
-				sb.append('[').append(df.format(date)).append("] ");
-				sb.append(escapedMessage);
+				String dateStr = "[" + df.format(date) + "] ";
+				pos += dateStr.length();
+				sb.append(escapeHtml3(dateStr)).append(escapedMessage);
 
 				if (hide) {
 					sb.append("</span>");
@@ -356,31 +362,24 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				sb.append("<br>");
 
 				//set caret position so the highlighted text is in the middle
-				if (highlight && !lineLengths.isEmpty()) {
-					caretPosition = totalTextLength + 400;
-					//caretPosition = sb.length();
-
-					//					int from = lineLengths.size() - 1;
-					//					int to = lineLengths.size() - 5;
-					//					if (to < 0) {
-					//						to = 0;
-					//					}
-					//					for (int i = from; i >= to; i--) {
-					//						caretPosition -= lineLengths.get(i);
-					//					}
-					//
-					//					if (caretPosition < 0) {
-					//						caretPosition = 0;
-					//					}
+				if (highlight) {
+					jumpToLine = linePositions.size() - 1;
 				}
-
-				int lineLength = message.length() + 12;
-				totalTextLength += lineLength;
-				lineLengths.add(lineLength);
 			}
 
 			setText(sb.toString());
-			setCaretPosition(caretPosition);
+			gotoLine(jumpToLine - 5);
+		}
+
+		public void gotoLine(int line) {
+			if (line < 0) {
+				line = 0;
+			}
+			if (line >= linePositions.size()) {
+				line = linePositions.size() - 1;
+			}
+
+			setCaretPosition(linePositions.get(line));
 		}
 	}
 
