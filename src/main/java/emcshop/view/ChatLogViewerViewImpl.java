@@ -5,6 +5,8 @@ import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml3;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.text.DateFormat;
@@ -67,6 +69,14 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				closeListeners.fire();
+			}
+		});
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowOpened(WindowEvent arg0) {
+				if (paymentTransaction != null && !messages.foundPaymentTransaction()) {
+					JOptionPane.showMessageDialog(ChatLogViewerViewImpl.this, "Payment transaction not found in chat log.");
+				}
 			}
 		});
 
@@ -252,6 +262,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		private PaymentTransaction paymentTransaction;
 		private List<ChatMessage> chatMessages = Collections.emptyList();
 		private List<Integer> linePositions;
+		private boolean foundPaymentTransaction;
 
 		public ChatLogEditorPane() {
 			setContentType("text/html");
@@ -274,6 +285,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			String search = filterPanel.search.getText().trim();
 			search = escapeHtml3(search);
 
+			foundPaymentTransaction = false;
 			linePositions = new ArrayList<Integer>();
 			StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
 			for (ChatMessage chatMessage : chatMessages) {
@@ -364,6 +376,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				//set caret position so the highlighted text is in the middle
 				if (highlight) {
 					jumpToLine = linePositions.size() - 1;
+					foundPaymentTransaction = true;
 				}
 			}
 
@@ -380,6 +393,10 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			}
 
 			setCaretPosition(linePositions.get(line));
+		}
+
+		public boolean foundPaymentTransaction() {
+			return foundPaymentTransaction;
 		}
 	}
 
