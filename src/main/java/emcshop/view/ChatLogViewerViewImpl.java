@@ -54,6 +54,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 	private final DatePicker datePicker;
 	private final FilterPanel filterPanel;
 	private final ChatLogEditorPane messages;
+	private List<ChatMessage> chatMessages;
 
 	private final Listeners dateChangedListeners = new Listeners();
 	private final Listeners closeListeners = new Listeners();
@@ -78,6 +79,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowOpened(WindowEvent arg0) {
+				messages.setChatMessages(chatMessages, paymentTransaction);
+
 				messages.requestFocusInWindow();
 				if (paymentTransaction != null && !messages.foundPaymentTransaction()) {
 					JOptionPane.showMessageDialog(ChatLogViewerViewImpl.this, "Payment transaction not found in chat log.");
@@ -143,6 +146,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 		messages = new ChatLogEditorPane();
 		messages.setEditable(false);
+		messages.setText("<center>Loading...</center>");
 
 		//////////////////////////////////////////////////
 
@@ -218,7 +222,10 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 	@Override
 	public void setChatMessages(List<ChatMessage> chatMessages) {
-		messages.setChatMessages(chatMessages, paymentTransaction);
+		this.chatMessages = chatMessages;
+		if (isVisible()) {
+			messages.setChatMessages(chatMessages, paymentTransaction);
+		}
 	}
 
 	@Override
