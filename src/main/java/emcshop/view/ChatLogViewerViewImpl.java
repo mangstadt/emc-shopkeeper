@@ -10,6 +10,7 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +31,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -74,6 +78,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowOpened(WindowEvent arg0) {
+				messages.requestFocusInWindow();
 				if (paymentTransaction != null && !messages.foundPaymentTransaction()) {
 					JOptionPane.showMessageDialog(ChatLogViewerViewImpl.this, "Payment transaction not found in chat log.");
 				}
@@ -114,7 +119,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		});
 
 		nextDay = new JButton(">");
-		prevDay.setToolTipText("Next day");
+		nextDay.setToolTipText("Next day");
 		nextDay.addActionListener(new ActionListener() {
 			private final Calendar c = Calendar.getInstance();
 
@@ -260,8 +265,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		private final Pattern receivedRupeesRegex = Pattern.compile("^You just received ([\\d,]+) rupees from (.*)");
 
 		private PaymentTransaction paymentTransaction;
+		private Pattern paymentTransactionRegex;
 		private List<ChatMessage> chatMessages = Collections.emptyList();
-		private List<Integer> linePositions;
 		private boolean foundPaymentTransaction;
 
 		public ChatLogEditorPane() {
@@ -270,8 +275,28 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 		public void setChatMessages(List<ChatMessage> chatMessages, PaymentTransaction paymentTransaction) {
 			this.chatMessages = chatMessages;
-			this.paymentTransaction = paymentTransaction;
+			setPaymentTransaction(paymentTransaction);
 			update();
+		}
+
+		public void setPaymentTransaction(PaymentTransaction paymentTransaction) {
+			this.paymentTransaction = paymentTransaction;
+
+			if (paymentTransaction == null) {
+				paymentTransactionRegex = null;
+				return;
+			}
+
+			int amount = paymentTransaction.getAmount();
+			String regex = "\\[(\\d\\d):(\\d\\d):(\\d\\d)\\] ";
+			NumberFormat nf = NumberFormat.getInstance(Locale.US);
+			if (amount < 0) {
+				amount *= -1;
+				regex += "You paid " + nf.format(amount) + " rupees to " + paymentTransaction.getPlayer();
+			} else {
+				regex += "You just received " + nf.format(amount) + " rupees from " + paymentTransaction.getPlayer();
+			}
+			paymentTransactionRegex = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 		}
 
 		public void update() {
@@ -280,17 +305,12 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				return;
 			}
 
-			int jumpToLine = 0;
-			int pos = 1;
 			String search = filterPanel.search.getText().trim();
 			search = escapeHtml3(search);
 
 			foundPaymentTransaction = false;
-			linePositions = new ArrayList<Integer>();
 			StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
 			for (ChatMessage chatMessage : chatMessages) {
-				linePositions.add(pos);
-
 				String message = chatMessage.getMessage();
 				message = message.trim();
 				message = message.replaceAll("\\s{2,}", " ");
@@ -302,15 +322,18 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				//color payment transactions
 				boolean isPaymentTransaction = false;
 				String paymentTransactionPlayer = null;
+				Integer paymentTransactionAmount = null;
 				Matcher m = gaveRupeesRegex.matcher(escapedMessage);
 				if (m.find()) {
 					isPaymentTransaction = true;
+					paymentTransactionAmount = Integer.valueOf(m.group(1).replace(",", "")) * -1;
 					escapedMessage = escapedMessage.replace(m.group(1), "<span style=\"color:red\"><b>" + m.group(1) + "</b></span>");
 					paymentTransactionPlayer = m.group(2);
 				}
 				m = receivedRupeesRegex.matcher(escapedMessage);
 				if (m.find()) {
 					isPaymentTransaction = true;
+					paymentTransactionAmount = Integer.valueOf(m.group(1).replace(",", ""));
 					escapedMessage = escapedMessage.replace(m.group(1), "<span style=\"color:green\"><b>" + m.group(1) + "</b></span>");
 					paymentTransactionPlayer = m.group(2);
 				}
@@ -345,12 +368,13 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				boolean highlight;
 				if (paymentTransaction != null && isPaymentTransaction) {
 					long diff = Math.abs(paymentTransaction.getTs().getTime() - date.getTime());
-					highlight = (diff < 1000 * 60 && paymentTransaction.getPlayer().equalsIgnoreCase(paymentTransactionPlayer));
+					highlight = (diff < 1000 * 60 && paymentTransaction.getAmount() == paymentTransactionAmount && paymentTransaction.getPlayer().equalsIgnoreCase(paymentTransactionPlayer));
 				} else {
 					highlight = false;
 				}
 
 				if (highlight) {
+					foundPaymentTransaction = true;
 					sb.append("<span style=\"background-color:yellow\">");
 				}
 
@@ -361,7 +385,6 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				}
 
 				String dateStr = "[" + df.format(date) + "] ";
-				pos += dateStr.length();
 				sb.append(escapeHtml3(dateStr)).append(escapedMessage);
 
 				if (hide) {
@@ -372,27 +395,41 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				}
 
 				sb.append("<br>");
-
-				//set caret position so the highlighted text is in the middle
-				if (highlight) {
-					jumpToLine = linePositions.size() - 1;
-					foundPaymentTransaction = true;
-				}
 			}
 
 			setText(sb.toString());
-			gotoLine(jumpToLine - 5);
+
+			//search for the payment transaction in the "Document" object's text in order to find the caret position
+			int caretPosition = 1;
+			if (paymentTransaction != null) {
+				String text = getDocumentText();
+
+				Calendar c = Calendar.getInstance();
+				c.setTime(datePicker.getDate());
+
+				Matcher m = paymentTransactionRegex.matcher(text);
+				while (m.find()) {
+					c.set(Calendar.HOUR, Integer.parseInt(m.group(1)));
+					c.set(Calendar.MINUTE, Integer.parseInt(m.group(2)));
+					c.set(Calendar.SECOND, Integer.parseInt(m.group(3)));
+					Date messageDate = c.getTime();
+					long diff = Math.abs(paymentTransaction.getTs().getTime() - messageDate.getTime());
+					if (diff < 1000 * 60) {
+						caretPosition = m.start();
+						break;
+					}
+				}
+			}
+			setCaretPosition(caretPosition);
 		}
 
-		public void gotoLine(int line) {
-			if (line < 0) {
-				line = 0;
+		private String getDocumentText() {
+			try {
+				Document document = getDocument();
+				return document.getText(0, document.getLength());
+			} catch (BadLocationException e) {
+				throw new RuntimeException(e);
 			}
-			if (line >= linePositions.size()) {
-				line = linePositions.size() - 1;
-			}
-
-			setCaretPosition(linePositions.get(line));
 		}
 
 		public boolean foundPaymentTransaction() {
