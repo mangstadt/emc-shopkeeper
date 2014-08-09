@@ -230,6 +230,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			channelColors.put("S", "#00cccc");
 			channelColors.put("R", "blue");
 			channelColors.put("G", "#009999");
+			channelColors.put("E", "#00cc00");
 		}
 		private final Pattern chatRegex;
 		{
