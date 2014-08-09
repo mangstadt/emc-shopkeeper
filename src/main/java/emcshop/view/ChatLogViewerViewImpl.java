@@ -390,7 +390,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		private final List<SearchListener> searchListeners = new ArrayList<SearchListener>();
 
 		public FilterPanel() {
-			searchLabel = new JLabel("<html><font size=2>Search:");
+			searchLabel = new JLabel("<html><font size=2>Highlight:");
 
 			search = new JTextField();
 			search.addActionListener(new ActionListener() {
