@@ -1,6 +1,5 @@
 package emcshop.view;
 
-import static emcshop.util.GuiUtils.shrinkFont;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml3;
 
 import java.awt.Window;
@@ -272,6 +271,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			int caretPosition = 0;
 			int totalTextLength = 0;
 			lineLengths = new ArrayList<Integer>(chatMessages.size());
+			String search = filterPanel.search.getText().trim();
+			search = escapeHtml3(search);
 
 			StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
 			for (ChatMessage chatMessage : chatMessages) {
@@ -303,13 +304,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				}
 
 				//highlight the search term
-				String search = filterPanel.search.getText().trim();
-				if (search.isEmpty()) {
-					search = null;
-				}
-				if (search != null) {
-					search = escapeHtml3(search);
-					escapedMessage = escapedMessage.replace(search, "<span style=\"background-color:yellow\">" + search + "</span>");
+				if (!search.isEmpty()) {
+					escapedMessage = escapedMessage.replaceAll("(?i)(" + Pattern.quote(search) + ")", "<span style=\"background-color:yellow\">$1</span>");
 				}
 
 				//color the chat message
@@ -390,33 +386,20 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 	private class FilterPanel extends JPanel {
 		private final JLabel searchLabel;
 		private final JTextField search;
-		private final JButton searchButton;
 
 		private final List<SearchListener> searchListeners = new ArrayList<SearchListener>();
 
 		public FilterPanel() {
 			searchLabel = new JLabel("<html><font size=2>Search:");
-			searchButton = new JButton("Search");
-			searchButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					String keyword = search.getText();
-					if (keyword.isEmpty()) {
-						return;
-					}
-
-					for (SearchListener listener : searchListeners) {
-						listener.searchPerformed(keyword);
-					}
-				}
-			});
-			shrinkFont(searchButton);
 
 			search = new JTextField();
 			search.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					searchButton.doClick();
+					String keyword = search.getText();
+					for (SearchListener listener : searchListeners) {
+						listener.searchPerformed(keyword);
+					}
 				}
 			});
 
@@ -426,7 +409,6 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 			add(searchLabel);
 			add(search, "w 150");
-			add(searchButton);
 		}
 
 		public void addSearchListener(SearchListener listener) {
@@ -437,7 +419,6 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		public void setEnabled(boolean enabled) {
 			super.setEnabled(enabled);
 			search.setEnabled(enabled);
-			searchButton.setEnabled(enabled);
 		}
 	}
 
