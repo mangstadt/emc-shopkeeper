@@ -1,44 +1,27 @@
-#Overview
+EMC Shopkeeper is a Java Swing application that allows [Empire Minecraft][1] players to track their in-game shop sales.
 
-EMC Shopkeeper is a program that allows you to download and view your [Empire Minecraft][1] shop transactions.
+For more information, see the project's [Github.io page][6].
 
-Empire Minecraft forum thread: [http://empireminecraft.com/threads/shop-statistics.22507/][5]
+#Build instructions
 
-See [screenshots][4].
+Requires:
 
-#To Run
+* Java 6 or higher
+* Maven
 
-*Requires:* Java 6
-
-There are two ways to run EMC Shopkeeper:
-
-[Auto-runner][2] (Java WebStart)  
-Automatically downloads EMC Shopkeeper and runs it.  The auto-runner ensures that you are always running the latest version.  If you are having trouble running it, try right-clicking on the .jnlp file and selecting "Open With > Java".  The auto-runner does not work on Mac computers.
-
-[JAR file][3]  
-Self-contained JAR file.  Works on all systems.  Double-click the file to run EMC Shopkeeper.  To run it on a Mac, right click on the file.  Then, hold down the "Control" key and click "Open". 
-
-#To Build
-
-*Requires:* Java 6, Maven
-
-1. The "microba" library (located in the "lib" directory) does not exist in the central Maven repository, and must be added to your local repository:  
+1. Install the "lib/microba-0.4.4.3.jar" library into your local Maven repository.  This must be done because this library does not exist on Maven Central:  
 `mvn install:install-file \`  
 `-Dfile=lib/microba-0.4.4.3.jar \`  
 `-DgroupId=microba \`  
 `-DartifactId=microba \`  
 `-Dversion=0.4.4.3 \`  
 `-Dpackaging=jar`
-1. Build the project:  
+1. Create the fat JAR by running:    
 `mvn clean compile assembly:single`
 
-You can then execute the JAR in the "target" directory by double clicking on it or running this command:
+#Command-line interface
 
-`java -jar target/emc-shopkeeper-VERSION-SNAPSHOT-jar-with-dependencies.jar`.
-
-#Command-line arguments
-
-EMC Shopkeeper includes a command-line interface, which contains limited, but functional functionality.
+EMC Shopkeeper includes a limited command-line interface:
 
     General arguments
     These arguments can be used for the GUI and CLI.
@@ -83,10 +66,11 @@ EMC Shopkeeper includes a command-line interface, which contains limited, but fu
     --help
       Prints this help message.
 
-*Note: This program is a fan creation and is not affiliated with Minecraft (copyright Mojang) or Empire Minecraft (copyright Starlis).*
+This program is a fan creation and is not affiliated with Minecraft (copyright Mojang) or Empire Minecraft (copyright Starlis).
 
 [1]: http://empireminecraft.com
 [2]: https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper.jnlp
 [3]: https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar
 [4]: https://github.com/mangstadt/emc-shopkeeper/tree/master/screenshots
 [5]: http://empireminecraft.com/threads/shop-statistics.22507/
+[6]: http://mangstadt.github.io/emc-shopkeeper
