@@ -39,6 +39,7 @@
 	<Item name="Bat Egg" id="383:65" group="Spawn Eggs" categories="0" />
 	<Item name="Beacon" id="138" />
 	<Item name="Bed" id="355" stack="1" />
+	<Item name="Big Daddy Helmet" stack="1" image="diamond_helmet.png" emcNames="Diamond Helmet - §aBig Daddy Helmet" categories="5,16" />
 	<Item name="Birch Leaves" id="18:2" categories="17" />
 	<Item name="Birch Log" id="17:2" group="Wood" categories="17" />
 	<Item name="Birch Plank" id="5:2" group="Wood" categories="17" />
@@ -110,6 +111,7 @@
 	<Item name="Cracked Stone" id="98:2" group="Stone" categories="14" />
 	<Item name="Creeper Head" id="397:4" group="Mob Heads" categories="9" />
 	<Item name="Creeper Sandstone" id="24:1" emcNames="Creeper Sandsto" />
+	<Item name="Cupid's Bow" stack="1" image="bow.png" emcNames="Bow - §dCupid's Bow" categories="5,16" />
 	<Item name="Cyan Stclay" id="159:9" group="Clay" categories="2" />
 	<Item name="Cyan Dye" id="351:6" group="Dyes" categories="4" />
 	<Item name="Cyan Wool" id="35:9" group="Wool" categories="18" />
@@ -156,12 +158,14 @@
 	<Item name="Eye Of Ender" id="381" />
 	<Item name="Far Disc" id="2260" stack="1" group="Discs" categories="3" />
 	<Item name="Feather" id="288" categories="9" />
+	<Item name="Feather Fallllling Boots" stack="1" image="diamond_boots.png" emcNames="Diamond Boots - §aFeather Fallllling Boots" categories="5,16" />
 	<Item name="Fence" id="85" group="Wood" categories="17" />
 	<Item name="Fence Gate" id="107" group="Wood" categories="17" />
 	<Item name="Fermented Spider Eye" id="376" categories="12" />
 	<Item name="Fern" id="31:2" categories="6" />
 	<Item name="Firework" id="401" />
 	<Item name="Fishing Rod" id="346" stack="1" categories="16" />
+	<Item name="Flaming Mob Launcher" stack="1" image="diamond_sword.png" emcNames="Diamond Sword - §aFlaming Mob Launcher" categories="5,16" />
 	<Item name="Flint" id="318" />
 	<Item name="Flint And Steel" id="259" stack="1" categories="16" />
 	<Item name="Flower Pot" id="390" emcNames="Flower Pot Item" group="Clay" categories="2,6" />
@@ -260,15 +264,22 @@
 	<Item name="Magenta Stclay" id="159:2" group="Clay" categories="2" />
 	<Item name="Magenta Dye" id="351:13" group="Dyes" categories="4" />
 	<Item name="Magenta Wool" id="35:2" group="Wool" categories="18" />
+	<Item name="Magical Eggcellent Wand" stack="1" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand" categories="5" />
 	<Item name="Magma Cream" id="378" categories="9,10,12" />
 	<Item name="Mall Disc" id="2261" stack="1" group="Discs" categories="3" />
 	<Item name="Map" id="358" stack="1" />
+	<Item name="Marlix's Armor" stack="1" image="marlix_armor.png" emcNames="Leather Tunic - §4§lMarlix's Armor" categories="5,9,16" />
+	<Item name="Marlix's Boots" stack="1" image="marlix_boots.png" emcNames="Leather Boots - §4§lMarlix's Boots" categories="5,9,16" />
+	<Item name="Marlix's Bow" stack="1" image="marlix_bow.png" emcNames="Bow - §4§lMarlix's Bow" categories="5,9,16" />
+	<Item name="Marlix's Helmet" stack="1" image="marlix_helmet.png" emcNames="Leather Cap - §4§lMarlix's Helmet" categories="5,9,16" />
+	<Item name="Marlix's Leggings" stack="1" image="marlix_leggings.png" emcNames="Leather Pants - §4§lMarlix's Leggings" categories="5,9,16" />
 	<Item name="Mellohi Disc" id="2262" stack="1" group="Discs" categories="3" />
 	<Item name="Melon" id="360" categories="7" />
 	<Item name="Melon Block" id="103" categories="6" />
 	<Item name="Melon Seeds" id="362" categories="6" />
 	<Item name="Milk Bucket" id="335" stack="1" group="Iron" categories="7,12,16" />
 	<Item name="Minecart" id="328" stack="1" group="Iron" categories="15" />
+	<Item name="Momentus's Toothpick" stack="1" image="momentus_toothpick.png" emcNames="Wooden Sword - §6§lMomentus's Toothpick" categories="5,9,16" />
 	<Item name="Mooshroom Egg" id="383:96" group="Spawn Eggs" categories="0" />
 	<Item name="Mossy Cobble" id="48" group="Stone" categories="14" />
 	<Item name="Mossy Stone" id="98:1" group="Stone" categories="14" />
@@ -297,6 +308,7 @@
 	<Item name="Orange Dye" id="351:14" group="Dyes" categories="4" />
 	<Item name="Orange Tulip" id="38:5" group="Flowers" categories="6" />
 	<Item name="Orange Wool" id="35:1" group="Wool" categories="18" />
+	<Item name="Ore Buster" stack="1" image="diamond_pickaxe.png" emcNames="Diamond Pickaxe - §aOre Buster" categories="5,16" />
 	<Item name="Oxeye Daisy" id="38:8" group="Flowers" categories="6" />
 	<Item name="Packed Ice" id="174" />
 	<Item name="Painting" id="321" />
@@ -381,6 +393,7 @@
 	<Item name="Spider Eye" id="375" categories="9,12" />
 	<Item name="Squid Egg" id="383:94" group="Spawn Eggs" categories="0" />
 	<Item name="Stal Disc" id="2263" stack="1" group="Discs" categories="3" />
+	<Item name="Starter Sword" stack="1" image="iron_sword.png" emcNames="Iron Sword - §6Starter Sword" categories="5,16" />
 	<Item name="Stick" id="280" group="Wood" categories="17" />
 	<Item name="Sticky Piston" id="29" categories="13" />
 	<Item name="Stone" id="1" group="Stone" categories="14" />
@@ -406,6 +419,8 @@
 	<Item name="Trap Door" id="96" group="Wood" emcNames="Trapdoor" categories="13,17" />
 	<Item name="Trapped Chest" id="146" group="Wood" categories="13,17" />
 	<Item name="Tripwire Hook" id="131" group="Iron" categories="13" />
+	<Item name="Turfinator" stack="1" image="diamond_shovel.png" emcNames="Diamond Shovel - §aTurfinator" categories="5,16" />
+	<Item name="Turkey Slicer" stack="1" image="diamond_sword.png" emcNames="Diamond Sword - §4Turkey Slicer" categories="5,16" />
 	<Item name="Villager Egg" id="383:120" group="Spawn Eggs" categories="0" />
 	<Item name="Vine" id="106" categories="6" />
 	<Item name="Ward Disc" id="2265" stack="1" group="Discs" categories="3" />
