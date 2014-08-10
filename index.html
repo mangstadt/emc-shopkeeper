@@ -8,8 +8,204 @@
 
   <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen">
   <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+  <link rel="stylesheet" href="javascripts/highslide/highslide.css" />
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script type="text/javascript" src="javascripts/script.js"></script>
+  <script type="text/javascript" src="javascripts/highslide/highslide-full.packed.js"></script>
+		<script type="text/javascript">
+			//HighSlide config settings
+			
+			//the location of the highslide graphics directory
+			hs.graphicsDir = 'javascripts/highslide/graphics/';
+
+      hs.outlineType = null;
+
+			//defines the border to use
+			//to get the custom borders that Highslide editor generates (http://highslide.com/editor/):
+			//1. Open Chrome's Developer Tools
+			//2. Click "Network"
+			//3. Edit your border in the Highslide editor.
+			//   HTTP GET requests to a "custom.php" script will be made every time you edit the border.
+			//   Use these URLs to download the border image.
+			//   Each URL looks something like this:
+			//   http://highslide.com/highslide/graphics/outlines/custom.php?color=FFFFFF&cornerRadius=5&width=5&opacity=0.75&size=3&offsetX=1&offsetY=3&fxGloss=0.png
+			//hs.outlineType = 'rounded-corners';
+
+			//gets the popup caption from the link's "title" attribute
+			//hs.captionEval = 'this.a.title';
+
+			//disables the left and right arrow keys so the user can't cycle through all the images on the page
+			//hs.enableKeyListener = false;
+
+			//only one popup can be visible at a time
+			hs.allowMultipleInstances = false;
+
+			//dims the background when a popup opens
+			//also, makes it so that when you click outside of the popup, it closes
+			//hs.dimmingOpacity = 0.5;
+
+			//don't preload any images
+			//hs.numberOfImagesToPreload = 0;
+
+			//don't hide the thumbnail when the full-res image is displayed
+			//hs.fadeInOut = true;
+
+			//add the Mac style "close" button
+			hs.registerOverlay({
+				html: '<div class="closebutton" onclick="return hs.close(this)" title="Close"></div>',
+				position: 'top right',
+				useOnHtml: true,
+				fade: 2 // fading the semi-transparent overlay looks bad in IE
+			});
+		</script>
+    <script>
+    hs.enableKeyListener = true;
+    hs.dragSensitivity = 9001;
+    var addGallery = function(){
+      var count = 0;
+      return function(){
+        //add slideshow to hs
+        hs.addSlideshow({
+          slideshowGroup: count,
+          interval: 5000,
+          repeat: false,
+          useControls: true,
+          fixedControls: 'fit',
+          overlayOptions: {
+            className: 'large-dark',
+            opacity: 0.75,
+            position: 'bottom center',
+            offsetX: 0,
+            offsetY: -10,
+            hideOnMouseOut: true
+          },
+          thumbstrip: {
+            mode: 'horizontal',
+            position: 'bottom center',
+            relativeTo: 'viewport'
+          },
+          transitions: ['expand', 'crossfade']
+        });
+
+        //create object for use with the onclick event
+        var gallery = {
+          slideshowGroup: count,
+          dimmingOpacity: 0.5,
+          transitions: ['expand', 'crossfade'],
+          align: 'center'
+        };
+
+        count++;
+
+        return gallery;
+      };
+    }();
+
+    var gallery = addGallery();
+    </script>
+
+		<style type="text/css">
+			/* HighSlide custom CSS settings */
+			
+			.highslide-wrapper, .highslide-outline {
+				background: none;
+			}
+			.highslide-image {
+				/*border: 5px solid #FFFFFF;*/
+				border: none !important;
+			}
+			
+			/*
+			.highslide-loading {
+				display: block;
+				padding: 3px 0 3px 38px;
+				width: 0;
+				height: 32px;
+				overflow: hidden;
+				background-color: black;
+				background-repeat: no-repeat;
+				background-position: 3px 3px;
+				background-image: url('javascripts/highslide/graphics/loader.big.black.gif');
+			}
+			*/
+
+			/* All thumbnails will be given this border. */
+			.highslide img {
+				/*border: none;*/
+			}
+			
+			/* All thumbnails will be given this border on mouseover. */
+			.highslide:hover img {
+				/*border: none;*/
+			}
+			
+			.highslide-caption {
+				padding: 0px;
+				padding-right: 2px;
+				padding-bottom: 10px;
+				padding-left: 10px;
+				text-align: center;
+				font-weight: bold;
+			}
+			
+			/*
+			IFrame popups include a "Close" link in the upper-right corner.
+			However, I've added my own close button (see "hs.registerOverlay" in Javascript config code), so hide this close link
+			*/
+			.highslide-header .highslide-close {
+				display: none;
+			}
+			
+			/* Controls that are displayed when displaying images in a gallery */
+			.highslide-controls {
+				position: static !important;
+				margin-bottom: 0;
+				width: 165px !important;
+			}
+			.large-dark .highslide-controls, .large-dark .highslide-controls ul, .large-dark .highslide-controls a {
+				/* Use the black-colored controls */
+				background-image: url(javascripts/highslide/graphics/controlbar-black-border.gif);
+			}
+			.highslide-controls .highslide-play {
+				/* Turn off the slideshow feature. */
+				display: none;
+			}
+			.highslide-controls .highslide-pause {
+				/* Turn off the slideshow feature. */
+				display: none;
+			}
+			
+
+			/* Neaten up the thumbnail strip that appears at the bottom of the screen with galleries. */
+			.highslide-thumbstrip-inner table td {
+				text-align: center;
+				padding-left: 5px;
+			}
+			.highslide-thumbstrip-inner table td a {
+				font-size: 0.8em;
+				color: #fff;
+				text-decoration: none;
+			}
+			.highslide-thumbstrip-inner table td img {
+				/*
+				A little triangle appears below the selected image.
+				Add padding to the image so the triangle does not appear over text below the image.
+				*/
+				padding-bottom: 5px;
+			}
+		</style>
+
+    <style>
+    .question{
+      font-weight:bold;
+      border-top: 1px solid black;
+      font-size: 1.1em;
+    }
+    .highlight{
+      background-color:yellow;
+    }
+    </style>
+
 
   <title>EMC Shopkeeper</title>
   <meta name="description" content="Downloads the transactions of your EMC shop.">
@@ -25,52 +221,433 @@
       <h1 class="title">EMC Shopkeeper</h1>
     </header>
     <div id="container">
-      <p class="tagline">Downloads the transactions of your EMC shop.</p>
+      <!--<p class="tagline">Keep track of your shop's rupee transactions with ease!</p>-->
       <div id="main" role="main">
         <div class="download-bar">
         <div class="inner">
-          <a href="https://github.com/mangstadt/emc-shopkeeper/tarball/master" class="download-button tar"><span>Download</span></a>
-          <a href="https://github.com/mangstadt/emc-shopkeeper/zipball/master" class="download-button zip"><span>Download</span></a>
-          <a href="https://github.com/mangstadt/emc-shopkeeper" class="code">View EMC Shopkeeper on GitHub</a>
+          <span style="color:#aaa; float:left;">Latest version: 0.4.21<br />Released: Aug 9, 2014</span>
+          <a href="https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar" class="download-button tar"><span>Download JAR</span></a>
+          <a href="https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper.jnlp" class="download-button zip"><span>Auto-run</span></a>
         </div>
         <span class="blc"></span><span class="trc"></span>
         </div>
         <article class="markdown-body">
-          <h3>
-<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h3>
 
-<p>EMC Shopkeeper is a program that allows you to download and view your <a href="http://www.empireminecraft.com">Empire Minecraft</a> shop transactions.</p>
+        <div align="right" style="float:right">
+          <a href="http://empireminecraft.com/threads/shop-statistics.22507/"><img src="images/forum-thread.png"/>Forum thread</a>
+          <a href="http://github.com/mangstadt/emc-shopkeeper"><img src="images/github.png" />Source code</a>
+          </div>
 
-<p>Empire Minecraft forum thread: <a href="http://empireminecraft.com/threads/shop-statistics.22507/">http://empireminecraft.com/threads/shop-statistics.22507/</a></p>
+          <h1>
+<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h1>
 
-<p><a href="images/screenshots/items-table.png"><img src="images/screenshots/items-table.thumb.png" alt=""></a></p>
+<p>EMC Shopkeeper is a program that helps you keep track of your in-game shop transactions on the <a href="http://www.empireminecraft.com">Empire Minecraft</a> server.  Find out how many rupees you've made, what items sell the best, and who your best customers are!</p>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<h1><a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Screenshots</h1>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p>
+  <script>
+  var folder = "images/screenshots/";
+  var screenshots = ["first-update-warning", "update-dialog", "items-table", "players-table", "dates-table", "payment-transactions", "chat-log", "inventory1", "inventory2", "inventory3", "bonuses-fees", "charts-net-total", "charts-item-groups", "charts-items"];
+  for (var i = 0; i < screenshots.length; i++){
+    var screenshot = screenshots[i];
+    var fullRes = folder + screenshot + ".png";
+    var thumbnail = folder + screenshot + ".thumb.png";
+    document.write('<a href="' + fullRes + '" class="highslide" onclick="return hs.expand(this, gallery)"><img src="' + thumbnail + '" width="100"/></a> ');
+  }
+  </script>
+</p>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<h1><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>FAQ</h1>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p class="question">What's the difference between the two download options?</p>
+<p>The <span class="highlight">auto-runner</span> ensures that you are always running the latest version of EMC Shopkeeper. Every time it launches, it checks for a new version, and downloads it if one is available. But occasionally, the auto-runner file itself ("emc-shopkeeper.jnlp") has to be updated, in which case you'll have to manually download a fresh copy. The downside to using the auto-runner is that it requires additional security rights which some computers block.</p>
+<p>The <span class="highlight">full JAR file</span> can be run on any computer. The downside to this is that it does not automatically update like the auto-runner does. If an update is available, EMC Shopkeeper will tell you when it starts up, in which case you will have to download the new JAR file manually.</p>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<p class="question">I tried to download the auto-runner, but all I see is a bunch of weird text.</p>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>This is because the file is being opened by your web browser instead of by Java. Go to "File > Save" and save the file somewhere on your computer. Then, right-click the file and select "Run As > Java" (or some variant thereof).</p>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<p class="question">How do I download the transactions of my alt account?</p>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p>If you have alt accounts and would like to download the transaction histories for them as well, you will need to create separate profiles for them. <span class="highlight">Do NOT simply enter different login credentials at the login prompt when you click the "Update Transactions" button!</span> Each profile is only designed to hold the transactions of a single account.</p>
+
+<p>To load EMC Shopkeeper under a different profile, run the following steps:</p>
+<ol>
+<li>In the "Tools" menu, select "Show Profiles On Startup".<br /><img src="images/faq/tools.png" width="300" />
+<li>Close EMC Shopkeeper and re-open it.
+<li>A profile dialog will appear. Type in the name of your new profile, then click "OK".<br /><img src="images/faq/profile.png" />
+</ol>
+
+<p class="question">I'm on a Mac and I can't use the auto-runner!</p>
+<p>You may have trouble auto-running the application if you're on a Mac. EMC Shopkeeper is not signed with a certificate from an official certificate authority, which Apple considers a security threat (rightly-so). If you can't auto-run, you will need to download the full JAR file instead.</p>
+<div align="center"><img src="images/faq/jnlp.png" /></div>
+
+<p class="question">I'm on a Mac and I can't run the JAR file!</p>
+<p>Double-clicking the JAR file may display a security warning, which prevents you from running it.</p>
+<div align="center"><img src="images/faq/mac-security.png" /></div>
+<p>To get around this, do the following:</p>
+<ol>
+<li>Right-click on the JAR file.<br />
+  <img src="images/faq/mac-rightclick.png" height="300" />
+<li>Select "Open" while holding down the "Control" key
+<li>Click the "Open" button at the warning dialog.<br />
+  <img src="images/faq/mac-security2.png" />
+</ol>
+
+<p>You only have to do this once, and then once again every time the file changes (i.e. when you update EMC Shopkeeper).
+</p>
+
+<h1><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Changelog</h1>
+
+<div>
+  <b>0.4.21</b> - <i>August 9, 2014</i><br>
+  <ul>
+    <li>Added a chat log viewer.</li>
+    <li>Added the ability to find a payment transaction in the chat log.  This help you to remember what the payment transaction was for if you forget.</li>
+    <li>Added totals for rupees lost/gained next to the "Net Total" count at the bottom of the screen.</li>
+    <li>Improved caching of profile pictures for better performance.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.20</b> - <i>July 10, 2014</i><br>
+  <ul>
+    <li>Fixed the stack value for eggs (used to be "1", but is now "16")</li>
+    <li>Added the ability to merge multiple payment transactions from the same player into a single payment transaction.</li>
+    <li>Added the ability to specify the transaction type when assigning a payment transaction.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.19</b> - <i>June 18, 2014</i><br>
+  <ul>
+    <li>Fixed a bug that prevented items with long names from being added to the database.</li>
+    <li>Fixed a bug where the tables weren't displaying the player portraits after being downloaded.</li>
+    <li>Fixed a bug that could prevent the generic error dialog from being displayed.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.18</b> - <i>June 15, 2014</i><br>
+  <ul>
+    <li>Improvements to the Inventory tab:
+      <ul>
+        <li>Added the ability to view items by category.</li>
+        <li>Added the ability to specify when an item should be considered "low in stock".  You can then view all "low in stock" items by selecting the "low in stock" category.</li>
+        <li>Made it easier to edit your inventory.  You can now click on a value in the table to edit it.</li>
+        <li>Fixed a bug that prevented the data from being exported to BBCode.</li>
+        <li>Fixed a bug that prevented the "Item Name" textbox from clearing after adding a new item.</li>
+      </ul>
+    </li>
+    <li>Made performance improvements to all table controls.</li>
+    <li>Removed the "Remember Me" checkbox from the login dialog since it never really worked properly.</li>
+    <li>Fixed some item name mappings.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.17</b> - <i>June 8, 2014</i><br>
+  <ul>
+    <li>Added the ability to view the purchases you made with other shops.</li>
+    <li>Improved the layout of the "Transactions" tab.</li>
+    <li>Added a cooler loading screen.</li>
+    <li>Added 1.8 item mappings.</li>
+    <li>Fixed some item name mappings.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.16</b> - <i>April 22, 2014</i><br>
+  <ul>
+    <li>Fixed a bug that prevented the app from starting up correctly.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.15</b> - <i>April 19, 2014</i><br>
+  <ul>
+    <li>Player names are now colored according to supporter level.</li>
+    <li>Added icons that show the server that each player is currently connected to.</li>
+    <li>Added mail fees to the Bonus/Fees tab.</li>
+    <li>Fixed some item name mappings.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.14</b> - <i>March 30, 2014</i><br>
+  <ul>
+    <li>Added the ability to backup and restore your EMC Shopkeeper database.</li>
+    <li>Fixed some item name mappings.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.13</b> - <i>February 17, 2014</i><br>
+  <ul>
+    <li>Fixed a bug where the user's inventory wasn't being updated correctly during a database update under certain circumstances.</li>
+    <li>Fixed a bug that caused the timestamps of some transactions in the "By Date" view to be off by a minute or two.</li>
+    <li>Fixed a bug where negative payment transactions weren't being split properly.</li>
+    <li>For Macs, the menu bar now displays "EMCShopkeeper" instead of "Main".</li>
+    <li>Cleaned up the layout of the BBCode export format.</li>
+    <li>Fixed some item name mappings.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.12</b> - <i>February 6, 2014</i><br>
+  <ul>
+    <li>Added the ability to view transactions by date, much like EMC's rupee history page.</li>
+    <li>Significantly improved the performance of downloading player profile pictures.</li>
+    <li>Added item icons for Tripwire Hooks, Dragon Stones, and Dragon Stone Fragments.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.11</b> - <i>February 4, 2014</i><br>
+  <ul>
+    <li>Fixed a bug that prevented the timer from starting on the Update dialog.</li>
+    <li>If a connection error occurs during an update, it will attempt to re-create the connection before displaying an error.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.10</b> - <i>February 3, 2014</i><br>
+  <ul>
+    <li>Fixed a "SQLException" bug that prevented old database versions from being updated during startup.</li>
+    <li>Fixed the "0 rupees" bug.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.9</b> - <i>February 1, 2014</i><br>
+  <ul>
+    <li>Increased the connection timeout for downloading transaction pages, so large transaction pages (~12,000 and above) don't timeout.</li>
+    <li>If an error occurs during the first update, you are now given a choice between saving the transactions or discarding them (before, it would always discard them).</li>
+    <li>Fixed a rendering glitch in the Update dialog</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.8</b> - <i>January 30, 2014</i><br>
+  <ul>
+    <li>Added a "Stop" button to the Update dialog.  This halts the update process and saves all transactions that were downloaded (unlike the Cancel button, which discards the transactions).  It only appears during the first update.</li>
+    <li>Increased the request timeout for downloading transaction pages, so large transaction pages (~12,000 and above) don't timeout.</li>
+    <li>Cleaned up the layout of the First Update dialog.</li>
+    <li>Added icons for mob player heads and other items.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.7</b> - <i>January 19, 2014</i><br>
+  <ul>
+    <li>Added a better splash screen.</li>
+    <li>The splash screen is now displayed for people who use the auto-runner.</li>
+    <li>Added a side-bar to the "players" view in the Transactions tab that lists all of the players.</li>
+    <li>Added separate counts for shop, payment, and bonus/fee transactions to the Update dialog.</li>
+    <li>Added an "Apply to inventory" checkbox to the "Assign" dialog of the Payments Tab.  When checked, the item quantity will be applied to your Inventory.</li>
+    <li>Fixed a "SecurityException" error that some people reported getting.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.6</b> - <i>January 8, 2014</i><br>
+  <ul>
+    <li>Fixed a bug that caused the first transaction page to be parsed twice.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.5</b> - <i>January 7, 2014</i><br>
+  <ul>
+    <li>Added the Charts tab.</li>
+    <li>Fixed a bug where the "total transactions parsed" count that is displayed after an update was double what it should be.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.4</b> - <i>January 1, 2014</i><br>
+  <ul>
+    <li>Added an option to display item quantities in stacks.</li>
+    <li>Fixed some item name mappings.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.3</b> - <i>December 24, 2013</i><br>
+  <ul>
+    <li>Added the ability to upload an error report when an error occurs.</li>
+    <li>Fixed some item name mappings and added more item icons.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.2</b> - <i>December 16, 2013</i><br>
+  <ul>
+    <li>Added the "Bonuses/Fees" tab, which keeps a tally of the rupee bonuses and fees your account has received.</li>
+    <li>Fixed some item name mappings.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.1</b> - <i>December 12, 2013</i><br>
+  <ul>
+    <li>Added icons for stained glass.</li>
+    <li>In the "Inventory" tab, you can now add to the quantity of an existing item by prepending the quantity value with a "+".  For example, "+1/" would add one stack to an item.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.4.0</b> - <i>December 2, 2013</i><br>
+  <ul>
+    <li>Redesigned the entire user interface.</li>
+    <li>Added an "Inventory" screen, which lets you know when your shop chests are getting low.</li>
+    <li>Added the ability to choose a profile on startup.</li>
+    <li>Added the ability to show transactions from the date of the previous update.</li>
+    <li>Added the ability to search over all transactions in your history.</li>
+    <li>An alert will now appear when a new version of EMC Shopkeeper is available (for people who use the full .jar file instead of the auto-runner).</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.9</b> - <i>November 28, 2013</i><br>
+  <ul>
+    <li>Fixed a bug where the net total wasn't displaying.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.8</b> - <i>November 28, 2013</i><br>
+  <ul>
+    <li>Added the ability to sort transactions by clicking on the column headers.</li>
+    <li>Fixed a bug where the list of items was not being regenerated after a database reset.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.7</b> - <i>November 25, 2013</i><br>
+  <ul>
+    <li>Added the ability to assign multiple items to a single payment transaction.</li>
+    <li>Added the forum thread's URL to the About dialog.</li>
+    <li>Fixed a bug where some item names appeared twice in the payment transactions dialog.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.6</b> - <i>November 18, 2013</i><br>
+  <ul>
+    <li>Added friendlier names for potions and other items.  For example, "Potion:8193" now displays as "Potion of Regeneration".</li>
+    <li>The auto-suggest box in the payment transactions dialog now displays a wider range of items (before, it just displayed items from your transaction history).</li>
+    <li>Added the ability to ignore old payment transactions during the first update.</li>
+    <li>Fixed the scaling of item icons that do not have equal height and width.</li>
+    <li>Added more item icons, including icons for 1.7 items.</li>
+    <li>Improvements to the command-line interface.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.5</b> - <i>October 20, 2013</i><br>
+  <ul>
+    <li>Fixed the "NullPointerException" issue people were getting (hopefully).</li>
+    <li>Added more item icons.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.4</b> - <i>August 25, 2013</i><br>
+  <ul>
+    <li>Added more item icons.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.3</b> - <i>July 31, 2013</i><br>
+  <ul>
+    <li>Added some missing item icons.</li>
+    <li>An error message is now displayed if the start date does not come before the end date.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.2</b> - <i>May 21, 2013</i><br>
+  <ul>
+    <li>Added the player's current rupee balance.</li>
+    <li>Added the EMC logo.</li>
+    <li>Added some missing item icons.</li>
+    <li>Improvements to player portrait downloading.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.1</b> - <i>May 12, 2013</i><br>
+  <ul>
+    <li>Fixed a bug where a player's "first seen" date was not being calculated correctly.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.3.0</b> - <i>May 12, 2013</i><br>
+  <ul>
+    <li>Added the ability to treat manual payment transactions ("/r pay") as shop transactions.</li>
+    <li>Added the ability to clear the saved login session ("Tools &gt; Clear Saved Session").</li>
+    <li>Added a place-holder image for when a player's profile portrait cannot be downloaded.</li>
+    <li>Fixed a bug where certain player profile portraits were not being downloaded correctly.</li>
+    <li>Fixed dialog boxes so they are centered better on the screen.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.2.0</b> - <i>May 5, 2013</i><br>
+  <ul>
+    <li>Added the ability to group transactions by player.</li>
+    <li>Added the ability to sort and filter the items table.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.1.3</b> - <i>April 27, 2013</i><br>
+  <ul>
+    <li>Addressed an issue where the login dialog would repeatedly appear, despite the fact that the user entered valid credentials.</li>
+    <li>Addressed an issue where users would get a "NullPointerException" while performing an update.</li>
+    <li>Separated out the "quantity" and "rupee" values of the "sold", "bought", and "net" columns into columns of their own.</li>
+    <li>Added more item icons.</li>
+    <li>Added an app icon.</li>
+    <li>Added Mac menubar integration.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.1.2</b> - <i>March 20, 2013</i><br>
+  <ul>
+    <li>Changed the way the database was wiped to prevent non-database files from being deleted.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.1.1</b> - <i>March 20, 2013</i><br>
+  <ul>
+    <li>Fixed a bug that prevented an update from stopping if the first transaction on page 1 is not a shop transaction.</li>
+    <li>Added the ability to specify which page to stop on while performing the first update.  This is useful for players with large transaction histories. Includes an estimate for how long the update is expected to take.</li>
+    <li>Added logging capabilities for debugging future problems.</li>
+    <li>Added the ability to wipe the database.</li>
+  </ul>
+</div>
+
+<div>
+  <b>0.1.0</b> - <i>March 16, 2013</i><br>
+  <ul>
+    <li>Initial version.</li>
+  </ul>
+</div>
+
+
         </article>
       </div>
     </div>
     <footer>
       <div class="owner">
       <p><a href="https://github.com/mangstadt" class="avatar"><img src="https://avatars3.githubusercontent.com/u/700174?v=2&amp;s=60" width="48" height="48"></a> <a href="https://github.com/mangstadt">mangstadt</a> maintains <a href="https://github.com/mangstadt/emc-shopkeeper">EMC Shopkeeper</a></p>
-
+      <p>EMC Shopkeeper is a fan creation and is not affiliated with Minecraft (copyright Mojang) or Empire Minecraft (copyright Starlis).</p>
 
       </div>
       <div class="creds">

@@ -609,7 +609,7 @@ p.tagline {
 
 a.zip,
 a.zip span {
-  background: transparent url(../images/zip.png) no-repeat 0 0;
+  background: transparent url(../images/auto-run.png) no-repeat 0 0;
   width: 30px;
   height: 21px;
   display: inline-block;
@@ -622,7 +622,7 @@ a.zip span {
 
 a.tar,
 a.tar span {
-  background: transparent url(../images/tar.png) no-repeat 0 0;
+  background: transparent url(../images/download.png) no-repeat 0 0;
   width: 30px;
   height: 21px;
   display: inline-block;
