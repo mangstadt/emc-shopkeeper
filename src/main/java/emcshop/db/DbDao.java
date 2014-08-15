@@ -180,7 +180,8 @@ public interface DbDao {
 	int countPendingPaymentTransactions() throws SQLException;
 
 	/**
-	 * Gets the date of the latest transaction from the database.
+	 * Gets the date of the latest parsed transaction (includes shop, payment,
+	 * and bonus/fee).
 	 * @return the date of the latest transaction or null if there are no
 	 * transactions
 	 * @throws SQLException
@@ -281,6 +282,13 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	void updateBonusesFeesSince(Date since) throws SQLException;
+
+	/**
+	 * Updates the date of the latest bonus/fee transaction.
+	 * @param latestParsedBonusFeeDate the date
+	 * @throws SQLException
+	 */
+	void updateBonusesFeesLatestTransactionDate(Date latestParsedBonusFeeDate) throws SQLException;
 
 	/**
 	 * Tallies up the profits by day.

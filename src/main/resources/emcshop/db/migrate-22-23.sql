@@ -1,2 +1,4 @@
 CALL UPDATE_ITEM_NAMES();
 CALL POPULATE_ITEMS_TABLE();
+
+ALTER TABLE bonuses_fees ADD latest_transaction_ts TIMESTAMP;

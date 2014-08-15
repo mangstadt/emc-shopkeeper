@@ -608,33 +608,29 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Date getLatestTransactionDate() throws SQLException {
-		List<Date> dates = new ArrayList<Date>();
-		String[] tables = { "transactions", "payment_transactions" };
-		for (String table : tables) {
-			PreparedStatement selectStmt = stmt("SELECT Max(ts) FROM " + table);
+		Date latest = null;
+		String queries[] = { "SELECT Max(ts) FROM transactions", "SELECT Max(ts) FROM payment_transactions", "SELECT latest_transaction_ts FROM bonuses_fees" };
+		for (String query : queries) {
+			Date date;
+			PreparedStatement stmt = stmt(query);
 			try {
-				ResultSet rs = selectStmt.executeQuery();
+				ResultSet rs = stmt.executeQuery();
 				if (!rs.next()) {
-					continue;
+					return null;
 				}
 
 				Timestamp ts = rs.getTimestamp(1);
-				if (ts == null) {
-					continue;
-				}
-
-				dates.add(toDate(ts));
+				date = toDate(ts);
 			} finally {
-				closeStatements(selectStmt);
+				closeStatements(stmt);
+			}
+
+			if (date != null && (latest == null || date.after(latest))) {
+				latest = date;
 			}
 		}
 
-		if (dates.isEmpty()) {
-			return null;
-		}
-
-		Collections.sort(dates, Collections.reverseOrder());
-		return dates.get(0);
+		return latest;
 	}
 
 	@Override
@@ -1194,6 +1190,33 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void updateBonusesFeesLatestTransactionDate(Date newLatest) throws SQLException {
+		Date oldLatest = null;
+		PreparedStatement selectStmt = stmt("SELECT latest_transaction_ts FROM bonuses_fees");
+		try {
+			ResultSet rs = selectStmt.executeQuery();
+			if (rs.next()) {
+				Timestamp ts = rs.getTimestamp(1);
+				oldLatest = toDate(ts);
+			}
+		} finally {
+			closeStatements(selectStmt);
+		}
+
+		if (oldLatest != null && newLatest.before(oldLatest)) {
+			return;
+		}
+
+		PreparedStatement updateStmt = stmt("UPDATE bonuses_fees SET latest_transaction_ts = ?");
+		try {
+			updateStmt.setTimestamp(1, toTimestamp(newLatest));
+			updateStmt.executeUpdate();
+		} finally {
+			closeStatements(updateStmt);
 		}
 	}
 

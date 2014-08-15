@@ -77,6 +77,7 @@ CREATE TABLE inventory(
 
 CREATE TABLE bonuses_fees(
 	since TIMESTAMP,
+	latest_transaction_ts TIMESTAMP,
 	horse INT NOT NULL DEFAULT 0,
 	lock INT NOT NULL DEFAULT 0,
 	eggify INT NOT NULL DEFAULT 0,

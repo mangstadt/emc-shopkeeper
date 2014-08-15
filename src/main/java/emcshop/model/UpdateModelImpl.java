@@ -42,7 +42,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	private TransactionPuller puller;
 	private long started, timeTaken;
 	private int transactionsCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, pagesCount;
-	private Date earliestParsedTransactionDate;
+	private Date earliestParsedTransactionDate, latestParsedBonusFeeDate;
 	private boolean downloadStopped = false;
 	private Throwable thrown;
 
@@ -166,6 +166,9 @@ public class UpdateModelImpl implements IUpdateModel {
 			if (earliestParsedTransactionDate != null) {
 				dao.updateBonusesFeesSince(earliestParsedTransactionDate);
 			}
+			if (latestParsedBonusFeeDate != null) {
+				dao.updateBonusesFeesLatestTransactionDate(latestParsedBonusFeeDate);
+			}
 
 			//log the update operation
 			dao.insertUpdateLog(new Date(started), getRupeeBalance(), shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, timeTaken);
@@ -235,6 +238,12 @@ public class UpdateModelImpl implements IUpdateModel {
 						paymentTransactionsCount += paymentTransactions.size();
 
 						List<BonusFeeTransaction> bonusFeeTransactions = transactions.find(BonusFeeTransaction.class);
+						for (BonusFeeTransaction transaction : bonusFeeTransactions) {
+							Date ts = transaction.getTs();
+							if (latestParsedBonusFeeDate == null || ts.after(latestParsedBonusFeeDate)) {
+								latestParsedBonusFeeDate = ts;
+							}
+						}
 						dao.updateBonusesFees(bonusFeeTransactions);
 						bonusFeeTransactionsCount += bonusFeeTransactions.size();
 
