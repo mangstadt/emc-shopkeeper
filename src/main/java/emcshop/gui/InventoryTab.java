@@ -514,7 +514,8 @@ public class InventoryTab extends JPanel implements ExportListener {
 		}
 
 		private class InventoryTableModel extends AbstractTableModel {
-			private final List<Row> data = new ArrayList<Row>();
+			//Java 7 compiler wants this field to be public
+			public final List<Row> data = new ArrayList<Row>();
 
 			public void setData(Collection<Inventory> data) {
 				this.data.clear();
