@@ -329,6 +329,7 @@ public class TransactionsTable extends JTable {
 		private void resetComponents() {
 			label.setIcon(null);
 			label.setForeground(UIDefaultsWrapper.getLabelForeground());
+			playerPanel.setForeground(UIDefaultsWrapper.getLabelForeground());
 		}
 	}
 
