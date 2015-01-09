@@ -678,7 +678,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 			Date from = fromDatePicker.getDate();
 			Date to = toDatePicker.getDate();
-			if (from.compareTo(to) > 0) {
+			if (from != null && to != null && from.compareTo(to) > 0) {
 				JOptionPane.showMessageDialog(this, "Invalid date range: \"Start\" date must come before \"End\" date.", "Invalid date range", JOptionPane.INFORMATION_MESSAGE);
 				return false;
 			}
