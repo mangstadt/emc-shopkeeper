@@ -138,6 +138,8 @@ public class ItemIndex {
 				for (String id : info.ids) {
 					byId.put(id, info);
 				}
+
+				groups.add(info.groups);
 			}
 
 			this.byName = byName.build();
