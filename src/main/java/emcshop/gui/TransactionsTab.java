@@ -976,7 +976,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		}
 
 		public void setShopsVisited(Integer shopsVisited) {
-			boolean show = (customers != null);
+			boolean show = (shopsVisited != null);
 
 			if (show) {
 				customersLabel.setText("<html><font size=5>Shops Visited:");
