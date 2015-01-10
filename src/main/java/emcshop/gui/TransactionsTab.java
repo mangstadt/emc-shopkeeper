@@ -46,6 +46,7 @@ import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
+import emcshop.util.RelativeDateFormat;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel implements ExportListener {
@@ -449,6 +450,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 	private class QueryPanel extends JPanel {
 		private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
 		private final DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+		private final RelativeDateFormat relativeFormat = new RelativeDateFormat();
 
 		private final JPanel fullPanel;
 		private final JRadioButton entireHistory, showSinceLastUpdate, dateRange;
@@ -745,7 +747,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 			StringBuilder sb = new StringBuilder("since previous update");
 			if (date != null) {
-				sb.append(" (").append(dateTimeFormat.format(date)).append(")");
+				sb.append(" (").append(relativeFormat.format(date)).append(")");
 			}
 
 			showSinceLastUpdate.setText(sb.toString());
@@ -761,7 +763,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				sb.append("entire history");
 			} else if (from != null && to == null) {
 				if (showSinceLastUpdate.isSelected()) {
-					sb.append("since last update (" + dateTimeFormat.format(from) + ")");
+					sb.append("since last update (" + relativeFormat.format(from) + ")");
 				} else {
 					sb.append("since " + dateFormat.format(from));
 				}
