@@ -26,6 +26,11 @@ public class XmlBuilder {
 	private final Element root;
 	private final String ns;
 
+	/**
+	 * Creates a new XML document builder.
+	 * @param ns the default namespace to use
+	 * @param root the name of the root element
+	 */
 	public XmlBuilder(String ns, String root) {
 		this.ns = ns;
 
@@ -43,6 +48,10 @@ public class XmlBuilder {
 		document.appendChild(this.root);
 	}
 
+	/**
+	 * Creates a new XML document builder.
+	 * @param root the name of the root element
+	 */
 	public XmlBuilder(String root) {
 		this(null, root);
 	}
@@ -95,6 +104,10 @@ public class XmlBuilder {
 		parent.appendChild(imported);
 	}
 
+	/**
+	 * Writes the XML document to a string.
+	 * @return the XML string
+	 */
 	@Override
 	public String toString() {
 		try {
@@ -106,11 +119,13 @@ public class XmlBuilder {
 			return writer.toString();
 		} catch (TransformerConfigurationException e) {
 			//no complex configurations
+			throw new RuntimeException(e);
 		} catch (TransformerFactoryConfigurationError e) {
 			//no complex configurations
+			throw new RuntimeException(e);
 		} catch (TransformerException e) {
 			//writing to a string
+			throw new RuntimeException(e);
 		}
-		return "";
 	}
 }
