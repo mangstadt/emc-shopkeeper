@@ -6,7 +6,7 @@ import java.util.Stack;
  * Builds BB Code strings.
  * @author Michael Angstadt
  */
-public class BBCodeBuilder {
+public class BBCodeBuilder implements CharSequence {
 	private static final String NEWLINE = System.getProperty("line.separator");
 	private final StringBuilder bbCode = new StringBuilder();
 	private final Stack<String> openTags = new Stack<String>();
@@ -158,7 +158,7 @@ public class BBCodeBuilder {
 	 * @return this
 	 */
 	public BBCodeBuilder text(CharSequence text) {
-		bbCode.append(text.toString());
+		bbCode.append(text);
 		return this;
 	}
 
@@ -214,7 +214,22 @@ public class BBCodeBuilder {
 		return sb.toString();
 	}
 
-	private void closeTag(String tag, StringBuilder sb) {
+	private static void closeTag(String tag, StringBuilder sb) {
 		sb.append("[/").append(tag).append(']');
+	}
+
+	@Override
+	public int length() {
+		return bbCode.length();
+	}
+
+	@Override
+	public char charAt(int index) {
+		return bbCode.charAt(index);
+	}
+
+	@Override
+	public CharSequence subSequence(int start, int end) {
+		return bbCode.subSequence(start, end);
 	}
 }
