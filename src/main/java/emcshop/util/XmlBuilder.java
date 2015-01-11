@@ -70,6 +70,10 @@ public class XmlBuilder {
 		return element(qname.getNamespaceURI(), qname.getLocalPart());
 	}
 
+	public Element append(String localName, String text) {
+		return append(root, localName, text);
+	}
+
 	public Element append(Element parent, String localName) {
 		return append(parent, new QName(ns, localName));
 	}
