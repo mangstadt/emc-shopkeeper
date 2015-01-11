@@ -1,5 +1,8 @@
 package emcshop.util;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Contains time-related utilities.
  * @author Michael Angstadt
@@ -23,6 +26,21 @@ public class TimeUtils {
 		long milliseconds = remaining;
 
 		return new long[] { milliseconds, seconds, minutes, hours };
+	}
+
+	/**
+	 * Zeroes out the time components of a date.
+	 * @param date the date
+	 * @return the modified date
+	 */
+	public static Date zeroOutTime(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
 	}
 
 	private TimeUtils() {

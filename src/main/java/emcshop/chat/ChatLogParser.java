@@ -1,5 +1,7 @@
 package emcshop.chat;
 
+import static emcshop.util.TimeUtils.zeroOutTime;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,11 +65,13 @@ public class ChatLogParser {
 			}
 
 			Matcher m = fileNameRegex.matcher(fileName);
-			if (m.find()) {
-				Integer num = Integer.valueOf(m.group(1));
-				logFiles.put(num, file);
+			if (!m.find()) {
+				//file name doesn't match pattern
 				continue;
 			}
+
+			Integer num = Integer.valueOf(m.group(1));
+			logFiles.put(num, file);
 		}
 
 		//parse log files
@@ -77,31 +81,24 @@ public class ChatLogParser {
 			if (file.getName().endsWith(".gz")) {
 				in = new GZIPInputStream(in);
 			}
-			BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 			try {
 				Calendar cal = Calendar.getInstance();
-				Pattern lineRegex = Pattern.compile("^\\[(\\d\\d):(\\d\\d):(\\d\\d)\\].*?\\[CHAT\\](.*)");
 				String line;
 				while ((line = reader.readLine()) != null) {
-					Matcher m = lineRegex.matcher(line);
-					if (!m.find()) {
+					Line parsedLine = Line.parse(line);
+					if (parsedLine == null) {
 						continue;
 					}
 
-					int hour = Integer.parseInt(m.group(1));
-					int minute = Integer.parseInt(m.group(2));
-					int second = Integer.parseInt(m.group(3));
-
 					cal.setTime(date);
-					cal.add(Calendar.HOUR_OF_DAY, hour);
-					cal.add(Calendar.MINUTE, minute);
-					cal.add(Calendar.SECOND, second);
+					cal.add(Calendar.HOUR_OF_DAY, parsedLine.hour);
+					cal.add(Calendar.MINUTE, parsedLine.minute);
+					cal.add(Calendar.SECOND, parsedLine.second);
 					Date ts = cal.getTime();
 
-					String message = m.group(4).trim();
-
-					messages.add(new ChatMessage(ts, message));
+					messages.add(new ChatMessage(ts, parsedLine.message));
 				}
 			} finally {
 				IOUtils.closeQuietly(reader);
@@ -111,13 +108,31 @@ public class ChatLogParser {
 		return messages;
 	}
 
-	private Date zeroOutTime(Date date) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-		return cal.getTime();
+	private static class Line {
+		private final int hour, minute, second;
+		private final String message;
+
+		public Line(int hour, int minute, int second, String message) {
+			this.hour = hour;
+			this.minute = minute;
+			this.second = second;
+			this.message = message;
+		}
+
+		private static final Pattern lineRegex = Pattern.compile("^\\[(\\d\\d):(\\d\\d):(\\d\\d)\\].*?\\[CHAT\\](.*)");
+
+		public static Line parse(String line) {
+			Matcher m = lineRegex.matcher(line);
+			if (!m.find()) {
+				return null;
+			}
+
+			int hour = Integer.parseInt(m.group(1));
+			int minute = Integer.parseInt(m.group(2));
+			int second = Integer.parseInt(m.group(3));
+			String message = m.group(4).trim();
+
+			return new Line(hour, minute, second, message);
+		}
 	}
 }
