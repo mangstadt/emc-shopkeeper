@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Represents an INSERT statement.
  * @author Michael Angstadt
@@ -24,6 +26,7 @@ public class InsertStatement {
 	private final String tableName;
 	private final Set<String> columnNames = new LinkedHashSet<String>();
 	private final List<Map<String, SqlColumn>> rows = new ArrayList<Map<String, SqlColumn>>();
+	private final int supportedTypes[] = new int[] { Types.INTEGER, Types.VARCHAR, Types.DATE, Types.TIMESTAMP };
 	private Map<String, SqlColumn> currentRow;
 
 	/**
@@ -111,18 +114,9 @@ public class InsertStatement {
 		}
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO ").append(tableName).append(" (");
-
-		int i = 0;
-		for (String columnName : columnNames) {
-			if (i > 0) {
-				sql.append(", ");
-			}
-			sql.append(columnName);
-			i++;
-		}
-
-		sql.append(") VALUES ");
+		sql.append("INSERT INTO ").append(tableName).append(' ');
+		sql.append('(').append(StringUtils.join(columnNames, ", ")).append(')');
+		sql.append(" VALUES ");
 
 		int nonEmptyRows = 0;
 		for (Map<String, SqlColumn> row : rows) {
@@ -135,14 +129,7 @@ public class InsertStatement {
 				sql.append(",\n");
 			}
 
-			sql.append('(');
-			for (int colCount = 0; colCount < columnNames.size(); colCount++) {
-				if (colCount > 0) {
-					sql.append(", ");
-				}
-				sql.append('?');
-			}
-			sql.append(')');
+			sql.append('(').append(StringUtils.repeat("?", ", ", columnNames.size())).append(')');
 
 			nonEmptyRows++;
 		}
@@ -161,7 +148,6 @@ public class InsertStatement {
 	public PreparedStatement toStatement(Connection conn) throws SQLException {
 		PreparedStatement stmt = conn.prepareStatement(toSql(), Statement.RETURN_GENERATED_KEYS);
 		int index = 1;
-		int supportedTypes[] = new int[] { Types.INTEGER, Types.VARCHAR, Types.DATE, Types.TIMESTAMP };
 		for (Map<String, SqlColumn> row : rows) {
 			if (row.isEmpty()) {
 				//ignore any extra "nextRow()" calls the user made
