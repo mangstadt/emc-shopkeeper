@@ -39,6 +39,7 @@ import emcshop.gui.images.ImageManager;
  */
 public class ItemIndex {
 	private static ItemIndex INSTANCE;
+	private static final int DEFAULT_STACK_SIZE = 64;
 
 	private final Map<String, ItemInfo> byName;
 	private final Map<String, ItemInfo> byEmcName;
@@ -56,9 +57,12 @@ public class ItemIndex {
 			InputStream in = ItemIndex.class.getResourceAsStream("items.xml");
 			try {
 				INSTANCE = new ItemIndex(in);
-			} catch (Throwable t) {
-				//nothing should be thrown because this file is on the classpath
-				throw new RuntimeException(t);
+			} catch (IOException e) {
+				//the program should terminate if this file can't be read!
+				throw new RuntimeException(e);
+			} catch (SAXException e) {
+				//the program should terminate if this file can't be parsed!
+				throw new RuntimeException(e);
 			} finally {
 				IOUtils.closeQuietly(in);
 			}
@@ -68,9 +72,9 @@ public class ItemIndex {
 	}
 
 	/**
-	 * Creates a new renamed items object.
+	 * Creates a new item index.
 	 * @param in the input stream to the XML document
-	 * @throws SAXException if there was a problem parse the XML
+	 * @throws SAXException if there was a problem parsing the XML
 	 * @throws IOException if there was a problem reading from the stream
 	 */
 	ItemIndex(InputStream in) throws SAXException, IOException {
@@ -149,7 +153,7 @@ public class ItemIndex {
 		}
 	}
 
-	private CategoryInfo parseCategory(Element element) {
+	private static CategoryInfo parseCategory(Element element) {
 		String name = element.getAttribute("name");
 		int id = Integer.parseInt(element.getAttribute("id"));
 
@@ -159,34 +163,42 @@ public class ItemIndex {
 		return new CategoryInfo(id, name, icon);
 	}
 
-	private ItemInfo parseItem(Element element, Map<Integer, CategoryInfo> categoriesById) {
+	private static ItemInfo parseItem(Element element, Map<Integer, CategoryInfo> categoriesById) {
 		String name = element.getAttribute("name");
 
 		String value = element.getAttribute("emcNames");
-		String emcNames[] = value.isEmpty() ? new String[0] : value.split("\\s*,\\s*");
+		String emcNames[] = splitValues(value);
 
 		value = element.getAttribute("id");
-		String ids[] = value.isEmpty() ? new String[0] : value.split("\\s*,\\s*");
+		String ids[] = splitValues(value);
 
 		value = element.getAttribute("image");
-		String image = value.isEmpty() ? name.toLowerCase().replace(' ', '_') + ".png" : value;
+		String image = value.isEmpty() ? imageFileName(name) : value;
 
 		value = element.getAttribute("stack");
-		int stackSize = value.isEmpty() ? 64 : Integer.valueOf(value);
+		int stackSize = value.isEmpty() ? DEFAULT_STACK_SIZE : Integer.valueOf(value);
 
 		value = element.getAttribute("group");
-		String groups[] = value.isEmpty() ? new String[0] : value.split("\\s*,\\s*");
+		String groups[] = splitValues(value);
 
 		value = element.getAttribute("categories");
-		String categoriesStr[] = value.isEmpty() ? new String[0] : value.split("\\s*,\\s*");
+		String categoriesStr[] = splitValues(value);
 		CategoryInfo[] categories = new CategoryInfo[categoriesStr.length];
 		for (int i = 0; i < categoriesStr.length; i++) {
-			int id = Integer.parseInt(categoriesStr[i]);
+			Integer id = Integer.valueOf(categoriesStr[i]);
 			categories[i] = categoriesById.get(id);
 
 		}
 
 		return new ItemInfo(name, emcNames, ids, image, stackSize, groups, categories);
+	}
+
+	private static String[] splitValues(String value) {
+		return value.isEmpty() ? new String[0] : value.split("\\s*,\\s*");
+	}
+
+	private static String imageFileName(String itemName) {
+		return itemName.toLowerCase().replace(' ', '_') + ".png";
 	}
 
 	/**
@@ -211,6 +223,7 @@ public class ItemIndex {
 			return item.name;
 		}
 
+		//try adding ":0" to the end
 		if (!id.contains(":")) {
 			item = byId.get(id + ":0");
 			if (item != null) {
@@ -218,6 +231,7 @@ public class ItemIndex {
 			}
 		}
 
+		//if the name ends with ":0", try removing that suffix
 		if (id.endsWith(":0")) {
 			item = byId.get(id.substring(0, id.length() - 2));
 			if (item != null) {
@@ -235,10 +249,7 @@ public class ItemIndex {
 	 */
 	public String getImageFileName(String displayName) {
 		ItemInfo item = byName.get(displayName.toLowerCase());
-		if (item == null) {
-			return displayName.toLowerCase().replace(" ", "_") + ".png";
-		}
-		return item.image;
+		return (item == null) ? imageFileName(displayName) : item.image;
 	}
 
 	/**
@@ -248,13 +259,12 @@ public class ItemIndex {
 	 */
 	public int getStackSize(String displayName) {
 		ItemInfo item = byName.get(displayName.toLowerCase());
-		return (item == null) ? 64 : item.stackSize;
+		return (item == null) ? DEFAULT_STACK_SIZE : item.stackSize;
 	}
 
 	/**
-	 * Gets the display-to-EMC name mappings (only includes the mappings that
-	 * differ from the default, reverse of
-	 * {@link #getEmcNameToDisplayNameMapping()}).
+	 * Gets the display-to-EMCName mappings (only includes the mappings that
+	 * differ from the default).
 	 * @return the mappings
 	 */
 	public Multimap<String, String> getDisplayNameToEmcNamesMapping() {
@@ -268,8 +278,8 @@ public class ItemIndex {
 	}
 
 	/**
-	 * Gets all the item names.
-	 * @return the item names
+	 * Gets all the item display names.
+	 * @return the item display names (sorted alphabetically)
 	 */
 	public List<String> getItemNames() {
 		List<String> names = new ArrayList<String>(byName.size());
@@ -297,13 +307,14 @@ public class ItemIndex {
 		return categories;
 	}
 
+	/**
+	 * Gets the categories that are assigned to an item.
+	 * @param itemName the item display name (e.g. "Oak Log")
+	 * @return the item categories
+	 */
 	public CategoryInfo[] getItemCategories(String itemName) {
 		ItemInfo item = byName.get(itemName.toLowerCase());
-		if (item == null) {
-			return new CategoryInfo[0];
-		}
-
-		return item.categories;
+		return (item == null) ? new CategoryInfo[0] : item.categories;
 	}
 
 	/**
@@ -313,9 +324,12 @@ public class ItemIndex {
 	 */
 	public Collection<String> getGroups(String itemName) {
 		ItemInfo item = byName.get(itemName.toLowerCase());
-		return Arrays.asList(item.groups);
+		return (item == null) ? Collections.<String> emptyList() : Arrays.asList(item.groups);
 	}
 
+	/**
+	 * Holds the information on an item.
+	 */
 	private static class ItemInfo {
 		private final String name;
 		private final String emcNames[];
@@ -336,6 +350,9 @@ public class ItemIndex {
 		}
 	}
 
+	/**
+	 * Holds the information on a category.
+	 */
 	public static class CategoryInfo {
 		private final int id;
 		private final String name;
