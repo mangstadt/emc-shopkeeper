@@ -26,6 +26,7 @@ import emcshop.cli.view.LoginShower;
 import emcshop.cli.view.UpdateViewCli;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
+import emcshop.db.ShopTransactionType;
 import emcshop.model.FirstUpdateModelImpl;
 import emcshop.model.IUpdateModel;
 import emcshop.presenter.FirstUpdatePresenter;
@@ -93,13 +94,13 @@ public class CliController {
 		Collection<ItemGroup> itemGroups;
 		Date from, to;
 		if (query.isEmpty()) {
-			itemGroups = dao.getItemGroups(null, null, true);
+			itemGroups = dao.getItemGroups(null, null, ShopTransactionType.MY_SHOP);
 			from = to = null;
 		} else {
 			Date range[] = parseDateRange(query);
 			from = range[0];
 			to = range[1];
-			itemGroups = dao.getItemGroups(from, to, true);
+			itemGroups = dao.getItemGroups(from, to, ShopTransactionType.MY_SHOP);
 		}
 
 		//sort items

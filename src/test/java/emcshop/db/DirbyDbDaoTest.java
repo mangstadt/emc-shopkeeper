@@ -572,7 +572,7 @@ public class DirbyDbDaoTest {
 
 	@Test
 	public void getItemGroups() throws Throwable {
-		assertTrue(dao.getItemGroups(null, null, true).isEmpty());
+		assertTrue(dao.getItemGroups(null, null, ShopTransactionType.MY_SHOP).isEmpty());
 
 		int jeb = players().name("Jeb").insert();
 		DateGenerator dg = new DateGenerator();
@@ -585,7 +585,7 @@ public class DirbyDbDaoTest {
 
 		//no date range
 		{
-			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(null, null, true));
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(null, null, ShopTransactionType.MY_SHOP));
 			assertEquals(2, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
@@ -597,7 +597,7 @@ public class DirbyDbDaoTest {
 
 		//start date (first transaction is not included)
 		{
-			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(dg.getGenerated(1), null, true));
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(dg.getGenerated(1), null, ShopTransactionType.MY_SHOP));
 			assertEquals(2, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
@@ -609,7 +609,7 @@ public class DirbyDbDaoTest {
 
 		//end date (last transaction is not included)
 		{
-			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(null, dg.getGenerated(5), true));
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(null, dg.getGenerated(5), ShopTransactionType.MY_SHOP));
 			assertEquals(1, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
@@ -618,7 +618,7 @@ public class DirbyDbDaoTest {
 
 		//start and end date (first and last transactions are not included)
 		{
-			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(dg.getGenerated(1), dg.getGenerated(5), true));
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(dg.getGenerated(1), dg.getGenerated(5), ShopTransactionType.MY_SHOP));
 			assertEquals(1, groups.size());
 
 			ItemGroup itemGroup = groups.get("Apple");
@@ -627,14 +627,14 @@ public class DirbyDbDaoTest {
 
 		//start and end date (no transactions included)
 		{
-			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(dg.next(), dg.next(), true));
+			Map<String, ItemGroup> groups = itemMap(dao.getItemGroups(dg.next(), dg.next(), ShopTransactionType.MY_SHOP));
 			assertEquals(0, groups.size());
 		}
 	}
 
 	@Test
 	public void getTransactionsByDate() throws Throwable {
-		assertTrue(dao.getTransactionsByDate(null, null, true).isEmpty());
+		assertTrue(dao.getTransactionsByDate(null, null, ShopTransactionType.MY_SHOP).isEmpty());
 
 		int jeb = players().name("Jeb").insert();
 		transactions().ts("2014-01-01 01:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
@@ -650,7 +650,7 @@ public class DirbyDbDaoTest {
 
 		//no date range
 		{
-			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, null, true).iterator();
+			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, null, ShopTransactionType.MY_SHOP).iterator();
 
 			ShopTransaction t = it.next();
 			transactions().ts("2014-01-01 01:00:00").item("Apple").player("Notch").amount(490).quantity(-49).test(t);
@@ -672,7 +672,7 @@ public class DirbyDbDaoTest {
 
 		//with start date
 		{
-			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), null, true).iterator();
+			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), null, ShopTransactionType.MY_SHOP).iterator();
 
 			ShopTransaction t = it.next();
 			transactions().ts("2014-01-01 01:00:02").item("Apple").player("Jeb").amount(-10).quantity(1).test(t);
@@ -691,7 +691,7 @@ public class DirbyDbDaoTest {
 
 		//with end date
 		{
-			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, date("2014-01-01 01:01:00"), true).iterator();
+			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, date("2014-01-01 01:01:00"), ShopTransactionType.MY_SHOP).iterator();
 
 			ShopTransaction t = it.next();
 			transactions().ts("2014-01-01 01:00:00").item("Apple").player("Notch").amount(290).quantity(-29).test(t);
@@ -707,7 +707,7 @@ public class DirbyDbDaoTest {
 
 		//with start and end dates
 		{
-			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), date("2014-01-01 01:01:00"), true).iterator();
+			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), date("2014-01-01 01:01:00"), ShopTransactionType.MY_SHOP).iterator();
 
 			ShopTransaction t = it.next();
 			transactions().ts("2014-01-01 01:00:02").item("Apple").player("Jeb").amount(-10).quantity(1).test(t);
@@ -721,7 +721,7 @@ public class DirbyDbDaoTest {
 
 	@Test
 	public void getPlayerGroups() throws Throwable {
-		assertTrue(dao.getPlayerGroups(null, null, true).isEmpty());
+		assertTrue(dao.getPlayerGroups(null, null, ShopTransactionType.MY_SHOP).isEmpty());
 
 		DateGenerator dg = new DateGenerator();
 		int jeb = players().name("Jeb").insert();
@@ -732,7 +732,7 @@ public class DirbyDbDaoTest {
 
 		//no date range
 		{
-			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(null, null, true));
+			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(null, null, ShopTransactionType.MY_SHOP));
 			assertEquals(2, groups.size());
 
 			{
@@ -764,7 +764,7 @@ public class DirbyDbDaoTest {
 
 		//with start date
 		{
-			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(dg.getGenerated(1), null, true));
+			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(dg.getGenerated(1), null, ShopTransactionType.MY_SHOP));
 			assertEquals(2, groups.size());
 
 			{
@@ -796,7 +796,7 @@ public class DirbyDbDaoTest {
 
 		//with end date
 		{
-			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(null, dg.getGenerated(3), true));
+			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(null, dg.getGenerated(3), ShopTransactionType.MY_SHOP));
 			assertEquals(2, groups.size());
 
 			{
@@ -828,7 +828,7 @@ public class DirbyDbDaoTest {
 
 		//with start and end dates
 		{
-			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(dg.getGenerated(1), dg.getGenerated(3), true));
+			Map<String, PlayerGroup> groups = playerMap(dao.getPlayerGroups(dg.getGenerated(1), dg.getGenerated(3), ShopTransactionType.MY_SHOP));
 			assertEquals(2, groups.size());
 
 			{

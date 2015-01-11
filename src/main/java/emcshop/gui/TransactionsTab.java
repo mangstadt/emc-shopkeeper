@@ -41,6 +41,7 @@ import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
+import emcshop.db.ShopTransactionType;
 import emcshop.gui.ExportButton.ExportListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupPanel;
@@ -76,20 +77,20 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		queryPanel = new QueryPanel();
 		queryPanel.addSearchListener(new SearchListener() {
 			@Override
-			public void searchPerformed(DateRange range, SearchType type, boolean shopTransactions) {
+			public void searchPerformed(DateRange range, SearchType type, ShopTransactionType transactionType) {
 				filterPanel.clear();
 
 				switch (type) {
 				case ITEMS:
-					showItems(range, shopTransactions);
+					showItems(range, transactionType);
 					break;
 
 				case PLAYERS:
-					showPlayers(range, shopTransactions);
+					showPlayers(range, transactionType);
 					break;
 
 				case DATES:
-					showTransactions(range, shopTransactions);
+					showTransactions(range, transactionType);
 					break;
 				}
 			}
@@ -206,7 +207,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		}
 	}
 
-	public void showItems(final DateRange range, final boolean shopTransactions) {
+	public void showItems(final DateRange range, final ShopTransactionType transactionType) {
 		owner.startProgress("Querying...");
 		Thread t = new Thread() {
 			@Override
@@ -216,7 +217,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					final List<ItemGroup> itemGroupsList;
 					{
 						//query database
-						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo(), shopTransactions));
+						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo(), transactionType));
 
 						//sort by item name
 						Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
@@ -260,14 +261,14 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		t.start();
 	}
 
-	public void showPlayers(final DateRange range, final boolean shopTransactions) {
+	public void showPlayers(final DateRange range, final ShopTransactionType transactionType) {
 		owner.startProgress("Querying...");
 		Thread t = new Thread() {
 			@Override
 			public void run() {
 				try {
 					//query database
-					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), shopTransactions);
+					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), transactionType);
 
 					//reset GUI
 					filterPanel.removeAll();
@@ -285,7 +286,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 					//render table
 					playersPanel = new PlayersPanel(playerGroups);
-					playersPanel.setShowFirstLastSeen(shopTransactions);
+					playersPanel.setShowFirstLastSeen(transactionType != ShopTransactionType.OTHER_SHOPS);
 					tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();
 
@@ -302,14 +303,14 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		t.start();
 	}
 
-	private void showTransactions(final DateRange range, final boolean shopTransactions) {
+	private void showTransactions(final DateRange range, final ShopTransactionType transactionType) {
 		owner.startProgress("Querying...");
 		Thread t = new Thread() {
 			@Override
 			public void run() {
 				try {
 					//query database
-					List<ShopTransaction> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), shopTransactions);
+					List<ShopTransaction> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), transactionType);
 
 					//reset GUI
 					filterPanel.removeAll();
@@ -325,7 +326,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					filterPanel.setVisible(true, true, false);
 
 					//render table
-					transactionsTable = new TransactionsTable(transactions, shopTransactions);
+					transactionsTable = new TransactionsTable(transactions, transactionType);
 					transactionsTable.setFillsViewportHeight(true);
 					transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
 					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
@@ -389,8 +390,10 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 		if (queryPanel.shopTransactions.isSelected()) {
 			statsPanel.setCustomers(customers);
-		} else {
+		} else if (queryPanel.myTransactions.isSelected()) {
 			statsPanel.setShopsVisited(customers);
+		} else if (queryPanel.bothTransactions.isSelected()) {
+			statsPanel.setPlayers(customers);
 		}
 	}
 
@@ -454,7 +457,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 		private final JPanel fullPanel;
 		private final JRadioButton entireHistory, showSinceLastUpdate, dateRange;
-		private final JRadioButton shopTransactions, myTransactions;
+		private final JRadioButton shopTransactions, myTransactions, bothTransactions;
 		private final DatePicker fromDatePicker, toDatePicker;
 		private final JButton compress, showItems, showPlayers, showTransactions;
 
@@ -512,6 +515,8 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				transactionTypeGroup.add(shopTransactions);
 				myTransactions = new JRadioButton("Other Shops");
 				transactionTypeGroup.add(myTransactions);
+				bothTransactions = new JRadioButton("Both");
+				transactionTypeGroup.add(bothTransactions);
 				shopTransactions.setSelected(true);
 
 				compress = new JButton(ImageManager.getImageIcon("up-arrow.png"));
@@ -563,6 +568,8 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				typePanel.add(new HelpLabel(null, "Shows the transactions that occurred when players bought/sold items to/from your shop."), "wrap");
 				typePanel.add(myTransactions);
 				typePanel.add(new HelpLabel(null, "Shows the transactions that occurred when you bought/sold items to/from someone else's shop."), "wrap");
+				typePanel.add(bothTransactions);
+				typePanel.add(new HelpLabel(null, "Includes shop transactions from both your shop and other players' shops."), "wrap");
 				fullPanel.add(typePanel, "growy, wrap");
 
 				fullPanel.add(compress, "w 30, split 4");
@@ -656,7 +663,16 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			setDescription(type, range);
 
 			for (SearchListener listener : listeners) {
-				listener.searchPerformed(range, type, shopTransactions.isSelected());
+				ShopTransactionType transactionType;
+				if (shopTransactions.isSelected()) {
+					transactionType = ShopTransactionType.MY_SHOP;
+				} else if (myTransactions.isSelected()) {
+					transactionType = ShopTransactionType.OTHER_SHOPS;
+				} else {
+					transactionType = ShopTransactionType.ALL;
+				}
+
+				listener.searchPerformed(range, type, transactionType);
 			}
 
 			if (getComponent(0) == fullPanel) {
@@ -777,8 +793,10 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			sb.append(" | ");
 			if (shopTransactions.isSelected()) {
 				sb.append("My Shop");
-			} else {
+			} else if (myTransactions.isSelected()) {
 				sb.append("Other Shops");
+			} else {
+				sb.append("All Shop Transactions");
 			}
 
 			description.setText(sb.toString());
@@ -910,7 +928,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 	}
 
 	private interface SearchListener {
-		void searchPerformed(DateRange range, SearchType type, boolean shopTransactions);
+		void searchPerformed(DateRange range, SearchType type, ShopTransactionType transactionType);
 	}
 
 	private interface FilterListener {
@@ -983,6 +1001,18 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			if (show) {
 				customersLabel.setText("<html><font size=5>Shops Visited:");
 				customers.setText("<html><font size=5><code>" + shopsVisited);
+			}
+
+			customersLabel.setVisible(show);
+			this.customers.setVisible(show);
+		}
+
+		public void setPlayers(Integer players) {
+			boolean show = (players != null);
+
+			if (show) {
+				customersLabel.setText("<html><font size=5>Players:");
+				this.customers.setText("<html><font size=5><code>" + players);
 			}
 
 			customersLabel.setVisible(show);

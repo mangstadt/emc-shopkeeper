@@ -31,6 +31,7 @@ import javax.swing.table.TableRowSorter;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.Settings;
+import emcshop.db.ShopTransactionType;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
 import emcshop.scraper.PlayerProfile;
@@ -67,14 +68,14 @@ public class TransactionsTable extends JTable {
 	private final Column[] columns = Column.values();
 	private final Model model;
 	private final TableRowSorter<Model> rowSorter;
-	private final boolean customers;
+	private final ShopTransactionType transactionType;
 
 	private boolean showQuantitiesInStacks;
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 
-	public TransactionsTable(List<ShopTransaction> transactions, boolean customers) {
-		this.customers = customers;
+	public TransactionsTable(List<ShopTransaction> transactions, ShopTransactionType transactionType) {
+		this.transactionType = transactionType;
 		this.showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
 
 		setRowHeight(24);
@@ -104,7 +105,7 @@ public class TransactionsTable extends JTable {
 	public int getDisplayedPlayersCount() {
 		Set<String> players = new HashSet<String>();
 		for (ShopTransaction transaction : getDisplayedTransactions()) {
-			String player = customers ? transaction.getPlayer() : transaction.getShopOwner();
+			String player = getPlayerName(transaction);
 			players.add(player);
 		}
 		return players.size();
@@ -154,10 +155,9 @@ public class TransactionsTable extends JTable {
 		rowSorter.setComparator(Column.PLAYER_NAME.ordinal(), new Comparator<ShopTransaction>() {
 			@Override
 			public int compare(ShopTransaction one, ShopTransaction two) {
-				if (customers) {
-					return one.getPlayer().compareToIgnoreCase(two.getPlayer());
-				}
-				return one.getShopOwner().compareToIgnoreCase(two.getShopOwner());
+				String name1 = getPlayerName(one);
+				String name2 = getPlayerName(two);
+				return name1.compareToIgnoreCase(name2);
 			}
 		});
 		rowSorter.setComparator(Column.ITEM_NAME.ordinal(), new Comparator<ShopTransaction>() {
@@ -182,6 +182,21 @@ public class TransactionsTable extends JTable {
 		rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.TS.ordinal(), SortOrder.DESCENDING)));
 
 		return rowSorter;
+	}
+
+	private String getPlayerName(ShopTransaction transaction) {
+		switch (transactionType) {
+		case MY_SHOP:
+			return transaction.getPlayer();
+		case OTHER_SHOPS:
+			return transaction.getShopOwner();
+		default:
+			String name = transaction.getPlayer();
+			if (name != null) {
+				return name;
+			}
+			return transaction.getShopOwner();
+		}
 	}
 
 	public void filterByItem(FilterList filterList) {
@@ -214,7 +229,7 @@ public class TransactionsTable extends JTable {
 					return true;
 				}
 
-				String name = customers ? transaction.getPlayer() : transaction.getShopOwner();
+				String name = getPlayerName(transaction);
 				return filteredPlayerNames.isFiltered(name);
 			}
 
@@ -268,7 +283,7 @@ public class TransactionsTable extends JTable {
 			case PLAYER_NAME:
 				component = playerPanel;
 
-				final String playerName = customers ? transaction.getPlayer() : transaction.getShopOwner();
+				final String playerName = getPlayerName(transaction);
 				playerPanel.setPlayer(playerName, new ProfileDownloadedListener() {
 					@Override
 					public void onProfileDownloaded(PlayerProfile profile) {
@@ -278,7 +293,7 @@ public class TransactionsTable extends JTable {
 							public void run() {
 								for (int i = 0; i < model.getRowCount(); i++) {
 									ShopTransaction t = model.transactions.get(i);
-									String name = customers ? t.getPlayer() : t.getShopOwner();
+									String name = getPlayerName(t);
 									if (playerName.equalsIgnoreCase(name)) {
 										model.fireTableCellUpdated(i, col);
 									}
@@ -349,7 +364,7 @@ public class TransactionsTable extends JTable {
 		public String getColumnName(int index) {
 			Column column = columns[index];
 
-			if (column == Column.PLAYER_NAME && !customers) {
+			if (column == Column.PLAYER_NAME && transactionType == ShopTransactionType.OTHER_SHOPS) {
 				return "Shop Owner";
 			} else {
 				return column.getName();
