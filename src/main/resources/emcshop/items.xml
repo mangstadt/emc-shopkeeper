@@ -149,6 +149,7 @@
 	<Item name="Emerald Ore" id="129" categories="11" />
 	<Item name="Empty Map" id="395" />
 	<Item name="Enchantment Table" id="116" group="Diamonds" />
+	<Item name="Enchanted Book" emcNames="Enchbook" />
 	<Item name="End Stone" id="121" />
 	<Item name="Ender Chest" id="130" />
 	<Item name="Ender Pearl" id="368" stack="16" categories="9,15" />
