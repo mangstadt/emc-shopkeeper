@@ -204,7 +204,7 @@
 	<Item name="Hard Clay" id="172" group="Clay" categories="2" />
 	<Item name="Hay Block" id="170" categories="0,6" />
 	<Item name="Hopper" id="154" group="Iron" categories="13" />
-	<Item name="Horse Egg" id="383:100" group="Spawn Eggs" categories="0" />
+	<Item name="Horse Egg" id="383:100" stack="1" group="Spawn Eggs" categories="0" />
 	<Item name="Ice" id="79" />
 	<Item name="Iron Axe" id="258" stack="1" group="Iron" categories="16" />
 	<Item name="Iron Barding" id="417" stack="1" group="Iron" categories="16" />
