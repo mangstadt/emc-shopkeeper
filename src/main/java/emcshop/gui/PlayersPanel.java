@@ -36,6 +36,7 @@ import emcshop.Settings;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
+import emcshop.db.ShopTransactionType;
 import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.ImageManager;
@@ -57,6 +58,7 @@ public class PlayersPanel extends JPanel {
 	private final ProfileLoader profileLoader;
 	private final OnlinePlayersMonitor onlinePlayersMonitor;
 	private boolean showQuantitiesInStacks, showFirstLastSeen = true;
+	private final ShopTransactionType shopTransactionType;
 
 	private final DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
@@ -73,7 +75,7 @@ public class PlayersPanel extends JPanel {
 	/**
 	 * @param playerGroups the players to display
 	 */
-	public PlayersPanel(Collection<PlayerGroup> playerGroups) {
+	public PlayersPanel(Collection<PlayerGroup> playerGroups, ShopTransactionType shopTransactionType) {
 		super(new MigLayout("fillx, insets 0"));
 
 		//add all the data to Lists so they can be sorted
@@ -86,6 +88,7 @@ public class PlayersPanel extends JPanel {
 		profileLoader = context.get(ProfileLoader.class);
 		onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 		showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
+		this.shopTransactionType = shopTransactionType;
 
 		sortByPlayerName();
 	}
@@ -535,7 +538,7 @@ public class PlayersPanel extends JPanel {
 					break;
 				}
 
-				itemsTable = new ItemsTable(displayedItems.get(playerGroup), column, ascending, showQuantitiesInStacks);
+				itemsTable = new ItemsTable(displayedItems.get(playerGroup), column, ascending, shopTransactionType, showQuantitiesInStacks);
 			}
 			add(itemsTable.getTableHeader(), "growx, wrap");
 			add(itemsTable, "growx, wrap");

@@ -242,7 +242,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					filterPanel.setVisible(true, false, false);
 
 					//render table
-					itemsTable = new ItemsTable(itemGroupsList, context.get(Settings.class).isShowQuantitiesInStacks());
+					itemsTable = new ItemsTable(itemGroupsList, transactionType, context.get(Settings.class).isShowQuantitiesInStacks());
 					itemsTable.setFillsViewportHeight(true);
 					itemsTableScrollPane = new MyJScrollPane(itemsTable);
 					tablePanel.add(itemsTableScrollPane, "grow, w 100%, h 100%, wrap");
@@ -285,7 +285,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					filterPanel.setVisible(true, true, true);
 
 					//render table
-					playersPanel = new PlayersPanel(playerGroups);
+					playersPanel = new PlayersPanel(playerGroups, transactionType);
 					playersPanel.setShowFirstLastSeen(transactionType != ShopTransactionType.OTHER_SHOPS);
 					tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
 					tablePanel.validate();

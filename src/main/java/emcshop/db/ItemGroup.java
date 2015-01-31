@@ -53,4 +53,17 @@ public class ItemGroup {
 		return boughtAmount + soldAmount;
 	}
 
+	public double getSoldPPU() {
+		if (soldQuantity == 0) {
+			return 0.0;
+		}
+		return soldAmount / (double) soldQuantity * -1;
+	}
+
+	public double getBoughtPPU() {
+		if (boughtQuantity == 0) {
+			return 0.0;
+		}
+		return boughtAmount / (double) boughtQuantity * -1;
+	}
 }

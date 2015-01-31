@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +27,7 @@ import javax.swing.table.TableCellRenderer;
 
 import emcshop.ItemIndex;
 import emcshop.db.ItemGroup;
+import emcshop.db.ShopTransactionType;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.GroupableColumnsTable;
 
@@ -40,7 +42,7 @@ public class ItemsTable extends GroupableColumnsTable {
 	 * are defined is the order that they will appear in the table.
 	 */
 	public static enum Column {
-		ITEM_NAME("Item Name"), SOLD_QTY("Qty"), SOLD_AMT("Rupees"), BOUGHT_QTY("Qty"), BOUGHT_AMT("Rupees"), NET_QTY("Qty"), NET_AMT("Rupees");
+		ITEM_NAME("Item Name"), PPU("PPU"), SOLD_QTY("Qty"), SOLD_AMT("Rupees"), BOUGHT_QTY("Qty"), BOUGHT_AMT("Rupees"), NET_QTY("Qty"), NET_AMT("Rupees");
 
 		private final String name;
 
@@ -62,11 +64,12 @@ public class ItemsTable extends GroupableColumnsTable {
 
 	/**
 	 * @param itemGroups the items to display
-	 * @param showQuantitiesInStacks true to display item quantities in stacks,
-	 * false not to
+	 * @param shopTransactionType the shop transaction type
+	 * @param showQtyInStacks true to display item quantities in stacks, false
+	 * not to
 	 */
-	public ItemsTable(List<ItemGroup> itemGroups, boolean showQuantitiesInStacks) {
-		this(itemGroups, Column.ITEM_NAME, true, showQuantitiesInStacks);
+	public ItemsTable(List<ItemGroup> itemGroups, ShopTransactionType shopTransactionType, boolean showQtyInStacks) {
+		this(itemGroups, Column.ITEM_NAME, true, shopTransactionType, showQtyInStacks);
 	}
 
 	/**
@@ -74,10 +77,11 @@ public class ItemsTable extends GroupableColumnsTable {
 	 * @param sortedBy the column that the items list is already sorted by
 	 * @param sortedByAscending true if the items list is sorted ascending,
 	 * false if descending
+	 * @param shopTransactionType the shop transaction type
 	 * @param showQtyInStacks true to display item quantities in stacks, false
 	 * not to
 	 */
-	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending, boolean showQtyInStacks) {
+	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending, final ShopTransactionType shopTransactionType, boolean showQtyInStacks) {
 		this.itemGroups = itemGroups;
 		this.itemGroupsToDisplay = itemGroups;
 		prevColumnClicked = sortedBy;
@@ -168,6 +172,31 @@ public class ItemsTable extends GroupableColumnsTable {
 				switch (column) {
 				case ITEM_NAME:
 					return group.getItem();
+				case PPU:
+					NumberFormat nf = NumberFormat.getNumberInstance();
+					nf.setMaximumFractionDigits(2);
+
+					StringBuilder sb = new StringBuilder();
+					switch (shopTransactionType) {
+					case OTHER_SHOPS:
+						if (group.getBoughtQuantity() != 0) {
+							sb.append("B ").append(nf.format(group.getBoughtPPU()));
+						}
+						if (group.getSoldQuantity() != 0) {
+							sb.append(':').append(nf.format(group.getSoldPPU())).append(" S");
+						}
+						break;
+					default:
+						if (group.getSoldQuantity() != 0) {
+							sb.append("B ").append(nf.format(group.getSoldPPU()));
+						}
+						if (group.getBoughtQuantity() != 0) {
+							sb.append(':').append(nf.format(group.getBoughtPPU())).append(" S");
+						}
+						break;
+					}
+
+					return (sb.length() == 0) ? null : sb.toString();
 				case SOLD_QTY:
 					if (group.getSoldQuantity() == 0) {
 						return null;
@@ -242,6 +271,12 @@ public class ItemsTable extends GroupableColumnsTable {
 				switch (prevColumnClicked) {
 				case ITEM_NAME:
 					return a.getItem().compareToIgnoreCase(b.getItem());
+				case PPU:
+					int c = Double.valueOf(a.getSoldPPU()).compareTo(Double.valueOf(b.getSoldPPU()));
+					if (c == 0) {
+						c = Double.valueOf(a.getBoughtPPU()).compareTo(Double.valueOf(b.getBoughtPPU()));
+					}
+					return c;
 				case BOUGHT_AMT:
 					return a.getBoughtAmount() - b.getBoughtAmount();
 				case BOUGHT_QTY:
