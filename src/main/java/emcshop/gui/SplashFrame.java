@@ -2,10 +2,12 @@ package emcshop.gui;
 
 import java.awt.Image;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JRootPane;
 import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.gui.images.ImageManager;
@@ -21,6 +23,7 @@ public class SplashFrame extends JFrame {
 		setResizable(false);
 		setUndecorated(true);
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+		getRootPane().setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 
 		Image appIcon = ImageManager.getAppIcon().getImage();
 		setIconImage(appIcon);

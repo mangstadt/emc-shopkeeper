@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -22,6 +23,7 @@ import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.border.BevelBorder;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -55,6 +57,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 		setModal(true);
 		setUndecorated(true);
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+		getRootPane().setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 		setResizable(false);
 
 		this.loginShower = loginShower;
