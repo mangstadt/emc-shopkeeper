@@ -15,7 +15,9 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -42,7 +44,7 @@ public class ItemsTable extends GroupableColumnsTable {
 	 * are defined is the order that they will appear in the table.
 	 */
 	public static enum Column {
-		ITEM_NAME("Item Name"), PPU("PPU"), SOLD_QTY("Qty"), SOLD_AMT("Rupees"), BOUGHT_QTY("Qty"), BOUGHT_AMT("Rupees"), NET_QTY("Qty"), NET_AMT("Rupees");
+		ITEM_NAME("Item Name"), PPU_BUY("Buy"), PPU_SELL("Sell"), SOLD_QTY("Qty"), SOLD_AMT("Rupees"), BOUGHT_QTY("Qty"), BOUGHT_AMT("Rupees"), NET_QTY("Qty"), NET_AMT("Rupees");
 
 		private final String name;
 
@@ -95,6 +97,8 @@ public class ItemsTable extends GroupableColumnsTable {
 		setRowHeight(24);
 
 		getTableHeader().addMouseListener(new MouseAdapter() {
+			private final Set<Column> descendingByDefault = EnumSet.of(Column.NET_AMT, Column.BOUGHT_QTY, Column.SOLD_AMT, Column.PPU_BUY, Column.PPU_SELL);
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				int index = convertColumnIndexToModel(columnAtPoint(e.getPoint()));
@@ -107,11 +111,7 @@ public class ItemsTable extends GroupableColumnsTable {
 					ascending = !ascending;
 				} else {
 					prevColumnClicked = column;
-					if (column == Column.NET_AMT || column == Column.BOUGHT_QTY || column == Column.SOLD_AMT) {
-						ascending = false;
-					} else {
-						ascending = true;
-					}
+					ascending = !descendingByDefault.contains(column);
 				}
 
 				sortData();
@@ -129,6 +129,10 @@ public class ItemsTable extends GroupableColumnsTable {
 			{
 				label.setOpaque(true);
 				label.setBorder(new EmptyBorder(4, 4, 4, 4));
+			}
+			private NumberFormat nf = NumberFormat.getNumberInstance();
+			{
+				nf.setMaximumFractionDigits(2);
 			}
 
 			@Override
@@ -172,31 +176,20 @@ public class ItemsTable extends GroupableColumnsTable {
 				switch (column) {
 				case ITEM_NAME:
 					return group.getItem();
-				case PPU:
-					NumberFormat nf = NumberFormat.getNumberInstance();
-					nf.setMaximumFractionDigits(2);
-
-					StringBuilder sb = new StringBuilder();
+				case PPU_BUY:
 					switch (shopTransactionType) {
 					case OTHER_SHOPS:
-						if (group.getBoughtQuantity() != 0) {
-							sb.append("B ").append(nf.format(group.getBoughtPPU()));
-						}
-						if (group.getSoldQuantity() != 0) {
-							sb.append(':').append(nf.format(group.getSoldPPU())).append(" S");
-						}
-						break;
+						return (group.getBoughtQuantity() != 0) ? nf.format(group.getBoughtPPU()) + "r" : null;
 					default:
-						if (group.getSoldQuantity() != 0) {
-							sb.append("B ").append(nf.format(group.getSoldPPU()));
-						}
-						if (group.getBoughtQuantity() != 0) {
-							sb.append(':').append(nf.format(group.getBoughtPPU())).append(" S");
-						}
-						break;
+						return (group.getSoldQuantity() != 0) ? nf.format(group.getSoldPPU()) + "r" : null;
 					}
-
-					return (sb.length() == 0) ? null : sb.toString();
+				case PPU_SELL:
+					switch (shopTransactionType) {
+					case OTHER_SHOPS:
+						return (group.getSoldQuantity() != 0) ? nf.format(group.getSoldPPU()) + "r" : null;
+					default:
+						return (group.getBoughtQuantity() != 0) ? nf.format(group.getBoughtPPU()) + "r" : null;
+					}
 				case SOLD_QTY:
 					if (group.getSoldQuantity() == 0) {
 						return null;
@@ -271,12 +264,10 @@ public class ItemsTable extends GroupableColumnsTable {
 				switch (prevColumnClicked) {
 				case ITEM_NAME:
 					return a.getItem().compareToIgnoreCase(b.getItem());
-				case PPU:
-					int c = Double.valueOf(a.getSoldPPU()).compareTo(Double.valueOf(b.getSoldPPU()));
-					if (c == 0) {
-						c = Double.valueOf(a.getBoughtPPU()).compareTo(Double.valueOf(b.getBoughtPPU()));
-					}
-					return c;
+				case PPU_BUY:
+					return Double.valueOf(a.getSoldPPU()).compareTo(Double.valueOf(b.getSoldPPU()));
+				case PPU_SELL:
+					return Double.valueOf(a.getBoughtPPU()).compareTo(Double.valueOf(b.getBoughtPPU()));
 				case BOUGHT_AMT:
 					return a.getBoughtAmount() - b.getBoughtAmount();
 				case BOUGHT_QTY:
@@ -322,10 +313,18 @@ public class ItemsTable extends GroupableColumnsTable {
 		//set the width of "item name" column so the name isn't snipped
 		columnModel.getColumn(Column.ITEM_NAME.ordinal()).setMinWidth(200);
 
+		columnModel.getColumn(Column.PPU_BUY.ordinal()).setMaxWidth(75);
+		columnModel.getColumn(Column.PPU_SELL.ordinal()).setMaxWidth(75);
+
 		//define column groups
 		List<ColumnGroup> columnGroups = new ArrayList<ColumnGroup>();
 
-		ColumnGroup columnGroup = new ColumnGroup("Sold");
+		ColumnGroup columnGroup = new ColumnGroup("Avg PPU");
+		columnGroup.add(columnModel.getColumn(Column.PPU_BUY.ordinal()));
+		columnGroup.add(columnModel.getColumn(Column.PPU_SELL.ordinal()));
+		columnGroups.add(columnGroup);
+
+		columnGroup = new ColumnGroup("Sold");
 		columnGroup.add(columnModel.getColumn(Column.SOLD_QTY.ordinal()));
 		columnGroup.add(columnModel.getColumn(Column.SOLD_AMT.ordinal()));
 		columnGroups.add(columnGroup);
