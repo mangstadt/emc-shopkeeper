@@ -17,7 +17,7 @@ import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.gui.HelpLabel;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
@@ -56,13 +56,13 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		messagePanel = new JPanel();
 		username = new JTextField();
 		password = new JPasswordField();
-		loading = new JLabel("Logging in...", ImageManager.getLoadingSmall(), SwingConstants.CENTER);
+		loading = new JLabel("Logging in...", Images.LOADING_SMALL, SwingConstants.CENTER);
 
 		///////////////////////
 
 		setLayout(new MigLayout());
 
-		add(new JLabel(ImageManager.getImageIcon("emc-logo.png")), "align center, wrap");
+		add(new JLabel(Images.EMC_LOGO), "align center, wrap");
 
 		add(new HelpLabel("<html><b>Please enter your login credentials.", "Your login credentials to the EMC website are required in order to download your rupee transactions.  EMC Shopkeeper does not save or steal your password."), "align center, wrap");
 

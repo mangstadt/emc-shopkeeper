@@ -1,7 +1,5 @@
 package emcshop.gui;
 
-import java.awt.Image;
-
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -10,7 +8,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 
 import net.miginfocom.swing.MigLayout;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 
 /**
  * The splash screen that is shown on startup.
@@ -24,13 +22,11 @@ public class SplashFrame extends JFrame {
 		setUndecorated(true);
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 		getRootPane().setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-
-		Image appIcon = ImageManager.getAppIcon().getImage();
-		setIconImage(appIcon);
+		setIconImage(Images.APP_ICON.getImage());
 
 		setLayout(new MigLayout("insets 5"));
 
-		add(new JLabel(ImageManager.getImageIcon("header.png")), "align center, wrap");
+		add(new JLabel(Images.HEADER), "align center, wrap");
 
 		message = new JLabel(" ");
 		message.setHorizontalAlignment(SwingConstants.CENTER);

@@ -1,6 +1,5 @@
 package emcshop.view;
 
-import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -14,7 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import net.miginfocom.swing.MigLayout;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
@@ -28,8 +27,7 @@ public class ProfileSelectorViewImpl extends JDialog implements IProfileSelector
 		setResizable(false);
 		setModal(true);
 
-		Image appIcon = ImageManager.getAppIcon().getImage();
-		setIconImage(appIcon);
+		setIconImage(Images.APP_ICON.getImage());
 
 		profiles = new JComboBox();
 		profiles.setEditable(true);
@@ -42,7 +40,7 @@ public class ProfileSelectorViewImpl extends JDialog implements IProfileSelector
 
 		setLayout(new MigLayout());
 
-		add(new JLabel(ImageManager.getImageIcon("header.png")), "align center, wrap");
+		add(new JLabel(Images.HEADER), "align center, wrap");
 		add(new JLabel("<html><div width=250><center>Select a profile:</center></div>"), "align center, wrap");
 		add(profiles, "w 200, align center, wrap");
 		add(ok, "split 2, align center");

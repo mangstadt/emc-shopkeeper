@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 
 /**
  * DAO for accessing the display names, transaction page names, and image file
@@ -158,7 +158,7 @@ public class ItemIndex {
 		int id = Integer.parseInt(element.getAttribute("id"));
 
 		String iconStr = element.getAttribute("icon");
-		ImageIcon icon = iconStr.isEmpty() ? null : ImageManager.getImageIcon("items/" + iconStr);
+		ImageIcon icon = iconStr.isEmpty() ? null : Images.get("items/" + iconStr);
 
 		return new CategoryInfo(id, name, icon);
 	}

@@ -4,7 +4,6 @@ import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.GuiUtils.toolTipText;
 
 import java.awt.Component;
-import java.awt.Image;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
@@ -57,7 +56,7 @@ import emcshop.EMCShopkeeper;
 import emcshop.LogManager;
 import emcshop.Settings;
 import emcshop.db.DbDao;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.InfiniteProgressPanel;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.model.BackupModelImpl;
@@ -121,6 +120,7 @@ public class MainFrame extends JFrame {
 		logManager = context.get(LogManager.class);
 
 		setTitle("EMC Shopkeeper v" + EMCShopkeeper.VERSION);
+		setIconImage(Images.APP_ICON.getImage());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		progressPanel = new InfiniteProgressPanel();
@@ -136,9 +136,6 @@ public class MainFrame extends JFrame {
 		createWidgets();
 		layoutWidgets();
 		setSize(settings.getWindowWidth(), settings.getWindowHeight());
-
-		Image appIcon = ImageManager.getAppIcon().getImage();
-		setIconImage(appIcon);
 
 		updatePaymentsCount();
 
@@ -178,7 +175,7 @@ public class MainFrame extends JFrame {
 		menu.setOffset(0, 32);
 
 		JMenu tools = menu.addMenu("Tools")
-		.icon(ImageManager.getImageIcon("tools.png"))
+		.icon(Images.TOOLS)
 		.add();
 		{
 			menu.addMenuItem("Log...")
@@ -191,7 +188,7 @@ public class MainFrame extends JFrame {
 			});
 			
 			menu.addMenuItem("Chat Log Viewer...")
-			.icon(ImageManager.getImageIcon("chat-large.png"))
+			.icon(Images.CHAT_LARGE)
 			.parent(tools)
 			.add(new ActionListener() {
 				@Override
@@ -216,7 +213,7 @@ public class MainFrame extends JFrame {
 			clearSessionMenuItem.setEnabled(settings.getSession() != null);
 			
 			menu.addMenuItem("Wipe Database...")
-			.icon(ImageManager.getImageIcon("wipe-database.png"))
+			.icon(Images.WIPE_DATABASE)
 			.parent(tools)
 			.add(new ActionListener() {
 				@Override
@@ -227,11 +224,11 @@ public class MainFrame extends JFrame {
 		}
 
 		JMenu settingsMenu = menu.addMenu("Settings")
-		.icon(ImageManager.getImageIcon("settings.png"))
+		.icon(Images.SETTINGS)
 		.add();
 		{
 			menu.addMenuItem("Database Backup...")
-			.icon(ImageManager.getImageIcon("backup-database.png"))
+			.icon(Images.BACKUP_DATABASE)
 			.parent(settingsMenu)
 			.add(new ActionListener() {
 				@Override
@@ -277,7 +274,7 @@ public class MainFrame extends JFrame {
 			}
 
 			menu.addCheckboxMenuItem("Show Quantities in Stacks")
-			.icon(ImageManager.getImageIcon("stack.png"))
+			.icon(Images.STACK)
 			.parent(settingsMenu)
 			.add(new ActionListener() {
 				@Override
@@ -294,7 +291,7 @@ public class MainFrame extends JFrame {
 
 			if (profile.equals(EMCShopkeeper.defaultProfileName)) {
 				menu.addCheckboxMenuItem("Show Profiles on Startup")
-				.icon(ImageManager.getImageIcon("show-profiles.png"))
+				.icon(Images.SHOW_PROFILES)
 				.parent(settingsMenu)
 				.add(new ActionListener() {
 					@Override
@@ -310,7 +307,7 @@ public class MainFrame extends JFrame {
 		menu.addSeparator();
 
 		menu.addMenuItem("Changelog")
-		.icon(ImageManager.getImageIcon("changelog.png"))
+		.icon(Images.CHANGELOG)
 		.add(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -319,7 +316,7 @@ public class MainFrame extends JFrame {
 		});
 
 		menu.addMenuItem("About")
-		.icon(ImageManager.getHelpIcon())
+		.icon(Images.HELP)
 		.add(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -338,7 +335,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void createWidgets() {
-		update = new JButton("Update Transactions", ImageManager.getUpdate());
+		update = new JButton("Update Transactions", Images.UPDATE);
 		update.setToolTipText(toolTipText("<font size=4><b>Update Transactions</b></font><br><br>Downloads your latest transactions from the EMC website."));
 		update.addActionListener(new ActionListener() {
 			@Override
@@ -439,7 +436,7 @@ public class MainFrame extends JFrame {
 
 		add(updatePanel);
 
-		add(new JLabel(ImageManager.getImageIcon("header.png")), "w 100%, align center");
+		add(new JLabel(Images.HEADER), "w 100%, align center");
 
 		JPanel right = new JPanel(new MigLayout("insets 0"));
 
@@ -663,7 +660,7 @@ public class MainFrame extends JFrame {
 
 					if (GuiUtils.canOpenWebPages()) {
 						JButton downloadUpdate = new JButton("Download");
-						downloadUpdate.setIcon(ImageManager.getImageIcon("download.png"));
+						downloadUpdate.setIcon(Images.DOWNLOAD);
 						downloadUpdate.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent event) {

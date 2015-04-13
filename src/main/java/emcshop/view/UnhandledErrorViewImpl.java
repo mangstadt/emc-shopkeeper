@@ -16,7 +16,7 @@ import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import emcshop.gui.MyJScrollPane;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
@@ -36,7 +36,7 @@ public class UnhandledErrorViewImpl extends JDialog implements IUnhandledErrorVi
 		displayText.setWrapStyleWord(true);
 
 		//http://stackoverflow.com/questions/1196797/where-are-these-error-and-warning-icons-as-a-java-resource
-		errorIcon = new JLabel(ImageManager.getErrorIcon());
+		errorIcon = new JLabel(Images.getErrorIcon());
 
 		stackTrace = new JTextArea();
 		stackTrace.setEditable(false);

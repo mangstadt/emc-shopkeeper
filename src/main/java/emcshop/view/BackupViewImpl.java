@@ -28,7 +28,7 @@ import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.gui.HelpLabel;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
@@ -88,10 +88,10 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 			}
 		});
 
-		backupLoading = new JLabel(ImageManager.getLoadingSmall(), SwingConstants.LEFT);
+		backupLoading = new JLabel(Images.LOADING_SMALL, SwingConstants.LEFT);
 		backupLoading.setVisible(false);
 
-		restoreLoading = new JLabel("Working...", ImageManager.getLoadingSmall(), SwingConstants.LEFT);
+		restoreLoading = new JLabel("Working...", Images.LOADING_SMALL, SwingConstants.LEFT);
 		restoreLoading.setVisible(false);
 
 		enabled = new JCheckBox("Enable automatic database backups");

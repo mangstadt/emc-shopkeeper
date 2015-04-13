@@ -30,7 +30,7 @@ import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.presenter.LoginPresenter;
 import emcshop.scraper.EmcSession;
 import emcshop.util.GuiUtils;
@@ -83,7 +83,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 
 		setLayout(new MigLayout());
 
-		add(new JLabel(ImageManager.getLoading()), "span 2, split 2, align center");
+		add(new JLabel(Images.LOADING), "span 2, split 2, align center");
 		add(new JLabel("<html><b>Updating...</b></html>"), "wrap");
 
 		add(new JLabel("Pages:"));
@@ -280,7 +280,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 			displayText.setLineWrap(true);
 			displayText.setWrapStyleWord(true);
 
-			JLabel errorIcon = new JLabel(ImageManager.getErrorIcon());
+			JLabel errorIcon = new JLabel(Images.getErrorIcon());
 
 			JTextArea stackTrace = new JTextArea(ExceptionUtils.getStackTrace(thrown));
 			stackTrace.setEditable(false);

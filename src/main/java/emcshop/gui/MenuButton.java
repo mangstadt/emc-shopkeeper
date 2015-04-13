@@ -19,7 +19,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 
 /**
  * A "main menu" button that displays a popup menu when clicked.
@@ -27,7 +27,7 @@ import emcshop.gui.images.ImageManager;
  */
 @SuppressWarnings("serial")
 public class MenuButton extends JToggleButton {
-	private final static ImageIcon empty = ImageManager.getImageIcon("menu-empty-icon.png");
+	private final static ImageIcon empty = Images.get("menu-empty-icon.png");
 
 	private static final int menuIconSize;
 	static {
@@ -46,7 +46,7 @@ public class MenuButton extends JToggleButton {
 	private int offsetX = 0, offsetY = 0;
 
 	public MenuButton() {
-		setIcon(ImageManager.getImageIcon("menu.png"));
+		setIcon(Images.get("menu.png"));
 
 		popupMenu.addPopupMenuListener(new PopupMenuListener() {
 			@Override
@@ -168,7 +168,7 @@ public class MenuButton extends JToggleButton {
 		}
 
 		public JMenu add() {
-			menu.setIcon(ImageManager.scale(icon, menuIconSize));
+			menu.setIcon(Images.scale(icon, menuIconSize));
 
 			if (parent == null) {
 				popupMenu.add(menu);
@@ -200,7 +200,7 @@ public class MenuButton extends JToggleButton {
 		}
 
 		public T add(ActionListener onClick) {
-			item.setIcon(ImageManager.scale(icon, menuItemIconSize));
+			item.setIcon(Images.scale(icon, menuItemIconSize));
 			item.addActionListener(onClick);
 
 			if (parent == null) {

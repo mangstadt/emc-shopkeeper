@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.scraper.EmcServer;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.Rank;
@@ -66,7 +66,7 @@ public class PlayerCellPanel extends JPanel {
 		}
 
 		EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
-		ImageIcon icon = (server == null) ? null : ImageManager.getOnline(server, 12);
+		ImageIcon icon = (server == null) ? null : Images.getOnline(server, 12);
 		serverLabel.setIcon(icon);
 	}
 

@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -43,7 +42,7 @@ import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
 import emcshop.db.ShopTransactionType;
 import emcshop.gui.ExportButton.ExportListener;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
@@ -468,10 +467,6 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		private final List<SearchListener> listeners = new ArrayList<SearchListener>();
 
 		public QueryPanel() {
-			ImageIcon searchItems = ImageManager.getImageIcon("search-items.png");
-			ImageIcon searchPlayers = ImageManager.getImageIcon("search-players.png");
-			ImageIcon searchDate = ImageManager.getImageIcon("search-date.png");
-
 			fullPanel = new JPanel(new MigLayout("insets 0"));
 			{
 				ButtonGroup dateRangeGroup = new ButtonGroup();
@@ -519,7 +514,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				transactionTypeGroup.add(bothTransactions);
 				shopTransactions.setSelected(true);
 
-				compress = new JButton(ImageManager.getImageIcon("up-arrow.png"));
+				compress = new JButton(Images.UP_ARROW);
 				compress.setToolTipText("Hide search controls.");
 				compress.addActionListener(new ActionListener() {
 					@Override
@@ -528,7 +523,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					}
 				});
 
-				showItems = new JButton("By Item", searchItems);
+				showItems = new JButton("By Item", Images.SEARCH_ITEMS);
 				showItems.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -536,7 +531,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					}
 				});
 
-				showPlayers = new JButton("By Player", searchPlayers);
+				showPlayers = new JButton("By Player", Images.SEARCH_PLAYERS);
 				showPlayers.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -544,7 +539,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					}
 				});
 
-				showTransactions = new JButton("By Date", searchDate);
+				showTransactions = new JButton("By Date", Images.SEARCH_DATE);
 				showTransactions.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -580,7 +575,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 			compressedPanel = new JPanel(new MigLayout("insets 0"));
 			{
-				expand = new JButton(ImageManager.getImageIcon("down-arrow.png"));
+				expand = new JButton(Images.DOWN_ARROW);
 				expand.setToolTipText("Show search controls.");
 				expand.addActionListener(new ActionListener() {
 					@Override
@@ -597,7 +592,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					}
 				});
 
-				showItemsSmall = new JButton("Item", searchItems);
+				showItemsSmall = new JButton("Item", Images.SEARCH_ITEMS);
 				showItemsSmall.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -605,7 +600,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					}
 				});
 
-				showPlayersSmall = new JButton("Player", searchPlayers);
+				showPlayersSmall = new JButton("Player", Images.SEARCH_PLAYERS);
 				showPlayersSmall.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
@@ -613,7 +608,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					}
 				});
 
-				showTransactionsSmall = new JButton("Date", searchDate);
+				showTransactionsSmall = new JButton("Date", Images.SEARCH_DATE);
 				showTransactionsSmall.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {

@@ -6,13 +6,13 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 
 @SuppressWarnings("serial")
 public class FilterTextField extends JTextField {
 	private final JButton clearButton;
 	{
-		clearButton = new JButton(ImageManager.getClearIcon());
+		clearButton = new JButton(Images.CLEAR);
 		clearButton.setToolTipText("Clear");
 		clearButton.addActionListener(new ActionListener() {
 			@Override

@@ -1,6 +1,5 @@
 package emcshop;
 
-import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +37,7 @@ import emcshop.gui.MainFrame;
 import emcshop.gui.OnlinePlayersMonitor;
 import emcshop.gui.ProfileLoader;
 import emcshop.gui.SplashFrame;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.JarSignersHardLinker;
 import emcshop.gui.lib.MacHandler;
 import emcshop.gui.lib.MacSupport;
@@ -445,8 +444,7 @@ public class EMCShopkeeper {
 			return;
 		}
 
-		Image appIcon = ImageManager.getAppIcon().getImage();
-		MacSupport.init("EMC Shopkeeper", false, appIcon, new MacHandler() {
+		MacSupport.init("EMC Shopkeeper", false, Images.APP_ICON.getImage(), new MacHandler() {
 			@Override
 			public void handleQuit(Object applicationEvent) {
 				mainFrame.exit();

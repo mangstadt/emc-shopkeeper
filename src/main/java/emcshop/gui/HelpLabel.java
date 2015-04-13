@@ -7,14 +7,14 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 
 /**
  * Represents a JLabel with a help icon.
  */
 @SuppressWarnings("serial")
 public class HelpLabel extends JLabel {
-	private static final ImageIcon helpIcon = ImageManager.scale(ImageManager.getHelpIcon(), 16);
+	private static final ImageIcon helpIcon = Images.scale(Images.HELP, 16);
 	private static final boolean toopTipsEnabled = ToolTipManager.sharedInstance().isEnabled();
 
 	/**

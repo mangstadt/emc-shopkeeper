@@ -16,7 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
 
 /**
@@ -64,8 +64,7 @@ public class ResetDatabaseDialog extends JDialog {
 		});
 		GuiUtils.onEscapeKeyPress(this, cancel);
 
-		ImageIcon tnt = ImageManager.getImageIcon("tnt.png");
-		tnt = ImageManager.scale(tnt, 48);
+		ImageIcon tnt = Images.scale(Images.get("tnt.png"), 48);
 
 		JLabel warningTitle = new JLabel("<html><center><h2>WARNING!</h2></center></html>");
 

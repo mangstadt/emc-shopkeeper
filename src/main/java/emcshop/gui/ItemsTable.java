@@ -30,7 +30,7 @@ import javax.swing.table.TableCellRenderer;
 import emcshop.ItemIndex;
 import emcshop.db.ItemGroup;
 import emcshop.db.ShopTransactionType;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.GroupableColumnsTable;
 
 /**
@@ -166,7 +166,7 @@ public class ItemsTable extends GroupableColumnsTable {
 			private ImageIcon getIcon(ItemGroup group, Column column) {
 				switch (column) {
 				case ITEM_NAME:
-					return ImageManager.getItemImage(group.getItem());
+					return Images.getItemImage(group.getItem());
 				default:
 					return null;
 				}

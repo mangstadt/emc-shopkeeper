@@ -16,7 +16,7 @@ import javax.swing.border.EmptyBorder;
 import com.google.common.collect.ImmutableMap;
 
 import emcshop.db.DbDao;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.suggest.ContainsMatcher;
 import emcshop.gui.lib.suggest.JSuggestField;
 import emcshop.util.UIDefaultsWrapper;
@@ -40,7 +40,7 @@ public class ItemSuggestField extends JSuggestField {
 				label.setBorder(new EmptyBorder(2, 4, 2, 4));
 			}
 
-			private final ImageIcon empty = ImageManager.getItemImage("_empty");
+			private final ImageIcon empty = Images.getItemImage("_empty");
 
 			@Override
 			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
@@ -77,7 +77,7 @@ public class ItemSuggestField extends JSuggestField {
 		//load item icons
 		ImmutableMap.Builder<String, ImageIcon> builder = ImmutableMap.builder();
 		for (String itemName : itemNamesList) {
-			ImageIcon image = ImageManager.getItemImage(itemName);
+			ImageIcon image = Images.getItemImage(itemName);
 			builder.put(itemName, image);
 		}
 		itemIcons = builder.build();

@@ -33,7 +33,7 @@ import emcshop.ItemIndex;
 import emcshop.Settings;
 import emcshop.db.ShopTransactionType;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.RelativeDateFormat;
@@ -310,7 +310,7 @@ public class TransactionsTable extends JTable {
 				String name = transaction.getItem();
 				label.setText(name);
 
-				ImageIcon icon = ImageManager.getItemImage(transaction.getItem());
+				ImageIcon icon = Images.getItemImage(transaction.getItem());
 				label.setIcon(icon);
 				break;
 

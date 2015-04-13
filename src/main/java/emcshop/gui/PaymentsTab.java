@@ -50,7 +50,7 @@ import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.db.DbDao;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.model.ChatLogViewerModelImpl;
 import emcshop.model.IChatLogViewerModel;
@@ -355,9 +355,9 @@ public class PaymentsTab extends JPanel {
 
 			private final PlayerCellPanel playerPanel = new PlayerCellPanel();
 
-			private final ImageIcon assignIcon = ImageManager.getImageIcon("assign.png");
-			private final ImageIcon splitIcon = ImageManager.getImageIcon("split.png");
-			private final ImageIcon chatIcon = ImageManager.getImageIcon("chat.png");
+			private final ImageIcon assignIcon = Images.ASSIGN;
+			private final ImageIcon splitIcon = Images.SPLIT;
+			private final ImageIcon chatIcon = Images.CHAT;
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, final int col) {

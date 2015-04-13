@@ -25,7 +25,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ListMultimap;
 
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.PlayerProfileScraper;
 import emcshop.scraper.Rank;
@@ -202,7 +202,7 @@ public class ProfileLoader {
 			logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
 		}
 		image = new ImageIcon(data);
-		image = ImageManager.scale(image, maxSize);
+		image = Images.scale(image, maxSize);
 		portraitCache.put(playerName, maxSize, image);
 		return image;
 	}
@@ -387,7 +387,7 @@ public class ProfileLoader {
 				return image;
 			}
 
-			image = ImageManager.scale(ImageManager.getUnknown(), maxSize);
+			image = Images.scale(Images.UNKNOWN, maxSize);
 			put("(unknown)", maxSize, image);
 			return image;
 		}

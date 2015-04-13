@@ -58,7 +58,7 @@ import com.michaelbaranov.microba.calendar.DatePicker;
 import emcshop.ItemIndex;
 import emcshop.db.DbDao;
 import emcshop.db.Profits;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.ImageCheckBox;
 
 @SuppressWarnings("serial")
@@ -69,23 +69,23 @@ public class ChartsTab extends JPanel {
 	private final ItemIndex index = ItemIndex.instance();
 	private final Map<String, ImageIcon> groupIcons = new HashMap<String, ImageIcon>();
 	{
-		groupIcons.put("Clay", ImageManager.getItemImage("Hard Clay"));
-		groupIcons.put("Diamonds", ImageManager.getItemImage("Diamond"));
-		groupIcons.put("Discs", ImageManager.getItemImage("Chirp Disc"));
-		groupIcons.put("Dyes", ImageManager.getItemImage("Red Dye"));
-		groupIcons.put("Fish", ImageManager.getItemImage("Raw Salmon"));
-		groupIcons.put("Flowers", ImageManager.getItemImage("Blue Orchid"));
-		groupIcons.put("Glass", ImageManager.getItemImage("Blue Glass"));
-		groupIcons.put("Gold", ImageManager.getItemImage("Gold Ingot"));
-		groupIcons.put("Iron", ImageManager.getItemImage("Iron Ingot"));
-		groupIcons.put("Lapis", ImageManager.getItemImage("Blue Dye"));
-		groupIcons.put("Leather", ImageManager.getItemImage("Leather"));
-		groupIcons.put("Potions", ImageManager.getItemImage("Potion of Health"));
-		groupIcons.put("Quartz", ImageManager.getItemImage("Quartz"));
-		groupIcons.put("Spawn Eggs", ImageManager.getItemImage("Pig Egg"));
-		groupIcons.put("Stone", ImageManager.getItemImage("Cobblestone"));
-		groupIcons.put("Wool", ImageManager.getItemImage("White Wool"));
-		groupIcons.put("Wood", ImageManager.getItemImage("Oak Plank"));
+		groupIcons.put("Clay", Images.getItemImage("Hard Clay"));
+		groupIcons.put("Diamonds", Images.getItemImage("Diamond"));
+		groupIcons.put("Discs", Images.getItemImage("Chirp Disc"));
+		groupIcons.put("Dyes", Images.getItemImage("Red Dye"));
+		groupIcons.put("Fish", Images.getItemImage("Raw Salmon"));
+		groupIcons.put("Flowers", Images.getItemImage("Blue Orchid"));
+		groupIcons.put("Glass", Images.getItemImage("Blue Glass"));
+		groupIcons.put("Gold", Images.getItemImage("Gold Ingot"));
+		groupIcons.put("Iron", Images.getItemImage("Iron Ingot"));
+		groupIcons.put("Lapis", Images.getItemImage("Blue Dye"));
+		groupIcons.put("Leather", Images.getItemImage("Leather"));
+		groupIcons.put("Potions", Images.getItemImage("Potion of Health"));
+		groupIcons.put("Quartz", Images.getItemImage("Quartz"));
+		groupIcons.put("Spawn Eggs", Images.getItemImage("Pig Egg"));
+		groupIcons.put("Stone", Images.getItemImage("Cobblestone"));
+		groupIcons.put("Wool", Images.getItemImage("White Wool"));
+		groupIcons.put("Wood", Images.getItemImage("Oak Plank"));
 	}
 
 	private final JCheckBox entireHistory;
@@ -185,7 +185,7 @@ public class ChartsTab extends JPanel {
 		groupBy = new JComboBox(GroupBy.values());
 		groupBy.setEditable(false);
 
-		loadData = new JButton("Load Data", ImageManager.getSearch());
+		loadData = new JButton("Load Data", Images.SEARCH);
 		loadData.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {

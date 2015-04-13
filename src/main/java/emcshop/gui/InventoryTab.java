@@ -73,7 +73,7 @@ import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.db.Inventory;
 import emcshop.gui.ExportButton.ExportListener;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.util.ChesterFile;
 import emcshop.util.GuiUtils;
@@ -699,7 +699,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 							label.setForeground(Color.RED);
 						}
 					} else {
-						ImageIcon img = ImageManager.getItemImage(inv.getItem());
+						ImageIcon img = Images.getItemImage(inv.getItem());
 						label.setText(inv.getItem());
 						label.setIcon(img);
 					}
@@ -965,7 +965,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 					ImageIcon icon = category.getIcon();
 					if (icon != null) {
-						icon = ImageManager.scale(icon, 16);
+						icon = Images.scale(icon, 16);
 					}
 					label.setIcon(icon);
 
@@ -1128,7 +1128,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			setLayout(new MigLayout("insets 0"));
 
-			add(new JLabel("<html><h3>Listening . . .</h3></html>", ImageManager.getLoading(), SwingConstants.LEFT), "align center, wrap");
+			add(new JLabel("<html><h3>Listening . . .</h3></html>", Images.LOADING, SwingConstants.LEFT), "align center, wrap");
 
 			add(new JLabel("You may now login to Minecraft and start opening your shop chests."), "align center, wrap");
 			add(new JLabel("Do not open the same chest twice, as its contents will be recorded twice."), "align center, wrap");

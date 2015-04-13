@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 import emcshop.EMCShopkeeper;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.GuiUtils;
 
@@ -69,7 +69,7 @@ public class AboutDialog extends JDialog {
 
 		setLayout(new MigLayout());
 		add(titleLabel, "split 2, w 100%");
-		add(new JLabel(ImageManager.getImageIcon("creeper.png")), "wrap");
+		add(new JLabel(Images.get("creeper.png")), "wrap");
 
 		add(new JLabel("Forum thread:"), "split 2");
 		add(forumUrlLabel, "wrap");

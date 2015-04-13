@@ -39,7 +39,7 @@ import emcshop.db.PlayerGroup;
 import emcshop.db.ShopTransactionType;
 import emcshop.gui.ItemsTable.Column;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
-import emcshop.gui.images.ImageManager;
+import emcshop.gui.images.Images;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.EmcServer;
 import emcshop.scraper.PlayerProfile;
@@ -201,7 +201,7 @@ public class PlayersPanel extends JPanel {
 				JLabel playerNameLabel = new JLabel(playerName);
 				EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
 				if (server != null) {
-					playerNameLabel.setIcon(ImageManager.getOnline(server, 16));
+					playerNameLabel.setIcon(Images.getOnline(server, 16));
 					playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
 					playerNameLabel.setVerticalTextPosition(SwingConstants.TOP);
 				}
@@ -474,7 +474,7 @@ public class PlayersPanel extends JPanel {
 				if (server != null) {
 					header.add(playerNameLabel, "span 2, split 2");
 
-					JLabel onlineLabel = new JLabel("<html><font size=2><i>Connected to <b>" + server, ImageManager.getOnline(null, 16), SwingConstants.LEFT);
+					JLabel onlineLabel = new JLabel("<html><font size=2><i>Connected to <b>" + server, Images.getOnline(null, 16), SwingConstants.LEFT);
 					onlineLabel.setIconTextGap(2);
 					header.add(onlineLabel, "gapleft 10, wrap");
 				} else {
