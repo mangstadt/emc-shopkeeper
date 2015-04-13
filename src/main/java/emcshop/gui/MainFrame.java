@@ -35,7 +35,6 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -61,7 +60,6 @@ import emcshop.db.DbDao;
 import emcshop.gui.images.ImageManager;
 import emcshop.gui.lib.InfiniteProgressPanel;
 import emcshop.gui.lib.JarSignersHardLinker;
-import emcshop.gui.lib.MacSupport;
 import emcshop.model.BackupModelImpl;
 import emcshop.model.ChatLogViewerModelImpl;
 import emcshop.model.FirstUpdateModelImpl;
@@ -109,6 +107,7 @@ public class MainFrame extends JFrame {
 	private BonusFeeTab bonusFeeTab;
 	private ChartsTab graphsTab;
 	private JMenuItem clearSessionMenuItem;
+	private MenuButton menu;
 
 	private final DbDao dao;
 	private final Settings settings;
@@ -158,7 +157,6 @@ public class MainFrame extends JFrame {
 	 * @param caption the caption to display
 	 */
 	public void startProgress(String caption) {
-		getJMenuBar().setEnabled(false);
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(ignoreKeyEvents);
 		busyCursor(this, true);
 		progressPanel.setText(caption);
@@ -172,42 +170,84 @@ public class MainFrame extends JFrame {
 		progressPanel.stop();
 		busyCursor(this, false);
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(ignoreKeyEvents);
-		getJMenuBar().setEnabled(true);
 	}
 
 	private void createMenu() {
-		//http://docs.oracle.com/javase/tutorial/uiswing/components/menu.html
+		//@formatter:off
+		menu = new MenuButton();
+		menu.setOffset(0, 32);
 
-		boolean mac = MacSupport.isMac();
-
-		JMenuBar menuBar = new JMenuBar();
-
-		JMenu file = new JMenu("File");
-		if (!mac) {
-			JMenuItem exit = new JMenuItem("Exit");
-			exit.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					exit();
-				}
-			});
-			file.add(exit);
-
-			menuBar.add(file);
-		}
-
-		JMenu tools = new JMenu("Tools");
+		JMenu tools = menu.addMenu("Tools")
+		.icon(ImageManager.getImageIcon("tools.png"))
+		.add();
 		{
-			JMenuItem showLog = new JMenuItem("Show log...");
-			showLog.addActionListener(new ActionListener() {
+			menu.addMenuItem("Log...")
+			.parent(tools)
+			.add(new ActionListener() {
 				@Override
-				public void actionPerformed(ActionEvent arg0) {
+				public void actionPerformed(ActionEvent event) {
 					ShowLogDialog.show(MainFrame.this);
 				}
 			});
-			tools.add(showLog);
+			
+			menu.addMenuItem("Chat Log Viewer...")
+			.icon(ImageManager.getImageIcon("chat-large.png"))
+			.parent(tools)
+			.add(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					IChatLogViewerView view = new ChatLogViewerViewImpl(MainFrame.this);
+					IChatLogViewerModel model = new ChatLogViewerModelImpl();
+					new ChatLogViewerPresenter(view, model);
+				}
+			});
+			
+			clearSessionMenuItem = menu.addMenuItem("Clear Saved Session")
+			.parent(tools)
+			.add(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					settings.setSession(null);
+					settings.save();
+					clearSessionMenuItem.setEnabled(false);
+					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
+				}
+			});
+			clearSessionMenuItem.setEnabled(settings.getSession() != null);
+			
+			menu.addMenuItem("Wipe Database...")
+			.icon(ImageManager.getImageIcon("wipe-database.png"))
+			.parent(tools)
+			.add(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					onWipeDatabase();
+				}
+			});
+		}
 
-			JMenu logLevel = new JMenu("Log level");
+		JMenu settingsMenu = menu.addMenu("Settings")
+		.icon(ImageManager.getImageIcon("settings.png"))
+		.add();
+		{
+			menu.addMenuItem("Database Backup...")
+			.icon(ImageManager.getImageIcon("backup-database.png"))
+			.parent(settingsMenu)
+			.add(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					IBackupView view = new BackupViewImpl(MainFrame.this);
+					IBackupModel model = new BackupModelImpl();
+					BackupPresenter presenter = new BackupPresenter(view, model);
+					if (presenter.getExit()) {
+						exit();
+					}
+				}
+			});
+
+			JMenu logLevel = menu.addMenu("Log Level")
+			.parent(settingsMenu)
+			.add();
 			{
 				Map<String, Level> levels = new LinkedHashMap<String, Level>();
 				levels.put("Detailed", Level.FINEST);
@@ -218,58 +258,32 @@ public class MainFrame extends JFrame {
 					String name = entry.getKey();
 					final Level level = entry.getValue();
 
-					JMenuItem levelItem = new JRadioButtonMenuItem(name);
-					levelItem.addActionListener(new ActionListener() {
+					JRadioButtonMenuItem levelItem = menu.addRadioButtonMenuItem(name, group)
+					.parent(logLevel)
+					.add(new ActionListener() {
 						@Override
-						public void actionPerformed(ActionEvent arg0) {
+						public void actionPerformed(ActionEvent event) {
 							logger.finest("Changing log level to " + level.getName() + ".");
 							logManager.setLevel(level);
 							settings.setLogLevel(level);
 							settings.save();
 						}
 					});
+
 					if (logManager.getLevel().equals(level)) {
 						levelItem.setSelected(true);
 					}
-
-					group.add(levelItem);
-					logLevel.add(levelItem);
 				}
 			}
-			tools.add(logLevel);
 
-			JMenuItem backupSettings = new JMenuItem("Backup Settings...");
-			backupSettings.addActionListener(new ActionListener() {
+			menu.addCheckboxMenuItem("Show Quantities in Stacks")
+			.icon(ImageManager.getImageIcon("stack.png"))
+			.parent(settingsMenu)
+			.add(new ActionListener() {
 				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					IBackupView view = new BackupViewImpl(MainFrame.this);
-					IBackupModel model = new BackupModelImpl();
-					BackupPresenter presenter = new BackupPresenter(view, model);
-					if (presenter.getExit()) {
-						exit();
-					}
-				}
-			});
-			tools.add(backupSettings);
-
-			JMenuItem chatLogViewer = new JMenuItem("Chat Log Viewer...");
-			chatLogViewer.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					IChatLogViewerView view = new ChatLogViewerViewImpl(MainFrame.this);
-					IChatLogViewerModel model = new ChatLogViewerModelImpl();
-					new ChatLogViewerPresenter(view, model);
-				}
-			});
-			tools.add(chatLogViewer);
-
-			tools.addSeparator();
-
-			final JCheckBoxMenuItem showQuantitiesInStacks = new JCheckBoxMenuItem("Show Quantities in Stacks", settings.isShowQuantitiesInStacks());
-			showQuantitiesInStacks.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					boolean stacks = showQuantitiesInStacks.isSelected();
+				public void actionPerformed(ActionEvent event) {
+					JCheckBoxMenuItem source = (JCheckBoxMenuItem) event.getSource();
+					boolean stacks = source.isSelected();
 					settings.setShowQuantitiesInStacks(stacks);
 					settings.save();
 
@@ -277,102 +291,50 @@ public class MainFrame extends JFrame {
 					transactionsTab.setShowQuantitiesInStacks(stacks);
 				}
 			});
-			tools.add(showQuantitiesInStacks);
 
 			if (profile.equals(EMCShopkeeper.defaultProfileName)) {
-				final JCheckBoxMenuItem showProfilesOnStartup = new JCheckBoxMenuItem("Show Profiles On Startup", settings.isShowProfilesOnStartup());
-				showProfilesOnStartup.addActionListener(new ActionListener() {
+				menu.addCheckboxMenuItem("Show Profiles on Startup")
+				.icon(ImageManager.getImageIcon("show-profiles.png"))
+				.parent(settingsMenu)
+				.add(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						settings.setShowProfilesOnStartup(showProfilesOnStartup.isSelected());
+					public void actionPerformed(ActionEvent event) {
+						JCheckBoxMenuItem source = (JCheckBoxMenuItem) event.getSource();
+						settings.setShowProfilesOnStartup(source.isSelected());
 						settings.save();
 					}
 				});
-				tools.add(showProfilesOnStartup);
 			}
-
-			tools.addSeparator();
-
-			clearSessionMenuItem = new JMenuItem("Clear Saved Session");
-			clearSessionMenuItem.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					settings.setSession(null);
-					settings.save();
-					clearSessionMenuItem.setEnabled(false);
-					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
-				}
-			});
-			clearSessionMenuItem.setEnabled(settings.getSession() != null);
-			tools.add(clearSessionMenuItem);
-
-			JMenuItem resetDb = new JMenuItem("Reset database...");
-			resetDb.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					boolean reset = ResetDatabaseDialog.show(MainFrame.this);
-					if (!reset) {
-						return;
-					}
-
-					startProgress("Resetting Database...");
-					Thread t = new Thread() {
-						@Override
-						public void run() {
-							try {
-								dao.wipe();
-								settings.setSession(null);
-								settings.save();
-								clearSessionMenuItem.setEnabled(false);
-								lastUpdateDate.setText("-");
-								updateRupeeBalance();
-								transactionsTab.clear();
-								updatePaymentsCount();
-								paymentsTab.reset();
-								inventoryTab.refresh();
-								bonusFeeTab.refresh();
-								graphsTab.clear();
-							} catch (Throwable e) {
-								throw new RuntimeException(e);
-							} finally {
-								stopProgress();
-							}
-						}
-					};
-					t.start();
-				}
-			});
-			tools.add(resetDb);
-
-			menuBar.add(tools);
 		}
 
-		JMenu help = new JMenu("Help");
-		{
-			JMenuItem changelog = new JMenuItem("Changelog");
-			changelog.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					ChangelogDialog.show(MainFrame.this);
-				}
-			});
-			help.add(changelog);
+		menu.addSeparator();
 
-			if (!mac) {
-				JMenuItem about = new JMenuItem("About");
-				about.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						AboutDialog.show(MainFrame.this);
-					}
-				});
-				help.add(about);
+		menu.addMenuItem("Changelog")
+		.icon(ImageManager.getImageIcon("changelog.png"))
+		.add(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				ChangelogDialog.show(MainFrame.this);
 			}
+		});
 
-			menuBar.add(help);
-		}
+		menu.addMenuItem("About")
+		.icon(ImageManager.getHelpIcon())
+		.add(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				AboutDialog.show(MainFrame.this);
+			}
+		});
 
-		setJMenuBar(menuBar);
+		menu.addMenuItem("Exit")
+		.add(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				exit();
+			}
+		});
+		//@formatter:on
 	}
 
 	private void createWidgets() {
@@ -467,6 +429,8 @@ public class MainFrame extends JFrame {
 	private void layoutWidgets() {
 		setLayout(new MigLayout("insets 5 10 10 10, fill"));
 
+		add(menu);
+
 		JPanel updatePanel = new JPanel(new MigLayout("insets 0"));
 		updatePanel.add(update);
 		updatePanel.add(updateAvailablePanel, "span 1 2, wrap");
@@ -502,7 +466,40 @@ public class MainFrame extends JFrame {
 		tabs.addTab("Charts", graphsTab);
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Charts</b></font><br><br>Generates graphs of your shop transaction data."));
 
-		add(tabs, "span 3, h 100%, w 100%");
+		add(tabs, "span 4, h 100%, w 100%");
+	}
+
+	private void onWipeDatabase() {
+		boolean reset = ResetDatabaseDialog.show(MainFrame.this);
+		if (!reset) {
+			return;
+		}
+
+		startProgress("Resetting Database...");
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				try {
+					dao.wipe();
+					settings.setSession(null);
+					settings.save();
+					clearSessionMenuItem.setEnabled(false);
+					lastUpdateDate.setText("-");
+					updateRupeeBalance();
+					transactionsTab.clear();
+					updatePaymentsCount();
+					paymentsTab.reset();
+					inventoryTab.refresh();
+					bonusFeeTab.refresh();
+					graphsTab.clear();
+				} catch (Throwable e) {
+					throw new RuntimeException(e);
+				} finally {
+					stopProgress();
+				}
+			}
+		};
+		t.start();
 	}
 
 	public void updatePaymentsCount() {

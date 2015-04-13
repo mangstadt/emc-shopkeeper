@@ -14,7 +14,7 @@ import emcshop.gui.images.ImageManager;
  */
 @SuppressWarnings("serial")
 public class HelpLabel extends JLabel {
-	private static final ImageIcon helpIcon = ImageManager.getHelpIcon();
+	private static final ImageIcon helpIcon = ImageManager.scale(ImageManager.getHelpIcon(), 16);
 	private static final boolean toopTipsEnabled = ToolTipManager.sharedInstance().isEnabled();
 
 	/**
