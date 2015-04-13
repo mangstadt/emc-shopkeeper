@@ -102,11 +102,7 @@ public class Images {
 		ImageIcon image = imageCache.get(imageFileName, 16);
 		if (image == null) {
 			image = get("items/" + imageFileName);
-			if (image == null) {
-				image = getItemImage("_empty");
-			} else {
-				image = scale(image, 16);
-			}
+			image = (image == null) ? getItemImage("_empty") : scale(image, 16);
 			imageCache.put(item, 16, image);
 		}
 		return image;
