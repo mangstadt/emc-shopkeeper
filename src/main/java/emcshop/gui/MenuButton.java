@@ -127,7 +127,7 @@ public class MenuButton extends JToggleButton {
 	public MenuItemAdder<JRadioButtonMenuItem> addRadioButtonMenuItem(String text, ButtonGroup group) {
 		JRadioButtonMenuItem item = new JRadioButtonMenuItem(text);
 		group.add(item);
-		return new MenuItemAdder<JRadioButtonMenuItem>(new JRadioButtonMenuItem(text));
+		return new MenuItemAdder<JRadioButtonMenuItem>(item);
 	}
 
 	/**
