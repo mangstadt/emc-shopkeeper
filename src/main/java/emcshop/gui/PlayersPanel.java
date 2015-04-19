@@ -271,9 +271,12 @@ public class PlayersPanel extends JPanel {
 
 		int rows = 1;
 
+		String title = null;
 		Date joined = null;
 		PlayerProfile profile = profileLoader.getProfile(playerName, null);
 		if (profile != null) {
+			title = profile.getTitle();
+
 			joined = profile.getJoined();
 			if (joined != null) {
 				rows++;
@@ -316,7 +319,6 @@ public class PlayersPanel extends JPanel {
 			header.add(playerNameLabel, "span 2, split 2");
 		}
 
-		String title = profile.getTitle();
 		if (title != null) {
 			Color color = null;
 			Rank rank = profile.getRank();
