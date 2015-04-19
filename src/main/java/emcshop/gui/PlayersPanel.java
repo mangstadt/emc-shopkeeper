@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -69,7 +68,6 @@ public class PlayersPanel extends JPanel {
 	private List<ItemsTable> tables = new ArrayList<ItemsTable>();
 	private Sort sort;
 	private JPanel tablesPanel;
-	private MyJScrollPane tablesPanelScrollPane;
 
 	/**
 	 * @param playerGroups the players to display
@@ -236,51 +234,179 @@ public class PlayersPanel extends JPanel {
 				return row;
 			}
 		});
-		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.addListSelectionListener(new ListSelectionListener() {
-			private int[] prevSelected;
+			private Integer prevSelected;
 
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
-				int[] selectedIndices = list.getSelectedIndices();
-				if (sameSelection(selectedIndices)) {
+				int selectedIndex = list.getSelectedIndex();
+				if (sameSelection(selectedIndex)) {
 					return;
 				}
 
-				List<PlayerGroup> selected = new ArrayList<PlayerGroup>();
-				for (int index : selectedIndices) {
-					selected.add(displayedPlayers.get(index));
-				}
-				showTables(selected);
+				showTable(displayedPlayers.get(selectedIndex));
 
-				prevSelected = selectedIndices;
+				prevSelected = selectedIndex;
 			}
 
-			private boolean sameSelection(int[] selectedIndices) {
-				return (prevSelected != null && Arrays.equals(prevSelected, selectedIndices));
+			private boolean sameSelection(int selectedIndex) {
+				return (prevSelected != null && prevSelected == selectedIndex);
 			}
 		});
 		add(new MyJScrollPane(list), "w 450, growy");
 
 		tablesPanel = new JPanel(new MigLayout("insets 3, fillx"));
-		tablesPanelScrollPane = new MyJScrollPane(tablesPanel);
-		add(tablesPanelScrollPane, "grow, w 100%, h 100%");
+		add(tablesPanel, "grow, w 100%, h 100%");
 
 		validate();
 	}
 
-	private void showTables(List<PlayerGroup> playerGroups) {
+	private JPanel buildPlayerInfoPanel(Player player) {
+		String playerName = player.getName();
+		final int profileImageSize = 96;
+
+		JPanel header = new JPanel(new MigLayout("insets 0"));
+		header.setOpaque(false);
+
+		int rows = 1;
+
+		Date joined = null;
+		PlayerProfile profile = profileLoader.getProfile(playerName, null);
+		if (profile != null) {
+			joined = profile.getJoined();
+			if (joined != null) {
+				rows++;
+			}
+			if (showFirstLastSeen) {
+				if (player.getFirstSeen() != null) {
+					rows++;
+				}
+				if (player.getLastSeen() != null) {
+					rows++;
+				}
+			}
+		}
+
+		final JLabel profileImage = new JLabel();
+		{
+			profileImage.setHorizontalAlignment(SwingConstants.CENTER);
+			profileImage.setVerticalAlignment(SwingConstants.TOP);
+			profileLoader.getPortrait(playerName, profileImage, profileImageSize, new ProfileDownloadedListener() {
+				@Override
+				public void onProfileDownloaded(PlayerProfile profile) {
+					profileLoader.getPortrait(profile.getPlayerName(), profileImage, profileImageSize);
+				}
+			});
+		}
+		header.add(profileImage, "span 1 " + rows + ", gapright 10, growy");
+
+		JLabel playerNameLabel = new ClickableLabel("<html><h3><u>" + playerName, "http://u.emc.gs/" + playerName);
+		playerNameLabel.setBorder(new EmptyBorder(-10, 0, -10, 0));
+		playerNameLabel.setToolTipText("View player's profile");
+
+		EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+		if (server != null) {
+			header.add(playerNameLabel, "span 2, split 3");
+
+			JLabel onlineLabel = new JLabel("<html><font size=2><i>Connected to <b>" + server, Images.getOnline(null, 16), SwingConstants.LEFT);
+			onlineLabel.setIconTextGap(2);
+			header.add(onlineLabel, "gapleft 10");
+		} else {
+			header.add(playerNameLabel, "span 2, split 2");
+		}
+
+		String title = profile.getTitle();
+		if (title != null) {
+			Color color = null;
+			Rank rank = profile.getRank();
+			if (rank != null) {
+				color = profileLoader.getRankColor(rank);
+			}
+
+			JLabel playerTitle = new JLabel("<html><i>" + title);
+			if (color != null) {
+				playerTitle.setForeground(color);
+			}
+			header.add(playerTitle, "wrap");
+		} else {
+			header.add(new JLabel(""), "wrap");
+		}
+
+		if (joined != null) {
+			header.add(new JLabel("Joined:"));
+			header.add(new JLabel(dateFormat.format(joined)), "wrap");
+		}
+
+		if (showFirstLastSeen) {
+			Date firstSeen = player.getFirstSeen();
+			if (firstSeen != null) {
+				header.add(new JLabel("First seen:"));
+				header.add(new JLabel(dateTimeFormat.format(firstSeen)), "wrap");
+			}
+
+			Date lastSeen = player.getLastSeen();
+			if (lastSeen != null) {
+				header.add(new JLabel("Last seen:"));
+				header.add(new JLabel(dateTimeFormat.format(lastSeen)), "wrap");
+			}
+		}
+
+		return header;
+	}
+
+	private ItemsTable buildItemsTable(PlayerGroup playerGroup) {
+		Column column;
+		boolean ascending;
+		switch (sort) {
+		case PLAYER:
+			column = Column.ITEM_NAME;
+			ascending = true;
+			break;
+		case SUPPLIER:
+			column = Column.NET_AMT;
+			ascending = true;
+			break;
+		case CUSTOMER:
+			column = Column.NET_AMT;
+			ascending = false;
+			break;
+		default:
+			column = null;
+			ascending = true;
+			break;
+		}
+
+		return new ItemsTable(displayedItems.get(playerGroup), column, ascending, shopTransactionType, showQuantitiesInStacks);
+	}
+
+	private void showTable(PlayerGroup playerGroup) {
 		tablesPanel.removeAll();
 		tables.clear();
 
-		for (PlayerGroup playerGroup : playerGroups) {
-			PlayerDisplayPanel panel = new PlayerDisplayPanel(playerGroup);
-			tables.add(panel.itemsTable);
-			tablesPanel.add(panel, "growx, wrap");
+		tablesPanel.add(buildPlayerInfoPanel(playerGroup.getPlayer()), "wrap");
+		ItemsTable itemsTable = buildItemsTable(playerGroup);
+		tables.add(itemsTable);
+		itemsTable.setFillsViewportHeight(true);
+		MyJScrollPane pane = new MyJScrollPane(itemsTable);
+		tablesPanel.add(pane, "grow, w 100%, h 100%, wrap");
+
+		JLabel netAmount;
+		{
+			int amount = calculateNetTotal(playerGroup);
+			RupeeFormatter rf = new RupeeFormatter();
+			rf.setPlus(true);
+			rf.setColor(true);
+
+			StringBuilder sb = new StringBuilder();
+			sb.append("<html><code><b>Total: ");
+			sb.append(rf.format(amount));
+			sb.append("</b></code></html>");
+			netAmount = new JLabel(sb.toString());
 		}
+		tablesPanel.add(netAmount, "align right");
 
 		tablesPanel.validate();
-		tablesPanelScrollPane.scrollToTop();
 	}
 
 	private int calculateNetTotal(PlayerGroup playerGroup) {
