@@ -2,8 +2,6 @@ package emcshop.gui;
 
 import static emcshop.util.GuiUtils.shrinkFont;
 import static emcshop.util.GuiUtils.toolTipText;
-import static emcshop.util.NumberFormatter.formatQuantity;
-import static emcshop.util.NumberFormatter.formatStacks;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -77,6 +75,7 @@ import emcshop.gui.images.Images;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.util.ChesterFile;
 import emcshop.util.GuiUtils;
+import emcshop.util.QuantityFormatter;
 import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
@@ -671,6 +670,8 @@ public class InventoryTab extends JPanel implements ExportListener {
 				checkbox.setOpaque(true);
 			}
 
+			private final QuantityFormatter qf = new QuantityFormatter();
+
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean hasFocus, int row, int col) {
 				if (value == null) {
@@ -708,14 +709,16 @@ public class InventoryTab extends JPanel implements ExportListener {
 				case REMAINING:
 					component = label;
 
-					String text = showQuantitiesInStacks ? formatStacks(inv.getQuantity(), index.getStackSize(inv.getItem()), false) : formatQuantity(inv.getQuantity(), false);
+					int stacks = showQuantitiesInStacks ? index.getStackSize(inv.getItem()) : 1;
+					String text = qf.format(inv.getQuantity(), stacks);
 					label.setText(text);
 					break;
 
 				case LOW_THRESHOLD:
 					component = label;
 
-					text = showQuantitiesInStacks ? formatStacks(inv.getLowInStockThreshold(), index.getStackSize(inv.getItem()), false) : formatQuantity(inv.getLowInStockThreshold(), false);
+					stacks = showQuantitiesInStacks ? index.getStackSize(inv.getItem()) : 1;
+					text = qf.format(inv.getLowInStockThreshold(), stacks);
 					label.setText(text);
 					break;
 				}

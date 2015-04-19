@@ -1,7 +1,5 @@
 package emcshop.gui;
 
-import static emcshop.util.NumberFormatter.formatRupeesWithColor;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.sql.SQLException;
@@ -25,6 +23,7 @@ import javax.swing.table.TableRowSorter;
 import net.miginfocom.swing.MigLayout;
 import emcshop.db.BonusFee;
 import emcshop.db.DbDao;
+import emcshop.util.RupeeFormatter;
 
 @SuppressWarnings("serial")
 public class BonusFeeTab extends JPanel {
@@ -117,6 +116,12 @@ public class BonusFeeTab extends JPanel {
 					label.setBorder(new EmptyBorder(4, 4, 4, 4));
 				}
 
+				private final RupeeFormatter rf = new RupeeFormatter();
+				{
+					rf.setPlus(true);
+					rf.setColor(true);
+				}
+
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 					if (value == null) {
@@ -132,7 +137,7 @@ public class BonusFeeTab extends JPanel {
 						break;
 
 					case TOTAL:
-						label.setText("<html>" + formatRupeesWithColor(rowObj.total) + "</html>");
+						label.setText("<html>" + rf.format(rowObj.total) + "</html>");
 						break;
 					}
 

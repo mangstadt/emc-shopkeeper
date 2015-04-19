@@ -2,9 +2,6 @@ package emcshop.gui;
 
 import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.GuiUtils.shrinkFont;
-import static emcshop.util.NumberFormatter.formatRupees;
-import static emcshop.util.NumberFormatter.formatRupeesWithColor;
-import static emcshop.util.NumberFormatter.getQuantityColor;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -58,8 +55,10 @@ import emcshop.presenter.ChatLogViewerPresenter;
 import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.ShopTransaction;
+import emcshop.util.BaseFormatter;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
+import emcshop.util.RupeeFormatter;
 import emcshop.util.UIDefaultsWrapper;
 import emcshop.view.ChatLogViewerViewImpl;
 import emcshop.view.IChatLogViewerView;
@@ -359,6 +358,11 @@ public class PaymentsTab extends JPanel {
 			private final ImageIcon splitIcon = Images.SPLIT;
 			private final ImageIcon chatIcon = Images.CHAT;
 
+			private final RupeeFormatter rf = new RupeeFormatter();
+			{
+				rf.setPlus(true);
+			}
+
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, final int col) {
 				if (value == null) {
@@ -433,11 +437,9 @@ public class PaymentsTab extends JPanel {
 					component = label;
 
 					int amount = transaction.getAmount();
-					Color color = getQuantityColor(amount);
-					if (color != null) {
-						label.setForeground(color);
-					}
-					label.setText(formatRupees(transaction.getAmount()));
+					Color color = (amount == 0) ? UIDefaultsWrapper.getLabelForeground() : BaseFormatter.getColor(amount);
+					label.setForeground(color);
+					label.setText(rf.format(transaction.getAmount()));
 					break;
 				}
 
@@ -843,7 +845,10 @@ public class PaymentsTab extends JPanel {
 			p.setPlayer(paymentTransaction.getPlayer());
 			p.setOpaque(false);
 			top.add(p, "gapright 10");
-			top.add(new JLabel("<html>" + formatRupeesWithColor(paymentTransaction.getAmount())));
+			RupeeFormatter rf = new RupeeFormatter();
+			rf.setPlus(true);
+			rf.setColor(true);
+			top.add(new JLabel("<html>" + rf.format(paymentTransaction.getAmount())));
 
 			add(top, "wrap");
 

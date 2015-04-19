@@ -2,7 +2,6 @@ package emcshop.gui;
 
 import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.GuiUtils.shrinkFont;
-import static emcshop.util.NumberFormatter.formatRupeesWithColor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -47,6 +46,7 @@ import emcshop.gui.lib.GroupPanel;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
 import emcshop.util.RelativeDateFormat;
+import emcshop.util.RupeeFormatter;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel implements ExportListener {
@@ -938,6 +938,11 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		private final JLabel netTotalLabel, gainedLabel, lostLabel;
 		private final JLabel customersLabel;
 		private final JLabel customers;
+		private final RupeeFormatter rf = new RupeeFormatter();
+		{
+			rf.setColor(true);
+			rf.setPlus(true);
+		}
 
 		public StatsPanel() {
 			netTotalLabel = new JLabel();
@@ -967,15 +972,15 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		}
 
 		public void setGained(int gained) {
-			gainedLabel.setText("<html><code>" + formatRupeesWithColor(gained));
+			gainedLabel.setText("<html><code>" + rf.format(gained));
 		}
 
 		public void setLost(int lost) {
-			lostLabel.setText("<html><code>" + formatRupeesWithColor(lost));
+			lostLabel.setText("<html><code>" + rf.format(lost));
 		}
 
 		public void setNetTotal(int netTotal) {
-			netTotalLabel.setText("<html><font size=5><code>" + formatRupeesWithColor(netTotal));
+			netTotalLabel.setText("<html><font size=5><code>" + rf.format(netTotal));
 		}
 
 		public void setCustomers(Integer customers) {

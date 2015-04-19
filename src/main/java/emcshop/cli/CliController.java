@@ -1,8 +1,5 @@
 package emcshop.cli;
 
-import static emcshop.util.NumberFormatter.formatRupees;
-import static emcshop.util.NumberFormatter.formatStacks;
-
 import java.io.PrintStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +31,8 @@ import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
 import emcshop.scraper.TransactionPullerFactory;
+import emcshop.util.QuantityFormatter;
+import emcshop.util.RupeeFormatter;
 import emcshop.view.IUpdateView;
 
 public class CliController {
@@ -138,18 +137,22 @@ public class CliController {
 			out.println("Item                                   |Net Quantity       |Net Amount          ");
 			out.println("--------------------------------------------------------------------------------");
 			int totalAmount = 0;
+			QuantityFormatter qf = new QuantityFormatter();
+			qf.setPlus(true);
+			RupeeFormatter rf = new RupeeFormatter();
+			rf.setPlus(true);
 			for (ItemGroup itemGroup : sortedItemGroups) {
 				out.print(fixedLength(itemGroup.getItem(), 39));
 				out.print('|');
 
 				int netQuantity = itemGroup.getNetQuantity();
 				String color = getColor(netQuantity);
-				out.print(color + fixedLength(formatStacks(itemGroup.getNetQuantity(), index.getStackSize(itemGroup.getItem()), true), 19) + reset);
+				out.print(color + fixedLength(qf.format(itemGroup.getNetQuantity(), index.getStackSize(itemGroup.getItem())), 19) + reset);
 				out.print('|');
 
 				int netAmount = itemGroup.getNetAmount();
 				color = getColor(netAmount);
-				out.print(color + fixedLength(formatRupees(itemGroup.getNetAmount(), true), 19) + reset);
+				out.print(color + fixedLength(rf.format(itemGroup.getNetAmount()), 19) + reset);
 
 				out.println();
 
@@ -159,7 +162,7 @@ public class CliController {
 			out.print(StringUtils.repeat(' ', 53));
 			out.print("Total: ");
 			String color = getBoldColor(totalAmount);
-			out.println(color + formatRupees(totalAmount) + reset);
+			out.println(color + rf.format(totalAmount) + reset);
 		}
 	}
 

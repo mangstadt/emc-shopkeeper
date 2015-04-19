@@ -1,8 +1,5 @@
 package emcshop.gui;
 
-import static emcshop.util.NumberFormatter.formatRupees;
-import static emcshop.util.NumberFormatter.formatRupeesWithColor;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.text.DateFormat;
@@ -44,6 +41,8 @@ import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.EmcServer;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.Rank;
+import emcshop.util.BaseFormatter;
+import emcshop.util.RupeeFormatter;
 import emcshop.util.UIDefaultsWrapper;
 
 /**
@@ -179,6 +178,11 @@ public class PlayersPanel extends JPanel {
 				}
 			};
 
+			private final RupeeFormatter rf = new RupeeFormatter();
+			{
+				rf.setPlus(true);
+			}
+
 			@Override
 			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
 				PlayerGroup playerGroup = (PlayerGroup) value;
@@ -224,13 +228,9 @@ public class PlayersPanel extends JPanel {
 				row.add(playerNameLabel, "gapbottom 0, wrap");
 
 				int netTotal = calculateNetTotal(playerGroup);
-				JLabel rupeeTotalLabel;
-				if (selected) {
-					rupeeTotalLabel = new JLabel(formatRupees(netTotal));
-					rupeeTotalLabel.setForeground(UIDefaultsWrapper.getListForegroundSelected());
-				} else {
-					rupeeTotalLabel = new JLabel("<html>" + formatRupeesWithColor(netTotal));
-				}
+				JLabel rupeeTotalLabel = new JLabel(rf.format(netTotal));
+				Color foreground = selected ? UIDefaultsWrapper.getListForegroundSelected() : BaseFormatter.getColor(netTotal);
+				rupeeTotalLabel.setForeground(foreground);
 				row.add(rupeeTotalLabel, "gaptop 0");
 
 				return row;
@@ -546,10 +546,13 @@ public class PlayersPanel extends JPanel {
 			JLabel netAmount;
 			{
 				int amount = calculateNetTotal(playerGroup);
+				RupeeFormatter rf = new RupeeFormatter();
+				rf.setPlus(true);
+				rf.setColor(true);
 
 				StringBuilder sb = new StringBuilder();
 				sb.append("<html><code><b>Total: ");
-				sb.append(formatRupeesWithColor(amount));
+				sb.append(rf.format(amount));
 				sb.append("</b></code></html>");
 				netAmount = new JLabel(sb.toString());
 			}

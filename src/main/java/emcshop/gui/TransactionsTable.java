@@ -1,9 +1,5 @@
 package emcshop.gui;
 
-import static emcshop.util.NumberFormatter.formatQuantityWithColor;
-import static emcshop.util.NumberFormatter.formatRupeesWithColor;
-import static emcshop.util.NumberFormatter.formatStacksWithColor;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
@@ -36,7 +32,9 @@ import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.Images;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.ShopTransaction;
+import emcshop.util.QuantityFormatter;
 import emcshop.util.RelativeDateFormat;
+import emcshop.util.RupeeFormatter;
 import emcshop.util.UIDefaultsWrapper;
 
 /**
@@ -261,6 +259,17 @@ public class TransactionsTable extends JTable {
 
 		private final PlayerCellPanel playerPanel = new PlayerCellPanel();
 
+		private final QuantityFormatter qf = new QuantityFormatter();
+		{
+			qf.setColor(true);
+			qf.setPlus(true);
+		}
+		private final RupeeFormatter rf = new RupeeFormatter();
+		{
+			rf.setColor(true);
+			rf.setPlus(true);
+		}
+
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
 			if (value == null) {
@@ -317,21 +326,15 @@ public class TransactionsTable extends JTable {
 			case QUANTITY:
 				component = label;
 
-				String text;
 				int quantity = transaction.getQuantity();
-				if (showQuantitiesInStacks) {
-					int stackSize = index.getStackSize(transaction.getItem());
-					text = formatStacksWithColor(quantity, stackSize);
-				} else {
-					text = formatQuantityWithColor(quantity);
-				}
-				label.setText("<html>" + text + "</html>");
+				int stackSize = showQuantitiesInStacks ? index.getStackSize(transaction.getItem()) : 1;
+				label.setText("<html>" + qf.format(quantity, stackSize));
 				break;
 
 			case AMOUNT:
 				component = label;
 
-				label.setText("<html>" + formatRupeesWithColor(transaction.getAmount()) + "</html>");
+				label.setText("<html>" + rf.format(transaction.getAmount()));
 				break;
 			}
 

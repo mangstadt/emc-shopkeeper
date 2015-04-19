@@ -1,9 +1,5 @@
 package emcshop;
 
-import static emcshop.util.NumberFormatter.formatQuantity;
-import static emcshop.util.NumberFormatter.formatRupees;
-import static emcshop.util.NumberFormatter.formatStacks;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -24,6 +20,8 @@ import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
 import emcshop.scraper.ShopTransaction;
 import emcshop.util.BBCodeBuilder;
+import emcshop.util.QuantityFormatter;
+import emcshop.util.RupeeFormatter;
 
 /**
  * Exports query results to various formats.
@@ -107,14 +105,10 @@ public class QueryExporter {
 		bbCode.text(StringUtils.repeat('_', 44 - footer.length()));
 		bbCode.b(" Total").text(" | ");
 		bbCode.b();
-		String netTotalStr = formatRupees(netTotal);
-		if (netTotal > 0) {
-			bbCode.color("green", netTotalStr);
-		} else if (netTotal < 0) {
-			bbCode.color("red", netTotalStr);
-		} else {
-			bbCode.text(netTotalStr);
-		}
+		RupeeFormatter rf = new RupeeFormatter();
+		rf.setPlus(true);
+		String netTotalStr = rf.format(netTotal);
+		colorize(netTotal, netTotalStr, bbCode);
 		bbCode.close(); //close "b"
 
 		bbCode.close(); //close "font"
@@ -126,6 +120,10 @@ public class QueryExporter {
 		ItemIndex index = ItemIndex.instance();
 		bbCode.u("Item").text(" - - - - - - - - - - - - - - - - | ").u("Net Quantity").text(" | ").u("Net Amount").nl();
 		int totalAmount = 0;
+		QuantityFormatter qf = new QuantityFormatter();
+		qf.setPlus(true);
+		RupeeFormatter rf = new RupeeFormatter();
+		rf.setPlus(true);
 		for (ItemGroup group : itemGroups) {
 			String item = group.getItem();
 			totalAmount += group.getNetAmount();
@@ -134,26 +132,14 @@ public class QueryExporter {
 			bbCode.text(" | ");
 
 			int netQuantity = group.getNetQuantity();
-			String netQuantityStr = formatStacks(netQuantity, index.getStackSize(item));
-			if (netQuantity > 0) {
-				bbCode.color("green", netQuantityStr);
-			} else if (netQuantity < 0) {
-				bbCode.color("red", netQuantityStr);
-			} else {
-				bbCode.text(netQuantityStr);
-			}
+			String netQuantityStr = qf.format(netQuantity, index.getStackSize(item));
+			colorize(netQuantity, netQuantityStr, bbCode);
 			bbCodeColumn("", 12 - netQuantityStr.length(), bbCode);
 			bbCode.text(" | ");
 
 			int netAmount = group.getNetAmount();
-			String netAmountStr = formatRupees(netAmount);
-			if (netAmount > 0) {
-				bbCode.color("green", netAmountStr);
-			} else if (netAmount < 0) {
-				bbCode.color("red", netAmountStr);
-			} else {
-				bbCode.text(netAmountStr);
-			}
+			String netAmountStr = rf.format(netAmount);
+			colorize(netAmount, netAmountStr, bbCode);
 
 			bbCode.nl();
 		}
@@ -170,15 +156,19 @@ public class QueryExporter {
 		bbCode.text(StringUtils.repeat('_', padding));
 		bbCode.b(" Total").text(" | ");
 		bbCode.b();
-		String netTotalStr = formatRupees(totalAmount);
-		if (totalAmount > 0) {
-			bbCode.color("green", netTotalStr);
-		} else if (totalAmount < 0) {
-			bbCode.color("red", netTotalStr);
-		} else {
-			bbCode.text(netTotalStr);
-		}
+		String netTotalStr = rf.format(totalAmount);
+		colorize(totalAmount, netTotalStr, bbCode);
 		bbCode.close(); //close "b"
+	}
+
+	private static void colorize(int amount, String str, BBCodeBuilder builder) {
+		if (amount > 0) {
+			builder.color("green", str);
+		} else if (amount < 0) {
+			builder.color("red", str);
+		} else {
+			builder.text(str);
+		}
 	}
 
 	public static String generatePlayersCsv(List<PlayerGroup> players, ListMultimap<PlayerGroup, ItemGroup> items, Date from, Date to) {
@@ -275,6 +265,10 @@ public class QueryExporter {
 		bbCode.close().nl();
 
 		//item table
+		QuantityFormatter qf = new QuantityFormatter();
+		qf.setPlus(true);
+		RupeeFormatter rf = new RupeeFormatter();
+		rf.setPlus(true);
 		DateFormat transactionDf = new SimpleDateFormat("MMM dd, HH:mm");
 		bbCode.u("Date").text("- - - - - | ").u("Player").text(" - - - - | ").u("Item").text(" - - - - - - | ").u("Quantity").text(" | ").u("Amount").nl();
 		for (ShopTransaction transaction : transactions) {
@@ -291,26 +285,14 @@ public class QueryExporter {
 			bbCode.text(" | ");
 
 			int quantity = transaction.getQuantity();
-			String quantityStr = formatQuantity(quantity);
-			if (quantity > 0) {
-				bbCode.color("green", quantityStr);
-			} else if (quantity < 0) {
-				bbCode.color("red", quantityStr);
-			} else {
-				bbCode.text(quantityStr);
-			}
+			String quantityStr = qf.format(quantity);
+			colorize(quantity, quantityStr, bbCode);
 			bbCodeColumn("", 8 - quantityStr.length(), bbCode);
 			bbCode.text(" | ");
 
 			int amount = transaction.getAmount();
-			String amountStr = formatRupees(amount);
-			if (amount > 0) {
-				bbCode.color("green", amountStr);
-			} else if (amount < 0) {
-				bbCode.color("red", amountStr);
-			} else {
-				bbCode.text(amountStr);
-			}
+			String amountStr = rf.format(amount);
+			colorize(amount, amountStr, bbCode);
 
 			bbCode.nl();
 		}
@@ -321,14 +303,8 @@ public class QueryExporter {
 		bbCode.text(" | ");
 		bbCode.b();
 		bbCode.text(" Total: ");
-		String netTotalStr = formatRupees(netTotal);
-		if (netTotal > 0) {
-			bbCode.color("green", netTotalStr);
-		} else if (netTotal < 0) {
-			bbCode.color("red", netTotalStr);
-		} else {
-			bbCode.text(netTotalStr);
-		}
+		String netTotalStr = rf.format(netTotal);
+		colorize(netTotal, netTotalStr, bbCode);
 		bbCode.close(); //close "b"
 
 		bbCode.close(); //close "font"
@@ -393,13 +369,14 @@ public class QueryExporter {
 
 		bbCode.font("courier new");
 
+		QuantityFormatter qf = new QuantityFormatter();
 		bbCode.u("Item").text(" - - - - - - - - - - - - - - - - - - | ").u("Remaining").nl();
 		for (Inventory inv : inventory) {
 			String item = inv.getItem();
 			bbCodeColumn(item, 40, bbCode);
 			bbCode.text(" | ");
 
-			String quantityStr = formatStacks(inv.getQuantity(), index.getStackSize(item), false);
+			String quantityStr = qf.format(inv.getQuantity(), index.getStackSize(item));
 			bbCode.text(quantityStr);
 
 			bbCode.nl();

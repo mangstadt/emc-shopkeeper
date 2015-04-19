@@ -76,7 +76,7 @@ import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.GuiUtils;
-import emcshop.util.NumberFormatter;
+import emcshop.util.RupeeFormatter;
 import emcshop.util.TimeUtils;
 import emcshop.view.BackupViewImpl;
 import emcshop.view.ChatLogViewerViewImpl;
@@ -621,8 +621,9 @@ public class MainFrame extends JFrame {
 	}
 
 	private void updateRupeeBalance(int balance) {
-		String balanceStr = NumberFormatter.formatRupees(balance, false);
-		rupeeBalance.setText("<html><h2><b>" + balanceStr + "</b></h2></html>");
+		RupeeFormatter rf = new RupeeFormatter();
+		String balanceStr = rf.format(balance);
+		rupeeBalance.setText("<html><h2><b>" + balanceStr);
 	}
 
 	public void exit() {

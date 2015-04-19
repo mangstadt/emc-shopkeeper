@@ -1,17 +1,9 @@
 package emcshop.gui;
 
-import static emcshop.util.NumberFormatter.formatQuantity;
-import static emcshop.util.NumberFormatter.formatQuantityWithColor;
-import static emcshop.util.NumberFormatter.formatRupees;
-import static emcshop.util.NumberFormatter.formatRupeesWithColor;
-import static emcshop.util.NumberFormatter.formatStacks;
-import static emcshop.util.NumberFormatter.formatStacksWithColor;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +24,8 @@ import emcshop.db.ItemGroup;
 import emcshop.db.ShopTransactionType;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.GroupableColumnsTable;
+import emcshop.util.QuantityFormatter;
+import emcshop.util.RupeeFormatter;
 
 /**
  * A table that displays transactions grouped by item.
@@ -130,9 +124,27 @@ public class ItemsTable extends GroupableColumnsTable {
 				label.setOpaque(true);
 				label.setBorder(new EmptyBorder(4, 4, 4, 4));
 			}
-			private NumberFormat nf = NumberFormat.getNumberInstance();
+			private final RupeeFormatter ppuRf = new RupeeFormatter(2);
+
+			private final RupeeFormatter rf = new RupeeFormatter();
 			{
-				nf.setMaximumFractionDigits(2);
+				rf.setPlus(true);
+			}
+
+			private final QuantityFormatter qf = new QuantityFormatter();
+			{
+				qf.setPlus(true);
+			}
+
+			private final QuantityFormatter netQf = new QuantityFormatter();
+			{
+				netQf.setColor(true);
+				netQf.setPlus(true);
+			}
+			private final RupeeFormatter netRf = new RupeeFormatter();
+			{
+				netRf.setColor(true);
+				netRf.setPlus(true);
 			}
 
 			@Override
@@ -172,6 +184,10 @@ public class ItemsTable extends GroupableColumnsTable {
 				}
 			}
 
+			private int stackSizeOf(ItemGroup group) {
+				return showQuantitiesInStacks ? index.getStackSize(group.getItem()) : 1;
+			}
+
 			public String getText(ItemGroup group, Column column) {
 				switch (column) {
 				case ITEM_NAME:
@@ -179,48 +195,47 @@ public class ItemsTable extends GroupableColumnsTable {
 				case PPU_BUY:
 					switch (shopTransactionType) {
 					case OTHER_SHOPS:
-						return (group.getBoughtQuantity() != 0) ? nf.format(group.getBoughtPPU()) + "r" : null;
+						return (group.getBoughtQuantity() != 0) ? ppuRf.format(group.getBoughtPPU()) : null;
 					default:
-						return (group.getSoldQuantity() != 0) ? nf.format(group.getSoldPPU()) + "r" : null;
+						if (group.getSoldQuantity() != 0) {
+							double boughtPpu = group.getBoughtPPU();
+							double soldPpu = group.getSoldPPU();
+							String red = "";
+							if (boughtPpu > 0 && boughtPpu > soldPpu) {
+								red = "<html><font color=red>";
+							}
+							return red + ppuRf.format(soldPpu);
+						}
+						return null;
 					}
 				case PPU_SELL:
 					switch (shopTransactionType) {
 					case OTHER_SHOPS:
-						return (group.getSoldQuantity() != 0) ? nf.format(group.getSoldPPU()) + "r" : null;
+						return (group.getSoldQuantity() != 0) ? ppuRf.format(group.getSoldPPU()) : null;
 					default:
-						return (group.getBoughtQuantity() != 0) ? nf.format(group.getBoughtPPU()) + "r" : null;
+						if (group.getBoughtQuantity() != 0) {
+							double boughtPpu = group.getBoughtPPU();
+							double soldPpu = group.getSoldPPU();
+							String red = "";
+							if (soldPpu > 0 && boughtPpu > soldPpu) {
+								red = "<html><font color=red>";
+							}
+							return red + ppuRf.format(boughtPpu);
+						}
+						return null;
 					}
 				case SOLD_QTY:
-					if (group.getSoldQuantity() == 0) {
-						return null;
-					}
-
-					int soldQuantity = group.getSoldQuantity();
-					int stackSize = index.getStackSize(group.getItem());
-
-					return showQuantitiesInStacks ? formatStacks(soldQuantity, stackSize) : formatQuantity(soldQuantity);
+					return (group.getSoldQuantity() == 0) ? null : qf.format(group.getSoldQuantity(), stackSizeOf(group));
 				case SOLD_AMT:
-					if (group.getSoldQuantity() == 0) {
-						return null;
-					}
-					return formatRupees(group.getSoldAmount());
+					return (group.getSoldQuantity() == 0) ? null : rf.format(group.getSoldAmount());
 				case BOUGHT_QTY:
-					if (group.getBoughtQuantity() == 0) {
-						return null;
-					}
-					return showQuantitiesInStacks ? formatStacks(group.getBoughtQuantity(), index.getStackSize(group.getItem())) : formatQuantity(group.getBoughtQuantity());
+					return (group.getBoughtQuantity() == 0) ? null : qf.format(group.getBoughtQuantity(), stackSizeOf(group));
 				case BOUGHT_AMT:
-					if (group.getBoughtQuantity() == 0) {
-						return null;
-					}
-					return formatRupees(group.getBoughtAmount());
+					return (group.getBoughtQuantity() == 0) ? null : rf.format(group.getBoughtAmount());
 				case NET_QTY:
-					int netQuantity = group.getNetQuantity();
-					stackSize = index.getStackSize(group.getItem());
-
-					return "<html>" + (showQuantitiesInStacks ? formatStacksWithColor(netQuantity, stackSize) : formatQuantityWithColor(netQuantity)) + "</html>";
+					return "<html>" + netQf.format(group.getNetQuantity(), stackSizeOf(group));
 				case NET_AMT:
-					return "<html>" + formatRupeesWithColor(group.getNetAmount()) + "</html>";
+					return "<html>" + netRf.format(group.getNetAmount());
 				default:
 					return null;
 				}

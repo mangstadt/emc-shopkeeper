@@ -1,7 +1,5 @@
 package emcshop.gui;
 
-import static emcshop.util.NumberFormatter.formatRupeesWithColor;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -60,6 +58,7 @@ import emcshop.db.DbDao;
 import emcshop.db.Profits;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.ImageCheckBox;
+import emcshop.util.RupeeFormatter;
 
 @SuppressWarnings("serial")
 public class ChartsTab extends JPanel {
@@ -589,9 +588,13 @@ public class ChartsTab extends JPanel {
 	}
 
 	private void updateNetTotal() {
+		RupeeFormatter rf = new RupeeFormatter();
+		rf.setPlus(true);
+		rf.setColor(true);
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html><font size=5><code>");
-		sb.append(formatRupeesWithColor(netTotal));
+		sb.append(rf.format(netTotal));
 		sb.append("</code></font></html>");
 		netTotalLabel.setText(sb.toString());
 	}

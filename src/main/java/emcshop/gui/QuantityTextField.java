@@ -1,14 +1,16 @@
 package emcshop.gui;
 
-import static emcshop.util.NumberFormatter.formatStacks;
-
 import javax.swing.JTextField;
+
+import emcshop.util.QuantityFormatter;
 
 /**
  * A text field that accepts a quantity value.
  */
 @SuppressWarnings("serial")
 public class QuantityTextField extends JTextField {
+	private final QuantityFormatter qf = new QuantityFormatter();
+
 	/**
 	 * Gets the quantity value.
 	 * @param stackSize the size of a stack (e.g. "64")
@@ -52,7 +54,7 @@ public class QuantityTextField extends JTextField {
 			return;
 		}
 
-		setText(formatStacks(quantity, stackSize, false));
+		setText(qf.format(quantity, stackSize));
 	}
 
 	/**
