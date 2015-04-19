@@ -1,5 +1,7 @@
 package emcshop.util;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -11,14 +13,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
-public class PropertiesWrapper {
+import emcshop.gui.WindowState;
+
+public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	private final Properties properties = new Properties();
 	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -95,9 +103,9 @@ public class PropertiesWrapper {
 	public Map<String, String> getMap(String keyStartsWith) {
 		Map<String, String> map = new HashMap<String, String>();
 		Pattern p = Pattern.compile("^" + Pattern.quote(keyStartsWith) + "(.*)");
-		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-			String key = (String) entry.getKey();
-			String value = (String) entry.getValue();
+		for (Map.Entry<String, String> entry : this) {
+			String key = entry.getKey();
+			String value = entry.getValue();
 			Matcher m = p.matcher(key);
 			if (m.find()) {
 				map.put(m.group(1), value);
@@ -112,6 +120,104 @@ public class PropertiesWrapper {
 		}
 	}
 
+	/**
+	 * Gets window state information.
+	 * @param key the key
+	 * @return the value or null if not found
+	 */
+	public WindowState getWindowState(String key) {
+		//first, check to see if any properties exist
+		boolean found = false;
+		String find = key + ".";
+		for (String k : keySet()) {
+			if (k.startsWith(find)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			return null;
+		}
+
+		Map<String, Object> componentValues = new HashMap<String, Object>();
+		Pattern keyRegex = Pattern.compile("^" + Pattern.quote(key) + "\\.(.*?)\\.(.*)");
+		for (Map.Entry<String, String> entry : this) {
+			Matcher m = keyRegex.matcher(entry.getKey());
+			if (!m.find()) {
+				continue;
+			}
+
+			String value = entry.getValue();
+			String type = m.group(1).toLowerCase();
+			Object guiValue;
+			if ("boolean".equals(type)) {
+				guiValue = Boolean.valueOf(value);
+			} else if ("string".equals(type)) {
+				guiValue = value;
+			} else {
+				continue;
+			}
+
+			String name = m.group(2);
+			componentValues.put(name, guiValue);
+		}
+
+		Point location;
+		{
+			Integer x = getInteger(key + ".window.x");
+			Integer y = getInteger(key + ".window.y");
+			location = (x == null | y == null) ? null : new Point(x, y);
+		}
+
+		Dimension size;
+		{
+			Integer width = getInteger(key + ".window.width");
+			Integer height = getInteger(key + ".window.height");
+			size = (width == null || height == null) ? null : new Dimension(width, height);
+		}
+
+		Integer state = getInteger(key + ".window.state");
+
+		return new WindowState(componentValues, location, size, state);
+	}
+
+	public void setWindowState(String key, WindowState state) {
+		if (state == null) {
+			//remove it
+			String find = key + ".";
+			for (String k : keySet()) {
+				if (k.startsWith(find)) {
+					remove(k);
+				}
+			}
+			return;
+		}
+
+		for (Map.Entry<String, Object> entry : state.getComponentValues().entrySet()) {
+			String type;
+			Object value = entry.getValue();
+			if (value instanceof Boolean) {
+				type = "boolean";
+			} else {
+				type = "string";
+			}
+
+			String name = entry.getKey();
+			set(key + "." + type + "." + name, value.toString());
+		}
+
+		Point location = state.getLocation();
+		set(key + ".window.x", (location == null) ? null : (int) location.getX());
+		set(key + ".window.y", (location == null) ? null : (int) location.getY());
+
+		Dimension size = state.getSize();
+		set(key + ".window.width", (size == null) ? null : (int) size.getWidth());
+		set(key + ".window.height", (size == null) ? null : (int) size.getHeight());
+
+		Integer state2 = state.getState();
+		set(key + ".window.state", state2);
+	}
+
 	public void store(File file, String comment) throws IOException {
 		Writer writer = null;
 		try {
@@ -119,6 +225,65 @@ public class PropertiesWrapper {
 			properties.store(writer, comment);
 		} finally {
 			IOUtils.closeQuietly(writer);
+		}
+	}
+
+	/**
+	 * Gets all the property keys.
+	 * @return the property keys
+	 */
+	public Set<String> keySet() {
+		Set<Object> keySet = properties.keySet();
+		Set<String> set = new HashSet<String>(keySet.size());
+		for (Object k : keySet) {
+			set.add((String) k);
+		}
+		return set;
+	}
+
+	@Override
+	public Iterator<Entry<String, String>> iterator() {
+		return new Iterator<Entry<String, String>>() {
+			private final Iterator<Entry<Object, Object>> it = properties.entrySet().iterator();
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+
+			@Override
+			public Entry<String, String> next() {
+				Entry<Object, Object> entry = it.next();
+				return new EntryImpl(entry);
+			}
+
+			@Override
+			public void remove() {
+				it.remove();
+			}
+		};
+	}
+
+	private static class EntryImpl implements Entry<String, String> {
+		private final Entry<Object, Object> entry;
+
+		public EntryImpl(Entry<Object, Object> entry) {
+			this.entry = entry;
+		}
+
+		@Override
+		public String getKey() {
+			return (String) entry.getKey();
+		}
+
+		@Override
+		public String getValue() {
+			return (String) entry.getValue();
+		}
+
+		@Override
+		public String setValue(String value) {
+			return (String) entry.setValue(value);
 		}
 	}
 }

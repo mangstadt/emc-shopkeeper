@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import emcshop.gui.WindowState;
 import emcshop.scraper.EmcSession;
 import emcshop.util.PropertiesWrapper;
 
@@ -19,7 +20,7 @@ public class Settings {
 	private final File file;
 
 	private Integer version;
-	private Integer windowWidth, windowHeight;
+	private WindowState windowState;
 	private Date previousUpdate;
 	private Date lastUpdated;
 	private EmcSession session;
@@ -53,20 +54,12 @@ public class Settings {
 		this.version = version;
 	}
 
-	public Integer getWindowWidth() {
-		return windowWidth;
+	public WindowState getWindowState() {
+		return windowState;
 	}
 
-	public void setWindowWidth(Integer windowWidth) {
-		this.windowWidth = windowWidth;
-	}
-
-	public Integer getWindowHeight() {
-		return windowHeight;
-	}
-
-	public void setWindowHeight(Integer windowHeight) {
-		this.windowHeight = windowHeight;
+	public void setWindowState(WindowState windowState) {
+		this.windowState = windowState;
 	}
 
 	//Removed from properties file in DB version 18.
@@ -158,8 +151,7 @@ public class Settings {
 
 	private void defaults() {
 		version = CURRENT_VERSION;
-		windowWidth = 1000;
-		windowHeight = 800;
+		windowState = null;
 		lastUpdated = null;
 		previousUpdate = null;
 		session = null;
@@ -188,18 +180,32 @@ public class Settings {
 			//migrate it
 		}
 
-		try {
-			windowWidth = props.getInteger("window.width", 1000);
-		} catch (NumberFormatException e) {
-			logger.log(Level.WARNING, "Problem parsing window.width: ", e);
-			windowWidth = 1000;
+		//migrate old window state settings
+		{
+			try {
+				Integer width = props.getInteger("window.width");
+				if (width != null) {
+					props.setInteger("gui.window.width", width);
+				}
+			} catch (NumberFormatException e) {
+				//ignore
+			}
+
+			try {
+				Integer height = props.getInteger("window.height");
+				if (height != null) {
+					props.setInteger("gui.window.height", height);
+				}
+			} catch (NumberFormatException e) {
+				//ignore
+			}
 		}
 
 		try {
-			windowHeight = props.getInteger("window.height", 800);
+			windowState = props.getWindowState("gui");
 		} catch (NumberFormatException e) {
-			logger.log(Level.WARNING, "Problem parsing window.height: ", e);
-			windowHeight = 800;
+			logger.log(Level.WARNING, "Problem parsing window state information: ", e);
+			windowState = null;
 		}
 
 		try {
@@ -286,8 +292,7 @@ public class Settings {
 		PropertiesWrapper props = new PropertiesWrapper();
 
 		props.setInteger("version", version);
-		props.setInteger("window.width", windowWidth);
-		props.setInteger("window.height", windowHeight);
+		props.setWindowState("gui", windowState);
 		if (session != null && persistSession) {
 			props.set("session.username", session.getUsername());
 			props.set("session.id", session.getSessionId());

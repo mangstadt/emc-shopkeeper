@@ -4,6 +4,7 @@ import static emcshop.util.GuiUtils.busyCursor;
 import static emcshop.util.GuiUtils.toolTipText;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
@@ -19,6 +20,7 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -135,7 +137,12 @@ public class MainFrame extends JFrame {
 		createMenu();
 		createWidgets();
 		layoutWidgets();
-		setSize(settings.getWindowWidth(), settings.getWindowHeight());
+
+		WindowState state = settings.getWindowState();
+		if (state == null) {
+			state = new WindowState(Collections.<String, Object> emptyMap(), null, new Dimension(800, 600), null);
+		}
+		state.applyTo(this);
 
 		updatePaymentsCount();
 
@@ -273,7 +280,7 @@ public class MainFrame extends JFrame {
 				}
 			}
 
-			menu.addCheckboxMenuItem("Show Quantities in Stacks")
+			JCheckBoxMenuItem stacks = menu.addCheckboxMenuItem("Show Quantities in Stacks")
 			.icon(Images.STACK)
 			.parent(settingsMenu)
 			.add(new ActionListener() {
@@ -288,9 +295,10 @@ public class MainFrame extends JFrame {
 					transactionsTab.setShowQuantitiesInStacks(stacks);
 				}
 			});
+			stacks.setSelected(settings.isShowQuantitiesInStacks());
 
 			if (profile.equals(EMCShopkeeper.defaultProfileName)) {
-				menu.addCheckboxMenuItem("Show Profiles on Startup")
+				JCheckBoxMenuItem showProfiles = menu.addCheckboxMenuItem("Show Profiles on Startup")
 				.icon(Images.SHOW_PROFILES)
 				.parent(settingsMenu)
 				.add(new ActionListener() {
@@ -301,6 +309,7 @@ public class MainFrame extends JFrame {
 						settings.save();
 					}
 				});
+				showProfiles.setSelected(settings.isShowProfilesOnStartup());
 			}
 		}
 
@@ -618,8 +627,7 @@ public class MainFrame extends JFrame {
 
 	public void exit() {
 		//remember the window size
-		settings.setWindowWidth(getWidth());
-		settings.setWindowHeight(getHeight());
+		settings.setWindowState(WindowState.of(this));
 		settings.save();
 
 		System.exit(0);
