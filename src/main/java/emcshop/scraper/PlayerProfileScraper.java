@@ -166,10 +166,7 @@ public class PlayerProfileScraper {
 	}
 
 	private String scrapeTitle(Document document) {
-		Elements elements = document.select(".userTitle span"); //supporting members
-		if (elements.isEmpty()) {
-			elements = document.select(".userTitle"); //non-supporting members
-		}
+		Elements elements = document.select(".userTitle");
 		return elements.isEmpty() ? null : elements.first().text();
 	}
 
