@@ -167,6 +167,9 @@ public class ProfileLoader {
 	 */
 	public void getPortrait(String playerName, JLabel label, int maxSize, ProfileDownloadedListener listener) {
 		ImageIcon image = getPortrait(playerName, maxSize);
+		if (image == null) {
+			image = portraitCache.unknown(maxSize);
+		}
 		label.setIcon(image);
 
 		//queue the image for download if necessary
@@ -191,7 +194,7 @@ public class ProfileLoader {
 
 		File file = portraitFile(playerName);
 		if (!file.exists()) {
-			return portraitCache.unknown(maxSize);
+			return null;
 		}
 
 		//load the image from the file cache
