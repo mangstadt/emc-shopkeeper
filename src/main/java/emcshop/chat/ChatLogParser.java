@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +39,13 @@ public class ChatLogParser {
 	/**
 	 * Gets the chat messages from a specific date.
 	 * @param date the date
+	 * @return the chat messages
 	 */
 	public List<ChatMessage> getLog(Date date) throws IOException {
+		if (!logDir.isDirectory()) {
+			return Collections.emptyList();
+		}
+
 		//zero-out time values of date
 		date = zeroOutTime(date);
 
