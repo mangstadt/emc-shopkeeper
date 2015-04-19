@@ -8,6 +8,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 
 import net.miginfocom.swing.MigLayout;
+import emcshop.EMCShopkeeper;
 import emcshop.gui.images.Images;
 
 /**
@@ -23,6 +24,7 @@ public class SplashFrame extends JFrame {
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 		getRootPane().setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 		setIconImage(Images.APP_ICON.getImage());
+		setTitle("EMC Shopkeeper v" + EMCShopkeeper.VERSION);
 
 		setLayout(new MigLayout("insets 5"));
 
