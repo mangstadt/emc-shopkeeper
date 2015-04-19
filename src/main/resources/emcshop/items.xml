@@ -303,7 +303,7 @@
 	<Item name="Pine Log" id="17:1" group="Wood" categories="17" />
 	<Item name="Pine Plank" id="5:1" group="Wood" categories="17" />
 	<Item name="Pine Sapling" id="6:1" categories="6,17" />
-	<Item name="Pine Slab" id="126:1" group="Wood" categories="17" />
+	<Item name="Pine Slab" id="126:1" group="Wood" emcNames="Spruce Slab" categories="17" />
 	<Item name="Pine Stairs" id="134" group="Wood" emcNames="Spruce Stairs" categories="17" />
 	<Item name="Pink Stclay" id="159:6" group="Clay" categories="2" />
 	<Item name="Pink Dye" id="351:9" group="Dyes" categories="4" />
