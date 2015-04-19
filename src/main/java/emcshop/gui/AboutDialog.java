@@ -52,7 +52,7 @@ public class AboutDialog extends JDialog {
 		JLabel copyrightLabel = new JLabel(
 		"<html>" +
 		"<br>" +
-		"<font size=2>Copyright 2013-2014 Michael Angstadt.  This program is a fan creation and is not affiliated with<br>Minecraft (copyright Mojang) or Empire Minecraft (copyright Starlis).<br></font>" +
+		"<font size=2>Copyright 2013-2015 Michael Angstadt.  This program is a fan creation and is not affiliated with<br>Minecraft (copyright Mojang) or Empire Minecraft (copyright Starlis).<br></font>" +
 		"<br>" +
 		"<center><i>No pigs were harmed in the making of this program.</i></center>" +
 		"</html>"
