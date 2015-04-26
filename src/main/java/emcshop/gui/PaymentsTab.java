@@ -200,7 +200,7 @@ public class PaymentsTab extends JPanel {
 				MyJScrollPane scrollPane = new MyJScrollPane(paymentsTable);
 				inner.add(scrollPane, "h 100%, w 100%");
 
-				add(inner, "align center, w :700:700, h 100%");
+				add(inner, "align center, w :800:800, h 100%");
 			}
 
 			validate();
@@ -226,7 +226,7 @@ public class PaymentsTab extends JPanel {
 	 * are defined is the order that they will appear in the table.
 	 */
 	private enum Column {
-		CHECKBOX(""), SPLIT("Split"), ASSIGN("Assign"), CHAT_LOG("Log"), TIME("Time"), PLAYER("Player"), AMOUNT("Amount");
+		CHECKBOX(""), SPLIT("Split"), ASSIGN("Assign"), CHAT_LOG("Log"), TIME("Time"), PLAYER("Player"), REASON("Reason"), AMOUNT("Amount");
 
 		private final String name;
 
@@ -322,6 +322,12 @@ public class PaymentsTab extends JPanel {
 				@Override
 				public int compare(Row one, Row two) {
 					return one.transaction.getPlayer().compareToIgnoreCase(two.transaction.getPlayer());
+				}
+			});
+			rowSorter.setComparator(Column.REASON.ordinal(), new Comparator<Row>() {
+				@Override
+				public int compare(Row one, Row two) {
+					return one.transaction.getReason().compareToIgnoreCase(two.transaction.getReason());
 				}
 			});
 			rowSorter.setComparator(Column.AMOUNT.ordinal(), new Comparator<Row>() {
@@ -431,6 +437,12 @@ public class PaymentsTab extends JPanel {
 							});
 						}
 					});
+					break;
+
+				case REASON:
+					component = label;
+
+					label.setText(transaction.getReason());
 					break;
 
 				case AMOUNT:
@@ -615,6 +627,9 @@ public class PaymentsTab extends JPanel {
 			TableColumn playerColumn = getColumn(Column.PLAYER);
 			playerColumn.setPreferredWidth(200);
 
+			TableColumn reasonColumn = getColumn(Column.REASON);
+			reasonColumn.setPreferredWidth(200);
+
 			TableColumn amountColumn = getColumn(Column.AMOUNT);
 			amountColumn.setPreferredWidth(100);
 
@@ -717,7 +732,18 @@ public class PaymentsTab extends JPanel {
 	private Integer showSplitDialog(PaymentTransaction transaction) {
 		int origAmount = Math.abs(transaction.getAmount());
 		do {
-			String amountStr = JOptionPane.showInputDialog(owner, "Enter the number of rupees you'd like to subtract\nfrom this payment transaction.  A new payment transaction\nwill then be created with the value you enter.\n\nEnter a value between 1 and " + (origAmount - 1) + ":", "Split Payment Transaction", JOptionPane.QUESTION_MESSAGE);
+			//@formatter:off
+			String amountStr = JOptionPane.showInputDialog(
+				owner,
+				"Enter the number of rupees you'd like to subtract\n" +
+					"from this payment transaction.  A new payment transaction\n" +
+					"will then be created with the value you enter.\n" +
+					"\n" +
+					"Enter a value between 1 and " + (origAmount - 1) + ":",
+				"Split Payment Transaction",
+				JOptionPane.QUESTION_MESSAGE
+			);
+			//@formatter:on
 			if (amountStr == null) {
 				//user canceled dialog
 				return null;
@@ -727,12 +753,24 @@ public class PaymentsTab extends JPanel {
 			try {
 				amountInt = Integer.valueOf(amountStr);
 			} catch (NumberFormatException e) {
-				JOptionPane.showMessageDialog(owner, "Invalid number.", "Error", JOptionPane.ERROR_MESSAGE);
+				//@formatter:off
+				JOptionPane.showMessageDialog(owner,
+					"Invalid number.",
+					"Error",
+					JOptionPane.ERROR_MESSAGE
+				);
+				//@formatter:on
 				continue;
 			}
 
 			if (amountInt <= 0 || amountInt >= origAmount) {
-				JOptionPane.showMessageDialog(owner, "Amount must be between 1 and " + (origAmount - 1) + ".", "Error", JOptionPane.ERROR_MESSAGE);
+				//@formatter:off
+				JOptionPane.showMessageDialog(owner,
+					"Amount must be between 1 and " + (origAmount - 1) + ".",
+					"Error",
+					JOptionPane.ERROR_MESSAGE
+				);
+				//@formatter:on
 				continue;
 			}
 
@@ -803,7 +841,14 @@ public class PaymentsTab extends JPanel {
 				}
 
 				private void showError(String message) {
-					JOptionPane.showMessageDialog(AssignDialog.this, message, "Error", JOptionPane.ERROR_MESSAGE);
+					//@formatter:off
+					JOptionPane.showMessageDialog(
+						AssignDialog.this,
+						message,
+						"Error",
+						JOptionPane.ERROR_MESSAGE
+					);
+					//@formatter:on
 				}
 			});
 

@@ -6,7 +6,7 @@ package emcshop.scraper;
  */
 public class PaymentTransaction extends RupeeTransaction {
 	private Integer id;
-	private String player;
+	private String player, reason;
 
 	public Integer getId() {
 		return id;
@@ -24,12 +24,21 @@ public class PaymentTransaction extends RupeeTransaction {
 		this.player = player;
 	}
 
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((player == null) ? 0 : player.hashCode());
+		result = prime * result + ((reason == null) ? 0 : reason.hashCode());
 		return result;
 	}
 
@@ -51,6 +60,11 @@ public class PaymentTransaction extends RupeeTransaction {
 			if (other.player != null)
 				return false;
 		} else if (!player.equals(other.player))
+			return false;
+		if (reason == null) {
+			if (other.reason != null)
+				return false;
+		} else if (!reason.equals(other.reason))
 			return false;
 		return true;
 	}

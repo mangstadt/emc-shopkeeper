@@ -65,7 +65,9 @@ CREATE TABLE payment_transactions(
 	"transaction" INT REFERENCES transactions(id),
 	
 	--"true" if the user has chosen to not associate this with a shop transaction
-	ignore BOOLEAN NOT NULL DEFAULT false
+	ignore BOOLEAN NOT NULL DEFAULT false,
+	
+	reason VARCHAR(128)
 );
 
 CREATE TABLE inventory(

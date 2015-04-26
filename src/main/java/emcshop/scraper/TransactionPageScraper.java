@@ -38,8 +38,8 @@ public class TransactionPageScraper {
 	private static final Pattern soldRegex = Pattern.compile("^Player shop sold ([\\d,]+) (.*?) to (.*)$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern boughtRegex = Pattern.compile("^Your player shop bought ([\\d,]+) (.*?) from (.*)$", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern paymentFromRegex = Pattern.compile("^Payment from (.*)$", Pattern.CASE_INSENSITIVE);
-	private static final Pattern paymentToRegex = Pattern.compile("^Payment to (.*)$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern paymentFromRegex = Pattern.compile("^Payment from (.*?)(: (.*))?$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern paymentToRegex = Pattern.compile("^Payment to (.*?)(: (.*))?$", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern horseFeeRegex = Pattern.compile("^Summoned stabled horse in the wild.*", Pattern.CASE_INSENSITIVE);
 	private static final Pattern lockFeeRegex = Pattern.compile("^(Locked an item wilderness|(Full|Partial) refund for unlocking item wilderness).*", Pattern.CASE_INSENSITIVE);
@@ -204,6 +204,7 @@ public class TransactionPageScraper {
 
 		PaymentTransaction transaction = new PaymentTransaction();
 		transaction.setPlayer(m.group(1));
+		transaction.setReason(m.group(3));
 		return transaction;
 	}
 

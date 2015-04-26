@@ -50,7 +50,7 @@ public abstract class DirbyDbDao implements DbDao {
 	 * directly. Use {@link #getAppDbVersion()} instead, because this method
 	 * gets overridden in unit tests.
 	 */
-	public static final int schemaVersion = 25;
+	public static final int schemaVersion = 26;
 
 	protected Connection conn;
 	protected String jdbcUrl;
@@ -605,6 +605,7 @@ public abstract class DirbyDbDao implements DbDao {
 		stmt.setInt("player", playerId);
 		stmt.setInt("amount", transaction.getAmount());
 		stmt.setInt("balance", transaction.getBalance());
+		stmt.setString("reason", transaction.getReason());
 	}
 
 	@Override
@@ -638,7 +639,7 @@ public abstract class DirbyDbDao implements DbDao {
 	public List<PaymentTransaction> getPendingPaymentTransactions() throws SQLException {
 		//@formatter:off
 		String sql =
-		"SELECT pt.id, pt.ts, pt.amount, pt.balance, p.name AS playerName " +
+		"SELECT pt.id, pt.ts, pt.amount, pt.balance, pt.reason, p.name AS playerName " +
 		"FROM payment_transactions pt " +
 		"INNER JOIN players p ON pt.player = p.id " +
 		"WHERE pt.\"transaction\" IS NULL " +
@@ -657,6 +658,7 @@ public abstract class DirbyDbDao implements DbDao {
 				transaction.setBalance(rs.getInt("balance"));
 				transaction.setPlayer(rs.getString("playerName"));
 				transaction.setTs(toDate(rs.getTimestamp("ts")));
+				transaction.setReason(rs.getString("reason"));
 
 				transactions.add(transaction);
 			}
