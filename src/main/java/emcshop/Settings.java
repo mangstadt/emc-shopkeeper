@@ -5,7 +5,9 @@ import static emcshop.util.MinecraftUtils.getDefaultMinecraftFolder;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,20 +22,14 @@ public class Settings {
 
 	private final File file;
 
-	private Integer version;
+	private Integer version, rupeeBalance, backupFrequency, maxBackups;
 	private WindowState windowState;
-	private Date previousUpdate;
-	private Date lastUpdated;
-	private String username;
-	private String password;
+	private Date previousUpdate, lastUpdated;
+	private String username, password;
 	private Level logLevel;
-	private Integer rupeeBalance;
-	private boolean showProfilesOnStartup;
-	private boolean showQuantitiesInStacks;
-	private boolean backupsEnabled;
-	private Integer backupFrequency;
-	private Integer maxBackups;
+	private boolean showProfilesOnStartup, showQuantitiesInStacks, backupsEnabled, reportUnknownItems;
 	private File chatLogDir;
+	private List<String> reportedUnknownItems;
 
 	public Settings(File file) throws IOException {
 		this.file = file;
@@ -150,6 +146,22 @@ public class Settings {
 		this.chatLogDir = chatLogDir;
 	}
 
+	public boolean isReportUnknownItems() {
+		return reportUnknownItems;
+	}
+
+	public void setReportUnknownItems(boolean reportUnknownItems) {
+		this.reportUnknownItems = reportUnknownItems;
+	}
+
+	public List<String> getReportedUnknownItems() {
+		return reportedUnknownItems;
+	}
+
+	public void setReportedUnknownItems(List<String> reported) {
+		reportedUnknownItems = reported;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowState = null;
@@ -161,6 +173,8 @@ public class Settings {
 		rupeeBalance = null;
 		showProfilesOnStartup = false;
 		showQuantitiesInStacks = false;
+		reportUnknownItems = false;
+		reportedUnknownItems = new ArrayList<String>();
 
 		backupsEnabled = true;
 		backupFrequency = 7;
@@ -253,6 +267,9 @@ public class Settings {
 
 		showQuantitiesInStacks = props.getBoolean("showQuantitiesInStacks", false);
 
+		reportUnknownItems = props.getBoolean("unknownItems.report", false);
+		reportedUnknownItems = props.list("unknownItems.reportedItems");
+
 		backupsEnabled = props.getBoolean("backup.enabled", true);
 
 		try {
@@ -291,6 +308,8 @@ public class Settings {
 		props.set("log.level", logLevel.getName());
 		props.setBoolean("showProfilesOnStartup", showProfilesOnStartup);
 		props.setBoolean("showQuantitiesInStacks", showQuantitiesInStacks);
+		props.setBoolean("unknownItems.report", reportUnknownItems);
+		props.list("unknownItems.reportedItems", reportedUnknownItems);
 		props.setBoolean("backup.enabled", backupsEnabled);
 		props.setInteger("backup.frequency", backupFrequency);
 		props.setInteger("backup.max", maxBackups);

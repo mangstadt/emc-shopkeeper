@@ -15,7 +15,6 @@ import javax.swing.border.EmptyBorder;
 
 import com.google.common.collect.ImmutableMap;
 
-import emcshop.db.DbDao;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.suggest.ContainsMatcher;
 import emcshop.gui.lib.suggest.JSuggestField;
@@ -60,23 +59,15 @@ public class ItemSuggestField extends JSuggestField {
 	}
 
 	/**
-	 * Builds the list of items that all instances of this control will use.
-	 * @param dao the database DAO
-	 * @throws SQLException if there's a problem retrieving data from the
-	 * database
+	 * Sets the list of items that all instances of this control will use. This
+	 * method should be called only once during application startup.
+	 * @param itemNames the item names to populate this control with
 	 */
-	public static void init(DbDao dao) throws SQLException {
-		if (itemNames != null) {
-			return;
-		}
+	public static void init(List<String> itemNames) throws SQLException {
+		ItemSuggestField.itemNames = new Vector<String>(itemNames);
 
-		//get item names
-		List<String> itemNamesList = dao.getItemNames();
-		itemNames = new Vector<String>(itemNamesList);
-
-		//load item icons
 		ImmutableMap.Builder<String, ImageIcon> builder = ImmutableMap.builder();
-		for (String itemName : itemNamesList) {
+		for (String itemName : itemNames) {
 			ImageIcon image = Images.getItemImage(itemName);
 			builder.put(itemName, image);
 		}

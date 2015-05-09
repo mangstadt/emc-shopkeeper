@@ -9,7 +9,9 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -428,11 +430,37 @@ public class EMCShopkeeper {
 
 		//pre-load the labels for the item suggest fields
 		splash.setMessage("Loading item icons...");
-		ItemSuggestField.init(dao);
+		List<String> itemNames = dao.getItemNames();
+		reportUnknownItems(itemNames, settings, reportSender);
+		ItemSuggestField.init(itemNames);
 
 		mainFrame = new MainFrame(profileDir.getName());
 		mainFrame.setVisible(true);
 		splash.dispose();
+	}
+
+	private static void reportUnknownItems(List<String> itemNames, Settings settings, ReportSender reportSender) {
+		if (!settings.isReportUnknownItems()) {
+			return;
+		}
+
+		List<String> alreadyReported = settings.getReportedUnknownItems();
+		List<String> itemsToReport = new ArrayList<String>();
+		ItemIndex itemIndex = ItemIndex.instance();
+		for (String itemName : itemNames) {
+			if (itemIndex.isUnknownItem(itemName) && !alreadyReported.contains(itemName)) {
+				itemsToReport.add(itemName);
+			}
+		}
+		if (itemsToReport.isEmpty()) {
+			return;
+		}
+
+		reportSender.report("Unknown items: " + itemsToReport, null);
+
+		alreadyReported.addAll(itemsToReport);
+		settings.setReportedUnknownItems(alreadyReported);
+		settings.save();
 	}
 
 	/**

@@ -30,6 +30,7 @@ public class Images {
 	public static final ImageIcon HELP = get("help.png");
 	public static final ImageIcon LOADING = get("loading.gif");
 	public static final ImageIcon LOADING_SMALL = get("loading-sml.gif");
+	public static final ImageIcon REPORT_UNKNOWN_ITEMS = get("report-unknown-items.png");
 	public static final ImageIcon SEARCH = get("search.png");
 	public static final ImageIcon SEARCH_DATE = get("search-date.png");
 	public static final ImageIcon SEARCH_ITEMS = get("search-items.png");

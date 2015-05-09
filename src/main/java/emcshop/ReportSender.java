@@ -60,10 +60,11 @@ public class ReportSender {
 
 	/**
 	 * Reports an error.
-	 * @param throwable the error to report
+	 * @param message the message to report (can be null)
+	 * @param throwable the error to report (can be null)
 	 */
-	public void report(Throwable throwable) {
-		Job job = new Job(throwable);
+	public void report(String message, Throwable throwable) {
+		Job job = new Job(message, throwable);
 		queue.add(job);
 	}
 
@@ -123,18 +124,27 @@ public class ReportSender {
 
 			xml.append("WebStart", JarSignersHardLinker.isRunningOnWebstart() + "");
 
-			String stackTrace = ExceptionUtils.getStackTrace(job.throwable);
-			xml.append("StackTrace", stackTrace);
+			String message = job.message;
+			if (message != null) {
+				xml.append("Message", message);
+			}
+
+			if (job.throwable != null) {
+				String stackTrace = ExceptionUtils.getStackTrace(job.throwable);
+				xml.append("StackTrace", stackTrace);
+			}
 
 			return xml.toString();
 		}
 	}
 
 	private static class Job {
+		private final String message;
 		private final Throwable throwable;
 		private final Date received = new Date();
 
-		public Job(Throwable throwable) {
+		public Job(String message, Throwable throwable) {
+			this.message = message;
 			this.throwable = throwable;
 		}
 	}

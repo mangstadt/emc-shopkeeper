@@ -11,10 +11,13 @@ import java.io.Writer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -23,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import emcshop.gui.WindowState;
 
@@ -46,6 +50,16 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 
 	public String get(String key) {
 		return properties.getProperty(key);
+	}
+
+	public List<String> list(String key) {
+		String value = get(key);
+		String split[] = (value == null || value.isEmpty()) ? new String[0] : value.split("\\s*,\\s*");
+		return new ArrayList<String>(Arrays.asList(split));
+	}
+
+	public void list(String key, List<String> list) {
+		set(key, StringUtils.join(list, ","));
 	}
 
 	public void set(String key, Object value) {

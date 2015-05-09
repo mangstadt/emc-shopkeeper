@@ -8,7 +8,7 @@ public class ReportSenderTest {
 		try {
 			Integer.parseInt("test");
 		} catch (Throwable t) {
-			rs.report(t);
+			rs.report(null, t);
 		}
 
 		System.in.read(); //stop the program from terminating

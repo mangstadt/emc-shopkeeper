@@ -190,7 +190,7 @@ public class UpdateModelImpl implements IUpdateModel {
 		if (thrown == null) {
 			return;
 		}
-		reportSender.report(thrown);
+		reportSender.report(null, thrown);
 	}
 
 	private class DownloadThread extends Thread {

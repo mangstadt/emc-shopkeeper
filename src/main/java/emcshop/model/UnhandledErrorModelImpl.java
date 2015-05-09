@@ -37,6 +37,6 @@ public class UnhandledErrorModelImpl implements IUnhandledErrorModel {
 
 	@Override
 	public void sendErrorReport() {
-		reportSender.report(thrown);
+		reportSender.report(null, thrown);
 	}
 }

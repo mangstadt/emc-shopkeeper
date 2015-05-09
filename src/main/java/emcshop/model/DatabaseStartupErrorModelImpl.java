@@ -52,7 +52,7 @@ public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel
 
 	@Override
 	public void sendErrorReport() {
-		reportSender.report(thrown);
+		reportSender.report(null, thrown);
 	}
 
 	@Override

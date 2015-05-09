@@ -313,6 +313,20 @@ public class MainFrame extends JFrame {
 				});
 				showProfiles.setSelected(settings.isShowProfilesOnStartup());
 			}
+			
+			JCheckBoxMenuItem reportUnknownItems = menu.addCheckboxMenuItem("Report Unknown Items")
+			.icon(Images.REPORT_UNKNOWN_ITEMS)
+			.parent(settingsMenu)
+			.add(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					JCheckBoxMenuItem source = (JCheckBoxMenuItem) event.getSource();
+					boolean report = source.isSelected();
+					settings.setReportUnknownItems(report);
+					settings.save();
+				}
+			});
+			reportUnknownItems.setSelected(settings.isReportUnknownItems());
 		}
 
 		menu.addSeparator();

@@ -242,6 +242,10 @@ public class ItemIndex {
 		return null;
 	}
 
+	public boolean isUnknownItem(String displayName) {
+		return byName.get(displayName.toLowerCase()) == null;
+	}
+
 	/**
 	 * Gets the image file name of an item
 	 * @param displayName the item's display name
