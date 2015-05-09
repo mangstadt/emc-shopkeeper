@@ -8,10 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 
 /**
  * Iterates over all the components in a container, recusively including the
- * components of {@link JPanel}s.
+ * components of {@link JPanel}s and {@link JTabbedPane}s.
  * @author Michael Angstadt
  */
 public class RecursiveComponentIterator implements Iterator<Component>, Iterable<Component> {
@@ -46,10 +47,22 @@ public class RecursiveComponentIterator implements Iterator<Component>, Iterable
 
 	private Component getNext() {
 		Component component = nextComponent();
-		while (component instanceof JPanel) {
-			JPanel panel = (JPanel) component;
-			components.addAll(Arrays.asList(panel.getComponents()));
-			component = nextComponent();
+		while (true) {
+			if (component instanceof JPanel) {
+				JPanel panel = (JPanel) component;
+				components.addAll(Arrays.asList(panel.getComponents()));
+				component = nextComponent();
+				continue;
+			}
+
+			if (component instanceof JTabbedPane) {
+				JTabbedPane pane = (JTabbedPane) component;
+				components.addAll(Arrays.asList(pane.getComponents()));
+				component = nextComponent();
+				continue;
+			}
+
+			break;
 		}
 		return component;
 	}

@@ -4,7 +4,9 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.beans.PropertyVetoException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +15,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+
+import com.michaelbaranov.microba.calendar.DatePicker;
 
 /**
  * Contains information about a window's state (such as size and position), as
@@ -73,6 +77,8 @@ public class WindowState {
 				value = ((JCheckBox) component).isSelected();
 			} else if (component instanceof JRadioButton) {
 				value = ((JRadioButton) component).isSelected();
+			} else if (component instanceof DatePicker) {
+				value = ((DatePicker) component).getDate();
 			} else {
 				continue;
 			}
@@ -138,6 +144,12 @@ public class WindowState {
 				((JCheckBox) component).setSelected((Boolean) value);
 			} else if (component instanceof JRadioButton && value instanceof Boolean) {
 				((JRadioButton) component).setSelected((Boolean) value);
+			} else if (component instanceof DatePicker && value instanceof Date) {
+				try {
+					((DatePicker) component).setDate((Date) value);
+				} catch (PropertyVetoException e) {
+					//should never be thrown
+				}
 			}
 		}
 	}

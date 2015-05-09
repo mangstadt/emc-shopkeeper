@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -144,6 +145,7 @@ public class MainFrame extends JFrame {
 			state = new WindowState(Collections.<String, Object> emptyMap(), null, new Dimension(800, 600), null);
 		}
 		state.applyTo(this);
+		transactionsTab.afterPopulate();
 
 		updatePaymentsCount();
 
@@ -627,8 +629,14 @@ public class MainFrame extends JFrame {
 	}
 
 	public void exit() {
-		//remember the window size
-		settings.setWindowState(WindowState.of(this));
+		WindowState state = WindowState.of(this);
+		if (!Boolean.TRUE.equals(state.getComponentValues().get("dateRange.range"))) {
+			Map<String, Object> map = new HashMap<String, Object>(state.getComponentValues());
+			map.remove("dateRange.from");
+			map.remove("dateRange.to");
+			state = new WindowState(map, state.getLocation(), state.getSize(), state.getState());
+		}
+		settings.setWindowState(state);
 		settings.save();
 
 		System.exit(0);

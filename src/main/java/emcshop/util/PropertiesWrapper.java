@@ -128,7 +128,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	public WindowState getWindowState(String key) {
 		//first, check to see if any properties exist
 		boolean found = false;
-		String find = key + ".";
+		String find = key + '.';
 		for (String k : keySet()) {
 			if (k.startsWith(find)) {
 				found = true;
@@ -152,6 +152,12 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 			Object guiValue;
 			if ("boolean".equals(type)) {
 				guiValue = Boolean.valueOf(value);
+			} else if ("date".equals(type)) {
+				try {
+					guiValue = df.parse(value);
+				} catch (ParseException e) {
+					continue;
+				}
 			} else if ("string".equals(type)) {
 				guiValue = value;
 			} else {
@@ -194,16 +200,21 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 		}
 
 		for (Map.Entry<String, Object> entry : state.getComponentValues().entrySet()) {
-			String type;
+			String type, strValue;
 			Object value = entry.getValue();
 			if (value instanceof Boolean) {
 				type = "boolean";
+				strValue = value.toString();
+			} else if (value instanceof Date) {
+				type = "date";
+				strValue = df.format(value);
 			} else {
 				type = "string";
+				strValue = value.toString();
 			}
 
 			String name = entry.getKey();
-			set(key + "." + type + "." + name, value.toString());
+			set(key + "." + type + "." + name, strValue);
 		}
 
 		Point location = state.getLocation();

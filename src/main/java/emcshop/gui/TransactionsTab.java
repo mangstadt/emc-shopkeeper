@@ -344,6 +344,10 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		t.start();
 	}
 
+	public void afterPopulate() {
+		queryPanel.updateState();
+	}
+
 	private void updateNetTotal() {
 		int gained = 0, lost = 0;
 		netTotal = 0;
@@ -473,32 +477,35 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 				final ActionListener radioButtonListener = new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						boolean enableDatePickers = dateRange.isSelected();
-						fromDatePicker.setEnabled(enableDatePickers);
-						toDatePicker.setEnabled(enableDatePickers);
+					public void actionPerformed(ActionEvent event) {
+						updateState();
 					}
 				};
 
 				entireHistory = new JRadioButton();
+				entireHistory.setName("dateRange.entireHistory");
 				dateRangeGroup.add(entireHistory);
 				entireHistory.addActionListener(radioButtonListener);
 
 				showSinceLastUpdate = new JRadioButton();
+				showSinceLastUpdate.setName("dateRange.sinceLastUpdate");
 				dateRangeGroup.add(showSinceLastUpdate);
 				showSinceLastUpdate.addActionListener(radioButtonListener);
 
 				dateRange = new JRadioButton("date range:");
+				dateRange.setName("dateRange.range");
 				dateRangeGroup.add(dateRange);
 				dateRange.addActionListener(radioButtonListener);
 
 				fromDatePicker = new DatePicker();
+				fromDatePicker.setName("dateRange.from");
 				fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 				fromDatePicker.setShowNoneButton(true);
 				fromDatePicker.setShowTodayButton(true);
 				fromDatePicker.setStripTime(true);
 
 				toDatePicker = new DatePicker();
+				toDatePicker.setName("dateRange.to");
 				toDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 				toDatePicker.setShowNoneButton(true);
 				toDatePicker.setShowTodayButton(true);
@@ -507,10 +514,13 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				ButtonGroup transactionTypeGroup = new ButtonGroup();
 
 				shopTransactions = new JRadioButton("My Shop");
+				shopTransactions.setName("transactionType.myShop");
 				transactionTypeGroup.add(shopTransactions);
 				myTransactions = new JRadioButton("Other Shops");
+				myTransactions.setName("transactionType.otherShops");
 				transactionTypeGroup.add(myTransactions);
 				bothTransactions = new JRadioButton("Both");
+				bothTransactions.setName("transactionType.both");
 				transactionTypeGroup.add(bothTransactions);
 				shopTransactions.setSelected(true);
 
@@ -626,6 +636,12 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			}
 
 			reset();
+		}
+
+		public void updateState() {
+			boolean enableDatePickers = dateRange.isSelected();
+			fromDatePicker.setEnabled(enableDatePickers);
+			toDatePicker.setEnabled(enableDatePickers);
 		}
 
 		public void reset() {
