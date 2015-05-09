@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,6 +26,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	private final JButton login, cancel;
 	private final JTextField username;
 	private final JPasswordField password;
+	private final JCheckBox savePassword;
 	private final JLabel loading;
 	private final JPanel messagePanel;
 
@@ -56,6 +58,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		messagePanel = new JPanel();
 		username = new JTextField();
 		password = new JPasswordField();
+		savePassword = new JCheckBox("Save password");
 		loading = new JLabel("Logging in...", Images.LOADING_SMALL, SwingConstants.CENTER);
 
 		///////////////////////
@@ -64,7 +67,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 
 		add(new JLabel(Images.EMC_LOGO), "align center, wrap");
 
-		add(new HelpLabel("<html><b>Please enter your login credentials.", "Your login credentials to the EMC website are required in order to download your rupee transactions.  EMC Shopkeeper does not save or steal your password."), "align center, wrap");
+		add(new HelpLabel("<html><b>Please enter your login credentials.", "Your login credentials to the EMC website are required in order to download your rupee transactions.  EMC Shopkeeper will not steal your password, I promise!"), "align center, wrap");
 
 		add(messagePanel, "align center, wrap");
 
@@ -72,8 +75,11 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		p.add(new JLabel("Username:"), "align right");
 		p.add(username, "w 150, wrap");
 		p.add(new JLabel("Password:"), "align right");
-		p.add(password, "w 150, wrap");
+		p.add(password, "w 150");
 		add(p, "align center, wrap");
+
+		add(savePassword, "split 2, align center");
+		add(new HelpLabel("", "Selecting this option will save your password to the hard drive so that EMC Shopkeeper can auto-fill your password on this screen."), "wrap");
 
 		add(login, "split 2, align center");
 		add(cancel);
@@ -119,18 +125,24 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	}
 
 	@Override
+	public void setPassword(String password) {
+		savePassword.setSelected(password != null);
+		this.password.setText(password);
+	}
+
+	@Override
 	public String getPassword() {
 		return new String(password.getPassword());
 	}
 
 	@Override
-	public boolean getRememberMe() {
-		return true;
+	public boolean getSavePassword() {
+		return savePassword.isSelected();
 	}
 
 	@Override
-	public void setRememberMe(boolean rememberMe) {
-		//empty
+	public void setSavePassword(boolean savePassword) {
+		this.savePassword.setSelected(savePassword);
 	}
 
 	@Override

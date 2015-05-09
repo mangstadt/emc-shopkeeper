@@ -34,16 +34,22 @@ public interface ILoginView {
 	String getPassword();
 
 	/**
-	 * Sets whether the user wants to remember the session.
-	 * @param rememberMe true to remember the session, false not to
+	 * Sets the password
+	 * @param password the password
 	 */
-	void setRememberMe(boolean rememberMe);
+	void setPassword(String password);
 
 	/**
-	 * Gets whether the user wants to remember the login session.
-	 * @return true to remember the session, false not to
+	 * Sets whether the user wants to save his password.
+	 * @param savePassword true to remember the password, false not to
 	 */
-	boolean getRememberMe();
+	void setSavePassword(boolean savePassword);
+
+	/**
+	 * Gets whether the user wants to save his password.
+	 * @return true to remember the password, false not to
+	 */
+	boolean getSavePassword();
 
 	/**
 	 * Called if a network error occurs during login.

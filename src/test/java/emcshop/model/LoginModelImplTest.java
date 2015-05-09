@@ -2,24 +2,20 @@ package emcshop.model;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Date;
 
 import org.junit.Test;
 
 import emcshop.AppContext;
 import emcshop.Settings;
-import emcshop.scraper.EmcSession;
 
 public class LoginModelImplTest {
 	@Test
 	public void getSavedUsername() {
 		Settings settings = mock(Settings.class);
-		when(settings.getSession()).thenReturn(new EmcSession("Notch", "token", new Date()));
+		when(settings.getUsername()).thenReturn("Notch");
 		AppContext.init(settings);
 
 		LoginModelImpl model = new LoginModelImpl();
@@ -27,9 +23,19 @@ public class LoginModelImplTest {
 	}
 
 	@Test
+	public void getSavedPassword() {
+		Settings settings = mock(Settings.class);
+		when(settings.getPassword()).thenReturn("password");
+		AppContext.init(settings);
+
+		LoginModelImpl model = new LoginModelImpl();
+		assertEquals("password", model.getSavedPassword());
+	}
+
+	@Test
 	public void getSavedUsername_none() {
 		Settings settings = mock(Settings.class);
-		when(settings.getSession()).thenReturn(null);
+		when(settings.getUsername()).thenReturn(null);
 		AppContext.init(settings);
 
 		LoginModelImpl model = new LoginModelImpl();
@@ -37,26 +43,25 @@ public class LoginModelImplTest {
 	}
 
 	@Test
-	public void getSavedRememberMe() {
+	public void getSavedPassword_none() {
 		Settings settings = mock(Settings.class);
-		when(settings.isPersistSession()).thenReturn(true);
+		when(settings.getPassword()).thenReturn(null);
 		AppContext.init(settings);
 
 		LoginModelImpl model = new LoginModelImpl();
-		assertTrue(model.getSavedRememberMe());
+		assertNull(model.getSavedPassword());
 	}
 
 	@Test
-	public void saveSession() {
+	public void saveSessionInfo() {
 		Settings settings = mock(Settings.class);
 		AppContext.init(settings);
 
 		LoginModelImpl model = new LoginModelImpl();
-		EmcSession session = new EmcSession("Notch", "token", new Date());
-		model.saveSession(session, true);
+		model.saveSessionInfo("Notch", "password");
 
-		verify(settings).setSession(session);
-		verify(settings).setPersistSession(true);
+		verify(settings).setUsername("Notch");
+		verify(settings).setPassword("password");
 		verify(settings).save();
 	}
 }

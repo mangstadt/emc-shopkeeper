@@ -20,31 +20,35 @@ public class LoginModelImpl implements ILoginModel {
 	}
 
 	@Override
-	public String login(String username, String password, boolean rememberMe) throws IOException {
-		return LoginUtils.login(username, password, rememberMe);
+	public String login(String username, String password) throws IOException {
+		return LoginUtils.login(username, password);
 	}
 
 	@Override
 	public String getSavedUsername() {
-		EmcSession oldSession = settings.getSession();
-		return (oldSession == null) ? null : oldSession.getUsername();
+		return settings.getUsername();
 	}
 
 	@Override
-	public boolean getSavedRememberMe() {
-		return settings.isPersistSession();
+	public String getSavedPassword() {
+		return settings.getPassword();
 	}
 
 	@Override
-	public void saveSession(EmcSession session, boolean rememberMe) {
-		settings.setSession(session);
-		settings.setPersistSession(rememberMe);
+	public void saveSessionInfo(String username, String password) {
+		settings.setUsername(username);
+		settings.setPassword(password);
 		settings.save();
 	}
 
 	@Override
 	public EmcSession getSession() {
-		return settings.getSession();
+		return context.get(EmcSession.class);
+	}
+
+	@Override
+	public void setSession(EmcSession session) {
+		context.add(session);
 	}
 
 	@Override

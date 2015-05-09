@@ -3,19 +3,19 @@ package emcshop.presenter;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Date;
 
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -25,32 +25,17 @@ import emcshop.view.ILoginView;
 
 public class LoginPresenterTest {
 	@Test
-	public void no_saved_session() {
+	public void constructor() {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.getSavedUsername()).thenReturn(null);
-		when(model.getSavedRememberMe()).thenReturn(false);
+		when(model.getSavedUsername()).thenReturn("username");
+		when(model.getSavedPassword()).thenReturn("password");
 
 		ILoginView view = mock(ILoginView.class);
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
 
-		verify(view).setUsername(null);
-		verify(view).setRememberMe(false);
-		assertFalse(presenter.isCanceled());
-	}
-
-	@Test
-	public void saved_session() {
-		ILoginModel model = mock(ILoginModel.class);
-		when(model.getSavedUsername()).thenReturn("Notch");
-		when(model.getSavedRememberMe()).thenReturn(true);
-
-		ILoginView view = mock(ILoginView.class);
-
-		LoginPresenter presenter = new LoginPresenter(view, model);
-
-		verify(view).setUsername("Notch");
-		verify(view).setRememberMe(true);
+		verify(view).setUsername("username");
+		verify(view).setPassword("password");
 		assertFalse(presenter.isCanceled());
 	}
 
@@ -58,15 +43,12 @@ public class LoginPresenterTest {
 	public void network_error() throws Throwable {
 		IOException e = new IOException();
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login(anyString(), anyString(), anyBoolean())).thenThrow(e);
+		when(model.login(anyString(), anyString())).thenThrow(e);
 
 		ILoginView view = mock(ILoginView.class);
-		ListenerAnswer clickLogin = new ListenerAnswer();
-		doAnswer(clickLogin).when(view).addOnLoginListener(any(ActionListener.class));
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
-
-		clickLogin.fire();
+		presenter.onLogin();
 
 		verify(model).logNetworkError(e);
 		verify(view).networkError();
@@ -76,34 +58,51 @@ public class LoginPresenterTest {
 	@Test
 	public void bad_login() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login(anyString(), anyString(), anyBoolean())).thenReturn(null);
+		when(model.login(anyString(), anyString())).thenReturn(null);
 
 		ILoginView view = mock(ILoginView.class);
-		ListenerAnswer clickLogin = new ListenerAnswer();
-		doAnswer(clickLogin).when(view).addOnLoginListener(any(ActionListener.class));
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
-
-		clickLogin.fire();
+		presenter.onLogin();
 
 		verify(view).badLogin();
 		assertFalse(presenter.isCanceled());
 	}
 
 	@Test
-	public void valid_login() throws Throwable {
+	public void valid_login_save_password() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login(anyString(), anyString(), anyBoolean())).thenReturn("token");
+		when(model.login("username", "password")).thenReturn("token");
 
 		ILoginView view = mock(ILoginView.class);
-		ListenerAnswer clickLogin = new ListenerAnswer();
-		doAnswer(clickLogin).when(view).addOnLoginListener(any(ActionListener.class));
+		when(view.getUsername()).thenReturn("username");
+		when(view.getPassword()).thenReturn("password");
+		when(view.getSavePassword()).thenReturn(true);
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
+		presenter.onLogin();
 
-		clickLogin.fire();
+		verify(model).saveSessionInfo("username", "password");
+		verify(model).setSession(session("username", "token", new Date()));
+		verify(view).close();
+		assertFalse(presenter.isCanceled());
+	}
 
-		verify(model).saveSession(any(EmcSession.class), anyBoolean());
+	@Test
+	public void valid_login_do_not_save_password() throws Throwable {
+		ILoginModel model = mock(ILoginModel.class);
+		when(model.login("username", "password")).thenReturn("token");
+
+		ILoginView view = mock(ILoginView.class);
+		when(view.getUsername()).thenReturn("username");
+		when(view.getPassword()).thenReturn("password");
+		when(view.getSavePassword()).thenReturn(false);
+
+		LoginPresenter presenter = new LoginPresenter(view, model);
+		presenter.onLogin();
+
+		verify(model).saveSessionInfo("username", null);
+		verify(model).setSession(session("username", "token", new Date()));
 		verify(view).close();
 		assertFalse(presenter.isCanceled());
 	}
@@ -111,16 +110,18 @@ public class LoginPresenterTest {
 	@Test
 	public void cancel_login() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login(anyString(), anyString(), anyBoolean())).thenReturn("token");
+		when(model.login("username", "password")).thenReturn("token");
 
 		ILoginView view = mock(ILoginView.class);
-		ListenerAnswer clickCancel = new ListenerAnswer();
-		doAnswer(clickCancel).when(view).addOnCancelListener(any(ActionListener.class));
+		when(view.getUsername()).thenReturn("username");
+		when(view.getPassword()).thenReturn("password");
+		when(view.getSavePassword()).thenReturn(true);
 
 		LoginPresenter presenter = new LoginPresenter(view, model);
+		presenter.onCancel();
 
-		clickCancel.fire();
-
+		verify(model, never()).saveSessionInfo(anyString(), anyString());
+		verify(model, never()).setSession(any(EmcSession.class));
 		verify(view).close();
 		assertTrue(presenter.isCanceled());
 	}
@@ -128,7 +129,7 @@ public class LoginPresenterTest {
 	@Test
 	public void cancel_login_while_logging_in() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		stub(model.login(anyString(), anyString(), anyBoolean())).toAnswer(new Answer<String>() {
+		stub(model.login(anyString(), anyString())).toAnswer(new Answer<String>() {
 			@Override
 			public String answer(InvocationOnMock invocation) throws Throwable {
 				Thread.sleep(300); //simulate network latency
@@ -137,27 +138,40 @@ public class LoginPresenterTest {
 		});
 
 		ILoginView view = mock(ILoginView.class);
-		ListenerAnswer clickCancel = new ListenerAnswer();
-		doAnswer(clickCancel).when(view).addOnCancelListener(any(ActionListener.class));
-		final ListenerAnswer clickLogin = new ListenerAnswer();
-		doAnswer(clickLogin).when(view).addOnLoginListener(any(ActionListener.class));
 
-		LoginPresenter presenter = new LoginPresenter(view, model);
+		final LoginPresenter presenter = new LoginPresenter(view, model);
 
 		Thread t = new Thread() {
 			@Override
 			public void run() {
-				clickLogin.fire();
+				presenter.onLogin();
 			}
 		};
 		t.start();
 
 		Thread.sleep(100);
-		clickCancel.fire();
+		presenter.onCancel();
 		t.join();
 
 		verify(view).close();
-		verify(model, never()).saveSession(any(EmcSession.class), any(boolean.class));
+		verify(model, never()).saveSessionInfo(anyString(), anyString());
+		verify(model, never()).setSession(any(EmcSession.class));
 		assertTrue(presenter.isCanceled());
+	}
+
+	private static EmcSession session(final String username, final String token, final Date created) {
+		return argThat(new ArgumentMatcher<EmcSession>() {
+			@Override
+			public boolean matches(Object argument) {
+				EmcSession session = (EmcSession) argument;
+
+				//@formatter:off
+				return
+				username.equals(session.getUsername()) &&
+				token.equals(session.getSessionId()) &&
+				Math.abs(session.getCreated().getTime() - created.getTime()) < 1000;
+				//@formatter:on
+			}
+		});
 	}
 }

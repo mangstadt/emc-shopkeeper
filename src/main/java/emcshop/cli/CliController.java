@@ -14,9 +14,9 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
+import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.QueryExporter;
-import emcshop.Settings;
 import emcshop.cli.model.UpdateModelCli;
 import emcshop.cli.view.FirstUpdateViewCli;
 import emcshop.cli.view.LoginShower;
@@ -40,11 +40,9 @@ public class CliController {
 	private static final PrintStream out = System.out;
 
 	private final DbDao dao;
-	private final Settings settings;
 
-	public CliController(DbDao dao, Settings settings) {
+	public CliController(DbDao dao) {
 		this.dao = dao;
-		this.settings = settings;
 	}
 
 	public void update(Integer startAtPage, Integer stopAtPage) throws Throwable {
@@ -73,7 +71,7 @@ public class CliController {
 
 		//log user in
 		LoginShower loginShower = new LoginShower();
-		EmcSession session = settings.getSession();
+		EmcSession session = AppContext.instance().get(EmcSession.class);
 		if (session == null) {
 			LoginPresenter presenter = loginShower.show();
 			session = presenter.getSession();

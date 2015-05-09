@@ -9,11 +9,10 @@ public interface ILoginModel {
 	 * Logs a user into EMC
 	 * @param username the username
 	 * @param password the password
-	 * @param rememberMe true if "remember me" is checked
 	 * @return the session token or null if the credentials were invalid
 	 * @throws IOException
 	 */
-	String login(String username, String password, boolean rememberMe) throws IOException;
+	String login(String username, String password) throws IOException;
 
 	/**
 	 * Gets the saved username.
@@ -22,23 +21,29 @@ public interface ILoginModel {
 	String getSavedUsername();
 
 	/**
-	 * Gets the saved "remember me" value.
-	 * @return the saved "remember me" value
+	 * Gets the saved password.
+	 * @return the saved password or null if not saved
 	 */
-	boolean getSavedRememberMe();
+	String getSavedPassword();
 
 	/**
-	 * Saves the given session.
-	 * @param session the session to save
-	 * @param rememberMe whether to remember the session or not
+	 * Saves the given session info.
+	 * @param username the username to save
+	 * @param password the password to save
 	 */
-	void saveSession(EmcSession session, boolean rememberMe);
+	void saveSessionInfo(String username, String password);
 
 	/**
 	 * Gets the login session.
 	 * @return the login session
 	 */
 	EmcSession getSession();
+
+	/**
+	 * Sets the login session.
+	 * @param session the login session
+	 */
+	void setSession(EmcSession session);
 
 	/**
 	 * Logs a network error.

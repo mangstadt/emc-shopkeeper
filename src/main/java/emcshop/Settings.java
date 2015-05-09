@@ -9,8 +9,9 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.codec.binary.Base64;
+
 import emcshop.gui.WindowState;
-import emcshop.scraper.EmcSession;
 import emcshop.util.PropertiesWrapper;
 
 public class Settings {
@@ -23,8 +24,8 @@ public class Settings {
 	private WindowState windowState;
 	private Date previousUpdate;
 	private Date lastUpdated;
-	private EmcSession session;
-	private boolean persistSession;
+	private String username;
+	private String password;
 	private Level logLevel;
 	private Integer rupeeBalance;
 	private boolean showProfilesOnStartup;
@@ -72,20 +73,20 @@ public class Settings {
 		return previousUpdate;
 	}
 
-	public EmcSession getSession() {
-		return session;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setSession(EmcSession session) {
-		this.session = session;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
-	public boolean isPersistSession() {
-		return persistSession;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setPersistSession(boolean persistSession) {
-		this.persistSession = persistSession;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public Level getLogLevel() {
@@ -154,8 +155,8 @@ public class Settings {
 		windowState = null;
 		lastUpdated = null;
 		previousUpdate = null;
-		session = null;
-		persistSession = true;
+		username = null;
+		password = null;
 		logLevel = Level.INFO;
 		rupeeBalance = null;
 		showProfilesOnStartup = false;
@@ -222,20 +223,12 @@ public class Settings {
 			previousUpdate = null;
 		}
 
-		String sessionId = props.get("session.id");
-		if (sessionId != null) {
-			String username = props.get("session.username");
-			Date created;
-			try {
-				created = props.getDate("session.created");
-			} catch (ParseException e) {
-				created = new Date();
-			}
-			session = new EmcSession(username, sessionId, created);
-		} else {
-			session = null;
+		username = props.get("session.username");
+
+		password = props.get("session.password");
+		if (password != null) {
+			password = new String(Base64.decodeBase64(password));
 		}
-		persistSession = props.getBoolean("session.remember", true);
 
 		String logLevelStr = props.get("log.level");
 		if (logLevelStr == null) {
@@ -293,12 +286,8 @@ public class Settings {
 
 		props.setInteger("version", version);
 		props.setWindowState("gui", windowState);
-		if (session != null && persistSession) {
-			props.set("session.username", session.getUsername());
-			props.set("session.id", session.getSessionId());
-			props.setDate("session.created", session.getCreated());
-		}
-		props.setBoolean("session.remember", persistSession);
+		props.set("session.username", username);
+		props.set("session.password", (password == null) ? null : Base64.encodeBase64String(password.getBytes()));
 		props.set("log.level", logLevel.getName());
 		props.setBoolean("showProfilesOnStartup", showProfilesOnStartup);
 		props.setBoolean("showQuantitiesInStacks", showQuantitiesInStacks);

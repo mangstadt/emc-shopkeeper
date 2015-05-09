@@ -35,20 +35,20 @@ public class LoginPresenter {
 
 		String username = model.getSavedUsername();
 		view.setUsername(username);
-		boolean rememberMe = model.getSavedRememberMe();
-		view.setRememberMe(rememberMe);
+		String password = model.getSavedPassword();
+		view.setPassword(password);
 
 		view.display();
 	}
 
-	private void onLogin() {
+	void onLogin() {
 		String username = view.getUsername();
 		String password = view.getPassword();
-		boolean rememberMe = view.getRememberMe();
+		boolean savePassword = view.getSavePassword();
 
 		String token;
 		try {
-			token = model.login(username, password, rememberMe);
+			token = model.login(username, password);
 		} catch (IOException e) {
 			model.logNetworkError(e);
 			view.networkError();
@@ -65,13 +65,14 @@ public class LoginPresenter {
 				return;
 			}
 			EmcSession session = new EmcSession(username, token, new Date());
-			model.saveSession(session, rememberMe);
+			model.setSession(session);
+			model.saveSessionInfo(session.getUsername(), savePassword ? password : null);
 		}
 
 		view.close();
 	}
 
-	private void onCancel() {
+	void onCancel() {
 		synchronized (this) {
 			canceled = true;
 		}

@@ -74,6 +74,7 @@ import emcshop.presenter.ChatLogViewerPresenter;
 import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
+import emcshop.scraper.EmcSession;
 import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.GuiUtils;
 import emcshop.util.RupeeFormatter;
@@ -211,13 +212,12 @@ public class MainFrame extends JFrame {
 			.add(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent event) {
-					settings.setSession(null);
-					settings.save();
+					context.remove(EmcSession.class);
 					clearSessionMenuItem.setEnabled(false);
 					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
 				}
 			});
-			clearSessionMenuItem.setEnabled(settings.getSession() != null);
+			clearSessionMenuItem.setEnabled(context.get(EmcSession.class) != null);
 			
 			menu.addMenuItem("Wipe Database...")
 			.icon(Images.WIPE_DATABASE)
@@ -351,7 +351,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				LoginShower loginShower = new LoginShower();
 
-				if (settings.getSession() == null) {
+				if (context.get(EmcSession.class) == null) {
 					//user hasn't logged in
 					LoginPresenter p = loginShower.show(MainFrame.this);
 					if (p.isCanceled()) {
@@ -392,7 +392,7 @@ public class MainFrame extends JFrame {
 
 				//show the update dialog
 				IUpdateView view = new UpdateViewImpl(MainFrame.this, loginShower);
-				IUpdateModel model = new UpdateModelImpl(pullerFactory, settings.getSession());
+				IUpdateModel model = new UpdateModelImpl(pullerFactory, context.get(EmcSession.class));
 				UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 				if (!presenter.isCanceled()) {
@@ -487,7 +487,7 @@ public class MainFrame extends JFrame {
 			public void run() {
 				try {
 					dao.wipe();
-					settings.setSession(null);
+					context.remove(EmcSession.class);
 					settings.save();
 					clearSessionMenuItem.setEnabled(false);
 					lastUpdateDate.setText("-");

@@ -226,7 +226,7 @@ public class EMCShopkeeper {
 
 		finishUpdateLogConversion(currentRupeeBalance, startingDbVersion, dao, settings);
 
-		CliController cli = new CliController(dao, settings);
+		CliController cli = new CliController(dao);
 
 		if (args.update()) {
 			//get stop at page
@@ -261,7 +261,7 @@ public class EMCShopkeeper {
 	private static void launchGui(File profileDir, File dbDir, final Settings settings, LogManager logManager) throws Throwable {
 		initializeMac();
 
-		AppContext context = AppContext.instance();
+		final AppContext context = AppContext.instance();
 		context.add(settings);
 		context.add(logManager);
 
@@ -321,7 +321,7 @@ public class EMCShopkeeper {
 		profileLoader.setHttpClientFactory(new HttpClientFactory() {
 			@Override
 			public HttpClient create() {
-				EmcSession session = settings.getSession();
+				EmcSession session = context.get(EmcSession.class);
 				return (session == null) ? new DefaultHttpClient() : session.createHttpClient();
 			}
 		});

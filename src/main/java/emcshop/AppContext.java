@@ -1,6 +1,7 @@
 package emcshop;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -53,10 +54,28 @@ public class AppContext {
 	}
 
 	/**
-	 * Adds an object
+	 * Adds an object.
 	 * @param object the object to add
 	 */
 	public void add(Object object) {
 		objects.add(object);
+	}
+
+	/**
+	 * Removes an object.
+	 * @param clazz the class of the object to remove
+	 * @return the removed object or null if it couldn't find an object to
+	 * remove
+	 */
+	public <T> T remove(Class<T> clazz) {
+		Iterator<Object> it = objects.iterator();
+		while (it.hasNext()) {
+			Object object = it.next();
+			if (clazz.isInstance(object)) {
+				it.remove();
+				return clazz.cast(object);
+			}
+		}
+		return null;
 	}
 }

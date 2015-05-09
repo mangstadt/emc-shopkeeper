@@ -13,8 +13,7 @@ public class LoginViewCli implements ILoginView {
 	private final PrintStream out = System.out;
 	private final Console console = System.console();
 
-	private String savedUsername, username, password;
-	private boolean rememberMe;
+	private String savedUsername, username, savedPassword, password;
 
 	private final List<ActionListener> onLoginListeners = new ArrayList<ActionListener>();
 	private final List<ActionListener> onCancelListeners = new ArrayList<ActionListener>();
@@ -40,18 +39,23 @@ public class LoginViewCli implements ILoginView {
 	}
 
 	@Override
+	public void setPassword(String password) {
+		this.savedPassword = this.password = password;
+	}
+
+	@Override
 	public String getPassword() {
 		return password;
 	}
 
 	@Override
-	public void setRememberMe(boolean rememberMe) {
-		this.rememberMe = rememberMe;
+	public void setSavePassword(boolean savePassword) {
+		//do nothing
 	}
 
 	@Override
-	public boolean getRememberMe() {
-		return rememberMe;
+	public boolean getSavePassword() {
+		return false;
 	}
 
 	@Override
@@ -85,7 +89,15 @@ public class LoginViewCli implements ILoginView {
 				username = savedUsername;
 			}
 		}
-		password = new String(console.readPassword("Password: "));
+
+		if (savedPassword == null) {
+			password = new String(console.readPassword("Password: "));
+		} else {
+			password = new String(console.readPassword("Password [" + savedPassword + "]: "));
+			if (password.isEmpty()) {
+				password = savedPassword;
+			}
+		}
 
 		out.println("Logging in...");
 		GuiUtils.fireEvents(onLoginListeners);
