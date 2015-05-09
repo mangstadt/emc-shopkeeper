@@ -22,6 +22,9 @@
 
 	<Item name="11 Disc" id="2266" stack="1" group="Discs" categories="3" />
 	<Item name="13 Disc" id="2256" stack="1" group="Discs" categories="3" />
+	<Item name="Acacia Door" id="196" group="Wood" categories="13,17" />
+	<Item name="Acacia Fence" id="192" group="Wood" categories="17" />
+	<Item name="Acacia Gate" id="187" group="Wood" categories="17" />
 	<Item name="Acacia Leaves" id="161:0" categories="17" />
 	<Item name="Acacia Log" id="162:0" emcNames="Acacia Wood" group="Wood" categories="17" />
 	<Item name="Acacia Plank" id="5:4" group="Wood" categories="17" />
@@ -33,12 +36,16 @@
 	<Item name="Andesite" id="1:5" />
 	<Item name="Anvil" id="145" group="Iron" categories="16" />
 	<Item name="Apple" id="260" categories="7" />
+	<Item name="Armor Stand" id="416" categories="16" />
 	<Item name="Arrow" id="262" categories="9,16" />
 	<Item name="Azure Bluet" id="38:3" group="Flowers" categories="6" />
 	<Item name="Baked Potato" id="393" categories="7" />
 	<Item name="Bat Egg" id="383:65" group="Spawn Eggs" categories="0" />
 	<Item name="Beacon" id="138" />
 	<Item name="Bed" id="355" stack="1" />
+	<Item name="Birch Door" id="194" group="Wood" categories="13,17" />
+	<Item name="Birch Fence" id="189" group="Wood" categories="17" />
+	<Item name="Birch Gate" id="184" group="Wood" categories="17" />
 	<Item name="Birch Leaves" id="18:2" categories="17" />
 	<Item name="Birch Log" id="17:2" group="Wood" categories="17" />
 	<Item name="Birch Plank" id="5:2" group="Wood" categories="17" />
@@ -87,6 +94,7 @@
 	<Item name="Chicken Egg" id="383:93" group="Spawn Eggs" categories="0" />
 	<Item name="Chirp Disc" id="2259" stack="1" group="Discs" categories="3" />
 	<Item name="Chiseled Quartz" id="155:1" group="Quartz" categories="11" />
+	<Item name="Chiseled Red Sandstone" id="179:1" emcNames="Ch Rd Sandstone" />
 	<Item name="Circle Stone" id="98:3" group="Stone" categories="14" />
 	<Item name="Clay Ball" id="337" group="Clay" categories="2" />
 	<Item name="Clay Block" id="82" group="Clay" categories="2" />
@@ -94,6 +102,7 @@
 	<Item name="Coal" id="263:0" group="Coal" categories="11" />
 	<Item name="Coal Block" id="173" group="Coal" categories="11" />
 	<Item name="Coal Ore" id="16" group="Coal" categories="11" />
+	<Item name="Coarse Dirt" id="3:1" />
 	<Item name="Cobble Slab" id="44:3" emcNames="Cobblestone Slab" group="Stone" categories="14" />
 	<Item name="Cobble Wall" id="139" group="Stone" categories="14" />
 	<Item name="Cobblestone" id="4" group="Stone" categories="14" />
@@ -104,6 +113,8 @@
 	<Item name="Cooked Chicken" id="366" emcNames="Chicken" categories="7" />
 	<Item name="Cooked Fish" id="350" group="Fish" categories="7" />
 	<Item name="Cooked Pork" id="320" emcNames="Pork Chop" categories="7" />
+	<Item name="Cooked Mutton" id="424" categories="7" />
+	<Item name="Cooked Rabbit" id="412" categories="7" />
 	<Item name="Cooked Salmon" id="350:1" group="Fish" categories="7" />
 	<Item name="Cookie" id="357" categories="7" />
 	<Item name="Cow Egg" id="383:92" group="Spawn Eggs" categories="0" />
@@ -114,12 +125,16 @@
 	<Item name="Cyan Dye" id="351:6" group="Dyes" categories="4" />
 	<Item name="Cyan Wool" id="35:9" group="Wool" categories="18" />
 	<Item name="Dandelion" id="37" group="Flowers" categories="6" />
+	<Item name="Dark Oak Door" id="197" group="Wood" categories="13,17" />
+	<Item name="Dark Oak Fence" id="191" group="Wood" categories="17" />
+	<Item name="Dark Oak Gate" id="186" group="Wood" categories="17" />
 	<Item name="Dark Oak Leaves" id="161:1" categories="17" />
 	<Item name="Dark Oak Log" emcNames="Dark Oak Wood" group="Wood" categories="17" />
 	<Item name="Dark Oak Plank" id="5:5" group="Wood" categories="17" />
 	<Item name="Dark Oak Sapling" id="6:5" emcNames="Darkoak Sapling" categories="6,17" />
 	<Item name="Dark Oak Slab" id="126:5" group="Wood" categories="17" />
 	<Item name="Dark Oak Stairs" id="164" group="Wood" categories="17" />
+	<Item name="Dark Prismarine" id="168:2" />
 	<Item name="Daylight Detector" id="151" group="Quartz" categories="13" />
 	<Item name="Dead Bush" id="32" categories="6" />
 	<Item name="Detector Rail" id="28" categories="13,15" />
@@ -157,8 +172,6 @@
 	<Item name="Eye Of Ender" id="381" />
 	<Item name="Far Disc" id="2260" stack="1" group="Discs" categories="3" />
 	<Item name="Feather" id="288" categories="9" />
-	<Item name="Fence" id="85" group="Wood" categories="17" />
-	<Item name="Fence Gate" id="107" group="Wood" categories="17" />
 	<Item name="Fermented Spider Eye" id="376" categories="12" />
 	<Item name="Fern" id="31:2" categories="6" />
 	<Item name="Firework" id="401" />
@@ -213,7 +226,7 @@
 	<Item name="Iron Boots" id="309" stack="1" group="Iron" categories="16" />
 	<Item name="Iron Bucket" id="325" stack="16" group="Iron" categories="16" />
 	<Item name="Iron Chest" id="307" stack="1" group="Iron" categories="16" />
-	<Item name="Iron Door" id="71" stack="1" group="Iron" categories="13" />
+	<Item name="Iron Door" id="71" group="Iron" categories="13" />
 	<Item name="Iron Helmet" id="306" stack="1" group="Iron" categories="16" />
 	<Item name="Iron Hoe" id="292" stack="1" group="Iron" categories="6,16" />
 	<Item name="Iron Ingot" id="265" group="Iron" categories="9,11" />
@@ -227,6 +240,9 @@
 	<Item name="Item Frame" id="389" group="Leather" />
 	<Item name="Jack O Lantern" id="91" />
 	<Item name="Jukebox" id="84" group="Diamonds" categories="3" />
+	<Item name="Jungle Door" id="195" group="Wood" categories="13,17" />
+	<Item name="Jungle Fence" id="190" group="Wood" categories="17" />
+	<Item name="Jungle Gate" id="185" group="Wood" categories="17" />
 	<Item name="Jungle Leaves" id="18:3" categories="17" />
 	<Item name="Jungle Log" id="17:3" group="Wood" categories="17" />
 	<Item name="Jungle Plank" id="5:3" group="Wood" categories="17" />
@@ -281,6 +297,9 @@
 	<Item name="Nether Star" id="399" categories="9" />
 	<Item name="Netherrack" id="87" categories="10" />
 	<Item name="Note Block" id="25" categories="3,13" />
+	<Item name="Oak Door" id="64" group="Wood" emcNames="Door,Wood Door" categories="13,17" />
+	<Item name="Oak Fence" id="85" group="Wood" emcNames="Fence" categories="17" />
+	<Item name="Oak Gate" id="107" group="Wood" emcNames="Fence Gate" categories="17" />
 	<Item name="Oak Leaves" id="18:0" emcNames="Leaves" categories="17" />
 	<Item name="Oak Log" id="17:0" group="Wood" categories="17" />
 	<Item name="Oak Plank" id="5:0" group="Wood" categories="17" />
@@ -299,12 +318,9 @@
 	<Item name="Paper" id="339" />
 	<Item name="Peony" id="175:5" group="Flowers" categories="6" />
 	<Item name="Pig Egg" id="383:90" group="Spawn Eggs" categories="0" />
-	<Item name="Pine Leaves" id="18:1" emcNames="Spruce Leaves" categories="17" />
 	<Item name="Pine Log" id="17:1" group="Wood" categories="17" />
 	<Item name="Pine Plank" id="5:1" group="Wood" categories="17" />
 	<Item name="Pine Sapling" id="6:1" categories="6,17" />
-	<Item name="Pine Slab" id="126:1" group="Wood" emcNames="Spruce Slab" categories="17" />
-	<Item name="Pine Stairs" id="134" group="Wood" emcNames="Spruce Stairs" categories="17" />
 	<Item name="Pink Stclay" id="159:6" group="Clay" categories="2" />
 	<Item name="Pink Dye" id="351:9" group="Dyes" categories="4" />
 	<Item name="Pink Tulip" id="38:7" group="Flowers" categories="6" />
@@ -320,6 +336,10 @@
 	<Item name="Potato" id="392" emcNames="Potato Item" categories="6,7" />
 	<Item name="Powered Minecart" id="343" stack="1" group="Iron" categories="15" />
 	<Item name="Powered Rail" id="27" group="Gold" categories="13,15" />
+	<Item name="Prismarine" id="168" />
+	<Item name="Prismarine Brick" id="168:1" />
+	<Item name="Prismarine Crystal" id="410" />
+	<Item name="Prismarine Shard" id="409" />
 	<Item name="Pufferfish" id="349:3" group="Fish" categories="0,12" />
 	<Item name="Pumpkin" id="86" categories="6" />
 	<Item name="Pumpkin Pie" id="400" categories="7" />
@@ -334,6 +354,9 @@
 	<Item name="Quartz Slab" id="44:7" group="Quartz" categories="10,11" />
 	<Item name="Quartz Stairs" id="156" group="Quartz" categories="10,11" />
 	<Item name="Rails" id="66" group="Iron" categories="15" />
+	<Item name="Rabbit Foot" id="414" group="Potions" categories="0,9,12" />
+	<Item name="Rabbit Egg" id="383:101" group="Spawn Eggs" categories="0" />
+	<Item name="Rabbit Hide" id="415" group="Leather" categories="9" />
 	<Item name="Raw Beef" id="363" categories="7,9" />
 	<Item name="Raw Chicken" id="365" categories="7,9" />
 	<Item name="Raw Fish" id="349" group="Fish" categories="0,7" />
@@ -343,6 +366,9 @@
 	<Item name="Red Dye" id="351:1" group="Dyes" categories="4" />
 	<Item name="Red Mushroom" id="40" categories="6" />
 	<Item name="Red Sand" id="12:1" />
+	<Item name="Red Sandstone" id="179" />
+	<Item name="Red Sandstone Slab" id="182" emcNames="Rd Sandstn Slab" />
+	<Item name="Red Sandstone Stairs" id="180" emcNames="Rd Sandstn Step" />
 	<Item name="Red Tulip" id="38:4" group="Flowers" categories="6" />
 	<Item name="Red Wool" id="35:14" group="Wool" categories="18" />
 	<Item name="Redstone Block" id="152" categories="11,13" />
@@ -359,6 +385,7 @@
 	<Item name="Sandstone" id="24:0" />
 	<Item name="Sandstone Slab" id="44:1" />
 	<Item name="Sandstone Stairs" id="128" />
+	<Item name="Sea Lantern" id="169" />
 	<Item name="Seeds" id="295" categories="0,6" />
 	<Item name="Shears" id="359" stack="1" group="Iron" categories="16" />
 	<Item name="Sheep Egg" id="383:91" group="Spawn Eggs" categories="0" />
@@ -369,10 +396,18 @@
 	<Item name="Slime Ball" id="341" categories="9" />
 	<Item name="Slime Block" id="165" />
 	<Item name="Smooth Sandstone" id="24:2" emcNames="Smooth Sandston" />
+	<Item name="Smooth Red Sandstone" id="179:2" emcNames="Smth Rd Sandstn" />
 	<Item name="Snow Ball" id="332" stack="16" categories="16" />
 	<Item name="Snow Block" id="80" />
 	<Item name="Soul Sand" id="88" categories="10" />
 	<Item name="Spider Eye" id="375" categories="9,12" />
+	<Item name="Sponge" id="19" />
+	<Item name="Spruce Door" id="193" group="Wood" categories="13,17" />
+	<Item name="Spruce Fence" id="188" group="Wood" categories="17" />
+	<Item name="Spruce Gate" id="183" group="Wood" categories="17" />
+	<Item name="Spruce Leaves" id="18:1" emcNames="Pine Leaves" categories="17" />
+	<Item name="Spruce Slab" id="126:1" group="Wood" emcNames="Pine Slab" categories="17" />
+	<Item name="Spruce Stairs" id="134" group="Wood" emcNames="Pine Stairs" categories="17" />
 	<Item name="Squid Egg" id="383:94" group="Spawn Eggs" categories="0" />
 	<Item name="Stal Disc" id="2263" stack="1" group="Discs" categories="3" />
 	<Item name="Stick" id="280" group="Wood" categories="17" />
@@ -408,6 +443,7 @@
 	<Item name="Water Bucket" id="326" stack="1" group="Iron" categories="16" />
 	<Item name="Water Lily" id="111" categories="6" />
 	<Item name="Web" id="30" />
+	<Item name="Wet Sponge" id="19:1" />
 	<Item name="Wheat" id="296" categories="0,6" />
 	<Item name="White Stclay" id="159:0" group="Clay" categories="2" />
 	<Item name="White Tulip" id="38:6" group="Flowers" categories="6" />
@@ -415,7 +451,6 @@
 	<Item name="Wither Skull" id="397:1" emcNames="Wither Head" categories="9" />
 	<Item name="Wolf Egg" id="383:95" group="Spawn Eggs" categories="0" />
 	<Item name="Wood Button" id="143" group="Wood" categories="13" />
-	<Item name="Wood Door" id="64" stack="1" group="Wood" emcNames="Door" categories="13,17" />
 	<Item name="Wooden Axe" id="271" stack="1" group="Wood" categories="16" />
 	<Item name="Wooden Hoe" id="290" stack="1" group="Wood" categories="6,16" />
 	<Item name="Wooden Pickaxe" id="270" stack="1" group="Wood" categories="16" />
@@ -427,6 +462,24 @@
 	<Item name="Yellow Dye" id="351:11" group="Dyes" categories="4" />
 	<Item name="Yellow Wool" id="35:4" group="Wool" categories="18" />
 	<Item name="Zombie Head" id="397:2" group="Mob Heads" categories="9" />
+	
+	<!-- Banners -->
+	<Item name="Black Banner" id="425:0" />
+	<Item name="Red Banner" id="425:1" />
+	<Item name="Green Banner" id="425:2" />
+	<Item name="Brown Banner" id="425:3" />
+	<Item name="Blue Banner" id="425:4" />
+	<Item name="Purple Banner" id="425:5" />
+	<Item name="Cyan Banner" id="425:6" />
+	<Item name="Light Grey Banner" id="425:7" emcNames="Lt Grey Banner" />
+	<Item name="Grey Banner" id="425:8" />
+	<Item name="Pink Banner" id="425:9" />
+	<Item name="Lime Banner" id="425:10" />
+	<Item name="Yellow Banner" id="425:11" />
+	<Item name="Light Blue Banner" id="425:12" emcNames="Lt Blue Banner" />
+	<Item name="Magenta Banner" id="425:13" />
+	<Item name="Orange Banner" id="425:14" />
+	<Item name="White Banner" id="425:15" />
 	
 	<!-- Promos ==================================================================================-->
 	<Item name="Big Daddy Helmet" stack="1" image="diamond_helmet_enchanted.png" emcNames="Diamond Helmet - §aBig Daddy Helmet" categories="5,16" />
@@ -558,6 +611,13 @@
 	<Item name="Potion of Water Breathing Ext" id="373:8269" emcNames="Potion:8269" image="potion_water_breathing.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Water Breathing" id="373:16397,373:16429" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Water Breathing Ext" id="373:16461" emcNames="Potion:16461" image="potion_water_breathing_splash.png" stack="1" group="Potions" categories="12" />
+	
+	<Item name="Potion of Leaping" id="373:8203" emcNames="Potion:8203" image="potion_leaping.png" stack="1" group="Potions" categories="12" />
+	<Item name="Potion of Leaping Ext" id="373:8267" emcNames="Potion:8267" image="potion_leaping.png" stack="1" group="Potions" categories="12" />
+	<Item name="Potion of Leaping II" id="373:8235" emcNames="Potion:8235" image="potion_leaping.png" stack="1" group="Potions" categories="12" />
+	<Item name="Splash Potion of Leaping" id="373:16395" emcNames="Potion:16395" image="potion_leaping_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Splash Potion of Leaping Ext" id="373:16459" emcNames="Potion:16459" image="potion_leaping_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Splash Potion of Leaping II" id="373:16427" emcNames="Potion:16427" image="potion_leaping_splash.png" stack="1" group="Potions" categories="12" />
 	
 	<!-- Stained Glass ==================================================================================-->
 	<Item name="White Glass" id="95:0" emcNames="White Stn Glass" group="Glass" categories="8" />
