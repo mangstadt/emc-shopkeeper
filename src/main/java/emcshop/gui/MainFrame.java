@@ -364,60 +364,8 @@ public class MainFrame extends JFrame {
 		update.setToolTipText(toolTipText("<font size=4><b>Update Transactions</b></font><br><br>Downloads your latest transactions from the EMC website."));
 		update.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				LoginShower loginShower = new LoginShower();
-
-				if (context.get(EmcSession.class) == null) {
-					//user hasn't logged in
-					LoginPresenter p = loginShower.show(MainFrame.this);
-					if (p.isCanceled()) {
-						return;
-					}
-				}
-
-				clearSessionMenuItem.setEnabled(true);
-
-				Date latestTransactionDate;
-				try {
-					latestTransactionDate = dao.getLatestTransactionDate();
-				} catch (SQLException e) {
-					throw new RuntimeException(e);
-				}
-
-				TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
-				if (latestTransactionDate == null) {
-					//it's the first update
-
-					IFirstUpdateView view = new FirstUpdateViewImpl(MainFrame.this);
-					view.setMaxPaymentTransactionAge(7);
-					view.setStopAtPage(5000);
-					IFirstUpdateModel model = new FirstUpdateModelImpl();
-					FirstUpdatePresenter presenter = new FirstUpdatePresenter(view, model);
-					if (presenter.isCanceled()) {
-						return;
-					}
-
-					Integer stopAtPage = presenter.getStopAtPage();
-					pullerFactory.setStopAtPage(stopAtPage);
-
-					Integer oldestPaymentTransactionDays = presenter.getMaxPaymentTransactionAge();
-					pullerFactory.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
-				} else {
-					pullerFactory.setStopAtDate(latestTransactionDate);
-				}
-
-				//show the update dialog
-				IUpdateView view = new UpdateViewImpl(MainFrame.this, loginShower);
-				IUpdateModel model = new UpdateModelImpl(pullerFactory, context.get(EmcSession.class));
-				UpdatePresenter presenter = new UpdatePresenter(view, model);
-
-				if (!presenter.isCanceled()) {
-					try {
-						updateSuccessful(presenter.getStarted(), presenter.getRupeeBalance(), presenter.getTimeTaken(), presenter.getShopTransactions(), presenter.getPaymentTransactions(), presenter.getBonusFeeTransactions(), presenter.getPageCount(), presenter.getShowResults());
-					} catch (SQLException e) {
-						throw new RuntimeException(e);
-					}
-				}
+			public void actionPerformed(ActionEvent event) {
+				onUpdate();
 			}
 		});
 
@@ -489,6 +437,62 @@ public class MainFrame extends JFrame {
 		tabs.setToolTipTextAt(index++, toolTipText("<font size=4><b>Charts</b></font><br><br>Generates graphs of your shop transaction data."));
 
 		add(tabs, "span 4, h 100%, w 100%");
+	}
+
+	private void onUpdate() {
+		LoginShower loginShower = new LoginShower();
+
+		if (context.get(EmcSession.class) == null) {
+			//user hasn't logged in
+			LoginPresenter p = loginShower.show(MainFrame.this);
+			if (p.isCanceled()) {
+				return;
+			}
+		}
+
+		clearSessionMenuItem.setEnabled(true);
+
+		Date latestTransactionDate;
+		try {
+			latestTransactionDate = dao.getLatestTransactionDate();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+
+		TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
+		if (latestTransactionDate == null) {
+			//it's the first update
+
+			IFirstUpdateView view = new FirstUpdateViewImpl(MainFrame.this);
+			view.setMaxPaymentTransactionAge(7);
+			view.setStopAtPage(5000);
+			IFirstUpdateModel model = new FirstUpdateModelImpl();
+			FirstUpdatePresenter presenter = new FirstUpdatePresenter(view, model);
+			if (presenter.isCanceled()) {
+				return;
+			}
+
+			Integer stopAtPage = presenter.getStopAtPage();
+			pullerFactory.setStopAtPage(stopAtPage);
+
+			Integer oldestPaymentTransactionDays = presenter.getMaxPaymentTransactionAge();
+			pullerFactory.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
+		} else {
+			pullerFactory.setStopAtDate(latestTransactionDate);
+		}
+
+		//show the update dialog
+		IUpdateView view = new UpdateViewImpl(MainFrame.this, loginShower);
+		IUpdateModel model = new UpdateModelImpl(pullerFactory);
+		UpdatePresenter presenter = new UpdatePresenter(view, model);
+
+		if (!presenter.isCanceled()) {
+			try {
+				updateSuccessful(presenter.getStarted(), presenter.getRupeeBalance(), presenter.getTimeTaken(), presenter.getShopTransactions(), presenter.getPaymentTransactions(), presenter.getBonusFeeTransactions(), presenter.getPageCount(), presenter.getShowResults());
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	private void onWipeDatabase() {

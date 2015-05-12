@@ -30,7 +30,6 @@ public class UpdateModelImpl implements IUpdateModel {
 
 	private final boolean firstUpdate;
 	private final TransactionPullerFactory pullerFactory;
-	private EmcSession session;
 	private final DbDao dao;
 	private final ReportSender reportSender;
 
@@ -46,10 +45,9 @@ public class UpdateModelImpl implements IUpdateModel {
 	private boolean downloadStopped = false;
 	private Throwable thrown;
 
-	public UpdateModelImpl(TransactionPullerFactory pullerFactory, EmcSession session) {
+	public UpdateModelImpl(TransactionPullerFactory pullerFactory) {
 		firstUpdate = (pullerFactory.getStopAtDate() == null);
 		this.pullerFactory = pullerFactory;
-		this.session = session;
 		dao = context.get(DbDao.class);
 		reportSender = context.get(ReportSender.class);
 	}
@@ -133,7 +131,7 @@ public class UpdateModelImpl implements IUpdateModel {
 
 	@Override
 	public void setSession(EmcSession session) {
-		this.session = session;
+		context.set(session);
 	}
 
 	@Override
@@ -201,7 +199,7 @@ public class UpdateModelImpl implements IUpdateModel {
 		@Override
 		public void run() {
 			try {
-				puller = pullerFactory.create(session);
+				puller = pullerFactory.create(context.get(EmcSession.class));
 			} catch (BadSessionException e) {
 				GuiUtils.fireEvents(badSessionListeners);
 				return;

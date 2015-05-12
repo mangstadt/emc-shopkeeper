@@ -90,7 +90,7 @@ public class UpdateModelImplTest {
 		doAnswer(interceptTransactions).when(dao).insertPaymentTransactions(anyCollection());
 		doAnswer(interceptTransactions).when(dao).updateBonusesFees(anyList());
 
-		AppContext.init(reportSender, dao);
+		AppContext.init(reportSender, dao, session);
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class UpdateModelImplTest {
 		{
 			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
 			when(factory.create(session)).thenThrow(new BadSessionException());
-			model = new UpdateModelImpl(factory, session);
+			model = new UpdateModelImpl(factory);
 		}
 
 		//register listeners
@@ -130,7 +130,7 @@ public class UpdateModelImplTest {
 		{
 			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
 			when(factory.create(session)).thenThrow(new IOException());
-			model = new UpdateModelImpl(factory, session);
+			model = new UpdateModelImpl(factory);
 		}
 
 		//register listeners
@@ -170,7 +170,7 @@ public class UpdateModelImplTest {
 			factory.setThreadCount(1);
 			factory.setStopAtDate(null);
 
-			model = new UpdateModelImpl(factory, session);
+			model = new UpdateModelImpl(factory);
 		}
 
 		//register listeners
@@ -222,7 +222,7 @@ public class UpdateModelImplTest {
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
 			factory.setStopAtDate(dg.next());
-			model = new UpdateModelImpl(factory, session);
+			model = new UpdateModelImpl(factory);
 		}
 
 		//register listeners
@@ -277,7 +277,7 @@ public class UpdateModelImplTest {
 			TransactionPullerFactory factory = new TransactionPullerFactory();
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
-			model = new UpdateModelImpl(factory, session);
+			model = new UpdateModelImpl(factory);
 		}
 
 		//register listeners
@@ -332,7 +332,7 @@ public class UpdateModelImplTest {
 			TransactionPullerFactory factory = new TransactionPullerFactory();
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
-			model = new UpdateModelImpl(factory, session);
+			model = new UpdateModelImpl(factory);
 		}
 
 		//register listeners
@@ -384,7 +384,7 @@ public class UpdateModelImplTest {
 			TransactionPullerFactory factory = new TransactionPullerFactory();
 			factory.setTransactionPageScraper(scraper);
 			factory.setThreadCount(1);
-			model = new UpdateModelImpl(factory, session);
+			model = new UpdateModelImpl(factory);
 		}
 
 		model.saveTransactions(); //no transactions to save

@@ -48,7 +48,7 @@ public class LoginModelImpl implements ILoginModel {
 
 	@Override
 	public void setSession(EmcSession session) {
-		context.add(session);
+		context.set(session);
 	}
 
 	@Override

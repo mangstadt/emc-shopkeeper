@@ -62,6 +62,16 @@ public class AppContext {
 	}
 
 	/**
+	 * Removes an objects that share the same class as the given object, then
+	 * adds the given object to the context.
+	 * @param object the object to add
+	 */
+	public void set(Object object) {
+		remove(object.getClass());
+		add(object);
+	}
+
+	/**
 	 * Removes an object.
 	 * @param clazz the class of the object to remove
 	 * @return the removed object or null if it couldn't find an object to

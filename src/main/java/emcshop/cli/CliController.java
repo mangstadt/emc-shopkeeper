@@ -27,7 +27,6 @@ import emcshop.db.ShopTransactionType;
 import emcshop.model.FirstUpdateModelImpl;
 import emcshop.model.IUpdateModel;
 import emcshop.presenter.FirstUpdatePresenter;
-import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
 import emcshop.scraper.TransactionPullerFactory;
@@ -73,13 +72,12 @@ public class CliController {
 		LoginShower loginShower = new LoginShower();
 		EmcSession session = AppContext.instance().get(EmcSession.class);
 		if (session == null) {
-			LoginPresenter presenter = loginShower.show();
-			session = presenter.getSession();
+			loginShower.show();
 		}
 
 		//start the update
 		IUpdateView view = new UpdateViewCli(loginShower);
-		IUpdateModel model = new UpdateModelCli(pullerFactory, session, dao);
+		IUpdateModel model = new UpdateModelCli(pullerFactory, dao);
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 		int transactions = presenter.getShopTransactions() + presenter.getPaymentTransactions() + presenter.getBonusFeeTransactions();
