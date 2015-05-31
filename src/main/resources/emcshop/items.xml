@@ -36,7 +36,7 @@
 	<Item name="Andesite" id="1:5" />
 	<Item name="Anvil" id="145" group="Iron" categories="16" />
 	<Item name="Apple" id="260" categories="7" />
-	<Item name="Armor Stand" id="416" categories="16" />
+	<Item name="Armor Stand" id="416" stack="16" categories="16" />
 	<Item name="Arrow" id="262" categories="9,16" />
 	<Item name="Azure Bluet" id="38:3" group="Flowers" categories="6" />
 	<Item name="Baked Potato" id="393" categories="7" />
@@ -108,6 +108,7 @@
 	<Item name="Cobblestone" id="4" group="Stone" categories="14" />
 	<Item name="Cobblestone Stairs" id="67" group="Stone" categories="14" />
 	<Item name="Cocoa Beans" id="351:3" emcNames="Brown Dye" group="Dyes" categories="4,6" />
+	<Item name="Comparator" id="404" categories="13" emcNames="Redstone Comparator" />
 	<Item name="Compass" id="345" group="Iron" />
 	<Item name="Cooked Beef" id="364" emcNames="Steak" categories="7" />
 	<Item name="Cooked Chicken" id="366" emcNames="Chicken" categories="7" />
@@ -372,7 +373,6 @@
 	<Item name="Red Tulip" id="38:4" group="Flowers" categories="6" />
 	<Item name="Red Wool" id="35:14" group="Wool" categories="18" />
 	<Item name="Redstone Block" id="152" categories="11,13" />
-	<Item name="Redstone Comparator" id="404" categories="13" />
 	<Item name="Redstone Dust" id="331" categories="11,12,13" />
 	<Item name="Redstone Lamp" id="123" categories="13" />
 	<Item name="Redstone Ore" id="73" categories="11,13" />
