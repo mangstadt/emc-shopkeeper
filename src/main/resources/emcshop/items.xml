@@ -463,7 +463,8 @@
 	<Item name="Yellow Wool" id="35:4" group="Wool" categories="18" />
 	<Item name="Zombie Head" id="397:2" group="Mob Heads" categories="9" />
 	
-	<!-- Banners -->
+	<!-- Banners ========================================================== -->
+
 	<Item name="Black Banner" id="425:0" />
 	<Item name="Red Banner" id="425:1" />
 	<Item name="Green Banner" id="425:2" />
@@ -481,7 +482,8 @@
 	<Item name="Orange Banner" id="425:14" />
 	<Item name="White Banner" id="425:15" />
 	
-	<!-- Promos ==================================================================================-->
+	<!-- Promos =========================================================== -->
+
 	<Item name="Big Daddy Helmet" stack="1" image="diamond_helmet_enchanted.png" emcNames="Diamond Helmet - §aBig Daddy Helmet" categories="5,16" />
 	<Item name="Cactus Pants" stack="1" image="diamond_leggings_enchanted.png" emcNames="Diamond Leggings - §aCactus Pants" categories="5,16" />
 	<Item name="Everlasting Axestopper" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §aEverlasting Axestopper" categories="5,16" />
@@ -490,8 +492,6 @@
 	<Item name="Ore Buster" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §aOre Buster" categories="5,16" />
 	<Item name="Turfinator" stack="1" image="diamond_shovel_enchanted.png" emcNames="Diamond Shovel - §aTurfinator" categories="5,16" />
 	
-	<Item name="Cupid's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §dCupid's Bow" categories="5,16" />
-	
 	<Item name="Marlix's Armor" stack="1" image="marlix_armor.png" emcNames="Leather Tunic - §4§lMarlix's Armor" categories="5,9,16" />
 	<Item name="Marlix's Boots" stack="1" image="marlix_boots.png" emcNames="Leather Boots - §4§lMarlix's Boots" categories="5,9,16" />
 	<Item name="Marlix's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §4§lMarlix's Bow" categories="5,9,16" />
@@ -499,20 +499,12 @@
 	<Item name="Marlix's Leggings" stack="1" image="marlix_leggings.png" emcNames="Leather Pants - §4§lMarlix's Leggings" categories="5,9,16" />
 	<Item name="Momentus's Toothpick" stack="1" image="momentus_toothpick.png" emcNames="Wooden Sword - §6§lMomentus's Toothpick" categories="5,9,16" />
 	
-	<Item name="Magical Eggcellent Wand" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand" categories="5" />
-	
 	<Item name="Haunted Head" stack="1" image="pumpkin.png" emcNames="Pumpkin - §aHaunted Head" categories="5,16" />
 	<Item name="Haunted Candy - Bone" emcNames="Bone - §eHaunted Candy" categories="5,7" />
 	<Item name="Haunted Candy - Ender Pearl" emcNames="Ender Pearl - §eHaunted Candy" categories="5,7" />
 	<Item name="Haunted Candy - Gunpowder" emcNames="Gunpowder - §eHaunted Candy" categories="5,7" />
 	<Item name="Haunted Candy - Rotten Flesh" emcNames="Rotten Flesh - §eHaunted Candy" categories="5,7" />
 	<Item name="Haunted Candy - Spider Eye" emcNames="Spider Eye - §eHaunted Candy" categories="5,7" />
-	
-	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench" categories="5" />
-	
-	<Item name="Turkey Slicer" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4Turkey Slicer" categories="5,16" />
-	
-	<Item name="Holiday Pick" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §f§l«§c§lHoliday Pick§f§l»" categories="5,16" />
 	
 	<Item name="Zombie Virus" emcNames="Water Bottle - §aZombie Virus" image="water_bottle.png" stack="1" categories="5,9,12" />
 	<Item name="Shiny Arrow" emcNames="Arrow - §bShiny Arrow" categories="5,9,16" />
@@ -523,7 +515,7 @@
 	<Item name="Independence Pants" stack="1" image="independence_pants.png" emcNames="Leather Pants - §cIndepe§fndence §9Pants" categories="5,16" />
 	<Item name="Independence Boots" stack="1" image="independence_boots.png" emcNames="Leather Boots - §cIndepe§fndence §9Boots" categories="5,16" />
 	<Item name="Freedom Blade" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4F§fr§9e§4e§fd§9o§4m §fB§9l§4a§fd§9e" categories="5,16" />
-	<Item name="Taste the Freedom" stack="1" image="cooked_beef.png" emcNames="Cooked Beef - §cTaste §fThe §9Freedom" categories="5,7,9" />
+	<Item name="Taste the Freedom" image="cooked_beef.png" emcNames="Cooked Beef - §cTaste §fThe §9Freedom" categories="5,7,9" />
 	
 	<Item name="Starter Axe" stack="1" image="iron_axe_enchanted.png" emcNames="Iron Axe - §6Starter Axe" categories="5,16" />
 	<Item name="Starter Boots" stack="1" image="iron_boots_enchanted.png" emcNames="Iron Boots - §6Starter Boots" categories="5,16" />
@@ -534,9 +526,20 @@
 	<Item name="Starter Shovel" stack="1" image="iron_shovel_enchanted.png" emcNames="Iron Shovel - §6Starter Shovel" categories="5,16" />
 	<Item name="Starter Sword" stack="1" image="iron_sword_enchanted.png" emcNames="Iron Sword - §6Starter Sword" categories="5,16" />
 	
+	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey" categories="5" />
+	<Item name="Cupid's Arrow" image="shiny_arrow.png" emcNames="Arrow - §dCupid's Arrow" categories="5,16" />
+	<Item name="Cupid's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §dCupid's Bow" categories="5,16" />
+	<Item name="Holiday Pick" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §f§l«§c§lHoliday Pick§f§l»" categories="5,16" />
+	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench" categories="5" />
 	<Item name="Lucky Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §1Lucky Bow" categories="5,16" />
+	<Item name="Magical Eggcellent Wand" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand" categories="5" />
+	<Item name="Pi Pie" image="pumpkin_pie.png" emcNames="Pumpkin Pie - §6Pi Pie" categories="5" />
+	<Item name="Pot of Gold" image="cauldron.png" emcNames="Cauldron - §ePot of Gold" categories="5" />
+	<Item name="Stable Voucher" image="empty_map.png" emcNames="Empty Map - §aStable Voucher" categories="5" />
+	<Item name="Turkey Slicer" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4Turkey Slicer" categories="5,16" />
+	<Item name="Vault Voucher" image="empty_map.png" emcNames="Empty Map - §aVault Voucher" categories="5" />
 	
-	<!-- Potions ==================================================================================-->
+	<!-- Potions ========================================================== -->
 	
 	<Item name="Awkward Potion" id="373:16" emcNames="Potion:16" image="water_bottle.png" stack="1" group="Potions" categories="12" />
 	<Item name="Thick Potion" id="373:32" emcNames="Potion:32" image="water_bottle.png" stack="1" group="Potions" categories="12" />
@@ -619,7 +622,8 @@
 	<Item name="Splash Potion of Leaping Ext" id="373:16459" emcNames="Potion:16459" image="potion_leaping_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Leaping II" id="373:16427" emcNames="Potion:16427" image="potion_leaping_splash.png" stack="1" group="Potions" categories="12" />
 	
-	<!-- Stained Glass ==================================================================================-->
+	<!-- Stained Glass ==================================================== -->
+
 	<Item name="White Glass" id="95:0" emcNames="White Stn Glass" group="Glass" categories="8" />
 	<Item name="Orange Glass" id="95:1" emcNames="Orangestn Glass" group="Glass" categories="8" />
 	<Item name="Magenta Glass" id="95:2" emcNames="Magentastnglass" group="Glass" categories="8" />
@@ -637,7 +641,8 @@
 	<Item name="Red Glass" id="95:14" emcNames="Red Stn Glass" group="Glass" categories="8" />
 	<Item name="Black Glass" id="95:15" emcNames="Black Stn Glass" group="Glass" categories="8" />
 
-	<!-- Stained Glass Panes ==================================================================================-->
+	<!-- Stained Glass Panes ============================================== -->
+
 	<Item name="White Glass Pane" id="160:0" emcNames="White Stn Pane" group="Glass" categories="8" />
 	<Item name="Orange Glass Pane" id="160:1" emcNames="Orangestn Pane" group="Glass" categories="8" />
 	<Item name="Magenta Glass Pane" id="160:2" emcNames="Magentastnpane" group="Glass" categories="8" />
@@ -655,7 +660,8 @@
 	<Item name="Red Glass Pane" id="160:14" emcNames="Red Stn Pane" group="Glass" categories="8" />
 	<Item name="Black Glass Pane" id="160:15" emcNames="Black Stn Pane" group="Glass" categories="8" />
 	
-	<!-- Carpet ==================================================================================-->
+	<!-- Carpet =========================================================== -->
+
 	<Item name="White Carpet" id="171:0" group="Wool" categories="18" />
 	<Item name="Orange Carpet" id="171:1" group="Wool" categories="18" />
 	<Item name="Magenta Carpet" id="171:2" group="Wool" categories="18" />
@@ -673,7 +679,8 @@
 	<Item name="Red Carpet" id="171:14" group="Wool" categories="18" />
 	<Item name="Black Carpet" id="171:15" group="Wool" categories="18" />
 	
-	<!-- Skin-based Mob Heads ==================================================================================-->
+	<!-- Skin-based Mob Heads ============================================= -->
+
 	<Item name="Blaze Head" emcNames="Head - Blaze Head" categories="9" />
 	<Item name="CaveSpider Head" emcNames="Head - CaveSpider Head" categories="9" />
 	<Item name="Chicken Head" emcNames="Head - Chicken Head" categories="9" />
