@@ -77,6 +77,7 @@
 	<Item name="Brick Slab" id="44:4" group="Clay" categories="2" />
 	<Item name="Brick Stairs" id="108" group="Clay" categories="2" />
 	<Item name="Brown Stclay" id="159:12" group="Clay" categories="2" />
+	<Item name="Brown Huge Mushroom" id="99" emcNames="Huge Mushroom 1" />
 	<Item name="Brown Mushroom" id="39" categories="6" />
 	<Item name="Brown Wool" id="35:12" group="Wool" categories="18" />
 	<Item name="Cactus" id="81" categories="6" />
@@ -365,6 +366,7 @@
 	<Item name="Record 12" id="2267" stack="1" group="Discs" categories="3" />
 	<Item name="Red Stclay" id="159:14" group="Clay" categories="2" />
 	<Item name="Red Dye" id="351:1" group="Dyes" categories="4" />
+	<Item name="Red Huge Mushroom" id="100" emcNames="Huge Mushroom 2" />
 	<Item name="Red Mushroom" id="40" categories="6" />
 	<Item name="Red Sand" id="12:1" />
 	<Item name="Red Sandstone" id="179" />
