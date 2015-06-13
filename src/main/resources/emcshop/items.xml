@@ -528,6 +528,10 @@
 	<Item name="Starter Shovel" stack="1" image="iron_shovel_enchanted.png" emcNames="Iron Shovel - §6Starter Shovel" categories="5,16" />
 	<Item name="Starter Sword" stack="1" image="iron_sword_enchanted.png" emcNames="Iron Sword - §6Starter Sword" categories="5,16" />
 	
+	<Item name="Iron Supporter Voucher" image="paper.png" emcNames="Paper - §7Iron Supporter Voucher" />
+	<Item name="Gold Supporter Voucher" image="paper.png" emcNames="Paper - §6Gold Supporter Voucher" />
+	<Item name="Diamond Supporter Voucher" image="paper.png" emcNames="Paper - §3Diamond Supporter Voucher" />
+	
 	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey" categories="5" />
 	<Item name="Cupid's Arrow" image="shiny_arrow.png" emcNames="Arrow - §dCupid's Arrow" categories="5,16" />
 	<Item name="Cupid's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §dCupid's Bow" categories="5,16" />
