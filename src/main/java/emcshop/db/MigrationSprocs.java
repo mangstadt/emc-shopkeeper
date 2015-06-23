@@ -138,11 +138,19 @@ public class MigrationSprocs {
 					Player goodPlayer = dao.selsertPlayer(playerName);
 					goodPlayerIds.add(goodPlayer.getId());
 
-					String reason = name.substring(colonPos + 1).trim();
+					String reason;
+					if (colonPos == name.length() - 1) {
+						reason = null;
+					} else {
+						reason = name.substring(colonPos + 1).trim();
+						if (reason.isEmpty()) {
+							reason = null;
+						}
+					}
 					reasons.add(reason);
 				}
 			}
-			
+
 			if (badPlayerIds.isEmpty()) {
 				//no bad data was saved to the database
 				return;
@@ -173,7 +181,12 @@ public class MigrationSprocs {
 				Integer badPlayerId = badPlayerIds.get(i);
 
 				stmt.setInt(1, goodPlayerId);
+
+				//if (reason == null) {
+				//stmt.setNull(2, Types.VARCHAR);
+				//} else {
 				stmt.setString(2, reason);
+				//}
 				stmt.setInt(3, badPlayerId);
 				stmt.executeUpdate();
 			}

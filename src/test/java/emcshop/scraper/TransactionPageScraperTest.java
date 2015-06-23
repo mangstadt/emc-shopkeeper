@@ -86,6 +86,13 @@ public class TransactionPageScraperTest {
 		pt.setReason("Reason");
 		assertEquals(pt, it.next());
 
+		pt = new PaymentTransaction();
+		pt.setTs(new Date(1354226347000L));
+		pt.setAmount(-100);
+		pt.setBalance(212994);
+		pt.setPlayer("PenguinDJ");
+		assertEquals(pt, it.next());
+
 		st = new ShopTransaction();
 		st.setTs(new Date(1354225000000L));
 		st.setAmount(-8);
