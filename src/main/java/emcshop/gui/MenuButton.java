@@ -1,6 +1,7 @@
 package emcshop.gui;
 
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -43,7 +44,6 @@ public class MenuButton extends JToggleButton {
 
 	private final JPopupMenu popupMenu = new JPopupMenu();
 	private long popupMenuCanceled = 0;
-	private int offsetX = 0, offsetY = 0;
 
 	public MenuButton() {
 		setIcon(Images.get("menu.png"));
@@ -75,20 +75,18 @@ public class MenuButton extends JToggleButton {
 					return;
 				}
 
-				popupMenu.show(MenuButton.this, getX() + offsetX, getY() + offsetY);
+				Point buttonScreenLocation = getLocationOnScreen();
+				int x = buttonScreenLocation.x;
+				int y = buttonScreenLocation.y + getHeight();
+
+				//"show()" is supposed to set the location of the menu relative to the parent component, but it never seems to set the location correctly for some reason
+				//however, we still need to call "show()" because the menu won't work right otherwise
+				popupMenu.show(MenuButton.this, x, y);
+
+				//this sets the menu's on-screen location (what we want)
+				popupMenu.setLocation(x, y);
 			}
 		});
-	}
-
-	/**
-	 * Sets the position the popup menu will be displayed, relative to the
-	 * button.
-	 * @param x the x offset
-	 * @param y the y offset
-	 */
-	public void setOffset(int x, int y) {
-		offsetX = x;
-		offsetY = y;
 	}
 
 	/**

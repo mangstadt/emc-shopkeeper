@@ -182,7 +182,6 @@ public class MainFrame extends JFrame {
 	private void createMenu() {
 		//@formatter:off
 		menu = new MenuButton();
-		menu.setOffset(0, 32);
 
 		JMenu tools = menu.addMenu("Tools")
 		.icon(Images.TOOLS)
