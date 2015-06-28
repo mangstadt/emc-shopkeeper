@@ -171,6 +171,7 @@
 	<Item name="Ender Chest" id="130" />
 	<Item name="Ender Pearl" id="368" stack="16" categories="9,15" />
 	<Item name="Exp Bottle" id="384" categories="12" />
+	<Item name="Explosive Minecart" id="407" stack="1" group="Iron" categories="15" />
 	<Item name="Eye Of Ender" id="381" />
 	<Item name="Far Disc" id="2260" stack="1" group="Discs" categories="3" />
 	<Item name="Feather" id="288" categories="9" />
@@ -292,7 +293,7 @@
 	<Item name="Name Tag" id="421" categories="0" />
 	<Item name="Nethbrick" id="405" categories="10" />
 	<Item name="Nether Brick" id="112" categories="10" />
-	<Item name="Nether Brick Stairs" id="114" emcNames="Nether Stairs" categories="10" />
+	<Item name="Nether Brick Stairs" id="114" emcNames="Nether Stairs,Nether Brick St" categories="10" />
 	<Item name="Nether Fence" id="113" categories="10" />
 	<Item name="Nether Brick Slab" id="44:6" emcNames="Nethbrick Slab" categories="10" />
 	<Item name="Nether Stalk" id="372" categories="10,12" />
@@ -306,7 +307,7 @@
 	<Item name="Oak Log" id="17:0" group="Wood" categories="17" />
 	<Item name="Oak Plank" id="5:0" group="Wood" categories="17" />
 	<Item name="Oak Sapling" id="6:0" categories="6,17" />
-	<Item name="Oak Slab" id="126:0" emcNames="Wood Slab" group="Wood" categories="17" />
+	<Item name="Oak Slab" id="126:0" emcNames="Wood Slab,Wood Step" group="Wood" categories="17" />
 	<Item name="Oak Stairs" id="53" emcNames="Wood Stairs" group="Wood" categories="17" />
 	<Item name="Obsidian" id="49" />
 	<Item name="Ocelot Egg" id="383:98" group="Spawn Eggs" categories="0" />
@@ -523,26 +524,33 @@
 	<Item name="Starter Boots" stack="1" image="iron_boots_enchanted.png" emcNames="Iron Boots - §6Starter Boots" categories="5,16" />
 	<Item name="Starter Chestplate" stack="1" image="iron_chest_enchanted.png" emcNames="Iron Chest - §6Starter Chestplate" categories="5,16" />
 	<Item name="Starter Helmet" stack="1" image="iron_helmet_enchanted.png" emcNames="Iron Helmet - §6Starter Helmet" categories="5,16" />
+	<Item name="Starter Horse" image="horse_egg.png" emcNames="Horse Egg - §6Starter Horse" categories="0,5" />
 	<Item name="Starter Leggings" stack="1" image="iron_leggings_enchanted.png" emcNames="Iron Leggings - §6Starter Leggings" categories="5,16" />
 	<Item name="Starter Pickaxe" stack="1" image="iron_pickaxe_enchanted.png" emcNames="Iron Pickaxe - §6Starter Pickaxe" categories="5,16" />
 	<Item name="Starter Shovel" stack="1" image="iron_shovel_enchanted.png" emcNames="Iron Shovel - §6Starter Shovel" categories="5,16" />
 	<Item name="Starter Sword" stack="1" image="iron_sword_enchanted.png" emcNames="Iron Sword - §6Starter Sword" categories="5,16" />
 	
-	<Item name="Iron Supporter Voucher" image="paper.png" emcNames="Paper - §7Iron Supporter Voucher" />
-	<Item name="Gold Supporter Voucher" image="paper.png" emcNames="Paper - §6Gold Supporter Voucher" />
-	<Item name="Diamond Supporter Voucher" image="paper.png" emcNames="Paper - §3Diamond Supporter Voucher" />
+	<Item name="Iron Supporter Voucher" image="paper.png" emcNames="Paper - §7Iron Supporter Voucher" categories="5" />
+	<Item name="Gold Supporter Voucher" image="paper.png" emcNames="Paper - §6Gold Supporter Voucher" categories="5" />
+	<Item name="Diamond Supporter Voucher" image="paper.png" emcNames="Paper - §3Diamond Supporter Voucher" categories="5" />
 	
-	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey" categories="5" />
+	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey" categories="5,7" />
+	<Item name="Cupid" image="pig_egg.png" emcNames="Pig Egg - §5=- §d§lCupid§5 -=" categories="0,5" />
 	<Item name="Cupid's Arrow" image="shiny_arrow.png" emcNames="Arrow - §dCupid's Arrow" categories="5,16" />
 	<Item name="Cupid's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §dCupid's Bow" categories="5,16" />
+	<Item name="Dancer" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lDancer§f§l»" categories="0,5" />
+	<Item name="Empire Assistant" image="compass.png" emcNames="Compass - §6Empire Assistant" categories="5" />
+	<Item name="Holiday Candle" image="torch.png" emcNames="Torch - §eHoliday Candle" categories="5" />
 	<Item name="Holiday Pick" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §f§l«§c§lHoliday Pick§f§l»" categories="5,16" />
-	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench" categories="5" />
-	<Item name="Lucky Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §1Lucky Bow" categories="5,16" />
+	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench,Workbench - §6Labor Bench" categories="5" />
+	<Item name="Lucky Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §1Lucky Bow,Bow - §9Lucky Bow" categories="5,16" />
 	<Item name="Magical Eggcellent Wand" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand" categories="5" />
+	<Item name="Maxarian Head" image="head.png" emcNames="Head - §cMaxarian Head" categories="5" />
 	<Item name="Pi Pie" image="pumpkin_pie.png" emcNames="Pumpkin Pie - §6Pi Pie" categories="5" />
 	<Item name="Pot of Gold" image="cauldron.png" emcNames="Cauldron - §ePot of Gold" categories="5" />
 	<Item name="Stable Voucher" image="empty_map.png" emcNames="Empty Map - §aStable Voucher" categories="5" />
 	<Item name="Turkey Slicer" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4Turkey Slicer" categories="5,16" />
+	<Item name="Valens" image="horse_egg.png" emcNames="Horse Egg - §6§lValens" categories="0,5" />
 	<Item name="Vault Voucher" image="empty_map.png" emcNames="Empty Map - §aVault Voucher" categories="5" />
 	
 	<!-- Potions ========================================================== -->
