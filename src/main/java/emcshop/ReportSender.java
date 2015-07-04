@@ -17,7 +17,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 import emcshop.gui.lib.JarSignersHardLinker;
@@ -73,7 +73,8 @@ public class ReportSender {
 		{
 			df.setTimeZone(TimeZone.getTimeZone("GMT"));
 		}
-		private final HttpClient client = new DefaultHttpClient();
+
+		private final HttpClient client = HttpClientBuilder.create().build();
 
 		@Override
 		public void run() {

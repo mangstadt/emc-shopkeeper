@@ -24,8 +24,9 @@ import joptsimple.OptionException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+
+import com.github.mangstadt.emc.net.EmcWebsiteConnection;
+import com.github.mangstadt.emc.net.EmcWebsiteConnectionImpl;
 
 import emcshop.cli.CliController;
 import emcshop.cli.EmcShopArguments;
@@ -53,7 +54,6 @@ import emcshop.presenter.UnhandledErrorPresenter;
 import emcshop.scraper.EmcSession;
 import emcshop.scraper.OnlinePlayersScraper;
 import emcshop.util.GuiUtils;
-import emcshop.util.HttpClientFactory;
 import emcshop.util.ZipUtils.ZipListener;
 import emcshop.view.DatabaseStartupErrorViewImpl;
 import emcshop.view.IDatabaseStartupErrorView;
@@ -320,11 +320,11 @@ public class EMCShopkeeper {
 
 		//start the profile image loader
 		ProfileLoader profileLoader = new ProfileLoader(cacheDir);
-		profileLoader.setHttpClientFactory(new HttpClientFactory() {
+		profileLoader.setConnectionFactory(new ProfileLoader.EmcWebsiteConnectionFactory() {
 			@Override
-			public HttpClient create() {
+			public EmcWebsiteConnection createConnection() {
 				EmcSession session = context.get(EmcSession.class);
-				return (session == null) ? new DefaultHttpClient() : session.createHttpClient();
+				return (session == null) ? new EmcWebsiteConnectionImpl() : session.createConnection();
 			}
 		});
 		profileLoader.start();
@@ -413,7 +413,7 @@ public class EMCShopkeeper {
 		}
 		context.add(dao);
 
-		OnlinePlayersMonitor onlinePlayersMonitor = new OnlinePlayersMonitor(new OnlinePlayersScraper(new DefaultHttpClient()), 1000 * 60 * 5);
+		OnlinePlayersMonitor onlinePlayersMonitor = new OnlinePlayersMonitor(new OnlinePlayersScraper(new EmcWebsiteConnectionImpl()), 1000 * 60 * 5);
 		onlinePlayersMonitor.start();
 		context.add(onlinePlayersMonitor);
 

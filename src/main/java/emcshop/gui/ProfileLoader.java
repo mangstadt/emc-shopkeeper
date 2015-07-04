@@ -18,9 +18,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.commons.io.IOUtils;
+import org.jsoup.nodes.Document;
 
+import com.github.mangstadt.emc.net.EmcWebsiteConnection;
+import com.github.mangstadt.emc.net.EmcWebsiteConnectionImpl;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ListMultimap;
@@ -31,7 +33,6 @@ import emcshop.scraper.PlayerProfileScraper;
 import emcshop.scraper.Rank;
 import emcshop.util.CaseInsensitiveHashSet;
 import emcshop.util.CaseInsensitiveMultimap;
-import emcshop.util.HttpClientFactory;
 import emcshop.util.ImageCache;
 import emcshop.util.PropertiesWrapper;
 
@@ -63,10 +64,10 @@ public class ProfileLoader {
 	private final ProfileCache profileCache = new ProfileCache();
 
 	private int threads = 4;
-	private HttpClientFactory clientFactory = new HttpClientFactory() {
+	private EmcWebsiteConnectionFactory connectionFactory = new EmcWebsiteConnectionFactory() {
 		@Override
-		public HttpClient create() {
-			return new DefaultHttpClient();
+		public EmcWebsiteConnection createConnection() {
+			return new EmcWebsiteConnectionImpl();
 		}
 	};
 	private PlayerProfileScraper scraper = new PlayerProfileScraper();
@@ -102,21 +103,12 @@ public class ProfileLoader {
 	}
 
 	/**
-	 * Gets the factory used to create {@link HttpClient} objects, which are
-	 * used to download the profile pages.
-	 * @return the factory
+	 * Sets the factory used to create {@link EmcWebsiteConnection} objects,
+	 * which are used to download the profile pages.
+	 * @param connectionFactory the factory
 	 */
-	public HttpClientFactory getHttpClientFactory() {
-		return clientFactory;
-	}
-
-	/**
-	 * Sets the factory used to create {@link HttpClient} objects, which are
-	 * used to download the profile pages.
-	 * @param clientFactory the factory
-	 */
-	public void setHttpClientFactory(HttpClientFactory clientFactory) {
-		this.clientFactory = clientFactory;
+	public void setConnectionFactory(EmcWebsiteConnectionFactory connectionFactory) {
+		this.connectionFactory = connectionFactory;
 	}
 
 	/**
@@ -299,44 +291,49 @@ public class ProfileLoader {
 				}
 
 				//scrape the profile page
-				HttpClient client = clientFactory.create(); //create a new client each time so the user's login session token can be used
 				PlayerProfile profile = null;
+				EmcWebsiteConnection connection = connectionFactory.createConnection(); //create a new client each time so the user's login session token can be used
 				try {
-					profile = scraper.downloadProfile(playerName, client);
-				} catch (IOException e) {
-					logger.log(Level.WARNING, "Problem downloading player profile page.", e);
-				}
-
-				byte[] data = null;
-				if (profile != null) {
-					//save profile data
 					try {
-						profileSerializer.save(profile);
-						profileCache.set(profile.getPlayerName(), profile);
+						Document page = connection.getProfilePage(playerName);
+						profile = scraper.scrapeProfile(playerName, page);
 					} catch (IOException e) {
-						logger.log(Level.WARNING, "Problem saving player profile data.", e);
+						logger.log(Level.WARNING, "Problem downloading player profile page.", e);
 					}
 
-					//download portrait
-					if (!profile.isPrivate()) {
-						//download image
-						File file = portraitFile(playerName);
-						Date lastModified = file.exists() ? new Date(file.lastModified()) : null;
+					byte[] data = null;
+					if (profile != null) {
+						//save profile data
 						try {
-							data = scraper.downloadPortrait(profile, lastModified, client);
+							profileSerializer.save(profile);
+							profileCache.set(profile.getPlayerName(), profile);
 						} catch (IOException e) {
-							logger.log(Level.WARNING, "Problem downloading profile image.", e);
+							logger.log(Level.WARNING, "Problem saving player profile data.", e);
 						}
 
-						//save to cache
-						if (data != null) {
+						//download portrait
+						if (!profile.isPrivate()) {
+							//download image
+							File file = portraitFile(playerName);
+							Date lastModified = file.exists() ? new Date(file.lastModified()) : null;
 							try {
-								FileUtils.writeByteArrayToFile(file, data);
+								data = scraper.downloadPortrait(profile, lastModified, connection.getHttpClient());
 							} catch (IOException e) {
-								logger.log(Level.WARNING, "Problem saving image to cache.", e);
+								logger.log(Level.WARNING, "Problem downloading profile image.", e);
+							}
+
+							//save to cache
+							if (data != null) {
+								try {
+									FileUtils.writeByteArrayToFile(file, data);
+								} catch (IOException e) {
+									logger.log(Level.WARNING, "Problem saving image to cache.", e);
+								}
 							}
 						}
 					}
+				} finally {
+					IOUtils.closeQuietly(connection);
 				}
 
 				List<Job> waiting;
@@ -480,5 +477,9 @@ public class ProfileLoader {
 		private File file(String playerName) {
 			return new File(cacheDir, playerName.toLowerCase() + ".properties");
 		}
+	}
+
+	public interface EmcWebsiteConnectionFactory {
+		EmcWebsiteConnection createConnection();
 	}
 }

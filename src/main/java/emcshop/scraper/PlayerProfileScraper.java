@@ -14,9 +14,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -42,37 +40,6 @@ public class PlayerProfileScraper {
 		builder.put("Community Manager", Rank.ADMIN);
 
 		titleToRankMapping = builder.build();
-	}
-
-	/**
-	 * Downloads and scrapes a player's profile page.
-	 * @param playerName the player name
-	 * @return the scraped page
-	 * @throws IOException if there's a problem downloading the profile
-	 */
-	public PlayerProfile downloadProfile(String playerName) throws IOException {
-		return downloadProfile(playerName, new DefaultHttpClient());
-	}
-
-	/**
-	 * Downloads and scrapes a player's profile page.
-	 * @param playerName the player name
-	 * @param client the HTTP client to use
-	 * @return the scraped page or null if the player does not exist
-	 * @throws IOException if there's a problem downloading the profile
-	 */
-	public PlayerProfile downloadProfile(String playerName, HttpClient client) throws IOException {
-		Document document;
-		HttpGet request = new HttpGet("http://u.emc.gs/" + playerName);
-		HttpResponse response = client.execute(request);
-		HttpEntity entity = response.getEntity();
-		try {
-			document = Jsoup.parse(entity.getContent(), "UTF-8", "http://empireminecraft.com");
-		} finally {
-			EntityUtils.consume(entity);
-		}
-
-		return scrapeProfile(playerName, document);
 	}
 
 	/**
