@@ -4,32 +4,56 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.io.IOUtils;
+
+import com.github.mangstadt.emc.net.InvalidCredentialsException;
+import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
+import com.github.mangstadt.emc.rupees.dto.DailySigninBonus;
+import com.github.mangstadt.emc.rupees.dto.EggifyFee;
+import com.github.mangstadt.emc.rupees.dto.HorseSummonFee;
+import com.github.mangstadt.emc.rupees.dto.LockTransaction;
+import com.github.mangstadt.emc.rupees.dto.MailFee;
+import com.github.mangstadt.emc.rupees.dto.PaymentTransaction;
+import com.github.mangstadt.emc.rupees.dto.RupeeTransaction;
+import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
+import com.github.mangstadt.emc.rupees.dto.VaultFee;
+import com.github.mangstadt.emc.rupees.dto.VoteBonus;
+import com.google.common.collect.ImmutableSet;
 
 import emcshop.AppContext;
 import emcshop.EMCShopkeeper;
 import emcshop.ReportSender;
 import emcshop.db.DbDao;
-import emcshop.scraper.BadSessionException;
-import emcshop.scraper.BonusFeeTransaction;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.PaymentTransaction;
-import emcshop.scraper.RupeeTransaction;
-import emcshop.scraper.RupeeTransactions;
-import emcshop.scraper.ShopTransaction;
-import emcshop.scraper.TransactionPuller;
-import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.GuiUtils;
 
 public class UpdateModelImpl implements IUpdateModel {
 	private static final Logger logger = Logger.getLogger(UpdateModelImpl.class.getName());
 	private static final AppContext context = AppContext.instance();
 
+	private final Set<Class<? extends RupeeTransaction>> bonusFeeTransactionTypes;
+	{
+		ImmutableSet.Builder<Class<? extends RupeeTransaction>> builder = ImmutableSet.builder();
+		builder.add(DailySigninBonus.class);
+		builder.add(EggifyFee.class);
+		builder.add(HorseSummonFee.class);
+		builder.add(LockTransaction.class);
+		builder.add(MailFee.class);
+		builder.add(VaultFee.class);
+		builder.add(VoteBonus.class);
+		bonusFeeTransactionTypes = builder.build();
+	}
+
 	private final boolean firstUpdate;
-	private final TransactionPullerFactory pullerFactory;
+	private final RupeeTransactionReader.Builder builder;
+	private final Integer oldestPaymentTransaction;
 	private final DbDao dao;
 	private final ReportSender reportSender;
 
@@ -38,16 +62,19 @@ public class UpdateModelImpl implements IUpdateModel {
 	private final List<ActionListener> downloadErrorListeners = new ArrayList<ActionListener>();
 	private final List<ActionListener> downloadCompleteListeners = new ArrayList<ActionListener>();
 
-	private TransactionPuller puller;
+	private RupeeTransactionReader reader;
 	private long started, timeTaken;
 	private int transactionsCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, pagesCount;
 	private Date earliestParsedTransactionDate, latestParsedBonusFeeDate;
 	private boolean downloadStopped = false;
 	private Throwable thrown;
+	private Integer rupeeBalance;
 
-	public UpdateModelImpl(TransactionPullerFactory pullerFactory) {
-		firstUpdate = (pullerFactory.getStopAtDate() == null);
-		this.pullerFactory = pullerFactory;
+	public UpdateModelImpl(RupeeTransactionReader.Builder builder, Integer oldestPaymentTransaction) {
+		this.builder = builder;
+		this.oldestPaymentTransaction = oldestPaymentTransaction;
+
+		firstUpdate = (builder.stopDate() == null);
 		dao = context.get(DbDao.class);
 		reportSender = context.get(ReportSender.class);
 	}
@@ -85,7 +112,7 @@ public class UpdateModelImpl implements IUpdateModel {
 
 	@Override
 	public Integer getStopAtPage() {
-		return pullerFactory.getStopAtPage();
+		return builder.stopPage();
 	}
 
 	@Override
@@ -151,7 +178,7 @@ public class UpdateModelImpl implements IUpdateModel {
 
 	@Override
 	public Integer getRupeeBalance() {
-		return puller.getRupeeBalance();
+		return rupeeBalance;
 	}
 
 	@Override
@@ -199,8 +226,8 @@ public class UpdateModelImpl implements IUpdateModel {
 		@Override
 		public void run() {
 			try {
-				puller = pullerFactory.create(context.get(EmcSession.class));
-			} catch (BadSessionException e) {
+				reader = builder.build();
+			} catch (InvalidCredentialsException e) {
 				GuiUtils.fireEvents(badSessionListeners);
 				return;
 			} catch (IOException e) {
@@ -208,49 +235,44 @@ public class UpdateModelImpl implements IUpdateModel {
 			}
 
 			try {
-				RupeeTransactions transactions;
-				while ((transactions = puller.nextPage()) != null) {
+				RupeeTransaction transaction;
+				int curPage = reader.getCurrentPageNumber();
+				while ((transaction = reader.next()) != null) {
+					int page = reader.getCurrentPageNumber();
 					synchronized (UpdateModelImpl.this) {
 						if (downloadStopped) {
-							puller.cancel();
 							break;
 						}
 
+						if (page != curPage) {
+							pagesCount++;
+							GuiUtils.fireEvents(pageDownloadedListeners);
+							curPage = page;
+						}
+
 						//keep track of the oldest transaction date
-						if (!transactions.isEmpty()) {
-							RupeeTransaction last = transactions.get(transactions.size() - 1); //transactions are ordered date descending
-							Date lastTs = last.getTs();
-							if (earliestParsedTransactionDate == null || lastTs.before(earliestParsedTransactionDate)) {
-								earliestParsedTransactionDate = lastTs;
-							}
-						}
+						earliestParsedTransactionDate = transaction.getTs();
 
-						List<ShopTransaction> shopTransactions = transactions.find(ShopTransaction.class);
-						for (ShopTransaction shopTransaction : shopTransactions) {
+						if (transaction instanceof ShopTransaction) {
+							ShopTransaction shopTransaction = (ShopTransaction) transaction;
 							dao.insertTransaction(shopTransaction, true);
-						}
-						shopTransactionsCount += shopTransactions.size();
-
-						List<PaymentTransaction> paymentTransactions = transactions.find(PaymentTransaction.class);
-						dao.insertPaymentTransactions(paymentTransactions);
-						paymentTransactionsCount += paymentTransactions.size();
-
-						List<BonusFeeTransaction> bonusFeeTransactions = transactions.find(BonusFeeTransaction.class);
-						for (BonusFeeTransaction transaction : bonusFeeTransactions) {
-							Date ts = transaction.getTs();
-							if (latestParsedBonusFeeDate == null || ts.after(latestParsedBonusFeeDate)) {
-								latestParsedBonusFeeDate = ts;
+							shopTransactionsCount++;
+							transactionsCount++;
+						} else if (transaction instanceof PaymentTransaction) {
+							//TODO ignore old payment transactions?
+							PaymentTransaction paymentTransaction = (PaymentTransaction) transaction;
+							dao.insertPaymentTransactions(Arrays.asList(paymentTransaction));
+							paymentTransactionsCount++;
+							transactionsCount++;
+						} else if (bonusFeeTransactionTypes.contains(transaction.getClass())) {
+							if (latestParsedBonusFeeDate == null) {
+								latestParsedBonusFeeDate = transaction.getTs();
 							}
+							dao.updateBonusFees(Arrays.asList(transaction));
+							bonusFeeTransactionsCount++;
+							transactionsCount++;
 						}
-						dao.updateBonusesFees(bonusFeeTransactions);
-						bonusFeeTransactionsCount += bonusFeeTransactions.size();
-
-						transactionsCount = shopTransactionsCount + paymentTransactionsCount + bonusFeeTransactionsCount;
-
-						pagesCount++;
 					}
-
-					GuiUtils.fireEvents(pageDownloadedListeners);
 				}
 
 				//update completed successfully
@@ -266,7 +288,6 @@ public class UpdateModelImpl implements IUpdateModel {
 				//an error occurred during the update
 				synchronized (UpdateModelImpl.this) {
 					stopDownload();
-					puller.cancel();
 
 					if (!firstUpdate || transactionsCount == 0) {
 						dao.rollback();
@@ -278,6 +299,8 @@ public class UpdateModelImpl implements IUpdateModel {
 				}
 
 				GuiUtils.fireEvents(downloadErrorListeners);
+			} finally {
+				IOUtils.closeQuietly(reader);
 			}
 		}
 	}

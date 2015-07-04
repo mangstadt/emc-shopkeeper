@@ -7,10 +7,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
+
+import com.github.mangstadt.emc.net.EmcServer;
+
 import emcshop.AppContext;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.Images;
-import emcshop.scraper.EmcServer;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.Rank;
 import emcshop.util.UIDefaultsWrapper;

@@ -12,7 +12,7 @@ public interface ILoginModel {
 	 * @return the session token or null if the credentials were invalid
 	 * @throws IOException
 	 */
-	String login(String username, String password) throws IOException;
+	EmcSession login(String username, String password) throws IOException;
 
 	/**
 	 * Gets the saved username.

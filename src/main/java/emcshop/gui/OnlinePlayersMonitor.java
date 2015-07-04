@@ -2,30 +2,36 @@ package emcshop.gui;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import emcshop.scraper.EmcServer;
-import emcshop.scraper.OnlinePlayersScraper;
+import org.apache.commons.io.IOUtils;
+
+import com.github.mangstadt.emc.net.EmcServer;
+import com.github.mangstadt.emc.net.EmcWebsiteConnection;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Keeps track of what players are online.
+ * @author Michael Angstadt
  */
 public class OnlinePlayersMonitor {
 	private static final Logger logger = Logger.getLogger(OnlinePlayersMonitor.class.getName());
 
-	private final OnlinePlayersScraper scraper;
+	private final EmcWebsiteConnection connection;
 	private final int refreshRate;
 	private final Map<String, EmcServer> onlinePlayers = new HashMap<String, EmcServer>();
 
 	/**
-	 * @param scraper the website scraper
+	 * @param connection the connection to the EMC website
 	 * @param refreshRate how often the player list will be refreshed (in
 	 * milliseconds)
 	 */
-	public OnlinePlayersMonitor(OnlinePlayersScraper scraper, int refreshRate) {
-		this.scraper = scraper;
+	public OnlinePlayersMonitor(EmcWebsiteConnection connection, int refreshRate) {
+		this.connection = connection;
 		this.refreshRate = refreshRate;
 	}
 
@@ -55,27 +61,36 @@ public class OnlinePlayersMonitor {
 	private class WorkerThread extends Thread {
 		@Override
 		public void run() {
-			while (true) {
-				try {
-					Map<String, EmcServer> players = scraper.getOnlinePlayers();
-					synchronized (onlinePlayers) {
-						onlinePlayers.clear();
-						for (Map.Entry<String, EmcServer> entry : players.entrySet()) {
-							String playerName = entry.getKey();
-							EmcServer server = entry.getValue();
-
-							onlinePlayers.put(playerName.toLowerCase(), server);
+			try {
+				while (true) {
+					try {
+						Multimap<EmcServer, String> onlinePlayersMultimap = ArrayListMultimap.create();
+						for (EmcServer server : EmcServer.values()) {
+							List<String> players = connection.getOnlinePlayers(server);
+							onlinePlayersMultimap.putAll(server, players);
 						}
-					}
-				} catch (IOException e) {
-					logger.log(Level.WARNING, "Unable to retrieve list of online players.", e);
-				}
 
-				try {
-					Thread.sleep(refreshRate);
-				} catch (InterruptedException e) {
-					break;
+						synchronized (onlinePlayers) {
+							onlinePlayers.clear();
+							for (Map.Entry<EmcServer, String> entry : onlinePlayersMultimap.entries()) {
+								EmcServer server = entry.getKey();
+								String playerName = entry.getValue();
+
+								onlinePlayers.put(playerName.toLowerCase(), server);
+							}
+						}
+					} catch (IOException e) {
+						logger.log(Level.WARNING, "Unable to retrieve list of online players.", e);
+					}
+
+					try {
+						Thread.sleep(refreshRate);
+					} catch (InterruptedException e) {
+						break;
+					}
 				}
+			} finally {
+				IOUtils.closeQuietly(connection);
 			}
 		}
 	}

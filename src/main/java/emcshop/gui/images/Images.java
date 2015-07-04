@@ -6,8 +6,9 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 
+import com.github.mangstadt.emc.net.EmcServer;
+
 import emcshop.ItemIndex;
-import emcshop.scraper.EmcServer;
 import emcshop.util.ImageCache;
 
 /**

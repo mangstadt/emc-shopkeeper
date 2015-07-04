@@ -23,4 +23,8 @@ public class EmcSession {
 	public EmcWebsiteConnection createConnection() {
 		return new EmcWebsiteConnectionImpl(cookieStore);
 	}
+
+	public CookieStore getCookieStore() {
+		return cookieStore;
+	}
 }

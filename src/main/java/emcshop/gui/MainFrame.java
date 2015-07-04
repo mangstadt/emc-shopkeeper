@@ -14,7 +14,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -51,8 +50,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+
+import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
 
 import emcshop.AppContext;
 import emcshop.EMCShopkeeper;
@@ -76,7 +78,6 @@ import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.GuiUtils;
 import emcshop.util.RupeeFormatter;
 import emcshop.util.TimeUtils;
@@ -449,6 +450,8 @@ public class MainFrame extends JFrame {
 			}
 		}
 
+		EmcSession session = context.get(EmcSession.class);
+
 		clearSessionMenuItem.setEnabled(true);
 
 		Date latestTransactionDate;
@@ -458,7 +461,8 @@ public class MainFrame extends JFrame {
 			throw new RuntimeException(e);
 		}
 
-		TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
+		Integer oldestPaymentTransactionInDays = null;
+		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getCookieStore());
 		if (latestTransactionDate == null) {
 			//it's the first update
 
@@ -472,17 +476,17 @@ public class MainFrame extends JFrame {
 			}
 
 			Integer stopAtPage = presenter.getStopAtPage();
-			pullerFactory.setStopAtPage(stopAtPage);
+			builder.stop(stopAtPage);
 
-			Integer oldestPaymentTransactionDays = presenter.getMaxPaymentTransactionAge();
-			pullerFactory.setMaxPaymentTransactionAge(oldestPaymentTransactionDays);
+			oldestPaymentTransactionInDays = presenter.getMaxPaymentTransactionAge();
 		} else {
-			pullerFactory.setStopAtDate(latestTransactionDate);
+			builder.stop(latestTransactionDate);
 		}
 
 		//show the update dialog
 		IUpdateView view = new UpdateViewImpl(MainFrame.this, loginShower);
-		IUpdateModel model = new UpdateModelImpl(pullerFactory);
+		Integer oldestPaymentTransactionInMillis = (oldestPaymentTransactionInDays == null) ? null : oldestPaymentTransactionInDays * 24 * 60 * 60 * 1000;
+		IUpdateModel model = new UpdateModelImpl(builder, oldestPaymentTransactionInMillis);
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 		if (!presenter.isCanceled()) {
@@ -673,7 +677,7 @@ public class MainFrame extends JFrame {
 					try {
 						json = downloadCommitInfo();
 					} catch (IOException e) {
-						//problem downloading file
+						logger.log(Level.WARNING, "Problem downloading commit info.", e);
 						return;
 					}
 
@@ -715,16 +719,19 @@ public class MainFrame extends JFrame {
 			}
 
 			private String downloadCommitInfo() throws IOException {
-				String url = "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits?path=" + URLEncoder.encode("dist/emc-shopkeeper-full.jar", "UTF-8");
+				URIBuilder builder = new URIBuilder(URI.create("https://api.github.com/repos/mangstadt/emc-shopkeeper/commits"));
+				builder.addParameter("path", "dist/emc-shopkeeper-full.jar");
+				String url = builder.toString();
 
-				DefaultHttpClient client = new DefaultHttpClient();
-				HttpGet request = new HttpGet(url);
-
-				HttpResponse response = client.execute(request);
-				HttpEntity entity = response.getEntity();
-				String json = IOUtils.toString(entity.getContent());
-				EntityUtils.consume(entity);
-				return json;
+				CloseableHttpClient client = HttpClientBuilder.create().build();
+				try {
+					HttpGet request = new HttpGet(url);
+					HttpResponse response = client.execute(request);
+					HttpEntity entity = response.getEntity();
+					return IOUtils.toString(entity.getContent());
+				} finally {
+					IOUtils.closeQuietly(client);
+				}
 			}
 
 			private Date parseLatestReleaseDate(String json) {

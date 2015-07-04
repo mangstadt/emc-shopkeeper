@@ -2,31 +2,33 @@ package emcshop.gui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import emcshop.scraper.EmcServer;
-import emcshop.scraper.OnlinePlayersScraper;
+import com.github.mangstadt.emc.net.EmcServer;
+import com.github.mangstadt.emc.net.EmcWebsiteConnection;
 
+/**
+ * @author Michael Angstadt
+ */
 public class OnlinePlayersMonitorTest {
 	@Test
 	public void getPlayerServer() throws Throwable {
-		Map<String, EmcServer> players = new HashMap<String, EmcServer>();
-		players.put("Notch", EmcServer.SMP1);
-		players.put("Jeb", EmcServer.SMP5);
-		players.put("Dinnebone", EmcServer.UTOPIA);
+		EmcWebsiteConnection connection = mock(EmcWebsiteConnection.class);
+		when(connection.getOnlinePlayers(any(EmcServer.class))).thenReturn(Collections.<String> emptyList());
+		when(connection.getOnlinePlayers(EmcServer.SMP1)).thenReturn(Arrays.asList("Notch"));
+		when(connection.getOnlinePlayers(EmcServer.SMP5)).thenReturn(Arrays.asList("Jeb"));
+		when(connection.getOnlinePlayers(EmcServer.UTOPIA)).thenReturn(Arrays.asList("Dinnerbone"));
 
-		OnlinePlayersScraper scraper = Mockito.mock(OnlinePlayersScraper.class);
-		when(scraper.getOnlinePlayers()).thenReturn(players);
+		OnlinePlayersMonitor monitor = new OnlinePlayersMonitor(connection, 1000);
 
-		OnlinePlayersMonitor monitor = new OnlinePlayersMonitor(scraper, 1000);
-
-		for (String player : players.keySet()) {
+		for (String player : new String[] { "Notch", "Jeb", "Dinnerbone" }) {
 			assertNull(monitor.getPlayerServer(player));
 			assertNull(monitor.getPlayerServer(player.toUpperCase()));
 		}
@@ -35,13 +37,10 @@ public class OnlinePlayersMonitorTest {
 		Thread.sleep(500);
 		thread.interrupt();
 
-		for (Map.Entry<String, EmcServer> entry : players.entrySet()) {
-			String player = entry.getKey();
-
-			EmcServer expected = entry.getValue();
-			EmcServer actual = monitor.getPlayerServer(player);
-			assertEquals(expected, actual);
-		}
+		assertEquals(EmcServer.SMP1, monitor.getPlayerServer("Notch"));
+		assertEquals(EmcServer.SMP1, monitor.getPlayerServer("NOTCH"));
+		assertEquals(EmcServer.SMP5, monitor.getPlayerServer("Jeb"));
+		assertEquals(EmcServer.UTOPIA, monitor.getPlayerServer("Dinnerbone"));
 		assertNull(monitor.getPlayerServer("Cupquake"));
 	}
 }

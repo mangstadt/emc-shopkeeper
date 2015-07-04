@@ -24,22 +24,24 @@ import javax.swing.JLabel;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.HttpClient;
+import org.jsoup.nodes.Document;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.github.mangstadt.emc.net.EmcWebsiteConnection;
+
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.PlayerProfileScraper;
 import emcshop.scraper.Rank;
-import emcshop.util.HttpClientFactory;
 
 public class ProfileLoaderTest {
 	private final byte[] portrait;
 	{
 		try {
-			portrait = IOUtils.toByteArray(ProfileLoaderTest.class.getResourceAsStream("shavingfoam.jpg"));
+			portrait = IOUtils.toByteArray(getClass().getResourceAsStream("shavingfoam.jpg"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -78,7 +80,7 @@ public class ProfileLoaderTest {
 	public void non_existent_user() throws Throwable {
 		String player = profile.getPlayerName();
 
-		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(null);
+		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(null);
 
 		profileImageLoader.getPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
@@ -96,7 +98,7 @@ public class ProfileLoaderTest {
 		PlayerProfile profile = new PlayerProfile();
 		profile.setPlayerName(player);
 		profile.setPrivate(true);
-		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);
 
 		profileImageLoader.getPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
@@ -115,7 +117,7 @@ public class ProfileLoaderTest {
 	public void image_downloaded() throws Throwable {
 		String player = profile.getPlayerName();
 
-		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
 		profileImageLoader.getPortrait(player, label, 16, listener);
@@ -157,7 +159,7 @@ public class ProfileLoaderTest {
 		temp.newFile(player + ".properties");
 		Date lastModified = new Date();
 
-		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), eq(lastModified), any(HttpClient.class))).thenReturn(null);
 
 		profileImageLoader.getPortrait(player, label, 16, listener);
@@ -181,7 +183,7 @@ public class ProfileLoaderTest {
 	public void stress_test() throws Throwable {
 		String player = profile.getPlayerName();
 
-		when(scraper.downloadProfile(eq(player), any(HttpClient.class))).thenReturn(profile);
+		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
 
 		for (int i = 0; i < 100; i++) {
@@ -212,10 +214,10 @@ public class ProfileLoaderTest {
 
 	private ProfileLoader create(File cacheDir, PlayerProfileScraper scraper) {
 		ProfileLoader loader = new ProfileLoader(cacheDir);
-		loader.setHttpClientFactory(new HttpClientFactory() {
+		loader.setConnectionFactory(new ProfileLoader.EmcWebsiteConnectionFactory() {
 			@Override
-			public HttpClient create() {
-				return mock(HttpClient.class);
+			public EmcWebsiteConnection createConnection() {
+				return mock(EmcWebsiteConnection.class);
 			}
 		});
 		loader.setProfilePageScraper(scraper);

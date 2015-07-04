@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.stub;
@@ -12,10 +11,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Date;
 
+import org.apache.http.impl.client.BasicCookieStore;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -72,7 +70,8 @@ public class LoginPresenterTest {
 	@Test
 	public void valid_login_save_password() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login("username", "password")).thenReturn("token");
+		EmcSession session = new EmcSession(new BasicCookieStore());
+		when(model.login("username", "password")).thenReturn(session);
 
 		ILoginView view = mock(ILoginView.class);
 		when(view.getUsername()).thenReturn("username");
@@ -83,7 +82,7 @@ public class LoginPresenterTest {
 		presenter.onLogin();
 
 		verify(model).saveSessionInfo("username", "password");
-		verify(model).setSession(session("username", "token", new Date()));
+		verify(model).setSession(session);
 		verify(view).close();
 		assertFalse(presenter.isCanceled());
 	}
@@ -91,7 +90,8 @@ public class LoginPresenterTest {
 	@Test
 	public void valid_login_do_not_save_password() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login("username", "password")).thenReturn("token");
+		EmcSession session = new EmcSession(new BasicCookieStore());
+		when(model.login("username", "password")).thenReturn(session);
 
 		ILoginView view = mock(ILoginView.class);
 		when(view.getUsername()).thenReturn("username");
@@ -102,7 +102,7 @@ public class LoginPresenterTest {
 		presenter.onLogin();
 
 		verify(model).saveSessionInfo("username", null);
-		verify(model).setSession(session("username", "token", new Date()));
+		verify(model).setSession(session);
 		verify(view).close();
 		assertFalse(presenter.isCanceled());
 	}
@@ -110,7 +110,8 @@ public class LoginPresenterTest {
 	@Test
 	public void cancel_login() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		when(model.login("username", "password")).thenReturn("token");
+		EmcSession session = new EmcSession(new BasicCookieStore());
+		when(model.login("username", "password")).thenReturn(session);
 
 		ILoginView view = mock(ILoginView.class);
 		when(view.getUsername()).thenReturn("username");
@@ -129,11 +130,11 @@ public class LoginPresenterTest {
 	@Test
 	public void cancel_login_while_logging_in() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		stub(model.login(anyString(), anyString())).toAnswer(new Answer<String>() {
+		stub(model.login(anyString(), anyString())).toAnswer(new Answer<EmcSession>() {
 			@Override
-			public String answer(InvocationOnMock invocation) throws Throwable {
+			public EmcSession answer(InvocationOnMock invocation) throws Throwable {
 				Thread.sleep(300); //simulate network latency
-				return "token";
+				return new EmcSession(new BasicCookieStore());
 			}
 		});
 
@@ -157,21 +158,5 @@ public class LoginPresenterTest {
 		verify(model, never()).saveSessionInfo(anyString(), anyString());
 		verify(model, never()).setSession(any(EmcSession.class));
 		assertTrue(presenter.isCanceled());
-	}
-
-	private static EmcSession session(final String username, final String token, final Date created) {
-		return argThat(new ArgumentMatcher<EmcSession>() {
-			@Override
-			public boolean matches(Object argument) {
-				EmcSession session = (EmcSession) argument;
-
-				//@formatter:off
-				return
-				username.equals(session.getUsername()) &&
-				token.equals(session.getSessionId()) &&
-				Math.abs(session.getCreated().getTime() - created.getTime()) < 1000;
-				//@formatter:on
-			}
-		});
 	}
 }

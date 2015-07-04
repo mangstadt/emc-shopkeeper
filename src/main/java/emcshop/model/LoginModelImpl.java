@@ -4,10 +4,15 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
+
+import com.github.mangstadt.emc.net.EmcWebsiteConnection;
+import com.github.mangstadt.emc.net.EmcWebsiteConnectionImpl;
+import com.github.mangstadt.emc.net.InvalidCredentialsException;
+
 import emcshop.AppContext;
 import emcshop.Settings;
 import emcshop.scraper.EmcSession;
-import emcshop.util.LoginUtils;
 
 public class LoginModelImpl implements ILoginModel {
 	private static final Logger logger = Logger.getLogger(LoginModelImpl.class.getName());
@@ -20,8 +25,16 @@ public class LoginModelImpl implements ILoginModel {
 	}
 
 	@Override
-	public String login(String username, String password) throws IOException {
-		return LoginUtils.login(username, password);
+	public EmcSession login(String username, String password) throws IOException {
+		EmcWebsiteConnection connection = null;
+		try {
+			connection = new EmcWebsiteConnectionImpl(username, password);
+			return new EmcSession(connection.getCookieStore());
+		} catch (InvalidCredentialsException e) {
+			return null;
+		} finally {
+			IOUtils.closeQuietly(connection);
+		}
 	}
 
 	@Override

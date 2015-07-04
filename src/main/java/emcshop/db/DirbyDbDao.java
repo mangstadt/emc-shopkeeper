@@ -28,14 +28,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
+import com.github.mangstadt.emc.rupees.dto.PaymentTransaction;
+import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 
 import emcshop.ItemIndex;
 import emcshop.scraper.BonusFeeTransaction;
-import emcshop.scraper.PaymentTransaction;
-import emcshop.scraper.ShopTransaction;
 import emcshop.util.ClasspathUtils;
 
 /**
@@ -501,7 +501,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException {
-		String playerName = transaction.getPlayer();
+		String playerName = transaction.getShopCustomer();
 		Player player = (playerName == null) ? null : selsertPlayer(playerName);
 
 		String ownerName = transaction.getShopOwner();
@@ -543,8 +543,7 @@ public abstract class DirbyDbDao implements DbDao {
 		stmt.setInt("quantity", transaction.getQuantity());
 		stmt.setInt("amount", transaction.getAmount());
 		stmt.setInt("balance", transaction.getBalance());
-		int id = stmt.execute(conn);
-		transaction.setId(id);
+		stmt.execute(conn);
 
 		if (player != null && updateInventory) {
 			addToInventory(itemId, transaction.getQuantity());
@@ -568,7 +567,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void deletePaymentTransaction(PaymentTransaction transaction) throws SQLException {
+	public void deletePaymentTransaction(PaymentTransactionDb transaction) throws SQLException {
 		PreparedStatement stmt = stmt("DELETE FROM payment_transactions WHERE id = ?");
 		try {
 			stmt.setInt(1, transaction.getId());
@@ -579,20 +578,26 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void upsertPaymentTransaction(PaymentTransaction transaction) throws SQLException {
-		if (transaction.getId() == null) {
+	public void upsertPaymentTransaction(PaymentTransactionDb transaction) throws SQLException {
+		Integer id = transaction.getId();
+		if (id == null) {
 			Player player = selsertPlayer(transaction.getPlayer());
 
 			InsertStatement stmt = new InsertStatement("payment_transactions");
-			insertPaymentTransaction(transaction, player.getId(), stmt);
-			Integer id = stmt.execute(conn);
+			stmt.setTimestamp("ts", transaction.getTs());
+			stmt.setInt("player", player.getId());
+			stmt.setInt("amount", transaction.getAmount());
+			stmt.setInt("balance", transaction.getBalance());
+			stmt.setString("reason", transaction.getReason());
+
+			id = stmt.execute(conn);
 			transaction.setId(id);
 		} else {
 			PreparedStatement stmt = stmt("UPDATE payment_transactions SET amount = ?, balance = ? WHERE id = ?");
 			try {
 				stmt.setInt(1, transaction.getAmount());
 				stmt.setInt(2, transaction.getBalance());
-				stmt.setInt(3, transaction.getId());
+				stmt.setInt(3, id);
 				stmt.executeUpdate();
 			} finally {
 				closeStatements(stmt);
@@ -636,7 +641,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public List<PaymentTransaction> getPendingPaymentTransactions() throws SQLException {
+	public List<PaymentTransactionDb> getPendingPaymentTransactions() throws SQLException {
 		//@formatter:off
 		String sql =
 		"SELECT pt.id, pt.ts, pt.amount, pt.balance, pt.reason, p.name AS playerName " +
@@ -650,16 +655,9 @@ public abstract class DirbyDbDao implements DbDao {
 		PreparedStatement selectStmt = stmt(sql);
 		try {
 			ResultSet rs = selectStmt.executeQuery();
-			List<PaymentTransaction> transactions = new ArrayList<PaymentTransaction>();
+			List<PaymentTransactionDb> transactions = new ArrayList<PaymentTransactionDb>();
 			while (rs.next()) {
-				PaymentTransaction transaction = new PaymentTransaction();
-				transaction.setId(rs.getInt("id"));
-				transaction.setAmount(rs.getInt("amount"));
-				transaction.setBalance(rs.getInt("balance"));
-				transaction.setPlayer(rs.getString("playerName"));
-				transaction.setTs(toDate(rs.getTimestamp("ts")));
-				transaction.setReason(rs.getString("reason"));
-
+				PaymentTransactionDb transaction = new PaymentTransactionDb(rs);
 				transactions.add(transaction);
 			}
 			return transactions;
@@ -810,7 +808,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public List<ShopTransaction> getTransactionsByDate(Date from, Date to, ShopTransactionType transactionType) throws SQLException {
+	public List<ShopTransactionDb> getTransactionsByDate(Date from, Date to, ShopTransactionType transactionType) throws SQLException {
 		String sql;
 		List<String> where = new ArrayList<String>();
 		//@formatter:off
@@ -848,9 +846,9 @@ public abstract class DirbyDbDao implements DbDao {
 		sql += " ORDER BY t.ts";
 
 		PreparedStatement stmt = stmt(sql);
-		List<ShopTransaction> transactions = new ArrayList<ShopTransaction>();
-		Map<String, ShopTransaction> lastTransactionByItem = new HashMap<String, ShopTransaction>();
-		Map<ShopTransaction, Date> dateOfLastTransaction = new HashMap<ShopTransaction, Date>();
+		List<ShopTransactionDb> transactions = new ArrayList<ShopTransactionDb>();
+		Map<String, ShopTransactionDb> lastTransactionByItem = new HashMap<String, ShopTransactionDb>();
+		Map<ShopTransactionDb, Date> dateOfLastTransaction = new HashMap<ShopTransactionDb, Date>();
 		try {
 			int index = 1;
 			if (from != null) {
@@ -890,7 +888,7 @@ public abstract class DirbyDbDao implements DbDao {
 				int quantity = rs.getInt("quantity");
 
 				String key = ((playerName == null) ? shopOwner : playerName) + ":" + item;
-				ShopTransaction transaction = lastTransactionByItem.get(key);
+				ShopTransactionDb transaction = lastTransactionByItem.get(key);
 				if (transaction != null) {
 					long diff = ts.getTime() - dateOfLastTransaction.get(transaction).getTime();
 					if (diff <= 1000 * 60 * 2) {
@@ -902,7 +900,7 @@ public abstract class DirbyDbDao implements DbDao {
 					}
 				}
 
-				transaction = new ShopTransaction();
+				transaction = new ShopTransactionDb();
 				transaction.setTs(ts);
 				transaction.setPlayer(playerName);
 				transaction.setShopOwner(shopOwner);

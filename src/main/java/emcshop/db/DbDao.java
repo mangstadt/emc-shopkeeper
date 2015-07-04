@@ -7,9 +7,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.github.mangstadt.emc.rupees.dto.PaymentTransaction;
+import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
+
 import emcshop.scraper.BonusFeeTransaction;
-import emcshop.scraper.PaymentTransaction;
-import emcshop.scraper.ShopTransaction;
 
 public interface DbDao {
 	/**
@@ -141,21 +142,21 @@ public interface DbDao {
 	 * @param transaction the transaction to delete
 	 * @throws SQLException
 	 */
-	void deletePaymentTransaction(PaymentTransaction transaction) throws SQLException;
+	void deletePaymentTransaction(PaymentTransactionDb transaction) throws SQLException;
 
 	/**
 	 * Updates or inserts a payment transaction.
 	 * @param transaction the payment transaction
 	 * @throws SQLException
 	 */
-	void upsertPaymentTransaction(PaymentTransaction transaction) throws SQLException;
+	void upsertPaymentTransaction(PaymentTransactionDb transaction) throws SQLException;
 
 	/**
 	 * Gets all unhandled payment transactions from the database.
 	 * @return the transactions
 	 * @throws SQLException
 	 */
-	List<PaymentTransaction> getPendingPaymentTransactions() throws SQLException;
+	List<PaymentTransactionDb> getPendingPaymentTransactions() throws SQLException;
 
 	/**
 	 * Ignores a pending payment transaction.
@@ -207,7 +208,7 @@ public interface DbDao {
 	 * @return the transactions
 	 * @throws SQLException
 	 */
-	List<ShopTransaction> getTransactionsByDate(Date from, Date to, ShopTransactionType transactionType) throws SQLException;
+	List<ShopTransactionDb> getTransactionsByDate(Date from, Date to, ShopTransactionType transactionType) throws SQLException;
 
 	/**
 	 * Computes what each player bought/sold over a date range.

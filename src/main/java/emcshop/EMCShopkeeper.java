@@ -52,7 +52,6 @@ import emcshop.presenter.DatabaseStartupErrorPresenter;
 import emcshop.presenter.ProfileSelectorPresenter;
 import emcshop.presenter.UnhandledErrorPresenter;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.OnlinePlayersScraper;
 import emcshop.util.GuiUtils;
 import emcshop.util.ZipUtils.ZipListener;
 import emcshop.view.DatabaseStartupErrorViewImpl;
@@ -413,7 +412,7 @@ public class EMCShopkeeper {
 		}
 		context.add(dao);
 
-		OnlinePlayersMonitor onlinePlayersMonitor = new OnlinePlayersMonitor(new OnlinePlayersScraper(new EmcWebsiteConnectionImpl()), 1000 * 60 * 5);
+		OnlinePlayersMonitor onlinePlayersMonitor = new OnlinePlayersMonitor(new EmcWebsiteConnectionImpl(), 1000 * 60 * 5);
 		onlinePlayersMonitor.start();
 		context.add(onlinePlayersMonitor);
 

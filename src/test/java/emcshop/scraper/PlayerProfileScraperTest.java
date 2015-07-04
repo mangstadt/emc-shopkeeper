@@ -4,33 +4,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 public class PlayerProfileScraperTest {
 	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
 	@Test
 	public void scrapeProfile() throws Throwable {
-		HttpClient client = createMockClient("SHAVINGFOAM");
-		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.downloadProfile("SHAVINGFOAM", client);
-
+		PlayerProfile profile = scrape("shavingfoam");
 		assertEquals("shavingfoam", profile.getPlayerName());
 		assertFalse(profile.isPrivate());
 		assertEquals("http://empireminecraft.com/data/avatars/l/12/12110.jpg?1389141773", profile.getPortraitUrl());
@@ -41,19 +30,13 @@ public class PlayerProfileScraperTest {
 
 	@Test
 	public void scrapeProfile_player_does_not_exist() throws Throwable {
-		HttpClient client = createMockClient("does-not-exist");
-		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.downloadProfile("does-not-exist", client);
-
+		PlayerProfile profile = scrape("does-not-exist");
 		assertNull(profile);
 	}
 
 	@Test
 	public void scrapeProfile_private_profile() throws Throwable {
-		HttpClient client = createMockClient("private");
-		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.downloadProfile("private", client);
-
+		PlayerProfile profile = scrape("private");
 		assertEquals("private", profile.getPlayerName());
 		assertTrue(profile.isPrivate());
 		assertNull(profile.getPortraitUrl());
@@ -78,57 +61,35 @@ public class PlayerProfileScraperTest {
 	}
 
 	private void assertRank(String player, Rank expected) throws IOException {
-		HttpClient client = createMockClient(player);
-		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.downloadProfile(player, client);
-
+		PlayerProfile profile = scrape(player);
 		Rank actual = profile.getRank();
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void scrapeProfile_missing_join_date() throws Throwable {
-		String player = "no-join-date";
-		HttpClient client = createMockClient(player);
-		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.downloadProfile(player, client);
-
+		PlayerProfile profile = scrape("no-join-date");
 		assertNull(profile.getJoined());
 	}
 
 	@Test
 	public void scrapeProfile_bad_join_date() throws Throwable {
-		String player = "bad-join-date";
-		HttpClient client = createMockClient(player);
-		PlayerProfileScraper scraper = new PlayerProfileScraper();
-		PlayerProfile profile = scraper.downloadProfile(player, client);
-
+		PlayerProfile profile = scrape("bad-join-date");
 		assertNull(profile.getJoined());
 	}
 
-	private static HttpClient createMockClient(final String expectedPlayerName) throws IOException {
-		HttpClient client = mock(HttpClient.class);
-		when(client.execute(any(HttpGet.class))).then(new Answer<HttpResponse>() {
-			@Override
-			public HttpResponse answer(InvocationOnMock invocation) throws Throwable {
-				HttpGet request = (HttpGet) invocation.getArguments()[0];
-				String uri = request.getURI().toString();
-				assertEquals("http://u.emc.gs/" + expectedPlayerName, uri);
+	private PlayerProfile scrape(String prefix) throws IOException {
+		Document document = load(prefix + "-profile.html");
+		PlayerProfileScraper scraper = new PlayerProfileScraper();
+		return scraper.scrapeProfile(prefix, document);
+	}
 
-				InputStream in = getClass().getResourceAsStream(expectedPlayerName.toLowerCase() + "-profile.html");
-				if (in == null) {
-					fail("Unexpected URI, check the unit test: " + uri);
-				}
-
-				HttpResponse response = mock(HttpResponse.class);
-
-				HttpEntity entity = mock(HttpEntity.class);
-				when(entity.getContent()).thenReturn(in);
-				when(response.getEntity()).thenReturn(entity);
-
-				return response;
-			}
-		});
-		return client;
+	private Document load(String file) throws IOException {
+		InputStream in = getClass().getResourceAsStream(file);
+		try {
+			return Jsoup.parse(in, "UTF-8", "");
+		} finally {
+			in.close();
+		}
 	}
 }

@@ -3,7 +3,6 @@ package emcshop.presenter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.Date;
 
 import emcshop.model.ILoginModel;
 import emcshop.scraper.EmcSession;
@@ -46,16 +45,16 @@ public class LoginPresenter {
 		String password = view.getPassword();
 		boolean savePassword = view.getSavePassword();
 
-		String token;
+		EmcSession session;
 		try {
-			token = model.login(username, password);
+			session = model.login(username, password);
 		} catch (IOException e) {
 			model.logNetworkError(e);
 			view.networkError();
 			return;
 		}
 
-		if (token == null) {
+		if (session == null) {
 			view.badLogin();
 			return;
 		}
@@ -64,9 +63,8 @@ public class LoginPresenter {
 			if (canceled) {
 				return;
 			}
-			EmcSession session = new EmcSession(username, token, new Date());
 			model.setSession(session);
-			model.saveSessionInfo(session.getUsername(), savePassword ? password : null);
+			model.saveSessionInfo(username, savePassword ? password : null);
 		}
 
 		view.close();
