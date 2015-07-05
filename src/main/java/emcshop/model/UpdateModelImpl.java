@@ -4,33 +4,28 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.github.mangstadt.emc.net.InvalidCredentialsException;
 import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
-import com.github.mangstadt.emc.rupees.dto.DailySigninBonus;
-import com.github.mangstadt.emc.rupees.dto.EggifyFee;
-import com.github.mangstadt.emc.rupees.dto.HorseSummonFee;
-import com.github.mangstadt.emc.rupees.dto.LockTransaction;
-import com.github.mangstadt.emc.rupees.dto.MailFee;
 import com.github.mangstadt.emc.rupees.dto.PaymentTransaction;
 import com.github.mangstadt.emc.rupees.dto.RupeeTransaction;
 import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
-import com.github.mangstadt.emc.rupees.dto.VaultFee;
-import com.github.mangstadt.emc.rupees.dto.VoteBonus;
-import com.google.common.collect.ImmutableSet;
 
 import emcshop.AppContext;
 import emcshop.EMCShopkeeper;
 import emcshop.ReportSender;
 import emcshop.db.DbDao;
+import emcshop.db.PaymentTransactionDb;
+import emcshop.db.ShopTransactionDb;
 import emcshop.scraper.EmcSession;
 import emcshop.util.GuiUtils;
 
@@ -38,22 +33,9 @@ public class UpdateModelImpl implements IUpdateModel {
 	private static final Logger logger = Logger.getLogger(UpdateModelImpl.class.getName());
 	private static final AppContext context = AppContext.instance();
 
-	private final Set<Class<? extends RupeeTransaction>> bonusFeeTransactionTypes;
-	{
-		ImmutableSet.Builder<Class<? extends RupeeTransaction>> builder = ImmutableSet.builder();
-		builder.add(DailySigninBonus.class);
-		builder.add(EggifyFee.class);
-		builder.add(HorseSummonFee.class);
-		builder.add(LockTransaction.class);
-		builder.add(MailFee.class);
-		builder.add(VaultFee.class);
-		builder.add(VoteBonus.class);
-		bonusFeeTransactionTypes = builder.build();
-	}
-
 	private final boolean firstUpdate;
 	private final RupeeTransactionReader.Builder builder;
-	private final Integer oldestPaymentTransaction;
+	private final Integer oldestAllowablePaymentTransactionAge;
 	private final DbDao dao;
 	private final ReportSender reportSender;
 
@@ -66,13 +48,21 @@ public class UpdateModelImpl implements IUpdateModel {
 	private long started, timeTaken;
 	private int transactionsCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, pagesCount;
 	private Date earliestParsedTransactionDate, latestParsedBonusFeeDate;
+	private Map<Class<? extends RupeeTransaction>, MutableInt> bonusFeeTotals;
 	private boolean downloadStopped = false;
 	private Throwable thrown;
 	private Integer rupeeBalance;
 
-	public UpdateModelImpl(RupeeTransactionReader.Builder builder, Integer oldestPaymentTransaction) {
+	/**
+	 * @param builder the builder object for constructing new
+	 * {@link RupeeTransactionReader} instances.
+	 * @param oldestPaymentTransactionAge ignore all payment transactions that
+	 * are older than this age (in milliseconds) or null to parse all payment
+	 * transactions regardless of age
+	 */
+	public UpdateModelImpl(RupeeTransactionReader.Builder builder, Integer oldestAllowablePaymentTransactionAge) {
 		this.builder = builder;
-		this.oldestPaymentTransaction = oldestPaymentTransaction;
+		this.oldestAllowablePaymentTransactionAge = oldestAllowablePaymentTransactionAge;
 
 		firstUpdate = (builder.stopDate() == null);
 		dao = context.get(DbDao.class);
@@ -143,6 +133,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	@Override
 	public Thread startDownload() {
 		started = System.currentTimeMillis();
+		bonusFeeTotals = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
 
 		DownloadThread thread = new DownloadThread();
 		thread.setDaemon(true);
@@ -191,8 +182,13 @@ public class UpdateModelImpl implements IUpdateModel {
 			if (earliestParsedTransactionDate != null) {
 				dao.updateBonusesFeesSince(earliestParsedTransactionDate);
 			}
+
 			if (latestParsedBonusFeeDate != null) {
 				dao.updateBonusesFeesLatestTransactionDate(latestParsedBonusFeeDate);
+			}
+
+			if (!bonusFeeTotals.isEmpty()) {
+				dao.updateBonusFeeTotals(bonusFeeTotals);
 			}
 
 			//log the update operation
@@ -234,6 +230,8 @@ public class UpdateModelImpl implements IUpdateModel {
 				throw new RuntimeException(e);
 			}
 
+			Long earliestAllowedPaymentTransaction = (oldestAllowablePaymentTransactionAge == null) ? null : started - oldestAllowablePaymentTransactionAge;
+
 			try {
 				RupeeTransaction transaction;
 				int curPage = reader.getCurrentPageNumber();
@@ -255,20 +253,32 @@ public class UpdateModelImpl implements IUpdateModel {
 
 						if (transaction instanceof ShopTransaction) {
 							ShopTransaction shopTransaction = (ShopTransaction) transaction;
-							dao.insertTransaction(shopTransaction, true);
+							dao.insertTransaction(new ShopTransactionDb(shopTransaction), true);
 							shopTransactionsCount++;
 							transactionsCount++;
 						} else if (transaction instanceof PaymentTransaction) {
-							//TODO ignore old payment transactions?
+							if (earliestAllowedPaymentTransaction != null && transaction.getTs().getTime() < earliestAllowedPaymentTransaction) {
+								//ignore old payment transactions
+								continue;
+							}
+
 							PaymentTransaction paymentTransaction = (PaymentTransaction) transaction;
-							dao.insertPaymentTransactions(Arrays.asList(paymentTransaction));
+							dao.insertPaymentTransaction(new PaymentTransactionDb(paymentTransaction));
 							paymentTransactionsCount++;
 							transactionsCount++;
-						} else if (bonusFeeTransactionTypes.contains(transaction.getClass())) {
+						} else if (dao.isBonusFeeTransaction(transaction)) {
 							if (latestParsedBonusFeeDate == null) {
 								latestParsedBonusFeeDate = transaction.getTs();
 							}
-							dao.updateBonusFees(Arrays.asList(transaction));
+
+							Class<? extends RupeeTransaction> clazz = transaction.getClass();
+							MutableInt count = bonusFeeTotals.get(clazz);
+							if (count == null) {
+								count = new MutableInt();
+								bonusFeeTotals.put(clazz, count);
+							}
+							count.add(transaction.getAmount());
+
 							bonusFeeTransactionsCount++;
 							transactionsCount++;
 						}
@@ -280,6 +290,8 @@ public class UpdateModelImpl implements IUpdateModel {
 					if (downloadStopped) {
 						return;
 					}
+					pagesCount++;
+					GuiUtils.fireEvents(pageDownloadedListeners);
 					timeTaken = System.currentTimeMillis() - started;
 				}
 

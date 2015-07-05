@@ -30,16 +30,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.LogManager;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.github.mangstadt.emc.rupees.dto.DailySigninBonus;
+import com.github.mangstadt.emc.rupees.dto.EggifyFee;
+import com.github.mangstadt.emc.rupees.dto.HorseSummonFee;
+import com.github.mangstadt.emc.rupees.dto.LockTransaction;
+import com.github.mangstadt.emc.rupees.dto.RupeeTransaction;
+import com.github.mangstadt.emc.rupees.dto.VaultFee;
+import com.github.mangstadt.emc.rupees.dto.VoteBonus;
+
 import emcshop.ItemIndex;
-import emcshop.scraper.BonusFeeTransaction;
-import emcshop.scraper.PaymentTransaction;
-import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateGenerator;
 
 public class DirbyDbDaoTest {
@@ -359,7 +365,7 @@ public class DirbyDbDaoTest {
 	public void insertTransaction() throws Throwable {
 		DateGenerator dg = new DateGenerator();
 
-		ShopTransaction transaction = transactions().ts(dg.next()).item("apple").player("notch").balance(1000).amount(-10).quantity(5).dto();
+		ShopTransactionDb transaction = transactions().ts(dg.next()).item("apple").player("notch").balance(1000).amount(-10).quantity(5).dto();
 		dao.insertTransaction(transaction, false);
 
 		transaction = transactions().ts(dg.next()).item("Item").player("Jeb").balance(1200).amount(200).quantity(-7).dto();
@@ -389,7 +395,7 @@ public class DirbyDbDaoTest {
 		inventory().item(appleId).quantity(100).insert();
 		inventory().item(diamondId).quantity(20).insert();
 
-		ShopTransaction transaction = transactions().ts(dg.next()).item("apple").player("notch").balance(1000).amount(10).dto();
+		ShopTransactionDb transaction = transactions().ts(dg.next()).item("apple").player("notch").balance(1000).amount(10).dto();
 
 		transaction.setQuantity(5);
 		dao.insertTransaction(transaction, false);
@@ -415,7 +421,7 @@ public class DirbyDbDaoTest {
 		players().name("Notch").firstSeen("2014-01-01 00:00:00").lastSeen("2014-01-02 00:00:00").insert();
 		players().name("Dinnerbone").firstSeen((Date) null).lastSeen((Date) null).insert();
 
-		ShopTransaction t = transactions().ts("2014-01-03 00:00:00").player("Notch").dto();
+		ShopTransactionDb t = transactions().ts("2014-01-03 00:00:00").player("Notch").dto();
 		dao.insertTransaction(t, false);
 		t = transactions().ts("2014-01-03 01:00:00").player("Jeb").dto();
 		dao.insertTransaction(t, false);
@@ -446,14 +452,12 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
-	public void insertPaymentTransactions() throws Throwable {
+	public void insertPaymentTransaction() throws Throwable {
 		DateGenerator dg = new DateGenerator();
-		PaymentTransaction t1 = paymentTransactions().amount(1000).balance(20000).player("Notch").ts(dg.next()).dto();
-		PaymentTransaction t2 = paymentTransactions().amount(-5000).balance(15000).player("Jeb").ts(dg.next()).dto();
+		PaymentTransactionDb t = paymentTransactions().amount(1000).balance(20000).player("Notch").ts(dg.next()).dto();
 
-		dao.insertPaymentTransactions(Arrays.asList(t1, t2));
-		assertNull(t1.getId()); //IDs are not retrieved
-		assertNull(t2.getId());
+		dao.insertPaymentTransaction(t);
+		assertEquals(Integer.valueOf(1), t.getId());
 
 		ResultSet rs = paymentTransactions().all();
 
@@ -467,14 +471,14 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
-	public void upsertPaymentTransaction() throws Throwable {
+	public void upsertPaymentTransactionDb() throws Throwable {
 		DateGenerator dg = new DateGenerator();
 		int jeb = players().name("Jeb").insert();
 		int t1 = paymentTransactions().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
 		paymentTransactions().ts(dg.next()).player(jeb).amount(-5000).balance(15000).ignore(false).transaction(null).insert();
 
-		PaymentTransaction t3 = paymentTransactions().amount(100).balance(15100).player("Notch").ts(dg.next()).dto();
-		PaymentTransaction t4 = paymentTransactions().id(t1).amount(200).balance(20100).dto();
+		PaymentTransactionDb t3 = paymentTransactions().amount(100).balance(15100).player("Notch").ts(dg.next()).dto();
+		PaymentTransactionDb t4 = paymentTransactions().id(t1).amount(200).balance(20100).dto();
 
 		dao.upsertPaymentTransaction(t3);
 		assertNotNull(t3.getId());
@@ -505,9 +509,9 @@ public class DirbyDbDaoTest {
 		paymentTransactions().ts(dg.next()).player(notchId).amount(400).balance(50000).ignore(false).transaction(transId).insert();
 		paymentTransactions().ts(dg.next()).player(notchId).amount(500).balance(60000).ignore(true).transaction(transId).insert();
 
-		Iterator<PaymentTransaction> it = dao.getPendingPaymentTransactions().iterator();
+		Iterator<PaymentTransactionDb> it = dao.getPendingPaymentTransactions().iterator();
 
-		PaymentTransaction t = it.next();
+		PaymentTransactionDb t = it.next();
 		paymentTransactions().ts(dg.getGenerated(2)).player("Notch").balance(30000).amount(200).id(t2).test(t);
 
 		t = it.next();
@@ -531,7 +535,7 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
-	public void ignorePaymentTransaction() throws Throwable {
+	public void ignorePaymentTransactionDb() throws Throwable {
 		DateGenerator dg = new DateGenerator();
 		int t1 = paymentTransactions().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
 		int t2 = paymentTransactions().ts(dg.next()).player(notchId).amount(200).balance(30000).ignore(true).transaction(null).insert();
@@ -551,7 +555,7 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
-	public void assignPaymentTransaction() throws Throwable {
+	public void assignPaymentTransactionDb() throws Throwable {
 		DateGenerator dg = new DateGenerator();
 		int transId = transactions().ts(dg.next()).item(appleId).player(notchId).amount(500).quantity(-10).insert();
 		int t1 = paymentTransactions().ts(dg.next()).player(notchId).amount(100).balance(20000).ignore(false).transaction(null).insert();
@@ -650,9 +654,9 @@ public class DirbyDbDaoTest {
 
 		//no date range
 		{
-			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, null, ShopTransactionType.MY_SHOP).iterator();
+			Iterator<ShopTransactionDb> it = dao.getTransactionsByDate(null, null, ShopTransactionType.MY_SHOP).iterator();
 
-			ShopTransaction t = it.next();
+			ShopTransactionDb t = it.next();
 			transactions().ts("2014-01-01 01:00:00").item("Apple").player("Notch").amount(490).quantity(-49).test(t);
 
 			t = it.next();
@@ -672,9 +676,9 @@ public class DirbyDbDaoTest {
 
 		//with start date
 		{
-			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), null, ShopTransactionType.MY_SHOP).iterator();
+			Iterator<ShopTransactionDb> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), null, ShopTransactionType.MY_SHOP).iterator();
 
-			ShopTransaction t = it.next();
+			ShopTransactionDb t = it.next();
 			transactions().ts("2014-01-01 01:00:02").item("Apple").player("Jeb").amount(-10).quantity(1).test(t);
 
 			t = it.next();
@@ -691,9 +695,9 @@ public class DirbyDbDaoTest {
 
 		//with end date
 		{
-			Iterator<ShopTransaction> it = dao.getTransactionsByDate(null, date("2014-01-01 01:01:00"), ShopTransactionType.MY_SHOP).iterator();
+			Iterator<ShopTransactionDb> it = dao.getTransactionsByDate(null, date("2014-01-01 01:01:00"), ShopTransactionType.MY_SHOP).iterator();
 
-			ShopTransaction t = it.next();
+			ShopTransactionDb t = it.next();
 			transactions().ts("2014-01-01 01:00:00").item("Apple").player("Notch").amount(290).quantity(-29).test(t);
 
 			t = it.next();
@@ -707,9 +711,9 @@ public class DirbyDbDaoTest {
 
 		//with start and end dates
 		{
-			Iterator<ShopTransaction> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), date("2014-01-01 01:01:00"), ShopTransactionType.MY_SHOP).iterator();
+			Iterator<ShopTransactionDb> it = dao.getTransactionsByDate(date("2014-01-01 01:00:02"), date("2014-01-01 01:01:00"), ShopTransactionType.MY_SHOP).iterator();
 
-			ShopTransaction t = it.next();
+			ShopTransactionDb t = it.next();
 			transactions().ts("2014-01-01 01:00:02").item("Apple").player("Jeb").amount(-10).quantity(1).test(t);
 
 			t = it.next();
@@ -929,88 +933,25 @@ public class DirbyDbDaoTest {
 	}
 
 	@Test
-	public void updateBonusesFees() throws Throwable {
-		List<BonusFeeTransaction> transactions = new ArrayList<BonusFeeTransaction>();
-		dao.updateBonusesFees(transactions);
+	public void updateBonusesFeeTotals() throws Throwable {
+		dao.updateBonusFeeTotals(Collections.<Class<? extends RupeeTransaction>, MutableInt> emptyMap());
 
 		bonusesFees().test();
 
-		BonusFeeTransaction t = new BonusFeeTransaction();
-		t.setAmount(400);
-		t.setSignInBonus(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(400);
-		t.setSignInBonus(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(-100);
-		t.setHorseFee(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(-100);
-		t.setHorseFee(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(-1000);
-		t.setLockFee(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(500);
-		t.setLockFee(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(-100);
-		t.setEggifyFee(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(-100);
-		t.setEggifyFee(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(-10);
-		t.setVaultFee(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(-10);
-		t.setVaultFee(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(100);
-		t.setVoteBonus(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(200);
-		t.setVoteBonus(true);
-		transactions.add(t);
-
-		dao.updateBonusesFees(transactions);
+		Map<Class<? extends RupeeTransaction>, MutableInt> map = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
+		map.put(DailySigninBonus.class, new MutableInt(800));
+		map.put(HorseSummonFee.class, new MutableInt(-200));
+		map.put(LockTransaction.class, new MutableInt(-500));
+		map.put(EggifyFee.class, new MutableInt(-200));
+		map.put(VaultFee.class, new MutableInt(-20));
+		map.put(VoteBonus.class, new MutableInt(300));
+		dao.updateBonusFeeTotals(map);
 		bonusesFees().since(null).horse(-200).lock(-500).eggify(-200).vault(-20).signIn(800).vote(300).test();
 
-		transactions.clear();
-
-		t = new BonusFeeTransaction();
-		t.setAmount(-10);
-		t.setVaultFee(true);
-		transactions.add(t);
-
-		t = new BonusFeeTransaction();
-		t.setAmount(100);
-		t.setVoteBonus(true);
-		transactions.add(t);
-
-		dao.updateBonusesFees(transactions);
+		map.clear();
+		map.put(VaultFee.class, new MutableInt(-10));
+		map.put(VoteBonus.class, new MutableInt(100));
+		dao.updateBonusFeeTotals(map);
 		bonusesFees().since(null).horse(-200).lock(-500).eggify(-200).vault(-30).signIn(800).vote(400).test();
 	}
 
@@ -1832,10 +1773,10 @@ public class DirbyDbDaoTest {
 			assertEquals(quantity, rs.getInt("quantity"));
 		}
 
-		public void test(ShopTransaction transaction) {
+		public void test(ShopTransactionDb transaction) {
 			assertEquals(ts, transaction.getTs());
 			assertEquals(itemStr, transaction.getItem());
-			assertEquals(playerStr, transaction.getPlayer());
+			assertEquals(playerStr, transaction.getShopCustomer());
 			assertEquals(quantity, transaction.getQuantity());
 			assertEquals(amount, transaction.getAmount());
 		}
@@ -1865,11 +1806,11 @@ public class DirbyDbDaoTest {
 			return query("SELECT * FROM transactions ORDER BY id");
 		}
 
-		public ShopTransaction dto() {
-			ShopTransaction dto = new ShopTransaction();
+		public ShopTransactionDb dto() {
+			ShopTransactionDb dto = new ShopTransactionDb();
 			dto.setTs(ts);
 			dto.setItem(itemStr);
-			dto.setPlayer(playerStr);
+			dto.setShopCustomer(playerStr);
 			dto.setBalance(balance);
 			dto.setAmount(amount);
 			dto.setQuantity(quantity);
@@ -1961,7 +1902,7 @@ public class DirbyDbDaoTest {
 			assertEquals(ignore, rs.getBoolean("ignore"));
 		}
 
-		public void test(PaymentTransaction transaction) throws SQLException {
+		public void test(PaymentTransactionDb transaction) throws SQLException {
 			if (id != null) {
 				assertEquals(id, transaction.getId());
 			}
@@ -1982,8 +1923,8 @@ public class DirbyDbDaoTest {
 			return query("SELECT * FROM payment_transactions ORDER BY id");
 		}
 
-		public PaymentTransaction dto() {
-			PaymentTransaction transaction = new PaymentTransaction();
+		public PaymentTransactionDb dto() {
+			PaymentTransactionDb transaction = new PaymentTransactionDb();
 			transaction.setId(id);
 			transaction.setTs(ts);
 			transaction.setAmount(amount);

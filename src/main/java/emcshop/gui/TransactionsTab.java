@@ -39,11 +39,11 @@ import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.db.ItemGroup;
 import emcshop.db.PlayerGroup;
+import emcshop.db.ShopTransactionDb;
 import emcshop.db.ShopTransactionType;
 import emcshop.gui.ExportButton.ExportListener;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.GroupPanel;
-import emcshop.scraper.ShopTransaction;
 import emcshop.util.DateRange;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.RupeeFormatter;
@@ -309,7 +309,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			public void run() {
 				try {
 					//query database
-					List<ShopTransaction> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), transactionType);
+					List<ShopTransactionDb> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), transactionType);
 
 					//reset GUI
 					filterPanel.removeAll();
@@ -365,7 +365,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				netTotal += item.getNetAmount();
 			}
 		} else if (transactionsTable != null) {
-			for (ShopTransaction transaction : transactionsTable.getDisplayedTransactions()) {
+			for (ShopTransactionDb transaction : transactionsTable.getDisplayedTransactions()) {
 				int amount = transaction.getAmount();
 				if (amount > 0) {
 					gained += amount;

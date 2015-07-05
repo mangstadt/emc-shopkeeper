@@ -39,14 +39,14 @@ import net.miginfocom.swing.MigLayout;
 import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.chat.ChatMessage;
+import emcshop.db.PaymentTransactionDb;
 import emcshop.gui.MyJScrollPane;
-import emcshop.scraper.PaymentTransaction;
 import emcshop.util.GuiUtils;
 import emcshop.util.Listeners;
 
 @SuppressWarnings("serial")
 public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView {
-	private PaymentTransaction paymentTransaction;
+	private PaymentTransactionDb paymentTransaction;
 	private String currentPlayer;
 
 	private final JTextField logDir;
@@ -197,7 +197,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 	}
 
 	@Override
-	public void setPaymentTransaction(PaymentTransaction paymentTransaction) {
+	public void setPaymentTransaction(PaymentTransactionDb paymentTransaction) {
 		this.paymentTransaction = paymentTransaction;
 	}
 
@@ -271,7 +271,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		private final Pattern gaveRupeesRegex = Pattern.compile("^You paid ([\\d,]+) rupees to (.*)");
 		private final Pattern receivedRupeesRegex = Pattern.compile("^You just received ([\\d,]+) rupees from (.*)");
 
-		private PaymentTransaction paymentTransaction;
+		private PaymentTransactionDb paymentTransaction;
 		private Pattern paymentTransactionRegex;
 		private List<ChatMessage> chatMessages = Collections.emptyList();
 		private boolean foundPaymentTransaction;
@@ -280,13 +280,13 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			setContentType("text/html");
 		}
 
-		public void setChatMessages(List<ChatMessage> chatMessages, PaymentTransaction paymentTransaction) {
+		public void setChatMessages(List<ChatMessage> chatMessages, PaymentTransactionDb paymentTransaction) {
 			this.chatMessages = chatMessages;
 			setPaymentTransaction(paymentTransaction);
 			update();
 		}
 
-		public void setPaymentTransaction(PaymentTransaction paymentTransaction) {
+		public void setPaymentTransaction(PaymentTransactionDb paymentTransaction) {
 			this.paymentTransaction = paymentTransaction;
 
 			if (paymentTransaction == null) {

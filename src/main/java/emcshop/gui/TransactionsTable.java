@@ -24,14 +24,16 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
+import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
+
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.Settings;
+import emcshop.db.ShopTransactionDb;
 import emcshop.db.ShopTransactionType;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.Images;
 import emcshop.scraper.PlayerProfile;
-import emcshop.scraper.ShopTransaction;
 import emcshop.util.QuantityFormatter;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.RupeeFormatter;
@@ -72,7 +74,7 @@ public class TransactionsTable extends JTable {
 	private FilterList filteredPlayerNames = new FilterList();
 	private FilterList filteredItemNames = new FilterList();
 
-	public TransactionsTable(List<ShopTransaction> transactions, ShopTransactionType transactionType) {
+	public TransactionsTable(List<ShopTransactionDb> transactions, ShopTransactionType transactionType) {
 		this.transactionType = transactionType;
 		this.showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
 
@@ -90,11 +92,11 @@ public class TransactionsTable extends JTable {
 		setSelectionModel();
 	}
 
-	public List<ShopTransaction> getDisplayedTransactions() {
-		List<ShopTransaction> transactions = new ArrayList<ShopTransaction>(getRowCount());
+	public List<ShopTransactionDb> getDisplayedTransactions() {
+		List<ShopTransactionDb> transactions = new ArrayList<ShopTransactionDb>(getRowCount());
 		for (int row = 0; row < getRowCount(); row++) {
 			int rowModel = convertRowIndexToModel(row);
-			ShopTransaction transaction = model.transactions.get(rowModel);
+			ShopTransactionDb transaction = model.transactions.get(rowModel);
 			transactions.add(transaction);
 		}
 		return transactions;
@@ -102,7 +104,7 @@ public class TransactionsTable extends JTable {
 
 	public int getDisplayedPlayersCount() {
 		Set<String> players = new HashSet<String>();
-		for (ShopTransaction transaction : getDisplayedTransactions()) {
+		for (ShopTransactionDb transaction : getDisplayedTransactions()) {
 			String player = getPlayerName(transaction);
 			players.add(player);
 		}
@@ -150,9 +152,9 @@ public class TransactionsTable extends JTable {
 				return one.getTs().compareTo(two.getTs());
 			}
 		});
-		rowSorter.setComparator(Column.PLAYER_NAME.ordinal(), new Comparator<ShopTransaction>() {
+		rowSorter.setComparator(Column.PLAYER_NAME.ordinal(), new Comparator<ShopTransactionDb>() {
 			@Override
-			public int compare(ShopTransaction one, ShopTransaction two) {
+			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
 				String name1 = getPlayerName(one);
 				String name2 = getPlayerName(two);
 				return name1.compareToIgnoreCase(name2);
@@ -182,14 +184,14 @@ public class TransactionsTable extends JTable {
 		return rowSorter;
 	}
 
-	private String getPlayerName(ShopTransaction transaction) {
+	private String getPlayerName(ShopTransactionDb transaction) {
 		switch (transactionType) {
 		case MY_SHOP:
-			return transaction.getPlayer();
+			return transaction.getShopCustomer();
 		case OTHER_SHOPS:
 			return transaction.getShopOwner();
 		default:
-			String name = transaction.getPlayer();
+			String name = transaction.getShopCustomer();
 			if (name != null) {
 				return name;
 			}
@@ -217,7 +219,7 @@ public class TransactionsTable extends JTable {
 			@Override
 			public boolean include(RowFilter.Entry<? extends Model, ? extends Integer> entry) {
 				int row = entry.getIdentifier();
-				ShopTransaction transaction = model.transactions.get(row);
+				ShopTransactionDb transaction = model.transactions.get(row);
 
 				if (!filteredItemNames.isFiltered(transaction.getItem())) {
 					return false;
@@ -276,7 +278,7 @@ public class TransactionsTable extends JTable {
 				return null;
 			}
 
-			final ShopTransaction transaction = (ShopTransaction) value;
+			final ShopTransactionDb transaction = (ShopTransactionDb) value;
 			Column column = columns[col];
 			resetComponents();
 
@@ -301,8 +303,8 @@ public class TransactionsTable extends JTable {
 							@Override
 							public void run() {
 								for (int i = 0; i < model.getRowCount(); i++) {
-									ShopTransaction t = model.transactions.get(i);
-									String name = getPlayerName(t);
+									ShopTransactionDb transaction = model.transactions.get(i);
+									String name = getPlayerName(transaction);
 									if (playerName.equalsIgnoreCase(name)) {
 										model.fireTableCellUpdated(i, col);
 									}
@@ -352,9 +354,9 @@ public class TransactionsTable extends JTable {
 	}
 
 	private class Model extends AbstractTableModel {
-		private final List<ShopTransaction> transactions;
+		private final List<ShopTransactionDb> transactions;
 
-		public Model(List<ShopTransaction> transactions) {
+		public Model(List<ShopTransactionDb> transactions) {
 			this.transactions = transactions;
 		}
 

@@ -2,6 +2,8 @@ package emcshop.db;
 
 import java.util.Date;
 
+import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
+
 /**
  * Represents a shop transaction.
  * @author Michael Angstadt
@@ -10,10 +12,24 @@ public class ShopTransactionDb {
 	private Integer id;
 	private Date ts;
 	private int amount, balance;
-	private String player;
+	private String shopCustomer;
 	private String shopOwner;
 	private String item;
 	private int quantity;
+
+	public ShopTransactionDb() {
+		//empty
+	}
+
+	public ShopTransactionDb(ShopTransaction transaction) {
+		ts = transaction.getTs();
+		amount = transaction.getAmount();
+		balance = transaction.getBalance();
+		shopCustomer = transaction.getShopCustomer();
+		shopOwner = transaction.getShopOwner();
+		item = transaction.getItem();
+		quantity = transaction.getQuantity();
+	}
 
 	public Integer getId() {
 		return id;
@@ -47,12 +63,12 @@ public class ShopTransactionDb {
 		this.balance = balance;
 	}
 
-	public String getPlayer() {
-		return player;
+	public String getShopCustomer() {
+		return shopCustomer;
 	}
 
-	public void setPlayer(String player) {
-		this.player = player;
+	public void setShopCustomer(String shopCustomer) {
+		this.shopCustomer = shopCustomer;
 	}
 
 	public String getShopOwner() {
@@ -87,7 +103,7 @@ public class ShopTransactionDb {
 		result = prime * result + balance;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((item == null) ? 0 : item.hashCode());
-		result = prime * result + ((player == null) ? 0 : player.hashCode());
+		result = prime * result + ((shopCustomer == null) ? 0 : shopCustomer.hashCode());
 		result = prime * result + quantity;
 		result = prime * result + ((shopOwner == null) ? 0 : shopOwner.hashCode());
 		result = prime * result + ((ts == null) ? 0 : ts.hashCode());
@@ -108,9 +124,9 @@ public class ShopTransactionDb {
 		if (item == null) {
 			if (other.item != null) return false;
 		} else if (!item.equals(other.item)) return false;
-		if (player == null) {
-			if (other.player != null) return false;
-		} else if (!player.equals(other.player)) return false;
+		if (shopCustomer == null) {
+			if (other.shopCustomer != null) return false;
+		} else if (!shopCustomer.equals(other.shopCustomer)) return false;
 		if (quantity != other.quantity) return false;
 		if (shopOwner == null) {
 			if (other.shopOwner != null) return false;

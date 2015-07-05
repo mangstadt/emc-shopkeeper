@@ -18,7 +18,7 @@ import emcshop.db.Inventory;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
 import emcshop.db.PlayerGroup;
-import emcshop.scraper.ShopTransaction;
+import emcshop.db.ShopTransactionDb;
 import emcshop.util.BBCodeBuilder;
 import emcshop.util.QuantityFormatter;
 import emcshop.util.RupeeFormatter;
@@ -243,7 +243,7 @@ public class QueryExporter {
 		return bbCode.toString();
 	}
 
-	public static String generateTransactionsBBCode(Collection<ShopTransaction> transactions, int netTotal, Date from, Date to) {
+	public static String generateTransactionsBBCode(Collection<ShopTransactionDb> transactions, int netTotal, Date from, Date to) {
 		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
@@ -271,12 +271,12 @@ public class QueryExporter {
 		rf.setPlus(true);
 		DateFormat transactionDf = new SimpleDateFormat("MMM dd, HH:mm");
 		bbCode.u("Date").text("- - - - - | ").u("Player").text(" - - - - | ").u("Item").text(" - - - - - - | ").u("Quantity").text(" | ").u("Amount").nl();
-		for (ShopTransaction transaction : transactions) {
+		for (ShopTransactionDb transaction : transactions) {
 			Date ts = transaction.getTs();
 			bbCodeColumn(transactionDf.format(ts), 13, bbCode);
 			bbCode.text(" | ");
 
-			String player = transaction.getPlayer();
+			String player = transaction.getShopCustomer();
 			bbCodeColumn(player, 14, bbCode);
 			bbCode.text(" | ");
 
@@ -312,18 +312,18 @@ public class QueryExporter {
 		return bbCode.toString();
 	}
 
-	public static String generateTransactionsCsv(Collection<ShopTransaction> transactions, int netTotal, Date from, Date to) {
+	public static String generateTransactionsCsv(Collection<ShopTransactionDb> transactions, int netTotal, Date from, Date to) {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
 		CSVWriter writer = new CSVWriter(sw);
 
 		writer.writeNext(new String[] { (from == null) ? "no start date" : df.format(from), (to == null) ? "no end date" : df.format(to) });
 		writer.writeNext(new String[] { "Date", "Player", "Item", "Quantity", "Amount" });
-		for (ShopTransaction group : transactions) {
+		for (ShopTransactionDb group : transactions) {
 			//@formatter:off
 			writer.writeNext(new String[]{
 				df.format(group.getTs()),
-				group.getPlayer(),
+				group.getShopCustomer(),
 				group.getItem(),
 				group.getQuantity() + "",
 				group.getAmount() + ""

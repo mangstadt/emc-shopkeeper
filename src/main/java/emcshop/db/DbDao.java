@@ -7,10 +7,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.github.mangstadt.emc.rupees.dto.PaymentTransaction;
-import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
+import org.apache.commons.lang3.mutable.MutableInt;
 
-import emcshop.scraper.BonusFeeTransaction;
+import com.github.mangstadt.emc.rupees.dto.RupeeTransaction;
 
 public interface DbDao {
 	/**
@@ -128,14 +127,14 @@ public interface DbDao {
 	 * @param updateInventory true to update the inventory, false not to
 	 * @throws SQLException
 	 */
-	void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException;
+	void insertTransaction(ShopTransactionDb transaction, boolean updateInventory) throws SQLException;
 
 	/**
-	 * Inserts multiple payment transactions.
-	 * @param transactions
+	 * Inserts a payment transaction.
+	 * @param transaction the transaction
 	 * @throws SQLException
 	 */
-	void insertPaymentTransactions(Collection<PaymentTransaction> transactions) throws SQLException;
+	void insertPaymentTransaction(PaymentTransactionDb transaction) throws SQLException;
 
 	/**
 	 * Deletes a payment transaction.
@@ -262,10 +261,10 @@ public interface DbDao {
 
 	/**
 	 * Updates the bonus/fee totals.
-	 * @param transactions the bonus/fee transactions
+	 * @param totals the totals
 	 * @throws SQLException
 	 */
-	void updateBonusesFees(List<BonusFeeTransaction> transactions) throws SQLException;
+	void updateBonusFeeTotals(Map<Class<? extends RupeeTransaction>, MutableInt> totals) throws SQLException;
 
 	/**
 	 * Gets the bonus/fee totals.
@@ -288,6 +287,14 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	void updateBonusesFeesLatestTransactionDate(Date latestParsedBonusFeeDate) throws SQLException;
+
+	/**
+	 * Determines if this DAO considers the given rupee transaction to be a
+	 * "bonus/fee" transaction.
+	 * @param transaction the rupee transaction
+	 * @return true if it's a "bonus/fee" transaction, false if not
+	 */
+	boolean isBonusFeeTransaction(RupeeTransaction transaction);
 
 	/**
 	 * Tallies up the profits by day.

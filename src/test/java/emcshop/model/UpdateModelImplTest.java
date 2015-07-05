@@ -3,14 +3,12 @@ package emcshop.model;
 import static emcshop.util.TestUtils.assertIntEquals;
 import static emcshop.util.TestUtils.gte;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyCollection;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -18,6 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.awt.event.ActionListener;
@@ -31,27 +30,31 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.LogManager;
 
+import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.http.client.HttpClient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import com.github.mangstadt.emc.net.InvalidCredentialsException;
+import com.github.mangstadt.emc.rupees.RupeeTransactionPageScraper;
+import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
+import com.github.mangstadt.emc.rupees.dto.DailySigninBonus;
+import com.github.mangstadt.emc.rupees.dto.PaymentTransaction;
+import com.github.mangstadt.emc.rupees.dto.RupeeTransaction;
+import com.github.mangstadt.emc.rupees.dto.RupeeTransactionPage;
+import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
 
 import emcshop.AppContext;
 import emcshop.ReportSender;
 import emcshop.db.DbDao;
-import emcshop.scraper.BadSessionException;
-import emcshop.scraper.BonusFeeTransaction;
+import emcshop.db.PaymentTransactionDb;
+import emcshop.db.ShopTransactionDb;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.PaymentTransaction;
-import emcshop.scraper.RawTransaction;
-import emcshop.scraper.RupeeTransaction;
-import emcshop.scraper.ShopTransaction;
-import emcshop.scraper.TransactionPage;
-import emcshop.scraper.TransactionPageScraper;
-import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.DateGenerator;
 
 public class UpdateModelImplTest {
@@ -86,9 +89,9 @@ public class UpdateModelImplTest {
 
 		dao = mock(DbDao.class);
 		interceptTransactions = new InterceptTransactionsAnswer();
-		doAnswer(interceptTransactions).when(dao).insertTransaction(any(ShopTransaction.class), anyBoolean());
-		doAnswer(interceptTransactions).when(dao).insertPaymentTransactions(anyCollection());
-		doAnswer(interceptTransactions).when(dao).updateBonusesFees(anyList());
+		doAnswer(interceptTransactions).when(dao).insertTransaction(any(ShopTransactionDb.class), anyBoolean());
+		doAnswer(interceptTransactions).when(dao).insertPaymentTransaction(any(PaymentTransactionDb.class));
+		doAnswer(interceptTransactions).when(dao).updateBonusFeeTotals(Mockito.anyMap());
 
 		AppContext.init(reportSender, dao, session);
 	}
@@ -97,9 +100,9 @@ public class UpdateModelImplTest {
 	public void startDownload_bad_session() throws Throwable {
 		UpdateModelImpl model;
 		{
-			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
-			when(factory.create(session)).thenThrow(new BadSessionException());
-			model = new UpdateModelImpl(factory);
+			RupeeTransactionReader.Builder builder = mock(RupeeTransactionReader.Builder.class);
+			when(builder.build()).thenThrow(new InvalidCredentialsException("username", "password"));
+			model = new UpdateModelImpl(builder, null);
 		}
 
 		//register listeners
@@ -125,12 +128,12 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void startDownload_IOException_on_create_puller() throws Throwable {
+	public void startDownload_IOException_on_build_reader() throws Throwable {
 		UpdateModelImpl model;
 		{
-			TransactionPullerFactory factory = mock(TransactionPullerFactory.class);
-			when(factory.create(session)).thenThrow(new IOException());
-			model = new UpdateModelImpl(factory);
+			RupeeTransactionReader.Builder builder = mock(RupeeTransactionReader.Builder.class);
+			when(builder.build()).thenThrow(new IOException());
+			model = new UpdateModelImpl(builder, null);
 		}
 
 		//register listeners
@@ -157,20 +160,40 @@ public class UpdateModelImplTest {
 
 	@Test
 	public void startDownload_error_during_first_update() throws Throwable {
-		ShopTransaction t1 = shop();
-		RawTransaction t2 = raw();
-		PaymentTransaction t3 = payment();
+		final ShopTransaction t1 = shop();
+		final RupeeTransaction t2 = raw();
+		final PaymentTransaction t3 = payment();
+		final Exception thrown = new IOException();
 
 		UpdateModelImpl model;
 		{
-			TransactionPageScraper scraper = scraper().page(t1, t2).page(t3).page(new IOException()).done();
+			RupeeTransactionReader reader = mock(RupeeTransactionReader.class);
+			when(reader.next()).thenAnswer(new Answer<RupeeTransaction>() {
+				private int count = 1;
 
-			TransactionPullerFactory factory = new TransactionPullerFactory();
-			factory.setTransactionPageScraper(scraper);
-			factory.setThreadCount(1);
-			factory.setStopAtDate(null);
+				@Override
+				public RupeeTransaction answer(InvocationOnMock invocation) throws Throwable {
+					switch (count++) {
+					case 1:
+						return t1;
+					case 2:
+						return t2;
+					case 3:
+						return t3;
+					case 4:
+						throw thrown;
+					}
 
-			model = new UpdateModelImpl(factory);
+					fail("next() called too many times.");
+					return null;
+				}
+			});
+			when(reader.getCurrentPageNumber()).thenReturn(1);
+
+			RupeeTransactionReader.Builder builder = mock(RupeeTransactionReader.Builder.class);
+			when(builder.build()).thenReturn(reader);
+
+			model = new UpdateModelImpl(builder, null);
 		}
 
 		//register listeners
@@ -183,35 +206,34 @@ public class UpdateModelImplTest {
 		ActionListener downloadErrorListener = mock(ActionListener.class);
 		model.addDownloadErrorListener(downloadErrorListener);
 
-		Thread thread = model.startDownload();
-		thread.join();
+		model.startDownload().join();
 
 		//verify all the transactions were inserted into the DAO
-		List<RupeeTransaction> savedTransactions = interceptTransactions.savedTransactions;
-		assertEquals(2, savedTransactions.size());
-		assertTrue(savedTransactions.contains(t1));
-		assertTrue(savedTransactions.contains(t3));
+		verify(dao).insertTransaction(any(ShopTransactionDb.class), eq(true));
+		verify(dao).insertPaymentTransaction(any(PaymentTransactionDb.class));
+		verifyNoMoreInteractions(dao);
 
 		//verify listeners
 		verify(badSessionListener, never()).actionPerformed(null);
-		verify(pageDownloadedListener, times(2)).actionPerformed(null);
+		verify(pageDownloadedListener, never()).actionPerformed(null);
 		verify(downloadCompleteListener, never()).actionPerformed(null);
 		verify(downloadErrorListener).actionPerformed(null);
 
 		assertEquals(1, model.getShopTransactionsDownloaded());
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
-		assertEquals(2, model.getPagesDownloaded());
-		assertEquals(dg.getGenerated(2), model.getOldestParsedTransactionDate());
+		assertEquals(0, model.getPagesDownloaded()); //it never finished downloading the first page
+		assertEquals(t3.getTs(), model.getOldestParsedTransactionDate());
 		assertIntEquals(123, model.getRupeeBalance());
-		assertNotNull(model.getDownloadError());
+		assertSame(thrown, model.getDownloadError());
+
 		verify(uncaughtExceptionHandler, never()).uncaughtException(any(Thread.class), any(Throwable.class));
 	}
 
 	@Test
 	public void startDownload_error() throws Throwable {
 		ShopTransaction t1 = shop();
-		RawTransaction t2 = raw();
+		RupeeTransaction t2 = raw();
 		PaymentTransaction t3 = payment();
 
 		UpdateModelImpl model;
@@ -400,27 +422,19 @@ public class UpdateModelImplTest {
 	}
 
 	private ShopTransaction shop() {
-		ShopTransaction t = new ShopTransaction();
-		t.setTs(dg.next());
-		return t;
+		return new ShopTransaction.Builder().ts(dg.next()).build();
 	}
 
-	private RawTransaction raw() {
-		RawTransaction t = new RawTransaction();
-		t.setTs(dg.next());
-		return t;
+	private RupeeTransaction raw() {
+		return new RupeeTransaction.Builder<RupeeTransaction.Builder<?>>().ts(dg.next()).build();
 	}
 
 	private PaymentTransaction payment() {
-		PaymentTransaction t = new PaymentTransaction();
-		t.setTs(dg.next());
-		return t;
+		return new PaymentTransaction.Builder().ts(dg.next()).build();
 	}
 
-	private BonusFeeTransaction bonusFee() {
-		BonusFeeTransaction t = new BonusFeeTransaction();
-		t.setTs(dg.next());
-		return t;
+	private DailySigninBonus bonusFee() {
+		return new DailySigninBonus.Builder().ts(dg.next()).build();
 	}
 
 	private static ScraperBuilder scraper() {
@@ -453,15 +467,13 @@ public class UpdateModelImplTest {
 	}
 
 	private static class ScraperBuilder {
-		private final TransactionPageScraper scraper = mock(TransactionPageScraper.class);
+		private final RupeeTransactionPageScraper scraper = mock(RupeeTransactionPageScraper.class);
 		private int pageCount = 1;
-		private TransactionPage page1;
+		private RupeeTransactionPage page1;
 		private int pause = 0;
 
 		public ScraperBuilder page(RupeeTransaction... transactions) throws IOException {
-			final TransactionPage page = new TransactionPage();
-			page.setTransactions(Arrays.asList(transactions));
-			page.setRupeeBalance(123);
+			final RupeeTransactionPage page = new RupeeTransactionPage(123, pageCount, null, Arrays.asList(transactions));
 
 			if (pageCount == 1) {
 				page1 = page;

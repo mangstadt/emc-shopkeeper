@@ -5,14 +5,14 @@ import java.util.Date;
 import java.util.List;
 
 import emcshop.chat.ChatMessage;
-import emcshop.scraper.PaymentTransaction;
+import emcshop.db.PaymentTransactionDb;
 
 public interface IChatLogViewerModel {
 	File getLogDirectory();
 
 	void setLogDirectory(File dir);
 
-	PaymentTransaction getPaymentTransaction();
+	PaymentTransactionDb getPaymentTransaction();
 
 	List<ChatMessage> getChatMessages(Date date);
 

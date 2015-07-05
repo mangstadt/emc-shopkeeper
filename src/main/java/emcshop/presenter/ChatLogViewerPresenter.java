@@ -5,8 +5,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Date;
 
+import emcshop.db.PaymentTransactionDb;
 import emcshop.model.IChatLogViewerModel;
-import emcshop.scraper.PaymentTransaction;
 import emcshop.view.IChatLogViewerView;
 
 public class ChatLogViewerPresenter {
@@ -41,7 +41,7 @@ public class ChatLogViewerPresenter {
 		view.setLogDirectory(model.getLogDirectory());
 		view.setCurrentPlayer(model.getCurrentPlayer());
 
-		PaymentTransaction paymentTransaction = model.getPaymentTransaction();
+		PaymentTransactionDb paymentTransaction = model.getPaymentTransaction();
 		view.setPaymentTransaction(paymentTransaction);
 
 		Date dateToDisplay = (paymentTransaction == null) ? new Date() : paymentTransaction.getTs();

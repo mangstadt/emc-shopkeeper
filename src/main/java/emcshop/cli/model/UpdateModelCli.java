@@ -1,12 +1,12 @@
 package emcshop.cli.model;
 
-import emcshop.db.DbDao;
+import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
+
 import emcshop.model.UpdateModelImpl;
-import emcshop.scraper.TransactionPullerFactory;
 
 public class UpdateModelCli extends UpdateModelImpl {
-	public UpdateModelCli(TransactionPullerFactory pullerFactory, DbDao dao) {
-		super(pullerFactory);
+	public UpdateModelCli(RupeeTransactionReader.Builder builder, Integer oldestAllowablePaymentTransactionAge) {
+		super(builder, oldestAllowablePaymentTransactionAge);
 	}
 
 	@Override

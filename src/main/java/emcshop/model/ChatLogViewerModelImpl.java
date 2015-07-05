@@ -9,20 +9,20 @@ import emcshop.AppContext;
 import emcshop.Settings;
 import emcshop.chat.ChatLogParser;
 import emcshop.chat.ChatMessage;
-import emcshop.scraper.PaymentTransaction;
+import emcshop.db.PaymentTransactionDb;
 
 public class ChatLogViewerModelImpl implements IChatLogViewerModel {
 	private static final AppContext context = AppContext.instance();
 
 	private final Settings settings = context.get(Settings.class);
-	private final PaymentTransaction paymentTransaction;
+	private final PaymentTransactionDb paymentTransaction;
 	private ChatLogParser parser;
 
 	public ChatLogViewerModelImpl() {
 		this(null);
 	}
 
-	public ChatLogViewerModelImpl(PaymentTransaction paymentTransaction) {
+	public ChatLogViewerModelImpl(PaymentTransactionDb paymentTransaction) {
 		this.paymentTransaction = paymentTransaction;
 		parser = new ChatLogParser(getLogDirectory());
 	}
@@ -40,7 +40,7 @@ public class ChatLogViewerModelImpl implements IChatLogViewerModel {
 	}
 
 	@Override
-	public PaymentTransaction getPaymentTransaction() {
+	public PaymentTransactionDb getPaymentTransaction() {
 		return paymentTransaction;
 	}
 

@@ -26,16 +26,23 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
-import com.github.mangstadt.emc.rupees.dto.PaymentTransaction;
-import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
+import com.github.mangstadt.emc.rupees.dto.DailySigninBonus;
+import com.github.mangstadt.emc.rupees.dto.EggifyFee;
+import com.github.mangstadt.emc.rupees.dto.HorseSummonFee;
+import com.github.mangstadt.emc.rupees.dto.LockTransaction;
+import com.github.mangstadt.emc.rupees.dto.MailFee;
+import com.github.mangstadt.emc.rupees.dto.RupeeTransaction;
+import com.github.mangstadt.emc.rupees.dto.VaultFee;
+import com.github.mangstadt.emc.rupees.dto.VoteBonus;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 
 import emcshop.ItemIndex;
-import emcshop.scraper.BonusFeeTransaction;
 import emcshop.util.ClasspathUtils;
 
 /**
@@ -55,6 +62,19 @@ public abstract class DirbyDbDao implements DbDao {
 	protected Connection conn;
 	protected String jdbcUrl;
 	private Map<Integer, Date[]> firstLastSeenDates = new HashMap<Integer, Date[]>();
+
+	private final Map<Class<? extends RupeeTransaction>, String> bonusFeeColumnNames;
+	{
+		ImmutableMap.Builder<Class<? extends RupeeTransaction>, String> builder = ImmutableMap.builder();
+		builder.put(DailySigninBonus.class, "sign_in");
+		builder.put(EggifyFee.class, "eggify");
+		builder.put(HorseSummonFee.class, "horse");
+		builder.put(LockTransaction.class, "lock");
+		builder.put(MailFee.class, "mail");
+		builder.put(VaultFee.class, "vault");
+		builder.put(VoteBonus.class, "vote");
+		bonusFeeColumnNames = builder.build();
+	}
 
 	/**
 	 * Connects to the database and creates the database from scratch if it
@@ -500,7 +520,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void insertTransaction(ShopTransaction transaction, boolean updateInventory) throws SQLException {
+	public void insertTransaction(ShopTransactionDb transaction, boolean updateInventory) throws SQLException {
 		String playerName = transaction.getShopCustomer();
 		Player player = (playerName == null) ? null : selsertPlayer(playerName);
 
@@ -543,7 +563,8 @@ public abstract class DirbyDbDao implements DbDao {
 		stmt.setInt("quantity", transaction.getQuantity());
 		stmt.setInt("amount", transaction.getAmount());
 		stmt.setInt("balance", transaction.getBalance());
-		stmt.execute(conn);
+		int id = stmt.execute(conn);
+		transaction.setId(id);
 
 		if (player != null && updateInventory) {
 			addToInventory(itemId, transaction.getQuantity());
@@ -551,19 +572,12 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void insertPaymentTransactions(Collection<PaymentTransaction> transactions) throws SQLException {
-		if (transactions.isEmpty()) {
-			return;
-		}
-
+	public void insertPaymentTransaction(PaymentTransactionDb transaction) throws SQLException {
 		InsertStatement stmt = new InsertStatement("payment_transactions");
-		for (PaymentTransaction transaction : transactions) {
-			Player player = selsertPlayer(transaction.getPlayer());
-
-			insertPaymentTransaction(transaction, player.getId(), stmt);
-			stmt.nextRow();
-		}
-		stmt.execute(conn);
+		Player player = selsertPlayer(transaction.getPlayer());
+		insertPaymentTransaction(transaction, player.getId(), stmt);
+		int id = stmt.execute(conn);
+		transaction.setId(id);
 	}
 
 	@Override
@@ -605,7 +619,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
-	private void insertPaymentTransaction(PaymentTransaction transaction, int playerId, InsertStatement stmt) {
+	private void insertPaymentTransaction(PaymentTransactionDb transaction, int playerId, InsertStatement stmt) {
 		stmt.setTimestamp("ts", transaction.getTs());
 		stmt.setInt("player", playerId);
 		stmt.setInt("amount", transaction.getAmount());
@@ -860,24 +874,24 @@ public abstract class DirbyDbDao implements DbDao {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				Date ts = toDate(rs.getTimestamp("ts"));
-				String playerName, shopOwner;
+				String shopCustomer, shopOwner;
 				switch (transactionType) {
 				case MY_SHOP:
-					playerName = rs.getString("player");
+					shopCustomer = rs.getString("player");
 					shopOwner = null;
 					break;
 				case OTHER_SHOPS:
-					playerName = null;
+					shopCustomer = null;
 					shopOwner = rs.getString("shop_owner");
 					break;
 				default:
 					Integer id = (Integer) rs.getObject("player");
 					if (id == null) {
 						id = (Integer) rs.getObject("shop_owner");
-						playerName = null;
+						shopCustomer = null;
 						shopOwner = getPlayerName(id);
 					} else {
-						playerName = getPlayerName(id);
+						shopCustomer = getPlayerName(id);
 						shopOwner = null;
 					}
 					break;
@@ -887,7 +901,7 @@ public abstract class DirbyDbDao implements DbDao {
 				int amount = rs.getInt("amount");
 				int quantity = rs.getInt("quantity");
 
-				String key = ((playerName == null) ? shopOwner : playerName) + ":" + item;
+				String key = ((shopCustomer == null) ? shopOwner : shopCustomer) + ":" + item;
 				ShopTransactionDb transaction = lastTransactionByItem.get(key);
 				if (transaction != null) {
 					long diff = ts.getTime() - dateOfLastTransaction.get(transaction).getTime();
@@ -902,7 +916,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 				transaction = new ShopTransactionDb();
 				transaction.setTs(ts);
-				transaction.setPlayer(playerName);
+				transaction.setShopCustomer(shopCustomer);
 				transaction.setShopOwner(shopOwner);
 				transaction.setItem(item);
 				transaction.setAmount(amount);
@@ -1245,63 +1259,36 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void updateBonusesFees(List<BonusFeeTransaction> transactions) throws SQLException {
-		if (transactions.isEmpty()) {
+	public boolean isBonusFeeTransaction(RupeeTransaction transaction) {
+		return bonusFeeColumnNames.containsKey(transaction.getClass());
+	}
+
+	@Override
+	public void updateBonusFeeTotals(Map<Class<? extends RupeeTransaction>, MutableInt> totals) throws SQLException {
+		if (totals.isEmpty()) {
 			return;
 		}
 
-		//tally up totals
-		int horse, lock, eggify, vault, signIn, vote, mail;
-		horse = lock = eggify = vault = signIn = vote = mail = 0;
-		for (BonusFeeTransaction transaction : transactions) {
-			int amount = transaction.getAmount();
-
-			if (transaction.isEggifyFee()) {
-				eggify += amount;
+		List<Integer> values = new ArrayList<Integer>();
+		List<String> assignments = new ArrayList<String>();
+		for (Map.Entry<Class<? extends RupeeTransaction>, String> entry : bonusFeeColumnNames.entrySet()) {
+			MutableInt value = totals.get(entry.getKey());
+			if (value == null) {
 				continue;
 			}
 
-			if (transaction.isHorseFee()) {
-				horse += amount;
-				continue;
-			}
+			values.add(value.getValue());
 
-			if (transaction.isLockFee()) {
-				lock += amount;
-				continue;
-			}
-
-			if (transaction.isSignInBonus()) {
-				signIn += amount;
-				continue;
-			}
-
-			if (transaction.isVaultFee()) {
-				vault += amount;
-				continue;
-			}
-
-			if (transaction.isVoteBonus()) {
-				vote += amount;
-				continue;
-			}
-
-			if (transaction.isMailFee()) {
-				mail += amount;
-				continue;
-			}
+			String columnName = entry.getValue();
+			assignments.add(columnName + " = " + columnName + " + ?");
 		}
 
-		PreparedStatement stmt = stmt("UPDATE bonuses_fees SET eggify = eggify + ?, horse = horse + ?, lock = lock + ?, sign_in = sign_in + ?, vault = vault + ?, vote = vote + ?, mail = mail + ?");
+		PreparedStatement stmt = stmt("UPDATE bonuses_fees SET " + StringUtils.join(assignments, ", "));
 		try {
 			int i = 1;
-			stmt.setInt(i++, eggify);
-			stmt.setInt(i++, horse);
-			stmt.setInt(i++, lock);
-			stmt.setInt(i++, signIn);
-			stmt.setInt(i++, vault);
-			stmt.setInt(i++, vote);
-			stmt.setInt(i++, mail);
+			for (Integer value : values) {
+				stmt.setInt(i++, value);
+			}
 			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);

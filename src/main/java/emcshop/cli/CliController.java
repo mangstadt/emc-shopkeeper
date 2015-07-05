@@ -14,6 +14,8 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
+
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.QueryExporter;
@@ -29,7 +31,6 @@ import emcshop.model.IUpdateModel;
 import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
-import emcshop.scraper.TransactionPullerFactory;
 import emcshop.util.QuantityFormatter;
 import emcshop.util.RupeeFormatter;
 import emcshop.view.IUpdateView;
@@ -47,9 +48,9 @@ public class CliController {
 	public void update(Integer startAtPage, Integer stopAtPage) throws Throwable {
 		Date latestTransactionDateFromDb = dao.getLatestTransactionDate();
 		boolean firstUpdate = (latestTransactionDateFromDb == null);
+		Integer oldestAllowablePaymentTransactionAge = null;
 
 		//set configuration settings for puller
-		TransactionPullerFactory pullerFactory = new TransactionPullerFactory();
 		if (firstUpdate) {
 			FirstUpdateViewCli view = new FirstUpdateViewCli();
 			view.setStopAtPage(stopAtPage);
@@ -61,11 +62,8 @@ public class CliController {
 				return;
 			}
 
-			pullerFactory.setMaxPaymentTransactionAge(presenter.getMaxPaymentTransactionAge());
-			pullerFactory.setStopAtPage(presenter.getStopAtPage());
-			pullerFactory.setStartAtPage(startAtPage);
-		} else {
-			pullerFactory.setStopAtDate(latestTransactionDateFromDb);
+			stopAtPage = presenter.getStopAtPage();
+			oldestAllowablePaymentTransactionAge = view.getMaxPaymentTransactionAge();
 		}
 
 		//log user in
@@ -75,9 +73,21 @@ public class CliController {
 			loginShower.show();
 		}
 
+		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getCookieStore());
+		if (firstUpdate) {
+			builder.stop(stopAtPage);
+			builder.start(startAtPage);
+		} else {
+			builder.stop(latestTransactionDateFromDb);
+		}
+
+		if (oldestAllowablePaymentTransactionAge != null) {
+			oldestAllowablePaymentTransactionAge *= 24 * 60 * 60 * 1000;
+		}
+
 		//start the update
 		IUpdateView view = new UpdateViewCli(loginShower);
-		IUpdateModel model = new UpdateModelCli(pullerFactory, dao);
+		IUpdateModel model = new UpdateModelCli(builder, oldestAllowablePaymentTransactionAge);
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 		int transactions = presenter.getShopTransactions() + presenter.getPaymentTransactions() + presenter.getBonusFeeTransactions();

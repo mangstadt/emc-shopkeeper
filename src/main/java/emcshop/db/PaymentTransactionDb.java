@@ -12,6 +12,10 @@ public class PaymentTransactionDb {
 	private int amount, balance;
 	private String player, reason;
 
+	public PaymentTransactionDb() {
+		//empty
+	}
+
 	public PaymentTransactionDb(ResultSet rs) throws SQLException {
 		id = rs.getInt("id");
 		amount = rs.getInt("amount");

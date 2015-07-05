@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import emcshop.chat.ChatMessage;
-import emcshop.scraper.PaymentTransaction;
+import emcshop.db.PaymentTransactionDb;
 
 public interface IChatLogViewerView {
 	void addDateChangedListener(ActionListener listener);
@@ -19,7 +19,7 @@ public interface IChatLogViewerView {
 
 	void setLogDirectory(File logDirectory);
 
-	void setPaymentTransaction(PaymentTransaction paymentTransaction);
+	void setPaymentTransaction(PaymentTransactionDb paymentTransaction);
 
 	Date getDate();
 

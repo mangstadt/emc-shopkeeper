@@ -46,15 +46,15 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.db.DbDao;
+import emcshop.db.PaymentTransactionDb;
+import emcshop.db.ShopTransactionDb;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.model.ChatLogViewerModelImpl;
 import emcshop.model.IChatLogViewerModel;
 import emcshop.presenter.ChatLogViewerPresenter;
-import emcshop.scraper.PaymentTransaction;
 import emcshop.scraper.PlayerProfile;
-import emcshop.scraper.ShopTransaction;
 import emcshop.util.BaseFormatter;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
@@ -85,7 +85,7 @@ public class PaymentsTab extends JPanel {
 			removeAll();
 			validate();
 
-			List<PaymentTransaction> pendingPayments = dao.getPendingPaymentTransactions();
+			List<PaymentTransactionDb> pendingPayments = dao.getPendingPaymentTransactions();
 			if (pendingPayments.isEmpty()) {
 				add(new JLabel("No payment transactions found."), "align center");
 			} else {
@@ -240,10 +240,10 @@ public class PaymentsTab extends JPanel {
 	}
 
 	private static class Row {
-		private final PaymentTransaction transaction;
+		private final PaymentTransactionDb transaction;
 		private boolean selected = false;
 
-		public Row(PaymentTransaction transaction) {
+		public Row(PaymentTransactionDb transaction) {
 			this.transaction = transaction;
 		}
 	}
@@ -253,7 +253,7 @@ public class PaymentsTab extends JPanel {
 		private final Model model;
 		private final TableRowSorter<Model> rowSorter;
 
-		public PaymentsTable(List<PaymentTransaction> rows) {
+		public PaymentsTable(List<PaymentTransactionDb> rows) {
 			setRowHeight(24);
 
 			setDefaultRenderer(Row.class, new Renderer());
@@ -376,7 +376,7 @@ public class PaymentsTab extends JPanel {
 				}
 
 				final Row rowObj = (Row) value;
-				PaymentTransaction transaction = rowObj.transaction;
+				PaymentTransactionDb transaction = rowObj.transaction;
 				Column column = columns[col];
 				resetComponents();
 
@@ -479,9 +479,9 @@ public class PaymentsTab extends JPanel {
 		private class Model extends AbstractTableModel {
 			private final List<Row> data;
 
-			public Model(List<PaymentTransaction> data) {
+			public Model(List<PaymentTransactionDb> data) {
 				this.data = new ArrayList<Row>(data.size());
-				for (PaymentTransaction transaction : data) {
+				for (PaymentTransactionDb transaction : data) {
 					Row row = new Row(transaction);
 					this.data.add(row);
 				}
@@ -637,18 +637,18 @@ public class PaymentsTab extends JPanel {
 		}
 
 		private void assignRow(int row) {
-			PaymentTransaction transaction = model.data.get(row).transaction;
+			PaymentTransactionDb transaction = model.data.get(row).transaction;
 
 			AssignDialog.Result result = AssignDialog.show(owner, transaction);
 			if (result == null) {
 				return;
 			}
 
-			ShopTransaction shopTransaction = new ShopTransaction();
+			ShopTransactionDb shopTransaction = new ShopTransactionDb();
 			shopTransaction.setTs(transaction.getTs());
 			String player = transaction.getPlayer();
 			if (result.isMyShop()) {
-				shopTransaction.setPlayer(player);
+				shopTransaction.setShopCustomer(player);
 			} else {
 				shopTransaction.setShopOwner(player);
 			}
@@ -682,7 +682,7 @@ public class PaymentsTab extends JPanel {
 		}
 
 		private void splitRow(int row) {
-			PaymentTransaction transaction = model.data.get(row).transaction;
+			PaymentTransactionDb transaction = model.data.get(row).transaction;
 
 			Integer splitAmount = showSplitDialog(transaction);
 			if (splitAmount == null) {
@@ -699,7 +699,7 @@ public class PaymentsTab extends JPanel {
 			transaction.setBalance(origBalance + transaction.getAmount());
 
 			//create the new payment transaction
-			PaymentTransaction splitTransaction = new PaymentTransaction();
+			PaymentTransactionDb splitTransaction = new PaymentTransactionDb();
 			splitTransaction.setAmount(splitAmount);
 			splitTransaction.setBalance(transaction.getBalance() + splitAmount);
 			splitTransaction.setPlayer(transaction.getPlayer());
@@ -722,14 +722,14 @@ public class PaymentsTab extends JPanel {
 		}
 
 		private void showChatLog(int row) {
-			PaymentTransaction transaction = model.data.get(row).transaction;
+			PaymentTransactionDb transaction = model.data.get(row).transaction;
 			IChatLogViewerView view = new ChatLogViewerViewImpl(owner);
 			IChatLogViewerModel model = new ChatLogViewerModelImpl(transaction);
 			new ChatLogViewerPresenter(view, model);
 		}
 	}
 
-	private Integer showSplitDialog(PaymentTransaction transaction) {
+	private Integer showSplitDialog(PaymentTransactionDb transaction) {
 		int origAmount = Math.abs(transaction.getAmount());
 		do {
 			//@formatter:off
@@ -788,7 +788,7 @@ public class PaymentsTab extends JPanel {
 		private final TransactionTypeComboBox transactionType;
 		private boolean canceled = false;
 
-		public AssignDialog(Window owner, final PaymentTransaction paymentTransaction) {
+		public AssignDialog(Window owner, final PaymentTransactionDb paymentTransaction) {
 			super(owner, "Assign Payment Transaction");
 			setModal(true);
 			setResizable(false);
@@ -924,7 +924,7 @@ public class PaymentsTab extends JPanel {
 			dispose();
 		}
 
-		public static Result show(Window owner, PaymentTransaction paymentTransaction) {
+		public static Result show(Window owner, PaymentTransactionDb paymentTransaction) {
 			AssignDialog dialog = new AssignDialog(owner, paymentTransaction);
 			dialog.setVisible(true);
 			if (dialog.canceled) {
