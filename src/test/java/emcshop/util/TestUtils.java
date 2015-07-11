@@ -33,7 +33,7 @@ public class TestUtils {
 	}
 
 	public static void assertIntEquals(int expected, Integer actual) {
-		assertNotNull(actual);
+		assertNotNull("Integer object is null", actual);
 		assertEquals(Integer.valueOf(expected), actual);
 	}
 

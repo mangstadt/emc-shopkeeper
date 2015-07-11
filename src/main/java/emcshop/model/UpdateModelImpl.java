@@ -236,6 +236,7 @@ public class UpdateModelImpl implements IUpdateModel {
 				RupeeTransaction transaction;
 				int curPage = reader.getCurrentPageNumber();
 				while ((transaction = reader.next()) != null) {
+					rupeeBalance = reader.getRupeeBalance();
 					int page = reader.getCurrentPageNumber();
 					synchronized (UpdateModelImpl.this) {
 						if (downloadStopped) {
