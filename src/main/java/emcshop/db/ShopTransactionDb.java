@@ -5,29 +5,32 @@ import java.util.Date;
 import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
 
 /**
- * Represents a shop transaction.
+ * Represents a shop transaction that is stored, or will be stored, in the
+ * database.
  * @author Michael Angstadt
  */
 public class ShopTransactionDb {
 	private Integer id;
 	private Date ts;
-	private int amount, balance;
-	private String shopCustomer;
-	private String shopOwner;
-	private String item;
-	private int quantity;
+	private int amount, balance, quantity;
+	private String shopCustomer, shopOwner, item;
 
 	public ShopTransactionDb() {
 		//empty
 	}
 
-	public ShopTransactionDb(ShopTransaction transaction) {
+	/**
+	 * @param transaction the shop transaction to base this database object off
+	 * of
+	 * @param itemName the item name to assign to the database object
+	 */
+	public ShopTransactionDb(ShopTransaction transaction, String itemName) {
 		ts = transaction.getTs();
 		amount = transaction.getAmount();
 		balance = transaction.getBalance();
 		shopCustomer = transaction.getShopCustomer();
 		shopOwner = transaction.getShopOwner();
-		item = transaction.getItem();
+		item = itemName;
 		quantity = transaction.getQuantity();
 	}
 

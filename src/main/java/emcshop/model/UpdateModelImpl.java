@@ -22,6 +22,7 @@ import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
 
 import emcshop.AppContext;
 import emcshop.EMCShopkeeper;
+import emcshop.ItemIndex;
 import emcshop.ReportSender;
 import emcshop.db.DbDao;
 import emcshop.db.PaymentTransactionDb;
@@ -33,6 +34,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	private static final Logger logger = Logger.getLogger(UpdateModelImpl.class.getName());
 	private static final AppContext context = AppContext.instance();
 
+	private final ItemIndex itemIndex = ItemIndex.instance();
 	private final boolean firstUpdate;
 	private final RupeeTransactionReader.Builder builder;
 	private final Integer oldestAllowablePaymentTransactionAge;
@@ -254,7 +256,8 @@ public class UpdateModelImpl implements IUpdateModel {
 
 						if (transaction instanceof ShopTransaction) {
 							ShopTransaction shopTransaction = (ShopTransaction) transaction;
-							dao.insertTransaction(new ShopTransactionDb(shopTransaction), true);
+							String itemName = itemIndex.getDisplayName(shopTransaction.getItem());
+							dao.insertTransaction(new ShopTransactionDb(shopTransaction, itemName), true);
 							shopTransactionsCount++;
 							transactionsCount++;
 						} else if (transaction instanceof PaymentTransaction) {

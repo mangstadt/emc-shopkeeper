@@ -642,6 +642,64 @@ public class UpdateModelImplTest {
 		verifyNoMoreInteractions(dao);
 	}
 
+	@Test
+	public void item_name_translation() throws Throwable {
+		final ShopTransaction t1 = new ShopTransaction.Builder().ts(dg.next()).item("Apple").build();
+		final ShopTransaction t2 = new ShopTransaction.Builder().ts(dg.next()).item("Black Stn Glass").build();
+		final ShopTransaction t3 = new ShopTransaction.Builder().ts(dg.next()).item("FooBar").build();
+
+		UpdateModelImpl model;
+		{
+			//@formatter:off
+			RupeeTransactionReader reader = new MockReaderBuilder()
+				.page(t1, t2, t3)
+			.build();
+			//@formatter:on
+
+			RupeeTransactionReader.Builder builder = new MockBuilder(reader);
+
+			model = new UpdateModelImpl(builder, null);
+		}
+
+		//register listeners
+		ActionListener badSessionListener = mock(ActionListener.class);
+		model.addBadSessionListener(badSessionListener);
+		ActionListener pageDownloadedListener = mock(ActionListener.class);
+		model.addPageDownloadedListener(pageDownloadedListener);
+		ActionListener downloadCompleteListener = mock(ActionListener.class);
+		model.addDownloadCompleteListener(downloadCompleteListener);
+		ActionListener downloadErrorListener = mock(ActionListener.class);
+		model.addDownloadErrorListener(downloadErrorListener);
+
+		model.startDownload().join();
+
+		verify(dao).insertTransaction(argThat(new ArgumentMatcher<ShopTransactionDb>() {
+			@Override
+			public boolean matches(Object argument) {
+				ShopTransactionDb arg = (ShopTransactionDb) argument;
+				return arg.getTs().equals(t1.getTs()) && arg.getItem().equals("Apple");
+			}
+		}), eq(true));
+
+		verify(dao).insertTransaction(argThat(new ArgumentMatcher<ShopTransactionDb>() {
+			@Override
+			public boolean matches(Object argument) {
+				ShopTransactionDb arg = (ShopTransactionDb) argument;
+				return arg.getTs().equals(t2.getTs()) && arg.getItem().equals("Black Glass");
+			}
+		}), eq(true));
+
+		verify(dao).insertTransaction(argThat(new ArgumentMatcher<ShopTransactionDb>() {
+			@Override
+			public boolean matches(Object argument) {
+				ShopTransactionDb arg = (ShopTransactionDb) argument;
+				return arg.getTs().equals(t3.getTs()) && arg.getItem().equals("FooBar");
+			}
+		}), eq(true));
+
+		verifyNoMoreInteractions(dao);
+	}
+
 	private void verfyUncaughtExceptionHandlerCalled(boolean called) {
 		VerificationMode mode = called ? times(1) : never();
 		verify(uncaughtExceptionHandler, mode).uncaughtException(any(Thread.class), any(Throwable.class));
