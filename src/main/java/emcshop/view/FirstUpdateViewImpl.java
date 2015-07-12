@@ -115,19 +115,9 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 
 		paymentTransactionAgeLabel = new JLabel("days");
 
-		//@formatter:off
-		JLabel text = new JLabel(
-		"<html><div width=450>" +
-		"<b><font color=#aa0000 size=4><center>This is the first time you are running an update!</center></font></b><br>" +
-		"<center>To ensure accurate results, it is recommended that you <u><b>set move perms to false</b></u> on your res for the duration of this update:</center><br>" +
-		"<center><b><font size=5><code>/res set move false</code></font></b></center>");
-		//@formatter:on
-
 		setLayout(new MigLayout());
 
-		add(text, "align center, wrap");
-
-		JPanel settings = new GroupPanel("Settings");
+		JPanel settings = new GroupPanel("First Update Settings");
 
 		settings.add(new HelpLabel(null, "The higher a transaction page number is, the longer it takes for the page to be downloaded.  For example, page 2000 takes longer to load than page 20.<br><br>Therefore, it is recommended that you stop around page 5000, but you may change or disable this setting if you wish.  During the update operation, you can also click the \"Stop\" button, which will halt the update process and keep all transactions that were downloaded."), "split 4");
 		settings.add(stopAtCheckBox);
