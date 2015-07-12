@@ -57,21 +57,23 @@ public class PlayerProfileScraper {
 			return null;
 		}
 
-		PlayerProfile profile = new PlayerProfile();
-		profile.setPrivate(isPrivate);
+		PlayerProfile.Builder builder = new PlayerProfile.Builder();
+		builder.private_(isPrivate);
 		if (isPrivate) {
-			profile.setPlayerName(playerName);
-			return profile;
+			return builder.playerName(playerName).build();
 		}
 
-		profile.setPlayerName(scrapedPlayerName);
-		profile.setPortraitUrl(scrapePortraitUrl(document));
 		String title = scrapeTitle(document);
-		profile.setTitle(title);
-		profile.setRank(titleToRankMapping.get(title));
-		profile.setJoined(scrapeJoined(document));
 
-		return profile;
+		//@formatter:off
+		return builder
+			.playerName(scrapedPlayerName)
+			.portraitUrl(scrapePortraitUrl(document))
+			.title(title)
+			.rank(titleToRankMapping.get(title))
+			.joined(scrapeJoined(document))
+		.build();
+		//@formatter:on
 	}
 
 	/**

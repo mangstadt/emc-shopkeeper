@@ -47,14 +47,15 @@ public class ProfileLoaderTest {
 		}
 	}
 
-	private final PlayerProfile profile = new PlayerProfile();
-	{
-		profile.setPlayerName("shavingfoam");
-		profile.setPrivate(false);
-		profile.setRank(Rank.GOLD);
-		profile.setPortraitUrl("http://empireminecraft.com/data/avatars/l/12/12110.jpg?1389141773");
-		profile.setJoined(new Date());
-	}
+	//@formatter:off
+	private final PlayerProfile profile = new PlayerProfile.Builder()
+		.playerName("shavingfoam")
+		.private_(false)
+		.rank(Rank.GOLD)
+		.portraitUrl("http://empireminecraft.com/data/avatars/l/12/12110.jpg?1389141773")
+		.joined(new Date())
+	.build();
+	//@formatter:on
 
 	private File portraitFile, propertiesFile;
 	private ProfileDownloadedListener listener;
@@ -95,9 +96,7 @@ public class ProfileLoaderTest {
 	public void private_profile() throws Throwable {
 		String player = profile.getPlayerName();
 
-		PlayerProfile profile = new PlayerProfile();
-		profile.setPlayerName(player);
-		profile.setPrivate(true);
+		PlayerProfile profile = new PlayerProfile.Builder().playerName(player).private_(true).build();
 		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);
 
 		profileImageLoader.getPortrait(player, label, 16, listener);

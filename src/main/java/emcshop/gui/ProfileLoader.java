@@ -433,27 +433,27 @@ public class ProfileLoader {
 				return null;
 			}
 
-			PlayerProfile profile = new PlayerProfile();
 			PropertiesWrapper properties = new PropertiesWrapper(file);
 
-			profile.setPlayerName(properties.get("name"));
-
-			profile.setPrivate(properties.getBoolean("private", false));
-
+			Date joined;
 			try {
-				profile.setJoined(properties.getDate("joined"));
+				joined = properties.getDate("joined");
 			} catch (ParseException e) {
-				//ignore
+				joined = null;
 			}
 
 			String rankStr = properties.get("rank");
-			if (rankStr != null) {
-				profile.setRank(stringToRank.get(rankStr.toLowerCase()));
-			}
+			Rank rank = (rankStr == null) ? null : stringToRank.get(rankStr.toLowerCase());
 
-			profile.setTitle(properties.get("title"));
-
-			return profile;
+			//@formatter:off
+			return new PlayerProfile.Builder()
+				.playerName(properties.get("name"))
+				.private_(properties.getBoolean("private", false))
+				.joined(joined)
+				.rank(rank)
+				.title(properties.get("title"))
+			.build();
+			//@formatter:on
 		}
 
 		public void save(PlayerProfile profile) throws IOException {
