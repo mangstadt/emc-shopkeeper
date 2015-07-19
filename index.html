@@ -225,7 +225,7 @@
       <div id="main" role="main">
         <div class="download-bar">
         <div class="inner">
-          <span style="color:#aaa; float:left;">Latest version: 0.5.3<br />Released: June 28, 2015</span>
+          <span style="color:#aaa; float:left;">Latest version: 0.5.4<br />Released: July 19, 2015</span>
           <a href="https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar" class="download-button tar"><span>Download JAR</span></a>
           <a href="https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper.jnlp" class="download-button zip"><span>Auto-run</span></a>
         </div>
@@ -312,6 +312,24 @@
 </ul>
 
 <h1><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Changelog</h1>
+
+<div>
+	<b>0.5.4</b> - <i>July 19, 2015</i><br>
+	<ul>
+		<li>
+			Completely re-worked the code that downloads the rupee transactions from EMC:
+			<ul>
+				<li>Moved it into its own library (see: http://github.com/mangstadt/emc-rupee-transaction-downloader)</li>
+				<li>Returns pages in sequence instead of whichever downloaded first.</li>
+				<li>Ignores duplicate transactions. You don't have to set move perms to false on your res anymore in order to prevent new transactions appearing while you are downloading them.</li>
+			</ul>
+		</li>
+		<li>A warning is now shown if you change the username at the login screen.  It informs you that you must create a new profile if you want to download the transactions for another account (such as an alt account).</li>
+		<li>Items like "Bow-eo0f" now have icons.</li>
+		<li>Fixed some item names.</li>
+		<li>Updated a lot of the dependency libraries that EMC Shopkeeper uses.</li>
+	</ul>
+</div>
 
 <div>
 	<b>0.5.3</b> - <i>June 28, 2015</i><br>
