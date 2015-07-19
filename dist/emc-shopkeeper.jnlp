@@ -14,18 +14,19 @@
 	<resources>
 		<j2se version="1.6+" />
 		<jar href="emc-shopkeeper.jar" main="true" />
-		<jar href="deps/commons-codec-1.6.jar"/>
-		<jar href="deps/commons-io-2.1.jar"/>
-		<jar href="deps/commons-lang3-3.1.jar"/>
-		<jar href="deps/commons-logging-1.1.1.jar"/>
-		<jar href="deps/derby-10.10.1.1.jar"/>
-		<jar href="deps/guava-16.0.1.jar"/>
-		<jar href="deps/httpclient-4.2.3.jar"/>
-		<jar href="deps/httpcore-4.2.2.jar"/>
-		<jar href="deps/jcommon-1.0.17.jar"/>
-		<jar href="deps/jfreechart-1.0.15.jar"/>
-		<jar href="deps/jopt-simple-4.6.jar"/>
-		<jar href="deps/jsoup-1.7.1.jar"/>
+		<jar href="deps/commons-codec-1.9.jar"/>
+		<jar href="deps/commons-io-2.4.jar"/>
+		<jar href="deps/commons-lang3-3.4.jar"/>
+		<jar href="deps/commons-logging-1.2.jar"/>
+		<jar href="deps/derby-10.11.1.1.jar"/>
+		<jar href="deps/emc-rupee-transaction-downloader-1.0.jar"/>
+		<jar href="deps/guava-18.0.jar"/>
+		<jar href="deps/httpclient-4.5.jar"/>
+		<jar href="deps/httpcore-4.4.1.jar"/>
+		<jar href="deps/jcommon-1.0.23.jar"/>
+		<jar href="deps/jfreechart-1.0.19.jar"/>
+		<jar href="deps/jopt-simple-4.9.jar"/>
+		<jar href="deps/jsoup-1.8.2.jar"/>
 		<jar href="deps/microba-0.4.4.3.jar"/>
 		<jar href="deps/miglayout-core-4.2.jar"/>
 		<jar href="deps/miglayout-swing-4.2.jar"/>
