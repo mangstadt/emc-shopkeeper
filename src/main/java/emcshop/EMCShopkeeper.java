@@ -24,8 +24,9 @@ import joptsimple.OptionException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
-import com.github.mangstadt.emc.net.EmcWebsiteConnection;
 import com.github.mangstadt.emc.net.EmcWebsiteConnectionImpl;
 
 import emcshop.cli.CliController;
@@ -319,11 +320,17 @@ public class EMCShopkeeper {
 
 		//start the profile image loader
 		ProfileLoader profileLoader = new ProfileLoader(cacheDir);
-		profileLoader.setConnectionFactory(new ProfileLoader.EmcWebsiteConnectionFactory() {
+		profileLoader.setSessionFactory(new ProfileLoader.EmcWebsiteSessionFactory() {
 			@Override
-			public EmcWebsiteConnection createConnection() {
+			public CloseableHttpClient createSession() {
+				HttpClientBuilder builder = HttpClientBuilder.create();
+
 				EmcSession session = context.get(EmcSession.class);
-				return (session == null) ? new EmcWebsiteConnectionImpl() : session.createConnection();
+				if (session != null) {
+					builder.setDefaultCookieStore(session.getCookieStore());
+				}
+
+				return builder.build();
 			}
 		});
 		profileLoader.start();

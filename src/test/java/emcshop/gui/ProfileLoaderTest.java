@@ -7,15 +7,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Properties;
 
@@ -23,14 +27,16 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.jsoup.nodes.Document;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import com.github.mangstadt.emc.net.EmcWebsiteConnection;
 
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.scraper.PlayerProfile;
@@ -213,10 +219,28 @@ public class ProfileLoaderTest {
 
 	private ProfileLoader create(File cacheDir, PlayerProfileScraper scraper) {
 		ProfileLoader loader = new ProfileLoader(cacheDir);
-		loader.setConnectionFactory(new ProfileLoader.EmcWebsiteConnectionFactory() {
+		loader.setSessionFactory(new ProfileLoader.EmcWebsiteSessionFactory() {
 			@Override
-			public EmcWebsiteConnection createConnection() {
-				return mock(EmcWebsiteConnection.class);
+			public CloseableHttpClient createSession() {
+				/*
+				 * Create a mock client that just returns empty HTML pages. This
+				 * has to be done, otherwise Jsoup.parse() will go into an
+				 * infinite loop when a mocked InputStream is passed into it.
+				 */
+				CloseableHttpClient client = mock(CloseableHttpClient.class, withSettings().defaultAnswer(RETURNS_MOCKS));
+				CloseableHttpResponse response = mock(CloseableHttpResponse.class, withSettings().defaultAnswer(RETURNS_MOCKS));
+				HttpEntity entity = mock(HttpEntity.class, withSettings().defaultAnswer(RETURNS_MOCKS));
+				InputStream in = new ByteArrayInputStream("<html />".getBytes());
+
+				try {
+					when(client.execute(any(HttpUriRequest.class))).thenReturn(response);
+					when(response.getEntity()).thenReturn(entity);
+					when(entity.getContent()).thenReturn(in);
+				} catch (Exception e) {
+					//ignore
+				}
+
+				return client;
 			}
 		});
 		loader.setProfilePageScraper(scraper);

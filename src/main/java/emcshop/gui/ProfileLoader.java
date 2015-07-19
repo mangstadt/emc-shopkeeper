@@ -3,6 +3,7 @@ package emcshop.gui;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.EnumMap;
@@ -19,13 +20,19 @@ import javax.swing.JLabel;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import com.github.mangstadt.emc.net.EmcWebsiteConnection;
-import com.github.mangstadt.emc.net.EmcWebsiteConnectionImpl;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.net.UrlEscapers;
 
 import emcshop.gui.images.Images;
 import emcshop.scraper.PlayerProfile;
@@ -64,10 +71,10 @@ public class ProfileLoader {
 	private final ProfileCache profileCache = new ProfileCache();
 
 	private int threads = 4;
-	private EmcWebsiteConnectionFactory connectionFactory = new EmcWebsiteConnectionFactory() {
+	private EmcWebsiteSessionFactory sessionFactory = new EmcWebsiteSessionFactory() {
 		@Override
-		public EmcWebsiteConnection createConnection() {
-			return new EmcWebsiteConnectionImpl();
+		public CloseableHttpClient createSession() {
+			return HttpClientBuilder.create().build();
 		}
 	};
 	private PlayerProfileScraper scraper = new PlayerProfileScraper();
@@ -103,12 +110,12 @@ public class ProfileLoader {
 	}
 
 	/**
-	 * Sets the factory used to create {@link EmcWebsiteConnection} objects,
-	 * which are used to download the profile pages.
-	 * @param connectionFactory the factory
+	 * Sets the factory used to retrieve EMC webiste session information, which
+	 * is used to download private profile pages.
+	 * @param sessionFactory the factory
 	 */
-	public void setConnectionFactory(EmcWebsiteConnectionFactory connectionFactory) {
-		this.connectionFactory = connectionFactory;
+	public void setSessionFactory(EmcWebsiteSessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
 	}
 
 	/**
@@ -292,10 +299,10 @@ public class ProfileLoader {
 
 				//scrape the profile page
 				PlayerProfile profile = null;
-				EmcWebsiteConnection connection = connectionFactory.createConnection(); //create a new client each time so the user's login session token can be used
+				CloseableHttpClient client = sessionFactory.createSession(); //get the session information each time so the user's login session token can be used
 				try {
 					try {
-						Document page = connection.getProfilePage(playerName);
+						Document page = getProfilePage(playerName, client);
 						profile = scraper.scrapeProfile(playerName, page);
 					} catch (IOException e) {
 						logger.log(Level.WARNING, "Problem downloading player profile page.", e);
@@ -317,7 +324,7 @@ public class ProfileLoader {
 							File file = portraitFile(playerName);
 							Date lastModified = file.exists() ? new Date(file.lastModified()) : null;
 							try {
-								data = scraper.downloadPortrait(profile, lastModified, connection.getHttpClient());
+								data = scraper.downloadPortrait(profile, lastModified, client);
 							} catch (IOException e) {
 								logger.log(Level.WARNING, "Problem downloading profile image.", e);
 							}
@@ -333,7 +340,7 @@ public class ProfileLoader {
 						}
 					}
 				} finally {
-					IOUtils.closeQuietly(connection);
+					IOUtils.closeQuietly(client);
 				}
 
 				List<Job> waiting;
@@ -358,6 +365,23 @@ public class ProfileLoader {
 				}
 
 				waitList.removeAll(playerName);
+			}
+		}
+
+		private Document getProfilePage(String playerName, HttpClient client) throws IOException {
+			/*
+			 * EmcWebsiteConnection#getPlayerProfile cannot be used because its
+			 * HttpClient is configured to IGNORE redirects!
+			 */
+			String url = "http://u.emc.gs/" + UrlEscapers.urlPathSegmentEscaper().escape(playerName);
+			HttpGet request = new HttpGet(url);
+			HttpResponse response = client.execute(request);
+			HttpEntity entity = response.getEntity();
+			InputStream in = entity.getContent();
+			try {
+				return Jsoup.parse(in, "UTF-8", "http://empireminecraft.com");
+			} finally {
+				IOUtils.closeQuietly(in);
 			}
 		}
 	}
@@ -479,7 +503,7 @@ public class ProfileLoader {
 		}
 	}
 
-	public interface EmcWebsiteConnectionFactory {
-		EmcWebsiteConnection createConnection();
+	public interface EmcWebsiteSessionFactory {
+		CloseableHttpClient createSession();
 	}
 }
