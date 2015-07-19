@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -20,15 +21,18 @@ import net.miginfocom.swing.MigLayout;
 import emcshop.gui.HelpLabel;
 import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
+import emcshop.util.Listeners;
 
 @SuppressWarnings("serial")
 public class LoginViewImpl extends JDialog implements ILoginView {
+	private final Listeners loginListeners = new Listeners();
 	private final JButton login, cancel;
 	private final JTextField username;
 	private final JPasswordField password;
 	private final JCheckBox savePassword;
 	private final JLabel loading;
 	private final JPanel messagePanel;
+	private String origUsername;
 
 	public LoginViewImpl(final Window owner) {
 		super(owner, "Login");
@@ -38,7 +42,14 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		login = new JButton("Login");
 		login.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent event) {
+				if (origUsername != null && !origUsername.equalsIgnoreCase(username.getText())) {
+					boolean cancel = !showUsernameChangedDialog();
+					if (cancel) {
+						return;
+					}
+				}
+
 				messagePanel.removeAll();
 				messagePanel.add(loading);
 
@@ -49,6 +60,15 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 
 				pack();
 				validate();
+
+				Thread t = new Thread() {
+					@Override
+					public void run() {
+						loginListeners.fire();
+					}
+				};
+				t.setDaemon(true);
+				t.start();
 			}
 		});
 		GuiUtils.onKeyPress(this, KeyEvent.VK_ENTER, login);
@@ -90,20 +110,8 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	}
 
 	@Override
-	public void addOnLoginListener(final ActionListener listener) {
-		login.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				Thread t = new Thread() {
-					@Override
-					public void run() {
-						listener.actionPerformed(e);
-					}
-				};
-				t.setDaemon(true);
-				t.start();
-			}
-		});
+	public void addOnLoginListener(ActionListener listener) {
+		loginListeners.add(listener);
 	}
 
 	@Override
@@ -114,6 +122,8 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 
 	@Override
 	public void setUsername(String username) {
+		origUsername = username;
+
 		this.username.setText(username);
 		if (username != null) {
 			password.requestFocus();
@@ -181,5 +191,31 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	@Override
 	public void display() {
 		setVisible(true);
+	}
+
+	/**
+	 * @return true to continue, false to cancel
+	 */
+	private boolean showUsernameChangedDialog() {
+		//@formatter:off
+		int choice = JOptionPane.showOptionDialog(
+			LoginViewImpl.this,
+			
+			"You have changed the username to something different!\n\n" +
+			"If you want to download the transactions of an alt account, you have to create a separate profile!\n\n" +
+			"1. Go to [Menu Button > Settings] and click the \"Show Profiles on Startup\" menu item.\n" +
+			"2. Restart EMC Shopkeeper.\n" +
+			"3. At the \"Choose Profile\" dialog, type a name for your new profile in the textbox and click OK.",
+			
+			"Warning",
+			JOptionPane.YES_NO_OPTION,
+			JOptionPane.WARNING_MESSAGE,
+			null,
+			new Object[]{"Continue (not recommended)", "Cancel"},
+			"Cancel"
+		);
+		//@formatter:on
+
+		return choice == JOptionPane.YES_OPTION;
 	}
 }
