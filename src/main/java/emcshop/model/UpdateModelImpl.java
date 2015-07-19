@@ -3,10 +3,8 @@ package emcshop.model;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +26,7 @@ import emcshop.db.DbDao;
 import emcshop.db.PaymentTransactionDb;
 import emcshop.db.ShopTransactionDb;
 import emcshop.scraper.EmcSession;
-import emcshop.util.GuiUtils;
+import emcshop.util.Listeners;
 
 public class UpdateModelImpl implements IUpdateModel {
 	private static final Logger logger = Logger.getLogger(UpdateModelImpl.class.getName());
@@ -41,10 +39,10 @@ public class UpdateModelImpl implements IUpdateModel {
 	private final DbDao dao;
 	private final ReportSender reportSender;
 
-	private final List<ActionListener> pageDownloadedListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> badSessionListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> downloadErrorListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> downloadCompleteListeners = new ArrayList<ActionListener>();
+	private final Listeners pageDownloadedListeners = new Listeners();
+	private final Listeners badSessionListeners = new Listeners();
+	private final Listeners downloadErrorListeners = new Listeners();
+	private final Listeners downloadCompleteListeners = new Listeners();
 
 	private RupeeTransactionReader reader;
 	private long started, timeTaken;
@@ -226,7 +224,7 @@ public class UpdateModelImpl implements IUpdateModel {
 			try {
 				reader = builder.build();
 			} catch (InvalidCredentialsException e) {
-				GuiUtils.fireEvents(badSessionListeners);
+				badSessionListeners.fire();
 				return;
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -247,7 +245,7 @@ public class UpdateModelImpl implements IUpdateModel {
 
 						if (page != curPage) {
 							pagesCount++;
-							GuiUtils.fireEvents(pageDownloadedListeners);
+							pageDownloadedListeners.fire();
 							curPage = page;
 						}
 
@@ -295,11 +293,11 @@ public class UpdateModelImpl implements IUpdateModel {
 						return;
 					}
 					pagesCount++;
-					GuiUtils.fireEvents(pageDownloadedListeners);
+					pageDownloadedListeners.fire();
 					timeTaken = System.currentTimeMillis() - started;
 				}
 
-				GuiUtils.fireEvents(downloadCompleteListeners);
+				downloadCompleteListeners.fire();
 			} catch (Throwable t) {
 				//an error occurred during the update
 				synchronized (UpdateModelImpl.this) {
@@ -314,7 +312,7 @@ public class UpdateModelImpl implements IUpdateModel {
 					logger.log(Level.SEVERE, "Error downloading transactions.", t);
 				}
 
-				GuiUtils.fireEvents(downloadErrorListeners);
+				downloadErrorListeners.fire();
 			} finally {
 				IOUtils.closeQuietly(reader);
 			}
