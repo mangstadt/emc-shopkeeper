@@ -107,7 +107,7 @@
 	<Item name="Cobble Slab" id="44:3" emcNames="Cobblestone Slab" group="Stone" categories="14" />
 	<Item name="Cobble Wall" id="139" group="Stone" categories="14" />
 	<Item name="Cobblestone" id="4" group="Stone" categories="14" />
-	<Item name="Cobblestone Stairs" id="67" group="Stone" categories="14" />
+	<Item name="Cobblestone Stairs" id="67" group="Stone" categories="14" emcNames="Cobblestone Sta" />
 	<Item name="Cocoa Beans" id="351:3" emcNames="Brown Dye" group="Dyes" categories="4,6" />
 	<Item name="Comparator" id="404" categories="13" emcNames="Redstone Comparator" />
 	<Item name="Compass" id="345" group="Iron" />
@@ -420,7 +420,7 @@
 	<Item name="Stone Button" id="77" emcNames="Button" group="Stone" categories="13" />
 	<Item name="Stone Brick" id="98" group="Stone" categories="14" />
 	<Item name="Stone Brick Slab" id="44:5" emcNames="Stonebrick Slab" group="Stone" categories="14" />
-	<Item name="Stone Brick Stairs" id="109" group="Stone" categories="14" />
+	<Item name="Stone Brick Stairs" id="109" group="Stone" categories="14" emcNames="Stone Brick Sta" />
 	<Item name="Stone Hoe" id="291" stack="1" group="Stone" categories="6,16" />
 	<Item name="Stone Pickaxe" id="274" stack="1" group="Stone" categories="16" />
 	<Item name="Stone Plate" id="70" group="Stone" categories="13" />
