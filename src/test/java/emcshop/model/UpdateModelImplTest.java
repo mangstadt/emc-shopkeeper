@@ -706,7 +706,7 @@ public class UpdateModelImplTest {
 	}
 
 	private ShopTransaction shop() {
-		return new ShopTransaction.Builder().ts(dg.next()).build();
+		return new ShopTransaction.Builder().ts(dg.next()).item("Apple").build();
 	}
 
 	private RupeeTransaction raw() {

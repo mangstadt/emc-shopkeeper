@@ -457,15 +457,12 @@ public class DirbyDbDaoTest {
 		PaymentTransactionDb t = paymentTransactions().amount(1000).balance(20000).player("Notch").ts(dg.next()).dto();
 
 		dao.insertPaymentTransaction(t);
-		assertEquals(Integer.valueOf(1), t.getId());
+		assertNotNull(t.getId());
 
 		ResultSet rs = paymentTransactions().all();
 
 		rs.next();
 		paymentTransactions().ts(dg.getGenerated(0)).player(notchId).balance(20000).amount(1000).transaction(null).ignore(false).test(rs);
-
-		rs.next();
-		paymentTransactions().ts(dg.getGenerated(1)).player(players().name("Jeb").id()).balance(15000).amount(-5000).transaction(null).ignore(false).test(rs);
 
 		assertFalse(rs.next());
 	}
