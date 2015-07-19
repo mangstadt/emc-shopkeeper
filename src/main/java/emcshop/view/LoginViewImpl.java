@@ -45,6 +45,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 				login.setEnabled(false);
 				username.setEnabled(false);
 				password.setEnabled(false);
+				savePassword.setEnabled(false);
 
 				pack();
 				validate();
@@ -166,6 +167,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		login.setEnabled(true);
 		username.setEnabled(true);
 		password.setEnabled(true);
+		savePassword.setEnabled(true);
 
 		validate();
 		shake(this);
