@@ -62,6 +62,8 @@ public class ItemIndexTest {
 		assertEquals("diamond.png", index.getImageFileName("Diamond"));
 		assertEquals("orange_clay.png", index.getImageFileName("Orange Clay"));
 		assertEquals("water_bottle.png", index.getImageFileName("Zombie Potion"));
+		assertEquals("bow.png", index.getImageFileName("Bow-eo0f"));
+		assertEquals("diamond_helmet.png", index.getImageFileName("Diamond Helmet - §aBig Daddy Helmet"));
 	}
 
 	@Test

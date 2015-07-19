@@ -247,13 +247,22 @@ public class ItemIndex {
 	}
 
 	/**
-	 * Gets the image file name of an item
+	 * Gets the image file name of an item.
 	 * @param displayName the item's display name
 	 * @return the item's image file name
 	 */
 	public String getImageFileName(String displayName) {
 		ItemInfo item = byName.get(displayName.toLowerCase());
-		return (item == null) ? imageFileName(displayName) : item.image;
+		if (item != null) {
+			return item.image;
+		}
+
+		int dashPos = displayName.indexOf('-');
+		if (dashPos > 0) {
+			String beforeDash = displayName.substring(0, dashPos).trim();
+			return getImageFileName(beforeDash);
+		}
+		return imageFileName(displayName);
 	}
 
 	/**
