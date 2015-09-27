@@ -117,6 +117,8 @@ public class ReportSender {
 			String dbVersionStr = (dbVersion == null) ? "null" : dbVersion.toString();
 			xml.append("DatabaseVersion", dbVersionStr);
 
+			xml.append("JavaVendor", System.getProperty("java.vendor"));
+
 			xml.append("JavaVersion", System.getProperty("java.version"));
 
 			xml.append("OS", System.getProperty("os.name"));
