@@ -24,8 +24,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
-import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
-
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.Settings;
@@ -79,7 +77,7 @@ public class TransactionsTable extends JTable {
 		this.showQuantitiesInStacks = context.get(Settings.class).isShowQuantitiesInStacks();
 
 		setRowHeight(24);
-		setDefaultRenderer(ShopTransaction.class, new Renderer());
+		setDefaultRenderer(ShopTransactionDb.class, new Renderer());
 
 		model = new Model(transactions);
 		setModel(model);
@@ -146,9 +144,9 @@ public class TransactionsTable extends JTable {
 	private TableRowSorter<Model> createRowSorter() {
 		TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
 
-		rowSorter.setComparator(Column.TS.ordinal(), new Comparator<ShopTransaction>() {
+		rowSorter.setComparator(Column.TS.ordinal(), new Comparator<ShopTransactionDb>() {
 			@Override
-			public int compare(ShopTransaction one, ShopTransaction two) {
+			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
 				return one.getTs().compareTo(two.getTs());
 			}
 		});
@@ -160,21 +158,21 @@ public class TransactionsTable extends JTable {
 				return name1.compareToIgnoreCase(name2);
 			}
 		});
-		rowSorter.setComparator(Column.ITEM_NAME.ordinal(), new Comparator<ShopTransaction>() {
+		rowSorter.setComparator(Column.ITEM_NAME.ordinal(), new Comparator<ShopTransactionDb>() {
 			@Override
-			public int compare(ShopTransaction one, ShopTransaction two) {
+			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
 				return one.getItem().compareToIgnoreCase(two.getItem());
 			}
 		});
-		rowSorter.setComparator(Column.QUANTITY.ordinal(), new Comparator<ShopTransaction>() {
+		rowSorter.setComparator(Column.QUANTITY.ordinal(), new Comparator<ShopTransactionDb>() {
 			@Override
-			public int compare(ShopTransaction one, ShopTransaction two) {
+			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
 				return one.getQuantity() - two.getQuantity();
 			}
 		});
-		rowSorter.setComparator(Column.AMOUNT.ordinal(), new Comparator<ShopTransaction>() {
+		rowSorter.setComparator(Column.AMOUNT.ordinal(), new Comparator<ShopTransactionDb>() {
 			@Override
-			public int compare(ShopTransaction one, ShopTransaction two) {
+			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
 				return one.getAmount() - two.getAmount();
 			}
 		});
@@ -388,7 +386,7 @@ public class TransactionsTable extends JTable {
 
 		@Override
 		public Class<?> getColumnClass(int c) {
-			return ShopTransaction.class;
+			return ShopTransactionDb.class;
 		}
 
 		@Override
