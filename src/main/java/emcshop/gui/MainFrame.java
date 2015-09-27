@@ -442,15 +442,15 @@ public class MainFrame extends JFrame {
 	private void onUpdate() {
 		LoginShower loginShower = new LoginShower();
 
-		if (context.get(EmcSession.class) == null) {
+		EmcSession session = context.get(EmcSession.class);
+		if (session == null) {
 			//user hasn't logged in
 			LoginPresenter p = loginShower.show(MainFrame.this);
 			if (p.isCanceled()) {
 				return;
 			}
+			session = p.getSession();
 		}
-
-		EmcSession session = context.get(EmcSession.class);
 
 		clearSessionMenuItem.setEnabled(true);
 
@@ -462,7 +462,7 @@ public class MainFrame extends JFrame {
 		}
 
 		Integer oldestPaymentTransactionInDays = null;
-		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getCookieStore());
+		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getUsername(), session.getPassword());
 		if (latestTransactionDate == null) {
 			//it's the first update
 

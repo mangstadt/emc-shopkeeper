@@ -70,7 +70,7 @@ public class LoginPresenterTest {
 	@Test
 	public void valid_login_save_password() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		EmcSession session = new EmcSession(new BasicCookieStore());
+		EmcSession session = new EmcSession("username", "password", new BasicCookieStore());
 		when(model.login("username", "password")).thenReturn(session);
 
 		ILoginView view = mock(ILoginView.class);
@@ -90,7 +90,7 @@ public class LoginPresenterTest {
 	@Test
 	public void valid_login_do_not_save_password() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		EmcSession session = new EmcSession(new BasicCookieStore());
+		EmcSession session = new EmcSession("username", "password", new BasicCookieStore());
 		when(model.login("username", "password")).thenReturn(session);
 
 		ILoginView view = mock(ILoginView.class);
@@ -110,7 +110,7 @@ public class LoginPresenterTest {
 	@Test
 	public void cancel_login() throws Throwable {
 		ILoginModel model = mock(ILoginModel.class);
-		EmcSession session = new EmcSession(new BasicCookieStore());
+		EmcSession session = new EmcSession("username", "password", new BasicCookieStore());
 		when(model.login("username", "password")).thenReturn(session);
 
 		ILoginView view = mock(ILoginView.class);
@@ -134,7 +134,7 @@ public class LoginPresenterTest {
 			@Override
 			public EmcSession answer(InvocationOnMock invocation) throws Throwable {
 				Thread.sleep(300); //simulate network latency
-				return new EmcSession(new BasicCookieStore());
+				return new EmcSession("", "", new BasicCookieStore());
 			}
 		});
 

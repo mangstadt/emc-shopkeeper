@@ -29,7 +29,7 @@ public class LoginModelImpl implements ILoginModel {
 		EmcWebsiteConnection connection = null;
 		try {
 			connection = new EmcWebsiteConnectionImpl(username, password);
-			return new EmcSession(connection.getCookieStore());
+			return new EmcSession(username, password, connection.getCookieStore());
 		} catch (InvalidCredentialsException e) {
 			return null;
 		} finally {

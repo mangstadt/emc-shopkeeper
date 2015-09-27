@@ -11,8 +11,11 @@ import com.github.mangstadt.emc.net.EmcWebsiteConnectionImpl;
  */
 public class EmcSession {
 	private final CookieStore cookieStore;
+	private final String username, password;
 
-	public EmcSession(CookieStore cookieStore) {
+	public EmcSession(String username, String password, CookieStore cookieStore) {
+		this.username = username;
+		this.password = password;
 		this.cookieStore = cookieStore;
 	}
 
@@ -26,5 +29,13 @@ public class EmcSession {
 
 	public CookieStore getCookieStore() {
 		return cookieStore;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getPassword() {
+		return password;
 	}
 }

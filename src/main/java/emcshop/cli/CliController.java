@@ -73,7 +73,7 @@ public class CliController {
 			loginShower.show();
 		}
 
-		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getCookieStore());
+		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getUsername(), session.getPassword());
 		if (firstUpdate) {
 			builder.stop(stopAtPage);
 			builder.start(startAtPage);
