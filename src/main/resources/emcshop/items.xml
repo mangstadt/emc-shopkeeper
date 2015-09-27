@@ -72,7 +72,7 @@
 	<Item name="Bowl" id="281" categories="17" />
 	<Item name="Bread" id="297" categories="7" />
 	<Item name="Brewing Stand" id="117" categories="12" />
-	<Item name="Brick" id="336" group="Clay" categories="2" />
+	<Item name="Brick" id="336" group="Clay" categories="2" emcNames="Clay Brick" />
 	<Item name="Brick Block" id="45" group="Clay" categories="2" />
 	<Item name="Brick Slab" id="44:4" group="Clay" categories="2" />
 	<Item name="Brick Stairs" id="108" group="Clay" categories="2" />
@@ -145,7 +145,7 @@
 	<Item name="Diamond Barding" id="419" stack="1" categories="16" />
 	<Item name="Diamond Block" id="57" group="Diamonds" categories="11" />
 	<Item name="Diamond Boots" id="313" stack="1" group="Diamonds" categories="16" />
-	<Item name="Diamond Chest" id="311" stack="1" group="Diamonds" categories="16" />
+	<Item name="Diamond Chestplate" id="311" stack="1" group="Diamonds" categories="16" emcNames="Diamond Chest" />
 	<Item name="Diamond Helmet" id="310" stack="1" group="Diamonds" categories="16" />
 	<Item name="Diamond Hoe" id="293" stack="1" group="Diamonds" categories="6,16" />
 	<Item name="Diamond Leggings" id="312" stack="1" group="Diamonds" categories="16" />
@@ -177,6 +177,7 @@
 	<Item name="Feather" id="288" categories="9" />
 	<Item name="Fermented Spider Eye" id="376" categories="12" />
 	<Item name="Fern" id="31:2" categories="6" />
+	<Item name="Fire Charge" id="385" emcNames="Firework Charge" />
 	<Item name="Firework" id="401" />
 	<Item name="Fishing Rod" id="346" stack="1" categories="16" />
 	<Item name="Flint" id="318" />
@@ -194,7 +195,7 @@
 	<Item name="Gold Barding" id="418" stack="1" categories="16" />
 	<Item name="Gold Block" id="41" group="Gold" categories="11" />
 	<Item name="Gold Boots" id="317" stack="1" group="Gold" categories="16" />
-	<Item name="Gold Chest" id="315" stack="1" group="Gold" categories="16" />
+	<Item name="Gold Chestplate" id="315" stack="1" group="Gold" categories="16" emcNames="Gold Chest" />
 	<Item name="Gold Helmet" id="314" stack="1" group="Gold" categories="16" />
 	<Item name="Gold Hoe" id="294" stack="1" group="Gold" categories="6,16" />
 	<Item name="Gold Ingot" id="266" group="Gold" categories="11" />
@@ -219,7 +220,9 @@
 	<Item name="Gunpowder" id="289" emcNames="Sulphur" categories="9,12" />
 	<Item name="Hard Clay" id="172" group="Clay" categories="2" />
 	<Item name="Hay Block" id="170" categories="0,6" />
+	<Item name="Head" id="397:3" categories="9" />
 	<Item name="Hopper" id="154" group="Iron" categories="13" />
+	<Item name="Hopper Minecart" id="408" stack="1" group="Iron" categories="13,15" />
 	<Item name="Horse Egg" id="383:100" stack="1" group="Spawn Eggs" categories="0" />
 	<Item name="Ice" id="79" />
 	<Item name="Iron Axe" id="258" stack="1" group="Iron" categories="16" />
@@ -228,7 +231,7 @@
 	<Item name="Iron Block" id="42" group="Iron" categories="11" />
 	<Item name="Iron Boots" id="309" stack="1" group="Iron" categories="16" />
 	<Item name="Iron Bucket" id="325" stack="16" group="Iron" categories="16" />
-	<Item name="Iron Chest" id="307" stack="1" group="Iron" categories="16" />
+	<Item name="Iron Chestplate" id="307" stack="1" group="Iron" categories="16" emcNames="Iron Chest" />
 	<Item name="Iron Door" id="71" group="Iron" categories="13" />
 	<Item name="Iron Helmet" id="306" stack="1" group="Iron" categories="16" />
 	<Item name="Iron Hoe" id="292" stack="1" group="Iron" categories="6,16" />
@@ -261,7 +264,7 @@
 	<Item name="Leather Boots" id="301" stack="1" group="Leather" categories="16" />
 	<Item name="Leather Cap" id="298" stack="1" group="Leather" emcNames="Leather Helmet" categories="16" />
 	<Item name="Leather Pants" id="300" stack="1" group="Leather" emcNames="Leather Leggings" categories="16" />
-	<Item name="Leather Tunic" id="299" stack="1" group="Leather" emcNames="Leather Chest" categories="16" />
+	<Item name="Leather Tunic" id="299" stack="1" group="Leather" emcNames="Leather Chest,Leather Chestplate" categories="16" />
 	<Item name="Lever" id="69" categories="13" />
 	<Item name="Lghtblue Stclay" id="159:3" group="Clay" categories="2" />
 	<Item name="Light Blue Dye" id="351:12" group="Dyes" categories="4" />
@@ -360,9 +363,12 @@
 	<Item name="Rabbit Foot" id="414" group="Potions" categories="0,9,12" />
 	<Item name="Rabbit Egg" id="383:101" group="Spawn Eggs" categories="0" />
 	<Item name="Rabbit Hide" id="415" group="Leather" categories="9" />
+	<Item name="Rabbit Stew" id="413" categories="7" />
 	<Item name="Raw Beef" id="363" categories="7,9" />
 	<Item name="Raw Chicken" id="365" categories="7,9" />
 	<Item name="Raw Fish" id="349" group="Fish" categories="0,7" />
+	<Item name="Raw Mutton" id="423" categories="7,9" />
+	<Item name="Raw Rabbit" id="411" categories="7,9" />
 	<Item name="Raw Salmon" id="349:1" group="Fish" categories="0,7" />
 	<Item name="Record 12" id="2267" stack="1" group="Discs" categories="3" />
 	<Item name="Red Stclay" id="159:14" group="Clay" categories="2" />
@@ -453,13 +459,13 @@
 	<Item name="White Wool" id="35:0" group="Wool" categories="18" />
 	<Item name="Wither Skull" id="397:1" emcNames="Wither Head" categories="9" />
 	<Item name="Wolf Egg" id="383:95" group="Spawn Eggs" categories="0" />
+	<Item name="Wood Axe" id="271" stack="1" group="Wood" categories="16" emcNames="Wooden Axe" />
 	<Item name="Wood Button" id="143" group="Wood" categories="13" />
-	<Item name="Wooden Axe" id="271" stack="1" group="Wood" categories="16" />
-	<Item name="Wooden Hoe" id="290" stack="1" group="Wood" categories="6,16" />
-	<Item name="Wooden Pickaxe" id="270" stack="1" group="Wood" categories="16" />
+	<Item name="Wood Hoe" id="290" stack="1" group="Wood" categories="6,16" emcNames="Wooden Hoe" />
+	<Item name="Wood Pickaxe" id="270" stack="1" group="Wood" categories="16" emcNames="Wooden Pickaxe" />
 	<Item name="Wood Plate" id="72" group="Wood" emcNames="Wooden Plate" categories="13" />
-	<Item name="Wooden Shovel" id="269" stack="1" group="Wood" emcNames="Wooden Spade" categories="16" />
-	<Item name="Wooden Sword" id="268" stack="1" group="Wood" categories="16" />
+	<Item name="Wood Shovel" id="269" stack="1" group="Wood" categories="16" emcNames="Wooden Spade,Wood Spade,Wooden Shovel" />
+	<Item name="Wood Sword" id="268" stack="1" group="Wood" categories="16" emcNames="Wooden Sword" />
 	<Item name="Workbench" id="58" group="Wood" categories="16" />
 	<Item name="Yellow Stclay" id="159:4" group="Clay" categories="2" />
 	<Item name="Yellow Dye" id="351:11" group="Dyes" categories="4" />
@@ -522,7 +528,7 @@
 	
 	<Item name="Starter Axe" stack="1" image="iron_axe_enchanted.png" emcNames="Iron Axe - §6Starter Axe" categories="5,16" />
 	<Item name="Starter Boots" stack="1" image="iron_boots_enchanted.png" emcNames="Iron Boots - §6Starter Boots" categories="5,16" />
-	<Item name="Starter Chestplate" stack="1" image="iron_chest_enchanted.png" emcNames="Iron Chest - §6Starter Chestplate" categories="5,16" />
+	<Item name="Starter Chestplate" stack="1" image="iron_chestplate_enchanted.png" emcNames="Iron Chest - §6Starter Chestplate,Iron Chestplate - §6Starter Chestplate" categories="5,16" />
 	<Item name="Starter Helmet" stack="1" image="iron_helmet_enchanted.png" emcNames="Iron Helmet - §6Starter Helmet" categories="5,16" />
 	<Item name="Starter Horse" image="horse_egg.png" emcNames="Horse Egg - §6Starter Horse" categories="0,5" />
 	<Item name="Starter Leggings" stack="1" image="iron_leggings_enchanted.png" emcNames="Iron Leggings - §6Starter Leggings" categories="5,16" />
@@ -530,28 +536,34 @@
 	<Item name="Starter Shovel" stack="1" image="iron_shovel_enchanted.png" emcNames="Iron Shovel - §6Starter Shovel" categories="5,16" />
 	<Item name="Starter Sword" stack="1" image="iron_sword_enchanted.png" emcNames="Iron Sword - §6Starter Sword" categories="5,16" />
 	
-	<Item name="Iron Supporter Voucher" image="paper.png" emcNames="Paper - §7Iron Supporter Voucher" categories="5" />
-	<Item name="Gold Supporter Voucher" image="paper.png" emcNames="Paper - §6Gold Supporter Voucher" categories="5" />
 	<Item name="Diamond Supporter Voucher" image="paper.png" emcNames="Paper - §3Diamond Supporter Voucher" categories="5" />
+	<Item name="Gold Supporter Voucher" image="paper.png" emcNames="Paper - §6Gold Supporter Voucher" categories="5" />
+	<Item name="Iron Supporter Voucher" image="paper.png" emcNames="Paper - §7Iron Supporter Voucher" categories="5" />
+	<Item name="Stable Voucher" image="empty_map.png" emcNames="Empty Map - §aStable Voucher" categories="5" />
+	<Item name="Vault Voucher" image="empty_map.png" emcNames="Empty Map - §aVault Voucher" categories="5" />
 	
+	<Item name="2014 Birthday Cake" image="cake.png" emcNames="Cake - §62014 Birthday Cake" categories="5,7" />
 	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey" categories="5,7" />
 	<Item name="Cupid" image="pig_egg.png" emcNames="Pig Egg - §5=- §d§lCupid§5 -=" categories="0,5" />
 	<Item name="Cupid's Arrow" image="shiny_arrow.png" emcNames="Arrow - §dCupid's Arrow" categories="5,16" />
 	<Item name="Cupid's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §dCupid's Bow" categories="5,16" />
 	<Item name="Dancer" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lDancer§f§l»" categories="0,5" />
 	<Item name="Empire Assistant" image="compass.png" emcNames="Compass - §6Empire Assistant" categories="5" />
+	<Item name="Empire Firework" image="firework.png" emcNames="Firework - §aEmpire Firework" categories="5" />
+	<Item name="Ham Hacker" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §6Ham Hacker" categories="5,16" />
 	<Item name="Holiday Candle" image="torch.png" emcNames="Torch - §eHoliday Candle" categories="5" />
 	<Item name="Holiday Pick" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §f§l«§c§lHoliday Pick§f§l»" categories="5,16" />
+	<Item name="Independence Day Firework" image="firework.png" emcNames="Firework - §cIndependence §fDay §9Firework" categories="5" />
 	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench,Workbench - §6Labor Bench" categories="5" />
 	<Item name="Lucky Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §1Lucky Bow,Bow - §9Lucky Bow" categories="5,16" />
 	<Item name="Magical Eggcellent Wand" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand" categories="5" />
 	<Item name="Maxarian Head" image="head.png" emcNames="Head - §cMaxarian Head" categories="5" />
-	<Item name="Pi Pie" image="pumpkin_pie.png" emcNames="Pumpkin Pie - §6Pi Pie" categories="5" />
+	<Item name="Pi Pie" image="pumpkin_pie.png" emcNames="Pumpkin Pie - §6Pi Pie" categories="5,7" />
 	<Item name="Pot of Gold" image="cauldron.png" emcNames="Cauldron - §ePot of Gold" categories="5" />
-	<Item name="Stable Voucher" image="empty_map.png" emcNames="Empty Map - §aStable Voucher" categories="5" />
+	<Item name="Spooky Egg" image="egg.png" stack="16" emcNames="Egg - §fSpooky Egg" categories="5" />
+	<Item name="Super Dragon Poop" image="obsidian.png" emcNames="Obsidian - §4§lSuper Dragon Poop" categories="5" />
 	<Item name="Turkey Slicer" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4Turkey Slicer" categories="5,16" />
 	<Item name="Valens" image="horse_egg.png" emcNames="Horse Egg - §6§lValens" categories="0,5" />
-	<Item name="Vault Voucher" image="empty_map.png" emcNames="Empty Map - §aVault Voucher" categories="5" />
 	
 	<!-- Potions ========================================================== -->
 	
@@ -645,7 +657,7 @@
 	<Item name="Yellow Glass" id="95:4" emcNames="Yellowstn Glass" group="Glass" categories="8" />
 	<Item name="Lime Glass" id="95:5" emcNames="Lime Stn Glass" group="Glass" categories="8" />
 	<Item name="Pink Glass" id="95:6" emcNames="Pink Stn Glass" group="Glass" categories="8" />
-	<Item name="Gray Glass" id="95:7" emcNames="Gray Stn Glass" group="Glass" categories="8" />
+	<Item name="Gray Glass" id="95:7" emcNames="Gray Stn Glass,Grey Stn Glass" group="Glass" categories="8" />
 	<Item name="Light Gray Glass" id="95:8" emcNames="Ltgraystn Glass" group="Glass" categories="8" />
 	<Item name="Cyan Glass" id="95:9" emcNames="Cyan Stn Glass" group="Glass" categories="8" />
 	<Item name="Purple Glass" id="95:10" emcNames="Purplestn Glass" group="Glass" categories="8" />
@@ -664,7 +676,7 @@
 	<Item name="Yellow Glass Pane" id="160:4" emcNames="Yellowstn Pane" group="Glass" categories="8" />
 	<Item name="Lime Glass Pane" id="160:5" emcNames="Lime Stn Pane" group="Glass" categories="8" />
 	<Item name="Pink Glass Pane" id="160:6" emcNames="Pink Stn Pane" group="Glass" categories="8" />
-	<Item name="Gray Glass Pane" id="160:7" emcNames="Gray Stn Pane" group="Glass" categories="8" />
+	<Item name="Gray Glass Pane" id="160:7" emcNames="Gray Stn Pane,Grey Stn Pane" group="Glass" categories="8" />
 	<Item name="Light Gray Glass Pane" id="160:8" emcNames="Ltgraystn Pane" group="Glass" categories="8" />
 	<Item name="Cyan Glass Pane" id="160:9" emcNames="Cyan Stn Pane" group="Glass" categories="8" />
 	<Item name="Purple Glass Pane" id="160:10" emcNames="Purplestn Pane" group="Glass" categories="8" />
@@ -683,7 +695,7 @@
 	<Item name="Yellow Carpet" id="171:4" group="Wool" categories="18" />
 	<Item name="Lime Carpet" id="171:5" group="Wool" categories="18" />
 	<Item name="Pink Carpet" id="171:6" group="Wool" categories="18" />
-	<Item name="Gray Carpet" id="171:7" group="Wool" categories="18" />
+	<Item name="Gray Carpet" id="171:7" group="Wool" categories="18" emcNames="Grey Carpet" />
 	<Item name="Light Gray Carpet" id="171:8" emcNames="Light Gray Carp" group="Wool" categories="18" />
 	<Item name="Cyan Carpet" id="171:9" group="Wool" categories="18" />
 	<Item name="Purple Carpet" id="171:10" group="Wool" categories="18" />
