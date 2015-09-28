@@ -23,6 +23,10 @@ public class PaymentTransactionDb {
 		player = rs.getString("playerName");
 		ts = rs.getTimestamp("ts"); //TODO do I need to do a new Date() here?
 		reason = rs.getString("reason");
+		if (reason == null) {
+			//the rest of the app assumes reason will never be null
+			reason = "";
+		}
 	}
 
 	public PaymentTransactionDb(PaymentTransaction transaction) {
@@ -96,24 +100,37 @@ public class PaymentTransactionDb {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
 		PaymentTransactionDb other = (PaymentTransactionDb) obj;
-		if (amount != other.amount) return false;
-		if (balance != other.balance) return false;
+		if (amount != other.amount)
+			return false;
+		if (balance != other.balance)
+			return false;
 		if (id == null) {
-			if (other.id != null) return false;
-		} else if (!id.equals(other.id)) return false;
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
 		if (player == null) {
-			if (other.player != null) return false;
-		} else if (!player.equals(other.player)) return false;
+			if (other.player != null)
+				return false;
+		} else if (!player.equals(other.player))
+			return false;
 		if (reason == null) {
-			if (other.reason != null) return false;
-		} else if (!reason.equals(other.reason)) return false;
+			if (other.reason != null)
+				return false;
+		} else if (!reason.equals(other.reason))
+			return false;
 		if (ts == null) {
-			if (other.ts != null) return false;
-		} else if (!ts.equals(other.ts)) return false;
+			if (other.ts != null)
+				return false;
+		} else if (!ts.equals(other.ts))
+			return false;
 		return true;
 	}
 }
