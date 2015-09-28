@@ -565,6 +565,10 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			@Override
 			public void setValueAt(Object value, int row, int col) {
+				if (value == null) {
+					return;
+				}
+
 				QuantityTextField textField = (QuantityTextField) value;
 				Row rowObj = data.get(row);
 				Inventory inv = rowObj.inventory;
