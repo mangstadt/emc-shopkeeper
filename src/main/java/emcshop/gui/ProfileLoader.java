@@ -373,13 +373,13 @@ public class ProfileLoader {
 			 * EmcWebsiteConnection#getPlayerProfile cannot be used because its
 			 * HttpClient is configured to IGNORE redirects!
 			 */
-			String url = "http://u.emc.gs/" + UrlEscapers.urlPathSegmentEscaper().escape(playerName);
+			String url = "https://u.emc.gs/" + UrlEscapers.urlPathSegmentEscaper().escape(playerName);
 			HttpGet request = new HttpGet(url);
 			HttpResponse response = client.execute(request);
 			HttpEntity entity = response.getEntity();
 			InputStream in = entity.getContent();
 			try {
-				return Jsoup.parse(in, "UTF-8", "http://empireminecraft.com");
+				return Jsoup.parse(in, "UTF-8", "https://empireminecraft.com");
 			} finally {
 				IOUtils.closeQuietly(in);
 			}

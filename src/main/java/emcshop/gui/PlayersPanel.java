@@ -354,7 +354,7 @@ public class PlayersPanel extends JPanel {
 				sb.append("</i></b>");
 			}
 
-			playerNameLabel = new ClickableLabel(sb.toString(), "http://u.emc.gs/" + playerName);
+			playerNameLabel = new ClickableLabel(sb.toString(), "https://u.emc.gs/" + playerName);
 			playerNameLabel.setToolTipText("View " + playerName + "'s profile");
 		}
 		header.add(playerNameLabel, "span 2, wrap");
