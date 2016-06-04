@@ -22,6 +22,7 @@
 
 	<Item name="11 Disc" id="2266" stack="1" group="Discs" categories="3" />
 	<Item name="13 Disc" id="2256" stack="1" group="Discs" categories="3" />
+	<Item name="Acacia Boat" id="447" stack="1" group="Wood" categories="15,17" />
 	<Item name="Acacia Door" id="196" group="Wood" categories="13,17" />
 	<Item name="Acacia Fence" id="192" group="Wood" categories="17" />
 	<Item name="Acacia Gate" id="187" group="Wood" categories="17" />
@@ -37,12 +38,15 @@
 	<Item name="Anvil" id="145" group="Iron" categories="16" />
 	<Item name="Apple" id="260" categories="7" />
 	<Item name="Armor Stand" id="416" stack="16" categories="16" />
-	<Item name="Arrow" id="262" categories="9,16" />
 	<Item name="Azure Bluet" id="38:3" group="Flowers" categories="6" />
 	<Item name="Baked Potato" id="393" categories="7" />
 	<Item name="Bat Egg" id="383:65" group="Spawn Eggs" categories="0" />
 	<Item name="Beacon" id="138" />
 	<Item name="Bed" id="355" stack="1" />
+	<Item name="Beetroot" id="434" categories="6,7" />
+	<Item name="Beetroot Seeds" id="435" categories="6" />
+	<Item name="Beetroot Soup" id="436" categories="7" />
+	<Item name="Birch Boat" id="445" stack="1" group="Wood" categories="15,17" />
 	<Item name="Birch Door" id="194" group="Wood" categories="13,17" />
 	<Item name="Birch Fence" id="189" group="Wood" categories="17" />
 	<Item name="Birch Gate" id="184" group="Wood" categories="17" />
@@ -62,7 +66,6 @@
 	<Item name="Blue Dye" id="351:4" group="Dyes,Lapis" categories="4,11" />
 	<Item name="Blue Orchid" id="38:1" group="Flowers" categories="6" />
 	<Item name="Blue Wool" id="35:11" group="Wool" categories="18" />
-	<Item name="Boat" id="333" stack="1" group="Wood" categories="15" />
 	<Item name="Bone" id="352" categories="0,9" />
 	<Item name="Bone Meal" id="351:15" emcNames="Bonemeal" group="Dyes" categories="4,6" />
 	<Item name="Book" id="340" group="Leather" />
@@ -96,6 +99,8 @@
 	<Item name="Chirp Disc" id="2259" stack="1" group="Discs" categories="3" />
 	<Item name="Chiseled Quartz" id="155:1" group="Quartz" categories="11" />
 	<Item name="Chiseled Red Sandstone" id="179:1" emcNames="Ch Rd Sandstone" />
+	<Item name="Chorus Flower" id="200" categories="6" />
+	<Item name="Chorus Fruit" id="432" categories="6,7" />
 	<Item name="Circle Stone" id="98:3" group="Stone" categories="14" />
 	<Item name="Clay Ball" id="337" group="Clay" categories="2" />
 	<Item name="Clay Block" id="82" group="Clay" categories="2" />
@@ -127,6 +132,7 @@
 	<Item name="Cyan Dye" id="351:6" group="Dyes" categories="4" />
 	<Item name="Cyan Wool" id="35:9" group="Wool" categories="18" />
 	<Item name="Dandelion" id="37" group="Flowers" categories="6" />
+	<Item name="Dark Oak Boat" id="448" stack="1" group="Wood" categories="15,17" />
 	<Item name="Dark Oak Door" id="197" group="Wood" categories="13,17" />
 	<Item name="Dark Oak Fence" id="191" group="Wood" categories="17" />
 	<Item name="Dark Oak Gate" id="186" group="Wood" categories="17" />
@@ -156,17 +162,23 @@
 	<Item name="Diorite" id="1:3" />
 	<Item name="Dirt" id="3" />
 	<Item name="Dispenser" id="23" group="Stone" categories="13" />
+	<Item name="Dragon's Breath" id="437" group="Potions" categories="12" emcNames="Dragons Breath" />
+	<Item name="Dragon Head" id="397:5" categories="9" />
 	<Item name="Dragon Egg" id="122" />
 	<Item name="Dragon Stone" emcNames="Coal - §5§lDragon Stone" categories="5" />
 	<Item name="Dragon Stone Fragment" emcNames="Flint - §5Dragon Stone Fragment" categories="5" />
 	<Item name="Dropper" id="158" group="Stone" categories="13" />
 	<Item name="Egg" id="344" stack="16" categories="9" />
+	<Item name="Elyta" id="443" categories="15" />
 	<Item name="Emerald" id="388" categories="11" />
 	<Item name="Emerald Block" id="133" categories="11" />
 	<Item name="Emerald Ore" id="129" categories="11" />
 	<Item name="Empty Map" id="395" />
 	<Item name="Enchantment Table" id="116" group="Diamonds" />
 	<Item name="Enchanted Book" emcNames="Enchbook" />
+	<Item name="End Brick" id="206" emcNames="End Bricks" />
+	<Item name="End Crystal" id="426" />
+	<Item name="End Rod" id="198" />
 	<Item name="End Stone" id="121" />
 	<Item name="Ender Chest" id="130" />
 	<Item name="Ender Pearl" id="368" stack="16" categories="9,15" />
@@ -179,6 +191,7 @@
 	<Item name="Fern" id="31:2" categories="6" />
 	<Item name="Fire Charge" id="385" emcNames="Firework Charge" />
 	<Item name="Firework" id="401" />
+	<Item name="Firework Star" id="402" />
 	<Item name="Fishing Rod" id="346" stack="1" categories="16" />
 	<Item name="Flint" id="318" />
 	<Item name="Flint And Steel" id="259" stack="1" categories="16" />
@@ -246,6 +259,7 @@
 	<Item name="Item Frame" id="389" group="Leather" />
 	<Item name="Jack O Lantern" id="91" />
 	<Item name="Jukebox" id="84" group="Diamonds" categories="3" />
+	<Item name="Jungle Boat" id="446" stack="1" group="Wood" categories="15,17" />
 	<Item name="Jungle Door" id="195" group="Wood" categories="13,17" />
 	<Item name="Jungle Fence" id="190" group="Wood" categories="17" />
 	<Item name="Jungle Gate" id="185" group="Wood" categories="17" />
@@ -287,7 +301,7 @@
 	<Item name="Melon Seeds" id="362" categories="6" />
 	<Item name="Milk Bucket" id="335" stack="1" group="Iron" categories="7,12,16" />
 	<Item name="Minecart" id="328" stack="1" group="Iron" categories="15" />
-	<Item name="Mooshroom Egg" id="383:96" group="Spawn Eggs" categories="0" />
+	<Item name="Mooshroom Egg" id="383:96" group="Spawn Eggs" categories="0" emcNames="MUSHROOM_COW EGG" />
 	<Item name="Mossy Cobble" id="48" group="Stone" categories="14" />
 	<Item name="Mossy Stone" id="98:1" group="Stone" categories="14" />
 	<Item name="Mossy Wall" id="139:1" group="Stone" categories="14" />
@@ -303,6 +317,7 @@
 	<Item name="Nether Star" id="399" categories="9" />
 	<Item name="Netherrack" id="87" categories="10" />
 	<Item name="Note Block" id="25" categories="3,13" />
+	<Item name="Oak Boat" id="333" stack="1" group="Wood" categories="15,17" emcNames="Boat" />
 	<Item name="Oak Door" id="64" group="Wood" emcNames="Door,Wood Door" categories="13,17" />
 	<Item name="Oak Fence" id="85" group="Wood" emcNames="Fence" categories="17" />
 	<Item name="Oak Gate" id="107" group="Wood" emcNames="Fence Gate" categories="17" />
@@ -337,6 +352,7 @@
 	<Item name="Polished Andesite" id="1:6" />
 	<Item name="Polished Diorite" id="1:4" />
 	<Item name="Polished Granite" id="1:2" />
+	<Item name="Popped Chorus Fruit" id="433" categories="6" />
 	<Item name="Poppy" id="38" emcNames="Rose" group="Flowers" categories="6,9" />
 	<Item name="Pork" id="319" categories="7,9" />
 	<Item name="Potato" id="392" emcNames="Potato Item" categories="6,7" />
@@ -398,6 +414,7 @@
 	<Item name="Seeds" id="295" categories="0,6" />
 	<Item name="Shears" id="359" stack="1" group="Iron" categories="16" />
 	<Item name="Sheep Egg" id="383:91" group="Spawn Eggs" categories="0" />
+	<Item name="Shield" id="442" stack="1" categories="16" />
 	<Item name="Sign" id="63" stack="16" group="Wood" categories="17" />
 	<Item name="Silver Dye" id="351:7" group="Dyes" categories="4" />
 	<Item name="Silver Wool" id="35:8" group="Wool" categories="18" />
@@ -411,6 +428,7 @@
 	<Item name="Soul Sand" id="88" categories="10" />
 	<Item name="Spider Eye" id="375" categories="9,12" />
 	<Item name="Sponge" id="19" />
+	<Item name="Spruce Boat" id="444" stack="1" group="Wood" categories="15,17" />
 	<Item name="Spruce Door" id="193" group="Wood" categories="13,17" />
 	<Item name="Spruce Fence" id="188" group="Wood" categories="17" />
 	<Item name="Spruce Gate" id="183" group="Wood" categories="17" />
@@ -567,6 +585,10 @@
 	
 	<!-- Potions ========================================================== -->
 	
+	<Item name="Potion" id="373" image="water_bottle.png" stack="1" group="Potions" categories="12" />
+	<Item name="Splash Potion" id="438" emcNames="SPLASH_POTION" image="potion_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion" id="441" emcNames="LINGERING_POTION" image="potion_lingering.png" stack="1" group="Potions" categories="12" />
+	
 	<Item name="Awkward Potion" id="373:16" emcNames="Potion:16" image="water_bottle.png" stack="1" group="Potions" categories="12" />
 	<Item name="Thick Potion" id="373:32" emcNames="Potion:32" image="water_bottle.png" stack="1" group="Potions" categories="12" />
 	<Item name="Mundane Potion Ext" id="373:64" emcNames="Potion:64" image="water_bottle.png" stack="1" group="Potions" categories="12" />
@@ -579,6 +601,9 @@
 	<Item name="Splash Potion of Regeneration" id="373:16385" emcNames="Potion:16385" image="potion_regeneration_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Regeneration II" id="373:16417" emcNames="Potion:16417" image="potion_regeneration_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Regeneration Ext" id="373:16449" emcNames="Potion:16449" image="potion_regeneration_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Regeneration" image="potion_regeneration_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Regeneration II" image="potion_regeneration_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Regeneration Ext" image="potion_regeneration_lingering.png" stack="1" group="Potions" categories="12" />
 
 	<Item name="Potion of Swiftness" id="373:8194" emcNames="Potion:8194" image="potion_swiftness.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Swiftness II" id="373:8226" emcNames="Potion:8226" image="potion_swiftness.png" stack="1" group="Potions" categories="12" />
@@ -586,11 +611,16 @@
 	<Item name="Splash Potion of Swiftness" id="373:16386" emcNames="Potion:16386" image="potion_swiftness_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Swiftness II" id="373:16418" emcNames="Potion:16418" image="potion_swiftness_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Swiftness Ext" id="373:16450" emcNames="Potion:16450" image="potion_swiftness_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Swiftness" image="potion_swiftness_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Swiftness II" image="potion_swiftness_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Swiftness Ext" image="potion_swiftness_lingering.png" stack="1" group="Potions" categories="12" />
 
 	<Item name="Potion of Fire Resistance" id="373:8195,373:8227" emcNames="Potion:8195,Potion:8227" image="potion_fire_resistance.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Fire Resistance Ext" id="373:8259" emcNames="Potion:8259" image="potion_fire_resistance.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Fire Resistance" id="373:16387,373:16419" emcNames="Potion:16387,Potion:16419" image="potion_fire_resistance_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Fire Resistance Ext" id="373:16451" emcNames="Potion:16451" image="potion_fire_resistance_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Fire Resistance" image="potion_fire_resistance_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Fire Resistance Ext" image="potion_fire_resistance_lingering.png" stack="1" group="Potions" categories="12" />
 
 	<Item name="Potion of Poison" id="373:8196" emcNames="Potion:8196" image="potion_poison.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Poison II" id="373:8228" emcNames="Potion:8228" image="potion_poison.png" stack="1" group="Potions" categories="12" />
@@ -598,21 +628,30 @@
 	<Item name="Splash Potion of Poison" id="373:16388" emcNames="Potion:16388" image="potion_poison_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Poison II" id="373:16420" emcNames="Potion:16420" image="potion_poison_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Poison Ext" id="373:16452" emcNames="Potion:16452" image="potion_poison_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Poison" image="potion_poison_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Poison II" image="potion_poison_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Poison Ext" image="potion_poison_lingering.png" stack="1" group="Potions" categories="12" />
 
 	<Item name="Potion of Health" id="373:8197" emcNames="Potion:8197" image="potion_health.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Health II" id="373:8229,373:8261" emcNames="Potion:8229,Potion:8261" image="potion_health.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Health" id="373:16389" emcNames="Potion:16389" image="potion_health_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Health II" id="373:16421,373:16453" emcNames="Potion:16421,Potion:16453" image="potion_health_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Health" image="potion_health_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Health II" image="potion_health_lingering.png" stack="1" group="Potions" categories="12" />
 
 	<Item name="Potion of Night Vision" id="373:8198,373:8230" emcNames="Potion:8198,Potion:8230" image="potion_night_vision.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Night Vision Ext" id="373:8262" emcNames="Potion:8262" image="potion_night_vision.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Night Vision" id="373:16390,373:16422" emcNames="Potion:16390,Potion:16422" image="potion_night_vision_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Night Vision Ext" id="373:16454" emcNames="Potion:16454" image="potion_night_vision_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Night Vision" image="potion_night_vision_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Night Vision Ext" image="potion_night_vision_lingering.png" stack="1" group="Potions" categories="12" />
 
 	<Item name="Potion of Weakness" id="373:8200,373:8232" emcNames="Potion:8200,Potion:8232" image="potion_weakness.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Weakness Ext" id="373:8264" emcNames="Potion:8264" image="potion_weakness.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Weakness" id="373:16392,373:16424" emcNames="Potion:16392,Potion:16424" image="potion_weakness_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Weakness Ext" id="373:16456" emcNames="Potion:16456,Potion:24648" image="potion_weakness_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Weakness" image="potion_weakness_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Weakness Ext" image="potion_weakness_lingering.png" stack="1" group="Potions" categories="12" />
 
 	<Item name="Potion of Strength" id="373:8201" emcNames="Potion:8201" image="potion_strength.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Strength II" id="373:8233" emcNames="Potion:8233" image="potion_strength.png" stack="1" group="Potions" categories="12" />
@@ -620,26 +659,37 @@
 	<Item name="Splash Potion of Strength" id="373:16393" emcNames="Potion:16393" image="potion_strength_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Strength II" id="373:16425" emcNames="Potion:16425" image="potion_strength_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Strength Ext" id="373:16457" emcNames="Potion:16457" image="potion_strength_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Strength" image="potion_strength_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Strength II" image="potion_strength_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Strength Ext" image="potion_strength_lingering.png" stack="1" group="Potions" categories="12" />
 	
 	<Item name="Potion of Slowness" id="373:8202,373:8234" emcNames="Potion:8202,Potion:8234" image="potion_slowness.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Slowness Ext" id="373:8266" emcNames="Potion:8266" image="potion_slowness.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Slowness" id="373:16394,373:16426" emcNames="Potion:16394,Potion:16426" image="potion_slowness_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Slowness Ext" id="373:16458" emcNames="Potion:16458,Potion:24650" image="potion_slowness_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Slowness" image="potion_slowness_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Slowness Ext" image="potion_slowness_lingering.png" stack="1" group="Potions" categories="12" />
 	
 	<Item name="Potion of Harming" id="373:8204" emcNames="Potion:8204" image="potion_harming.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Harming II" id="373:8236,373:8268" emcNames="Potion:8236,Potion:8268" image="potion_harming.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Harming" id="373:16396" emcNames="Potion:16396" image="potion_harming_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Harming II" id="373:16428,373:16460,373:24620" emcNames="Potion:16428,Potion:16460,Potion:24620" image="potion_harming_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Harming" image="potion_harming_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Harming II" image="potion_harming_lingering.png" stack="1" group="Potions" categories="12" />
 
 	<Item name="Potion of Invisibility" id="373:8206,373:8238" emcNames="Potion:8206,Potion:8238" image="potion_invisibility.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Invisibility Ext" id="373:8270" emcNames="Potion:8270" image="potion_invisibility.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Invisibility" id="373:16398,373:16430" emcNames="Potion:16398,Potion:16430" image="potion_invisibility_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Invisibility Ext" id="373:16462,373:24654" emcNames="Potion:16462,Potion:24654" image="potion_invisibility_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Lingering" image="potion_invisibility_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Lingering Ext" image="potion_invisibility_lingering.png" stack="1" group="Potions" categories="12" />
 	
 	<Item name="Potion of Water Breathing" id="373:8205,373:8237" emcNames="Potion:8205,Potion:8237" image="potion_water_breathing.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Water Breathing Ext" id="373:8269" emcNames="Potion:8269" image="potion_water_breathing.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Water Breathing" id="373:16397,373:16429" emcNames="Potion:16397,Potion:16429" image="potion_water_breathing_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Water Breathing Ext" id="373:16461" emcNames="Potion:16461" image="potion_water_breathing_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Water Breathing" image="potion_water_breathing_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Water Breathing Ext" image="potion_water_breathing_lingering.png" stack="1" group="Potions" categories="12" />
 	
 	<Item name="Potion of Leaping" id="373:8203" emcNames="Potion:8203" image="potion_leaping.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Leaping Ext" id="373:8267" emcNames="Potion:8267" image="potion_leaping.png" stack="1" group="Potions" categories="12" />
@@ -647,6 +697,65 @@
 	<Item name="Splash Potion of Leaping" id="373:16395" emcNames="Potion:16395" image="potion_leaping_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Leaping Ext" id="373:16459" emcNames="Potion:16459" image="potion_leaping_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Leaping II" id="373:16427" emcNames="Potion:16427" image="potion_leaping_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Leaping" image="potion_leaping_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Leaping Ext" image="potion_leaping_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Leaping II" image="potion_leaping_lingering.png" stack="1" group="Potions" categories="12" />
+	
+	<Item name="Potion of Luck" image="potion_luck.png" stack="1" group="Potions" categories="12" />
+	<Item name="Splash Potion of Luck" image="potion_luck_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Luck" image="potion_luck_lingering.png" stack="1" group="Potions" categories="12" />
+	
+	<!-- Arrows ==================================================== -->
+	
+	<Item name="Arrow" id="262" categories="9,16" />
+	<Item name="Spectral Arrow" id="439" categories="16" />
+	<Item name="Tipped Arrow" id="440" emcNames="TIPPED_ARROW" categories="16" image="arrow_poison.png" />
+	
+	<Item name="Tipped Arrow of Fire Resistance" categories="16" image="arrow_fire_resistance.png" />
+	<Item name="Tipped Arrow of Fire Resistance Ext" categories="16" image="arrow_fire_resistance.png" />
+	
+	<Item name="Tipped Arrow of Harming" categories="16" image="arrow_harming.png" />
+	<Item name="Tipped Arrow of Harming II" categories="16" image="arrow_harming.png" />
+	
+	<Item name="Tipped Arrow of Healing" categories="16" image="arrow_healing.png" />
+	<Item name="Tipped Arrow of Healing II" categories="16" image="arrow_healing.png" />
+	
+	<Item name="Tipped Arrow of Invisibility" categories="16" image="arrow_invisibility.png" />
+	<Item name="Tipped Arrow of Invisibility Ext" categories="16" image="arrow_invisibility.png" />
+	
+	<Item name="Tipped Arrow of Leaping" categories="16" image="arrow_leaping.png" />
+	<Item name="Tipped Arrow of Leaping Ext" categories="16" image="arrow_leaping.png" />
+	<Item name="Tipped Arrow of Leaping II" categories="16" image="arrow_leaping.png" />
+	
+	<Item name="Tipped Arrow of Luck" categories="16" image="arrow_luck.png" />
+	
+	<Item name="Tipped Arrow of Night Vision" categories="16" image="arrow_night_vision.png" />
+	<Item name="Tipped Arrow of Night Vision Ext" categories="16" image="arrow_night_vision.png" />
+	
+	<Item name="Tipped Arrow of Poison" categories="16" image="arrow_poison.png" />
+	<Item name="Tipped Arrow of Poison Ext" categories="16" image="arrow_poison.png" />
+	<Item name="Tipped Arrow of Poison II" categories="16" image="arrow_poison.png" />
+	
+	<Item name="Tipped Arrow of Regeneration" categories="16" image="arrow_regeneration.png" />
+	<Item name="Tipped Arrow of Regeneration Ext" categories="16" image="arrow_regeneration.png" />
+	<Item name="Tipped Arrow of Regeneration II" categories="16" image="arrow_regeneration.png" />
+	
+	<Item name="Tipped Arrow of Slowness" categories="16" image="arrow_fire_slowness.png" />
+	<Item name="Tipped Arrow of Slowness Ext" categories="16" image="arrow_fire_slowness.png" />
+	
+	<Item name="Tipped Arrow of Strength" categories="16" image="arrow_strength.png" />
+	<Item name="Tipped Arrow of Strength Ext" categories="16" image="arrow_strength.png" />
+	<Item name="Tipped Arrow of Strength II" categories="16" image="arrow_strength.png" />
+	
+	<Item name="Tipped Arrow of Swiftness" categories="16" image="arrow_swiftness.png" />
+	<Item name="Tipped Arrow of Swiftness Ext" categories="16" image="arrow_swiftness.png" />
+	<Item name="Tipped Arrow of Swiftness II" categories="16" image="arrow_swiftness.png" />
+	
+	<Item name="Tipped Arrow of Water Breathing" categories="16" image="arrow_water_breathing.png" />
+	<Item name="Tipped Arrow of Water Breathing Ext" categories="16" image="arrow_water_breathing.png" />
+	
+	<Item name="Tipped Arrow of Weakness" categories="16" image="arrow_weakness.png" />
+	<Item name="Tipped Arrow of Weakness Ext" categories="16" image="arrow_weakness.png" />
 	
 	<!-- Stained Glass ==================================================== -->
 
