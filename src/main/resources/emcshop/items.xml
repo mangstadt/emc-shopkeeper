@@ -170,7 +170,7 @@
 	<Item name="Dragons Breath" id="437" group="Potions" categories="12" />
 	<Item name="Dropper" id="158" group="Stone" categories="13" />
 	<Item name="Egg" id="344" stack="16" categories="9" />
-	<Item name="Elyta" id="443" categories="15" />
+	<Item name="Elytra" id="443" stack="1" categories="15" />
 	<Item name="Emerald" id="388" categories="11" />
 	<Item name="Emerald Block" id="133" categories="11" />
 	<Item name="Emerald Ore" id="129" categories="11" />
@@ -579,7 +579,6 @@
 	<Item name="Empire Firework (New Year 2015)" image="firework.png" emcNames="Firework - §a#§2§lEmpire Firework§a# " categories="5" />
 	<Item name="Feast for a King" image="paper.png" emcNames="Paper - §bFeast for a King" categories="5" />
 	<Item name="Ham Hacker" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §6Ham Hacker" categories="5,16" />
-	<Item name="Haunted Head" stack="1" image="pumpkin.png" emcNames="Pumpkin - §aHaunted Head" categories="5,16" />
 	<Item name="Headless Horseman Mask" stack="1" image="pumpkin.png" emcNames="Pumpkin - §6§oHeadless Horseman Mask" categories="5,16" />
 	<Item name="Holiday Candle" image="torch.png" emcNames="Torch - §eHoliday Candle" categories="5" />
 	<Item name="Holiday Pick" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §f§l«§c§lHoliday Pick§f§l»" categories="5,16" />
@@ -649,12 +648,12 @@
 	<Item name="Lingering Potion of Poison II" emcNames="Lingering Potion of Poison Upgraded" image="potion_poison_lingering.png" stack="1" group="Potions" categories="12" />
 	<Item name="Lingering Potion of Poison Ext" emcNames="Lingering Potion of Poison Extended" image="potion_poison_lingering.png" stack="1" group="Potions" categories="12" />
 
-	<Item name="Potion of Health" id="373:8197" emcNames="Potion:8197" image="potion_health.png" stack="1" group="Potions" categories="12" />
-	<Item name="Potion of Health II" id="373:8229,373:8261" emcNames="Potion:8229,Potion:8261,Potion of Health Upgraded" image="potion_health.png" stack="1" group="Potions" categories="12" />
-	<Item name="Splash Potion of Health" id="373:16389" emcNames="Potion:16389" image="potion_health_splash.png" stack="1" group="Potions" categories="12" />
-	<Item name="Splash Potion of Health II" id="373:16421,373:16453" emcNames="Potion:16421,Potion:16453,Splash Potion of Health Upgraded" image="potion_health_splash.png" stack="1" group="Potions" categories="12" />
-	<Item name="Lingering Potion of Health" image="potion_health_lingering.png" stack="1" group="Potions" categories="12" />
-	<Item name="Lingering Potion of Health II" emcNames="Lingering Potion of Health Upgraded" image="potion_health_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Potion of Health" id="373:8197" emcNames="Potion:8197,Potion of Healing" image="potion_health.png" stack="1" group="Potions" categories="12" />
+	<Item name="Potion of Health II" id="373:8229,373:8261" emcNames="Potion:8229,Potion:8261,Potion of Healing Upgraded" image="potion_health.png" stack="1" group="Potions" categories="12" />
+	<Item name="Splash Potion of Health" id="373:16389" emcNames="Potion:16389,Splash Potion of Healing" image="potion_health_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Splash Potion of Health II" id="373:16421,373:16453" emcNames="Potion:16421,Potion:16453,Splash Potion of Healing Upgraded" image="potion_health_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Health" emcNames="Lingering Potion of Healing" image="potion_health_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Health II" emcNames="Lingering Potion of Healing Upgraded" image="potion_health_lingering.png" stack="1" group="Potions" categories="12" />
 
 	<Item name="Potion of Night Vision" id="373:8198,373:8230" emcNames="Potion:8198,Potion:8230" image="potion_night_vision.png" stack="1" group="Potions" categories="12" />
 	<Item name="Potion of Night Vision Ext" id="373:8262" emcNames="Potion:8262,Potion of Night Vision Extended" image="potion_night_vision.png" stack="1" group="Potions" categories="12" />
