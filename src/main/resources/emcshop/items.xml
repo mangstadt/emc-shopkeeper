@@ -576,7 +576,7 @@
 	<Item name="Empire Assistant" image="compass.png" emcNames="Compass - §6Empire Assistant" categories="5" />
 	<Item name="Empire Firework" image="firework.png" emcNames="Firework - §aEmpire Firework" categories="5" />
 	<Item name="Empire Firework (New Year 2014)" image="firework.png" emcNames="Firework - §b§l*§9§lEmpire Firework§b§l*" categories="5" />
-	<Item name="Empire Firework (New Year 2015)" image="firework.png" emcNames="Firework - §a#§2§lEmpire Firework§a# " categories="5" />
+	<Item name="Empire Firework (New Year 2015)" image="firework.png" emcNames="Firework - §a#§2§lEmpire Firework§a#" categories="5" />
 	<Item name="Feast for a King" image="paper.png" emcNames="Paper - §bFeast for a King" categories="5" />
 	<Item name="Ham Hacker" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §6Ham Hacker" categories="5,16" />
 	<Item name="Headless Horseman Mask" stack="1" image="pumpkin.png" emcNames="Pumpkin - §6§oHeadless Horseman Mask" categories="5,16" />
