@@ -533,7 +533,7 @@
 	<Item name="Haunted Candy - Rotten Flesh" emcNames="Rotten Flesh - §eHaunted Candy" categories="5,7" />
 	<Item name="Haunted Candy - Spider Eye" emcNames="Spider Eye - §eHaunted Candy" categories="5,7" />
 	
-	<Item name="Zombie Virus" emcNames="Water Bottle - §aZombie Virus" image="water_bottle.png" stack="1" categories="5,9,12" />
+	<Item name="Zombie Virus" emcNames="Water Bottle - §aZombie Virus,§aZombie Virus - §aZombie Virus" image="water_bottle.png" stack="1" categories="5,9,12" />
 	<Item name="Shiny Arrow" emcNames="Arrow - §bShiny Arrow" categories="5,9,16" />
 	<Item name="Shiny Flesh" emcNames="Rotten Flesh - §6Shiny Flesh" categories="5,7,9" />
 	
@@ -676,7 +676,7 @@
 	<Item name="Splash Potion of Strength II" id="373:16425" emcNames="Potion:16425,Splash Potion of Strength Upgraded" image="potion_strength_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion of Strength Ext" id="373:16457" emcNames="Potion:16457,Splash Potion of Strength Extended" image="potion_strength_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Lingering Potion of Strength" image="potion_strength_lingering.png" stack="1" group="Potions" categories="12" />
-	<Item name="Lingering Potion of Strength II" emcNames="Lingering Potion of Streng Upgraded" image="potion_strength_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion of Strength II" emcNames="Lingering Potion of Strength Upgraded" image="potion_strength_lingering.png" stack="1" group="Potions" categories="12" />
 	<Item name="Lingering Potion of Strength Ext" emcNames="Lingering Potion of Strength Extended" image="potion_strength_lingering.png" stack="1" group="Potions" categories="12" />
 	
 	<Item name="Potion of Slowness" id="373:8202,373:8234" emcNames="Potion:8202,Potion:8234" image="potion_slowness.png" stack="1" group="Potions" categories="12" />
@@ -728,50 +728,50 @@
 	<Item name="Tipped Arrow" id="440" emcNames="TIPPED_ARROW" categories="16" image="arrow_poison.png" />
 	
 	<Item name="Arrow of Fire Resistance" categories="16" image="arrow_fire_resistance.png" />
-	<Item name="Arrow of Fire Resistance Ext" categories="16" image="arrow_fire_resistance.png" />
+	<Item name="Arrow of Fire Resistance Ext" emcNames="Arrow of Fire Resistance Extended" categories="16" image="arrow_fire_resistance.png" />
 	
 	<Item name="Arrow of Harming" categories="16" image="arrow_harming.png" />
-	<Item name="Arrow of Harming II" categories="16" image="arrow_harming.png" />
+	<Item name="Arrow of Harming II" emcNames="Arrow of Harming Upgraded" categories="16" image="arrow_harming.png" />
 	
 	<Item name="Arrow of Healing" categories="16" image="arrow_healing.png" />
-	<Item name="Arrow of Healing II" categories="16" image="arrow_healing.png" />
+	<Item name="Arrow of Healing II" emcNames="Arrow of Healing Upgraded" categories="16" image="arrow_healing.png" />
 	
 	<Item name="Arrow of Invisibility" categories="16" image="arrow_invisibility.png" />
-	<Item name="Arrow of Invisibility Ext" categories="16" image="arrow_invisibility.png" />
+	<Item name="Arrow of Invisibility Ext" emcNames="Arrow of Invisibility Extended" categories="16" image="arrow_invisibility.png" />
 	
 	<Item name="Arrow of Leaping" categories="16" image="arrow_leaping.png" />
-	<Item name="Arrow of Leaping Ext" categories="16" image="arrow_leaping.png" />
-	<Item name="Arrow of Leaping II" categories="16" image="arrow_leaping.png" />
+	<Item name="Arrow of Leaping Ext" emcNames="Arrow of Leaping Extended" categories="16" image="arrow_leaping.png" />
+	<Item name="Arrow of Leaping II" emcNames="Arrow of Leaping Upgraded" categories="16" image="arrow_leaping.png" />
 	
 	<Item name="Arrow of Luck" categories="16" image="arrow_luck.png" />
 	
 	<Item name="Arrow of Night Vision" categories="16" image="arrow_night_vision.png" />
-	<Item name="Arrow of Night Vision Ext" categories="16" image="arrow_night_vision.png" />
+	<Item name="Arrow of Night Vision Ext" emcNames="Arrow of Night Vision Extended" categories="16" image="arrow_night_vision.png" />
 	
 	<Item name="Arrow of Poison" categories="16" image="arrow_poison.png" />
-	<Item name="Arrow of Poison Ext" categories="16" image="arrow_poison.png" />
-	<Item name="Arrow of Poison II" categories="16" image="arrow_poison.png" />
+	<Item name="Arrow of Poison Ext" emcNames="Arrow of Poison Extended" categories="16" image="arrow_poison.png" />
+	<Item name="Arrow of Poison II" emcNames="Arrow of Poison Upgraded" categories="16" image="arrow_poison.png" />
 	
 	<Item name="Arrow of Regeneration" categories="16" image="arrow_regeneration.png" />
-	<Item name="Arrow of Regeneration Ext" categories="16" image="arrow_regeneration.png" />
-	<Item name="Arrow of Regeneration II" categories="16" image="arrow_regeneration.png" />
+	<Item name="Arrow of Regeneration Ext" emcNames="Arrow of Regeneration Extended" categories="16" image="arrow_regeneration.png" />
+	<Item name="Arrow of Regeneration II" emcNames="Arrow of Regeneration Upgraded" categories="16" image="arrow_regeneration.png" />
 	
-	<Item name="Arrow of Slowness" categories="16" image="arrow_fire_slowness.png" />
-	<Item name="Arrow of Slowness Ext" categories="16" image="arrow_fire_slowness.png" />
+	<Item name="Arrow of Slowness" categories="16" image="arrow_slowness.png" />
+	<Item name="Arrow of Slowness Ext" emcNames="Arrow of Slowness Extended" categories="16" image="arrow_slowness.png" />
 	
 	<Item name="Arrow of Strength" categories="16" image="arrow_strength.png" />
-	<Item name="Arrow of Strength Ext" categories="16" image="arrow_strength.png" />
-	<Item name="Arrow of Strength II" categories="16" image="arrow_strength.png" />
+	<Item name="Arrow of Strength Ext" emcNames="Arrow of Strength Extended" categories="16" image="arrow_strength.png" />
+	<Item name="Arrow of Strength II" emcNames="Arrow of Strength Upgraded" categories="16" image="arrow_strength.png" />
 	
 	<Item name="Arrow of Swiftness" categories="16" image="arrow_swiftness.png" />
-	<Item name="Arrow of Swiftness Ext" categories="16" image="arrow_swiftness.png" />
-	<Item name="Arrow of Swiftness II" categories="16" image="arrow_swiftness.png" />
+	<Item name="Arrow of Swiftness Ext" emcNames="Arrow of Swiftness Extended" categories="16" image="arrow_swiftness.png" />
+	<Item name="Arrow of Swiftness II" emcNames="Arrow of Swiftness Upgraded" categories="16" image="arrow_swiftness.png" />
 	
 	<Item name="Arrow of Water Breathing" categories="16" image="arrow_water_breathing.png" />
-	<Item name="Arrow of Water Breathing Ext" categories="16" image="arrow_water_breathing.png" />
+	<Item name="Arrow of Water Breathing Ext" emcNames="Arrow of Water Breathing Extended" categories="16" image="arrow_water_breathing.png" />
 	
 	<Item name="Arrow of Weakness" categories="16" image="arrow_weakness.png" />
-	<Item name="Arrow of Weakness Ext" categories="16" image="arrow_weakness.png" />
+	<Item name="Arrow of Weakness Ext" emcNames="Arrow of Weakness Extended" categories="16" image="arrow_weakness.png" />
 	
 	<!-- Stained Glass ==================================================== -->
 
