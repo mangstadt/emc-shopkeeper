@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -310,61 +311,111 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void updateItemNamesAndAliases() throws SQLException {
+		class Item {
+			Integer id;
+			String name;
+
+			Item(Integer id, String name) {
+				this.id = id;
+				this.name = name;
+			}
+		}
+
 		int dbVersion = selectDbVersion();
 		Multimap<String, String> aliases = ItemIndex.instance().getDisplayNameToEmcNamesMapping();
 		for (String displayName : aliases.keySet()) {
-			String newName = displayName;
-			Integer newNameId = getItemId(newName);
+			Item itemOfficial = new Item(getItemId(displayName), displayName);
 
-			Collection<String> oldNames = aliases.get(displayName);
-			List<Integer> oldNameIds = new ArrayList<Integer>(oldNames.size());
-			for (String oldName : oldNames) {
-				Integer oldNameId = getItemId(oldName);
-				if (oldNameId != null) {
-					oldNameIds.add(oldNameId);
+			List<Item> itemAliases = new ArrayList<Item>();
+			for (String name : aliases.get(displayName)) {
+				Integer id = getItemId(name);
+				if (id != null) {
+					itemAliases.add(new Item(id, name));
 				}
 			}
 
-			if (oldNameIds.isEmpty() && newNameId == null) {
-				//nothing needs to be changed because neither name exists
+			if (itemAliases.isEmpty()) {
+				/*
+				 * Nothing needs to be changed because there are no aliases to
+				 * worry about.
+				 */
 				continue;
 			}
 
-			if (oldNameIds.isEmpty() && newNameId != null) {
-				//nothing needs to be changed because the new name is already in use
-				continue;
-			}
-			if (!oldNameIds.isEmpty() && newNameId == null) {
-				//the old name is still being used, so change it to the new name
-				newNameId = oldNameIds.get(0);
-				oldNameIds = oldNameIds.subList(1, oldNameIds.size());
+			/*
+			 * Sort by item ID descending. Items with lower IDs are likely to
+			 * have been in the database longer and are therefore likely to have
+			 * been referenced by more rows throughout the database.
+			 */
+			Collections.sort(itemAliases, new Comparator<Item>() {
+				@Override
+				public int compare(Item o1, Item o2) {
+					return o1.id - o2.id;
+				}
+			});
 
-				//change the name in the "items" table
-				updateItemName(newNameId, newName);
+			/*
+			 * Determine what row in the "items" table will act as the
+			 * "official" row, and which rows need to be reassigned to point to
+			 * the "official" row and then deleted.
+			 */
+			List<Integer> idsToReassign = new ArrayList<Integer>();
+			Integer newId;
+			if (itemOfficial.id == null) {
+				/*
+				 * The new item name doesn't exist in the table yet, so just
+				 * rename the row that's already there. Rename the row that has
+				 * been in the "items" table the longest so that we don't have
+				 * to update as many rows to use a new ID.
+				 */
+				Item oldestItem = itemAliases.get(0);
+				updateItemName(oldestItem.id, itemOfficial.name);
+				if (itemAliases.size() == 1) {
+					//no other aliases to worry about
+					continue;
+				}
 
-				if (!oldNameIds.isEmpty()) {
-					if (dbVersion >= 7) {
-						updateInventoryItem(oldNameIds, newNameId);
+				for (Item item : itemAliases.subList(1, itemAliases.size())) {
+					idsToReassign.add(item.id);
+				}
+				newId = oldestItem.id;
+			} else {
+				if (itemOfficial.id < itemAliases.get(0).id) {
+					/*
+					 * If the row with the official name has a lower ID than any
+					 * of the aliases, then it has been here the longest. Simply
+					 * reassign everything to point to this row.
+					 */
+					idsToReassign = new ArrayList<Integer>();
+					for (Item item : itemAliases) {
+						idsToReassign.add(item.id);
 					}
-					deleteItems(oldNameIds.toArray(new Integer[0]));
+					newId = itemOfficial.id;
+				} else {
+					/*
+					 * Rename the row that has been in the database the longest
+					 * so that we don't have to update as many rows to use a new
+					 * ID. Then, reassign everything to point to this row.
+					 */
+					Item oldestItem = itemAliases.get(0);
+					updateItemName(oldestItem.id, itemOfficial.name);
+
+					for (Item item : itemAliases.subList(1, itemAliases.size())) {
+						idsToReassign.add(item.id);
+					}
+					idsToReassign.add(itemOfficial.id);
+					newId = oldestItem.id;
 				}
-				continue;
 			}
 
-			if (!oldNameIds.isEmpty() && newNameId != null) {
-				//both the old and new names exist
-				//update all transactions that use the old name with the new name, and delete the old name
-
-				updateTransactionItem(oldNameIds, newNameId);
-
-				if (dbVersion >= 7) {
-					updateInventoryItem(oldNameIds, newNameId);
-				}
-
-				deleteItems(oldNameIds.toArray(new Integer[0]));
-
-				continue;
+			//reassign IDs to point to the new ID
+			updateTransactionItem(idsToReassign, newId);
+			if (dbVersion >= 7) {
+				updateInventoryItem(idsToReassign, newId);
 			}
+
+			//delete the rows from the items table that are now no longer being used
+			deleteItems(idsToReassign);
 		}
 	}
 
@@ -413,19 +464,19 @@ public abstract class DirbyDbDao implements DbDao {
 				updateInventoryItem(oldIds, newId);
 			}
 			updateTransactionItem(oldIds, newId);
-			deleteItems(oldIds.toArray(new Integer[0]));
+			deleteItems(oldIds);
 		}
 	}
 
-	private void deleteItems(Integer... ids) throws SQLException {
-		if (ids.length == 0) {
+	private void deleteItems(Collection<Integer> itemIds) throws SQLException {
+		if (itemIds.isEmpty()) {
 			return;
 		}
 
-		PreparedStatement stmt = stmt("DELETE FROM items WHERE id " + in(ids.length));
+		PreparedStatement stmt = stmt("DELETE FROM items WHERE id " + in(itemIds.size()));
 		try {
 			int i = 1;
-			for (Integer id : ids) {
+			for (Integer id : itemIds) {
 				stmt.setInt(i++, id);
 			}
 			stmt.executeUpdate();
