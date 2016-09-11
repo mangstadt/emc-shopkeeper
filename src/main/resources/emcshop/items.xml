@@ -97,7 +97,7 @@
 	<Item name="Chest" id="54" group="Wood" categories="17" />
 	<Item name="Chicken Egg" id="383:93" group="Spawn Eggs" categories="0" emcNames="Spawn Chicken" />
 	<Item name="Chirp Disc" id="2259" stack="1" group="Discs" categories="3" emcNames="Record 4" />
-	<Item name="Chiseled Quartz" id="155:1" group="Quartz" categories="11" />
+	<Item name="Chiseled Quartz" id="155:1" group="Quartz" categories="11" emcNames="Chiseled Quartz Block" />
 	<Item name="Chiseled Red Sandstone" id="179:1" emcNames="Ch Rd Sandstone" />
 	<Item name="Chiseled Sandstone" id="24:1" emcNames="Creeper Sandsto,Creeper Sandstone" />
 	<Item name="Chiseled Stone Bricks" id="98:3" group="Stone" categories="14" emcNames="Circle Stone" />
@@ -111,7 +111,7 @@
 	<Item name="Coal Ore" id="16" group="Coal" categories="11" />
 	<Item name="Coarse Dirt" id="3:1" />
 	<Item name="Cobble Slab" id="44:3" emcNames="Cobblestone Slab" group="Stone" categories="14" />
-	<Item name="Cobble Wall" id="139" group="Stone" categories="14" />
+	<Item name="Cobble Wall" id="139" group="Stone" categories="14" emcNames="Cobblestone Wall" />
 	<Item name="Cobblestone" id="4" group="Stone" categories="14" />
 	<Item name="Cobblestone Stairs" id="67" group="Stone" categories="14" emcNames="Cobblestone Sta" />
 	<Item name="Cobweb" id="30" emcNames="Web" />
@@ -121,7 +121,7 @@
 	<Item name="Cooked Beef" id="364" emcNames="Steak" categories="7" />
 	<Item name="Cooked Chicken" id="366" emcNames="Chicken" categories="7" />
 	<Item name="Cooked Fish" id="350" group="Fish" categories="7" />
-	<Item name="Cooked Pork" id="320" emcNames="Pork Chop" categories="7" />
+	<Item name="Cooked Pork" id="320" emcNames="Pork Chop,Cooked Porkchop" categories="7" />
 	<Item name="Cooked Mutton" id="424" categories="7" />
 	<Item name="Cooked Rabbit" id="412" categories="7" />
 	<Item name="Cooked Salmon" id="350:1" group="Fish" categories="7" />
@@ -216,7 +216,7 @@
 	<Item name="Gold Nugget" id="371" group="Gold" categories="9,11" />
 	<Item name="Gold Ore" id="14" group="Gold" categories="11" />
 	<Item name="Gold Pickaxe" id="285" stack="1" group="Gold" categories="16" emcNames="Golden Pickaxe" />
-	<Item name="Gold Plate" id="147" group="Gold" categories="13" />
+	<Item name="Gold Plate" id="147" group="Gold" categories="13" emcNames="Weighted Pressure Plate (Light)" />
 	<Item name="Gold Shovel" id="284" stack="1" group="Gold" emcNames="Gold Spade,Golden Shovel" categories="16" />
 	<Item name="Gold Sword" id="283" stack="1" group="Gold" categories="16" emcNames="Golden Sword" />
 	<Item name="Golden Apple" id="322" group="Gold" categories="7" />
@@ -252,7 +252,7 @@
 	<Item name="Iron Leggings" id="308" stack="1" group="Iron" categories="16" />
 	<Item name="Iron Ore" id="15" group="Iron" categories="11" />
 	<Item name="Iron Pickaxe" id="257" stack="1" group="Iron" categories="16" />
-	<Item name="Iron Plate" id="148" group="Iron" categories="13" />
+	<Item name="Iron Plate" id="148" group="Iron" categories="13" emcNames="Weighted Pressure Plate (Heavy)" />
 	<Item name="Iron Shovel" id="256" stack="1" group="Iron" emcNames="Iron Spade" categories="16" />
 	<Item name="Iron Sword" id="267" stack="1" group="Iron" categories="16" />
 	<Item name="Iron Trapdoor" id="167" categories="13" emcNames="Iron Trap Door" />
@@ -271,8 +271,8 @@
 	<Item name="Jungle Stairs" id="136" group="Wood" categories="17" emcNames="Jungle Wood Stairs" />
 	<Item name="Ladder" id="65" group="Wood" categories="17" />
 	<Item name="Lapis" id="351:4" group="Dyes,Lapis" emcNames="Lapis Lazuli,Blue Dye" categories="4,11" />
-	<Item name="Lapis Block" id="22" group="Lapis" categories="11" emcNames="Block of Lapis Lazuli" />
-	<Item name="Lapis Ore" id="21" group="Lapis" categories="11" />
+	<Item name="Lapis Block" id="22" group="Lapis" categories="11" emcNames="Block of Lapis Lazuli,Lapis Lazuli Block" />
+	<Item name="Lapis Ore" id="21" group="Lapis" categories="11" emcNames="Lapis Lazuli Ore" />
 	<Item name="Lava Bucket" id="327" stack="1" group="Iron" categories="16" />
 	<Item name="Leash" id="420" categories="0" emcNames="Lead" />
 	<Item name="Leather" id="334" group="Leather" categories="9" />
@@ -308,7 +308,7 @@
 	<Item name="Mooshroom Egg" id="383:96" group="Spawn Eggs" categories="0" emcNames="MUSHROOM_COW EGG,Spawn Mooshroom" />
 	<Item name="Mossy Cobble" id="48" group="Stone" categories="14" emcNames="Moss Stone" />
 	<Item name="Mossy Stone Brick" id="98:1" group="Stone" categories="14" emcNames="Mossy Stone,Mossy Stone Bricks" />
-	<Item name="Mossy Wall" id="139:1" group="Stone" categories="14" />
+	<Item name="Mossy Wall" id="139:1" group="Stone" categories="14" emcNames="Mossy Cobblestone Wall" />
 	<Item name="Mushroom Soup" id="282" stack="1" emcNames="Mushroom Stew" categories="7" />
 	<Item name="Music Disc" stack="1" group="Discs" categories="3" image="chirp_disc.png" />
 	<Item name="Mycel" id="110" />
@@ -316,7 +316,7 @@
 	<Item name="Nethbrick" id="405" categories="10" />
 	<Item name="Nether Brick" id="112" categories="10" />
 	<Item name="Nether Brick Stairs" id="114" emcNames="Nether Stairs,Nether Brick St" categories="10" />
-	<Item name="Nether Fence" id="113" categories="10" />
+	<Item name="Nether Fence" id="113" categories="10" emcNames="Nether Brick Fence" />
 	<Item name="Nether Brick Slab" id="44:6" emcNames="Nethbrick Slab" categories="10" />
 	<Item name="Nether Star" id="399" categories="9" />
 	<Item name="Nether Wart" id="372" categories="10,12" emcNames="Nether Stalk" />
@@ -377,7 +377,7 @@
 	<Item name="Quartz" id="406" group="Quartz" categories="10,11" emcNames="Nether Quartz" />
 	<Item name="Quartz Block" id="155:0" group="Quartz" categories="10,11" emcNames="Block of Quartz" />
 	<Item name="Quartz Pillar" id="155:2" group="Quartz" categories="10,11" emcNames="Pillar Quartz Block" />
-	<Item name="Quartz Ore" id="153" group="Quartz" categories="10,11" />
+	<Item name="Quartz Ore" id="153" group="Quartz" categories="10,11" emcNames="Nether Quartz Ore" />
 	<Item name="Quartz Slab" id="44:7" group="Quartz" categories="10,11" />
 	<Item name="Quartz Stairs" id="156" group="Quartz" categories="10,11" />
 	<Item name="Rail" id="66" group="Iron" categories="15" emcNames="Rails" />
@@ -425,7 +425,7 @@
 	<Item name="Slime Block" id="165" />
 	<Item name="Smooth Sandstone" id="24:2" emcNames="Smooth Sandston" />
 	<Item name="Smooth Red Sandstone" id="179:2" emcNames="Smth Rd Sandstn" />
-	<Item name="Snow Ball" id="332" stack="16" categories="16" />
+	<Item name="Snow Ball" id="332" stack="16" categories="16" emcNames="Snowball" />
 	<Item name="Snow Block" id="80" />
 	<Item name="Soul Sand" id="88" categories="10" />
 	<Item name="Spider Eye" id="375" categories="9,12" />
@@ -481,7 +481,7 @@
 	<Item name="Wood Button" id="143" group="Wood" categories="13" />
 	<Item name="Wood Hoe" id="290" stack="1" group="Wood" categories="6,16" emcNames="Wooden Hoe" />
 	<Item name="Wood Pickaxe" id="270" stack="1" group="Wood" categories="16" emcNames="Wooden Pickaxe" />
-	<Item name="Wood Plate" id="72" group="Wood" emcNames="Wooden Plate" categories="13" />
+	<Item name="Wood Plate" id="72" group="Wood" emcNames="Wooden Plate,Wooden Pressure Plate" categories="13" />
 	<Item name="Wood Shovel" id="269" stack="1" group="Wood" categories="16" emcNames="Wooden Spade,Wood Spade,Wooden Shovel" />
 	<Item name="Wood Sword" id="268" stack="1" group="Wood" categories="16" emcNames="Wooden Sword" />
 	<Item name="Wooden Trapdoor" id="96" group="Wood" emcNames="Trapdoor,Trap Door,Wooden Trap Door" categories="13,17" />
@@ -555,15 +555,16 @@
 	<Item name="Starter Shovel" stack="1" image="iron_shovel_enchanted.png" emcNames="Iron Shovel - §6Starter Shovel" categories="5,16" />
 	<Item name="Starter Sword" stack="1" image="iron_sword_enchanted.png" emcNames="Iron Sword - §6Starter Sword" categories="5,16" />
 	
-	<Item name="Diamond Supporter Voucher" image="paper.png" emcNames="Paper - §3Diamond Supporter Voucher" categories="5" />
-	<Item name="Gold Supporter Voucher" image="paper.png" emcNames="Paper - §6Gold Supporter Voucher" categories="5" />
-	<Item name="Iron Supporter Voucher" image="paper.png" emcNames="Paper - §7Iron Supporter Voucher" categories="5" />
-	<Item name="Stable Voucher" image="empty_map.png" emcNames="Empty Map - §aStable Voucher" categories="5" />
-	<Item name="Vault Voucher" image="empty_map.png" emcNames="Empty Map - §aVault Voucher" categories="5" />
+	<Item name="Diamond Supporter Voucher" image="paper.png" emcNames="Paper - §3Diamond Supporter Voucher,§3Diamond Supporter Voucher - §3Diamond Supporter Voucher" categories="5" />
+	<Item name="Gold Supporter Voucher" image="paper.png" emcNames="Paper - §6Gold Supporter Voucher,§6Gold Supporter Voucher - §6Gold Supporter Voucher" categories="5" />
+	<Item name="Iron Supporter Voucher" image="paper.png" emcNames="Paper - §7Iron Supporter Voucher,§7Iron Supporter Voucher - §7Iron Supporter Voucher" categories="5" />
+	<Item name="Stable Voucher" image="empty_map.png" emcNames="Empty Map - §aStable Voucher,§aStable Voucher - §aStable Voucher" categories="5" />
+	<Item name="Vault Voucher" image="empty_map.png" emcNames="Empty Map - §aVault Voucher,§aVault Voucher - §aVault Voucher" categories="5" />
 	
 	<Item name="2014 Birthday Cake" image="cake.png" emcNames="Cake - §62014 Birthday Cake" categories="5,7" />
 	<Item name="2015 Birthday Cake" image="cake.png" emcNames="Cake - §62015 Birthday Cake" categories="5,7" />
 	<Item name="2015 Birthday Cookie" image="cookie.png" emcNames="Cookie - §62015 Birthday Cookie" categories="5,7" />
+	<Item name="2016 Birthday Cake" image="cake.png" emcNames="Cake - §62016 Birthday Cake,§62016 Birthday Cake - §62016 Birthday Cake" categories="5,7" />
 	<Item name="Avalauncher" image="snow_ball.png" emcNames="Snow Ball - §4Avalauncher" categories="16" />
 	<Item name="Blizz Ard's Arm" image="stick.png" emcNames="Stick - §4Blizz Ard's Arm" categories="5" />
 	<Item name="Blizz Ard's Eye" image="coal.png" emcNames="Coal - §4Blizz Ard's Eye" categories="5" />
@@ -590,6 +591,7 @@
 	<Item name="IcecreamCow Skin" image="raw_beef.png" emcNames="Leather - §6IcecreamCow Skin" categories="5" />
 	<Item name="Independence Day Firework" image="firework.png" emcNames="Firework - §cIndependence §fDay §9Firework" categories="5" />
 	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench,Workbench - §6Labor Bench" categories="5" />
+	<Item name="Liberty Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §cLibe§frty S§9word - §cLibe§frty S§9word,§cLibe§frty S§9word - §cLibe§frty S§9word - §cLibe§frty S§9word - §cLibe§frty S§9word" categories="5,16" />
 	<Item name="Lucky Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §1Lucky Bow,Bow - §9Lucky Bow" categories="5,16" />
 	<Item name="Magical Eggcellent Wand" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand" categories="5" />
 	<Item name="Maxarian Head" image="head.png" emcNames="Head - §cMaxarian Head" categories="5" />
