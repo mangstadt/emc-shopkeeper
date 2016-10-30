@@ -128,6 +128,7 @@
 	<Item name="Cookie" id="357" categories="7" />
 	<Item name="Cow Egg" id="383:92" group="Spawn Eggs" categories="0" emcNames="Spawn Cow" />
 	<Item name="Cracked Stone Brick" id="98:2" group="Stone" categories="14" emcNames="Cracked Stone Bricks,Cracked Stone" />
+	<Item name="Crafting Table" id="58" group="Wood" categories="16" emcNames="Workbench" />
 	<Item name="Creeper Head" id="397:4" group="Mob Heads" categories="9" />
 	<Item name="Cyan Clay" id="159:9" group="Clay" categories="2" emcNames="Cyan Stclay,Cyan Stained Clay" />
 	<Item name="Cyan Dye" id="351:6" group="Dyes" categories="4" />
@@ -172,7 +173,7 @@
 	<Item name="Egg" id="344" stack="16" categories="9" />
 	<Item name="Elytra" id="443" stack="1" categories="15" />
 	<Item name="Emerald" id="388" categories="11" />
-	<Item name="Emerald Block" id="133" categories="11" />
+	<Item name="Emerald Block" id="133" categories="11" emcNames="Block of Emerald" />
 	<Item name="Emerald Ore" id="129" categories="11" />
 	<Item name="Empty Map" id="395" />
 	<Item name="Enchantment Table" id="116" group="Diamonds" />
@@ -311,7 +312,7 @@
 	<Item name="Mossy Wall" id="139:1" group="Stone" categories="14" emcNames="Mossy Cobblestone Wall" />
 	<Item name="Mushroom Soup" id="282" stack="1" emcNames="Mushroom Stew" categories="7" />
 	<Item name="Music Disc" stack="1" group="Discs" categories="3" image="chirp_disc.png" />
-	<Item name="Mycel" id="110" />
+	<Item name="Mycel" id="110" emcNames="Mycelium" />
 	<Item name="Name Tag" id="421" categories="0" />
 	<Item name="Nethbrick" id="405" categories="10" />
 	<Item name="Nether Brick" id="112" categories="10" />
@@ -359,13 +360,13 @@
 	<Item name="Polished Granite" id="1:2" emcNames="Pol. Granite" />
 	<Item name="Popped Chorus Fruit" id="433" categories="6" emcNames="Chorus Fruit Popped" />
 	<Item name="Poppy" id="38" emcNames="Rose" group="Flowers" categories="6,9" />
-	<Item name="Pork" id="319" categories="7,9" />
+	<Item name="Pork" id="319" categories="7,9" emcNames="Raw Porkchop" />
 	<Item name="Potato" id="392" emcNames="Potato Item" categories="6,7" />
 	<Item name="Powered Minecart" id="343" stack="1" group="Iron" categories="15" emcNames="Minecart with Furnace" />
 	<Item name="Powered Rail" id="27" group="Gold" categories="13,15" />
 	<Item name="Prismarine" id="168" />
 	<Item name="Prismarine Brick" id="168:1" emcNames="Prismarine Bricks" />
-	<Item name="Prismarine Crystal" id="410" />
+	<Item name="Prismarine Crystal" id="410" emcNames="Prismarine Crystals" />
 	<Item name="Prismarine Shard" id="409" />
 	<Item name="Pufferfish" id="349:3" group="Fish" categories="0,12" />
 	<Item name="Pumpkin" id="86" categories="6" />
@@ -449,7 +450,7 @@
 	<Item name="Stone Brick Stairs" id="109" group="Stone" categories="14" emcNames="Stone Brick Sta" />
 	<Item name="Stone Hoe" id="291" stack="1" group="Stone" categories="6,16" />
 	<Item name="Stone Pickaxe" id="274" stack="1" group="Stone" categories="16" />
-	<Item name="Stone Plate" id="70" group="Stone" categories="13" />
+	<Item name="Stone Plate" id="70" group="Stone" categories="13" emcNames="Stone Pressure Plate" />
 	<Item name="Stone Shovel" id="273" stack="1" group="Stone" emcNames="Stone Spade" categories="16" />
 	<Item name="Stone Slab" id="44:0" group="Stone" categories="14" />
 	<Item name="Stone Sword" id="272" stack="1" group="Stone" categories="16" />
@@ -485,7 +486,6 @@
 	<Item name="Wood Shovel" id="269" stack="1" group="Wood" categories="16" emcNames="Wooden Spade,Wood Spade,Wooden Shovel" />
 	<Item name="Wood Sword" id="268" stack="1" group="Wood" categories="16" emcNames="Wooden Sword" />
 	<Item name="Wooden Trapdoor" id="96" group="Wood" emcNames="Trapdoor,Trap Door,Wooden Trap Door" categories="13,17" />
-	<Item name="Workbench" id="58" group="Wood" categories="16" />
 	<Item name="Yellow Clay" id="159:4" group="Clay" categories="2" emcNames="Yellow Stclay,Yellow Stained Clay" />
 	<Item name="Yellow Dye" id="351:11" group="Dyes" categories="4" emcNames="Dandelion Yellow" />
 	<Item name="Yellow Wool" id="35:4" group="Wool" categories="18" />
@@ -512,22 +512,22 @@
 	
 	<!-- Promos =========================================================== -->
 
-	<Item name="Big Daddy Helmet" stack="1" image="diamond_helmet_enchanted.png" emcNames="Diamond Helmet - §aBig Daddy Helmet" categories="5,16" />
-	<Item name="Cactus Pants" stack="1" image="diamond_leggings_enchanted.png" emcNames="Diamond Leggings - §aCactus Pants" categories="5,16" />
-	<Item name="Everlasting Axestopper" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §aEverlasting Axestopper" categories="5,16" />
-	<Item name="Feather Fallllling Boots" stack="1" image="diamond_boots_enchanted.png" emcNames="Diamond Boots - §aFeather Fallllling Boots" categories="5,16" />
-	<Item name="Flaming Mob Launcher" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §aFlaming Mob Launcher" categories="5,16" />
-	<Item name="Ore Buster" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §aOre Buster" categories="5,16" />
-	<Item name="Turfinator" stack="1" image="diamond_shovel_enchanted.png" emcNames="Diamond Shovel - §aTurfinator" categories="5,16" />
+	<Item name="Big Daddy Helmet" stack="1" image="diamond_helmet_enchanted.png" emcNames="Diamond Helmet - §aBig Daddy Helmet,§aBig Daddy Helmet - §aBig Daddy Helmet" categories="5,16" />
+	<Item name="Cactus Pants" stack="1" image="diamond_leggings_enchanted.png" emcNames="Diamond Leggings - §aCactus Pants,§aCactus Pants - §aCactus Pants" categories="5,16" />
+	<Item name="Everlasting Axestopper" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §aEverlasting Axestopper,§aEverlasting Axestopper - §aEverlasting Axestopper" categories="5,16" />
+	<Item name="Feather Fallllling Boots" stack="1" image="diamond_boots_enchanted.png" emcNames="Diamond Boots - §aFeather Fallllling Boots,§aFeather Fallllling Boots - §aFeather Fallllling Boots" categories="5,16" />
+	<Item name="Flaming Mob Launcher" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §aFlaming Mob Launcher,§aFlaming Mob Launcher - §aFlaming Mob Launcher" categories="5,16" />
+	<Item name="Ore Buster" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §aOre Buster,§aOre Buster - §aOre Buster" categories="5,16" />
+	<Item name="Turfinator" stack="1" image="diamond_shovel_enchanted.png" emcNames="Diamond Shovel - §aTurfinator,§aTurfinator - §aTurfinator" categories="5,16" />
 	
-	<Item name="Marlix's Armor" stack="1" image="marlix_armor.png" emcNames="Leather Tunic - §4§lMarlix's Armor" categories="5,9,16" />
-	<Item name="Marlix's Boots" stack="1" image="marlix_boots.png" emcNames="Leather Boots - §4§lMarlix's Boots" categories="5,9,16" />
-	<Item name="Marlix's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §4§lMarlix's Bow" categories="5,9,16" />
-	<Item name="Marlix's Helmet" stack="1" image="marlix_helmet.png" emcNames="Leather Cap - §4§lMarlix's Helmet" categories="5,9,16" />
-	<Item name="Marlix's Leggings" stack="1" image="marlix_leggings.png" emcNames="Leather Pants - §4§lMarlix's Leggings" categories="5,9,16" />
-	<Item name="Momentus's Toothpick" stack="1" image="momentus_toothpick.png" emcNames="Wooden Sword - §6§lMomentus's Toothpick" categories="5,9,16" />
+	<Item name="Marlix's Armor" stack="1" image="marlix_armor.png" emcNames="Leather Tunic - §4§lMarlix's Armor,§4§lMarlix's Armor - §4§lMarlix's Armor" categories="5,9,16" />
+	<Item name="Marlix's Boots" stack="1" image="marlix_boots.png" emcNames="Leather Boots - §4§lMarlix's Boots,§4§lMarlix's Boots - §4§lMarlix's Boots" categories="5,9,16" />
+	<Item name="Marlix's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §4§lMarlix's Bow,§4§lMarlix's Bow - §4§lMarlix's Bow" categories="5,9,16" />
+	<Item name="Marlix's Helmet" stack="1" image="marlix_helmet.png" emcNames="Leather Cap - §4§lMarlix's Helmet,§4§lMarlix's Helmet - §4§lMarlix's Helmet" categories="5,9,16" />
+	<Item name="Marlix's Leggings" stack="1" image="marlix_leggings.png" emcNames="Leather Pants - §4§lMarlix's Leggings,§4§lMarlix's Leggings - §4§lMarlix's Leggings" categories="5,9,16" />
+	<Item name="Momentus's Toothpick" stack="1" image="momentus_toothpick.png" emcNames="Wooden Sword - §6§lMomentus's Toothpick,§6§lMomentus's Toothpick - §6§lMomentus's Toothpick" categories="5,9,16" />
 	
-	<Item name="Haunted Head" stack="1" image="pumpkin.png" emcNames="Pumpkin - §aHaunted Head" categories="5,16" />
+	<Item name="Haunted Head" stack="1" image="pumpkin.png" emcNames="Pumpkin - §aHaunted Head,§aHaunted Head - §aHaunted Head" categories="5,16" />
 	<Item name="Haunted Candy - Bone" emcNames="Bone - §eHaunted Candy" categories="5,7" />
 	<Item name="Haunted Candy - Ender Pearl" emcNames="Ender Pearl - §eHaunted Candy" categories="5,7" />
 	<Item name="Haunted Candy - Gunpowder" emcNames="Gunpowder - §eHaunted Candy" categories="5,7" />
@@ -538,22 +538,22 @@
 	<Item name="Shiny Arrow" emcNames="Arrow - §bShiny Arrow,§bShiny Arrow - §bShiny Arrow" categories="5,9,16" />
 	<Item name="Shiny Flesh" emcNames="Rotten Flesh - §6Shiny Flesh,§6Shiny Flesh - §6Shiny Flesh" categories="5,7,9" />
 	
-	<Item name="Independence Head" stack="1" image="independence_helmet.png" emcNames="Leather Cap - §cIndepe§fndence §9Head" categories="5,16" />
-	<Item name="Independence Chest" stack="1" image="independence_chest.png" emcNames="Leather Tunic - §cIndepe§fndence §9Chest" categories="5,16" />
-	<Item name="Independence Pants" stack="1" image="independence_pants.png" emcNames="Leather Pants - §cIndepe§fndence §9Pants" categories="5,16" />
-	<Item name="Independence Boots" stack="1" image="independence_boots.png" emcNames="Leather Boots - §cIndepe§fndence §9Boots" categories="5,16" />
-	<Item name="Freedom Blade" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4F§fr§9e§4e§fd§9o§4m §fB§9l§4a§fd§9e" categories="5,16" />
-	<Item name="Taste the Freedom" image="cooked_beef.png" emcNames="Cooked Beef - §cTaste §fThe §9Freedom" categories="5,7,9" />
+	<Item name="Independence Head" stack="1" image="independence_helmet.png" emcNames="Leather Cap - §cIndepe§fndence §9Head,§cIndepe§fndence §9Head - §cIndepe§fndence §9Head" categories="5,16" />
+	<Item name="Independence Chest" stack="1" image="independence_chest.png" emcNames="Leather Tunic - §cIndepe§fndence §9Chest,§cIndepe§fndence §9Chest - §cIndepe§fndence §9Chest" categories="5,16" />
+	<Item name="Independence Pants" stack="1" image="independence_pants.png" emcNames="Leather Pants - §cIndepe§fndence §9Pants,§cIndepe§fndence §9Pants - §cIndepe§fndence §9Pants" categories="5,16" />
+	<Item name="Independence Boots" stack="1" image="independence_boots.png" emcNames="Leather Boots - §cIndepe§fndence §9Boots,§cIndepe§fndence §9Boots - §cIndepe§fndence §9Boots" categories="5,16" />
+	<Item name="Freedom Blade" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4F§fr§9e§4e§fd§9o§4m §fB§9l§4a§fd§9e,§4F§fr§9e§4e§fd§9o§4m §fB§9l§4a§fd§9e - §4F§fr§9e§4e§fd§9o§4m §fB§9l§4a§fd§9e" categories="5,16" />
+	<Item name="Taste the Freedom" image="cooked_beef.png" emcNames="Cooked Beef - §cTaste §fThe §9Freedom,§cTaste §fThe §9Freedom - §cTaste §fThe §9Freedom" categories="5,7,9" />
 	
-	<Item name="Starter Axe" stack="1" image="iron_axe_enchanted.png" emcNames="Iron Axe - §6Starter Axe" categories="5,16" />
-	<Item name="Starter Boots" stack="1" image="iron_boots_enchanted.png" emcNames="Iron Boots - §6Starter Boots" categories="5,16" />
-	<Item name="Starter Chestplate" stack="1" image="iron_chestplate_enchanted.png" emcNames="Iron Chest - §6Starter Chestplate,Iron Chestplate - §6Starter Chestplate" categories="5,16" />
-	<Item name="Starter Helmet" stack="1" image="iron_helmet_enchanted.png" emcNames="Iron Helmet - §6Starter Helmet" categories="5,16" />
-	<Item name="Starter Horse" image="horse_egg.png" emcNames="Horse Egg - §6Starter Horse" categories="0,5" />
-	<Item name="Starter Leggings" stack="1" image="iron_leggings_enchanted.png" emcNames="Iron Leggings - §6Starter Leggings" categories="5,16" />
-	<Item name="Starter Pickaxe" stack="1" image="iron_pickaxe_enchanted.png" emcNames="Iron Pickaxe - §6Starter Pickaxe" categories="5,16" />
-	<Item name="Starter Shovel" stack="1" image="iron_shovel_enchanted.png" emcNames="Iron Shovel - §6Starter Shovel" categories="5,16" />
-	<Item name="Starter Sword" stack="1" image="iron_sword_enchanted.png" emcNames="Iron Sword - §6Starter Sword" categories="5,16" />
+	<Item name="Starter Axe" stack="1" image="iron_axe_enchanted.png" emcNames="Iron Axe - §6Starter Axe,§6Starter Axe - §6Starter Axe" categories="5,16" />
+	<Item name="Starter Boots" stack="1" image="iron_boots_enchanted.png" emcNames="Iron Boots - §6Starter Boots,§6Starter Boots - §6Starter Boots" categories="5,16" />
+	<Item name="Starter Chestplate" stack="1" image="iron_chestplate_enchanted.png" emcNames="Iron Chest - §6Starter Chestplate,Iron Chestplate - §6Starter Chestplate,§6Starter Chestplate - §6Starter Chestplate" categories="5,16" />
+	<Item name="Starter Helmet" stack="1" image="iron_helmet_enchanted.png" emcNames="Iron Helmet - §6Starter Helmet,§6Starter Helmet - §6Starter Helmet" categories="5,16" />
+	<Item name="Starter Horse" image="horse_egg.png" emcNames="Horse Egg - §6Starter Horse,§6Starter Horse - §6Starter Horse" categories="0,5" />
+	<Item name="Starter Leggings" stack="1" image="iron_leggings_enchanted.png" emcNames="Iron Leggings - §6Starter Leggings,§6Starter Leggings - §6Starter Leggings" categories="5,16" />
+	<Item name="Starter Pickaxe" stack="1" image="iron_pickaxe_enchanted.png" emcNames="Iron Pickaxe - §6Starter Pickaxe,§6Starter Pickaxe - §6Starter Pickaxe" categories="5,16" />
+	<Item name="Starter Shovel" stack="1" image="iron_shovel_enchanted.png" emcNames="Iron Shovel - §6Starter Shovel,§6Starter Shovel - §6Starter Shovel" categories="5,16" />
+	<Item name="Starter Sword" stack="1" image="iron_sword_enchanted.png" emcNames="Iron Sword - §6Starter Sword,§6Starter Sword - §6Starter Sword" categories="5,16" />
 	
 	<Item name="Diamond Supporter Voucher" image="paper.png" emcNames="Paper - §3Diamond Supporter Voucher,§3Diamond Supporter Voucher - §3Diamond Supporter Voucher" categories="5" />
 	<Item name="Gold Supporter Voucher" image="paper.png" emcNames="Paper - §6Gold Supporter Voucher,§6Gold Supporter Voucher - §6Gold Supporter Voucher" categories="5" />
@@ -561,50 +561,51 @@
 	<Item name="Stable Voucher" image="empty_map.png" emcNames="Empty Map - §aStable Voucher,§aStable Voucher - §aStable Voucher" categories="5" />
 	<Item name="Vault Voucher" image="empty_map.png" emcNames="Empty Map - §aVault Voucher,§aVault Voucher - §aVault Voucher" categories="5" />
 	
-	<Item name="2014 Birthday Cake" image="cake.png" emcNames="Cake - §62014 Birthday Cake" categories="5,7" />
-	<Item name="2015 Birthday Cake" image="cake.png" emcNames="Cake - §62015 Birthday Cake" categories="5,7" />
-	<Item name="2015 Birthday Cookie" image="cookie.png" emcNames="Cookie - §62015 Birthday Cookie" categories="5,7" />
+	<Item name="2014 Birthday Cake" image="cake.png" emcNames="Cake - §62014 Birthday Cake,§62014 Birthday Cake - §62014 Birthday Cake" categories="5,7" />
+	<Item name="2015 Birthday Cake" image="cake.png" emcNames="Cake - §62015 Birthday Cake,§62015 Birthday Cake - §62015 Birthday Cake" categories="5,7" />
+	<Item name="2015 Birthday Cookie" image="cookie.png" emcNames="Cookie - §62015 Birthday Cookie,§62015 Birthday Cookie - §62015 Birthday Cookie" categories="5,7" />
 	<Item name="2016 Birthday Cake" image="cake.png" emcNames="Cake - §62016 Birthday Cake,§62016 Birthday Cake - §62016 Birthday Cake" categories="5,7" />
-	<Item name="Avalauncher" image="snow_ball.png" emcNames="Snow Ball - §4Avalauncher" categories="16" />
-	<Item name="Blizz Ard's Arm" image="stick.png" emcNames="Stick - §4Blizz Ard's Arm" categories="5" />
-	<Item name="Blizz Ard's Eye" image="coal.png" emcNames="Coal - §4Blizz Ard's Eye" categories="5" />
-	<Item name="Blizz Ard's Nose" image="carrot.png" emcNames="Carrot - §4Blizz Ard's Nose" categories="5" />
-	<Item name="Bonus Chest" image="diamond_shovel_enchanted.png" emcNames="Chest - §6Bonus Chest" categories="5" />
-	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey" categories="5,7" />
-	<Item name="Cupid" image="pig_egg.png" emcNames="Pig Egg - §5=- §d§lCupid§5 -=" categories="0,5" />
-	<Item name="Cupid's Arrow" image="shiny_arrow.png" emcNames="Arrow - §dCupid's Arrow" categories="5,16" />
-	<Item name="Cupid's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §dCupid's Bow" categories="5,16" />
-	<Item name="Dancer" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lDancer§f§l»" categories="0,5" />
-	<Item name="Dasher" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lDasher§f§l»" categories="0,5" />
-	<Item name="Emergency Snow Clearing Device" stack="1" image="diamond_shovel_enchanted.png" emcNames="Diamond Spade - §cEmergency Snow Clearing Device" categories="5,16" />
-	<Item name="Empire Assistant" image="compass.png" emcNames="Compass - §6Empire Assistant" categories="5" />
-	<Item name="Empire Firework" image="firework.png" emcNames="Firework - §aEmpire Firework" categories="5" />
-	<Item name="Empire Firework (New Year 2014)" image="firework.png" emcNames="Firework - §b§l*§9§lEmpire Firework§b§l*" categories="5" />
-	<Item name="Empire Firework (New Year 2015)" image="firework.png" emcNames="Firework - §a#§2§lEmpire Firework§a#" categories="5" />
-	<Item name="Feast for a King" image="paper.png" emcNames="Paper - §bFeast for a King" categories="5" />
-	<Item name="Getting Started" stack="1" image="book_and_quill.png" emcNames="Book And Quill - §6Getting Started" categories="5" />
-	<Item name="Ham Hacker" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §6Ham Hacker" categories="5,16" />
-	<Item name="Headless Horseman Mask" stack="1" image="pumpkin.png" emcNames="Pumpkin - §6§oHeadless Horseman Mask" categories="5,16" />
-	<Item name="Holiday Candle" image="torch.png" emcNames="Torch - §eHoliday Candle" categories="5" />
-	<Item name="Holiday Pick" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §f§l«§c§lHoliday Pick§f§l»" categories="5,16" />
-	<Item name="IcecreamCow Flesh" image="raw_beef.png" emcNames="Raw Beef - §6IcecreamCow Flesh" categories="5" />
-	<Item name="IcecreamCow Skin" image="raw_beef.png" emcNames="Leather - §6IcecreamCow Skin" categories="5" />
-	<Item name="Independence Day Firework" image="firework.png" emcNames="Firework - §cIndependence §fDay §9Firework" categories="5" />
-	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench,Workbench - §6Labor Bench" categories="5" />
+	<Item name="Avalauncher" image="snow_ball.png" emcNames="Snow Ball - §4Avalauncher,§4Avalauncher - §4Avalauncher" categories="16" />
+	<Item name="Blizz Ard's Arm" image="stick.png" emcNames="Stick - §4Blizz Ard's Arm,§4Blizz Ard's Arm - §4Blizz Ard's Arm" categories="5" />
+	<Item name="Blizz Ard's Eye" image="coal.png" emcNames="Coal - §4Blizz Ard's Eye,§4Blizz Ard's Eye - §4Blizz Ard's Eye" categories="5" />
+	<Item name="Blizz Ard's Nose" image="carrot.png" emcNames="Carrot - §4Blizz Ard's Nose,§4Blizz Ard's Nose - §4Blizz Ard's Nose" categories="5" />
+	<Item name="Bonus Chest" image="diamond_shovel_enchanted.png" emcNames="Chest - §6Bonus Chest,§6Bonus Chest - §6Bonus Chest" categories="5" />
+	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey,§eCooked Turkey - §eCooked Turkey" categories="5,7" />
+	<Item name="Cupid" image="pig_egg.png" emcNames="Pig Egg - §5=- §d§lCupid§5 -=,§5=- §d§lCupid§5 -= - §5=- §d§lCupid§5 -=" categories="0,5" />
+	<Item name="Cupid's Arrow" image="shiny_arrow.png" emcNames="Arrow - §dCupid's Arrow,§dCupid's Arrow - §dCupid's Arrow" categories="5,16" />
+	<Item name="Cupid's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §dCupid's Bow,§dCupid's Bow - §dCupid's Bow" categories="5,16" />
+	<Item name="Dancer" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lDancer§f§l»,§f§l«§c§lDancer§f§l» - §f§l«§c§lDancer§f§l»" categories="0,5" />
+	<Item name="Dasher" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lDasher§f§l»,§f§l«§c§lDasher§f§l» - §f§l«§c§lDasher§f§l»" categories="0,5" />
+	<Item name="Emergency Snow Clearing Device" stack="1" image="diamond_shovel_enchanted.png" emcNames="Diamond Spade - §cEmergency Snow Clearing Device,§cEmergency Snow Clearing Device - §cEmergency Snow Clearing Device" categories="5,16" />
+	<Item name="Empire Assistant" image="compass.png" emcNames="Compass - §6Empire Assistant,§6Empire Assistant - §6Empire Assistant" categories="5" />
+	<Item name="Empire Firework" image="firework.png" emcNames="Firework - §aEmpire Firework,§aEmpire Firework - §aEmpire Firework" categories="5" />
+	<Item name="Empire Firework (New Year 2014)" image="firework.png" emcNames="Firework - §b§l*§9§lEmpire Firework§b§l*,§b§l*§9§lEmpire Firework§b§l* - §b§l*§9§lEmpire Firework§b§l*" categories="5" />
+	<Item name="Empire Firework (New Year 2015)" image="firework.png" emcNames="Firework - §a#§2§lEmpire Firework§a#,§a#§2§lEmpire Firework§a# - §a#§2§lEmpire Firework§a#" categories="5" />
+	<Item name="Feast for a King" image="paper.png" emcNames="Paper - §bFeast for a King,§bFeast for a King - §bFeast for a King" categories="5" />
+	<Item name="Getting Started" stack="1" image="book_and_quill.png" emcNames="Book And Quill - §6Getting Started,§6Getting Started - §6Getting Started" categories="5" />
+	<Item name="Ham Hacker" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §6Ham Hacker,§6Ham Hacker - §6Ham Hacker" categories="5,16" />
+	<Item name="Headless Horseman Axe" stack="1" image="diamond_axe_enchanted.png" emcNames="§6§oHeadless Horseman Axe - §6§oHeadless Horseman Axe" categories="5,16" />
+	<Item name="Headless Horseman Mask" stack="1" image="pumpkin.png" emcNames="Pumpkin - §6§oHeadless Horseman Mask,§6§oHeadless Horseman Mask - §6§oHeadless Horseman Mask" categories="5,16" />
+	<Item name="Holiday Candle" image="torch.png" emcNames="Torch - §eHoliday Candle,§eHoliday Candle - §eHoliday Candle" categories="5" />
+	<Item name="Holiday Pick" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §f§l«§c§lHoliday Pick§f§l»,§f§l«§c§lHoliday Pick§f§l» - §f§l«§c§lHoliday Pick§f§l»" categories="5,16" />
+	<Item name="IcecreamCow Flesh" image="raw_beef.png" emcNames="Raw Beef - §6IcecreamCow Flesh,§6IcecreamCow Flesh - §6IcecreamCow Flesh" categories="5" />
+	<Item name="IcecreamCow Skin" image="raw_beef.png" emcNames="Leather - §6IcecreamCow Skin,§6IcecreamCow Skin - §6IcecreamCow Skin" categories="5" />
+	<Item name="Independence Day Firework" image="firework.png" emcNames="Firework - §cIndependence §fDay §9Firework,§cIndependence §fDay §9Firework - §cIndependence §fDay §9Firework" categories="5" />
+	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench,Workbench - §6Labor Bench,§aLabor Bench - §aLabor Bench,§6Labor Bench - §6Labor Bench" categories="5" />
 	<Item name="Liberty Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §cLibe§frty S§9word - §cLibe§frty S§9word,§cLibe§frty S§9word - §cLibe§frty S§9word - §cLibe§frty S§9word - §cLibe§frty S§9word" categories="5,16" />
-	<Item name="Lucky Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §1Lucky Bow,Bow - §9Lucky Bow" categories="5,16" />
-	<Item name="Magical Eggcellent Wand" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand" categories="5" />
-	<Item name="Maxarian Head" image="head.png" emcNames="Head - §cMaxarian Head" categories="5" />
-	<Item name="Meteor Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §6Meteor Bow,Bow - §r§6Meteor Bow" categories="5,16" />
-	<Item name="Pi Pie" image="pumpkin_pie.png" emcNames="Pumpkin Pie - §6Pi Pie" categories="5,7" />
-	<Item name="Pot of Gold" image="cauldron.png" emcNames="Cauldron - §ePot of Gold" categories="5" />
-	<Item name="Potato Plate" stack="1" image="diamond_chestplate_enchanted.png" emcNames="Diamond Chest - §6Potato Plate" categories="5,16" />
-	<Item name="Referral Block of Clickyness" image="gold_block.png" emcNames="Gold Block - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s" categories="5" />
-	<Item name="Remembrance Poppy" image="poppy.png" emcNames="Poppy - §4Remembrance Poppy" categories="6" />
-	<Item name="Spooky Egg" image="egg.png" stack="16" emcNames="Egg - §fSpooky Egg" categories="5" />
-	<Item name="Super Dragon Poop" image="obsidian.png" emcNames="Obsidian - §4§lSuper Dragon Poop,Obsidian - §4§lSuper Dragon Poop!" categories="5" />
-	<Item name="Turkey Slicer" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4Turkey Slicer,Diamond Sword - §6Turkey Slicer" categories="5,16" />
-	<Item name="Valens" image="horse_egg.png" emcNames="Horse Egg - §6§lValens" categories="0,5" />
+	<Item name="Lucky Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §1Lucky Bow,Bow - §9Lucky Bow,§1Lucky Bow - §1Lucky Bow,§9Lucky Bow - §9Lucky Bow" categories="5,16" />
+	<Item name="Magical Eggcellent Wand" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand,§6Magical Eggcellent Wand - §6Magical Eggcellent Wand" categories="5" />
+	<Item name="Maxarian Head" image="head.png" emcNames="Head - §cMaxarian Head,§cMaxarian Head - §cMaxarian Head" categories="5" />
+	<Item name="Meteor Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §6Meteor Bow,Bow - §r§6Meteor Bow,§6Meteor Bow - §6Meteor Bow,§r§6Meteor Bow - §r§6Meteor Bow" categories="5,16" />
+	<Item name="Pi Pie" image="pumpkin_pie.png" emcNames="Pumpkin Pie - §6Pi Pie,§6Pi Pie - §6Pi Pie" categories="5,7" />
+	<Item name="Pot of Gold" image="cauldron.png" emcNames="Cauldron - §ePot of Gold,§ePot of Gold - §ePot of Gold" categories="5" />
+	<Item name="Potato Plate" stack="1" image="diamond_chestplate_enchanted.png" emcNames="Diamond Chest - §6Potato Plate,§6Potato Plate - §6Potato Plate" categories="5,16" />
+	<Item name="Referral Block of Clickyness" image="gold_block.png" emcNames="Gold Block - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s,§2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s" categories="5" />
+	<Item name="Remembrance Poppy" image="poppy.png" emcNames="Poppy - §4Remembrance Poppy,§4Remembrance Poppy - §4Remembrance Poppy" categories="6" />
+	<Item name="Spooky Egg" image="egg.png" stack="16" emcNames="Egg - §fSpooky Egg,§fSpooky Egg - §fSpooky Egg" categories="5" />
+	<Item name="Super Dragon Poop" image="obsidian.png" emcNames="Obsidian - §4§lSuper Dragon Poop,Obsidian - §4§lSuper Dragon Poop!,§4§lSuper Dragon Poop - §4§lSuper Dragon Poop,§4§lSuper Dragon Poop! - §4§lSuper Dragon Poop!" categories="5" />
+	<Item name="Turkey Slicer" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4Turkey Slicer,Diamond Sword - §6Turkey Slicer,§4Turkey Slicer - §4Turkey Slicer,§6Turkey Slicer - §6Turkey Slicer" categories="5,16" />
+	<Item name="Valens" image="horse_egg.png" emcNames="Horse Egg - §6§lValens,§6§lValens - §6§lValens" categories="0,5" />
 	
 	<!-- Potions ========================================================== -->
 	
