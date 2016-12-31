@@ -57,14 +57,17 @@
 	<Item name="Birch Slab" id="126:2" group="Wood" categories="17" emcNames="Birch Wood Slab" />
 	<Item name="Birch Stairs" id="135" group="Wood" categories="17" emcNames="Birch Wood Stairs" />
 	<Item name="Black Clay" id="159:15" group="Clay" categories="2" emcNames="Black Stclay,Black Stained Clay" />
+	<Item name="Black Shulker Box" />
 	<Item name="Black Wool" id="35:15" group="Wool" categories="18" />
 	<Item name="Blaze Powder" id="377" categories="12" />
 	<Item name="Blaze Rod" id="369" categories="9" />
 	<Item name="Blocks Disc" id="2258" stack="1" group="Discs" categories="3" emcNames="Record 3" />
+	<Item name="Blue Shulker Box" />
 	<Item name="Blue Clay" id="159:11" group="Clay" categories="2" emcNames="Blue Stclay,Blue Stained Clay" />
 	<Item name="Blue Orchid" id="38:1" group="Flowers" categories="6" />
 	<Item name="Blue Wool" id="35:11" group="Wool" categories="18" />
-	<Item name="Bone" id="352" categories="0,9" />
+	<Item name="Bone" id="352" categories="9" />
+	<Item name="Bone Block" id="216" />
 	<Item name="Bone Meal" id="351:15" emcNames="Bonemeal" group="Dyes" categories="4,6" />
 	<Item name="Book" id="340" group="Leather" />
 	<Item name="Book And Quill" id="386" group="Leather" />
@@ -81,6 +84,7 @@
 	<Item name="Brown Clay" id="159:12" group="Clay" categories="2" emcNames="Brown Stclay,Brown Stained Clay" />
 	<Item name="Brown Huge Mushroom" id="99" emcNames="Huge Mushroom 1" />
 	<Item name="Brown Mushroom" id="39" categories="6" />
+	<Item name="Brown Shulker Box" emcNames="Brown Shulkbox" />
 	<Item name="Brown Wool" id="35:12" group="Wool" categories="18" />
 	<Item name="Bucket" id="325" stack="16" group="Iron" categories="16" emcNames="Iron Bucket" />
 	<Item name="Cactus" id="81" categories="6" />
@@ -132,6 +136,7 @@
 	<Item name="Creeper Head" id="397:4" group="Mob Heads" categories="9" />
 	<Item name="Cyan Clay" id="159:9" group="Clay" categories="2" emcNames="Cyan Stclay,Cyan Stained Clay" />
 	<Item name="Cyan Dye" id="351:6" group="Dyes" categories="4" />
+	<Item name="Cyan Shulker Box" />
 	<Item name="Cyan Wool" id="35:9" group="Wool" categories="18" />
 	<Item name="Dandelion" id="37" group="Flowers" categories="6" />
 	<Item name="Dark Oak Boat" id="448" stack="1" group="Wood" categories="15,17" />
@@ -227,9 +232,11 @@
 	<Item name="Gravel" id="13" />
 	<Item name="Gray Clay" id="159:7" group="Clay" categories="2" emcNames="Gray Stclay,Gray Stained Clay" />
 	<Item name="Gray Dye" id="351:8" group="Dyes" categories="4" />
+	<Item name="Gray Shulker Box" />
 	<Item name="Gray Wool" id="35:7" group="Wool" categories="18" />
 	<Item name="Green Clay" id="159:13" group="Clay" categories="2" emcNames="Green Stclay,Green Stained Clay" />
 	<Item name="Green Dye" id="351:2" group="Dyes" categories="4" emcNames="Cactus Green" />
+	<Item name="Green Shulker Box" emcNames="Green Shulkerbox" />
 	<Item name="Green Wool" id="35:13" group="Wool" categories="18" />
 	<Item name="Gunpowder" id="289" emcNames="Sulphur" categories="9,12" />
 	<Item name="Hard Clay" id="172" group="Clay" categories="2" emcNames="Hardened Clay" />
@@ -251,6 +258,7 @@
 	<Item name="Iron Hoe" id="292" stack="1" group="Iron" categories="6,16" />
 	<Item name="Iron Ingot" id="265" group="Iron" categories="9,11" />
 	<Item name="Iron Leggings" id="308" stack="1" group="Iron" categories="16" />
+	<Item name="Iron Nugget" id="452" group="Iron" categories="11" />
 	<Item name="Iron Ore" id="15" group="Iron" categories="11" />
 	<Item name="Iron Pickaxe" id="257" stack="1" group="Iron" categories="16" />
 	<Item name="Iron Plate" id="148" group="Iron" categories="13" emcNames="Weighted Pressure Plate (Heavy)" />
@@ -284,19 +292,25 @@
 	<Item name="Lever" id="69" categories="13" />
 	<Item name="Light Blue Clay" id="159:3" group="Clay" categories="2" emcNames="Lghtblue Stclay,Light Blue Stained Clay" />
 	<Item name="Light Blue Dye" id="351:12" group="Dyes" categories="4" />
+	<Item name="Light Blue Shulker Box" emcNames="Lt Blue Shulk Box" />
 	<Item name="Light Blue Wool" id="35:3" group="Wool" categories="18" />
 	<Item name="Light Gray Clay" id="159:8" group="Clay" categories="2" emcNames="Lghtgray Stclay,Light Gray Stained Clay" />
 	<Item name="Light Gray Dye" id="351:7" group="Dyes" categories="4" emcNames="Silver Dye" />
+	<Item name="Light Gray Shulker Box" emcNames="Silver Shulk Box" />
 	<Item name="Light Gray Wool" id="35:8" group="Wool" categories="18" emcNames="Silver Wool" />
 	<Item name="Lily Pad" id="111" categories="6" emcNames="Water Lily" />	
 	<Item name="Lilac" id="175:1" group="Flowers" categories="6" />
 	<Item name="Lime Clay" id="159:5" group="Clay" categories="2" emcNames="Lime Stclay,Lime Stained Clay" />
 	<Item name="Lime Dye" id="351:10" group="Dyes" categories="4" />
+	<Item name="Lime Shulker Box" />
 	<Item name="Lime Wool" id="35:5" group="Wool" categories="18" />
+	<Item name="Llama Egg" group="Spawn Eggs" categories="0" emcNames="Spawn Llama" />
 	<Item name="Long Grass" id="31:1" emcNames="Tall Grass" categories="6" />
 	<Item name="Magenta Clay" id="159:2" group="Clay" categories="2" emcNames="Magenta Stclay,Magenta Stained Clay" />
 	<Item name="Magenta Dye" id="351:13" group="Dyes" categories="4" />
+	<Item name="Magenta Shulker Box" emcNames="Magenta Shulk" />
 	<Item name="Magenta Wool" id="35:2" group="Wool" categories="18" />
+	<Item name="Magma Block" id="213" categories="10" />
 	<Item name="Magma Cream" id="378" categories="9,10,12" />
 	<Item name="Mall Disc" id="2261" stack="1" group="Discs" categories="3" emcNames="Record 6" />
 	<Item name="Map" id="358" stack="1" />
@@ -304,7 +318,7 @@
 	<Item name="Melon" id="360" categories="7" />
 	<Item name="Melon Block" id="103" categories="6" />
 	<Item name="Melon Seeds" id="362" categories="6" />
-	<Item name="Milk Bucket" id="335" stack="1" group="Iron" categories="7,12,16" />
+	<Item name="Milk Bucket" id="335" stack="1" group="Iron" categories="7,12,16" emcNames="Milk" />
 	<Item name="Minecart" id="328" stack="1" group="Iron" categories="15" />
 	<Item name="Mooshroom Egg" id="383:96" group="Spawn Eggs" categories="0" emcNames="MUSHROOM_COW EGG,Spawn Mooshroom" />
 	<Item name="Mossy Cobble" id="48" group="Stone" categories="14" emcNames="Moss Stone" />
@@ -320,7 +334,8 @@
 	<Item name="Nether Fence" id="113" categories="10" emcNames="Nether Brick Fence" />
 	<Item name="Nether Brick Slab" id="44:6" emcNames="Nethbrick Slab" categories="10" />
 	<Item name="Nether Star" id="399" categories="9" />
-	<Item name="Nether Wart" id="372" categories="10,12" emcNames="Nether Stalk" />
+	<Item name="Nether Wart" id="372" categories="6,10,12" emcNames="Nether Stalk" />
+	<Item name="Nether Wart Block" id="214" categories="10" />
 	<Item name="Netherrack" id="87" categories="10" />
 	<Item name="Note Block" id="25" categories="3,13" />
 	<Item name="Oak Boat" id="333" stack="1" group="Wood" categories="15,17" emcNames="Boat" />
@@ -333,10 +348,12 @@
 	<Item name="Oak Sapling" id="6:0" categories="6,17" />
 	<Item name="Oak Slab" id="126:0" emcNames="Wood Slab,Wood Step,Oak Wood Slab" group="Wood" categories="17" />
 	<Item name="Oak Stairs" id="53" emcNames="Wood Stairs,Oak Wood Stairs" group="Wood" categories="17" />
+	<Item name="Observer" id="218" categories="13" />
 	<Item name="Obsidian" id="49" />
 	<Item name="Ocelot Egg" id="383:98" group="Spawn Eggs" categories="0" emcNames="Spawn Ocelot" />
 	<Item name="Orange Clay" id="159:1" group="Clay" categories="2" emcNames="Orange Stclay,Orange Stained Clay" />
 	<Item name="Orange Dye" id="351:14" group="Dyes" categories="4" />
+	<Item name="Orange Shulker Box" emcNames="Orange Shulk Box" />
 	<Item name="Orange Tulip" id="38:5" group="Flowers" categories="6" />
 	<Item name="Orange Wool" id="35:1" group="Wool" categories="18" />
 	<Item name="Oxeye Daisy" id="38:8" group="Flowers" categories="6" />
@@ -350,6 +367,7 @@
 	<Item name="Pine Sapling" id="6:1" categories="6,17" emcNames="Spruce Sapling" />
 	<Item name="Pink Clay" id="159:6" group="Clay" categories="2" emcNames="Pink Stclay,Pink Stained Clay" />
 	<Item name="Pink Dye" id="351:9" group="Dyes" categories="4" />
+	<Item name="Pink Shulker Box" />
 	<Item name="Pink Tulip" id="38:7" group="Flowers" categories="6" />
 	<Item name="Pink Wool" id="35:6" group="Wool" categories="18" />
 	<Item name="Piston" id="33" categories="13" />
@@ -374,6 +392,7 @@
 	<Item name="Pumpkin Seeds" id="361" categories="6" />
 	<Item name="Purple Clay" id="159:10" group="Clay" categories="2" emcNames="Purple Stclay,Purple Stained Clay" />
 	<Item name="Purple Dye" id="351:5" group="Dyes" categories="4" />
+	<Item name="Purple Shulker Box" emcNames="Purple Shulk Box" />
 	<Item name="Purple Wool" id="35:10" group="Wool" categories="18" />
 	<Item name="Quartz" id="406" group="Quartz" categories="10,11" emcNames="Nether Quartz" />
 	<Item name="Quartz Block" id="155:0" group="Quartz" categories="10,11" emcNames="Block of Quartz" />
@@ -396,10 +415,12 @@
 	<Item name="Red Dye" id="351:1" group="Dyes" categories="4" emcNames="Rose Red" />
 	<Item name="Red Huge Mushroom" id="100" emcNames="Huge Mushroom 2" />
 	<Item name="Red Mushroom" id="40" categories="6" />
+	<Item name="Red Nether Brick" id="215" categories="10" />
 	<Item name="Red Sand" id="12:1" />
 	<Item name="Red Sandstone" id="179" />
 	<Item name="Red Sandstone Slab" id="182" emcNames="Rd Sandstn Slab" />
 	<Item name="Red Sandstone Stairs" id="180" emcNames="Rd Sandstn Step" />
+	<Item name="Red Shulker Box" />
 	<Item name="Red Tulip" id="38:4" group="Flowers" categories="6" />
 	<Item name="Red Wool" id="35:14" group="Wool" categories="18" />
 	<Item name="Redstone Block" id="152" categories="11,13" emcNames="Block of Redstone" />
@@ -420,6 +441,7 @@
 	<Item name="Shears" id="359" stack="1" group="Iron" categories="16" />
 	<Item name="Sheep Egg" id="383:91" group="Spawn Eggs" categories="0" emcNames="Spawn Sheep" />
 	<Item name="Shield" id="442" stack="1" categories="16" />
+	<Item name="Shulker Shell" id="450" categories="9" />
 	<Item name="Sign" id="63" stack="16" group="Wood" categories="17" />
 	<Item name="Skeleton Skull" id="397:0" group="Mob Heads" categories="9" emcNames="Skull Item" />
 	<Item name="Slime Ball" id="341" categories="9" emcNames="Slimeball" />
@@ -446,7 +468,7 @@
 	<Item name="Stone Axe" id="275" stack="1" group="Stone" categories="16" />
 	<Item name="Stone Button" id="77" emcNames="Button" group="Stone" categories="13" />
 	<Item name="Stone Brick" id="98" group="Stone" categories="14" emcNames="Stone Bricks" />
-	<Item name="Stone Brick Slab" id="44:5" emcNames="Stonebrick Slab" group="Stone" categories="14" />
+	<Item name="Stone Brick Slab" id="44:5" emcNames="Stonebrick Slab,Stone Bricks Slab" group="Stone" categories="14" />
 	<Item name="Stone Brick Stairs" id="109" group="Stone" categories="14" emcNames="Stone Brick Sta" />
 	<Item name="Stone Hoe" id="291" stack="1" group="Stone" categories="6,16" />
 	<Item name="Stone Pickaxe" id="274" stack="1" group="Stone" categories="16" />
@@ -462,6 +484,7 @@
 	<Item name="Sunflower" id="175:0" group="Flowers" categories="6" />
 	<Item name="Tnt" id="46" categories="13" />
 	<Item name="Torch" id="50" />
+	<Item name="Totem of Undying" id="449" />
 	<Item name="Trapped Chest" id="146" group="Wood" categories="13,17" />
 	<Item name="Tripwire Hook" id="131" group="Iron" categories="13" />
 	<Item name="Villager Egg" id="383:120" group="Spawn Eggs" categories="0" emcNames="Spawn Villager" />
@@ -474,6 +497,7 @@
 	<Item name="Wet Sponge" id="19:1" />
 	<Item name="Wheat" id="296" categories="0,6" />
 	<Item name="White Clay" id="159:0" group="Clay" categories="2" emcNames="White Stclay,White Stained Clay" />
+	<Item name="White Shulker Box" />
 	<Item name="White Tulip" id="38:6" group="Flowers" categories="6" />
 	<Item name="White Wool" id="35:0" group="Wool" categories="18" emcNames="Wool" />
 	<Item name="Wither Skull" id="397:1" emcNames="Wither Head,Wither Skeleton Skull" categories="9" />
@@ -488,6 +512,7 @@
 	<Item name="Wooden Trapdoor" id="96" group="Wood" emcNames="Trapdoor,Trap Door,Wooden Trap Door" categories="13,17" />
 	<Item name="Yellow Clay" id="159:4" group="Clay" categories="2" emcNames="Yellow Stclay,Yellow Stained Clay" />
 	<Item name="Yellow Dye" id="351:11" group="Dyes" categories="4" emcNames="Dandelion Yellow" />
+	<Item name="Yellow Shulker Box" emcNames="Yellow Shulkerbox" />
 	<Item name="Yellow Wool" id="35:4" group="Wool" categories="18" />
 	<Item name="Zombie Head" id="397:2" group="Mob Heads" categories="9" />
 	
@@ -528,6 +553,7 @@
 	<Item name="Momentus's Toothpick" stack="1" image="momentus_toothpick.png" emcNames="Wooden Sword - §6§lMomentus's Toothpick,§6§lMomentus's Toothpick - §6§lMomentus's Toothpick" categories="5,9,16" />
 	
 	<Item name="Haunted Head" stack="1" image="pumpkin.png" emcNames="Pumpkin - §aHaunted Head,§aHaunted Head - §aHaunted Head" categories="5,16" />
+	<Item name="Haunted Candy" emcNames="§eHaunted Candy - §eHaunted Candy" image="haunted_candy_-_bone.png" categories="5,7" />
 	<Item name="Haunted Candy - Bone" emcNames="Bone - §eHaunted Candy" categories="5,7" />
 	<Item name="Haunted Candy - Ender Pearl" emcNames="Ender Pearl - §eHaunted Candy" categories="5,7" />
 	<Item name="Haunted Candy - Gunpowder" emcNames="Gunpowder - §eHaunted Candy" categories="5,7" />
@@ -569,11 +595,13 @@
 	<Item name="Blizz Ard's Arm" image="stick.png" emcNames="Stick - §4Blizz Ard's Arm,§4Blizz Ard's Arm - §4Blizz Ard's Arm" categories="5" />
 	<Item name="Blizz Ard's Eye" image="coal.png" emcNames="Coal - §4Blizz Ard's Eye,§4Blizz Ard's Eye - §4Blizz Ard's Eye" categories="5" />
 	<Item name="Blizz Ard's Nose" image="carrot.png" emcNames="Carrot - §4Blizz Ard's Nose,§4Blizz Ard's Nose - §4Blizz Ard's Nose" categories="5" />
-	<Item name="Bonus Chest" image="diamond_shovel_enchanted.png" emcNames="Chest - §6Bonus Chest,§6Bonus Chest - §6Bonus Chest" categories="5" />
+	<Item name="Bionic Pants" stack="1" image="diamond_leggings_enchanted.png" emcNames="§6Bionic Pants - §6Bionic Pants" categories="5,16" />
+	<Item name="Bonus Chest" image="chest.png" emcNames="Chest - §6Bonus Chest,§6Bonus Chest - §6Bonus Chest" categories="5" />
+	<Item name="Candy Cane Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="§4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le§f§lS§4§lw§f§lo§4§lr§f§ld - §4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le§f§lS§4§lw§f§lo§4§lr§f§ld" categories="5,16" />
 	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey,§eCooked Turkey - §eCooked Turkey" categories="5,7" />
 	<Item name="Cupid" image="pig_egg.png" emcNames="Pig Egg - §5=- §d§lCupid§5 -=,§5=- §d§lCupid§5 -= - §5=- §d§lCupid§5 -=" categories="0,5" />
 	<Item name="Cupid's Arrow" image="shiny_arrow.png" emcNames="Arrow - §dCupid's Arrow,§dCupid's Arrow - §dCupid's Arrow" categories="5,16" />
-	<Item name="Cupid's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §dCupid's Bow,§dCupid's Bow - §dCupid's Bow" categories="5,16" />
+	<Item name="Cupid's Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §dCupid's Bow,§dCupid's Bow - §dCupid's Bow,§r§dCupid's Bow - §r§dCupid's Bow" categories="5,16" />
 	<Item name="Dancer" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lDancer§f§l»,§f§l«§c§lDancer§f§l» - §f§l«§c§lDancer§f§l»" categories="0,5" />
 	<Item name="Dasher" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lDasher§f§l»,§f§l«§c§lDasher§f§l» - §f§l«§c§lDasher§f§l»" categories="0,5" />
 	<Item name="Emergency Snow Clearing Device" stack="1" image="diamond_shovel_enchanted.png" emcNames="Diamond Spade - §cEmergency Snow Clearing Device,§cEmergency Snow Clearing Device - §cEmergency Snow Clearing Device" categories="5,16" />
@@ -597,6 +625,7 @@
 	<Item name="Magical Eggcellent Wand" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand,§6Magical Eggcellent Wand - §6Magical Eggcellent Wand" categories="5" />
 	<Item name="Maxarian Head" image="head.png" emcNames="Head - §cMaxarian Head,§cMaxarian Head - §cMaxarian Head" categories="5" />
 	<Item name="Meteor Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §6Meteor Bow,Bow - §r§6Meteor Bow,§6Meteor Bow - §6Meteor Bow,§r§6Meteor Bow - §r§6Meteor Bow" categories="5,16" />
+	<Item name="Mineral Mincer" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §6Mineral Mincer,§6Mineral Mincer - §6Mineral Mincer" categories="5,16" />
 	<Item name="Pi Pie" image="pumpkin_pie.png" emcNames="Pumpkin Pie - §6Pi Pie,§6Pi Pie - §6Pi Pie" categories="5,7" />
 	<Item name="Pot of Gold" image="cauldron.png" emcNames="Cauldron - §ePot of Gold,§ePot of Gold - §ePot of Gold" categories="5" />
 	<Item name="Potato Plate" stack="1" image="diamond_chestplate_enchanted.png" emcNames="Diamond Chest - §6Potato Plate,§6Potato Plate - §6Potato Plate" categories="5,16" />
@@ -862,7 +891,7 @@
 
 	<Item name="Blaze Head" emcNames="Head - Blaze Head,Blaze Head - Blaze Head" group="Mob Heads" categories="9" />
 	<Item name="CaveSpider Head" emcNames="Head - CaveSpider Head,CaveSpider Head - CaveSpider Head" group="Mob Heads" categories="9" />
-	<Item name="Chicken Head" emcNames="Head - Chicken Head - Chicken Head" group="Mob Heads" categories="9" />
+	<Item name="Chicken Head" emcNames="Head - Chicken Head,Chicken Head - Chicken Head" group="Mob Heads" categories="9" />
 	<Item name="Cow Head" emcNames="Head - Cow Head,Cow Head - Cow Head" group="Mob Heads" categories="9" />
 	<Item name="Enderman Head" emcNames="Head - Enderman Head,Enderman Head - Enderman Head" group="Mob Heads" categories="9" />
 	<Item name="Ghast Head" emcNames="Head - Ghast Head,Ghast Head - Ghast Head" group="Mob Heads" categories="9" />
