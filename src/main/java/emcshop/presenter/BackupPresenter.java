@@ -116,13 +116,13 @@ public class BackupPresenter {
 
 	private void onSaveSettings() {
 		Integer frequency = view.getBackupFrequency();
-		if (frequency <= 0) {
+		if (frequency == null || frequency <= 0) {
 			view.invalidFrequency();
 			return;
 		}
 
 		Integer max = view.getMaxBackups();
-		if (max <= 0) {
+		if (max == null || max <= 0) {
 			view.invalidMax();
 			return;
 		}
