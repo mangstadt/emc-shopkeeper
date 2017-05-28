@@ -58,7 +58,7 @@ public abstract class DirbyDbDao implements DbDao {
 	 * directly. Use {@link #getAppDbVersion()} instead, because this method
 	 * gets overridden in unit tests.
 	 */
-	public static final int schemaVersion = 35;
+	public static final int schemaVersion = 36;
 
 	protected Connection conn;
 	protected String jdbcUrl;

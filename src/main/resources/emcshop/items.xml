@@ -169,6 +169,7 @@
 	<Item name="Diorite" id="1:3" />
 	<Item name="Dirt" id="3" />
 	<Item name="Dispenser" id="23" group="Stone" categories="13" />
+	<Item name="Donkey Egg" id="383:31" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Donkey" />
 	<Item name="Dragon Head" id="397:5" group="Mob Heads" categories="9" />
 	<Item name="Dragon Egg" id="122" />
 	<Item name="Dragon Stone" emcNames="Coal - §5§lDragon Stone,§5§lDragon Stone - §5§lDragon Stone" categories="5" />
@@ -324,6 +325,7 @@
 	<Item name="Mossy Cobble" id="48" group="Stone" categories="14" emcNames="Moss Stone" />
 	<Item name="Mossy Stone Brick" id="98:1" group="Stone" categories="14" emcNames="Mossy Stone,Mossy Stone Bricks" />
 	<Item name="Mossy Wall" id="139:1" group="Stone" categories="14" emcNames="Mossy Cobblestone Wall" />
+	<Item name="Mule Egg" id="383:32" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Mule" />
 	<Item name="Mushroom Soup" id="282" stack="1" emcNames="Mushroom Stew" categories="7" />
 	<Item name="Music Disc" stack="1" group="Discs" categories="3" image="chirp_disc.png" />
 	<Item name="Mycel" id="110" emcNames="Mycelium" />
