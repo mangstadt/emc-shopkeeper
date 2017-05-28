@@ -79,7 +79,7 @@
 	<Item name="Brewing Stand" id="117" categories="12" />
 	<Item name="Brick" id="336" group="Clay" categories="2" emcNames="Clay Brick" />
 	<Item name="Brick Block" id="45" group="Clay" categories="2" emcNames="Bricks" />
-	<Item name="Brick Slab" id="44:4" group="Clay" categories="2" />
+	<Item name="Brick Slab" id="44:4" group="Clay" categories="2" emcNames="Bricks Slab" />
 	<Item name="Brick Stairs" id="108" group="Clay" categories="2" />
 	<Item name="Brown Clay" id="159:12" group="Clay" categories="2" emcNames="Brown Stclay,Brown Stained Clay,Brown Hardened Clay" />
 	<Item name="Brown Huge Mushroom" id="99" emcNames="Huge Mushroom 1" />
@@ -374,6 +374,7 @@
 	<Item name="Pink Wool" id="35:6" group="Wool" categories="18" />
 	<Item name="Piston" id="33" categories="13" />
 	<Item name="Podzol" id="3:2" />
+	<Item name="Polar Bear Egg" id="383:102" group="Spawn Eggs" categories="0" emcNames="Spawn Polar Bear" />
 	<Item name="Poisonous Potato" id="394" categories="6,7" />
 	<Item name="Polished Andesite" id="1:6" emcNames="Pol. Andesite" />
 	<Item name="Polished Diorite" id="1:4" emcNames="Pol. Diorite" />
@@ -599,7 +600,7 @@
 	<Item name="Blizz Ard's Nose" image="carrot.png" emcNames="Carrot - §4Blizz Ard's Nose,§4Blizz Ard's Nose - §4Blizz Ard's Nose" categories="5" />
 	<Item name="Bionic Pants" stack="1" image="diamond_leggings_enchanted.png" emcNames="§6Bionic Pants - §6Bionic Pants" categories="5,16" />
 	<Item name="Bonus Chest" image="chest.png" emcNames="Chest - §6Bonus Chest,§6Bonus Chest - §6Bonus Chest" categories="5" />
-	<Item name="Candy Cane Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="§4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le§f§lS§4§lw§f§lo§4§lr§f§ld - §4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le§f§lS§4§lw§f§lo§4§lr§f§ld" categories="5,16" />
+	<Item name="Candy Cane Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="§4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le §f§lS§4§lw§f§lo§4§lr§f§ld - §4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le §f§lS§4§lw§f§lo§4§lr§f§ld" categories="5,16" />
 	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey,§eCooked Turkey - §eCooked Turkey" categories="5,7" />
 	<Item name="Cupid" image="pig_egg.png" emcNames="Pig Egg - §5=- §d§lCupid§5 -=,§5=- §d§lCupid§5 -= - §5=- §d§lCupid§5 -=" categories="0,5" />
 	<Item name="Cupid's Arrow" image="shiny_arrow.png" emcNames="Arrow - §dCupid's Arrow,§dCupid's Arrow - §dCupid's Arrow" categories="5,16" />
@@ -616,7 +617,7 @@
 	<Item name="Ham Hacker" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §6Ham Hacker,§6Ham Hacker - §6Ham Hacker" categories="5,16" />
 	<Item name="Headless Horseman Axe" stack="1" image="diamond_axe_enchanted.png" emcNames="§6§oHeadless Horseman Axe - §6§oHeadless Horseman Axe" categories="5,16" />
 	<Item name="Headless Horseman Mask" stack="1" image="pumpkin.png" emcNames="Pumpkin - §6§oHeadless Horseman Mask,§6§oHeadless Horseman Mask - §6§oHeadless Horseman Mask" categories="5,16" />
-	<Item name="Holiday Candle" image="torch.png" emcNames="Torch - §eHoliday Candle,§eHoliday Candle - §eHoliday Candle" categories="5" />
+	<Item name="Holiday Candle" image="torch.png" emcNames="Torch - §eHoliday Candle,§eHoliday Candle - §eHoliday Candle,Torch - §9Holiday Candle,§9Holiday Candle - §9Holiday Candle" categories="5" />
 	<Item name="Holiday Pick" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §f§l«§c§lHoliday Pick§f§l»,§f§l«§c§lHoliday Pick§f§l» - §f§l«§c§lHoliday Pick§f§l»" categories="5,16" />
 	<Item name="IcecreamCow Flesh" image="raw_beef.png" emcNames="Raw Beef - §6IcecreamCow Flesh,§6IcecreamCow Flesh - §6IcecreamCow Flesh" categories="5" />
 	<Item name="IcecreamCow Skin" image="raw_beef.png" emcNames="Leather - §6IcecreamCow Skin,§6IcecreamCow Skin - §6IcecreamCow Skin" categories="5" />
@@ -631,8 +632,10 @@
 	<Item name="Pi Pie" image="pumpkin_pie.png" emcNames="Pumpkin Pie - §6Pi Pie,§6Pi Pie - §6Pi Pie" categories="5,7" />
 	<Item name="Pot of Gold" image="cauldron.png" emcNames="Cauldron - §ePot of Gold,§ePot of Gold - §ePot of Gold" categories="5" />
 	<Item name="Potato Plate" stack="1" image="diamond_chestplate_enchanted.png" emcNames="Diamond Chest - §6Potato Plate,§6Potato Plate - §6Potato Plate" categories="5,16" />
+	<Item name="Prancer" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lPrancer§f§l»,§f§l«§c§lPrancer§f§l» - §f§l«§c§lPrancer§f§l»" categories="0,5" />
 	<Item name="Referral Block of Clickyness" image="gold_block.png" emcNames="Gold Block - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s,§2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s" categories="5" />
 	<Item name="Remembrance Poppy" image="poppy.png" emcNames="Poppy - §4Remembrance Poppy,§4Remembrance Poppy - §4Remembrance Poppy" categories="6" />
+	<Item name="Shear Madness" stack="1" image="shears.png" emcNames="Shears - §6Shear Madness,§6Shear Madness - §6Shear Madness" categories="5,16" />
 	<Item name="Spooky Egg" image="egg.png" stack="16" emcNames="Egg - §fSpooky Egg,§fSpooky Egg - §fSpooky Egg" categories="5" />
 	<Item name="Super Dragon Poop" image="obsidian.png" emcNames="Obsidian - §4§lSuper Dragon Poop,Obsidian - §4§lSuper Dragon Poop!,§4§lSuper Dragon Poop - §4§lSuper Dragon Poop,§4§lSuper Dragon Poop! - §4§lSuper Dragon Poop!" categories="5" />
 	<Item name="Turkey Slicer" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §4Turkey Slicer,Diamond Sword - §6Turkey Slicer,§4Turkey Slicer - §4Turkey Slicer,§6Turkey Slicer - §6Turkey Slicer" categories="5,16" />
