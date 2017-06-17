@@ -1453,17 +1453,17 @@ public abstract class DirbyDbDao implements DbDao {
 
 		//@formatter:off
 		String sql =
-		"SELECT t.ts, t.amount, i.name AS item " +
+		"SELECT t.ts, t.amount, t.balance, t.player, i.name AS item " +
 		"FROM transactions t " +
-		"INNER JOIN items i ON t.item = i.id " +
-		"WHERE t.player IS NOT NULL ";
+		"INNER JOIN items i ON t.item = i.id ";
 		//@formatter:off
 		
-		if (from != null) {
-			sql += "AND t.ts >= ? ";
-		}
-		if (to != null) {
-			sql += "AND t.ts < ? ";
+		if (from != null && to != null){
+			sql += "WHERE t.ts >= ? AND t.ts < ?";
+		} else if (from != null){
+			sql += "WHERE t.ts >= ?";
+		} else if (to != null){
+			sql += "WHERE t.ts < ?";
 		}
 
 		PreparedStatement stmt = stmt(sql);
@@ -1475,6 +1475,7 @@ public abstract class DirbyDbDao implements DbDao {
 			if (to != null) {
 				stmt.setTimestamp(index++, toTimestamp(to));
 			}
+
 			ResultSet rs = stmt.executeQuery();
 			Calendar c = Calendar.getInstance();
 			while (rs.next()) {
@@ -1489,15 +1490,23 @@ public abstract class DirbyDbDao implements DbDao {
 				c.set(Calendar.MILLISECOND, 0);
 				Date date = c.getTime();
 
-				Profits p = profits.get(date);
-				if (p == null) {
-					p = new Profits();
-					profits.put(date, p);
+				Profits profit = profits.get(date);
+				if (profit == null) {
+					profit = new Profits();
+					profits.put(date, profit);
 				}
 
-				int amount = rs.getInt("amount");
-				String item = rs.getString("item");
-				p.addTransaction(item, amount);
+				if (rs.getObject("player") != null) {
+					//only include shop transactions
+					int amount = rs.getInt("amount");
+					String item = rs.getString("item");
+					profit.addTransaction(item, amount);
+				}
+				
+				int balance = rs.getInt("balance");
+				if (balance > profit.getBalance()) {
+					profit.setBalance(balance);
+				}
 			}
 		} finally {
 			closeStatements(stmt);

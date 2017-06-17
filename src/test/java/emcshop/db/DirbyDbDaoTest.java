@@ -1079,20 +1079,23 @@ public class DirbyDbDaoTest {
 	public void getProfitsByMonth() throws Throwable {
 		assertTrue(dao.getProfitsByMonth(null, null).isEmpty());
 
-		transactions().ts("2014-01-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transactions().ts("2014-01-02 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transactions().ts("2014-01-03 00:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
-		transactions().ts("2014-01-04 00:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).insert();
-		transactions().ts("2014-01-05 00:00:00").item(diamondId).player(notchId).amount(10).quantity(-1).insert();
-		transactions().ts("2014-02-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
-		transactions().ts("2014-04-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).insert();
+		transactions().ts("2014-01-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).balance(500).insert();
+		transactions().ts("2014-01-02 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).balance(510).insert();
+		transactions().ts("2014-01-03 00:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).balance(520).insert();
+		transactions().ts("2014-01-04 00:00:00").item(diamondId).player(notchId).amount(-50).quantity(5).balance(500).insert();
+		transactions().ts("2014-01-05 00:00:00").item(diamondId).player(notchId).amount(10).quantity(-1).balance(490).insert();
+		transactions().ts("2014-01-06 00:00:00").item(diamondId).player((Integer) null).amount(50).quantity(-5).balance(540).insert();
+		transactions().ts("2014-02-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).balance(600).insert();
+		transactions().ts("2014-04-01 00:00:00").item(appleId).player(notchId).amount(100).quantity(-10).balance(700).insert();
+		transactions().ts("2014-05-01 00:00:00").item(diamondId).player((Integer) null).amount(50).quantity(-5).balance(800).insert();
 
 		//no date range
 		{
 			Map<Date, Profits> profits = dao.getProfitsByMonth(null, null);
-			assertEquals(3, profits.size());
+			assertEquals(4, profits.size());
 
 			Profits p = profits.get(date("2014-01-01"));
+			assertTrue(p.hasTransactions());
 			assertEquals(2, p.getCustomerTotals().size());
 			assertIntEquals(200, p.getCustomerTotals().get("apple"));
 			assertIntEquals(10, p.getCustomerTotals().get("diamond"));
@@ -1100,40 +1103,57 @@ public class DirbyDbDaoTest {
 			assertIntEquals(-100, p.getSupplierTotals().get("diamond"));
 			assertEquals(210, p.getCustomerTotal());
 			assertEquals(-100, p.getSupplierTotal());
+			assertEquals(540, p.getBalance());
 
 			p = profits.get(date("2014-02-01"));
+			assertTrue(p.hasTransactions());
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
+			assertEquals(600, p.getBalance());
 
 			p = profits.get(date("2014-04-01"));
+			assertTrue(p.hasTransactions());
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
+			assertEquals(700, p.getBalance());
+
+			p = profits.get(date("2014-05-01"));
+			assertFalse(p.hasTransactions());
+			assertEquals(800, p.getBalance());
 		}
 
 		//with start date
 		{
 			Map<Date, Profits> profits = dao.getProfitsByMonth(date("2014-02-01"), null);
-			assertEquals(2, profits.size());
+			assertEquals(3, profits.size());
 
 			Profits p = profits.get(date("2014-02-01"));
+			assertTrue(p.hasTransactions());
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
+			assertEquals(600, p.getBalance());
 
 			p = profits.get(date("2014-04-01"));
+			assertTrue(p.hasTransactions());
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
+			assertEquals(700, p.getBalance());
+
+			p = profits.get(date("2014-05-01"));
+			assertFalse(p.hasTransactions());
+			assertEquals(800, p.getBalance());
 		}
 
 		//with end date
@@ -1142,6 +1162,7 @@ public class DirbyDbDaoTest {
 			assertEquals(2, profits.size());
 
 			Profits p = profits.get(date("2014-01-01"));
+			assertTrue(p.hasTransactions());
 			assertEquals(2, p.getCustomerTotals().size());
 			assertIntEquals(200, p.getCustomerTotals().get("apple"));
 			assertIntEquals(10, p.getCustomerTotals().get("diamond"));
@@ -1149,13 +1170,16 @@ public class DirbyDbDaoTest {
 			assertIntEquals(-100, p.getSupplierTotals().get("diamond"));
 			assertEquals(210, p.getCustomerTotal());
 			assertEquals(-100, p.getSupplierTotal());
+			assertEquals(540, p.getBalance());
 
 			p = profits.get(date("2014-02-01"));
+			assertTrue(p.hasTransactions());
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
+			assertEquals(600, p.getBalance());
 		}
 
 		//with start and end dates
@@ -1164,11 +1188,13 @@ public class DirbyDbDaoTest {
 			assertEquals(1, profits.size());
 
 			Profits p = profits.get(date("2014-02-01"));
+			assertTrue(p.hasTransactions());
 			assertEquals(1, p.getCustomerTotals().size());
 			assertIntEquals(100, p.getCustomerTotals().get("apple"));
 			assertEquals(0, p.getSupplierTotals().size());
 			assertEquals(100, p.getCustomerTotal());
 			assertEquals(0, p.getSupplierTotal());
+			assertEquals(600, p.getBalance());
 		}
 	}
 
@@ -1710,7 +1736,8 @@ public class DirbyDbDaoTest {
 
 	private static class TransactionTester {
 		private Date ts = new Date();
-		private int item = appleId, player = notchId, amount, quantity, balance;
+		private int item = appleId, amount, quantity, balance;
+		private Integer player = notchId;
 		private String itemStr = "Apple", playerStr = "Notch";
 
 		public TransactionTester ts(String ts) {
@@ -1734,7 +1761,7 @@ public class DirbyDbDaoTest {
 			return this;
 		}
 
-		public TransactionTester player(int player) {
+		public TransactionTester player(Integer player) {
 			this.player = player;
 			this.playerStr = null;
 			return this;
@@ -1764,7 +1791,7 @@ public class DirbyDbDaoTest {
 		public void test(ResultSet rs) throws SQLException {
 			assertEquals(ts, rs.getTimestamp("ts"));
 			assertEquals(item, rs.getInt("item"));
-			assertEquals(player, rs.getInt("player"));
+			assertEquals(player, rs.getObject("player"));
 			assertEquals(balance, rs.getInt("balance"));
 			assertEquals(amount, rs.getInt("amount"));
 			assertEquals(quantity, rs.getInt("quantity"));
@@ -1784,7 +1811,11 @@ public class DirbyDbDaoTest {
 			int i = 1;
 			stmt.setTimestamp(i++, timestamp(ts));
 			stmt.setInt(i++, item);
-			stmt.setInt(i++, player);
+			if (player == null) {
+				stmt.setNull(i++, Types.INTEGER);
+			} else {
+				stmt.setInt(i++, player);
+			}
 			stmt.setInt(i++, amount);
 			stmt.setInt(i++, quantity);
 			stmt.setInt(i++, balance);

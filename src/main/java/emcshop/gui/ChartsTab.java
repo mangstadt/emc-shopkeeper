@@ -111,7 +111,7 @@ public class ChartsTab extends JPanel {
 	private int netTotal = 0;
 
 	private enum Show {
-		NET_PROFITS("Net Profits"), ITEM_GROUPS("Item Groups"), ITEMS("Items");
+		NET_PROFITS("Net Profits"), ITEM_GROUPS("Item Groups"), ITEMS("Items"), RUPEE_BALANCE("Rupee Balance");
 
 		private final String display;
 
@@ -211,6 +211,7 @@ public class ChartsTab extends JPanel {
 				showPanel.removeAll();
 				switch (selected) {
 				case NET_PROFITS:
+				case RUPEE_BALANCE:
 					break;
 				case ITEM_GROUPS:
 					showPanel.add(new MyJScrollPane(itemGroupsPanel), "w 100%");
@@ -437,8 +438,12 @@ public class ChartsTab extends JPanel {
 			TimeSeries netProfitSeries = new TimeSeries("Net Profit");
 
 			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
-				Date date = entry.getKey();
 				Profits p = entry.getValue();
+				if (!p.hasTransactions()) {
+					continue;
+				}
+
+				Date date = entry.getKey();
 				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
 
 				customersSeries.add(timePeriod, p.getCustomerTotal());
@@ -463,8 +468,12 @@ public class ChartsTab extends JPanel {
 			}
 
 			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
-				Date date = entry.getKey();
 				Profits p = entry.getValue();
+				if (!p.hasTransactions()) {
+					continue;
+				}
+
+				Date date = entry.getKey();
 				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
 
 				Map<String, Integer> customerGroupTotals = organizeIntoGroups(p.getCustomerTotals());
@@ -500,8 +509,12 @@ public class ChartsTab extends JPanel {
 			}
 
 			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
-				Date date = entry.getKey();
 				Profits p = entry.getValue();
+				if (!p.hasTransactions()) {
+					continue;
+				}
+
+				Date date = entry.getKey();
 				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
 
 				for (Map.Entry<String, TimeSeries> tsEntry : series.entrySet()) {
@@ -525,11 +538,27 @@ public class ChartsTab extends JPanel {
 			return dataset;
 		}
 
+		if (show.getSelectedItem() == Show.RUPEE_BALANCE) {
+			TimeSeries balanceSeries = new TimeSeries("Rupee Balance");
+
+			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
+				Date date = entry.getKey();
+				Profits p = entry.getValue();
+				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
+
+				balanceSeries.add(timePeriod, p.getBalance());
+			}
+
+			dataset.addSeries(balanceSeries);
+			return dataset;
+		}
+
 		return dataset;
 	}
 
 	private JFreeChart createChart(XYDataset dataset) {
-		JFreeChart chart = ChartFactory.createTimeSeriesChart("", "Date", "Rupees Earned", dataset, true, false, false);
+		String yAxisLabel = (show.getSelectedItem() == Show.RUPEE_BALANCE) ? "Rupee Balance" : "Rupees Earned";
+		JFreeChart chart = ChartFactory.createTimeSeriesChart("", "Date", yAxisLabel, dataset, true, false, false);
 		chart.setBackgroundPaint(null); //transparent
 
 		XYPlot plot = (XYPlot) chart.getPlot();
@@ -548,6 +577,8 @@ public class ChartsTab extends JPanel {
 			renderer.setSeriesPaint(1, Color.red);
 			renderer.setSeriesPaint(2, Color.blue);
 			renderer.setSeriesStroke(2, new BasicStroke(3));
+		} else if (show.getSelectedItem() == Show.RUPEE_BALANCE) {
+			renderer.setSeriesPaint(0, new Color(0, 128, 0));
 		}
 
 		if (renderer instanceof XYLineAndShapeRenderer) {
@@ -563,7 +594,7 @@ public class ChartsTab extends JPanel {
 		NumberFormat nf = new DecimalFormat("#,###'r'");
 		nf.setGroupingUsed(true);
 		yAxis.setNumberFormatOverride(nf);
-		yAxis.setAutoRangeIncludesZero(true);
+		yAxis.setAutoRangeIncludesZero(show.getSelectedItem() != Show.RUPEE_BALANCE);
 
 		return chart;
 	}
@@ -588,6 +619,15 @@ public class ChartsTab extends JPanel {
 	}
 
 	private void updateNetTotal() {
+		if (show.getSelectedItem() == Show.RUPEE_BALANCE) {
+			netTotalLabelLabel.setVisible(false);
+			netTotalLabel.setVisible(false);
+			return;
+		}
+
+		netTotalLabelLabel.setVisible(true);
+		netTotalLabel.setVisible(true);
+
 		RupeeFormatter rf = new RupeeFormatter();
 		rf.setPlus(true);
 		rf.setColor(true);

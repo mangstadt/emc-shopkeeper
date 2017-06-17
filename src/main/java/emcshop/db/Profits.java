@@ -6,6 +6,7 @@ import java.util.Map;
 public class Profits {
 	private final Map<String, Integer> customerTotals = new HashMap<String, Integer>();
 	private final Map<String, Integer> supplierTotals = new HashMap<String, Integer>();
+	private int balance;
 
 	public void addTransaction(String item, int amount) {
 		item = item.toLowerCase();
@@ -16,6 +17,10 @@ public class Profits {
 		}
 		value += amount;
 		map.put(item, value);
+	}
+
+	public boolean hasTransactions() {
+		return !customerTotals.isEmpty() || !supplierTotals.isEmpty();
 	}
 
 	public Map<String, Integer> getCustomerTotals() {
@@ -32,6 +37,14 @@ public class Profits {
 
 	public int getSupplierTotal() {
 		return getTotal(supplierTotals);
+	}
+
+	public int getBalance() {
+		return balance;
+	}
+
+	public void setBalance(int balance) {
+		this.balance = balance;
 	}
 
 	private int getTotal(Map<String, Integer> map) {
