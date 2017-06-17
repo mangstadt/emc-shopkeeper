@@ -601,6 +601,8 @@
 	<Item name="Bionic Pants" stack="1" image="diamond_leggings_enchanted.png" emcNames="§6Bionic Pants - §6Bionic Pants" categories="5,16" />
 	<Item name="Bonus Chest" image="chest.png" emcNames="Chest - §6Bonus Chest,§6Bonus Chest - §6Bonus Chest" categories="5" />
 	<Item name="Candy Cane Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="§4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le §f§lS§4§lw§f§lo§4§lr§f§ld - §4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le §f§lS§4§lw§f§lo§4§lr§f§ld" categories="5,16" />
+	<Item name="Chicken Skewer" stack="1" image="diamond_sword_enchanted.png" emcNames="§6Chicken Skewer - §6Chicken Skewer" categories="5,16" />
+	<Item name="Chocolate Bunny" image="rabbit_egg.png" emcNames="§5§lChocolate Bunny - §5§lChocolate Bunny" categories="0,5" />
 	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey,§eCooked Turkey - §eCooked Turkey" categories="5,7" />
 	<Item name="Cupid" image="pig_egg.png" emcNames="Pig Egg - §5=- §d§lCupid§5 -=,§5=- §d§lCupid§5 -= - §5=- §d§lCupid§5 -=" categories="0,5" />
 	<Item name="Cupid's Arrow" image="shiny_arrow.png" emcNames="Arrow - §dCupid's Arrow,§dCupid's Arrow - §dCupid's Arrow" categories="5,16" />
