@@ -223,6 +223,22 @@ public class MigrationSprocs {
 	}
 
 	/**
+	 * Populates the "bonuses_fees.highest_balance" and
+	 * "bonuses_fees.highest_balance_ts" database fields.
+	 * @throws SQLException if there's a database problem
+	 */
+	public static void findHighestBalance() throws SQLException {
+		Connection conn = conn();
+		DbDao dao = new DirbyEmbeddedDbDao(conn);
+
+		try {
+			dao.findHighestBalance();
+		} finally {
+			conn.close();
+		}
+	}
+
+	/**
 	 * Creates a connection to the database.
 	 * @return the database connection
 	 * @throws SQLException if there's a database problem

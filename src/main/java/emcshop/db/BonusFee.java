@@ -3,8 +3,8 @@ package emcshop.db;
 import java.util.Date;
 
 public class BonusFee {
-	private Date since;
-	private int horse, lock, eggify, vault, signIn, vote, mail;
+	private Date since, highestBalanceTs;
+	private int horse, lock, eggify, vault, signIn, vote, mail, highestBalance;
 
 	public Date getSince() {
 		return since;
@@ -68,5 +68,21 @@ public class BonusFee {
 
 	public void setMail(int mail) {
 		this.mail = mail;
+	}
+
+	public Date getHighestBalanceTs() {
+		return highestBalanceTs;
+	}
+
+	public void setHighestBalanceTs(Date highestBalanceTs) {
+		this.highestBalanceTs = highestBalanceTs;
+	}
+
+	public int getHighestBalance() {
+		return highestBalance;
+	}
+
+	public void setHighestBalance(int highestBalance) {
+		this.highestBalance = highestBalance;
 	}
 }

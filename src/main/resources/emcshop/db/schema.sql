@@ -86,7 +86,9 @@ CREATE TABLE bonuses_fees(
 	vault INT NOT NULL DEFAULT 0,
 	sign_in INT NOT NULL DEFAULT 0,
 	vote INT NOT NULL DEFAULT 0,
-	mail INT NOT NULL DEFAULT 0
+	mail INT NOT NULL DEFAULT 0,
+	highest_balance INT NOT NULL DEFAULT 0,
+	highest_balance_ts TIMESTAMP
 );
 INSERT INTO bonuses_fees (since) VALUES (NULL);
 

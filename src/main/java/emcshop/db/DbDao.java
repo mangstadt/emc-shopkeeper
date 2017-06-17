@@ -289,6 +289,15 @@ public interface DbDao {
 	void updateBonusesFeesLatestTransactionDate(Date latestParsedBonusFeeDate) throws SQLException;
 
 	/**
+	 * Updates the player's highest rupee balance after an update operation.
+	 * @param transaction the transaction with the highest rupee balance from
+	 * the update operation that was just run (this may or may not be higher
+	 * than the rupee balance in the bonus_fees table)
+	 * @throws SQLException
+	 */
+	void updateBonusesFeesHighestBalance(RupeeTransaction transaction) throws SQLException;
+
+	/**
 	 * Determines if this DAO considers the given rupee transaction to be a
 	 * "bonus/fee" transaction.
 	 * @param transaction the rupee transaction
@@ -319,6 +328,13 @@ public interface DbDao {
 	 * @throws SQLException
 	 */
 	void calculatePlayersFirstLastSeenDates() throws SQLException;
+
+	/**
+	 * Finds the highest rupee balance the player has ever had, and saves that
+	 * information to the bonuses_fees table.
+	 * @throws SQLException
+	 */
+	void findHighestBalance() throws SQLException;
 
 	/**
 	 * Logs an update operation.

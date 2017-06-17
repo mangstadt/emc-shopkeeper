@@ -20,10 +20,11 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.db.BonusFee;
 import emcshop.db.DbDao;
+import emcshop.util.RelativeDateFormat;
 import emcshop.util.RupeeFormatter;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class BonusFeeTab extends JPanel {
@@ -86,12 +87,13 @@ public class BonusFeeTab extends JPanel {
 	}
 
 	private static class Row {
-		private final String description;
+		private final String description, text;
 		private final int total;
 
-		public Row(String description, int total) {
+		public Row(String description, int total, String text) {
 			this.description = description;
 			this.total = total;
+			this.text = text;
 		}
 	}
 
@@ -116,12 +118,6 @@ public class BonusFeeTab extends JPanel {
 					label.setBorder(new EmptyBorder(4, 4, 4, 4));
 				}
 
-				private final RupeeFormatter rf = new RupeeFormatter();
-				{
-					rf.setPlus(true);
-					rf.setColor(true);
-				}
-
 				@Override
 				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 					if (value == null) {
@@ -137,7 +133,7 @@ public class BonusFeeTab extends JPanel {
 						break;
 
 					case TOTAL:
-						label.setText("<html>" + rf.format(rowObj.total) + "</html>");
+						label.setText("<html>" + rowObj.text + "</html>");
 						break;
 					}
 
@@ -178,13 +174,30 @@ public class BonusFeeTab extends JPanel {
 
 		private void setData(BonusFee bonusFee) {
 			model.data.clear();
-			model.data.add(new Row("Horse Summoning", bonusFee.getHorse()));
-			model.data.add(new Row("Chest Locking", bonusFee.getLock()));
-			model.data.add(new Row("Eggifying animals", bonusFee.getEggify()));
-			model.data.add(new Row("Vault fees", bonusFee.getVault()));
-			model.data.add(new Row("Sign-in bonuses", bonusFee.getSignIn()));
-			model.data.add(new Row("Voting bonuses", bonusFee.getVote()));
-			model.data.add(new Row("Mail fees", bonusFee.getMail()));
+
+			RupeeFormatter rf = new RupeeFormatter();
+			rf.setPlus(true);
+			rf.setColor(true);
+
+			model.data.add(new Row("Horse Summoning", bonusFee.getHorse(), rf.format(bonusFee.getHorse())));
+			model.data.add(new Row("Chest Locking", bonusFee.getLock(), rf.format(bonusFee.getLock())));
+			model.data.add(new Row("Eggifying animals", bonusFee.getEggify(), rf.format(bonusFee.getEggify())));
+			model.data.add(new Row("Vault fees", bonusFee.getVault(), rf.format(bonusFee.getVault())));
+			model.data.add(new Row("Sign-in bonuses", bonusFee.getSignIn(), rf.format(bonusFee.getSignIn())));
+			model.data.add(new Row("Voting bonuses", bonusFee.getVote(), rf.format(bonusFee.getVote())));
+			model.data.add(new Row("Mail fees", bonusFee.getMail(), rf.format(bonusFee.getMail())));
+
+			rf.setPlus(false);
+			rf.setColor(false);
+			String text = rf.format(bonusFee.getHighestBalance());
+			Date highestBalanceTs = bonusFee.getHighestBalanceTs();
+			if (highestBalanceTs != null) {
+				RelativeDateFormat df = new RelativeDateFormat();
+				text += " (" + df.format(highestBalanceTs) + ")";
+			}
+			
+			model.data.add(new Row("Highest Balance", bonusFee.getHighestBalance(), text));
+
 			model.fireTableDataChanged();
 		}
 

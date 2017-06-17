@@ -1391,6 +1391,9 @@ public abstract class DirbyDbDao implements DbDao {
 			bonusesFees.setVault(rs.getInt("vault"));
 			bonusesFees.setVote(rs.getInt("vote"));
 			bonusesFees.setMail(rs.getInt("mail"));
+			bonusesFees.setHighestBalance(rs.getInt("highest_balance"));
+			bonusesFees.setHighestBalanceTs(toDate(rs.getTimestamp("highest_balance_ts")));
+
 			return bonusesFees;
 		} finally {
 			closeStatements(stmt);
@@ -1405,6 +1408,33 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void updateBonusesFeesHighestBalance(RupeeTransaction transaction) throws SQLException {
+		int highestBalance = 0;
+		PreparedStatement selectStmt = stmt("SELECT highest_balance FROM bonuses_fees");
+		try {
+			ResultSet rs = selectStmt.executeQuery();
+			if (rs.next()) {
+				highestBalance = rs.getInt(1);
+			}
+		} finally {
+			closeStatements(selectStmt);
+		}
+
+		if (transaction.getBalance() <= highestBalance) {
+			return;
+		}
+
+		PreparedStatement updateStmt = stmt("UPDATE bonuses_fees SET highest_balance = ?, highest_balance_ts = ?");
+		try {
+			updateStmt.setInt(1, transaction.getBalance());
+			updateStmt.setTimestamp(2, toTimestamp(transaction.getTs()));
+			updateStmt.executeUpdate();
+		} finally {
+			closeStatements(updateStmt);
 		}
 	}
 
@@ -1571,6 +1601,34 @@ public abstract class DirbyDbDao implements DbDao {
 				Date lastSeen = toDate(rs.getTimestamp("lastSeen"));
 				updateFirstLastSeen(player, firstSeen, lastSeen);
 			}
+		} finally {
+			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void findHighestBalance() throws SQLException {
+		int highestBalance = 0;
+		Timestamp highestBalanceTs = null;
+		PreparedStatement stmt = stmt("SELECT ts, balance FROM transactions");
+		try {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				int balance = rs.getInt("balance");
+				if (balance > highestBalance) {
+					highestBalance = balance;
+					highestBalanceTs = rs.getTimestamp("ts");
+				}
+			}
+		} finally {
+			closeStatements(stmt);
+		}
+
+		stmt = stmt("UPDATE bonuses_fees SET highest_balance = ?, highest_balance_ts = ?");
+		try {
+			stmt.setInt(1, highestBalance);
+			stmt.setTimestamp(2, highestBalanceTs);
+			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
 		}

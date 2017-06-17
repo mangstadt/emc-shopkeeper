@@ -48,6 +48,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	private long started, timeTaken;
 	private int transactionsCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, pagesCount;
 	private Date earliestParsedTransactionDate, latestParsedBonusFeeDate;
+	private RupeeTransaction highestBalance;
 	private Map<Class<? extends RupeeTransaction>, MutableInt> bonusFeeTotals;
 	private boolean downloadStopped = false;
 	private Throwable thrown;
@@ -191,6 +192,10 @@ public class UpdateModelImpl implements IUpdateModel {
 				dao.updateBonusFeeTotals(bonusFeeTotals);
 			}
 
+			if (highestBalance != null) {
+				dao.updateBonusesFeesHighestBalance(highestBalance);
+			}
+
 			//log the update operation
 			dao.insertUpdateLog(new Date(started), getRupeeBalance(), shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, timeTaken);
 
@@ -233,6 +238,7 @@ public class UpdateModelImpl implements IUpdateModel {
 			Long earliestAllowedPaymentTransaction = (oldestAllowablePaymentTransactionAge == null) ? null : started - oldestAllowablePaymentTransactionAge;
 
 			try {
+				highestBalance = null;
 				RupeeTransaction transaction;
 				int curPage = reader.getCurrentPageNumber();
 				while ((transaction = reader.next()) != null) {
@@ -251,6 +257,11 @@ public class UpdateModelImpl implements IUpdateModel {
 
 						//keep track of the oldest transaction date
 						earliestParsedTransactionDate = transaction.getTs();
+
+						//keep track of the transaction with the highest balance
+						if (highestBalance == null || transaction.getBalance() > highestBalance.getBalance()) {
+							highestBalance = transaction;
+						}
 
 						if (transaction instanceof ShopTransaction) {
 							ShopTransaction shopTransaction = (ShopTransaction) transaction;

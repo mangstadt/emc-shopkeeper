@@ -540,6 +540,7 @@ public class UpdateModelImplTest {
 		model.saveTransactions();
 
 		verify(dao).updateBonusesFeesSince(t3.getTs());
+		verify(dao).updateBonusesFeesHighestBalance(t1);
 		verify(dao).insertUpdateLog(any(Date.class), eq(123), eq(1), eq(1), eq(0), anyLong());
 		verify(dao).commit();
 		verifyNoMoreInteractions(dao);
@@ -585,6 +586,8 @@ public class UpdateModelImplTest {
 		Map<Class<? extends RupeeTransaction>, MutableInt> totals = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
 		totals.put(DailySigninBonus.class, new MutableInt(100));
 		verify(dao).updateBonusFeeTotals(totals);
+
+		verify(dao).updateBonusesFeesHighestBalance(t1);
 
 		verify(dao).insertUpdateLog(any(Date.class), eq(123), eq(1), eq(1), eq(1), anyLong());
 		verify(dao).commit();
@@ -636,6 +639,7 @@ public class UpdateModelImplTest {
 		totals.put(DailySigninBonus.class, new MutableInt(100));
 		totals.put(HorseSummonFee.class, new MutableInt(200));
 		verify(dao).updateBonusFeeTotals(totals);
+		verify(dao).updateBonusesFeesHighestBalance(t1);
 
 		verify(dao).insertUpdateLog(any(Date.class), eq(123), eq(1), eq(1), eq(3), anyLong());
 		verify(dao).commit();
