@@ -67,7 +67,7 @@ CREATE TABLE payment_transactions(
 	--"true" if the user has chosen to not associate this with a shop transaction
 	ignore BOOLEAN NOT NULL DEFAULT false,
 	
-	reason VARCHAR(128)
+	reason VARCHAR(256)
 );
 
 CREATE TABLE inventory(
