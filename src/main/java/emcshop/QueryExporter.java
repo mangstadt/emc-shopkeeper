@@ -184,8 +184,8 @@ public class QueryExporter {
 				//@formatter:off
 				writer.writeNext(new String[]{
 					p.getName(),
-					df.format(p.getFirstSeen()),
-					df.format(p.getLastSeen()),
+					(p.getFirstSeen() == null) ? "" : df.format(p.getFirstSeen()),
+					(p.getLastSeen() == null) ? "" : df.format(p.getLastSeen()),
 					group.getItem(),
 					group.getSoldQuantity() + "",
 					group.getSoldAmount() + "",
