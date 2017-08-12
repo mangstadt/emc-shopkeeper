@@ -253,7 +253,7 @@
 	<Item name="Gray Dye" id="351:8" group="Dyes" categories="4" />
 	<Item name="Gray Glazed Terracotta" id="242" group="Clay" categories="2" />
 	<Item name="Gray Shulker Box" />
-	<Item name="Gray Terracotta" id="159:7" group="Clay" categories="2" emcNames="Gray Clay,Gray Stclay,Gray Stained Clay,Gray Hardened Clay" />
+	<Item name="Gray Terracotta" id="159:7" group="Clay" categories="2" emcNames="Grey Terracotta,Gray Clay,Gray Stclay,Gray Stained Clay,Gray Hardened Clay" />
 	<Item name="Gray Wool" id="35:7" group="Wool" categories="18" />
 	<Item name="Green Bed" id="355:13" stack="1" />
 	<Item name="Green Concrete" id="251:13" categories="19" />
@@ -328,7 +328,7 @@
 	<Item name="Light Gray Dye" id="351:7" group="Dyes" categories="4" emcNames="Silver Dye" />
 	<Item name="Light Gray Glazed Terracotta" id="243" group="Clay" categories="2" />
 	<Item name="Light Gray Shulker Box" emcNames="Silver Shulk Box" />
-	<Item name="Light Gray Terracotta" id="159:8" group="Clay" categories="2" emcNames="Light Gray Clay,Lghtgray Stclay,Light Gray Stained Clay,Light Gray Hardened Clay" />
+	<Item name="Light Gray Terracotta" id="159:8" group="Clay" categories="2" emcNames="Light Grey Terracotta,Light Gray Clay,Lghtgray Stclay,Light Gray Stained Clay,Light Gray Hardened Clay" />
 	<Item name="Light Gray Wool" id="35:8" group="Wool" categories="18" emcNames="Silver Wool" />
 	<Item name="Lily Pad" id="111" categories="6" emcNames="Water Lily" />	
 	<Item name="Lilac" id="175:1" group="Flowers" categories="6" />
@@ -659,6 +659,7 @@
 	<Item name="2015 Birthday Cake" image="cake.png" emcNames="Cake - §62015 Birthday Cake,§62015 Birthday Cake - §62015 Birthday Cake" categories="5,7" />
 	<Item name="2015 Birthday Cookie" image="cookie.png" emcNames="Cookie - §62015 Birthday Cookie,§62015 Birthday Cookie - §62015 Birthday Cookie" categories="5,7" />
 	<Item name="2016 Birthday Cake" image="cake.png" emcNames="Cake - §62016 Birthday Cake,§62016 Birthday Cake - §62016 Birthday Cake" categories="5,7" />
+	<Item name="2017 Birthday Cake" image="cake.png" emcNames="§62017 Birthday Cake - §62017 Birthday Cake" categories="5,7" />
 	<Item name="Avalauncher" image="snow_ball.png" emcNames="Snow Ball - §4Avalauncher,§4Avalauncher - §4Avalauncher" categories="16" />
 	<Item name="Blizz Ard's Arm" image="stick.png" emcNames="Stick - §4Blizz Ard's Arm,§4Blizz Ard's Arm - §4Blizz Ard's Arm" categories="5" />
 	<Item name="Blizz Ard's Eye" image="coal.png" emcNames="Coal - §4Blizz Ard's Eye,§4Blizz Ard's Eye - §4Blizz Ard's Eye" categories="5" />
@@ -692,6 +693,7 @@
 	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench,Workbench - §6Labor Bench,§aLabor Bench - §aLabor Bench,§6Labor Bench - §6Labor Bench" categories="5" />
 	<Item name="Liberty Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §cLibe§frty S§9word - §cLibe§frty S§9word,§cLibe§frty S§9word - §cLibe§frty S§9word - §cLibe§frty S§9word - §cLibe§frty S§9word" categories="5,16" />
 	<Item name="Lucky Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §1Lucky Bow,Bow - §9Lucky Bow,§1Lucky Bow - §1Lucky Bow,§9Lucky Bow - §9Lucky Bow" categories="5,16" />
+	<Item name="Lucky Rabbit's Foot" image="rabbit_foot.png" emcNames="§2Lucky Rabbit's Foot - §2Lucky Rabbit's Foot" categories="5" />
 	<Item name="Magical Eggcellent Wand" image="blaze_rod.png" emcNames="Blaze Rod - §6Magical Eggcellent Wand,§6Magical Eggcellent Wand - §6Magical Eggcellent Wand" categories="5" />
 	<Item name="Maxarian Head" image="head.png" emcNames="Head - §cMaxarian Head,§cMaxarian Head - §cMaxarian Head" categories="5" />
 	<Item name="Meteor Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §6Meteor Bow,Bow - §r§6Meteor Bow,§6Meteor Bow - §6Meteor Bow,§r§6Meteor Bow - §r§6Meteor Bow" categories="5,16" />
@@ -702,6 +704,7 @@
 	<Item name="Prancer" image="horse_egg.png" emcNames="Horse Egg - §f§l«§c§lPrancer§f§l»,§f§l«§c§lPrancer§f§l» - §f§l«§c§lPrancer§f§l»" categories="0,5" />
 	<Item name="Referral Block of Clickyness" image="gold_block.png" emcNames="Gold Block - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s,§2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s" categories="5" />
 	<Item name="Remembrance Poppy" image="poppy.png" emcNames="Poppy - §4Remembrance Poppy,§4Remembrance Poppy - §4Remembrance Poppy" categories="6" />
+	<Item name="Remote Shop Sign" image="sign.png" emcNames="§aRemote Shop Sign - §aRemote Shop Sign" categories="5" />
 	<Item name="Shear Madness" stack="1" image="shears.png" emcNames="Shears - §6Shear Madness,§6Shear Madness - §6Shear Madness" categories="5,16" />
 	<Item name="Spooky Egg" image="egg.png" stack="16" emcNames="Egg - §fSpooky Egg,§fSpooky Egg - §fSpooky Egg" categories="5" />
 	<Item name="Super Dragon Poop" image="obsidian.png" emcNames="Obsidian - §4§lSuper Dragon Poop,Obsidian - §4§lSuper Dragon Poop!,§4§lSuper Dragon Poop - §4§lSuper Dragon Poop,§4§lSuper Dragon Poop! - §4§lSuper Dragon Poop!" categories="5" />
