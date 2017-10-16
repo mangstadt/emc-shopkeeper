@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
-import com.github.mangstadt.emc.net.EmcServer;
+import emcshop.net.EmcServer;
 
 import emcshop.AppContext;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
@@ -22,62 +22,62 @@ import emcshop.util.UIDefaultsWrapper;
  */
 @SuppressWarnings("serial")
 public class PlayerCellPanel extends JPanel {
-	private static final AppContext context = AppContext.instance();
+    private static final AppContext context = AppContext.instance();
 
-	private final ProfileLoader profileLoader = context.get(ProfileLoader.class);
-	private final OnlinePlayersMonitor onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
+    private final ProfileLoader profileLoader = context.get(ProfileLoader.class);
+    private final OnlinePlayersMonitor onlinePlayersMonitor = context.get(OnlinePlayersMonitor.class);
 
-	private final JLabel playerLabel = new JLabel();
-	private final JLabel serverLabel = new JLabel();
+    private final JLabel playerLabel = new JLabel();
+    private final JLabel serverLabel = new JLabel();
 
-	public PlayerCellPanel() {
-		//the model can't be passed into the constructor because it becomes "null" when "ProfileDownloadedListener" is called somehow 
+    public PlayerCellPanel() {
+        //the model can't be passed into the constructor because it becomes "null" when "ProfileDownloadedListener" is called somehow
 
-		setLayout(new MigLayout("insets 2"));
-		setOpaque(true);
+        setLayout(new MigLayout("insets 2"));
+        setOpaque(true);
 
-		add(playerLabel);
-		add(serverLabel);
-	}
+        add(playerLabel);
+        add(serverLabel);
+    }
 
-	public void setPlayer(final String playerName) {
-		setPlayer(playerName, new ProfileDownloadedListener() {
-			@Override
-			public void onProfileDownloaded(PlayerProfile profile) {
-				profileLoader.getPortrait(playerName, playerLabel, 16);
-			}
-		});
-	}
+    public void setPlayer(final String playerName) {
+        setPlayer(playerName, new ProfileDownloadedListener() {
+            @Override
+            public void onProfileDownloaded(PlayerProfile profile) {
+                profileLoader.getPortrait(playerName, playerLabel, 16);
+            }
+        });
+    }
 
-	public void setPlayer(String playerName, ProfileDownloadedListener listener) {
-		playerLabel.setText(playerName);
+    public void setPlayer(String playerName, ProfileDownloadedListener listener) {
+        playerLabel.setText(playerName);
 
-		profileLoader.getPortrait(playerName, playerLabel, 16, listener);
+        profileLoader.getPortrait(playerName, playerLabel, 16, listener);
 
-		PlayerProfile profile = profileLoader.getProfile(playerName, listener);
-		if (profile != null) {
-			Color color = null;
-			Rank rank = profile.getRank();
-			if (rank != null) {
-				color = profileLoader.getRankColor(rank);
-			}
-			if (color == null) {
-				color = UIDefaultsWrapper.getLabelForeground();
-			}
-			playerLabel.setForeground(color);
-		}
+        PlayerProfile profile = profileLoader.getProfile(playerName, listener);
+        if (profile != null) {
+            Color color = null;
+            Rank rank = profile.getRank();
+            if (rank != null) {
+                color = profileLoader.getRankColor(rank);
+            }
+            if (color == null) {
+                color = UIDefaultsWrapper.getLabelForeground();
+            }
+            playerLabel.setForeground(color);
+        }
 
-		EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
-		ImageIcon icon = (server == null) ? null : Images.getOnline(server, 12);
-		serverLabel.setIcon(icon);
-	}
+        EmcServer server = onlinePlayersMonitor.getPlayerServer(playerName);
+        ImageIcon icon = (server == null) ? null : Images.getOnline(server, 12);
+        serverLabel.setIcon(icon);
+    }
 
-	@Override
-	public void setForeground(Color color) {
-		if (playerLabel != null) {
-			//this method is called before the constructor is called!
-			playerLabel.setForeground(color);
-		}
-		super.setForeground(color);
-	}
+    @Override
+    public void setForeground(Color color) {
+        if (playerLabel != null) {
+            //this method is called before the constructor is called!
+            playerLabel.setForeground(color);
+        }
+        super.setForeground(color);
+    }
 }

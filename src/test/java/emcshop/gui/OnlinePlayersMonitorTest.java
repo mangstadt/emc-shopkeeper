@@ -11,8 +11,8 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import com.github.mangstadt.emc.net.EmcServer;
-import com.github.mangstadt.emc.net.EmcWebsiteConnection;
+import emcshop.net.EmcServer;
+import emcshop.net.EmcWebsiteConnection;
 
 /**
  * @author Michael Angstadt

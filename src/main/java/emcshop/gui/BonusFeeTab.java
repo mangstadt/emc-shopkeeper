@@ -28,212 +28,213 @@ import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class BonusFeeTab extends JPanel {
-	private final DbDao dao;
-	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+    private final DbDao dao;
+    private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 
-	private final JLabel since;
-	private final BonusFeeTable table;
-	private final MyJScrollPane tableScrollPane;
+    private final JLabel since;
+    private final BonusFeeTable table;
+    private final MyJScrollPane tableScrollPane;
 
-	/**
-	 * Defines all of the columns in this table. The order in which the enums
-	 * are defined is the order that they will appear in the table.
-	 */
-	private enum Column {
-		DESCRIPTION("Description"), TOTAL("Total");
+    /**
+     * Defines all of the columns in this table. The order in which the enums
+     * are defined is the order that they will appear in the table.
+     */
+    private enum Column {
+        DESCRIPTION("Description"), TOTAL("Total");
 
-		private final String name;
+        private final String name;
 
-		private Column(String name) {
-			this.name = name;
-		}
+        private Column(String name) {
+            this.name = name;
+        }
 
-		public String getName() {
-			return name;
-		}
-	}
+        public String getName() {
+            return name;
+        }
+    }
 
-	public BonusFeeTab(DbDao dao) {
-		this.dao = dao;
+    public BonusFeeTab(DbDao dao) {
+        this.dao = dao;
 
-		table = new BonusFeeTable();
-		since = new JLabel();
+        table = new BonusFeeTable();
+        since = new JLabel();
 
-		///////////////////////
+        ///////////////////////
 
-		setLayout(new MigLayout("fillx, insets 5"));
+        setLayout(new MigLayout("fillx, insets 5"));
 
-		add(new JLabel("Data collection start date:"), "split 2, align center");
-		add(since, "wrap");
+        add(new JLabel("Data collection start date:"), "split 2, align center");
+        add(since, "wrap");
 
-		tableScrollPane = new MyJScrollPane(table);
-		add(tableScrollPane, "align center");
+        tableScrollPane = new MyJScrollPane(table);
+        add(tableScrollPane, "align center");
 
-		refresh();
-	}
+        refresh();
+    }
 
-	public void refresh() {
-		BonusFee bonusFee;
-		try {
-			bonusFee = dao.getBonusesFees();
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
+    public void refresh() {
+        BonusFee bonusFee;
+        try {
+            bonusFee = dao.getBonusesFees();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
-		Date sinceDate = bonusFee.getSince();
-		since.setText("<html><b><i><font color=navy>" + ((sinceDate == null) ? "never" : df.format(sinceDate)) + "</font></i></b></html>");
+        Date sinceDate = bonusFee.getSince();
+        since.setText("<html><b><i><font color=navy>" + ((sinceDate == null) ? "never" : df.format(sinceDate)) + "</font></i></b></html>");
 
-		table.setData(bonusFee);
-	}
+        table.setData(bonusFee);
+    }
 
-	private static class Row {
-		private final String description, text;
-		private final int total;
+    private static class Row {
+        private final String description, text;
+        private final int total;
 
-		public Row(String description, int total, String text) {
-			this.description = description;
-			this.total = total;
-			this.text = text;
-		}
-	}
+        public Row(String description, int total, String text) {
+            this.description = description;
+            this.total = total;
+            this.text = text;
+        }
+    }
 
-	private static class BonusFeeTable extends JTable {
-		private final Column columns[] = Column.values();
-		private final Model model;
+    private static class BonusFeeTable extends JTable {
+        private final Column columns[] = Column.values();
+        private final Model model;
 
-		public BonusFeeTable() {
-			getTableHeader().setReorderingAllowed(false);
-			setColumnSelectionAllowed(false);
-			setRowSelectionAllowed(false);
-			setCellSelectionEnabled(false);
-			setRowHeight(24);
+        public BonusFeeTable() {
+            getTableHeader().setReorderingAllowed(false);
+            setColumnSelectionAllowed(false);
+            setRowSelectionAllowed(false);
+            setCellSelectionEnabled(false);
+            setRowHeight(24);
 
-			setDefaultRenderer(Row.class, new TableCellRenderer() {
-				private final Color evenRowColor = new Color(255, 255, 255);
-				private final Color oddRowColor = new Color(240, 240, 240);
+            setDefaultRenderer(Row.class, new TableCellRenderer() {
+                private final Color evenRowColor = new Color(255, 255, 255);
+                private final Color oddRowColor = new Color(240, 240, 240);
 
-				private final JLabel label = new JLabel();
-				{
-					label.setOpaque(true);
-					label.setBorder(new EmptyBorder(4, 4, 4, 4));
-				}
+                private final JLabel label = new JLabel();
 
-				@Override
-				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-					if (value == null) {
-						return null;
-					}
+                {
+                    label.setOpaque(true);
+                    label.setBorder(new EmptyBorder(4, 4, 4, 4));
+                }
 
-					Row rowObj = (Row) value;
-					Column column = columns[col];
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                    if (value == null) {
+                        return null;
+                    }
 
-					switch (column) {
-					case DESCRIPTION:
-						label.setText(rowObj.description);
-						break;
+                    Row rowObj = (Row) value;
+                    Column column = columns[col];
 
-					case TOTAL:
-						label.setText("<html>" + rowObj.text + "</html>");
-						break;
-					}
+                    switch (column) {
+                        case DESCRIPTION:
+                            label.setText(rowObj.description);
+                            break;
 
-					//set the background color of the row
-					Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
-					label.setBackground(color);
+                        case TOTAL:
+                            label.setText("<html>" + rowObj.text + "</html>");
+                            break;
+                    }
 
-					return label;
-				}
-			});
+                    //set the background color of the row
+                    Color color = (row % 2 == 0) ? evenRowColor : oddRowColor;
+                    label.setBackground(color);
 
-			model = new Model();
-			setModel(model);
+                    return label;
+                }
+            });
 
-			setRowSorter(createRowSorter());
-		}
+            model = new Model();
+            setModel(model);
 
-		private TableRowSorter<Model> createRowSorter() {
-			TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
+            setRowSorter(createRowSorter());
+        }
 
-			rowSorter.setComparator(Column.DESCRIPTION.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.description.compareToIgnoreCase(two.description);
-				}
-			});
-			rowSorter.setComparator(Column.TOTAL.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.total - two.total;
-				}
-			});
-			rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.DESCRIPTION.ordinal(), SortOrder.ASCENDING)));
-			rowSorter.setSortsOnUpdates(true);
+        private TableRowSorter<Model> createRowSorter() {
+            TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
 
-			return rowSorter;
-		}
+            rowSorter.setComparator(Column.DESCRIPTION.ordinal(), new Comparator<Row>() {
+                @Override
+                public int compare(Row one, Row two) {
+                    return one.description.compareToIgnoreCase(two.description);
+                }
+            });
+            rowSorter.setComparator(Column.TOTAL.ordinal(), new Comparator<Row>() {
+                @Override
+                public int compare(Row one, Row two) {
+                    return one.total - two.total;
+                }
+            });
+            rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.DESCRIPTION.ordinal(), SortOrder.ASCENDING)));
+            rowSorter.setSortsOnUpdates(true);
 
-		private void setData(BonusFee bonusFee) {
-			model.data.clear();
+            return rowSorter;
+        }
 
-			RupeeFormatter rf = new RupeeFormatter();
-			rf.setPlus(true);
-			rf.setColor(true);
+        private void setData(BonusFee bonusFee) {
+            model.data.clear();
 
-			model.data.add(new Row("Horse Summoning", bonusFee.getHorse(), rf.format(bonusFee.getHorse())));
-			model.data.add(new Row("Chest Locking", bonusFee.getLock(), rf.format(bonusFee.getLock())));
-			model.data.add(new Row("Eggifying animals", bonusFee.getEggify(), rf.format(bonusFee.getEggify())));
-			model.data.add(new Row("Vault fees", bonusFee.getVault(), rf.format(bonusFee.getVault())));
-			model.data.add(new Row("Sign-in bonuses", bonusFee.getSignIn(), rf.format(bonusFee.getSignIn())));
-			model.data.add(new Row("Voting bonuses", bonusFee.getVote(), rf.format(bonusFee.getVote())));
-			model.data.add(new Row("Mail fees", bonusFee.getMail(), rf.format(bonusFee.getMail())));
+            RupeeFormatter rf = new RupeeFormatter();
+            rf.setPlus(true);
+            rf.setColor(true);
 
-			rf.setPlus(false);
-			rf.setColor(false);
-			String text = rf.format(bonusFee.getHighestBalance());
-			Date highestBalanceTs = bonusFee.getHighestBalanceTs();
-			if (highestBalanceTs != null) {
-				RelativeDateFormat df = new RelativeDateFormat();
-				text += " (" + df.format(highestBalanceTs) + ")";
-			}
-			
-			model.data.add(new Row("Highest Balance", bonusFee.getHighestBalance(), text));
+            model.data.add(new Row("Horse Summoning", bonusFee.getHorse(), rf.format(bonusFee.getHorse())));
+            model.data.add(new Row("Chest Locking", bonusFee.getLock(), rf.format(bonusFee.getLock())));
+            model.data.add(new Row("Eggifying animals", bonusFee.getEggify(), rf.format(bonusFee.getEggify())));
+            model.data.add(new Row("Vault fees", bonusFee.getVault(), rf.format(bonusFee.getVault())));
+            model.data.add(new Row("Sign-in bonuses", bonusFee.getSignIn(), rf.format(bonusFee.getSignIn())));
+            model.data.add(new Row("Voting bonuses", bonusFee.getVote(), rf.format(bonusFee.getVote())));
+            model.data.add(new Row("Mail fees", bonusFee.getMail(), rf.format(bonusFee.getMail())));
 
-			model.fireTableDataChanged();
-		}
+            rf.setPlus(false);
+            rf.setColor(false);
+            String text = rf.format(bonusFee.getHighestBalance());
+            Date highestBalanceTs = bonusFee.getHighestBalanceTs();
+            if (highestBalanceTs != null) {
+                RelativeDateFormat df = new RelativeDateFormat();
+                text += " (" + df.format(highestBalanceTs) + ")";
+            }
 
-		private class Model extends AbstractTableModel {
-			private final List<Row> data = new ArrayList<Row>();
+            model.data.add(new Row("Highest Balance", bonusFee.getHighestBalance(), text));
 
-			@Override
-			public int getColumnCount() {
-				return columns.length;
-			}
+            model.fireTableDataChanged();
+        }
 
-			@Override
-			public String getColumnName(int index) {
-				Column column = columns[index];
-				return column.getName();
-			}
+        private class Model extends AbstractTableModel {
+            private final List<Row> data = new ArrayList<Row>();
 
-			@Override
-			public int getRowCount() {
-				return data.size();
-			}
+            @Override
+            public int getColumnCount() {
+                return columns.length;
+            }
 
-			@Override
-			public Object getValueAt(int row, int col) {
-				return data.get(row);
-			}
+            @Override
+            public String getColumnName(int index) {
+                Column column = columns[index];
+                return column.getName();
+            }
 
-			@Override
-			public Class<?> getColumnClass(int col) {
-				return Row.class;
-			}
+            @Override
+            public int getRowCount() {
+                return data.size();
+            }
 
-			@Override
-			public boolean isCellEditable(int row, int col) {
-				return false;
-			}
-		}
-	}
+            @Override
+            public Object getValueAt(int row, int col) {
+                return data.get(row);
+            }
+
+            @Override
+            public Class<?> getColumnClass(int col) {
+                return Row.class;
+            }
+
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
+        }
+    }
 }

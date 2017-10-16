@@ -8,13 +8,13 @@ import emcshop.chat.ChatMessage;
 import emcshop.db.PaymentTransactionDb;
 
 public interface IChatLogViewerModel {
-	File getLogDirectory();
+    File getLogDirectory();
 
-	void setLogDirectory(File dir);
+    void setLogDirectory(File dir);
 
-	PaymentTransactionDb getPaymentTransaction();
+    PaymentTransactionDb getPaymentTransaction();
 
-	List<ChatMessage> getChatMessages(Date date);
+    List<ChatMessage> getChatMessages(Date date);
 
-	String getCurrentPlayer();
+    String getCurrentPlayer();
 }

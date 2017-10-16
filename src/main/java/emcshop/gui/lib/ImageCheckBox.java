@@ -10,38 +10,38 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 public class ImageCheckBox {
-	private final JCheckBox checkbox;
-	private final JLabel label;
+    private final JCheckBox checkbox;
+    private final JLabel label;
 
-	public ImageCheckBox(String text, Icon image) {
-		checkbox = new JCheckBox();
-		label = new JLabel(text, image, SwingConstants.LEFT);
-		label.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				checkbox.doClick();
-			}
-		});
-	}
+    public ImageCheckBox(String text, Icon image) {
+        checkbox = new JCheckBox();
+        label = new JLabel(text, image, SwingConstants.LEFT);
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent arg0) {
+                checkbox.doClick();
+            }
+        });
+    }
 
-	public void setEnabled(boolean enabled) {
-		checkbox.setEnabled(enabled);
-		label.setEnabled(enabled);
-	}
+    public void setEnabled(boolean enabled) {
+        checkbox.setEnabled(enabled);
+        label.setEnabled(enabled);
+    }
 
-	public JCheckBox getCheckbox() {
-		return checkbox;
-	}
+    public JCheckBox getCheckbox() {
+        return checkbox;
+    }
 
-	public JLabel getLabel() {
-		return label;
-	}
+    public JLabel getLabel() {
+        return label;
+    }
 
-	public boolean isSelected() {
-		return checkbox.isSelected();
-	}
+    public boolean isSelected() {
+        return checkbox.isSelected();
+    }
 
-	public void addActionListener(ActionListener listener) {
-		checkbox.addActionListener(listener);
-	}
+    public void addActionListener(ActionListener listener) {
+        checkbox.addActionListener(listener);
+    }
 }

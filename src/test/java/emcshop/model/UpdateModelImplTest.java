@@ -38,13 +38,13 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.mockito.verification.VerificationMode;
 
-import com.github.mangstadt.emc.net.InvalidCredentialsException;
-import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
-import com.github.mangstadt.emc.rupees.dto.DailySigninBonus;
-import com.github.mangstadt.emc.rupees.dto.HorseSummonFee;
-import com.github.mangstadt.emc.rupees.dto.PaymentTransaction;
-import com.github.mangstadt.emc.rupees.dto.RupeeTransaction;
-import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
+import emcshop.net.InvalidCredentialsException;
+import emcshop.rupees.RupeeTransactionReader;
+import emcshop.rupees.dto.DailySigninBonus;
+import emcshop.rupees.dto.HorseSummonFee;
+import emcshop.rupees.dto.PaymentTransaction;
+import emcshop.rupees.dto.RupeeTransaction;
+import emcshop.rupees.dto.ShopTransaction;
 
 import emcshop.AppContext;
 import emcshop.ReportSender;

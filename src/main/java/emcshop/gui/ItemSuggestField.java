@@ -22,55 +22,57 @@ import emcshop.util.UIDefaultsWrapper;
 
 @SuppressWarnings("serial")
 public class ItemSuggestField extends JSuggestField {
-	private static Vector<String> itemNames;
-	private static Map<String, ImageIcon> itemIcons;
+    private static Vector<String> itemNames;
+    private static Map<String, ImageIcon> itemIcons;
 
-	/**
-	 * @param parent the parent window
-	 */
-	public ItemSuggestField(Window parent) {
-		super(parent, itemNames);
+    /**
+     * @param parent the parent window
+     */
+    public ItemSuggestField(Window parent) {
+        super(parent, itemNames);
 
-		setSuggestMatcher(new ContainsMatcher());
-		setListCellRenderer(new ListCellRenderer() {
-			private final JLabel label = new JLabel();
-			{
-				label.setOpaque(true);
-				label.setBorder(new EmptyBorder(2, 4, 2, 4));
-			}
+        setSuggestMatcher(new ContainsMatcher());
+        setListCellRenderer(new ListCellRenderer() {
+            private final JLabel label = new JLabel();
 
-			private final ImageIcon empty = Images.getItemImage("_empty");
+            {
+                label.setOpaque(true);
+                label.setBorder(new EmptyBorder(2, 4, 2, 4));
+            }
 
-			@Override
-			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
-				String itemName = (String) value;
-				label.setText(itemName);
+            private final ImageIcon empty = Images.getItemImage("_empty");
 
-				ImageIcon icon = itemIcons.get(itemName);
-				if (icon == null) {
-					icon = empty;
-				}
-				label.setIcon(icon);
+            @Override
+            public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
+                String itemName = (String) value;
+                label.setText(itemName);
 
-				UIDefaultsWrapper.assignListFormats(label, selected);
-				return label;
-			}
-		});
-	}
+                ImageIcon icon = itemIcons.get(itemName);
+                if (icon == null) {
+                    icon = empty;
+                }
+                label.setIcon(icon);
 
-	/**
-	 * Sets the list of items that all instances of this control will use. This
-	 * method should be called only once during application startup.
-	 * @param itemNames the item names to populate this control with
-	 */
-	public static void init(List<String> itemNames) throws SQLException {
-		ItemSuggestField.itemNames = new Vector<String>(itemNames);
+                UIDefaultsWrapper.assignListFormats(label, selected);
+                return label;
+            }
+        });
+    }
 
-		ImmutableMap.Builder<String, ImageIcon> builder = ImmutableMap.builder();
-		for (String itemName : itemNames) {
-			ImageIcon image = Images.getItemImage(itemName);
-			builder.put(itemName, image);
-		}
-		itemIcons = builder.build();
-	}
+    /**
+     * Sets the list of items that all instances of this control will use. This
+     * method should be called only once during application startup.
+     *
+     * @param itemNames the item names to populate this control with
+     */
+    public static void init(List<String> itemNames) throws SQLException {
+        ItemSuggestField.itemNames = new Vector<String>(itemNames);
+
+        ImmutableMap.Builder<String, ImageIcon> builder = ImmutableMap.builder();
+        for (String itemName : itemNames) {
+            ImageIcon image = Images.getItemImage(itemName);
+            builder.put(itemName, image);
+        }
+        itemIcons = builder.build();
+    }
 }

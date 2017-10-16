@@ -27,128 +27,132 @@ import emcshop.util.XmlBuilder;
  * Uploads error reports to my website.
  */
 public class ReportSender {
-	private static final Logger logger = Logger.getLogger(ReportSender.class.getName());
+    private static final Logger logger = Logger.getLogger(ReportSender.class.getName());
 
-	private final String url;
-	private Integer dbVersion;
-	private final BlockingQueue<Job> queue = new LinkedBlockingQueue<Job>();
+    private final String url;
+    private Integer dbVersion;
+    private final BlockingQueue<Job> queue = new LinkedBlockingQueue<Job>();
 
-	public ReportSender() {
-		this("http://mikeangstadt.name/emc-shopkeeper/error-report.php");
-	}
+    public ReportSender() {
+        this("http://mikeangstadt.name/emc-shopkeeper/error-report.php");
+    }
 
-	/**
-	 * Creates a new report sender.
-	 * @param url the URL to send the error reports to
-	 */
-	ReportSender(String url) {
-		this.url = url;
+    /**
+     * Creates a new report sender.
+     *
+     * @param url the URL to send the error reports to
+     */
+    ReportSender(String url) {
+        this.url = url;
 
-		SenderThread t = new SenderThread();
-		t.setName(t.getClass().getSimpleName());
-		t.setDaemon(true);
-		t.start();
-	}
+        SenderThread t = new SenderThread();
+        t.setName(t.getClass().getSimpleName());
+        t.setDaemon(true);
+        t.start();
+    }
 
-	/**
-	 * Sets the version of the database.
-	 * @param version the database version
-	 */
-	public void setDatabaseVersion(Integer version) {
-		dbVersion = version;
-	}
+    /**
+     * Sets the version of the database.
+     *
+     * @param version the database version
+     */
+    public void setDatabaseVersion(Integer version) {
+        dbVersion = version;
+    }
 
-	/**
-	 * Reports an error.
-	 * @param message the message to report (can be null)
-	 * @param throwable the error to report (can be null)
-	 */
-	public void report(String message, Throwable throwable) {
-		Job job = new Job(message, throwable);
-		queue.add(job);
-	}
+    /**
+     * Reports an error.
+     *
+     * @param message   the message to report (can be null)
+     * @param throwable the error to report (can be null)
+     */
+    public void report(String message, Throwable throwable) {
+        Job job = new Job(message, throwable);
+        queue.add(job);
+    }
 
-	private class SenderThread extends Thread {
-		private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss'Z'");
-		{
-			df.setTimeZone(TimeZone.getTimeZone("GMT"));
-		}
+    private class SenderThread extends Thread {
+        private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss'Z'");
 
-		private final HttpClient client = HttpClientBuilder.create().build();
+        {
+            df.setTimeZone(TimeZone.getTimeZone("GMT"));
+        }
 
-		@Override
-		public void run() {
-			while (true) {
-				//get the next error
-				Job job;
-				try {
-					job = queue.take();
-				} catch (InterruptedException e) {
-					break;
-				}
+        private final HttpClient client = HttpClientBuilder.create().build();
 
-				try {
-					String body = createRequestBody(job);
-					HttpPost request = new HttpPost(url);
-					request.setEntity(new StringEntity(body, ContentType.TEXT_XML));
+        @Override
+        public void run() {
+            while (true) {
+                //get the next error
+                Job job;
+                try {
+                    job = queue.take();
+                } catch (InterruptedException e) {
+                    break;
+                }
 
-					HttpResponse response = client.execute(request);
+                try {
+                    String body = createRequestBody(job);
+                    HttpPost request = new HttpPost(url);
+                    request.setEntity(new StringEntity(body, ContentType.TEXT_XML));
 
-					int status = response.getStatusLine().getStatusCode();
-					HttpEntity entity = response.getEntity();
-					String responseBody = (entity == null) ? "" : EntityUtils.toString(entity);
-					if (status != 200 || !responseBody.isEmpty()) {
-						logger.log(Level.WARNING, "Error report not accepted (HTTP " + status + "): " + responseBody);
-					}
-				} catch (Throwable t) {
-					logger.log(Level.WARNING, "Problem sending error report.", t);
-				}
-			}
-		}
+                    HttpResponse response = client.execute(request);
 
-		private String createRequestBody(Job job) {
-			XmlBuilder xml = new XmlBuilder("Error");
+                    int status = response.getStatusLine().getStatusCode();
+                    HttpEntity entity = response.getEntity();
+                    String responseBody = (entity == null) ? "" : EntityUtils.toString(entity);
+                    if (status != 200 || !responseBody.isEmpty()) {
+                        logger.log(Level.WARNING, "Error report not accepted (HTTP " + status + "): " + responseBody);
+                    }
+                } catch (Throwable t) {
+                    logger.log(Level.WARNING, "Problem sending error report.", t);
+                }
+            }
+        }
 
-			String timestamp = df.format(job.received);
-			xml.append("Timestamp", timestamp);
+        private String createRequestBody(Job job) {
+            XmlBuilder xml = new XmlBuilder("Error");
 
-			xml.append("Version", EMCShopkeeper.VERSION);
+            String timestamp = df.format(job.received);
+            xml.append("Timestamp", timestamp);
 
-			String dbVersionStr = (dbVersion == null) ? "null" : dbVersion.toString();
-			xml.append("DatabaseVersion", dbVersionStr);
+            xml.append("Version", EMCShopkeeper.VERSION);
 
-			xml.append("JavaVendor", System.getProperty("java.vendor"));
+            String dbVersionStr = (dbVersion == null) ? "null" : dbVersion.toString();
+            xml.append("DatabaseVersion", dbVersionStr);
 
-			xml.append("JavaVersion", System.getProperty("java.version"));
+            xml.append("JavaVendor", System.getProperty("java.vendor"));
 
-			xml.append("OS", System.getProperty("os.name"));
+            xml.append("JavaVersion", System.getProperty("java.version"));
 
-			xml.append("Locale", Locale.getDefault().toString());
+            xml.append("OS", System.getProperty("os.name"));
 
-			xml.append("WebStart", JarSignersHardLinker.isRunningOnWebstart() + "");
+            xml.append("Locale", Locale.getDefault().toString());
 
-			String message = job.message;
-			if (message != null) {
-				xml.append("Message", message);
-			}
+            xml.append("WebStart", JarSignersHardLinker.isRunningOnWebstart() + "");
 
-			if (job.throwable != null) {
-				String stackTrace = ExceptionUtils.getStackTrace(job.throwable);
-				xml.append("StackTrace", stackTrace);
-			}
+            String message = job.message;
+            if (message != null) {
+                xml.append("Message", message);
+            }
 
-			return xml.toString();
-		}
-	}
+            if (job.throwable != null) {
+                String stackTrace = ExceptionUtils.getStackTrace(job.throwable);
+                xml.append("StackTrace", stackTrace);
+            }
 
-	private static class Job {
-		private final String message;
-		private final Throwable throwable;
-		private final Date received = new Date();
+            return xml.toString();
+        }
+    }
 
-		public Job(String message, Throwable throwable) {
-			this.message = message;
-			this.throwable = throwable;
-		}
-	}
+    private static class Job {
+        private final String message;
+        private final Throwable throwable;
+        private final Date received = new Date();
+
+        public Job(String message, Throwable throwable) {
+            this.message = message;
+            this.throwable = throwable;
+        }
+    }
 }

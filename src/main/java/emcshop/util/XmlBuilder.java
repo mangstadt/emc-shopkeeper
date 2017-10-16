@@ -22,110 +22,113 @@ import org.w3c.dom.Node;
  * Helper class used to construct XML documents.
  */
 public class XmlBuilder {
-	private final Document document;
-	private final Element root;
-	private final String ns;
+    private final Document document;
+    private final Element root;
+    private final String ns;
 
-	/**
-	 * Creates a new XML document builder.
-	 * @param ns the default namespace to use
-	 * @param root the name of the root element
-	 */
-	public XmlBuilder(String ns, String root) {
-		this.ns = ns;
+    /**
+     * Creates a new XML document builder.
+     *
+     * @param ns   the default namespace to use
+     * @param root the name of the root element
+     */
+    public XmlBuilder(String ns, String root) {
+        this.ns = ns;
 
-		try {
-			DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
-			fact.setNamespaceAware(ns != null);
-			DocumentBuilder db = fact.newDocumentBuilder();
-			document = db.newDocument();
-		} catch (ParserConfigurationException e) {
-			//will probably never be thrown because we're not doing anything fancy with the configuration
-			throw new RuntimeException(e);
-		}
+        try {
+            DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
+            fact.setNamespaceAware(ns != null);
+            DocumentBuilder db = fact.newDocumentBuilder();
+            document = db.newDocument();
+        } catch (ParserConfigurationException e) {
+            //will probably never be thrown because we're not doing anything fancy with the configuration
+            throw new RuntimeException(e);
+        }
 
-		this.root = element(root);
-		document.appendChild(this.root);
-	}
+        this.root = element(root);
+        document.appendChild(this.root);
+    }
 
-	/**
-	 * Creates a new XML document builder.
-	 * @param root the name of the root element
-	 */
-	public XmlBuilder(String root) {
-		this(null, root);
-	}
+    /**
+     * Creates a new XML document builder.
+     *
+     * @param root the name of the root element
+     */
+    public XmlBuilder(String root) {
+        this(null, root);
+    }
 
-	public Document document() {
-		return document;
-	}
+    public Document document() {
+        return document;
+    }
 
-	public Element root() {
-		return root;
-	}
+    public Element root() {
+        return root;
+    }
 
-	public Element element(String localName) {
-		return element(ns, localName);
-	}
+    public Element element(String localName) {
+        return element(ns, localName);
+    }
 
-	public Element element(String ns, String localName) {
-		if (ns == null) {
-			return document.createElement(localName);
-		}
-		return document.createElementNS(ns, localName);
-	}
+    public Element element(String ns, String localName) {
+        if (ns == null) {
+            return document.createElement(localName);
+        }
+        return document.createElementNS(ns, localName);
+    }
 
-	public Element element(QName qname) {
-		return element(qname.getNamespaceURI(), qname.getLocalPart());
-	}
+    public Element element(QName qname) {
+        return element(qname.getNamespaceURI(), qname.getLocalPart());
+    }
 
-	public Element append(String localName, String text) {
-		return append(root, localName, text);
-	}
+    public Element append(String localName, String text) {
+        return append(root, localName, text);
+    }
 
-	public Element append(Element parent, String localName) {
-		return append(parent, new QName(ns, localName));
-	}
+    public Element append(Element parent, String localName) {
+        return append(parent, new QName(ns, localName));
+    }
 
-	public Element append(Element parent, String localName, String text) {
-		Element element = append(parent, localName);
-		element.setTextContent(text);
-		return element;
-	}
+    public Element append(Element parent, String localName, String text) {
+        Element element = append(parent, localName);
+        element.setTextContent(text);
+        return element;
+    }
 
-	public Element append(Element parent, QName qname) {
-		Element element = element(qname);
-		parent.appendChild(element);
-		return element;
-	}
+    public Element append(Element parent, QName qname) {
+        Element element = element(qname);
+        parent.appendChild(element);
+        return element;
+    }
 
-	public void append(Element parent, Element child) {
-		Node imported = document.importNode(child, true);
-		parent.appendChild(imported);
-	}
+    public void append(Element parent, Element child) {
+        Node imported = document.importNode(child, true);
+        parent.appendChild(imported);
+    }
 
-	/**
-	 * Writes the XML document to a string.
-	 * @return the XML string
-	 */
-	@Override
-	public String toString() {
-		try {
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			DOMSource source = new DOMSource(document);
-			StringWriter writer = new StringWriter();
-			StreamResult result = new StreamResult(writer);
-			transformer.transform(source, result);
-			return writer.toString();
-		} catch (TransformerConfigurationException e) {
-			//no complex configurations
-			throw new RuntimeException(e);
-		} catch (TransformerFactoryConfigurationError e) {
-			//no complex configurations
-			throw new RuntimeException(e);
-		} catch (TransformerException e) {
-			//writing to a string
-			throw new RuntimeException(e);
-		}
-	}
+    /**
+     * Writes the XML document to a string.
+     *
+     * @return the XML string
+     */
+    @Override
+    public String toString() {
+        try {
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            DOMSource source = new DOMSource(document);
+            StringWriter writer = new StringWriter();
+            StreamResult result = new StreamResult(writer);
+            transformer.transform(source, result);
+            return writer.toString();
+        } catch (TransformerConfigurationException e) {
+            //no complex configurations
+            throw new RuntimeException(e);
+        } catch (TransformerFactoryConfigurationError e) {
+            //no complex configurations
+            throw new RuntimeException(e);
+        } catch (TransformerException e) {
+            //writing to a string
+            throw new RuntimeException(e);
+        }
+    }
 }

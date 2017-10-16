@@ -3,23 +3,23 @@ package emcshop.view;
 import java.awt.event.ActionListener;
 
 public interface IFirstUpdateView {
-	void addOnCancelListener(ActionListener listener);
+    void addOnCancelListener(ActionListener listener);
 
-	void addOnBeginListener(ActionListener listener);
+    void addOnBeginListener(ActionListener listener);
 
-	void addStopAtPageChangedListener(ActionListener listener);
+    void addStopAtPageChangedListener(ActionListener listener);
 
-	Integer getStopAtPage();
+    Integer getStopAtPage();
 
-	void setStopAtPage(Integer stopAtPage);
+    void setStopAtPage(Integer stopAtPage);
 
-	Integer getMaxPaymentTransactionAge();
+    Integer getMaxPaymentTransactionAge();
 
-	void setMaxPaymentTransactionAge(Integer age);
+    void setMaxPaymentTransactionAge(Integer age);
 
-	void setEstimatedTime(Long estimatedTime);
+    void setEstimatedTime(Long estimatedTime);
 
-	void display();
+    void display();
 
-	void close();
+    void close();
 }

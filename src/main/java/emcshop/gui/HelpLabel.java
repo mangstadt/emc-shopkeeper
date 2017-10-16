@@ -14,19 +14,19 @@ import emcshop.gui.images.Images;
  */
 @SuppressWarnings("serial")
 public class HelpLabel extends JLabel {
-	private static final ImageIcon helpIcon = Images.scale(Images.HELP, 16);
-	private static final boolean toopTipsEnabled = ToolTipManager.sharedInstance().isEnabled();
+    private static final ImageIcon helpIcon = Images.scale(Images.HELP, 16);
+    private static final boolean toopTipsEnabled = ToolTipManager.sharedInstance().isEnabled();
 
-	/**
-	 * @param text the label text
-	 * @param tooltip the tooltip text
-	 */
-	public HelpLabel(String text, String tooltip) {
-		super(text);
-		if (toopTipsEnabled) {
-			setIcon(helpIcon);
-			setHorizontalAlignment(SwingConstants.LEFT);
-			setToolTipText(toolTipText(tooltip));
-		}
-	}
+    /**
+     * @param text    the label text
+     * @param tooltip the tooltip text
+     */
+    public HelpLabel(String text, String tooltip) {
+        super(text);
+        if (toopTipsEnabled) {
+            setIcon(helpIcon);
+            setHorizontalAlignment(SwingConstants.LEFT);
+            setToolTipText(toolTipText(tooltip));
+        }
+    }
 }

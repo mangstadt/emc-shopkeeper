@@ -3,71 +3,79 @@ package emcshop.view;
 import java.awt.event.ActionListener;
 
 public interface ILoginView {
-	/**
-	 * Adds a listener for when the credentials are entered.
-	 * @param listener the listener to add
-	 */
-	void addOnLoginListener(ActionListener listener);
+    /**
+     * Adds a listener for when the credentials are entered.
+     *
+     * @param listener the listener to add
+     */
+    void addOnLoginListener(ActionListener listener);
 
-	/**
-	 * Adds a listener for when the dialog is canceled.
-	 * @param listener the listener to add
-	 */
-	void addOnCancelListener(ActionListener listener);
+    /**
+     * Adds a listener for when the dialog is canceled.
+     *
+     * @param listener the listener to add
+     */
+    void addOnCancelListener(ActionListener listener);
 
-	/**
-	 * Sets the username.
-	 * @param username the username
-	 */
-	void setUsername(String username);
+    /**
+     * Sets the username.
+     *
+     * @param username the username
+     */
+    void setUsername(String username);
 
-	/**
-	 * Gets the username.
-	 * @return the username
-	 */
-	String getUsername();
+    /**
+     * Gets the username.
+     *
+     * @return the username
+     */
+    String getUsername();
 
-	/**
-	 * Gets the password.
-	 * @return the password
-	 */
-	String getPassword();
+    /**
+     * Gets the password.
+     *
+     * @return the password
+     */
+    String getPassword();
 
-	/**
-	 * Sets the password
-	 * @param password the password
-	 */
-	void setPassword(String password);
+    /**
+     * Sets the password
+     *
+     * @param password the password
+     */
+    void setPassword(String password);
 
-	/**
-	 * Sets whether the user wants to save his password.
-	 * @param savePassword true to remember the password, false not to
-	 */
-	void setSavePassword(boolean savePassword);
+    /**
+     * Sets whether the user wants to save his password.
+     *
+     * @param savePassword true to remember the password, false not to
+     */
+    void setSavePassword(boolean savePassword);
 
-	/**
-	 * Gets whether the user wants to save his password.
-	 * @return true to remember the password, false not to
-	 */
-	boolean getSavePassword();
+    /**
+     * Gets whether the user wants to save his password.
+     *
+     * @return true to remember the password, false not to
+     */
+    boolean getSavePassword();
 
-	/**
-	 * Called if a network error occurs during login.
-	 */
-	void networkError();
+    /**
+     * Called if a network error occurs during login.
+     */
+    void networkError();
 
-	/**
-	 * Called if the login credentials are invalid.
-	 */
-	void badLogin();
+    /**
+     * Called if the login credentials are invalid.
+     */
+    void badLogin();
 
-	/**
-	 * Closes the dialog.
-	 */
-	void close();
+    /**
+     * Closes the dialog.
+     */
+    void close();
 
-	/**
-	 * Displays the dialog.
-	 */
-	void display();
+    /**
+     * Displays the dialog.
+     */
+    void display();
 }
