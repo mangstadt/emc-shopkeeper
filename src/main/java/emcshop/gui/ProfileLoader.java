@@ -52,14 +52,14 @@ public class ProfileLoader {
     private static final Map<Rank, Color> rankToColor = new EnumMap<Rank, Color>(Rank.class);
 
     {
-        rankToColor.put(Rank.IRON, new Color(128, 128, 128));
-        rankToColor.put(Rank.GOLD, new Color(181, 181, 0));
-        rankToColor.put(Rank.DIAMOND, new Color(0, 181, 194));
+        rankToColor.put(Rank.IRON, new Color(170, 170, 170));
+        rankToColor.put(Rank.GOLD, new Color(255, 170, 0));
+        rankToColor.put(Rank.DIAMOND, new Color(0, 170, 170));
         rankToColor.put(Rank.HELPER, new Color(224, 165, 0));
-        rankToColor.put(Rank.MODERATOR, new Color(0, 64, 0));
-        rankToColor.put(Rank.SENIOR_STAFF, new Color(0, 255, 0));
-        rankToColor.put(Rank.DEVELOPER, new Color(0, 0, 128));
-        rankToColor.put(Rank.ADMIN, new Color(209, 0, 195));
+        rankToColor.put(Rank.MODERATOR, new Color(0, 170, 0));
+        rankToColor.put(Rank.SENIOR_STAFF, new Color(85, 255, 85));
+        rankToColor.put(Rank.DEVELOPER, new Color(85, 85, 255));
+        rankToColor.put(Rank.ADMIN, new Color(170, 0, 170));
     }
 
     private final File cacheDir;
