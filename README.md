@@ -2,7 +2,7 @@ EMC Shopkeeper is a Java Swing application that allows [Empire Minecraft][1] pla
 
 For more information, see the project's [Github.io page][6].
 
-#Build instructions
+# Build instructions
 
 Requires:
 
@@ -19,7 +19,7 @@ Requires:
 1. Create the fat JAR by running:    
 `mvn clean compile assembly:single`
 
-#Command-line interface
+# Command-line interface
 
 EMC Shopkeeper includes a limited command-line interface:
 
