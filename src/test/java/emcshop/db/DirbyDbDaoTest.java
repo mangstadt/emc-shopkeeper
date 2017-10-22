@@ -37,13 +37,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.github.mangstadt.emc.rupees.dto.DailySigninBonus;
-import com.github.mangstadt.emc.rupees.dto.EggifyFee;
-import com.github.mangstadt.emc.rupees.dto.HorseSummonFee;
-import com.github.mangstadt.emc.rupees.dto.LockTransaction;
-import com.github.mangstadt.emc.rupees.dto.RupeeTransaction;
-import com.github.mangstadt.emc.rupees.dto.VaultFee;
-import com.github.mangstadt.emc.rupees.dto.VoteBonus;
+import emcshop.rupees.dto.DailySigninBonus;
+import emcshop.rupees.dto.EggifyFee;
+import emcshop.rupees.dto.HorseSummonFee;
+import emcshop.rupees.dto.LockTransaction;
+import emcshop.rupees.dto.RupeeTransaction;
+import emcshop.rupees.dto.VaultFee;
+import emcshop.rupees.dto.VoteBonus;
 
 import emcshop.ItemIndex;
 import emcshop.util.DateGenerator;

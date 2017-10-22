@@ -9,29 +9,29 @@ import emcshop.chat.ChatMessage;
 import emcshop.db.PaymentTransactionDb;
 
 public interface IChatLogViewerView {
-	void addDateChangedListener(ActionListener listener);
+    void addDateChangedListener(ActionListener listener);
 
-	void addLogDirectoryChanged(ActionListener listener);
+    void addLogDirectoryChanged(ActionListener listener);
 
-	void addCloseListener(ActionListener listener);
+    void addCloseListener(ActionListener listener);
 
-	File getLogDirectory();
+    File getLogDirectory();
 
-	void setLogDirectory(File logDirectory);
+    void setLogDirectory(File logDirectory);
 
-	void setPaymentTransaction(PaymentTransactionDb paymentTransaction);
+    void setPaymentTransaction(PaymentTransactionDb paymentTransaction);
 
-	Date getDate();
+    Date getDate();
 
-	void setDate(Date dateToDisplay);
+    void setDate(Date dateToDisplay);
 
-	void setChatMessages(List<ChatMessage> chatMessages);
+    void setChatMessages(List<ChatMessage> chatMessages);
 
-	void setCurrentPlayer(String currentPlayer);
+    void setCurrentPlayer(String currentPlayer);
 
-	void showError(String string);
+    void showError(String string);
 
-	void display();
+    void display();
 
-	void close();
+    void close();
 }

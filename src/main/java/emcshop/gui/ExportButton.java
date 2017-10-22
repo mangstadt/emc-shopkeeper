@@ -16,39 +16,39 @@ import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class ExportButton extends JButton {
-	private final JPopupMenu exportMenu;
+    private final JPopupMenu exportMenu;
 
-	public ExportButton(final Window owner, final ExportListener listener) {
-		setText("<html><font size=2>Export \u00bb");
+    public ExportButton(final Window owner, final ExportListener listener) {
+        setText("<html><font size=2>Export \u00bb");
 
-		exportMenu = new JPopupMenu();
-		for (final ExportType type : ExportType.values()) {
-			AbstractAction action = new AbstractAction() {
-				@Override
-				public String toString() {
-					return type.toString();
-				}
+        exportMenu = new JPopupMenu();
+        for (final ExportType type : ExportType.values()) {
+            AbstractAction action = new AbstractAction() {
+                @Override
+                public String toString() {
+                    return type.toString();
+                }
 
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					String text = listener.exportData(type);
-					GuiUtils.copyToClipboard(text);
-					JOptionPane.showMessageDialog(owner, "Copied to clipboard.");
-				}
-			};
-			action.putValue(Action.NAME, type.toString());
-			exportMenu.add(action);
-		}
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String text = listener.exportData(type);
+                    GuiUtils.copyToClipboard(text);
+                    JOptionPane.showMessageDialog(owner, "Copied to clipboard.");
+                }
+            };
+            action.putValue(Action.NAME, type.toString());
+            exportMenu.add(action);
+        }
 
-		addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent event) {
-				exportMenu.show(ExportButton.this, event.getX(), event.getY());
-			}
-		});
-	}
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent event) {
+                exportMenu.show(ExportButton.this, event.getX(), event.getY());
+            }
+        });
+    }
 
-	public interface ExportListener {
-		String exportData(ExportType type);
-	}
+    public interface ExportListener {
+        String exportData(ExportType type);
+    }
 }

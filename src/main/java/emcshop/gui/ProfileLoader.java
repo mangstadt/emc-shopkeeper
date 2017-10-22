@@ -47,463 +47,477 @@ import emcshop.util.PropertiesWrapper;
  * Used for downloading player profile data.
  */
 public class ProfileLoader {
-	private static final Logger logger = Logger.getLogger(ProfileLoader.class.getName());
+    private static final Logger logger = Logger.getLogger(ProfileLoader.class.getName());
 
-	private static final Map<Rank, Color> rankToColor = new EnumMap<Rank, Color>(Rank.class);
-	{
-		rankToColor.put(Rank.IRON, new Color(128, 128, 128));
-		rankToColor.put(Rank.GOLD, new Color(181, 181, 0));
-		rankToColor.put(Rank.DIAMOND, new Color(0, 181, 194));
-		rankToColor.put(Rank.HELPER, new Color(224, 165, 0));
-		rankToColor.put(Rank.MODERATOR, new Color(0, 64, 0));
-		rankToColor.put(Rank.SENIOR_STAFF, new Color(0, 255, 0));
-		rankToColor.put(Rank.DEVELOPER, new Color(0, 0, 128));
-		rankToColor.put(Rank.ADMIN, new Color(209, 0, 195));
-	}
+    private static final Map<Rank, Color> rankToColor = new EnumMap<Rank, Color>(Rank.class);
 
-	private final File cacheDir;
-	private final Set<String> downloaded = CaseInsensitiveHashSet.create();
-	private final ListMultimap<String, Job> waitList = CaseInsensitiveMultimap.create();
-	private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<String>();
-	private final PlayerProfileSerializer profileSerializer = new PlayerProfileSerializer();
+    {
+        rankToColor.put(Rank.IRON, new Color(170, 170, 170));
+        rankToColor.put(Rank.GOLD, new Color(255, 170, 0));
+        rankToColor.put(Rank.DIAMOND, new Color(0, 170, 170));
+        rankToColor.put(Rank.HELPER, new Color(224, 165, 0));
+        rankToColor.put(Rank.MODERATOR, new Color(0, 170, 0));
+        rankToColor.put(Rank.SENIOR_STAFF, new Color(85, 255, 85));
+        rankToColor.put(Rank.DEVELOPER, new Color(85, 85, 255));
+        rankToColor.put(Rank.ADMIN, new Color(170, 0, 170));
+    }
 
-	private final PortraitCache portraitCache = new PortraitCache();
-	private final ProfileCache profileCache = new ProfileCache();
+    private final File cacheDir;
+    private final Set<String> downloaded = CaseInsensitiveHashSet.create();
+    private final ListMultimap<String, Job> waitList = CaseInsensitiveMultimap.create();
+    private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<String>();
+    private final PlayerProfileSerializer profileSerializer = new PlayerProfileSerializer();
 
-	private int threads = 4;
-	private EmcWebsiteSessionFactory sessionFactory = new EmcWebsiteSessionFactory() {
-		@Override
-		public CloseableHttpClient createSession() {
-			return HttpClientBuilder.create().build();
-		}
-	};
-	private PlayerProfileScraper scraper = new PlayerProfileScraper();
+    private final PortraitCache portraitCache = new PortraitCache();
+    private final ProfileCache profileCache = new ProfileCache();
 
-	/**
-	 * The number of items on the queue, plus the number of jobs currently being
-	 * processed by the threads (for unit testing purposes).
-	 */
-	volatile int jobsBeingProcessed = 0;
+    private int threads = 4;
+    private EmcWebsiteSessionFactory sessionFactory = new EmcWebsiteSessionFactory() {
+        @Override
+        public CloseableHttpClient createSession() {
+            return HttpClientBuilder.create().build();
+        }
+    };
+    private PlayerProfileScraper scraper = new PlayerProfileScraper();
 
-	/**
-	 * Creates a profile image loader.
-	 * @param cacheDir the directory where the images are cached
-	 */
-	public ProfileLoader(File cacheDir) {
-		this.cacheDir = cacheDir;
-	}
+    /**
+     * The number of items on the queue, plus the number of jobs currently being
+     * processed by the threads (for unit testing purposes).
+     */
+    volatile int jobsBeingProcessed = 0;
 
-	/**
-	 * Gets the number of threads that are used to download the profile pages.
-	 * @return the number of threads
-	 */
-	public int getThreads() {
-		return threads;
-	}
+    /**
+     * Creates a profile image loader.
+     *
+     * @param cacheDir the directory where the images are cached
+     */
+    public ProfileLoader(File cacheDir) {
+        this.cacheDir = cacheDir;
+    }
 
-	/**
-	 * Sets the number of threads that are used to download the profile pages.
-	 * @param threads the number of threads (defaults to 4)
-	 */
-	public void setThreads(int threads) {
-		this.threads = threads;
-	}
+    /**
+     * Gets the number of threads that are used to download the profile pages.
+     *
+     * @return the number of threads
+     */
+    public int getThreads() {
+        return threads;
+    }
 
-	/**
-	 * Sets the factory used to retrieve EMC webiste session information, which
-	 * is used to download private profile pages.
-	 * @param sessionFactory the factory
-	 */
-	public void setSessionFactory(EmcWebsiteSessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
-	}
+    /**
+     * Sets the number of threads that are used to download the profile pages.
+     *
+     * @param threads the number of threads (defaults to 4)
+     */
+    public void setThreads(int threads) {
+        this.threads = threads;
+    }
 
-	/**
-	 * Gets the object used to download and scrape the profile pages.
-	 * @return the profile page scraper
-	 */
-	public PlayerProfileScraper getProfilePageScraper() {
-		return scraper;
-	}
+    /**
+     * Sets the factory used to retrieve EMC webiste session information, which
+     * is used to download private profile pages.
+     *
+     * @param sessionFactory the factory
+     */
+    public void setSessionFactory(EmcWebsiteSessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
 
-	/**
-	 * Sets the object used to download and scrape the profile pages.
-	 * @param scraper the profile page scraper
-	 */
-	public void setProfilePageScraper(PlayerProfileScraper scraper) {
-		this.scraper = scraper;
-	}
+    /**
+     * Gets the object used to download and scrape the profile pages.
+     *
+     * @return the profile page scraper
+     */
+    public PlayerProfileScraper getProfilePageScraper() {
+        return scraper;
+    }
 
-	/**
-	 * Starts the downloader threads.
-	 */
-	public void start() {
-		for (int i = 0; i < threads; i++) {
-			LoadThread t = new LoadThread();
-			t.setDaemon(true); //terminate the thread when the program exits
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.setName(getClass().getSimpleName() + "-" + i);
-			t.start();
-		}
-	}
+    /**
+     * Sets the object used to download and scrape the profile pages.
+     *
+     * @param scraper the profile page scraper
+     */
+    public void setProfilePageScraper(PlayerProfileScraper scraper) {
+        this.scraper = scraper;
+    }
 
-	/**
-	 * Loads a profile image, queuing it for download if necessary.
-	 * @param playerName the player name
-	 * @param label the label to insert the image into
-	 * @param maxSize the size to scale the image to
-	 */
-	public void getPortrait(String playerName, JLabel label, int maxSize) {
-		getPortrait(playerName, label, maxSize, null);
-	}
+    /**
+     * Starts the downloader threads.
+     */
+    public void start() {
+        for (int i = 0; i < threads; i++) {
+            LoadThread t = new LoadThread();
+            t.setDaemon(true); //terminate the thread when the program exits
+            t.setPriority(Thread.MIN_PRIORITY);
+            t.setName(getClass().getSimpleName() + "-" + i);
+            t.start();
+        }
+    }
 
-	/**
-	 * Loads a profile image, queuing it for download if necessary.
-	 * @param playerName the player name
-	 * @param label the label to insert the image into
-	 * @param maxSize the size to scale the image to
-	 * @param listener invoked when the image has been assigned to the label
-	 */
-	public void getPortrait(String playerName, JLabel label, int maxSize, ProfileDownloadedListener listener) {
-		ImageIcon image = getPortrait(playerName, maxSize);
-		if (image == null) {
-			image = portraitCache.unknown(maxSize);
-		}
-		label.setIcon(image);
+    /**
+     * Loads a profile image, queuing it for download if necessary.
+     *
+     * @param playerName the player name
+     * @param label      the label to insert the image into
+     * @param maxSize    the size to scale the image to
+     */
+    public void getPortrait(String playerName, JLabel label, int maxSize) {
+        getPortrait(playerName, label, maxSize, null);
+    }
 
-		//queue the image for download if necessary
-		Job job = new Job(playerName, listener);
-		queueJob(job);
-	}
+    /**
+     * Loads a profile image, queuing it for download if necessary.
+     *
+     * @param playerName the player name
+     * @param label      the label to insert the image into
+     * @param maxSize    the size to scale the image to
+     * @param listener   invoked when the image has been assigned to the label
+     */
+    public void getPortrait(String playerName, JLabel label, int maxSize, ProfileDownloadedListener listener) {
+        ImageIcon image = getPortrait(playerName, maxSize);
+        if (image == null) {
+            image = portraitCache.unknown(maxSize);
+        }
+        label.setIcon(image);
 
-	public Color getRankColor(Rank rank) {
-		return rankToColor.get(rank);
-	}
+        //queue the image for download if necessary
+        Job job = new Job(playerName, listener);
+        queueJob(job);
+    }
 
-	/**
-	 * Loads a profile image from the cache.
-	 * @param playerName the player name
-	 * @return the cached image or null if no image exists in the cache
-	 */
-	public ImageIcon getPortrait(String playerName, int maxSize) {
-		ImageIcon image = portraitCache.get(playerName, maxSize);
-		if (image != null) {
-			return image;
-		}
+    public Color getRankColor(Rank rank) {
+        return rankToColor.get(rank);
+    }
 
-		File file = portraitFile(playerName);
-		if (!file.exists()) {
-			return null;
-		}
+    /**
+     * Loads a profile image from the cache.
+     *
+     * @param playerName the player name
+     * @return the cached image or null if no image exists in the cache
+     */
+    public ImageIcon getPortrait(String playerName, int maxSize) {
+        ImageIcon image = portraitCache.get(playerName, maxSize);
+        if (image != null) {
+            return image;
+        }
 
-		//load the image from the file cache
-		byte data[] = null;
-		try {
-			data = FileUtils.readFileToByteArray(file);
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
-		}
-		image = new ImageIcon(data);
-		image = Images.scale(image, maxSize);
-		portraitCache.put(playerName, maxSize, image);
-		return image;
-	}
+        File file = portraitFile(playerName);
+        if (!file.exists()) {
+            return null;
+        }
 
-	/**
-	 * Determines if a player's profile was downloaded or not.
-	 * @param playerName the player name
-	 * @return true if the player's profile was downloaded, false if not
-	 */
-	public boolean wasDownloaded(String playerName) {
-		synchronized (downloaded) {
-			return downloaded.contains(playerName);
-		}
-	}
+        //load the image from the file cache
+        byte data[] = null;
+        try {
+            data = FileUtils.readFileToByteArray(file);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
+        }
+        image = new ImageIcon(data);
+        image = Images.scale(image, maxSize);
+        portraitCache.put(playerName, maxSize, image);
+        return image;
+    }
 
-	public PlayerProfile getProfile(String playerName, ProfileDownloadedListener listener) {
-		PlayerProfile profile = profileCache.get(playerName);
-		if (profile == null) {
-			try {
-				profile = profileSerializer.load(playerName);
-				if (profile != null) {
-					profileCache.set(playerName, profile);
-				}
-			} catch (IOException e) {
-				//ignore
-			}
-		}
-		if (profile != null) {
-			return profile;
-		}
+    /**
+     * Determines if a player's profile was downloaded or not.
+     *
+     * @param playerName the player name
+     * @return true if the player's profile was downloaded, false if not
+     */
+    public boolean wasDownloaded(String playerName) {
+        synchronized (downloaded) {
+            return downloaded.contains(playerName);
+        }
+    }
 
-		//queue the profile page for download if necessary
-		Job job = new Job(playerName, listener);
-		queueJob(job);
-		return null;
-	}
+    public PlayerProfile getProfile(String playerName, ProfileDownloadedListener listener) {
+        PlayerProfile profile = profileCache.get(playerName);
+        if (profile == null) {
+            try {
+                profile = profileSerializer.load(playerName);
+                if (profile != null) {
+                    profileCache.set(playerName, profile);
+                }
+            } catch (IOException e) {
+                //ignore
+            }
+        }
+        if (profile != null) {
+            return profile;
+        }
 
-	private void queueJob(Job job) {
-		synchronized (downloaded) {
-			if (wasDownloaded(job.playerName)) {
-				//the image has already been downloaded, so the cached version is the most up-to-date version of the image
-				return;
-			}
+        //queue the profile page for download if necessary
+        Job job = new Job(playerName, listener);
+        queueJob(job);
+        return null;
+    }
 
-			//see if the image is already queued for download
-			if (!waitList.containsKey(job.playerName)) {
-				//player name is not queued for download, so add it to the queue
-				try {
-					jobsBeingProcessed++;
-					downloadQueue.put(job.playerName);
-				} catch (InterruptedException e) {
-					//should never be thrown because the queue doesn't have a max size
-					logger.log(Level.SEVERE, "Queue's \"put\" operation was interrupted.", e);
-				}
-			}
+    private void queueJob(Job job) {
+        synchronized (downloaded) {
+            if (wasDownloaded(job.playerName)) {
+                //the image has already been downloaded, so the cached version is the most up-to-date version of the image
+                return;
+            }
 
-			//add job to wait list
-			waitList.put(job.playerName, job);
-		}
-	}
+            //see if the image is already queued for download
+            if (!waitList.containsKey(job.playerName)) {
+                //player name is not queued for download, so add it to the queue
+                try {
+                    jobsBeingProcessed++;
+                    downloadQueue.put(job.playerName);
+                } catch (InterruptedException e) {
+                    //should never be thrown because the queue doesn't have a max size
+                    logger.log(Level.SEVERE, "Queue's \"put\" operation was interrupted.", e);
+                }
+            }
 
-	/**
-	 * Gets the path to a player's cached profile image.
-	 * @param playerName the player name
-	 * @return the file path
-	 */
-	private File portraitFile(String playerName) {
-		return new File(cacheDir, playerName.toLowerCase());
-	}
+            //add job to wait list
+            waitList.put(job.playerName, job);
+        }
+    }
 
-	/**
-	 * Monitors the job queue for new images to download
-	 */
-	private class LoadThread extends Thread {
-		@Override
-		public void run() {
-			boolean first = true;
-			while (true) {
-				if (first) {
-					first = false;
-				} else {
-					jobsBeingProcessed--;
-				}
+    /**
+     * Gets the path to a player's cached profile image.
+     *
+     * @param playerName the player name
+     * @return the file path
+     */
+    private File portraitFile(String playerName) {
+        return new File(cacheDir, playerName.toLowerCase());
+    }
 
-				//get the next player name
-				String playerName;
-				try {
-					playerName = downloadQueue.take();
-				} catch (InterruptedException e) {
-					break;
-				}
+    /**
+     * Monitors the job queue for new images to download
+     */
+    private class LoadThread extends Thread {
+        @Override
+        public void run() {
+            boolean first = true;
+            while (true) {
+                if (first) {
+                    first = false;
+                } else {
+                    jobsBeingProcessed--;
+                }
 
-				//scrape the profile page
-				PlayerProfile profile = null;
-				CloseableHttpClient client = sessionFactory.createSession(); //get the session information each time so the user's login session token can be used
-				try {
-					try {
-						Document page = getProfilePage(playerName, client);
-						profile = scraper.scrapeProfile(playerName, page);
-					} catch (IOException e) {
-						logger.log(Level.WARNING, "Problem downloading player profile page.", e);
-					}
+                //get the next player name
+                String playerName;
+                try {
+                    playerName = downloadQueue.take();
+                } catch (InterruptedException e) {
+                    break;
+                }
 
-					byte[] data = null;
-					if (profile != null) {
-						//save profile data
-						try {
-							profileSerializer.save(profile);
-							profileCache.set(profile.getPlayerName(), profile);
-						} catch (IOException e) {
-							logger.log(Level.WARNING, "Problem saving player profile data.", e);
-						}
+                //scrape the profile page
+                PlayerProfile profile = null;
+                CloseableHttpClient client = sessionFactory.createSession(); //get the session information each time so the user's login session token can be used
+                try {
+                    try {
+                        Document page = getProfilePage(playerName, client);
+                        profile = scraper.scrapeProfile(playerName, page);
+                    } catch (IOException e) {
+                        logger.log(Level.WARNING, "Problem downloading player profile page.", e);
+                    }
 
-						//download portrait
-						if (!profile.isPrivate()) {
-							//download image
-							File file = portraitFile(playerName);
-							Date lastModified = file.exists() ? new Date(file.lastModified()) : null;
-							try {
-								data = scraper.downloadPortrait(profile, lastModified, client);
-							} catch (IOException e) {
-								logger.log(Level.WARNING, "Problem downloading profile image.", e);
-							}
+                    byte[] data = null;
+                    if (profile != null) {
+                        //save profile data
+                        try {
+                            profileSerializer.save(profile);
+                            profileCache.set(profile.getPlayerName(), profile);
+                        } catch (IOException e) {
+                            logger.log(Level.WARNING, "Problem saving player profile data.", e);
+                        }
 
-							//save to cache
-							if (data != null) {
-								try {
-									FileUtils.writeByteArrayToFile(file, data);
-								} catch (IOException e) {
-									logger.log(Level.WARNING, "Problem saving image to cache.", e);
-								}
-							}
-						}
-					}
-				} finally {
-					IOUtils.closeQuietly(client);
-				}
+                        //download portrait
+                        if (!profile.isPrivate()) {
+                            //download image
+                            File file = portraitFile(playerName);
+                            Date lastModified = file.exists() ? new Date(file.lastModified()) : null;
+                            try {
+                                data = scraper.downloadPortrait(profile, lastModified, client);
+                            } catch (IOException e) {
+                                logger.log(Level.WARNING, "Problem downloading profile image.", e);
+                            }
 
-				List<Job> waiting;
-				synchronized (downloaded) {
-					downloaded.add(playerName);
+                            //save to cache
+                            if (data != null) {
+                                try {
+                                    FileUtils.writeByteArrayToFile(file, data);
+                                } catch (IOException e) {
+                                    logger.log(Level.WARNING, "Problem saving image to cache.", e);
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    IOUtils.closeQuietly(client);
+                }
 
-					waiting = waitList.get(playerName);
-					if (waiting.isEmpty()) {
-						//there are no labels waiting to be updated
-						//should never happen, there should always be at least 1 label waiting to be updated
-						continue;
-					}
-				}
+                List<Job> waiting;
+                synchronized (downloaded) {
+                    downloaded.add(playerName);
 
-				//call the listener
-				if (profile != null) {
-					for (Job job : waiting) {
-						if (job.listener != null) {
-							job.listener.onProfileDownloaded(profile);
-						}
-					}
-				}
+                    waiting = waitList.get(playerName);
+                    if (waiting.isEmpty()) {
+                        //there are no labels waiting to be updated
+                        //should never happen, there should always be at least 1 label waiting to be updated
+                        continue;
+                    }
+                }
 
-				waitList.removeAll(playerName);
-			}
-		}
+                //call the listener
+                if (profile != null) {
+                    for (Job job : waiting) {
+                        if (job.listener != null) {
+                            job.listener.onProfileDownloaded(profile);
+                        }
+                    }
+                }
 
-		private Document getProfilePage(String playerName, HttpClient client) throws IOException {
-			/*
+                waitList.removeAll(playerName);
+            }
+        }
+
+        private Document getProfilePage(String playerName, HttpClient client) throws IOException {
+            /*
 			 * EmcWebsiteConnection#getPlayerProfile cannot be used because its
 			 * HttpClient is configured to IGNORE redirects!
 			 */
-			String url = "https://u.emc.gs/" + UrlEscapers.urlPathSegmentEscaper().escape(playerName);
-			HttpGet request = new HttpGet(url);
-			HttpResponse response = client.execute(request);
-			HttpEntity entity = response.getEntity();
-			InputStream in = entity.getContent();
-			try {
-				return Jsoup.parse(in, "UTF-8", "https://empireminecraft.com");
-			} finally {
-				IOUtils.closeQuietly(in);
-			}
-		}
-	}
+            String url = "https://u.emc.gs/" + UrlEscapers.urlPathSegmentEscaper().escape(playerName);
+            HttpGet request = new HttpGet(url);
+            HttpResponse response = client.execute(request);
+            HttpEntity entity = response.getEntity();
+            InputStream in = entity.getContent();
+            try {
+                return Jsoup.parse(in, "UTF-8", "https://empireminecraft.com");
+            } finally {
+                IOUtils.closeQuietly(in);
+            }
+        }
+    }
 
-	private static class Job {
-		private final String playerName;
-		private final ProfileDownloadedListener listener;
+    private static class Job {
+        private final String playerName;
+        private final ProfileDownloadedListener listener;
 
-		private Job(String playerName, ProfileDownloadedListener listener) {
-			this.playerName = playerName;
-			this.listener = listener;
-		}
-	}
+        private Job(String playerName, ProfileDownloadedListener listener) {
+            this.playerName = playerName;
+            this.listener = listener;
+        }
+    }
 
-	public interface ProfileDownloadedListener {
-		/**
-		 * Called when a player's profile page is downloaded.
-		 * @param label the label that was updated
-		 */
-		void onProfileDownloaded(PlayerProfile profile);
-	}
+    public interface ProfileDownloadedListener {
+        /**
+         * Called when a player's profile page is downloaded.
+         *
+         * @param label the label that was updated
+         */
+        void onProfileDownloaded(PlayerProfile profile);
+    }
 
-	private static class PortraitCache extends ImageCache {
-		public ImageIcon unknown(int maxSize) {
-			ImageIcon image = get("(unknown)", maxSize);
-			if (image != null) {
-				return image;
-			}
+    private static class PortraitCache extends ImageCache {
+        public ImageIcon unknown(int maxSize) {
+            ImageIcon image = get("(unknown)", maxSize);
+            if (image != null) {
+                return image;
+            }
 
-			image = Images.scale(Images.UNKNOWN, maxSize);
-			put("(unknown)", maxSize, image);
-			return image;
-		}
-	}
+            image = Images.scale(Images.UNKNOWN, maxSize);
+            put("(unknown)", maxSize, image);
+            return image;
+        }
+    }
 
-	private static class ProfileCache {
-		private final Map<String, PlayerProfile> cache = new HashMap<String, PlayerProfile>();
+    private static class ProfileCache {
+        private final Map<String, PlayerProfile> cache = new HashMap<String, PlayerProfile>();
 
-		public synchronized PlayerProfile get(String player) {
-			return cache.get(key(player));
-		}
+        public synchronized PlayerProfile get(String player) {
+            return cache.get(key(player));
+        }
 
-		public synchronized void set(String player, PlayerProfile profile) {
-			cache.put(key(player), profile);
-		}
+        public synchronized void set(String player, PlayerProfile profile) {
+            cache.put(key(player), profile);
+        }
 
-		private String key(String player) {
-			return player.toLowerCase();
-		}
-	}
+        private String key(String player) {
+            return player.toLowerCase();
+        }
+    }
 
-	private class PlayerProfileSerializer {
-		private final BiMap<Rank, String> rankToString;
-		private final BiMap<String, Rank> stringToRank;
-		{
-			ImmutableBiMap.Builder<Rank, String> builder = ImmutableBiMap.builder();
-			builder.put(Rank.IRON, "iron");
-			builder.put(Rank.GOLD, "gold");
-			builder.put(Rank.DIAMOND, "diamond");
-			builder.put(Rank.HELPER, "helper");
-			builder.put(Rank.MODERATOR, "moderator");
-			builder.put(Rank.SENIOR_STAFF, "senior_staff");
-			builder.put(Rank.DEVELOPER, "developer");
-			builder.put(Rank.ADMIN, "admin");
+    private class PlayerProfileSerializer {
+        private final BiMap<Rank, String> rankToString;
+        private final BiMap<String, Rank> stringToRank;
 
-			rankToString = builder.build();
-			stringToRank = rankToString.inverse();
-		}
+        {
+            ImmutableBiMap.Builder<Rank, String> builder = ImmutableBiMap.builder();
+            builder.put(Rank.IRON, "iron");
+            builder.put(Rank.GOLD, "gold");
+            builder.put(Rank.DIAMOND, "diamond");
+            builder.put(Rank.HELPER, "helper");
+            builder.put(Rank.MODERATOR, "moderator");
+            builder.put(Rank.SENIOR_STAFF, "senior_staff");
+            builder.put(Rank.DEVELOPER, "developer");
+            builder.put(Rank.ADMIN, "admin");
 
-		public PlayerProfile load(String playerName) throws IOException {
-			File file = file(playerName);
-			if (!file.exists()) {
-				return null;
-			}
+            rankToString = builder.build();
+            stringToRank = rankToString.inverse();
+        }
 
-			PropertiesWrapper properties = new PropertiesWrapper(file);
+        public PlayerProfile load(String playerName) throws IOException {
+            File file = file(playerName);
+            if (!file.exists()) {
+                return null;
+            }
 
-			Date joined;
-			try {
-				joined = properties.getDate("joined");
-			} catch (ParseException e) {
-				joined = null;
-			}
+            PropertiesWrapper properties = new PropertiesWrapper(file);
 
-			String rankStr = properties.get("rank");
-			Rank rank = (rankStr == null) ? null : stringToRank.get(rankStr.toLowerCase());
+            Date joined;
+            try {
+                joined = properties.getDate("joined");
+            } catch (ParseException e) {
+                joined = null;
+            }
 
-			//@formatter:off
-			return new PlayerProfile.Builder()
-				.playerName(properties.get("name"))
-				.private_(properties.getBoolean("private", false))
-				.joined(joined)
-				.rank(rank)
-				.title(properties.get("title"))
-			.build();
-			//@formatter:on
-		}
+            String rankStr = properties.get("rank");
+            Rank rank = (rankStr == null) ? null : stringToRank.get(rankStr.toLowerCase());
 
-		public void save(PlayerProfile profile) throws IOException {
-			PropertiesWrapper properties = new PropertiesWrapper();
+            //@formatter:off
+            return new PlayerProfile.Builder()
+                    .playerName(properties.get("name"))
+                    .private_(properties.getBoolean("private", false))
+                    .joined(joined)
+                    .rank(rank)
+                    .title(properties.get("title"))
+                    .build();
+            //@formatter:on
+        }
 
-			properties.set("name", profile.getPlayerName());
-			properties.set("private", profile.isPrivate());
-			properties.setDate("joined", profile.getJoined());
+        public void save(PlayerProfile profile) throws IOException {
+            PropertiesWrapper properties = new PropertiesWrapper();
 
-			Rank rank = profile.getRank();
-			if (rank != null) {
-				properties.set("rank", rankToString.get(rank));
-			}
+            properties.set("name", profile.getPlayerName());
+            properties.set("private", profile.isPrivate());
+            properties.setDate("joined", profile.getJoined());
 
-			properties.set("title", profile.getTitle());
+            Rank rank = profile.getRank();
+            if (rank != null) {
+                properties.set("rank", rankToString.get(rank));
+            }
 
-			File file = file(profile.getPlayerName());
-			properties.store(file, "");
-		}
+            properties.set("title", profile.getTitle());
 
-		private File file(String playerName) {
-			return new File(cacheDir, playerName.toLowerCase() + ".properties");
-		}
-	}
+            File file = file(profile.getPlayerName());
+            properties.store(file, "");
+        }
 
-	public interface EmcWebsiteSessionFactory {
-		CloseableHttpClient createSession();
-	}
+        private File file(String playerName) {
+            return new File(cacheDir, playerName.toLowerCase() + ".properties");
+        }
+    }
+
+    public interface EmcWebsiteSessionFactory {
+        CloseableHttpClient createSession();
+    }
 }

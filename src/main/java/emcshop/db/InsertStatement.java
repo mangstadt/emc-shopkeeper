@@ -20,222 +20,232 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents an INSERT statement.
+ *
  * @author Michael Angstadt
  */
 public class InsertStatement {
-	private final String tableName;
-	private final Set<String> columnNames = new LinkedHashSet<String>();
-	private final List<Map<String, SqlColumn>> rows = new ArrayList<Map<String, SqlColumn>>();
-	private final int supportedTypes[] = new int[] { Types.INTEGER, Types.VARCHAR, Types.DATE, Types.TIMESTAMP };
-	private Map<String, SqlColumn> currentRow;
+    private final String tableName;
+    private final Set<String> columnNames = new LinkedHashSet<String>();
+    private final List<Map<String, SqlColumn>> rows = new ArrayList<Map<String, SqlColumn>>();
+    private final int supportedTypes[] = new int[]{Types.INTEGER, Types.VARCHAR, Types.DATE, Types.TIMESTAMP};
+    private Map<String, SqlColumn> currentRow;
 
-	/**
-	 * @param tableName the name of the table
-	 */
-	public InsertStatement(String tableName) {
-		this.tableName = tableName;
-		nextRow();
-	}
+    /**
+     * @param tableName the name of the table
+     */
+    public InsertStatement(String tableName) {
+        this.tableName = tableName;
+        nextRow();
+    }
 
-	/**
-	 * Adds column with a string value to the statement.
-	 * @param columnName the column name
-	 * @param value the column value
-	 * @return this
-	 */
-	public InsertStatement setString(String columnName, String value) {
-		return set(columnName, value, Types.VARCHAR);
-	}
+    /**
+     * Adds column with a string value to the statement.
+     *
+     * @param columnName the column name
+     * @param value      the column value
+     * @return this
+     */
+    public InsertStatement setString(String columnName, String value) {
+        return set(columnName, value, Types.VARCHAR);
+    }
 
-	/**
-	 * Adds column with an integer value to the statement.
-	 * @param columnName the column name
-	 * @param value the column value
-	 * @return this
-	 */
-	public InsertStatement setInt(String columnName, Integer value) {
-		return set(columnName, value, Types.INTEGER);
-	}
+    /**
+     * Adds column with an integer value to the statement.
+     *
+     * @param columnName the column name
+     * @param value      the column value
+     * @return this
+     */
+    public InsertStatement setInt(String columnName, Integer value) {
+        return set(columnName, value, Types.INTEGER);
+    }
 
-	/**
-	 * Adds column with a date value to the statement.
-	 * @param columnName the column name
-	 * @param value the column value
-	 * @return this
-	 */
-	public InsertStatement setDate(String columnName, Date value) {
-		return set(columnName, value, Types.DATE);
-	}
+    /**
+     * Adds column with a date value to the statement.
+     *
+     * @param columnName the column name
+     * @param value      the column value
+     * @return this
+     */
+    public InsertStatement setDate(String columnName, Date value) {
+        return set(columnName, value, Types.DATE);
+    }
 
-	/**
-	 * Adds column with a timestamp value to the statement.
-	 * @param columnName the column name
-	 * @param value the column value
-	 * @return this
-	 */
-	public InsertStatement setTimestamp(String columnName, Date value) {
-		return set(columnName, value, Types.TIMESTAMP);
-	}
+    /**
+     * Adds column with a timestamp value to the statement.
+     *
+     * @param columnName the column name
+     * @param value      the column value
+     * @return this
+     */
+    public InsertStatement setTimestamp(String columnName, Date value) {
+        return set(columnName, value, Types.TIMESTAMP);
+    }
 
-	/**
-	 * Adds a column
-	 * @param columnName the column name
-	 * @param value the column value
-	 * @param sqlType the data type
-	 * @return this
-	 */
-	private InsertStatement set(String columnName, Object value, int sqlType) {
-		String columnNameLowerCase = columnName.toLowerCase();
-		columnNames.add(columnNameLowerCase);
-		currentRow.put(columnNameLowerCase, new SqlColumn(value, sqlType));
-		return this;
-	}
+    /**
+     * Adds a column
+     *
+     * @param columnName the column name
+     * @param value      the column value
+     * @param sqlType    the data type
+     * @return this
+     */
+    private InsertStatement set(String columnName, Object value, int sqlType) {
+        String columnNameLowerCase = columnName.toLowerCase();
+        columnNames.add(columnNameLowerCase);
+        currentRow.put(columnNameLowerCase, new SqlColumn(value, sqlType));
+        return this;
+    }
 
-	/**
-	 * Prepares for a new row to be added to the statement. All subsequent
-	 * setter calls will be applied to this new row.
-	 * @return this
-	 */
-	public InsertStatement nextRow() {
-		currentRow = new HashMap<String, SqlColumn>();
-		rows.add(currentRow);
-		return this;
-	}
+    /**
+     * Prepares for a new row to be added to the statement. All subsequent
+     * setter calls will be applied to this new row.
+     *
+     * @return this
+     */
+    public InsertStatement nextRow() {
+        currentRow = new HashMap<String, SqlColumn>();
+        rows.add(currentRow);
+        return this;
+    }
 
-	/**
-	 * Generates the SQL command for this insert statement.
-	 * @return the SQL command
-	 * @throws IllegalStateException if no columns were added (via the "set"
-	 * methods)
-	 */
-	public String toSql() {
-		if (columnNames.isEmpty()) {
-			throw new IllegalStateException("Cannot generate SQL: no columns were added.");
-		}
+    /**
+     * Generates the SQL command for this insert statement.
+     *
+     * @return the SQL command
+     * @throws IllegalStateException if no columns were added (via the "set"
+     *                               methods)
+     */
+    public String toSql() {
+        if (columnNames.isEmpty()) {
+            throw new IllegalStateException("Cannot generate SQL: no columns were added.");
+        }
 
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO ").append(tableName).append(' ');
-		sql.append('(').append(StringUtils.join(columnNames, ", ")).append(')');
-		sql.append(" VALUES ");
+        StringBuilder sql = new StringBuilder();
+        sql.append("INSERT INTO ").append(tableName).append(' ');
+        sql.append('(').append(StringUtils.join(columnNames, ", ")).append(')');
+        sql.append(" VALUES ");
 
-		int nonEmptyRows = 0;
-		for (Map<String, SqlColumn> row : rows) {
-			if (row.isEmpty()) {
-				//ignore any extra "nextRow()" calls the user made
-				continue;
-			}
+        int nonEmptyRows = 0;
+        for (Map<String, SqlColumn> row : rows) {
+            if (row.isEmpty()) {
+                //ignore any extra "nextRow()" calls the user made
+                continue;
+            }
 
-			if (nonEmptyRows > 0) {
-				sql.append(",\n");
-			}
+            if (nonEmptyRows > 0) {
+                sql.append(",\n");
+            }
 
-			sql.append('(').append(StringUtils.repeat("?", ", ", columnNames.size())).append(')');
+            sql.append('(').append(StringUtils.repeat("?", ", ", columnNames.size())).append(')');
 
-			nonEmptyRows++;
-		}
+            nonEmptyRows++;
+        }
 
-		return sql.toString();
-	}
+        return sql.toString();
+    }
 
-	/**
-	 * Generates the {@link PreparedStatement} object for this insert statement.
-	 * @param conn the database connection
-	 * @return the statement object
-	 * @throws IllegalStateException if no columns were added (via the "set"
-	 * methods)
-	 * @throws SQLException if there was a problem creating the statement
-	 */
-	public PreparedStatement toStatement(Connection conn) throws SQLException {
-		PreparedStatement stmt = conn.prepareStatement(toSql(), Statement.RETURN_GENERATED_KEYS);
-		int index = 1;
-		for (Map<String, SqlColumn> row : rows) {
-			if (row.isEmpty()) {
-				//ignore any extra "nextRow()" calls the user made
-				continue;
-			}
+    /**
+     * Generates the {@link PreparedStatement} object for this insert statement.
+     *
+     * @param conn the database connection
+     * @return the statement object
+     * @throws IllegalStateException if no columns were added (via the "set"
+     *                               methods)
+     * @throws SQLException          if there was a problem creating the statement
+     */
+    public PreparedStatement toStatement(Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(toSql(), Statement.RETURN_GENERATED_KEYS);
+        int index = 1;
+        for (Map<String, SqlColumn> row : rows) {
+            if (row.isEmpty()) {
+                //ignore any extra "nextRow()" calls the user made
+                continue;
+            }
 
-			for (String columnName : columnNames) {
-				SqlColumn column = row.get(columnName);
-				if (column == null) {
-					//set the column value to "null"
-					for (int type : supportedTypes) {
-						try {
-							stmt.setNull(index, type);
-						} catch (SQLDataException e) {
-							//try the next type
-						}
-					}
-				} else {
-					Object value = column.getValue();
-					int sqlType = column.getSqlType();
+            for (String columnName : columnNames) {
+                SqlColumn column = row.get(columnName);
+                if (column == null) {
+                    //set the column value to "null"
+                    for (int type : supportedTypes) {
+                        try {
+                            stmt.setNull(index, type);
+                        } catch (SQLDataException e) {
+                            //try the next type
+                        }
+                    }
+                } else {
+                    Object value = column.getValue();
+                    int sqlType = column.getSqlType();
 
-					if (value == null) {
-						stmt.setNull(index, sqlType);
-					} else {
-						switch (sqlType) {
-						case Types.INTEGER:
-							stmt.setInt(index, (Integer) value);
-							break;
-						case Types.VARCHAR:
-							stmt.setString(index, (String) value);
-							break;
-						case Types.DATE:
-							Date date = (Date) value;
-							stmt.setDate(index, new java.sql.Date(date.getTime()));
-							break;
-						case Types.TIMESTAMP:
-							Date timestamp = (Date) value;
-							stmt.setTimestamp(index, new Timestamp(timestamp.getTime()));
-							break;
-						default:
-							throw new UnsupportedOperationException("Unable to handle SQL type " + sqlType + ".");
-						}
-					}
-				}
-				index++;
-			}
-		}
-		return stmt;
-	}
+                    if (value == null) {
+                        stmt.setNull(index, sqlType);
+                    } else {
+                        switch (sqlType) {
+                            case Types.INTEGER:
+                                stmt.setInt(index, (Integer) value);
+                                break;
+                            case Types.VARCHAR:
+                                stmt.setString(index, (String) value);
+                                break;
+                            case Types.DATE:
+                                Date date = (Date) value;
+                                stmt.setDate(index, new java.sql.Date(date.getTime()));
+                                break;
+                            case Types.TIMESTAMP:
+                                Date timestamp = (Date) value;
+                                stmt.setTimestamp(index, new Timestamp(timestamp.getTime()));
+                                break;
+                            default:
+                                throw new UnsupportedOperationException("Unable to handle SQL type " + sqlType + ".");
+                        }
+                    }
+                }
+                index++;
+            }
+        }
+        return stmt;
+    }
 
-	/**
-	 * Executes the insert statement.
-	 * @param conn the database connection
-	 * @return the generated ID or null if no ID was generated
-	 * @throws IllegalStateException if no columns were added (via the "set"
-	 * methods)
-	 * @throws SQLException if there was a problem executing the query
-	 */
-	public Integer execute(Connection conn) throws SQLException {
-		PreparedStatement stmt = null;
-		try {
-			stmt = toStatement(conn);
-			stmt.execute();
+    /**
+     * Executes the insert statement.
+     *
+     * @param conn the database connection
+     * @return the generated ID or null if no ID was generated
+     * @throws IllegalStateException if no columns were added (via the "set"
+     *                               methods)
+     * @throws SQLException          if there was a problem executing the query
+     */
+    public Integer execute(Connection conn) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = toStatement(conn);
+            stmt.execute();
 
-			ResultSet rs = stmt.getGeneratedKeys();
-			return rs.next() ? rs.getInt(1) : null; //this only returns one ID, even if multiple rows are inserted
-		} finally {
-			if (stmt != null) {
-				stmt.close();
-			}
-		}
-	}
+            ResultSet rs = stmt.getGeneratedKeys();
+            return rs.next() ? rs.getInt(1) : null; //this only returns one ID, even if multiple rows are inserted
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+    }
 
-	private static class SqlColumn {
-		private final Object value;
-		private final int sqlType;
+    private static class SqlColumn {
+        private final Object value;
+        private final int sqlType;
 
-		public SqlColumn(Object value, int sqlType) {
-			this.value = value;
-			this.sqlType = sqlType;
-		}
+        public SqlColumn(Object value, int sqlType) {
+            this.value = value;
+            this.sqlType = sqlType;
+        }
 
-		public Object getValue() {
-			return value;
-		}
+        public Object getValue() {
+            return value;
+        }
 
-		public int getSqlType() {
-			return sqlType;
-		}
-	}
+        public int getSqlType() {
+            return sqlType;
+        }
+    }
 }

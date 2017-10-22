@@ -17,38 +17,39 @@ import emcshop.gui.images.Images;
  */
 @SuppressWarnings("serial")
 public class SplashFrame extends JFrame {
-	private final JLabel message;
+    private final JLabel message;
 
-	public SplashFrame() {
-		setResizable(false);
-		setUndecorated(true);
-		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
-		getRootPane().setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-		setIconImage(Images.APP_ICON.getImage());
-		setTitle("EMC Shopkeeper v" + EMCShopkeeper.VERSION);
+    public SplashFrame() {
+        setResizable(false);
+        setUndecorated(true);
+        getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+        getRootPane().setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        setIconImage(Images.APP_ICON.getImage());
+        setTitle("EMC Shopkeeper v" + EMCShopkeeper.VERSION);
 
-		setLayout(new MigLayout("insets 5"));
+        setLayout(new MigLayout("insets 5"));
 
-		add(new JLabel(Images.HEADER), "align center, wrap");
+        add(new JLabel(Images.HEADER), "align center, wrap");
 
-		message = new JLabel(" ");
-		message.setHorizontalAlignment(SwingConstants.CENTER);
-		add(message, "w 100%");
+        message = new JLabel(" ");
+        message.setHorizontalAlignment(SwingConstants.CENTER);
+        add(message, "w 100%");
 
-		pack();
-		setLocationRelativeTo(null);
-	}
+        pack();
+        setLocationRelativeTo(null);
+    }
 
-	/**
-	 * Sets the text on the splash screen.
-	 * @param message the text
-	 */
-	public void setMessage(final String message) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				SplashFrame.this.message.setText(message);
-			}
-		});
-	}
+    /**
+     * Sets the text on the splash screen.
+     *
+     * @param message the text
+     */
+    public void setMessage(final String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                SplashFrame.this.message.setText(message);
+            }
+        });
+    }
 }

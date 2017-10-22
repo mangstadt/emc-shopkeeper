@@ -21,81 +21,81 @@ import emcshop.util.GuiUtils;
 
 @SuppressWarnings("serial")
 public class UnhandledErrorViewImpl extends JDialog implements IUnhandledErrorView {
-	private final JTextArea displayText, stackTrace;
-	private final JLabel errorIcon;
-	private final JButton close, report;
+    private final JTextArea displayText, stackTrace;
+    private final JLabel errorIcon;
+    private final JButton close, report;
 
-	public UnhandledErrorViewImpl(Window owner) {
-		super(owner, "Error");
-		setModalityType(ModalityType.DOCUMENT_MODAL); //go on top of all windows
+    public UnhandledErrorViewImpl(Window owner) {
+        super(owner, "Error");
+        setModalityType(ModalityType.DOCUMENT_MODAL); //go on top of all windows
 
-		displayText = new JTextArea();
-		displayText.setEditable(false);
-		displayText.setBackground(getBackground());
-		displayText.setLineWrap(true);
-		displayText.setWrapStyleWord(true);
+        displayText = new JTextArea();
+        displayText.setEditable(false);
+        displayText.setBackground(getBackground());
+        displayText.setLineWrap(true);
+        displayText.setWrapStyleWord(true);
 
-		//http://stackoverflow.com/questions/1196797/where-are-these-error-and-warning-icons-as-a-java-resource
-		errorIcon = new JLabel(Images.getErrorIcon());
+        //http://stackoverflow.com/questions/1196797/where-are-these-error-and-warning-icons-as-a-java-resource
+        errorIcon = new JLabel(Images.getErrorIcon());
 
-		stackTrace = new JTextArea();
-		stackTrace.setEditable(false);
-		stackTrace.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        stackTrace = new JTextArea();
+        stackTrace.setEditable(false);
+        stackTrace.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 
-		close = new JButton("Close");
-		GuiUtils.onEscapeKeyPress(this, close);
+        close = new JButton("Close");
+        GuiUtils.onEscapeKeyPress(this, close);
 
-		report = new JButton("Send Error Report");
+        report = new JButton("Send Error Report");
 
-		/////////////////
+        /////////////////
 
-		setLayout(new MigLayout());
-		add(errorIcon, "split 2");
-		add(displayText, "w 100:100%:100%, gapleft 10, wrap");
-		JScrollPane scroll = new MyJScrollPane(stackTrace);
-		add(scroll, "grow, w 100%, h 100%, align center, wrap");
-		add(close, "split 2, align center");
-		add(report);
+        setLayout(new MigLayout());
+        add(errorIcon, "split 2");
+        add(displayText, "w 100:100%:100%, gapleft 10, wrap");
+        JScrollPane scroll = new MyJScrollPane(stackTrace);
+        add(scroll, "grow, w 100%, h 100%, align center, wrap");
+        add(close, "split 2, align center");
+        add(report);
 
-		setSize(500, 300);
-	}
+        setSize(500, 300);
+    }
 
-	@Override
-	public void setMessage(String message) {
-		displayText.setText(message);
-	}
+    @Override
+    public void setMessage(String message) {
+        displayText.setText(message);
+    }
 
-	@Override
-	public void setThrown(Throwable thrown) {
-		stackTrace.setText(ExceptionUtils.getStackTrace(thrown));
-		stackTrace.setCaretPosition(0); //scroll to top
-	}
+    @Override
+    public void setThrown(Throwable thrown) {
+        stackTrace.setText(ExceptionUtils.getStackTrace(thrown));
+        stackTrace.setCaretPosition(0); //scroll to top
+    }
 
-	@Override
-	public void addSendErrorReportListener(ActionListener listener) {
-		report.addActionListener(listener);
-	}
+    @Override
+    public void addSendErrorReportListener(ActionListener listener) {
+        report.addActionListener(listener);
+    }
 
-	@Override
-	public void addCloseListener(ActionListener listener) {
-		close.addActionListener(listener);
-		GuiUtils.addCloseDialogListener(this, listener);
-	}
+    @Override
+    public void addCloseListener(ActionListener listener) {
+        close.addActionListener(listener);
+        GuiUtils.addCloseDialogListener(this, listener);
+    }
 
-	@Override
-	public void errorReportSent() {
-		report.setEnabled(false);
-		report.setText("Reported");
-		JOptionPane.showMessageDialog(UnhandledErrorViewImpl.this, "Error report sent.  Thanks!");
-	}
+    @Override
+    public void errorReportSent() {
+        report.setEnabled(false);
+        report.setText("Reported");
+        JOptionPane.showMessageDialog(UnhandledErrorViewImpl.this, "Error report sent.  Thanks!");
+    }
 
-	@Override
-	public void display() {
-		setVisible(true);
-	}
+    @Override
+    public void display() {
+        setVisible(true);
+    }
 
-	@Override
-	public void close() {
-		dispose();
-	}
+    @Override
+    public void close() {
+        dispose();
+    }
 }

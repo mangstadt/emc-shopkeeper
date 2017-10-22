@@ -5,31 +5,31 @@ import java.util.Date;
 import java.util.List;
 
 public interface IBackupModel {
-	void addBackupCompleteListener(ActionListener listener);
+    void addBackupCompleteListener(ActionListener listener);
 
-	void addBackupPercentCompleteListener(ActionListener listener);
+    void addBackupPercentCompleteListener(ActionListener listener);
 
-	void addRestoreCompleteListener(ActionListener listener);
+    void addRestoreCompleteListener(ActionListener listener);
 
-	boolean getAutoBackupEnabled();
+    boolean getAutoBackupEnabled();
 
-	Integer getBackupFrequency();
+    Integer getBackupFrequency();
 
-	Integer getMaxBackups();
+    Integer getMaxBackups();
 
-	void setAutoBackupEnabled(boolean enabled);
+    void setAutoBackupEnabled(boolean enabled);
 
-	void setBackupFrequency(Integer days);
+    void setBackupFrequency(Integer days);
 
-	void setMaxBackups(Integer days);
+    void setMaxBackups(Integer days);
 
-	List<Date> getBackups();
+    List<Date> getBackups();
 
-	void saveSettings();
+    void saveSettings();
 
-	Thread startBackup();
+    Thread startBackup();
 
-	Thread startRestore(Date date);
+    Thread startRestore(Date date);
 
-	void deleteBackup(Date date);
+    void deleteBackup(Date date);
 }
