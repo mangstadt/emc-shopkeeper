@@ -78,7 +78,7 @@
 	<Item name="Bone Block" id="216" />
 	<Item name="Bone Meal" id="351:15" emcNames="Bonemeal" group="Dyes" categories="4,6" />
 	<Item name="Book" id="340" group="Leather" />
-	<Item name="Book And Quill" id="386" group="Leather" />
+	<Item name="Book And Quill" stack="1" id="386" group="Leather" />
 	<Item name="Bookshelf" id="47" group="Leather" />
 	<Item name="Bottle o' Enchanting" id="384" categories="12" image="exp_bottle.png" emcNames="Exp Bottle" />
 	<Item name="Bow" id="261" stack="1" categories="16" />
