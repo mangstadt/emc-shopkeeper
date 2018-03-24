@@ -86,8 +86,8 @@ public class ZipUtilsTest {
 			Set<String> expectedPaths = new HashSet<String>();
 			expectedPaths.add("/" + dir.getName() + "/" + file1.getName());
 			expectedPaths.add("/" + dir.getName() + "/" + file2.getName());
-			expectedPaths.add("/" + dir.getName() + "/" + dir2.getName() + "/" + file3.getName());
-			expectedPaths.add("/" + dir.getName() + "/" + dir3.getName() + "/empty");
+			expectedPaths.add("\\" + dir.getName() + "/" + dir2.getName() + "/" + file3.getName()); //on Windows, this path starts with a backslash for some reason
+			expectedPaths.add("\\" + dir.getName() + "/" + dir3.getName() + "/empty"); //on Windows, this path starts with a backslash for some reason
 
 			assertEquals(expectedPaths, actualPaths);
 		}

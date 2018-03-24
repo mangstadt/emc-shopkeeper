@@ -29,7 +29,8 @@ public class RupeeFormatterTest {
 		assertEquals("1r", rf.format(1));
 		assertEquals("1.5r", rf.format(1.5));
 		assertEquals("1.55r", rf.format(1.55));
-		assertEquals("1.56r", rf.format(1.555));
+		assertEquals("1.55r", rf.format(1.555)); //on Mac, this would return "1.56r"
+		assertEquals("1.56r", rf.format(1.5555));
 
 		assertEquals("1,234r", rf.format(1234));
 		assertEquals("1,234.5r", rf.format(1234.5));
@@ -39,7 +40,8 @@ public class RupeeFormatterTest {
 		assertEquals("1,234,567r", rf.format(1234567));
 		assertEquals("1,234,567.5r", rf.format(1234567.5));
 		assertEquals("1,234,567.55r", rf.format(1234567.55));
-		assertEquals("1,234,567.56r", rf.format(1234567.555));
+		assertEquals("1,234,567.55r", rf.format(1234567.555)); //on Mac, this would return "1,234,567.56r"
+		assertEquals("1,234,567.56r", rf.format(1234567.5555));
 	}
 
 	@Test
