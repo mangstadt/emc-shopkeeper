@@ -6,8 +6,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -17,31 +18,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Scrapes information from player profile pages.
  */
 public class PlayerProfileScraper {
-	private static final Map<String, Rank> titleToRankMapping;
-	static {
-		ImmutableMap.Builder<String, Rank> builder = ImmutableMap.builder();
-		builder.put("Iron Supporter", Rank.IRON);
-		builder.put("Gold Supporter", Rank.GOLD);
-		builder.put("Diamond Supporter", Rank.DIAMOND);
-		builder.put("Build Team", Rank.HELPER);
-		builder.put("Contribution Team", Rank.HELPER);
-		builder.put("Moderator", Rank.MODERATOR);
-		builder.put("Senior Staff", Rank.SENIOR_STAFF);
-		builder.put("Developer", Rank.DEVELOPER);
-		builder.put("Lead Developer", Rank.ADMIN);
-		builder.put("Community Manager", Rank.ADMIN);
-
-		titleToRankMapping = builder.build();
-	}
-
 	/**
 	 * Scrapes a player's profile page.
 	 * @param playerName the player name
@@ -63,14 +47,12 @@ public class PlayerProfileScraper {
 			return builder.playerName(playerName).build();
 		}
 
-		String title = scrapeTitle(document);
+		scrapeRankAndTitle(document, builder);
 
 		//@formatter:off
 		return builder
 			.playerName(scrapedPlayerName)
 			.portraitUrl(scrapePortraitUrl(document))
-			.title(title)
-			.rank(titleToRankMapping.get(title))
 			.joined(scrapeJoined(document))
 		.build();
 		//@formatter:on
@@ -134,9 +116,39 @@ public class PlayerProfileScraper {
 		return src.isEmpty() ? null : src;
 	}
 
-	private String scrapeTitle(Document document) {
+	private void scrapeRankAndTitle(Document document, PlayerProfile.Builder builder) {
 		Elements elements = document.select(".userTitle");
-		return elements.isEmpty() ? null : elements.first().text();
+		if (elements.isEmpty()) {
+			return;
+		}
+
+		//Example of what the child nodes look like for the ".userTitle" element:
+		//<span style="color:#00BFBF;font-weight:bold;">Diamond Supporter</span><br>Elite Member
+		Pattern colorRegex = Pattern.compile("color:(#[0-9a-f]{6})", Pattern.CASE_INSENSITIVE);
+		for (Node node : elements.first().childNodes()) {
+			if (node instanceof Element) {
+				Element element = (Element) node;
+				if (element.tagName().equals("span")) {
+					String rank = element.text();
+					String color;
+					{
+						String style = element.attr("style");
+						Matcher m = colorRegex.matcher(style);
+						color = m.find() ? m.group(1) : null;
+					}
+
+					builder.rank(rank, color);
+				}
+				continue;
+			}
+
+			if (node instanceof TextNode) {
+				TextNode textNode = (TextNode) node;
+				String title = textNode.text();
+				builder.title(title);
+				continue;
+			}
+		}
 	}
 
 	private Date scrapeJoined(Document document) {

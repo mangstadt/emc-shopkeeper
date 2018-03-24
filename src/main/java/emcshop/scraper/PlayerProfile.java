@@ -8,18 +8,18 @@ import java.util.Date;
  * @author Michael Angstadt
  */
 public class PlayerProfile {
-	private final String playerName, portraitUrl, title;
+	private final String playerName, portraitUrl, rank, rankColor, title;
 	private final boolean private_;
-	private final Rank rank;
 	private final Date joined;
 
 	private PlayerProfile(Builder builder) {
 		playerName = builder.playerName;
-		private_ = builder.private_;
 		portraitUrl = builder.portraitUrl;
 		rank = builder.rank;
-		joined = (builder.joined == null) ? null : new Date(builder.joined.getTime());
+		rankColor = builder.rankColor;
 		title = builder.title;
+		private_ = builder.private_;
+		joined = (builder.joined == null) ? null : new Date(builder.joined.getTime());
 	}
 
 	/**
@@ -48,10 +48,20 @@ public class PlayerProfile {
 
 	/**
 	 * Gets the player's rank.
-	 * @return the player's rank or null if not found
+	 * @return the player's rank (e.g. "Diamond Supporter") or null if player
+	 * has no rank
 	 */
-	public Rank getRank() {
+	public String getRank() {
 		return rank;
+	}
+
+	/**
+	 * Gets the color of the rank (e.g. light blue for "Diamond Supporter").
+	 * @return the color in hex format (e.g. "#00BFBF") or null if no color was
+	 * specified
+	 */
+	public String getRankColor() {
+		return rankColor;
 	}
 
 	/**
@@ -64,7 +74,8 @@ public class PlayerProfile {
 
 	/**
 	 * Gets the player's title.
-	 * @return the player's title or null if not found
+	 * @return the player's title (e.g. "Dedicated Member") or null if player
+	 * has no title
 	 */
 	public String getTitle() {
 		return title;
@@ -75,9 +86,8 @@ public class PlayerProfile {
 	 * @author Michael Angstadt
 	 */
 	public static class Builder {
-		private String playerName, portraitUrl, title;
+		private String playerName, portraitUrl, rank, rankColor, title;
 		private boolean private_;
-		private Rank rank;
 		private Date joined;
 
 		public Builder() {
@@ -86,11 +96,12 @@ public class PlayerProfile {
 
 		public Builder(PlayerProfile orig) {
 			playerName = orig.playerName;
-			private_ = orig.private_;
 			portraitUrl = orig.portraitUrl;
 			rank = orig.rank;
-			joined = orig.joined;
+			rankColor = orig.rankColor;
 			title = orig.title;
+			private_ = orig.private_;
+			joined = orig.joined;
 		}
 
 		public Builder playerName(String playerName) {
@@ -108,8 +119,9 @@ public class PlayerProfile {
 			return this;
 		}
 
-		public Builder rank(Rank rank) {
+		public Builder rank(String rank, String color) {
 			this.rank = rank;
+			this.rankColor = color;
 			return this;
 		}
 

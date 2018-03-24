@@ -6,16 +6,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 import com.github.mangstadt.emc.net.EmcServer;
 
 import emcshop.AppContext;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.Images;
 import emcshop.scraper.PlayerProfile;
-import emcshop.scraper.Rank;
 import emcshop.util.UIDefaultsWrapper;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Used for rendering a player name in a JTable.
@@ -56,13 +54,17 @@ public class PlayerCellPanel extends JPanel {
 
 		PlayerProfile profile = profileLoader.getProfile(playerName, listener);
 		if (profile != null) {
-			Color color = null;
-			Rank rank = profile.getRank();
-			if (rank != null) {
-				color = profileLoader.getRankColor(rank);
-			}
-			if (color == null) {
-				color = UIDefaultsWrapper.getLabelForeground();
+			Color color = UIDefaultsWrapper.getLabelForeground();
+			String rankColorStr = profile.getRankColor();
+			if (rankColorStr != null) {
+				try {
+					color = Color.decode(rankColorStr);
+				} catch (NumberFormatException e) {
+					/*
+					 * If the color string is not in the correct format, ignore
+					 * it.
+					 */
+				}
 			}
 			playerLabel.setForeground(color);
 		}

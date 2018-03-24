@@ -41,7 +41,6 @@ import org.junit.rules.TemporaryFolder;
 import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.PlayerProfileScraper;
-import emcshop.scraper.Rank;
 
 public class ProfileLoaderTest {
 	private final byte[] portrait;
@@ -57,7 +56,7 @@ public class ProfileLoaderTest {
 	private final PlayerProfile profile = new PlayerProfile.Builder()
 		.playerName("shavingfoam")
 		.private_(false)
-		.rank(Rank.GOLD)
+		.rank("Gold Supporter", null)
 		.portraitUrl("http://empireminecraft.com/data/avatars/l/12/12110.jpg?1389141773")
 		.joined(new Date())
 	.build();
@@ -139,7 +138,7 @@ public class ProfileLoaderTest {
 		props.load(new FileInputStream(propertiesFile));
 		assertEquals(4, props.size());
 		assertEquals("false", props.get("private"));
-		assertEquals("gold", props.get("rank"));
+		assertEquals("Gold Supporter", props.get("rank"));
 		assertNotNull(props.get("joined"));
 
 		//loading it again should retrieve it from the cache
@@ -180,7 +179,7 @@ public class ProfileLoaderTest {
 		props.load(new FileInputStream(propertiesFile));
 		assertEquals(4, props.size());
 		assertEquals("false", props.get("private"));
-		assertEquals("gold", props.get("rank"));
+		assertEquals("Gold Supporter", props.get("rank"));
 		assertNotNull(props.get("joined"));
 	}
 
@@ -207,7 +206,7 @@ public class ProfileLoaderTest {
 		props.load(new FileInputStream(propertiesFile));
 		assertEquals(4, props.size());
 		assertEquals("false", props.get("private"));
-		assertEquals("gold", props.get("rank"));
+		assertEquals("Gold Supporter", props.get("rank"));
 		assertNotNull(props.get("joined"));
 	}
 

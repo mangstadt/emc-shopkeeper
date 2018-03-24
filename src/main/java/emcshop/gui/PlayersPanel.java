@@ -25,8 +25,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import net.miginfocom.swing.MigLayout;
-
 import com.github.mangstadt.emc.net.EmcServer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -42,11 +40,11 @@ import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.scraper.PlayerProfile;
-import emcshop.scraper.Rank;
 import emcshop.util.BaseFormatter;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.RupeeFormatter;
 import emcshop.util.UIDefaultsWrapper;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * A panel that displays transactions grouped by player.
@@ -215,17 +213,20 @@ public class PlayersPanel extends JPanel {
 				if (selected) {
 					playerNameLabel.setForeground(UIDefaultsWrapper.getListForegroundSelected());
 				} else {
-					Color color = null;
 					PlayerProfile profile = profileLoader.getProfile(playerName, null);
 					if (profile != null) {
-						Rank rank = profile.getRank();
-						if (rank != null) {
-							color = profileLoader.getRankColor(rank);
+						String rankColorStr = profile.getRankColor();
+						if (rankColorStr != null) {
+							try {
+								Color color = Color.decode(rankColorStr);
+								playerNameLabel.setForeground(color);
+							} catch (NumberFormatException e) {
+								/*
+								 * If the color string is not in the correct
+								 * format, ignore it.
+								 */
+							}
 						}
-					}
-
-					if (color != null) {
-						playerNameLabel.setForeground(color);
 					}
 				}
 				row.add(playerNameLabel, "gapbottom 0, wrap");
@@ -298,10 +299,13 @@ public class PlayersPanel extends JPanel {
 
 	private JPanel buildPlayerInfoPanel(Player player) {
 		String playerName = player.getName();
+		String rank = null, rankColor = null;
 		String title = null;
 		Date joined = null;
 		PlayerProfile profile = profileLoader.getProfile(playerName, null);
 		if (profile != null) {
+			rank = profile.getRank();
+			rankColor = profile.getRankColor();
 			title = profile.getTitle();
 			joined = profile.getJoined();
 		}
@@ -334,24 +338,20 @@ public class PlayersPanel extends JPanel {
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.append("<html><span style=\"font-size:2em\"><b>").append(playerName).append("</b></span>");
-			if (title != null) {
-				Color color = null;
-				Rank rank = profile.getRank();
-				if (rank != null) {
-					color = profileLoader.getRankColor(rank);
-				}
-
+			if (rank != null) {
 				sb.append(" <i><b>");
-				if (color != null) {
-					sb.append("<span style=\"");
-					sb.append("color:rgb(").append(color.getRed()).append(",").append(color.getGreen()).append(",").append(color.getBlue()).append(")");
-					sb.append("\">");
-				}
-				sb.append(title);
-				if (color != null) {
-					sb.append("</span>");
+				if (rankColor == null) {
+					sb.append(rank);
+				} else {
+					sb.append("<span style=\"color:").append(rankColor).append("\">").append(rank).append("</span>");
 				}
 				sb.append("</i></b>");
+			}
+			if (title != null) {
+				if (rank != null) {
+					sb.append(",");
+				}
+				sb.append(" ").append(title);
 			}
 
 			playerNameLabel = new ClickableLabel(sb.toString(), "https://u.emc.gs/" + playerName);

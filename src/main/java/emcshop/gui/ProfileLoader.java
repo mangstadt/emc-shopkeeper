@@ -1,12 +1,10 @@
 package emcshop.gui;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,15 +27,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.net.UrlEscapers;
 
 import emcshop.gui.images.Images;
 import emcshop.scraper.PlayerProfile;
 import emcshop.scraper.PlayerProfileScraper;
-import emcshop.scraper.Rank;
 import emcshop.util.CaseInsensitiveHashSet;
 import emcshop.util.CaseInsensitiveMultimap;
 import emcshop.util.ImageCache;
@@ -48,18 +43,6 @@ import emcshop.util.PropertiesWrapper;
  */
 public class ProfileLoader {
 	private static final Logger logger = Logger.getLogger(ProfileLoader.class.getName());
-
-	private static final Map<Rank, Color> rankToColor = new EnumMap<Rank, Color>(Rank.class);
-	{
-		rankToColor.put(Rank.IRON, new Color(128, 128, 128));
-		rankToColor.put(Rank.GOLD, new Color(181, 181, 0));
-		rankToColor.put(Rank.DIAMOND, new Color(0, 181, 194));
-		rankToColor.put(Rank.HELPER, new Color(224, 165, 0));
-		rankToColor.put(Rank.MODERATOR, new Color(0, 64, 0));
-		rankToColor.put(Rank.SENIOR_STAFF, new Color(0, 255, 0));
-		rankToColor.put(Rank.DEVELOPER, new Color(0, 0, 128));
-		rankToColor.put(Rank.ADMIN, new Color(209, 0, 195));
-	}
 
 	private final File cacheDir;
 	private final Set<String> downloaded = CaseInsensitiveHashSet.create();
@@ -174,10 +157,6 @@ public class ProfileLoader {
 		//queue the image for download if necessary
 		Job job = new Job(playerName, listener);
 		queueJob(job);
-	}
-
-	public Color getRankColor(Rank rank) {
-		return rankToColor.get(rank);
 	}
 
 	/**
@@ -434,23 +413,6 @@ public class ProfileLoader {
 	}
 
 	private class PlayerProfileSerializer {
-		private final BiMap<Rank, String> rankToString;
-		private final BiMap<String, Rank> stringToRank;
-		{
-			ImmutableBiMap.Builder<Rank, String> builder = ImmutableBiMap.builder();
-			builder.put(Rank.IRON, "iron");
-			builder.put(Rank.GOLD, "gold");
-			builder.put(Rank.DIAMOND, "diamond");
-			builder.put(Rank.HELPER, "helper");
-			builder.put(Rank.MODERATOR, "moderator");
-			builder.put(Rank.SENIOR_STAFF, "senior_staff");
-			builder.put(Rank.DEVELOPER, "developer");
-			builder.put(Rank.ADMIN, "admin");
-
-			rankToString = builder.build();
-			stringToRank = rankToString.inverse();
-		}
-
 		public PlayerProfile load(String playerName) throws IOException {
 			File file = file(playerName);
 			if (!file.exists()) {
@@ -466,15 +428,12 @@ public class ProfileLoader {
 				joined = null;
 			}
 
-			String rankStr = properties.get("rank");
-			Rank rank = (rankStr == null) ? null : stringToRank.get(rankStr.toLowerCase());
-
 			//@formatter:off
 			return new PlayerProfile.Builder()
 				.playerName(properties.get("name"))
 				.private_(properties.getBoolean("private", false))
 				.joined(joined)
-				.rank(rank)
+				.rank(properties.get("rank"), properties.get("rankColor"))
 				.title(properties.get("title"))
 			.build();
 			//@formatter:on
@@ -486,12 +445,8 @@ public class ProfileLoader {
 			properties.set("name", profile.getPlayerName());
 			properties.set("private", profile.isPrivate());
 			properties.setDate("joined", profile.getJoined());
-
-			Rank rank = profile.getRank();
-			if (rank != null) {
-				properties.set("rank", rankToString.get(rank));
-			}
-
+			properties.set("rank", profile.getRank());
+			properties.set("rankColor", profile.getRankColor());
 			properties.set("title", profile.getTitle());
 
 			File file = file(profile.getPlayerName());
