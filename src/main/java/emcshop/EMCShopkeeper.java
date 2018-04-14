@@ -20,8 +20,6 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
-import joptsimple.OptionException;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -59,6 +57,7 @@ import emcshop.view.DatabaseStartupErrorViewImpl;
 import emcshop.view.IDatabaseStartupErrorView;
 import emcshop.view.IProfileSelectorView;
 import emcshop.view.ProfileSelectorViewImpl;
+import joptsimple.OptionException;
 
 public class EMCShopkeeper {
 	private static final Logger logger = Logger.getLogger(EMCShopkeeper.class.getName());
@@ -481,7 +480,15 @@ public class EMCShopkeeper {
 		MacSupport.init("EMC Shopkeeper", false, Images.APP_ICON.getImage(), new MacHandler() {
 			@Override
 			public void handleQuit(Object applicationEvent) {
-				mainFrame.exit();
+				if (mainFrame == null) {
+					/*
+					 * Handle the case where the user exits the application
+					 * before the main window appears.
+					 */
+					System.exit(0);
+				} else {
+					mainFrame.exit();
+				}
 			}
 
 			@Override
