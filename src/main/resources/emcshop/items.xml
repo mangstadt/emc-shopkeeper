@@ -672,6 +672,18 @@
 	<Item name="Indy 500K Hot Rod" stack="1" image="fishing_rod.png" emcNames="§6§lIndy 500K Hot Rod - §6§lIndy 500K Hot Rod" categories="5,16" />
 	<Item name="Pizza Hut 500K Special Pick" stack="1" image="gold_pickaxe.png" emcNames="§6§lPizza Hut 500K Special Pick - §6§lPizza Hut 500K Special Pick" categories="5,16" />
 	
+	<!-- Fireworks -->
+	<Item name="Empire Firework" image="firework.png" emcNames="Firework - §aEmpire Firework,§aEmpire Firework - §aEmpire Firework" categories="5" />
+	<Item name="Empire Firework (New Year 2014)" image="firework.png" emcNames="Firework - §b§l*§9§lEmpire Firework§b§l*,§b§l*§9§lEmpire Firework§b§l* - §b§l*§9§lEmpire Firework§b§l*" categories="5" />
+	<Item name="Empire Firework (New Year 2015)" image="firework.png" emcNames="Firework - §a#§2§lEmpire Firework§a#,§a#§2§lEmpire Firework§a# - §a#§2§lEmpire Firework§a#" categories="5" />
+	<Item name="Independence Day Firework" image="firework.png" emcNames="Firework - §cIndependence §fDay §9Firework,§cIndependence §fDay §9Firework - §cIndependence §fDay §9Firework" categories="5" />
+	<!-- 
+	Don't know what year these are for:
+	Firework - §c§l-Empire Firework-
+	Firework - §a§l«§bEmpire Firework§a§l»
+	Firework - §5§l*§e§lEmpire Firework§5§l*
+	-->
+	
 	<!-- Misc promos -->
 	<Item name="2014 Birthday Cake" image="cake.png" emcNames="Cake - §62014 Birthday Cake,§62014 Birthday Cake - §62014 Birthday Cake" categories="5,7" />
 	<Item name="2015 Birthday Cake" image="cake.png" emcNames="Cake - §62015 Birthday Cake,§62015 Birthday Cake - §62015 Birthday Cake" categories="5,7" />
@@ -700,9 +712,6 @@
 	<Item name="Easter Bunny" image="rabbit_egg.png" emcNames="§aE§ba§ds§et§ae§br §dB§eu§an§bn§dy - §aE§ba§ds§et§ae§br §dB§eu§an§bn§dy" categories="0,5" />
 	<Item name="Emergency Snow Clearing Device" stack="1" image="diamond_shovel_enchanted.png" emcNames="Diamond Spade - §cEmergency Snow Clearing Device,§cEmergency Snow Clearing Device - §cEmergency Snow Clearing Device" categories="5,16" />
 	<Item name="Empire Assistant" image="compass.png" emcNames="Compass - §6Empire Assistant,§6Empire Assistant - §6Empire Assistant" categories="5" />
-	<Item name="Empire Firework" image="firework.png" emcNames="Firework - §aEmpire Firework,§aEmpire Firework - §aEmpire Firework" categories="5" />
-	<Item name="Empire Firework (New Year 2014)" image="firework.png" emcNames="Firework - §b§l*§9§lEmpire Firework§b§l*,§b§l*§9§lEmpire Firework§b§l* - §b§l*§9§lEmpire Firework§b§l*" categories="5" />
-	<Item name="Empire Firework (New Year 2015)" image="firework.png" emcNames="Firework - §a#§2§lEmpire Firework§a#,§a#§2§lEmpire Firework§a# - §a#§2§lEmpire Firework§a#" categories="5" />
 	<Item name="Feast for a King" image="paper.png" emcNames="Paper - §bFeast for a King,§bFeast for a King - §bFeast for a King" categories="5" />
 	<Item name="Getting Started" stack="1" image="book_and_quill.png" emcNames="Book And Quill - §6Getting Started,§6Getting Started - §6Getting Started" categories="5" />
 	<Item name="Ham Hacker" stack="1" image="diamond_axe_enchanted.png" emcNames="Diamond Axe - §6Ham Hacker,§6Ham Hacker - §6Ham Hacker" categories="5,16" />
@@ -713,7 +722,6 @@
 	<Item name="Holiday Pick" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="Diamond Pickaxe - §f§l«§c§lHoliday Pick§f§l»,§f§l«§c§lHoliday Pick§f§l» - §f§l«§c§lHoliday Pick§f§l»" categories="5,16" />
 	<Item name="IcecreamCow Flesh" image="raw_beef.png" emcNames="Raw Beef - §6IcecreamCow Flesh,§6IcecreamCow Flesh - §6IcecreamCow Flesh" categories="5" />
 	<Item name="IcecreamCow Skin" image="raw_beef.png" emcNames="Leather - §6IcecreamCow Skin,§6IcecreamCow Skin - §6IcecreamCow Skin" categories="5" />
-	<Item name="Independence Day Firework" image="firework.png" emcNames="Firework - §cIndependence §fDay §9Firework,§cIndependence §fDay §9Firework - §cIndependence §fDay §9Firework" categories="5" />
 	<Item name="Labor Bench" stack="1" image="workbench.png" emcNames="Workbench - §aLabor Bench,Workbench - §6Labor Bench,§aLabor Bench - §aLabor Bench,§6Labor Bench - §6Labor Bench,§cLabor Bench - §cLabor Bench,§dLabor Bench - §dLabor Bench" categories="5" />
 	<Item name="Liberty Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §cLibe§frty S§9word,§cLibe§frty S§9word - §cLibe§frty S§9word" categories="5,16" />
 	<Item name="Lucky Bow" stack="1" image="bow_enchanted.png" emcNames="Bow - §1Lucky Bow,Bow - §9Lucky Bow,§1Lucky Bow - §1Lucky Bow,§9Lucky Bow - §9Lucky Bow" categories="5,16" />
