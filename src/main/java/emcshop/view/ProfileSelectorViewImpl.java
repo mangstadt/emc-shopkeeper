@@ -12,9 +12,9 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class ProfileSelectorViewImpl extends JDialog implements IProfileSelectorView {
@@ -41,7 +41,7 @@ public class ProfileSelectorViewImpl extends JDialog implements IProfileSelector
 		setLayout(new MigLayout());
 
 		add(new JLabel(Images.HEADER), "align center, wrap");
-		add(new JLabel("<html><div width=250><center>Select a profile:</center></div>"), "align center, wrap");
+		add(new JLabel("<html><div width=250><center>Select an existing profile, or type the name of a new profile:</center></div>"), "align center, wrap");
 		add(profiles, "w 200, align center, wrap");
 		add(ok, "split 2, align center");
 		add(quit);
