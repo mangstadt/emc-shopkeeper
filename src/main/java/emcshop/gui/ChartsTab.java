@@ -32,8 +32,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -59,6 +57,7 @@ import emcshop.db.Profits;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.ImageCheckBox;
 import emcshop.util.RupeeFormatter;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class ChartsTab extends JPanel {
@@ -68,7 +67,7 @@ public class ChartsTab extends JPanel {
 	private final ItemIndex index = ItemIndex.instance();
 	private final Map<String, ImageIcon> groupIcons = new HashMap<String, ImageIcon>();
 	{
-		groupIcons.put("Clay", Images.getItemImage("Hard Clay"));
+		groupIcons.put("Clay", Images.getItemImage("Terracotta"));
 		groupIcons.put("Diamonds", Images.getItemImage("Diamond"));
 		groupIcons.put("Discs", Images.getItemImage("Chirp Disc"));
 		groupIcons.put("Dyes", Images.getItemImage("Red Dye"));
@@ -77,7 +76,7 @@ public class ChartsTab extends JPanel {
 		groupIcons.put("Glass", Images.getItemImage("Blue Glass"));
 		groupIcons.put("Gold", Images.getItemImage("Gold Ingot"));
 		groupIcons.put("Iron", Images.getItemImage("Iron Ingot"));
-		groupIcons.put("Lapis", Images.getItemImage("Blue Dye"));
+		groupIcons.put("Lapis", Images.getItemImage("Lapis"));
 		groupIcons.put("Leather", Images.getItemImage("Leather"));
 		groupIcons.put("Potions", Images.getItemImage("Potion of Health"));
 		groupIcons.put("Quartz", Images.getItemImage("Quartz"));
