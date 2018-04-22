@@ -97,7 +97,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			}
 		});
 
-		loadLogDir = new JButton("Load");
+		loadLogDir = new JButton("Reload");
 
 		datePicker = new DatePicker();
 		datePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
@@ -151,7 +151,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 		setLayout(new MigLayout());
 
-		add(logDir, "w 100%, split 2");
+		add(new JLabel("Minecraft Log Directory:"), "split 3");
+		add(logDir, "w 100%");
 		add(loadLogDir, "wrap");
 
 		add(new JLabel("Date:"), "split 4");
@@ -451,7 +452,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		private final List<SearchListener> searchListeners = new ArrayList<SearchListener>();
 
 		public FilterPanel() {
-			searchLabel = new JLabel("<html><font size=2>Highlight:");
+			searchLabel = new JLabel("Search current log:");
 
 			search = new JTextField();
 			search.addActionListener(new ActionListener() {
