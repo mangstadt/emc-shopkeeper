@@ -59,6 +59,11 @@ import emcshop.view.IProfileSelectorView;
 import emcshop.view.ProfileSelectorViewImpl;
 import joptsimple.OptionException;
 
+/**
+ * Contains the main method. This class is named "EMCShopkeeper" because this is
+ * where macOS gets the app name from when the app is run from a JAR file.
+ * @author Michael Angstadt
+ */
 public class EMCShopkeeper {
 	private static final Logger logger = Logger.getLogger(EMCShopkeeper.class.getName());
 	private static final PrintStream out = System.out;
@@ -261,6 +266,8 @@ public class EMCShopkeeper {
 
 	private static void launchGui(File profileDir, File dbDir, final Settings settings, LogManager logManager) throws Throwable {
 		initializeMac();
+
+		//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
 		final AppContext context = AppContext.instance();
 		context.add(settings);
