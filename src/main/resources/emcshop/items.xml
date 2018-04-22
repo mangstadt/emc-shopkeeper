@@ -449,6 +449,10 @@
 	<Item name="Purple Shulker Box" emcNames="Purple Shulk Box" />
 	<Item name="Purple Terracotta" id="159:10" group="Clay" categories="2" emcNames="Purple Clay,Purple Stclay,Purple Stained Clay,Purple Hardened Clay" />
 	<Item name="Purple Wool" id="35:10" group="Wool" categories="18" />
+	<Item name="Purpur Block" id="201" />
+	<Item name="Purpur Pillar" id="202" />
+	<Item name="Purpur Slab" id="205" />
+	<Item name="Purpur Stairs" id="203" />
 	<Item name="Quartz" id="406" group="Quartz" categories="10,11" emcNames="Nether Quartz" />
 	<Item name="Quartz Block" id="155:0" group="Quartz" categories="10,11" emcNames="Block of Quartz" />
 	<Item name="Quartz Pillar" id="155:2" group="Quartz" categories="10,11" emcNames="Pillar Quartz Block" />
