@@ -34,8 +34,6 @@ import javax.swing.WindowConstants;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import net.miginfocom.swing.MigLayout;
-
 import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.chat.ChatMessage;
@@ -43,6 +41,7 @@ import emcshop.db.PaymentTransactionDb;
 import emcshop.gui.MyJScrollPane;
 import emcshop.util.GuiUtils;
 import emcshop.util.Listeners;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView {
@@ -248,6 +247,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		private final Map<String, String> channelColors = new HashMap<String, String>();
 		{
 			channelColors.put("T", "green");
+			channelColors.put("C", "green");
 			channelColors.put("L", "#cccc00");
 			channelColors.put("S", "#00cccc");
 			channelColors.put("R", "blue");
