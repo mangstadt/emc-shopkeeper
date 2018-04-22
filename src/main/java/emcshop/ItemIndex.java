@@ -14,15 +14,8 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.IOUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -31,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 import emcshop.gui.images.Images;
+import emcshop.util.Leaf;
 
 /**
  * DAO for accessing the display names, transaction page names, and image file
@@ -79,35 +73,25 @@ public class ItemIndex {
 	 */
 	ItemIndex(InputStream in) throws SAXException, IOException {
 		//parse XML document
-		Document xml;
+		Leaf document;
 		try {
 			DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
 			fact.setIgnoringComments(true);
 			fact.setIgnoringElementContentWhitespace(true);
 
-			xml = fact.newDocumentBuilder().parse(in);
+			document = new Leaf(fact.newDocumentBuilder().parse(in));
 		} catch (ParserConfigurationException e) {
 			//should never be thrown
 			throw new RuntimeException(e);
 		}
 
-		XPath xpath = XPathFactory.newInstance().newXPath();
-
 		//parse categories
 		Map<Integer, CategoryInfo> categoriesById = new HashMap<Integer, CategoryInfo>();
 		{
-			NodeList categoryNodes;
-			try {
-				categoryNodes = (NodeList) xpath.evaluate("/Items/Categories/Category", xml, XPathConstants.NODESET);
-			} catch (XPathExpressionException e) {
-				//should never be thrown
-				throw new RuntimeException(e);
-			}
+			List<Leaf> categoryElements = document.select("/Items/Categories/Category");
 
 			ImmutableSet.Builder<CategoryInfo> categories = ImmutableSet.builder();
-			for (int i = 0; i < categoryNodes.getLength(); i++) {
-				Element categoryElement = (Element) categoryNodes.item(i);
-
+			for (Leaf categoryElement : categoryElements) {
 				CategoryInfo category = parseCategory(categoryElement);
 				categories.add(category);
 				categoriesById.put(category.id, category);
@@ -117,20 +101,13 @@ public class ItemIndex {
 
 		//parse items
 		{
-			NodeList itemNodes;
-			try {
-				itemNodes = (NodeList) xpath.evaluate("/Items/Item", xml, XPathConstants.NODESET);
-			} catch (XPathExpressionException e) {
-				//should never be thrown
-				throw new RuntimeException(e);
-			}
+			List<Leaf> itemElements = document.select("/Items/Item");
 
 			ImmutableMap.Builder<String, ItemInfo> byName = ImmutableMap.builder();
 			ImmutableMap.Builder<String, ItemInfo> byEmcName = ImmutableMap.builder();
 			ImmutableMap.Builder<String, ItemInfo> byId = ImmutableMap.builder();
 			ImmutableSet.Builder<String> groups = ImmutableSet.builder();
-			for (int i = 0; i < itemNodes.getLength(); i++) {
-				Element itemElement = (Element) itemNodes.item(i);
+			for (Leaf itemElement : itemElements) {
 				ItemInfo info = parseItem(itemElement, categoriesById);
 
 				byName.put(info.name.toLowerCase(), info);
@@ -153,41 +130,40 @@ public class ItemIndex {
 		}
 	}
 
-	private static CategoryInfo parseCategory(Element element) {
-		String name = element.getAttribute("name");
-		int id = Integer.parseInt(element.getAttribute("id"));
+	private static CategoryInfo parseCategory(Leaf element) {
+		String name = element.attribute("name");
+		int id = Integer.parseInt(element.attribute("id"));
 
-		String iconStr = element.getAttribute("icon");
+		String iconStr = element.attribute("icon");
 		ImageIcon icon = iconStr.isEmpty() ? null : Images.get("items/" + iconStr);
 
 		return new CategoryInfo(id, name, icon);
 	}
 
-	private static ItemInfo parseItem(Element element, Map<Integer, CategoryInfo> categoriesById) {
-		String name = element.getAttribute("name");
+	private static ItemInfo parseItem(Leaf element, Map<Integer, CategoryInfo> categoriesById) {
+		String name = element.attribute("name");
 
-		String value = element.getAttribute("emcNames");
+		String value = element.attribute("emcNames");
 		String emcNames[] = splitValues(value);
 
-		value = element.getAttribute("id");
+		value = element.attribute("id");
 		String ids[] = splitValues(value);
 
-		value = element.getAttribute("image");
+		value = element.attribute("image");
 		String image = value.isEmpty() ? imageFileName(name) : value;
 
-		value = element.getAttribute("stack");
+		value = element.attribute("stack");
 		int stackSize = value.isEmpty() ? DEFAULT_STACK_SIZE : Integer.valueOf(value);
 
-		value = element.getAttribute("group");
+		value = element.attribute("group");
 		String groups[] = splitValues(value);
 
-		value = element.getAttribute("categories");
+		value = element.attribute("categories");
 		String categoriesStr[] = splitValues(value);
 		CategoryInfo[] categories = new CategoryInfo[categoriesStr.length];
 		for (int i = 0; i < categoriesStr.length; i++) {
 			Integer id = Integer.valueOf(categoriesStr[i]);
 			categories[i] = categoriesById.get(id);
-
 		}
 
 		return new ItemInfo(name, emcNames, ids, image, stackSize, groups, categories);
@@ -242,8 +218,13 @@ public class ItemIndex {
 		return null;
 	}
 
+	/**
+	 * Determines if the given item is not defined in the items list.
+	 * @param displayName the item name
+	 * @return true if it's not in the item list, false if it is
+	 */
 	public boolean isUnknownItem(String displayName) {
-		return byName.get(displayName.toLowerCase()) == null;
+		return !byName.containsKey(displayName.toLowerCase());
 	}
 
 	/**
@@ -257,11 +238,15 @@ public class ItemIndex {
 			return item.image;
 		}
 
+		/*
+		 * Display an icon for enchanted items (e.g. "Bow-b0a8").
+		 */
 		int dashPos = displayName.indexOf('-');
 		if (dashPos > 0) {
 			String beforeDash = displayName.substring(0, dashPos).trim();
 			return getImageFileName(beforeDash);
 		}
+
 		return imageFileName(displayName);
 	}
 
@@ -276,9 +261,19 @@ public class ItemIndex {
 	}
 
 	/**
-	 * Gets the display-to-EMCName mappings (only includes the mappings that
-	 * differ from the default).
-	 * @return the mappings
+	 * <p>
+	 * Gets the names that the rupee transaction history page on the EMC website
+	 * uses for each item (for example, Black Terracotta was called "Black
+	 * Stclay" and "Black Hardened Clay" at various times in the past).
+	 * </p>
+	 * <p>
+	 * Items whose names do not differ are not returned by this method (for
+	 * example, both EMC Shopkeeper and the rupee transaction history page use
+	 * the name "Purpur Block" to refer to that item, so this method will not
+	 * include this item in its return value).
+	 * </p>
+	 * @return the item name mappings (key = EMC Shopkeeper display name; value
+	 * = rupee transaction history name(s))
 	 */
 	public Multimap<String, String> getDisplayNameToEmcNamesMapping() {
 		Multimap<String, String> mappings = ArrayListMultimap.create();
