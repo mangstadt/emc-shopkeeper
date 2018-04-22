@@ -56,8 +56,6 @@ public class LogManager {
 	}
 
 	public String getEntireLog() throws IOException {
-		StringBuilder sb = new StringBuilder();
-
 		List<File> files = Arrays.asList(logFile.getParentFile().listFiles(new FileFilter() {
 			@Override
 			public boolean accept(File file) {
@@ -69,14 +67,19 @@ public class LogManager {
 		Collections.sort(files, new Comparator<File>() {
 			@Override
 			public int compare(File one, File two) {
-				return (int) (one.lastModified() - two.lastModified());
+				/*
+				 * Do not cast the difference as an int and return that, since
+				 * it's technically possible that an overflow could occur.
+				 */
+				long diff = one.lastModified() - two.lastModified();
+				return (diff < 0) ? -1 : (diff > 0) ? 1 : 0;
 			}
 		});
 
+		StringBuilder sb = new StringBuilder();
 		for (File file : files) {
 			sb.append(FileUtils.readFileToString(file));
 		}
-
 		return sb.toString();
 	}
 }
