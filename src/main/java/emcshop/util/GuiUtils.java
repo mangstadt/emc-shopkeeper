@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -40,8 +41,8 @@ public final class GuiUtils {
 	private static boolean desktopCreated = false;
 
 	/**
-	 * Opens a webpage in the user's browser.
-	 * @param uri the URI
+	 * Opens a webpage in the user's default browser.
+	 * @param uri the webpage address
 	 * @throws IOException if there's a problem opening the web page
 	 */
 	public static void openWebPage(URI uri) throws IOException {
@@ -53,21 +54,44 @@ public final class GuiUtils {
 	}
 
 	/**
-	 * Determines if the user's computer supports opening webpages.
+	 * Opens a file in the default program for that file type.
+	 * @param file the file to open
+	 * @throws IOException if there's a problem opening the file
+	 */
+	public static void openFile(File file) throws IOException {
+		if (!canOpenFiles()) {
+			return;
+		}
+
+		desktop.open(file);
+	}
+
+	/**
+	 * Determines if the user's JVM supports opening webpages.
 	 * @return true if it can open web pages, false if not
 	 */
 	public static boolean canOpenWebPages() {
-		if (!desktopCreated) {
-			if (Desktop.isDesktopSupported()) {
-				desktop = Desktop.getDesktop();
-				if (desktop != null && !desktop.isSupported(Desktop.Action.BROWSE)) {
-					desktop = null;
-				}
-			}
-			desktopCreated = true;
+		createDesktop();
+		return desktop != null && desktop.isSupported(Desktop.Action.BROWSE);
+	}
+
+	/**
+	 * Determines if the user's JVM supports opening files in their native
+	 * applications.
+	 * @return true if it can open files, false if not
+	 */
+	public static boolean canOpenFiles() {
+		createDesktop();
+		return desktop != null && desktop.isSupported(Desktop.Action.OPEN);
+	}
+
+	private static void createDesktop() {
+		if (desktopCreated) {
+			return;
 		}
 
-		return desktop != null;
+		desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+		desktopCreated = true;
 	}
 
 	/**

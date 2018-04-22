@@ -44,8 +44,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -90,6 +88,7 @@ import emcshop.view.IFirstUpdateView;
 import emcshop.view.IUpdateView;
 import emcshop.view.LoginShower;
 import emcshop.view.UpdateViewImpl;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
@@ -188,7 +187,20 @@ public class MainFrame extends JFrame {
 		.icon(Images.TOOLS)
 		.add();
 		{
-			menu.addMenuItem("Log...")
+			menu.addMenuItem("Open Profile Folder...")
+			.parent(tools)
+			.add(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					try {
+						GuiUtils.openFile(logManager.getFile().getParentFile());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			});
+			
+			menu.addMenuItem("Show Application Log...")
 			.parent(tools)
 			.add(new ActionListener() {
 				@Override
