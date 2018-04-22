@@ -97,7 +97,7 @@ public class Leaf {
 	 * objects. All other types of XML nodes (e.g. comments, text, etc) are
 	 * ignored.
 	 * @param nodeList the node list
-	 * @return the leaf object
+	 * @return the leaf objects
 	 */
 	private List<Leaf> leavesFrom(NodeList nodeList) {
 		List<Leaf> leaves = new ArrayList<Leaf>();
