@@ -16,7 +16,7 @@ import java.util.Map.Entry;
  * @author Michael Angstadt
  * @see "http://wiki.apache.org/db-derby/DerbySQLroutines"
  */
-public class MigrationSprocs {
+public final class MigrationSprocs {
 	//these sprocs may be called multiple times over the course of a database update
 	//however, they only need to be called once
 	static boolean populateItemsTableCalled = false;

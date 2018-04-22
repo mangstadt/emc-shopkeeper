@@ -9,7 +9,7 @@ import javax.swing.UIManager;
 /**
  * Wraps calls to {@link UIDefaults}.
  */
-public class UIDefaultsWrapper {
+public final class UIDefaultsWrapper {
 	private static final UIDefaults defaults = UIManager.getLookAndFeel().getDefaults();
 
 	/**

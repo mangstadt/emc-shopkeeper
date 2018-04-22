@@ -15,7 +15,7 @@ import java.util.jar.JarFile;
  * Contains classpath-related utility methods.
  * @author Michael Angstadt
  */
-public class ClasspathUtils {
+public final class ClasspathUtils {
 	/**
 	 * The same as {@link Class#getResourceAsStream(String)}, except throws a
 	 * {@link FileNotFoundException} when null is returned.

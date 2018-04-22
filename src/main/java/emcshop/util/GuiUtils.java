@@ -29,7 +29,7 @@ import javax.swing.Timer;
  * Contains GUI utility methods.
  * @author Michael Angstadt
  */
-public class GuiUtils {
+public final class GuiUtils {
 	/**
 	 * True if the local operating system is Linux, false if not.
 	 */

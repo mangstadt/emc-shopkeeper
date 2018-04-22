@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 /**
  * Misc Minecraft-related utilities.
  */
-public class MinecraftUtils {
+public final class MinecraftUtils {
 	/**
 	 * Gets the location of the default Minecraft installation.
 	 * @return the Minecraft directory or null if unknown
@@ -29,5 +29,9 @@ public class MinecraftUtils {
 		}
 
 		return null;
+	}
+
+	private MinecraftUtils() {
+		//hide
 	}
 }

@@ -10,10 +10,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import au.com.bytecode.opencsv.CSVWriter;
-
 import com.google.common.collect.ListMultimap;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import emcshop.db.Inventory;
 import emcshop.db.ItemGroup;
 import emcshop.db.Player;
@@ -27,7 +26,7 @@ import emcshop.util.RupeeFormatter;
  * Exports query results to various formats.
  * @author Michael Angstadt
  */
-public class QueryExporter {
+public final class QueryExporter {
 	/**
 	 * Generates a CSV string.
 	 * @param itemGroups the items
@@ -415,5 +414,9 @@ public class QueryExporter {
 				sb.text('.');
 			}
 		}
+	}
+
+	private QueryExporter() {
+		//hide
 	}
 }

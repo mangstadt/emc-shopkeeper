@@ -15,7 +15,7 @@ import emcshop.util.ImageCache;
  * Manages the images of the application.
  * @author Michael Angstadt
  */
-public class Images {
+public final class Images {
 	public static final ImageIcon APP_ICON = get("app-icon.png");
 	public static final ImageIcon ASSIGN = get("assign.png");
 	public static final ImageIcon BACKUP_DATABASE = get("backup-database.png");

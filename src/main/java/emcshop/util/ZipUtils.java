@@ -16,7 +16,7 @@ import org.apache.commons.io.IOUtils;
 /**
  * Contains ZIP file utility methods.
  */
-public class ZipUtils {
+public final class ZipUtils {
 	/**
 	 * Zips a directory.
 	 * @param directory the directory to zip

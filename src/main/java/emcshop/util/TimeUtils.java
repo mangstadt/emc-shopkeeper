@@ -7,9 +7,10 @@ import java.util.Date;
  * Contains time-related utilities.
  * @author Michael Angstadt
  */
-public class TimeUtils {
+public final class TimeUtils {
 	/**
-	 * Splits a length of time up into minutes, seconds, and milliseconds.
+	 * Splits a length of time up into hours, minutes, seconds, and
+	 * milliseconds.
 	 * @param totalMs the total number of milliseconds
 	 * @return the time components, starting with milliseconds at index 0
 	 */

@@ -3,7 +3,7 @@ package emcshop.util;
 /**
  * Determines the local operating system.
  */
-public class OS {
+public final class OS {
 	private static final String os;
 	static {
 		String value = System.getProperty("os.name");
@@ -20,5 +20,9 @@ public class OS {
 
 	public static boolean isLinux() {
 		return os.contains("linux") || os.contains("unix");
+	}
+
+	private OS() {
+		//hide
 	}
 }
