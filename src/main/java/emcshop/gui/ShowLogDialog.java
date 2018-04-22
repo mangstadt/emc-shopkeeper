@@ -4,7 +4,6 @@ import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -12,13 +11,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 
-import net.miginfocom.swing.MigLayout;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
 import emcshop.AppContext;
 import emcshop.LogManager;
 import emcshop.util.GuiUtils;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Displays the contents of the log files.
@@ -40,12 +36,7 @@ public class ShowLogDialog extends JDialog {
 		location.setEditable(false);
 		location.setBackground(getBackground());
 
-		String logText = null;
-		try {
-			logText = logManager.getEntireLog();
-		} catch (IOException e) {
-			logText = "Error getting log:\n" + ExceptionUtils.getStackTrace(e);
-		}
+		String logText = logManager.getEntireLog();
 		JTextArea log = new JTextArea(logText);
 		log.setLineWrap(true);
 		log.setWrapStyleWord(true);

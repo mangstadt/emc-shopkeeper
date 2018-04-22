@@ -16,11 +16,20 @@ import java.util.logging.SimpleFormatter;
 
 import org.apache.commons.io.FileUtils;
 
+/**
+ * Manages the application's debug log.
+ * @author Michael Angstadt
+ */
 public class LogManager {
 	private final Logger global;
 	private Level level;
 	private File logFile;
 
+	/**
+	 * @param level the log level
+	 * @param logFile the path to the log file
+	 * @throws IOException if there's a problem starting the logger
+	 */
 	public LogManager(Level level, File logFile) throws IOException {
 		this.level = level;
 		this.logFile = logFile;
@@ -32,34 +41,64 @@ public class LogManager {
 
 		FileHandler handler = new FileHandler(logFile.getAbsolutePath(), 1000000, 5, true);
 		handler.setFormatter(new SimpleFormatter());
+
+		//only log messages from this app
 		handler.setFilter(new Filter() {
+			private final String appBasePackage = EMCShopkeeper.class.getPackage().getName();
+
 			@Override
 			public boolean isLoggable(LogRecord record) {
-				//only log messages from this app
-				return record.getLoggerName().startsWith(EMCShopkeeper.class.getPackage().getName());
+				return record.getLoggerName().startsWith(appBasePackage);
 			}
 		});
+
 		global.addHandler(handler);
 	}
 
+	/**
+	 * Gets the log level.
+	 * @return the log level
+	 */
 	public Level getLevel() {
 		return level;
 	}
 
+	/**
+	 * Changes the log level.
+	 * @param level the log level
+	 */
 	public void setLevel(Level level) {
 		this.level = level;
 		global.setLevel(level);
 	}
 
+	/**
+	 * Gets the base name of the log file.
+	 * @return the base name of the log file
+	 */
 	public File getFile() {
 		return logFile;
 	}
 
-	public String getEntireLog() throws IOException {
+	/**
+	 * Gets the contents of the entire log.
+	 * @return the contents of the entire log
+	 */
+	public String getEntireLog() {
+		/*
+		 * Java breaks the log up into multiple files when the max file size has
+		 * been reached. Each file name starts with the base file name that we
+		 * passed into the logging API, followed by a dot, followed by a number.
+		 * 
+		 * A lock file exists while the app is running. It is empty. The lock
+		 * file name also starts with the base file name that we passed into the
+		 * logging API, and ends with ".lck".
+		 */
 		List<File> files = Arrays.asList(logFile.getParentFile().listFiles(new FileFilter() {
 			@Override
 			public boolean accept(File file) {
-				return file.getName().startsWith(logFile.getName());
+				String name = file.getName();
+				return name.startsWith(logFile.getName()) && !name.endsWith(".lck");
 			}
 		}));
 
@@ -78,7 +117,11 @@ public class LogManager {
 
 		StringBuilder sb = new StringBuilder();
 		for (File file : files) {
-			sb.append(FileUtils.readFileToString(file));
+			try {
+				sb.append(FileUtils.readFileToString(file));
+			} catch (IOException e) {
+				sb.append("===ERROR: Could not open log file: " + file).append(System.getProperty("line.separator"));
+			}
 		}
 		return sb.toString();
 	}
