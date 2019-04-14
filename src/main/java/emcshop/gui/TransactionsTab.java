@@ -26,8 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-
-import net.miginfocom.swing.MigLayout;
+import javax.swing.SwingUtilities;
 
 import com.google.common.collect.ListMultimap;
 import com.michaelbaranov.microba.calendar.DatePicker;
@@ -47,6 +46,7 @@ import emcshop.gui.lib.GroupPanel;
 import emcshop.util.DateRange;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.RupeeFormatter;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class TransactionsTab extends JPanel implements ExportListener {
@@ -227,29 +227,34 @@ public class TransactionsTab extends JPanel implements ExportListener {
 						});
 					}
 
-					//reset GUI
-					filterPanel.removeAll();
-					filterPanel.validate();
-					tablePanel.removeAll();
-					tablePanel.validate();
+					SwingUtilities.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							//reset GUI
+							filterPanel.removeAll();
+							filterPanel.validate();
+							tablePanel.removeAll();
+							tablePanel.validate();
 
-					playersPanel = null;
-					transactionsTable = null;
-					transactionsTableScrollPane = null;
+							playersPanel = null;
+							transactionsTable = null;
+							transactionsTableScrollPane = null;
 
-					//render filter panel
-					filterPanel.setVisible(true, false, false);
+							//render filter panel
+							filterPanel.setVisible(true, false, false);
 
-					//render table
-					itemsTable = new ItemsTable(itemGroupsList, transactionType, context.get(Settings.class).isShowQuantitiesInStacks());
-					itemsTable.setFillsViewportHeight(true);
-					itemsTableScrollPane = new MyJScrollPane(itemsTable);
-					tablePanel.add(itemsTableScrollPane, "grow, w 100%, h 100%, wrap");
-					tablePanel.validate();
+							//render table
+							itemsTable = new ItemsTable(itemGroupsList, transactionType, context.get(Settings.class).isShowQuantitiesInStacks());
+							itemsTable.setFillsViewportHeight(true);
+							itemsTableScrollPane = new MyJScrollPane(itemsTable);
+							tablePanel.add(itemsTableScrollPane, "grow, w 100%, h 100%, wrap");
+							tablePanel.validate();
 
-					updateNetTotal();
-					updateCustomers();
-				} catch (SQLException e) {
+							updateNetTotal();
+							updateCustomers();
+						}
+					});
+				} catch (Exception e) {
 					throw new RuntimeException(e);
 				} finally {
 					owner.stopProgress();
@@ -267,31 +272,36 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			public void run() {
 				try {
 					//query database
-					Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), transactionType);
+					final Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), transactionType);
 
-					//reset GUI
-					filterPanel.removeAll();
-					filterPanel.validate();
-					tablePanel.removeAll();
-					tablePanel.validate();
+					SwingUtilities.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							//reset GUI
+							filterPanel.removeAll();
+							filterPanel.validate();
+							tablePanel.removeAll();
+							tablePanel.validate();
 
-					itemsTable = null;
-					itemsTableScrollPane = null;
-					transactionsTable = null;
-					transactionsTableScrollPane = null;
+							itemsTable = null;
+							itemsTableScrollPane = null;
+							transactionsTable = null;
+							transactionsTableScrollPane = null;
 
-					//render filter panel
-					filterPanel.setVisible(true, true, true);
+							//render filter panel
+							filterPanel.setVisible(true, true, true);
 
-					//render table
-					playersPanel = new PlayersPanel(playerGroups, transactionType);
-					playersPanel.setShowFirstLastSeen(transactionType != ShopTransactionType.OTHER_SHOPS);
-					tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
-					tablePanel.validate();
+							//render table
+							playersPanel = new PlayersPanel(playerGroups, transactionType);
+							playersPanel.setShowFirstLastSeen(transactionType != ShopTransactionType.OTHER_SHOPS);
+							tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
+							tablePanel.validate();
 
-					updateNetTotal();
-					updateCustomers();
-				} catch (SQLException e) {
+							updateNetTotal();
+							updateCustomers();
+						}
+					});
+				} catch (Exception e) {
 					throw new RuntimeException(e);
 				} finally {
 					owner.stopProgress();
@@ -309,31 +319,36 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			public void run() {
 				try {
 					//query database
-					List<ShopTransactionDb> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), transactionType);
+					final List<ShopTransactionDb> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), transactionType);
 
-					//reset GUI
-					filterPanel.removeAll();
-					filterPanel.validate();
-					tablePanel.removeAll();
-					tablePanel.validate();
+					SwingUtilities.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							//reset GUI
+							filterPanel.removeAll();
+							filterPanel.validate();
+							tablePanel.removeAll();
+							tablePanel.validate();
 
-					itemsTable = null;
-					itemsTableScrollPane = null;
-					playersPanel = null;
+							itemsTable = null;
+							itemsTableScrollPane = null;
+							playersPanel = null;
 
-					//render filter panel
-					filterPanel.setVisible(true, true, false);
+							//render filter panel
+							filterPanel.setVisible(true, true, false);
 
-					//render table
-					transactionsTable = new TransactionsTable(transactions, transactionType);
-					transactionsTable.setFillsViewportHeight(true);
-					transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
-					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
-					tablePanel.validate();
+							//render table
+							transactionsTable = new TransactionsTable(transactions, transactionType);
+							transactionsTable.setFillsViewportHeight(true);
+							transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
+							tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
+							tablePanel.validate();
 
-					updateNetTotal();
-					updateCustomers();
-				} catch (SQLException e) {
+							updateNetTotal();
+							updateCustomers();
+						}
+					});
+				} catch (Exception e) {
 					throw new RuntimeException(e);
 				} finally {
 					owner.stopProgress();

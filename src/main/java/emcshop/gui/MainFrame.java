@@ -36,6 +36,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -512,15 +513,21 @@ public class MainFrame extends JFrame {
 					dao.wipe();
 					context.remove(EmcSession.class);
 					settings.save();
-					clearSessionMenuItem.setEnabled(false);
-					lastUpdateDate.setText("-");
-					updateRupeeBalance();
-					transactionsTab.clear();
-					updatePaymentsCount();
-					paymentsTab.reset();
-					inventoryTab.refresh();
-					bonusFeeTab.refresh();
-					graphsTab.clear();
+
+					SwingUtilities.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							clearSessionMenuItem.setEnabled(false);
+							lastUpdateDate.setText("-");
+							updateRupeeBalance(0);
+							transactionsTab.clear();
+							updatePaymentsCount(0);
+							paymentsTab.reset();
+							inventoryTab.refresh();
+							bonusFeeTab.refresh();
+							graphsTab.clear();
+						}
+					});
 				} catch (Throwable e) {
 					throw new RuntimeException(e);
 				} finally {
@@ -539,14 +546,18 @@ public class MainFrame extends JFrame {
 			throw new RuntimeException(e);
 		}
 
-		StringBuilder sb = new StringBuilder("Payments");
+		updatePaymentsCount(count);
+	}
+
+	public void updatePaymentsCount(int count) {
+		String title = "Payments";
 		if (count > 0) {
-			sb.append(" (").append(count).append(")");
+			title += " (" + count + ")";
 		}
 
 		for (int i = 0; i < tabs.getTabCount(); i++) {
 			if (paymentsTab == tabs.getComponentAt(i)) {
-				tabs.setTitleAt(i, sb.toString());
+				tabs.setTitleAt(i, title);
 				break;
 			}
 		}
@@ -692,25 +703,30 @@ public class MainFrame extends JFrame {
 						return;
 					}
 
-					updateAvailablePanel.add(new JLabel("<html><center><b>New Version Available!</b></center></html>"), "gapleft 10, align center, wrap");
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							updateAvailablePanel.add(new JLabel("<html><center><b>New Version Available!</b></center></html>"), "gapleft 10, align center, wrap");
 
-					if (GuiUtils.canOpenWebPages()) {
-						JButton downloadUpdate = new JButton("Download");
-						downloadUpdate.setIcon(Images.DOWNLOAD);
-						downloadUpdate.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent event) {
-								try {
-									GuiUtils.openWebPage(URI.create("https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar"));
-								} catch (IOException e) {
-									throw new RuntimeException("Error opening webpage.", e);
-								}
+							if (GuiUtils.canOpenWebPages()) {
+								JButton downloadUpdate = new JButton("Download");
+								downloadUpdate.setIcon(Images.DOWNLOAD);
+								downloadUpdate.addActionListener(new ActionListener() {
+									@Override
+									public void actionPerformed(ActionEvent event) {
+										try {
+											GuiUtils.openWebPage(URI.create("https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar"));
+										} catch (IOException e) {
+											throw new RuntimeException("Error opening webpage.", e);
+										}
+									}
+								});
+								updateAvailablePanel.add(downloadUpdate, "gapleft 10, align center");
 							}
-						});
-						updateAvailablePanel.add(downloadUpdate, "gapleft 10, align center");
-					}
 
-					validate();
+							validate();
+						}
+					});
 				} catch (Throwable e) {
 					logger.log(Level.WARNING, "Problem checking for updates.", e);
 				}

@@ -31,6 +31,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -346,9 +347,14 @@ public class ChartsTab extends JPanel {
 					profitsGroupBy = (GroupBy) groupBy.getSelectedItem();
 					profits = (profitsGroupBy == GroupBy.DAY) ? dao.getProfitsByDay(from, to) : dao.getProfitsByMonth(from, to);
 
-					updateDateRangeLabel(from, to);
-					refreshChart();
-				} catch (SQLException e) {
+					SwingUtilities.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							updateDateRangeLabel(from, to);
+							refreshChart();
+						}
+					});
+				} catch (Exception e) {
 					throw new RuntimeException(e);
 				} finally {
 					owner.stopProgress();
