@@ -1,0 +1,2372 @@
+[
+  {
+    "sha": "b1a6b09a21aa35f99c5d596f0f7d6a3a40e78652",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpiMWE2YjA5YTIxYWEzNWY5OWM1ZDU5NmYwZjdkNmEzYTQwZTc4NjUy",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2018-05-15T15:52:59Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2018-05-15T15:52:59Z"
+      },
+      "message": "Release of 0.5.14.",
+      "tree": {
+        "sha": "af7349b2e0b27ef47ac0866213fb2af185c2b23a",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/af7349b2e0b27ef47ac0866213fb2af185c2b23a"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/b1a6b09a21aa35f99c5d596f0f7d6a3a40e78652",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/b1a6b09a21aa35f99c5d596f0f7d6a3a40e78652",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/b1a6b09a21aa35f99c5d596f0f7d6a3a40e78652",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/b1a6b09a21aa35f99c5d596f0f7d6a3a40e78652/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "7300e519ea0b42bd831e9fe78ebf9b9ba072202c",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/7300e519ea0b42bd831e9fe78ebf9b9ba072202c",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/7300e519ea0b42bd831e9fe78ebf9b9ba072202c"
+      }
+    ]
+  },
+  {
+    "sha": "5d763f98b0d706fd593fe1dddeb0306f93e41ed6",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTo1ZDc2M2Y5OGIwZDcwNmZkNTkzZmUxZGRkZWIwMzA2ZjkzZTQxZWQ2",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2017-08-12T18:40:58Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2017-08-12T18:40:58Z"
+      },
+      "message": "Release of 0.5.13.",
+      "tree": {
+        "sha": "30f23da5d7a3c0c37c78b1d5b602ed63125460aa",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/30f23da5d7a3c0c37c78b1d5b602ed63125460aa"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/5d763f98b0d706fd593fe1dddeb0306f93e41ed6",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/5d763f98b0d706fd593fe1dddeb0306f93e41ed6",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/5d763f98b0d706fd593fe1dddeb0306f93e41ed6",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/5d763f98b0d706fd593fe1dddeb0306f93e41ed6/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "18caee78099556bd6e7ad70e23b77bb1be991cc8",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/18caee78099556bd6e7ad70e23b77bb1be991cc8",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/18caee78099556bd6e7ad70e23b77bb1be991cc8"
+      }
+    ]
+  },
+  {
+    "sha": "7dff0d8ede312f5ecdc2cf6ab8110be84ea2858a",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTo3ZGZmMGQ4ZWRlMzEyZjVlY2RjMmNmNmFiODExMGJlODRlYTI4NThh",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2017-06-24T22:15:30Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2017-06-24T22:15:30Z"
+      },
+      "message": "Release of version 0.5.12.",
+      "tree": {
+        "sha": "f6070d5bc4c625bfc5161cc0b6866890fa16f611",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/f6070d5bc4c625bfc5161cc0b6866890fa16f611"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/7dff0d8ede312f5ecdc2cf6ab8110be84ea2858a",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/7dff0d8ede312f5ecdc2cf6ab8110be84ea2858a",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/7dff0d8ede312f5ecdc2cf6ab8110be84ea2858a",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/7dff0d8ede312f5ecdc2cf6ab8110be84ea2858a/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "366a2c90849ff8dbce4a7890720ee728e025f5c1",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/366a2c90849ff8dbce4a7890720ee728e025f5c1",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/366a2c90849ff8dbce4a7890720ee728e025f5c1"
+      }
+    ]
+  },
+  {
+    "sha": "2b0bbf98316fe192bcd159ae0a51a2bb078ec1ce",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NToyYjBiYmY5ODMxNmZlMTkyYmNkMTU5YWUwYTUxYTJiYjA3OGVjMWNl",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2017-06-17T19:49:36Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2017-06-17T19:49:36Z"
+      },
+      "message": "Release of version 0.5.11.",
+      "tree": {
+        "sha": "aaa4016b2960446750b9c58d2be65284c9da7c6d",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/aaa4016b2960446750b9c58d2be65284c9da7c6d"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/2b0bbf98316fe192bcd159ae0a51a2bb078ec1ce",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/2b0bbf98316fe192bcd159ae0a51a2bb078ec1ce",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/2b0bbf98316fe192bcd159ae0a51a2bb078ec1ce",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/2b0bbf98316fe192bcd159ae0a51a2bb078ec1ce/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "ab7859bb6b2b39380bd07de131a44e3c7ea18d1f",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/ab7859bb6b2b39380bd07de131a44e3c7ea18d1f",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/ab7859bb6b2b39380bd07de131a44e3c7ea18d1f"
+      }
+    ]
+  },
+  {
+    "sha": "3c85538d27e790c0eb8305ff8f4328316cd7cbd5",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTozYzg1NTM4ZDI3ZTc5MGMwZWI4MzA1ZmY4ZjQzMjgzMTZjZDdjYmQ1",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-12-31T22:34:14Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-12-31T22:34:14Z"
+      },
+      "message": "Release of version 0.5.10.",
+      "tree": {
+        "sha": "7acb1478264b735b9cc2685db39d48880a77452a",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/7acb1478264b735b9cc2685db39d48880a77452a"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/3c85538d27e790c0eb8305ff8f4328316cd7cbd5",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/3c85538d27e790c0eb8305ff8f4328316cd7cbd5",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/3c85538d27e790c0eb8305ff8f4328316cd7cbd5",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/3c85538d27e790c0eb8305ff8f4328316cd7cbd5/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "f534c59b25dfdf717fee638bb83d2dfa2e2ba8da",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/f534c59b25dfdf717fee638bb83d2dfa2e2ba8da",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/f534c59b25dfdf717fee638bb83d2dfa2e2ba8da"
+      }
+    ]
+  },
+  {
+    "sha": "c7208d505d3e43f36e90aec25bb58d2dcdd347f8",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpjNzIwOGQ1MDVkM2U0M2YzNmU5MGFlYzI1YmI1OGQyZGNkZDM0N2Y4",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-10-30T21:45:33Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-10-30T21:45:33Z"
+      },
+      "message": "Release of 0.5.9.",
+      "tree": {
+        "sha": "a9211fc6dc6ee0ede6910a01c673737b1672c462",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/a9211fc6dc6ee0ede6910a01c673737b1672c462"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/c7208d505d3e43f36e90aec25bb58d2dcdd347f8",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/c7208d505d3e43f36e90aec25bb58d2dcdd347f8",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/c7208d505d3e43f36e90aec25bb58d2dcdd347f8",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/c7208d505d3e43f36e90aec25bb58d2dcdd347f8/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "ebdf3f30c1d774a02c641993bc1eacfc7ebf6f1f",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/ebdf3f30c1d774a02c641993bc1eacfc7ebf6f1f",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/ebdf3f30c1d774a02c641993bc1eacfc7ebf6f1f"
+      }
+    ]
+  },
+  {
+    "sha": "095b5bab20a8363256df3e338f93d4560f9753f7",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTowOTViNWJhYjIwYTgzNjMyNTZkZjNlMzM4ZjkzZDQ1NjBmOTc1M2Y3",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-08-20T23:09:56Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-08-20T23:09:56Z"
+      },
+      "message": "Release of version 0.5.8.",
+      "tree": {
+        "sha": "1c613587dd2c5b53ccff603c13686c31863aeebd",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/1c613587dd2c5b53ccff603c13686c31863aeebd"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/095b5bab20a8363256df3e338f93d4560f9753f7",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/095b5bab20a8363256df3e338f93d4560f9753f7",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/095b5bab20a8363256df3e338f93d4560f9753f7",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/095b5bab20a8363256df3e338f93d4560f9753f7/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "0a3edb89c843d9f3921b06210f6fff81c33bd78d",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/0a3edb89c843d9f3921b06210f6fff81c33bd78d",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/0a3edb89c843d9f3921b06210f6fff81c33bd78d"
+      }
+    ]
+  },
+  {
+    "sha": "3937a3163eb267193dbc412ec10860313231ac1c",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTozOTM3YTMxNjNlYjI2NzE5M2RiYzQxMmVjMTA4NjAzMTMyMzFhYzFj",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-06-11T19:39:06Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-06-11T19:39:06Z"
+      },
+      "message": "Release of 0.5.7.",
+      "tree": {
+        "sha": "b7c78ec3b04f6724727c62a23e6bec445e193b62",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/b7c78ec3b04f6724727c62a23e6bec445e193b62"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/3937a3163eb267193dbc412ec10860313231ac1c",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/3937a3163eb267193dbc412ec10860313231ac1c",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/3937a3163eb267193dbc412ec10860313231ac1c",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/3937a3163eb267193dbc412ec10860313231ac1c/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "1ba9480bb1898781936de8c1af0513eb9d7fbdba",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/1ba9480bb1898781936de8c1af0513eb9d7fbdba",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/1ba9480bb1898781936de8c1af0513eb9d7fbdba"
+      }
+    ]
+  },
+  {
+    "sha": "526542483a0a4de7c440c24842d983b632589cae",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTo1MjY1NDI0ODNhMGE0ZGU3YzQ0MGMyNDg0MmQ5ODNiNjMyNTg5Y2Fl",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-04-19T13:43:25Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2016-04-19T13:43:25Z"
+      },
+      "message": "Release of version 0.5.6.",
+      "tree": {
+        "sha": "a2acc89f47a3bf9615c8b7141751724e5c8c971c",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/a2acc89f47a3bf9615c8b7141751724e5c8c971c"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/526542483a0a4de7c440c24842d983b632589cae",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/526542483a0a4de7c440c24842d983b632589cae",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/526542483a0a4de7c440c24842d983b632589cae",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/526542483a0a4de7c440c24842d983b632589cae/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "5df474f1f944ec318ca63c649ebe9c9560490306",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/5df474f1f944ec318ca63c649ebe9c9560490306",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/5df474f1f944ec318ca63c649ebe9c9560490306"
+      }
+    ]
+  },
+  {
+    "sha": "081e093da109884005dd497ac558eeefe719a113",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTowODFlMDkzZGExMDk4ODQwMDVkZDQ5N2FjNTU4ZWVlZmU3MTlhMTEz",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-09-28T00:58:58Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-09-28T00:58:58Z"
+      },
+      "message": "Release of version 0.5.5.",
+      "tree": {
+        "sha": "35d377d091c0f6fc3e21200ce214271c4e31ab26",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/35d377d091c0f6fc3e21200ce214271c4e31ab26"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/081e093da109884005dd497ac558eeefe719a113",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/081e093da109884005dd497ac558eeefe719a113",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/081e093da109884005dd497ac558eeefe719a113",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/081e093da109884005dd497ac558eeefe719a113/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "8cb9815ff7be95a6ede63a8ae293e277007ca21e",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/8cb9815ff7be95a6ede63a8ae293e277007ca21e",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/8cb9815ff7be95a6ede63a8ae293e277007ca21e"
+      }
+    ]
+  },
+  {
+    "sha": "3afb4af9a4dd0bdff0a5de2b5d740bb1a1cf1b79",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTozYWZiNGFmOWE0ZGQwYmRmZjBhNWRlMmI1ZDc0MGJiMWExY2YxYjc5",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-07-19T19:13:58Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-07-19T19:13:58Z"
+      },
+      "message": "Release of version 0.5.4.",
+      "tree": {
+        "sha": "561c85362386d027e31a346d0cc7b08da38020ec",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/561c85362386d027e31a346d0cc7b08da38020ec"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/3afb4af9a4dd0bdff0a5de2b5d740bb1a1cf1b79",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/3afb4af9a4dd0bdff0a5de2b5d740bb1a1cf1b79",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/3afb4af9a4dd0bdff0a5de2b5d740bb1a1cf1b79",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/3afb4af9a4dd0bdff0a5de2b5d740bb1a1cf1b79/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "d289f254aa6785c98de165f6e1e29aa75ae19e9c",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/d289f254aa6785c98de165f6e1e29aa75ae19e9c",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/d289f254aa6785c98de165f6e1e29aa75ae19e9c"
+      }
+    ]
+  },
+  {
+    "sha": "c3e033af5246d01ae2f40a5d607c68d8cf20c2f4",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpjM2UwMzNhZjUyNDZkMDFhZTJmNDBhNWQ2MDdjNjhkOGNmMjBjMmY0",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-06-28T19:42:47Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-06-28T19:42:47Z"
+      },
+      "message": "Release of version 0.5.3.",
+      "tree": {
+        "sha": "d91fb0a670bb8ad28f5108638e054c68853aa5a4",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/d91fb0a670bb8ad28f5108638e054c68853aa5a4"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/c3e033af5246d01ae2f40a5d607c68d8cf20c2f4",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/c3e033af5246d01ae2f40a5d607c68d8cf20c2f4",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/c3e033af5246d01ae2f40a5d607c68d8cf20c2f4",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/c3e033af5246d01ae2f40a5d607c68d8cf20c2f4/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "117f5dd9006d84c53003d37ffa2c69e01e682d2a",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/117f5dd9006d84c53003d37ffa2c69e01e682d2a",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/117f5dd9006d84c53003d37ffa2c69e01e682d2a"
+      }
+    ]
+  },
+  {
+    "sha": "850298ba84360205e0d6cfec18cf94d17bb6d4fb",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTo4NTAyOThiYTg0MzYwMjA1ZTBkNmNmZWMxOGNmOTRkMTdiYjZkNGZi",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-06-13T17:51:58Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-06-13T17:51:58Z"
+      },
+      "message": "Release of version 0.5.2.",
+      "tree": {
+        "sha": "e45c33fb7b46c8c9e3f79483e22e8bb9e650438f",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/e45c33fb7b46c8c9e3f79483e22e8bb9e650438f"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/850298ba84360205e0d6cfec18cf94d17bb6d4fb",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/850298ba84360205e0d6cfec18cf94d17bb6d4fb",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/850298ba84360205e0d6cfec18cf94d17bb6d4fb",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/850298ba84360205e0d6cfec18cf94d17bb6d4fb/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "20b8e6af5f7c52ab01fb303e7a869e318be630d4",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/20b8e6af5f7c52ab01fb303e7a869e318be630d4",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/20b8e6af5f7c52ab01fb303e7a869e318be630d4"
+      }
+    ]
+  },
+  {
+    "sha": "3140336074a604cdce70bc1a88fd2baea8b9863b",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTozMTQwMzM2MDc0YTYwNGNkY2U3MGJjMWE4OGZkMmJhZWE4Yjk4NjNi",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-05-12T14:06:40Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-05-12T14:06:40Z"
+      },
+      "message": "Release of version 0.5.1.",
+      "tree": {
+        "sha": "caef5bfffef50a6c7b5b4a2b7143dee061c6ce01",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/caef5bfffef50a6c7b5b4a2b7143dee061c6ce01"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/3140336074a604cdce70bc1a88fd2baea8b9863b",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/3140336074a604cdce70bc1a88fd2baea8b9863b",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/3140336074a604cdce70bc1a88fd2baea8b9863b",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/3140336074a604cdce70bc1a88fd2baea8b9863b/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "ab25f6b349a7bb7380149f10555fc5f6066ba7d6",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/ab25f6b349a7bb7380149f10555fc5f6066ba7d6",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/ab25f6b349a7bb7380149f10555fc5f6066ba7d6"
+      }
+    ]
+  },
+  {
+    "sha": "8341213ba8958193e52301f4dc5ea2b7076b8d6d",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTo4MzQxMjEzYmE4OTU4MTkzZTUyMzAxZjRkYzVlYTJiNzA3NmI4ZDZk",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-05-09T23:22:26Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-05-09T23:22:26Z"
+      },
+      "message": "Release of version 0.5.0.",
+      "tree": {
+        "sha": "1180659e84ddd7459cb2b5fde8a8e935d4dfad0c",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/1180659e84ddd7459cb2b5fde8a8e935d4dfad0c"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/8341213ba8958193e52301f4dc5ea2b7076b8d6d",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/8341213ba8958193e52301f4dc5ea2b7076b8d6d",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/8341213ba8958193e52301f4dc5ea2b7076b8d6d",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/8341213ba8958193e52301f4dc5ea2b7076b8d6d/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "78fb3f8c0451b4a971efd5c3a77597e7b8631885",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/78fb3f8c0451b4a971efd5c3a77597e7b8631885",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/78fb3f8c0451b4a971efd5c3a77597e7b8631885"
+      }
+    ]
+  },
+  {
+    "sha": "d48f4cfdada0459fff6bdfb0f21c608ce77ce93d",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpkNDhmNGNmZGFkYTA0NTlmZmY2YmRmYjBmMjFjNjA4Y2U3N2NlOTNk",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-04-26T01:08:49Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-04-26T01:08:49Z"
+      },
+      "message": "Release of version 0.4.26.",
+      "tree": {
+        "sha": "6cf86dd0f45580c4faeafcae81cfd9e8c1e1d111",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/6cf86dd0f45580c4faeafcae81cfd9e8c1e1d111"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/d48f4cfdada0459fff6bdfb0f21c608ce77ce93d",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/d48f4cfdada0459fff6bdfb0f21c608ce77ce93d",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/d48f4cfdada0459fff6bdfb0f21c608ce77ce93d",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/d48f4cfdada0459fff6bdfb0f21c608ce77ce93d/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "ebd1ac2436ba12287d763ffbc6499581c32b7604",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/ebd1ac2436ba12287d763ffbc6499581c32b7604",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/ebd1ac2436ba12287d763ffbc6499581c32b7604"
+      }
+    ]
+  },
+  {
+    "sha": "1bc32cfa45eb9a93f3ef0865ffaca72bc1873491",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NToxYmMzMmNmYTQ1ZWI5YTkzZjNlZjA4NjVmZmFjYTcyYmMxODczNDkx",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-04-19T20:33:07Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-04-19T20:33:07Z"
+      },
+      "message": "Release of version 0.4.25.",
+      "tree": {
+        "sha": "20cde737cb2f1cbc7049650734868e83053c7628",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/20cde737cb2f1cbc7049650734868e83053c7628"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/1bc32cfa45eb9a93f3ef0865ffaca72bc1873491",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/1bc32cfa45eb9a93f3ef0865ffaca72bc1873491",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/1bc32cfa45eb9a93f3ef0865ffaca72bc1873491",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/1bc32cfa45eb9a93f3ef0865ffaca72bc1873491/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "8788ec3280f6238270cdb62fdb2e9d671717e996",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/8788ec3280f6238270cdb62fdb2e9d671717e996",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/8788ec3280f6238270cdb62fdb2e9d671717e996"
+      }
+    ]
+  },
+  {
+    "sha": "b913598c6ec1d7ff01ed0cde7277bdca926dc3f6",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpiOTEzNTk4YzZlYzFkN2ZmMDFlZDBjZGU3Mjc3YmRjYTkyNmRjM2Y2",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-01-31T22:15:17Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-01-31T22:15:17Z"
+      },
+      "message": "Release of version 0.4.24.  Also regenerated the certificate.",
+      "tree": {
+        "sha": "f8c83e30ea30f239c9dd0d37090372d1dc4f306e",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/f8c83e30ea30f239c9dd0d37090372d1dc4f306e"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/b913598c6ec1d7ff01ed0cde7277bdca926dc3f6",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/b913598c6ec1d7ff01ed0cde7277bdca926dc3f6",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/b913598c6ec1d7ff01ed0cde7277bdca926dc3f6",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/b913598c6ec1d7ff01ed0cde7277bdca926dc3f6/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "286c02e6392d516a294fcf1597fc41a447a986b4",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/286c02e6392d516a294fcf1597fc41a447a986b4",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/286c02e6392d516a294fcf1597fc41a447a986b4"
+      }
+    ]
+  },
+  {
+    "sha": "7b1ae01baf4c9503f134b8bb3c179a988f5a87e0",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTo3YjFhZTAxYmFmNGM5NTAzZjEzNGI4YmIzYzE3OWE5ODhmNWE4N2Uw",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-01-12T02:33:30Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2015-01-12T02:33:30Z"
+      },
+      "message": "Release of version 0.4.23.",
+      "tree": {
+        "sha": "89360564ea1dcb72b77f6436d237490de026de79",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/89360564ea1dcb72b77f6436d237490de026de79"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/7b1ae01baf4c9503f134b8bb3c179a988f5a87e0",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/7b1ae01baf4c9503f134b8bb3c179a988f5a87e0",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/7b1ae01baf4c9503f134b8bb3c179a988f5a87e0",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/7b1ae01baf4c9503f134b8bb3c179a988f5a87e0/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "0e4096c89a1a4e92638f89ee8624e881dd7ff4b1",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/0e4096c89a1a4e92638f89ee8624e881dd7ff4b1",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/0e4096c89a1a4e92638f89ee8624e881dd7ff4b1"
+      }
+    ]
+  },
+  {
+    "sha": "0ef4421d8a0e0ae4a06b2b23e71e9a6b1b2b0eab",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTowZWY0NDIxZDhhMGUwYWU0YTA2YjJiMjNlNzFlOWE2YjFiMmIwZWFi",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-08-17T01:53:58Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-08-17T01:53:58Z"
+      },
+      "message": "Release of 0.4.22.",
+      "tree": {
+        "sha": "6f9f6569cfa37027ea672363755a9b362d2ac129",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/6f9f6569cfa37027ea672363755a9b362d2ac129"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/0ef4421d8a0e0ae4a06b2b23e71e9a6b1b2b0eab",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/0ef4421d8a0e0ae4a06b2b23e71e9a6b1b2b0eab",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/0ef4421d8a0e0ae4a06b2b23e71e9a6b1b2b0eab",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/0ef4421d8a0e0ae4a06b2b23e71e9a6b1b2b0eab/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "988b91cf660b1bf77394a51d03c5b6093bf638ca",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/988b91cf660b1bf77394a51d03c5b6093bf638ca",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/988b91cf660b1bf77394a51d03c5b6093bf638ca"
+      }
+    ]
+  },
+  {
+    "sha": "36cbf7d077638645e74a9133d4468e97592d59f2",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTozNmNiZjdkMDc3NjM4NjQ1ZTc0YTkxMzNkNDQ2OGU5NzU5MmQ1OWYy",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-08-09T18:23:16Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-08-09T18:23:16Z"
+      },
+      "message": "Release of version 0.4.21.",
+      "tree": {
+        "sha": "281a1c70ff870630d32ecae0a45d66bd330645de",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/281a1c70ff870630d32ecae0a45d66bd330645de"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/36cbf7d077638645e74a9133d4468e97592d59f2",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/36cbf7d077638645e74a9133d4468e97592d59f2",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/36cbf7d077638645e74a9133d4468e97592d59f2",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/36cbf7d077638645e74a9133d4468e97592d59f2/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "411b685150a8b0c6df8e77e8884056b08d62ac59",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/411b685150a8b0c6df8e77e8884056b08d62ac59",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/411b685150a8b0c6df8e77e8884056b08d62ac59"
+      }
+    ]
+  },
+  {
+    "sha": "b6a5258041c9efab7703cd14306d51045563cb90",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpiNmE1MjU4MDQxYzllZmFiNzcwM2NkMTQzMDZkNTEwNDU1NjNjYjkw",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-07-11T00:45:54Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-07-11T00:45:54Z"
+      },
+      "message": "Release of version 0.4.20.",
+      "tree": {
+        "sha": "1034d184622947acca6ce0d814340e9f44afc901",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/1034d184622947acca6ce0d814340e9f44afc901"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/b6a5258041c9efab7703cd14306d51045563cb90",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/b6a5258041c9efab7703cd14306d51045563cb90",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/b6a5258041c9efab7703cd14306d51045563cb90",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/b6a5258041c9efab7703cd14306d51045563cb90/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "b97d9b74f6c1593c0699e39a22aeccfee572e099",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/b97d9b74f6c1593c0699e39a22aeccfee572e099",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/b97d9b74f6c1593c0699e39a22aeccfee572e099"
+      }
+    ]
+  },
+  {
+    "sha": "6a5b66170ff180af133dea7354d80df43012a7ee",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTo2YTViNjYxNzBmZjE4MGFmMTMzZGVhNzM1NGQ4MGRmNDMwMTJhN2Vl",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-06-19T00:52:10Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-06-19T00:52:10Z"
+      },
+      "message": "Release of version 0.4.19.",
+      "tree": {
+        "sha": "1c96b434e4d7eb796552e1b9951369bf0dfd81d1",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/1c96b434e4d7eb796552e1b9951369bf0dfd81d1"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/6a5b66170ff180af133dea7354d80df43012a7ee",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/6a5b66170ff180af133dea7354d80df43012a7ee",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/6a5b66170ff180af133dea7354d80df43012a7ee",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/6a5b66170ff180af133dea7354d80df43012a7ee/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "96f37183a8913c5c833f1089a8623452928affad",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/96f37183a8913c5c833f1089a8623452928affad",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/96f37183a8913c5c833f1089a8623452928affad"
+      }
+    ]
+  },
+  {
+    "sha": "ca8124363f999b8dbf600ce8f0ed1bc7895200e7",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpjYTgxMjQzNjNmOTk5YjhkYmY2MDBjZThmMGVkMWJjNzg5NTIwMGU3",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-06-15T18:01:11Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-06-15T18:01:11Z"
+      },
+      "message": "Release of version 0.4.18.",
+      "tree": {
+        "sha": "841fa23c5e207250ffa6a19f3d4d19686f1be8cc",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/841fa23c5e207250ffa6a19f3d4d19686f1be8cc"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/ca8124363f999b8dbf600ce8f0ed1bc7895200e7",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/ca8124363f999b8dbf600ce8f0ed1bc7895200e7",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/ca8124363f999b8dbf600ce8f0ed1bc7895200e7",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/ca8124363f999b8dbf600ce8f0ed1bc7895200e7/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "c40e7ce59c6ceabaac26bcdff2182b3612bd5450",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/c40e7ce59c6ceabaac26bcdff2182b3612bd5450",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/c40e7ce59c6ceabaac26bcdff2182b3612bd5450"
+      }
+    ]
+  },
+  {
+    "sha": "dcd482c2f6af132641cbe04b5968a29091d305f8",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpkY2Q0ODJjMmY2YWYxMzI2NDFjYmUwNGI1OTY4YTI5MDkxZDMwNWY4",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-06-08T22:27:29Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-06-08T22:27:29Z"
+      },
+      "message": "Release of version 0.4.17.",
+      "tree": {
+        "sha": "8ab1ad31c7378e83d161acb86929f76d7fb7e7d8",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/8ab1ad31c7378e83d161acb86929f76d7fb7e7d8"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/dcd482c2f6af132641cbe04b5968a29091d305f8",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/dcd482c2f6af132641cbe04b5968a29091d305f8",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/dcd482c2f6af132641cbe04b5968a29091d305f8",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/dcd482c2f6af132641cbe04b5968a29091d305f8/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "73ce86c456c96a9e049839f857f435164503cb38",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/73ce86c456c96a9e049839f857f435164503cb38",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/73ce86c456c96a9e049839f857f435164503cb38"
+      }
+    ]
+  },
+  {
+    "sha": "74481a905ae6bca4f25864f0d4c997fa9cf4a69e",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTo3NDQ4MWE5MDVhZTZiY2E0ZjI1ODY0ZjBkNGM5OTdmYTljZjRhNjll",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-04-22T15:20:03Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-04-22T15:20:03Z"
+      },
+      "message": "Release of version 0.4.16.",
+      "tree": {
+        "sha": "6ba3d7ecd1ccef104bed9eea819bb0b4f3828a54",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/6ba3d7ecd1ccef104bed9eea819bb0b4f3828a54"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/74481a905ae6bca4f25864f0d4c997fa9cf4a69e",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/74481a905ae6bca4f25864f0d4c997fa9cf4a69e",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/74481a905ae6bca4f25864f0d4c997fa9cf4a69e",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/74481a905ae6bca4f25864f0d4c997fa9cf4a69e/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "690928a8414d9049609ff8fff9f6d8754eabe6d3",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/690928a8414d9049609ff8fff9f6d8754eabe6d3",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/690928a8414d9049609ff8fff9f6d8754eabe6d3"
+      }
+    ]
+  },
+  {
+    "sha": "48764e0f82fa236202d80b752beddaf1b50678e8",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTo0ODc2NGUwZjgyZmEyMzYyMDJkODBiNzUyYmVkZGFmMWI1MDY3OGU4",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-04-19T19:28:43Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-04-19T19:28:43Z"
+      },
+      "message": "Release of version 0.4.15.",
+      "tree": {
+        "sha": "c5e92e20d1e182bda89e007a73fa7015aa30ceda",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/c5e92e20d1e182bda89e007a73fa7015aa30ceda"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/48764e0f82fa236202d80b752beddaf1b50678e8",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/48764e0f82fa236202d80b752beddaf1b50678e8",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/48764e0f82fa236202d80b752beddaf1b50678e8",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/48764e0f82fa236202d80b752beddaf1b50678e8/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "fc0d56e58dd223996dbe3c21e9fa54822157127b",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/fc0d56e58dd223996dbe3c21e9fa54822157127b",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/fc0d56e58dd223996dbe3c21e9fa54822157127b"
+      }
+    ]
+  },
+  {
+    "sha": "a699b0d2298610d2162af876fdae281168805669",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTphNjk5YjBkMjI5ODYxMGQyMTYyYWY4NzZmZGFlMjgxMTY4ODA1NjY5",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-03-30T22:29:04Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-03-30T22:29:04Z"
+      },
+      "message": "Release of version 0.4.14.",
+      "tree": {
+        "sha": "df6fa243c3dd132e7776af0a5be8fcaa2f4339f0",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/df6fa243c3dd132e7776af0a5be8fcaa2f4339f0"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/a699b0d2298610d2162af876fdae281168805669",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/a699b0d2298610d2162af876fdae281168805669",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/a699b0d2298610d2162af876fdae281168805669",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/a699b0d2298610d2162af876fdae281168805669/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "7c94e9c7d176ae96e1d7a9c6feddb097e8ebcdcd",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/7c94e9c7d176ae96e1d7a9c6feddb097e8ebcdcd",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/7c94e9c7d176ae96e1d7a9c6feddb097e8ebcdcd"
+      }
+    ]
+  },
+  {
+    "sha": "b32d8fa9c673b1398b1a5e40ae9fa2927f7fdc65",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpiMzJkOGZhOWM2NzNiMTM5OGIxYTVlNDBhZTlmYTI5MjdmN2ZkYzY1",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-02-17T21:11:45Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-02-17T21:11:45Z"
+      },
+      "message": "Release of version 0.4.13.",
+      "tree": {
+        "sha": "09dafe3c13b83e63b771ac152b3e21cbc329a4d9",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/09dafe3c13b83e63b771ac152b3e21cbc329a4d9"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/b32d8fa9c673b1398b1a5e40ae9fa2927f7fdc65",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/b32d8fa9c673b1398b1a5e40ae9fa2927f7fdc65",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/b32d8fa9c673b1398b1a5e40ae9fa2927f7fdc65",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/b32d8fa9c673b1398b1a5e40ae9fa2927f7fdc65/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "dbc19c550d33929036a5a842a09bc5a81f0caf58",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/dbc19c550d33929036a5a842a09bc5a81f0caf58",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/dbc19c550d33929036a5a842a09bc5a81f0caf58"
+      }
+    ]
+  },
+  {
+    "sha": "df15bd5a482c90eefb84086c7d1c2e235232b529",
+    "node_id": "MDY6Q29tbWl0ODA2NTI3NTpkZjE1YmQ1YTQ4MmM5MGVlZmI4NDA4NmM3ZDFjMmUyMzUyMzJiNTI5",
+    "commit": {
+      "author": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-02-06T20:12:38Z"
+      },
+      "committer": {
+        "name": "Mike Angstadt",
+        "email": "mike.angstadt@gmail.com",
+        "date": "2014-02-06T20:12:38Z"
+      },
+      "message": "Release of version 0.4.12.",
+      "tree": {
+        "sha": "a1e30d0542862dca28642f806e1ec5f62b757bcd",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/trees/a1e30d0542862dca28642f806e1ec5f62b757bcd"
+      },
+      "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/git/commits/df15bd5a482c90eefb84086c7d1c2e235232b529",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null
+      }
+    },
+    "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/df15bd5a482c90eefb84086c7d1c2e235232b529",
+    "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/df15bd5a482c90eefb84086c7d1c2e235232b529",
+    "comments_url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/df15bd5a482c90eefb84086c7d1c2e235232b529/comments",
+    "author": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "mangstadt",
+      "id": 700174,
+      "node_id": "MDQ6VXNlcjcwMDE3NA==",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/700174?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mangstadt",
+      "html_url": "https://github.com/mangstadt",
+      "followers_url": "https://api.github.com/users/mangstadt/followers",
+      "following_url": "https://api.github.com/users/mangstadt/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mangstadt/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mangstadt/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mangstadt/subscriptions",
+      "organizations_url": "https://api.github.com/users/mangstadt/orgs",
+      "repos_url": "https://api.github.com/users/mangstadt/repos",
+      "events_url": "https://api.github.com/users/mangstadt/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mangstadt/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "7c983843fcc0a5c02108c33dcc9038216f6de712",
+        "url": "https://api.github.com/repos/mangstadt/emc-shopkeeper/commits/7c983843fcc0a5c02108c33dcc9038216f6de712",
+        "html_url": "https://github.com/mangstadt/emc-shopkeeper/commit/7c983843fcc0a5c02108c33dcc9038216f6de712"
+      }
+    ]
+  }
+]

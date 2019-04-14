@@ -17,18 +17,13 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -43,14 +38,6 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
 
@@ -76,6 +63,7 @@ import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.LoginPresenter;
 import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
+import emcshop.util.GitHubCommitsApi;
 import emcshop.util.GuiUtils;
 import emcshop.util.RupeeFormatter;
 import emcshop.util.TimeUtils;
@@ -683,24 +671,22 @@ public class MainFrame extends JFrame {
 		Thread t = new Thread() {
 			@Override
 			public void run() {
+				GitHubCommitsApi gitHub = new GitHubCommitsApi("mangstadt", "emc-shopkeeper");
 				try {
 					logger.finest("Checking for updates.");
-					String json;
-					try {
-						json = downloadCommitInfo();
-					} catch (IOException e) {
-						logger.log(Level.WARNING, "Problem downloading commit info.", e);
-						return;
-					}
-
-					Date latestRelease = parseLatestReleaseDate(json);
+					Date latestRelease = gitHub.getDateOfLatestCommit("dist/emc-shopkeeper-full.jar");
 					if (latestRelease == null) {
 						//couldn't find the release date
 						return;
 					}
 
+					/*
+					 * Allow for a buffer of 10 minutes because there will be a
+					 * few minutes difference between the build timestamp
+					 * and the commit timestamp.
+					 */
 					long diff = latestRelease.getTime() - EMCShopkeeper.BUILT.getTime();
-					if (diff < 1000 * 60 * 10) { //give a buffer of 10 minutes because there will be a few minutes difference between the build timestamp and the commit timestamp
+					if (diff < 1000 * 60 * 10) {
 						//already running the latest version
 						logger.finest("Running latest version.");
 						return;
@@ -727,40 +713,6 @@ public class MainFrame extends JFrame {
 					validate();
 				} catch (Throwable e) {
 					logger.log(Level.WARNING, "Problem checking for updates.", e);
-				}
-			}
-
-			private String downloadCommitInfo() throws IOException {
-				URIBuilder builder = new URIBuilder(URI.create("https://api.github.com/repos/mangstadt/emc-shopkeeper/commits"));
-				builder.addParameter("path", "dist/emc-shopkeeper-full.jar");
-				String url = builder.toString();
-
-				CloseableHttpClient client = HttpClientBuilder.create().build();
-				try {
-					HttpGet request = new HttpGet(url);
-					HttpResponse response = client.execute(request);
-					HttpEntity entity = response.getEntity();
-					return IOUtils.toString(entity.getContent());
-				} finally {
-					IOUtils.closeQuietly(client);
-				}
-			}
-
-			private Date parseLatestReleaseDate(String json) {
-				Pattern p = Pattern.compile("\"date\":\"(.*?)\"");
-				Matcher m = p.matcher(json);
-				if (!m.find()) {
-					logger.log(Level.WARNING, "Could not find release date in Github commit log: " + json);
-					return null;
-				}
-
-				DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-				df.setTimeZone(TimeZone.getTimeZone("GMT"));
-				try {
-					return df.parse(m.group(1));
-				} catch (ParseException e) {
-					logger.log(Level.WARNING, "Could not parse release date from Github commit log.", e);
-					return null;
 				}
 			}
 		};
