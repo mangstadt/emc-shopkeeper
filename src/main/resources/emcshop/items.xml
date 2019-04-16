@@ -702,7 +702,7 @@
 	<!-- Survival Update 2.0 -->
 	<Item name="Fiery Apple" image="apple.png" emcNames="§cFiery Apple - §cFiery Apple" categories="5,7" />
 	<Item name="Fiery Baked Potato" image="baked_potato.png" emcNames="§cFiery Baked Potato - §cFiery Baked Potato" categories="5,7" />
-	<Item name="Fiery Beetroot"image="beetroot.png" emcNames="§cFiery Beetroot - §cFiery Beetroot" categories="5,7" />
+	<Item name="Fiery Beetroot" image="beetroot.png" emcNames="§cFiery Beetroot - §cFiery Beetroot" categories="5,7" />
 	<Item name="Fiery Beetroot Soup" image="beetroot_soup.png" emcNames="§cFiery Beetroot Soup - §cFiery Beetroot Soup" categories="5,7" />
 	<Item name="Fiery Bread" image="bread.png" emcNames="§cFiery Bread - §cFiery Bread" categories="5,7" />
 	<Item name="Fiery Carrot" image="carrot.png" emcNames="§cFiery Carrot - §cFiery Carrot" categories="5,7" />
