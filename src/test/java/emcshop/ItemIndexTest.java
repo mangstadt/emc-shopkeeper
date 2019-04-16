@@ -1,6 +1,8 @@
 package emcshop;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
@@ -32,6 +34,13 @@ public class ItemIndexTest {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Test
+	public void isEmcNameRecognized() {
+		assertTrue(index.isEmcNameRecognized("Potion of Fire Resistance"));
+		assertTrue(index.isEmcNameRecognized("Potion:8195"));
+		assertFalse(index.isEmcNameRecognized("Potion:9999"));
 	}
 
 	@Test

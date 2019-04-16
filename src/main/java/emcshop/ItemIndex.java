@@ -178,6 +178,17 @@ public class ItemIndex {
 	}
 
 	/**
+	 * Determines if an item name from the transaction history is associated
+	 * with a known item.
+	 * @param emcName the name from the transaction history
+	 * @return true if it's in the list, false if not
+	 */
+	public boolean isEmcNameRecognized(String emcName) {
+		emcName = emcName.toLowerCase();
+		return byName.containsKey(emcName) || byEmcName.containsKey(emcName);
+	}
+
+	/**
 	 * Gets the display name of an item.
 	 * @param emcName the name from the transaction history (e.g. "Potion:8193")
 	 * @return the display name (e.g. "Potion of Regeneration") or the
