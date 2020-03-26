@@ -176,7 +176,7 @@
 	<Item name="Dark Oak Gate" id="186" group="Wood" categories="17" emcNames="Dark Oak Fence Gate" />
 	<Item name="Dark Oak Leaves" id="161:1" categories="17" />
 	<Item name="Dark Oak Log" emcNames="Dark Oak Wood" group="Wood" categories="17" />
-	<Item name="Dark Oak Plank" id="5:5" group="Wood" categories="17" emcNames="Dark Oak Wood Planks" />
+	<Item name="Dark Oak Plank" id="5:5" group="Wood" categories="17" emcNames="Dark Oak Wood Planks,Dark Oak Planks" />
 	<Item name="Dark Oak Pressure Plate" group="Wood" categories="13,17" />
 	<Item name="Dark Oak Sapling" id="6:5" emcNames="Darkoak Sapling" categories="6,17" />
 	<Item name="Dark Oak Sign" stack="16" group="Wood" categories="17" />
@@ -221,7 +221,7 @@
 	<Item name="Emerald Block" id="133" categories="11" emcNames="Block of Emerald" />
 	<Item name="Emerald Ore" id="129" categories="11" />
 	<Item name="Empty Map" id="395" />
-	<Item name="Enchantment Table" id="116" group="Diamonds" />
+	<Item name="Enchantment Table" id="116" group="Diamonds" emcNames="Enchanting Table" />
 	<Item name="Enchanted Book" emcNames="Enchbook" />
 	<Item name="End Bricks" id="206" emcNames="End Stone Bricks" />
 	<Item name="End Crystal" id="426" />
@@ -247,7 +247,7 @@
 	<Item name="Glass" id="20" group="Glass" categories="8" />
 	<Item name="Glass Bottle" id="374" group="Glass" categories="12" />
 	<Item name="Glass Pane" id="102" group="Glass" categories="8" />
-	<Item name="Glistering Melon" id="382" group="Gold" categories="12" />
+	<Item name="Glistering Melon Slice" id="382" group="Gold" categories="12" emcNames="Glistering Melon" />
 	<Item name="Glowstone" id="89" categories="10" />
 	<Item name="Glowstone Dust" id="348" categories="12" />
 	<Item name="Gold Axe" id="286" stack="1" group="Gold" categories="16" emcNames="Golden Axe" />
@@ -836,6 +836,7 @@
 	<Item name="2017 Birthday Cake" stack="1" image="cake.png" emcNames="§62017 Birthday Cake - §62017 Birthday Cake" categories="5,7" />
 	<Item name="2017 Birthday Cookie" image="cookie.png" emcNames="§62017 Birthday Cookie - §62017 Birthday Cookie" categories="5,7" />
 	<Item name="2018 Birthday Cake" stack="1" image="cake.png" emcNames="§62018 Birthday Cake - §62018 Birthday Cake" categories="5,7" />
+	<Item name="2019 Birthday Cake" stack="1" image="cake.png" emcNames="§62019 Birthday Cake - §62019 Birthday Cake" categories="5,7" />
 	<Item name="Aikar's Hot Hat" image="tnt.png" emcNames="§cAikar's Hot Hat - §cAikar's Hot Hat" categories="5" />
 	<Item name="Avalauncher" image="snow_ball.png" emcNames="Snow Ball - §4Avalauncher,§4Avalauncher - §4Avalauncher" categories="16" />
 	<Item name="Blizz Ard's Arm" image="stick.png" emcNames="Stick - §4Blizz Ard's Arm,§4Blizz Ard's Arm - §4Blizz Ard's Arm" categories="5" />
@@ -879,6 +880,7 @@
 	<Item name="Pi Pie" image="pumpkin_pie.png" emcNames="Pumpkin Pie - §6Pi Pie,§6Pi Pie - §6Pi Pie" categories="5,7" />
 	<Item name="Pot of Gold" image="cauldron.png" emcNames="Cauldron - §ePot of Gold,§ePot of Gold - §ePot of Gold" categories="5" />
 	<Item name="Potato Plate" stack="1" image="diamond_chestplate_enchanted.png" emcNames="Diamond Chest - §6Potato Plate,§6Potato Plate - §6Potato Plate" categories="5,16" />
+	<Item name="Presidential Pen" stack="1" image="diamond_sword_enchanted.png" emcNames="§c§lPresidential Pen - §c§lPresidential Pen" categories="5,16" />
 	<Item name="Referral Block of Clickyness" image="gold_block.png" emcNames="Gold Block - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s,§2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s" categories="5" />
 	<Item name="Remembrance Poppy" image="poppy.png" emcNames="Poppy - §4Remembrance Poppy,§4Remembrance Poppy - §4Remembrance Poppy" categories="6" />
 	<Item name="Remote Shop Sign" image="sign.png" emcNames="§aRemote Shop Sign - §aRemote Shop Sign" categories="5" />
@@ -1173,7 +1175,7 @@
 	<Item name="Pig Head" emcNames="Head - Pig Head,Pig Head - Pig Head" group="Mob Heads" categories="9" />
 	<Item name="PigZombie Head" emcNames="Head - PigZombie Head,PigZombie Head - PigZombie Head" group="Mob Heads" categories="9" />
 	<Item name="Sheep Head" emcNames="Head - Sheep Head,Sheep Head - Sheep Head" group="Mob Heads" categories="9" />
-	<Item name="Silverfish Head" emcNames="Silverfish Head" group="Mob Heads" categories="9" />
+	<Item name="Silverfish Head" emcNames="Player Head - Silverfish Head,Silverfish Head - Silverfish Head" group="Mob Heads" categories="9" />
 	<Item name="Slime Head" emcNames="Head - Slime Head,Slime Head - Slime Head" group="Mob Heads" categories="9" />
 	<Item name="Spider Head" emcNames="Head - Spider Head,Spider Head - Spider Head" group="Mob Heads" categories="9" />
 	<Item name="Squid Head" emcNames="Head - Squid Head,Squid Head - Squid Head" group="Mob Heads" categories="9" />
