@@ -78,6 +78,7 @@
 	<Item name="Black Shulker Box" />
 	<Item name="Black Terracotta" id="159:15" group="Clay" categories="2" emcNames="Black Clay,Black Stclay,Black Stained Clay,Black Hardened Clay" />
 	<Item name="Black Wool" id="35:15" group="Wool" categories="18" />
+	<Item name="Blast Furnace" />
 	<Item name="Blaze Powder" id="377" categories="12" />
 	<Item name="Blaze Rod" id="369" categories="9" />
 	<Item name="Blocks Disc" id="2258" stack="1" group="Discs" categories="3" emcNames="Record 3" />
@@ -126,6 +127,7 @@
 	<Item name="Cake" id="354" stack="1" categories="7" />
 	<Item name="Carrot" id="391" emcNames="Carrot Item" categories="0,6,7" />
 	<Item name="Carrot Stick" id="398" stack="1" categories="0,16" />
+	<Item name="Cartography Table" />
 	<Item name="Carved Pumpkin" id="86" categories="6" />
 	<Item name="Cat Disc" id="2257" stack="1" group="Discs" categories="3" emcNames="Green Record" />
 	<Item name="Cauldron" id="118" group="Iron" categories="16" />
@@ -158,6 +160,7 @@
 	<Item name="Cocoa Beans" id="351:3" emcNames="Brown Dye" group="Dyes" categories="4,6" />
 	<Item name="Comparator" id="404" categories="13" emcNames="Redstone Comparator" />
 	<Item name="Compass" id="345" group="Iron" />
+	<Item name="Composter" />
 	<Item name="Conduit" />
 	<Item name="Cooked Beef" id="364" emcNames="Steak" categories="7" />
 	<Item name="Cooked Chicken" id="366" emcNames="Chicken" categories="7" />
@@ -260,6 +263,7 @@
 	<Item name="Firework" id="401" />
 	<Item name="Firework Star" id="402" />
 	<Item name="Fishing Rod" id="346" stack="1" categories="16" />
+	<Item name="Fletching Table" />
 	<Item name="Flint" id="318" />
 	<Item name="Flint And Steel" id="259" stack="1" categories="16" />
 	<Item name="Flower Pot" id="390" emcNames="Flower Pot Item" group="Clay" categories="2,6" />
@@ -310,6 +314,7 @@
 	<Item name="Green Shulker Box" emcNames="Green Shulkerbox" />
 	<Item name="Green Terracotta" id="159:13" group="Clay" categories="2" emcNames="Green Clay,Green Stclay,Green Stained Clay,Green Hardened Clay" />
 	<Item name="Green Wool" id="35:13" group="Wool" categories="18" />
+	<Item name="Grindstone" />
 	<Item name="Gunpowder" id="289" emcNames="Sulphur" categories="9,12" />
 	<Item name="Hay Bale" id="170" categories="0,6" emcNames="Hay Block" />
 	<Item name="Head" id="397:3" categories="9" />
@@ -587,6 +592,8 @@
 	<Item name="Skeleton Skull" id="397:0" group="Mob Heads" categories="9" emcNames="Skull Item" />
 	<Item name="Slime Ball" id="341" categories="9" emcNames="Slimeball" />
 	<Item name="Slime Block" id="165" />
+	<Item name="Smithing Table" />
+	<Item name="Smoker" />
 	<Item name="Smooth Quartz Slab" group="Quartz" categories="10,11" />
 	<Item name="Smooth Quartz Stairs" group="Quartz" categories="10,11" />
 	<Item name="Smooth Red Sandstone" />
