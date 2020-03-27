@@ -15,7 +15,7 @@ public class ResizeImages {
 	private static final int size = 16;
 
 	public static void main(String args[]) throws Exception {
-		File dir = new File("src/main/resources/emcshop/gui/images/items");
+		File dir = new File("path/to/folder");
 		for (File file : dir.listFiles(new FileFilter() {
 			@Override
 			public boolean accept(File file) {
@@ -39,7 +39,11 @@ public class ResizeImages {
 			Graphics2D g2 = bi.createGraphics();
 			g2.drawImage(img, 0, 0, null);
 			g2.dispose();
-			ImageIO.write(bi, "png", file);
+
+			File destFolder = new File(file.getParent(), "small");
+			destFolder.mkdir();
+			File dest = new File(destFolder, file.getName().toLowerCase());
+			ImageIO.write(bi, "png", dest);
 		}
 		System.out.println("Done.");
 	}
