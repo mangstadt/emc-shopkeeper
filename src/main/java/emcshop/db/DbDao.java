@@ -298,6 +298,19 @@ public interface DbDao {
 	void updateBonusesFeesHighestBalance(RupeeTransaction transaction) throws SQLException;
 
 	/**
+	 * When EMC updated to 1.15, some item names changed such that the old names
+	 * were being used by new items. For example, "Smooth Sandstone" changed to
+	 * "Cut Sandstone", and a new block was added called "Smooth Sandstone".
+	 * This method updates all existing transactions so that only transactions
+	 * before the server transition are updated with the new name.
+	 * @param oldNames the old names
+	 * @param newNames the new names
+	 * @param date the date the server was updated
+	 * @throws SQLException
+	 */
+	void updateItemsWhoseOldNamesAreUsedByExistingItems(List<String> oldNames, List<String> newNames, Date date) throws SQLException;
+
+	/**
 	 * Determines if this DAO considers the given rupee transaction to be a
 	 * "bonus/fee" transaction.
 	 * @param transaction the rupee transaction

@@ -6,9 +6,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Map.Entry;
 
 /**
@@ -233,6 +237,42 @@ public final class MigrationSprocs {
 
 		try {
 			dao.findHighestBalance();
+		} finally {
+			conn.close();
+		}
+	}
+
+	/**
+	 * When EMC updated to 1.15, some item names changed such that the old names
+	 * were being used by new items. For example, "Smooth Sandstone" changed to
+	 * "Cut Sandstone", and a new block was added called "Smooth Sandstone".
+	 * This method updates all existing transactions so that only transactions
+	 * before the server transition are updated with the new name.
+	 * @throws SQLException if there's a database problem
+	 * @see "https://empireminecraft.com/threads/empire-update-to-1-15-the-aquatic-buzzy-village-update.81962/"
+	 */
+	public static void updateItemsWhoseOldNamesAreUsedByExistingItemsIn1_15() throws SQLException {
+		List<String> oldNames = Arrays.asList("Smooth Sandstone", "Smooth Red Sandstone", "Stone Slab");
+		List<String> newNames = Arrays.asList("Cut Sandstone", "Cut Red Sandstone", "Smooth Stone Slab");
+		Date date;
+		{
+			TimeZone emcTime = TimeZone.getTimeZone("America/New_York");
+			Calendar c = Calendar.getInstance(emcTime);
+			c.set(Calendar.YEAR, 2020);
+			c.set(Calendar.MONTH, Calendar.MARCH);
+			c.set(Calendar.DATE, 15);
+			c.set(Calendar.HOUR_OF_DAY, 13);
+			c.set(Calendar.MINUTE, 0);
+			c.set(Calendar.SECOND, 0);
+			c.set(Calendar.MILLISECOND, 0);
+			date = c.getTime();
+		}
+
+		Connection conn = conn();
+		DbDao dao = new DirbyEmbeddedDbDao(conn);
+
+		try {
+			dao.updateItemsWhoseOldNamesAreUsedByExistingItems(oldNames, newNames, date);
 		} finally {
 			conn.close();
 		}

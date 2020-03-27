@@ -58,7 +58,7 @@ public abstract class DirbyDbDao implements DbDao {
 	 * directly. Use {@link #getAppDbVersion()} instead, because this method
 	 * gets overridden in unit tests.
 	 */
-	public static final int schemaVersion = 39;
+	public static final int schemaVersion = 40;
 
 	protected Connection conn;
 	protected String jdbcUrl;
@@ -427,6 +427,30 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.executeUpdate();
 		} finally {
 			closeStatements(stmt);
+		}
+	}
+
+	@Override
+	public void updateItemsWhoseOldNamesAreUsedByExistingItems(List<String> oldNames, List<String> newNames, Date date) throws SQLException {
+		if (oldNames.size() != newNames.size()) {
+			throw new IllegalArgumentException("oldNames and newNames lists must be the same size.");
+		}
+
+		for (int i = 0; i < oldNames.size(); i++) {
+			String oldName = oldNames.get(i);
+			String newName = newNames.get(i);
+			int oldNameId = selsertItem(oldName); //e.g. smooth sandstone
+			int newNameId = selsertItem(newName); //e.g. cut sandstone
+
+			PreparedStatement stmt = stmt("UPDATE transactions SET item = ? WHERE item = ? AND ts < ?");
+			try {
+				stmt.setInt(1, newNameId);
+				stmt.setInt(2, oldNameId);
+				stmt.setTimestamp(3, toTimestamp(date));
+				stmt.executeUpdate();
+			} finally {
+				closeStatements(stmt);
+			}
 		}
 	}
 
