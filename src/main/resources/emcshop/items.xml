@@ -170,6 +170,7 @@
 	<Item name="Cooked Rabbit" id="412" categories="7" />
 	<Item name="Cooked Salmon" id="350:1" group="Fish" categories="7" />
 	<Item name="Cookie" id="357" categories="7" />
+	<Item name="Cornflower" group="Flowers" categories="6" />
 	<Item name="Cow Egg" id="383:92" group="Spawn Eggs" categories="0" emcNames="Spawn Cow" />
 	<Item name="Cracked Stone Brick" id="98:2" group="Stone" categories="14" emcNames="Cracked Stone Bricks,Cracked Stone" />
 	<Item name="Crafting Table" id="58" group="Wood" categories="16" emcNames="Workbench" />
@@ -389,6 +390,7 @@
 	<Item name="Light Gray Shulker Box" emcNames="Silver Shulk Box" />
 	<Item name="Light Gray Terracotta" id="159:8" group="Clay" categories="2" emcNames="Light Grey Terracotta,Light Gray Clay,Lghtgray Stclay,Light Gray Stained Clay,Light Gray Hardened Clay" />
 	<Item name="Light Gray Wool" id="35:8" group="Wool" categories="18" emcNames="Silver Wool" />
+	<Item name="Lily of the Valley" group="Flowers" categories="6" />
 	<Item name="Lily Pad" id="111" categories="6" emcNames="Water Lily" />	
 	<Item name="Lilac" id="175:1" group="Flowers" categories="6" />
 	<Item name="Lime Bed" id="355:5" stack="1" />
@@ -687,6 +689,7 @@
 	<Item name="White Terracotta" id="159:0" group="Clay" categories="2" emcNames="White Clay,White Stclay,White Stained Clay,White Hardened Clay" />
 	<Item name="White Tulip" id="38:6" group="Flowers" categories="6" />
 	<Item name="White Wool" id="35:0" group="Wool" categories="18" emcNames="Wool" />
+	<Item name="Wither Rose" group="Flowers" categories="6" />
 	<Item name="Wither Skull" id="397:1" emcNames="Wither Head,Wither Skeleton Skull" categories="9" />
 	<Item name="Wolf Egg" id="383:95" group="Spawn Eggs" categories="0" emcNames="Spawn Wolf" />
 	<Item name="Wood Axe" id="271" stack="1" group="Wood" categories="16" emcNames="Wooden Axe" />
