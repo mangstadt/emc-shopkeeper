@@ -369,6 +369,7 @@
 	<Item name="Lava Bucket" id="327" stack="1" group="Iron" categories="16" />
 	<Item name="Leash" id="420" categories="0" emcNames="Lead" />
 	<Item name="Leather" id="334" group="Leather" categories="9" />
+	<Item name="Leather Barding" stack="1" categories="16" emcNames="Leather Horse Armor" />
 	<Item name="Leather Boots" id="301" stack="1" group="Leather" categories="16" />
 	<Item name="Leather Cap" id="298" stack="1" group="Leather" emcNames="Leather Helmet" categories="16" />
 	<Item name="Leather Pants" id="300" stack="1" group="Leather" emcNames="Leather Leggings" categories="16" />
