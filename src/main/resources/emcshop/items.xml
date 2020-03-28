@@ -50,6 +50,7 @@
 	<Item name="Azure Bluet" id="38:3" group="Flowers" categories="6" />
 	<Item name="Baked Potato" id="393" categories="7" />
 	<Item name="Bamboo" />
+	<Item name="Barrel" group="Wood" categories="17" />
 	<Item name="Bat Egg" id="383:65" group="Spawn Eggs" categories="0" emcNames="Spawn Bat" />
 	<Item name="Beacon" id="138" />
 	<Item name="Bee Egg" group="Spawn Eggs" categories="0" />
