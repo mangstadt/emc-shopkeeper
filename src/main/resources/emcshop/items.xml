@@ -148,7 +148,6 @@
 	<Item name="Chorus Fruit" id="432" categories="6,7" />
 	<Item name="Clay Ball" id="337" group="Clay" categories="2" />
 	<Item name="Clay Block" id="82" group="Clay" categories="2" emcNames="Clay" />
-	<Item name="Clownfish" id="349:2" group="Fish" categories="0" />
 	<Item name="Coal" id="263:0" group="Coal" categories="11" />
 	<Item name="Coal Block" id="173" group="Coal" categories="11" emcNames="Block of Coal" />
 	<Item name="Coal Ore" id="16" group="Coal" categories="11" />
@@ -165,7 +164,7 @@
 	<Item name="Conduit" />
 	<Item name="Cooked Beef" id="364" emcNames="Steak" categories="7" />
 	<Item name="Cooked Chicken" id="366" emcNames="Chicken" categories="7" />
-	<Item name="Cooked Fish" id="350" group="Fish" categories="7" />
+	<Item name="Cooked Cod" id="350" group="Fish" categories="7" emcNames="Cooked Fish" />
 	<Item name="Cooked Pork" id="320" emcNames="Pork Chop,Cooked Porkchop" categories="7" />
 	<Item name="Cooked Mutton" id="424" categories="7" />
 	<Item name="Cooked Rabbit" id="412" categories="7" />
@@ -545,7 +544,7 @@
 	<Item name="Rabbit Stew" id="413" categories="7" />
 	<Item name="Raw Beef" id="363" categories="7,9" />
 	<Item name="Raw Chicken" id="365" categories="7,9" />
-	<Item name="Raw Fish" id="349" group="Fish" categories="0,7" />
+	<Item name="Raw Cod" id="349" group="Fish" categories="0,7" emcNames="Raw Fish" />
 	<Item name="Raw Mutton" id="423" categories="7,9" />
 	<Item name="Raw Rabbit" id="411" categories="7,9" />
 	<Item name="Raw Salmon" id="349:1" group="Fish" categories="0,7" />
@@ -670,6 +669,7 @@
 	<Item name="Trapped Chest" id="146" group="Wood" categories="13,17" />
 	<Item name="Trident" stack="1" categories="16" />
 	<Item name="Tripwire Hook" id="131" group="Iron" categories="13" />
+	<Item name="Tropical Fish" id="349:2" group="Fish" categories="0" emcNames="Clownfish" />
 	<Item name="Turtle Egg" group="Spawn Eggs" categories="0" />
 	<Item name="Turtle Spawn Egg" group="Spawn Eggs" categories="0" />
 	<Item name="Turtle Shell" categories="0,9,16" />
