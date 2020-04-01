@@ -8,11 +8,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.EMCShopkeeper;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.ClickableLabel;
 import emcshop.util.GuiUtils;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Displays an about dialog.
@@ -52,7 +52,7 @@ public class AboutDialog extends JDialog {
 		JLabel copyrightLabel = new JLabel(
 		"<html>" +
 		"<br>" +
-		"<font size=2>Copyright 2013-2015 Michael Angstadt.  This program is a fan creation and is not affiliated with<br>Minecraft (copyright Mojang) or Empire Minecraft (copyright Starlis).<br></font>" +
+		"<font size=2>Copyright 2013-2020 Michael Angstadt.  This program is a fan creation and is not affiliated with<br>Minecraft (copyright Mojang) or Empire Minecraft (copyright Starlis).<br></font>" +
 		"<br>" +
 		"<center><i>No pigs were harmed in the making of this program.</i></center>" +
 		"</html>"
