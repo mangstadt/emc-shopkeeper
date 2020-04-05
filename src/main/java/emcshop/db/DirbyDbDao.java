@@ -134,7 +134,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 
 		if (curVersion > latestVersion) {
-			throw new SQLException("Database version is newer than DAO verison.");
+			throw new SQLException("Database version is newer than DAO version.");
 		}
 
 		if (listener != null) {
@@ -1480,13 +1480,13 @@ public abstract class DirbyDbDao implements DbDao {
 		"SELECT t.ts, t.amount, t.balance, t.player, i.name AS item " +
 		"FROM transactions t " +
 		"INNER JOIN items i ON t.item = i.id ";
-		//@formatter:off
-		
-		if (from != null && to != null){
+		//@formatter:on
+
+		if (from != null && to != null) {
 			sql += "WHERE t.ts >= ? AND t.ts < ?";
-		} else if (from != null){
+		} else if (from != null) {
 			sql += "WHERE t.ts >= ?";
-		} else if (to != null){
+		} else if (to != null) {
 			sql += "WHERE t.ts < ?";
 		}
 
@@ -1526,7 +1526,7 @@ public abstract class DirbyDbDao implements DbDao {
 					String item = rs.getString("item");
 					profit.addTransaction(item, amount);
 				}
-				
+
 				int balance = rs.getInt("balance");
 				if (balance > profit.getBalance()) {
 					profit.setBalance(balance);
@@ -1590,8 +1590,11 @@ public abstract class DirbyDbDao implements DbDao {
 		try {
 			conn.rollback();
 		} catch (SQLException e) {
-			//exception is caught here instead of being thrown because ever time I catch the exception for rollback(), I just log the exception and continue on
-			//plus, an exception is unlikely to be thrown here anyway
+			/*
+			 * The exception is caught here instead of being thrown because
+			 * every time I catch it when calling this method, I just log it and
+			 * continue on. Plus, the exception is unlikely to be thrown anyway.
+			 */
 			logger.log(Level.WARNING, "Problem rolling back transaction.", e);
 		}
 	}
@@ -1603,15 +1606,14 @@ public abstract class DirbyDbDao implements DbDao {
 		try {
 			logger.info("Closing database.");
 			DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		} catch (SQLException se) {
-			if (se.getErrorCode() == 50000 && "XJ015".equals(se.getSQLState())) {
-				// we got the expected exception
-			} else if (se.getErrorCode() == 45000 && "08006".equals(se.getSQLState())) {
-				// we got the expected exception for single database shutdown
+		} catch (SQLException e) {
+			if (e.getErrorCode() == 50000 && "XJ015".equals(e.getSQLState())) {
+				//we got the expected exception
+			} else if (e.getErrorCode() == 45000 && "08006".equals(e.getSQLState())) {
+				//we got the expected exception for single database shutdown
 			} else {
-				// if the error code or SQLState is different, we have
-				// an unexpected exception (shutdown failed)
-				throw se;
+				//if the error code or SQLState is different, the shutdown operation may have failed
+				throw e;
 			}
 		}
 	}
