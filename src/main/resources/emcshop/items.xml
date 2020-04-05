@@ -367,6 +367,7 @@
 	<Item name="Jungle Wood" group="Wood" categories="17" />
 	<Item name="Kelp" categories="6" />
 	<Item name="Ladder" id="65" group="Wood" categories="17" />
+	<Item name="Lantern" />
 	<Item name="Lapis" id="351:4" group="Lapis" emcNames="Lapis Lazuli" categories="11" />
 	<Item name="Lapis Block" id="22" group="Lapis" categories="11" emcNames="Block of Lapis Lazuli,Lapis Lazuli Block" />
 	<Item name="Lapis Ore" id="21" group="Lapis" categories="11" emcNames="Lapis Lazuli Ore" />
