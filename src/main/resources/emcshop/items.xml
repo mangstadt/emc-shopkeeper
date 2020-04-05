@@ -228,7 +228,7 @@
 	<Item name="Dirt" id="3" />
 	<Item name="Dispenser" id="23" group="Stone" categories="13" />
 	<Item name="Dolphin Spawn Egg" group="Spawn Eggs" categories="0" emcNames="Dolphin Egg" />
-	<Item name="Donkey Spawn Egg" id="383:31" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Donkey,Donkey Egg" />
+	<Item name="Donkey Spawn Egg" id="383:31" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Donkey,Donkey Egg,Horse Egg - Donkey" />
 	<Item name="Dragon Head" id="397:5" group="Mob Heads" categories="9" />
 	<Item name="Dragon Egg" id="122" />
 	<Item name="Dragon Stone" emcNames="Coal - §5§lDragon Stone,§5§lDragon Stone - §5§lDragon Stone" categories="5" />
@@ -326,7 +326,7 @@
 	<Item name="Honeycomb Block" />
 	<Item name="Hopper" id="154" group="Iron" categories="13" />
 	<Item name="Hopper Minecart" id="408" stack="1" group="Iron" categories="13,15" emcNames="Minecart with Hopper" />
-	<Item name="Horse Spawn Egg" id="383:100" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Horse,Horse - Horse,Horse Egg" />
+	<Item name="Horse Spawn Egg" id="383:100" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Horse,Horse - Horse,Horse Egg,Horse Egg - Horse" />
 	<Item name="Ice" id="79" />
 	<Item name="Ink Sac" id="351:0" categories="9" emcNames="Ink Sack" />
 	<Item name="Iron Axe" id="258" stack="1" group="Iron" categories="16" />
@@ -436,7 +436,7 @@
 	<Item name="Mossy Cobblestone Wall" id="139:1" group="Stone" categories="14" emcNames="Mossy Wall" />
 	<Item name="Mossy Stone Brick" id="98:1" group="Stone" categories="14" emcNames="Mossy Stone,Mossy Stone Bricks" />
 	<Item name="Mossy Stone Brick Wall" group="Stone" categories="14" />
-	<Item name="Mule Spawn Egg" id="383:32" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Mule,Mule Egg" />
+	<Item name="Mule Spawn Egg" id="383:32" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Mule,Mule Egg,Horse Egg - Mule" />
 	<Item name="Mushroom Soup" id="282" stack="1" emcNames="Mushroom Stew" categories="7" />
 	<Item name="Music Disc" stack="1" group="Discs" categories="3" image="chirp_disc.png" />
 	<Item name="Mycel" id="110" emcNames="Mycelium" />
@@ -616,6 +616,7 @@
 	<Item name="Smooth Sandstone Stairs" />
 	<Item name="Smooth Stone" group="Stone" categories="14" />
 	<Item name="Smooth Stone Slab" id="44:0" group="Stone" categories="14" />
+	<Item name="Snow" />
 	<Item name="Snow Ball" id="332" stack="16" categories="16" emcNames="Snowball" />
 	<Item name="Snow Block" id="80" />
 	<Item name="Soul Sand" id="88" categories="10" />
@@ -962,7 +963,7 @@
 	<Item name="Presidential Pen" stack="1" image="diamond_sword_enchanted.png" emcNames="§c§lPresidential Pen - §c§lPresidential Pen" categories="5,16" />
 	<Item name="Referral Block of Clickyness" image="gold_block.png" emcNames="Gold Block - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s,§2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s - §2R§3e§4f§5e§6r§7r§9a§al §bB§cl§do§ec§2k §3O§4f §5C§6l§9i§ac§bk§cy§dn§ee§2s§3s" categories="5" />
 	<Item name="Remembrance Poppy" image="poppy.png" emcNames="Poppy - §4Remembrance Poppy,§4Remembrance Poppy - §4Remembrance Poppy" categories="6" />
-	<Item name="Remote Shop Sign" image="sign.png" emcNames="§aRemote Shop Sign - §aRemote Shop Sign" categories="5" />
+	<Item name="Remote Shop Sign" image="oak_sign.png" emcNames="§aRemote Shop Sign - §aRemote Shop Sign" categories="5" />
 	<Item name="Santa's Magic Bag" stack="1" image="red_shulker_box.png" emcNames="§c§lSanta's Magic Bag - §c§lSanta's Magic Bag" categories="5" />
 	<Item name="Shear Madness" stack="1" image="shears.png" emcNames="Shears - §6Shear Madness,§6Shear Madness - §6Shear Madness" categories="5,16" />
 	<Item name="Spooky Egg" image="egg.png" stack="16" emcNames="Egg - §fSpooky Egg,§fSpooky Egg - §fSpooky Egg" categories="5" />
@@ -976,8 +977,14 @@
 	<!-- Potions ========================================================== -->
 	
 	<Item name="Potion" id="373" image="water_bottle.png" stack="1" group="Potions" categories="12" />
+	<Item name="Potion Extended" image="water_bottle.png" stack="1" group="Potions" categories="12" />
+	<Item name="Potion Upgraded" image="water_bottle.png" stack="1" group="Potions" categories="12" />
 	<Item name="Splash Potion" id="438" emcNames="SPLASH_POTION" image="potion_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Splash Potion Extended" image="potion_splash.png" stack="1" group="Potions" categories="12" />
+	<Item name="Splash Potion Upgraded" image="potion_splash.png" stack="1" group="Potions" categories="12" />
 	<Item name="Lingering Potion" id="441" emcNames="LINGERING_POTION" image="potion_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion Extended" image="potion_lingering.png" stack="1" group="Potions" categories="12" />
+	<Item name="Lingering Potion Upgraded" image="potion_lingering.png" stack="1" group="Potions" categories="12" />
 	
 	<Item name="Awkward Potion" id="373:16" emcNames="Potion:16" image="water_bottle.png" stack="1" group="Potions" categories="12" />
 	<Item name="Thick Potion" id="373:32" emcNames="Potion:32" image="water_bottle.png" stack="1" group="Potions" categories="12" />
@@ -1111,6 +1118,8 @@
 	<Item name="Arrow" id="262" categories="9,16" />
 	<Item name="Spectral Arrow" id="439" categories="16" />
 	<Item name="Tipped Arrow" id="440" emcNames="TIPPED_ARROW" categories="16" image="arrow_poison.png" />
+	<Item name="Tipped Arrow Extended" categories="16" image="arrow_poison.png" />
+	<Item name="Tipped Arrow Upgraded" categories="16" image="arrow_poison.png" />
 	
 	<Item name="Arrow of Fire Resistance" categories="16" image="arrow_fire_resistance.png" />
 	<Item name="Arrow of Fire Resistance Ext" emcNames="Arrow of Fire Resistance Extended" categories="16" image="arrow_fire_resistance.png" />
