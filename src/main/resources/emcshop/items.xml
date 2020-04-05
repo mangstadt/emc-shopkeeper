@@ -288,7 +288,6 @@
 	<Item name="Gold Nugget" id="371" group="Gold" categories="9,11" />
 	<Item name="Gold Ore" id="14" group="Gold" categories="11" />
 	<Item name="Gold Pickaxe" id="285" stack="1" group="Gold" categories="16" emcNames="Golden Pickaxe" />
-	<Item name="Gold Plate" id="147" group="Gold" categories="13" emcNames="Weighted Pressure Plate (Light)" />
 	<Item name="Gold Shovel" id="284" stack="1" group="Gold" emcNames="Gold Spade,Golden Shovel" categories="16" />
 	<Item name="Gold Sword" id="283" stack="1" group="Gold" categories="16" emcNames="Golden Sword" />
 	<Item name="Golden Apple" id="322" group="Gold" categories="7" />
@@ -320,6 +319,7 @@
 	<Item name="Hay Bale" id="170" categories="0,6" emcNames="Hay Block" />
 	<Item name="Head" id="397:3" categories="9" />
 	<Item name="Heart of the Sea" />
+	<Item name="Heavy Weighted Pressure Plate" id="148" group="Iron" categories="13" emcNames="Weighted Pressure Plate (Heavy),Iron Plate" />
 	<Item name="Honey Block" />
 	<Item name="Honey Bottle" />
 	<Item name="Honeycomb" />
@@ -343,7 +343,6 @@
 	<Item name="Iron Nugget" id="452" group="Iron" categories="11" />
 	<Item name="Iron Ore" id="15" group="Iron" categories="11" />
 	<Item name="Iron Pickaxe" id="257" stack="1" group="Iron" categories="16" />
-	<Item name="Iron Plate" id="148" group="Iron" categories="13" emcNames="Weighted Pressure Plate (Heavy)" />
 	<Item name="Iron Shovel" id="256" stack="1" group="Iron" emcNames="Iron Spade" categories="16" />
 	<Item name="Iron Sword" id="267" stack="1" group="Iron" categories="16" />
 	<Item name="Iron Trapdoor" id="167" categories="13" emcNames="Iron Trap Door" />
@@ -397,6 +396,7 @@
 	<Item name="Light Gray Shulker Box" emcNames="Silver Shulk Box" />
 	<Item name="Light Gray Terracotta" id="159:8" group="Clay" categories="2" emcNames="Light Grey Terracotta,Light Gray Clay,Lghtgray Stclay,Light Gray Stained Clay,Light Gray Hardened Clay" />
 	<Item name="Light Gray Wool" id="35:8" group="Wool" categories="18" emcNames="Silver Wool" />
+	<Item name="Light Weighted Pressure Plate" id="147" group="Gold" categories="13" emcNames="Weighted Pressure Plate (Light),Gold Plate" />
 	<Item name="Lily of the Valley" group="Flowers" categories="6" />
 	<Item name="Lily Pad" id="111" categories="6" emcNames="Water Lily" />	
 	<Item name="Lilac" id="175:1" group="Flowers" categories="6" />
@@ -1248,32 +1248,32 @@
 	<Item name="Black Shield" categories="16" />
 	
 	<!-- Skin-based Mob Heads ============================================= -->
-
-	<Item name="Blaze Head" emcNames="Head - Blaze Head,Blaze Head - Blaze Head" group="Mob Heads" categories="9" />
-	<Item name="CaveSpider Head" emcNames="Head - CaveSpider Head,CaveSpider Head - CaveSpider Head" group="Mob Heads" categories="9" />
-	<Item name="Charged Creeper Head" group="Mob Heads" categories="9" />
-	<Item name="Chicken Head" emcNames="Head - Chicken Head,Chicken Head - Chicken Head" group="Mob Heads" categories="9" />
-	<Item name="Cow Head" emcNames="Head - Cow Head,Cow Head - Cow Head" group="Mob Heads" categories="9" />
-	<Item name="Drowned Head" group="Mob Heads" categories="9" />
-	<Item name="Enderman Head" emcNames="Head - Enderman Head,Enderman Head - Enderman Head" group="Mob Heads" categories="9" />
-	<Item name="Enraged Shulker Head" image="shulker_head.png" emcNames="Enraged Shulker Head - Enraged Shulker Head" group="Mob Heads" categories="9" />
-	<Item name="Ghast Head" emcNames="Head - Ghast Head,Ghast Head - Ghast Head" group="Mob Heads" categories="9" />
-	<Item name="Golem Head" emcNames="Head - Golem Head,Golem Head - Golem Head" group="Mob Heads" categories="9" />
-	<Item name="Killer Rabbit Head" group="Mob Heads" categories="9" />
-	<Item name="LavaSlime Head" emcNames="Head - LavaSlime Head,LavaSlime Head - LavaSlime Head" group="Mob Heads" categories="9" />
-	<Item name="MushroomCow Head" emcNames="Head - MushroomCow Head,MushroomCow Head - MushroomCow Head" group="Mob Heads" categories="9" />
-	<Item name="Netherhound Head" group="Mob Heads" categories="9" />
-	<Item name="Ocelot Head" emcNames="Head - Ocelot Head,Ocelot Head - Ocelot Head" group="Mob Heads" categories="9" />
-	<Item name="Pig Head" emcNames="Head - Pig Head,Pig Head - Pig Head" group="Mob Heads" categories="9" />
-	<Item name="PigZombie Head" emcNames="Head - PigZombie Head,PigZombie Head - PigZombie Head" group="Mob Heads" categories="9" />
-	<Item name="Polar Bear Head" group="Mob Heads" categories="9" />
-	<Item name="Rabbit Head" group="Mob Heads" categories="9" />
-	<Item name="Sheep Head" emcNames="Head - Sheep Head,Sheep Head - Sheep Head" group="Mob Heads" categories="9" />
-	<Item name="Silverfish Head" emcNames="Player Head - Silverfish Head,Silverfish Head - Silverfish Head" group="Mob Heads" categories="9" />
-	<Item name="Slime Head" emcNames="Head - Slime Head,Slime Head - Slime Head,Player Head - Slime Head" group="Mob Heads" categories="9" />
-	<Item name="Spider Head" emcNames="Head - Spider Head,Spider Head - Spider Head" group="Mob Heads" categories="9" />
-	<Item name="Squid Head" emcNames="Head - Squid Head,Squid Head - Squid Head" group="Mob Heads" categories="9" />
-	<Item name="Stray Head" group="Mob Heads" categories="9" />
-	<Item name="Villager Head" emcNames="Head - Villager Head,Villager Head - Villager Head" group="Mob Heads" categories="9" />
-	<Item name="Witch Head" group="Mob Heads" categories="9" />
+	<Item name="Blaze Head" emcNames="Head - Blaze Head,Player Head - Blaze Head,Blaze Head - Blaze Head" group="Mob Heads" categories="9" />
+	<Item name="CaveSpider Head" emcNames="Head - CaveSpider Head,Player Head - CaveSpider Head,CaveSpider Head - CaveSpider Head" group="Mob Heads" categories="9" />
+	<Item name="Charged Creeper Head" emcNames="Head - Charged Creeper Head,Player Head - Charged Creeper Head,Charged Creeper Head - Charged Creeper Head" group="Mob Heads" categories="9" />
+	<Item name="Chicken Head" emcNames="Head - Chicken Head,Player Head - Chicken Head,Chicken Head - Chicken Head" group="Mob Heads" categories="9" />
+	<Item name="Cow Head" emcNames="Head - Cow Head,Player Head - Cow Head,Cow Head - Cow Head" group="Mob Heads" categories="9" />
+	<Item name="Drowned Head" emcNames="Head - Drowned Head,Player Head - Drowned Head,Drowned Head - Drowned Head" group="Mob Heads" categories="9" />
+	<Item name="Enderman Head" emcNames="Head - Enderman Head,Player Head - Enderman Head,Enderman Head - Enderman Head" group="Mob Heads" categories="9" />
+	<Item name="Enraged Shulker Head" emcNames="Head - Enraged Shulker Head,Player Head - Enraged Shulker Head,Enraged Shulker Head - Enraged Shulker Head" group="Mob Heads" categories="9" image="shulker_head.png" />
+	<Item name="Ghast Head" emcNames="Head - Ghast Head,Player Head - Ghast Head,Ghast Head - Ghast Head" group="Mob Heads" categories="9" />
+	<Item name="Golem Head" emcNames="Head - Golem Head,Player Head - Golem Head,Golem Head - Golem Head" group="Mob Heads" categories="9" />
+	<Item name="Killer Rabbit Head" emcNames="Head - Killer Rabbit Head,Player Head - Killer Rabbit Head,Killer Rabbit Head - Killer Rabbit Head" group="Mob Heads" categories="9" />
+	<Item name="LavaSlime Head" emcNames="Head - LavaSlime Head,Player Head - LavaSlime Head,LavaSlime Head - LavaSlime Head" group="Mob Heads" categories="9" />
+	<Item name="MushroomCow Head" emcNames="Head - MushroomCow Head,Player Head - MushroomCow Head,MushroomCow Head - MushroomCow Head" group="Mob Heads" categories="9" />
+	<Item name="Netherhound Head" emcNames="Head - Netherhound Head,Player Head - Netherhound Head,Netherhound Head - Netherhound Head" group="Mob Heads" categories="9" />
+	<Item name="Ocelot Head" emcNames="Head - Ocelot Head,Player Head - Ocelot Head,Ocelot Head - Ocelot Head" group="Mob Heads" categories="9" />
+	<Item name="Pig Head" emcNames="Head - Pig Head,Player Head - Pig Head,Pig Head - Pig Head" group="Mob Heads" categories="9" />
+	<Item name="PigZombie Head" emcNames="Head - PigZombie Head,Player Head - PigZombie Head,PigZombie Head - PigZombie Head" group="Mob Heads" categories="9" />
+	<Item name="Polar Bear Head" emcNames="Head - Polar Bear Head,Player Head - Polar Bear Head,Polar Bear Head - Polar Bear Head" group="Mob Heads" categories="9" />
+	<Item name="Rabbit Head" emcNames="Head - Rabbit Head,Player Head - Rabbit Head,Rabbit Head - Rabbit Head" group="Mob Heads" categories="9" />
+	<Item name="Sheep Head" emcNames="Head - Sheep Head,Player Head - Sheep Head,Sheep Head - Sheep Head" group="Mob Heads" categories="9" />
+	<Item name="Shulker Head" emcNames="Head - Shulker Head,Player Head - Shulker Head,Shulker Head - Shulker Head" group="Mob Heads" categories="9" />
+	<Item name="Silverfish Head" emcNames="Head - Silverfish Head,Player Head - Silverfish Head,Silverfish Head - Silverfish Head" group="Mob Heads" categories="9" />
+	<Item name="Slime Head" emcNames="Head - Slime Head,Player Head - Slime Head,Slime Head - Slime Head" group="Mob Heads" categories="9" />
+	<Item name="Spider Head" emcNames="Head - Spider Head,Player Head - Spider Head,Spider Head - Spider Head" group="Mob Heads" categories="9" />
+	<Item name="Squid Head" emcNames="Head - Squid Head,Player Head - Squid Head,Squid Head - Squid Head" group="Mob Heads" categories="9" />
+	<Item name="Stray Head" emcNames="Head - Stray Head,Player Head - Stray Head,Stray Head - Stray Head" group="Mob Heads" categories="9" />
+	<Item name="Villager Head" emcNames="Head - Villager Head,Player Head - Villager Head,Villager Head - Villager Head" group="Mob Heads" categories="9" />
+	<Item name="Witch Head" emcNames="Head - Witch Head,Player Head - Witch Head,Witch Head - Witch Head" group="Mob Heads" categories="9" />
 </Items>
