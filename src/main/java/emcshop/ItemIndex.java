@@ -255,7 +255,8 @@ public class ItemIndex {
 		int dashPos = displayName.indexOf('-');
 		if (dashPos > 0) {
 			String beforeDash = displayName.substring(0, dashPos).trim();
-			return getImageFileName(beforeDash);
+			String displayNameBeforeDash = getDisplayName(beforeDash);
+			return getImageFileName(displayNameBeforeDash);
 		}
 
 		return imageFileName(displayName);

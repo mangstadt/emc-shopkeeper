@@ -41,6 +41,7 @@ public class ItemIndexTest {
 			"<Item name=\"Zombie Potion\" image=\"water_bottle.png\" />" +
 			"<Item name=\"Oak Log\" id=\"17:0\" />" +
 			"<Item name=\"Ender Pearl\" id=\"368\" stack=\"16\" />" +
+			"<Item name=\"Diamond Chestplate\" emcNames=\"Diamond Chest\" />" +
 		"</Items>";
 		//@formatter:on
 
@@ -102,13 +103,14 @@ public class ItemIndexTest {
 		assertEquals("orange_clay.png", mockIndex.getImageFileName("Orange Clay"));
 		assertEquals("water_bottle.png", mockIndex.getImageFileName("Zombie Potion"));
 		assertEquals("bow.png", mockIndex.getImageFileName("Bow-eo0f"));
+		assertEquals("diamond_chestplate.png", mockIndex.getImageFileName("Diamond Chest-eo0f"));
 		assertEquals("diamond_helmet.png", mockIndex.getImageFileName("Diamond Helmet - §aBig Daddy Helmet"));
 	}
 
 	@Test
 	public void getItemNames() {
 		Set<String> actual = new HashSet<String>(mockIndex.getItemNames());
-		Set<String> expected = new HashSet<String>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion", "Oak Log", "Ender Pearl"));
+		Set<String> expected = new HashSet<String>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion", "Oak Log", "Ender Pearl", "Diamond Chestplate"));
 		assertEquals(expected, actual);
 	}
 
