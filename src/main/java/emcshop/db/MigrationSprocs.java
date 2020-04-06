@@ -165,12 +165,7 @@ public final class MigrationSprocs {
 					Integer badPlayerId = badPlayerIds.get(i);
 
 					stmt.setInt(1, goodPlayerId);
-
-					//if (reason == null) {
-					//stmt.setNull(2, Types.VARCHAR);
-					//} else {
 					stmt.setString(2, reason);
-					//}
 					stmt.setInt(3, badPlayerId);
 					stmt.executeUpdate();
 				}
