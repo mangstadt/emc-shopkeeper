@@ -36,7 +36,7 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 	private final JTextArea displayText, stackTrace;
 	private final JLabel errorIcon, restoreLoading;
 	private final JButton quit, report, restore;
-	private final JList backups;
+	private final JList<Date> backups;
 	private final List<ActionListener> restoreListeners = new ArrayList<ActionListener>();
 
 	public DatabaseStartupErrorViewImpl(Window owner) {
@@ -77,14 +77,13 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 
 		report = new JButton("Send Error Report");
 
-		backups = new JList();
+		backups = new JList<>();
 		backups.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		backups.setCellRenderer(new ListCellRenderer() {
+		backups.setCellRenderer(new ListCellRenderer<Date>() {
 			private final RelativeDateFormat df = new RelativeDateFormat();
 
 			@Override
-			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
-				Date date = (Date) value;
+			public Component getListCellRendererComponent(JList<? extends Date> list, Date date, int index, boolean selected, boolean hasFocus) {
 				JLabel label = new JLabel(df.format(date));
 				UIDefaultsWrapper.assignListFormats(label, selected);
 				return label;
@@ -146,9 +145,9 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 
 	@Override
 	public void setBackups(final List<Date> backups) {
-		this.backups.setModel(new AbstractListModel() {
+		this.backups.setModel(new AbstractListModel<Date>() {
 			@Override
-			public Object getElementAt(int index) {
+			public Date getElementAt(int index) {
 				return backups.get(index);
 			}
 

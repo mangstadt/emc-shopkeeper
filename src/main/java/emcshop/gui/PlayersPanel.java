@@ -166,8 +166,8 @@ public class PlayersPanel extends JPanel {
 		removeAll();
 		table = null;
 
-		final JList list = new JList(new Vector<PlayerGroup>(displayedPlayers));
-		list.setCellRenderer(new ListCellRenderer() {
+		final JList<PlayerGroup> list = new JList<>(new Vector<PlayerGroup>(displayedPlayers));
+		list.setCellRenderer(new ListCellRenderer<PlayerGroup>() {
 			private static final int profileImageSize = 32;
 			private final ProfileDownloadedListener onImageDownloaded = profile -> {
 				synchronized (this) {
@@ -181,8 +181,7 @@ public class PlayersPanel extends JPanel {
 			}
 
 			@Override
-			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
-				PlayerGroup playerGroup = (PlayerGroup) value;
+			public Component getListCellRendererComponent(JList<? extends PlayerGroup> list, PlayerGroup playerGroup, int index, boolean selected, boolean hasFocus) {
 				Player player = playerGroup.getPlayer();
 				String playerName = player.getName();
 

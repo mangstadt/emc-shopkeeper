@@ -91,10 +91,10 @@ public class ChartsTab extends JPanel {
 	private final DatePicker toDatePicker;
 	private final JLabel fromDatePickerLabel;
 	private final DatePicker fromDatePicker;
-	private final JComboBox groupBy;
+	private final JComboBox<GroupBy> groupBy;
 	private final JButton loadData;
 
-	private final JComboBox show;
+	private final JComboBox<Show> show;
 	private final JPanel showPanel;
 	private final Map<String, ImageCheckBox> itemGroupCheckboxes = new LinkedHashMap<String, ImageCheckBox>();
 	private final JPanel itemGroupsPanel, itemNamesPanel;
@@ -177,7 +177,7 @@ public class ChartsTab extends JPanel {
 			toDatePicker.setEnabled(enableDatePickers);
 		});
 
-		groupBy = new JComboBox(GroupBy.values());
+		groupBy = new JComboBox<>(GroupBy.values());
 		groupBy.setEditable(false);
 
 		loadData = new JButton("Load Data", Images.SEARCH);
@@ -248,7 +248,7 @@ public class ChartsTab extends JPanel {
 			itemNamesPanel.add(f, "w 150" + wrap);
 		}
 
-		show = new JComboBox(Show.values());
+		show = new JComboBox<>(Show.values());
 		show.addActionListener(event -> {
 			Show selected = (Show) show.getSelectedItem();
 

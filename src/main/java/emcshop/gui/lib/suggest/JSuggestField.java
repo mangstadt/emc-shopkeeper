@@ -50,7 +50,7 @@ public class JSuggestField extends JTextField {
 	private Point location;
 
 	/** List contained in the drop-down dialog. */
-	private JList list;
+	private JList<String> list;
 
 	/**
 	 * Vectors containing the original data and the filtered data for the
@@ -70,13 +70,15 @@ public class JSuggestField extends JTextField {
 	 */
 	private Font busy, regular;
 
-	/** Needed for the new narrowing search, so we know when to reset the list */
+	/**
+	 * Needed for the new narrowing search, so we know when to reset the list
+	 */
 	private String lastWord = "";
 
 	/**
 	 * The last chosen variable which exists. Needed if user continued to type
 	 * but didn't press the enter key
-	 * */
+	 */
 	private String lastChosenExistingVariable;
 
 	/**
@@ -168,7 +170,7 @@ public class JSuggestField extends JTextField {
 		dropDownList.setUndecorated(true);
 		dropDownList.setFocusableWindowState(false);
 		dropDownList.setFocusable(false);
-		list = new JList();
+		list = new JList<>();
 		list.addMouseListener(new MouseAdapter() {
 			private int selected;
 
@@ -261,7 +263,7 @@ public class JSuggestField extends JTextField {
 		return true;
 	}
 
-	public void setListCellRenderer(ListCellRenderer renderer) {
+	public void setListCellRenderer(ListCellRenderer<String> renderer) {
 		list.setCellRenderer(renderer);
 	}
 

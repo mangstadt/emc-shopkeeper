@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -886,12 +885,9 @@ public class InventoryTab extends JPanel implements ExportListener {
 		return null;
 	}
 
-	private class CategoryComboBox extends JComboBox {
+	private class CategoryComboBox extends JComboBox<CategoryInfo> {
 		public CategoryComboBox() {
-			Set<CategoryInfo> categoriesSet = index.getCategories();
-
-			//sort alphabetically
-			List<CategoryInfo> categories = new ArrayList<CategoryInfo>(categoriesSet);
+			List<CategoryInfo> categories = new ArrayList<CategoryInfo>(index.getCategories());
 			Collections.sort(categories, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
 			//add "all" and "misc" items
@@ -899,10 +895,10 @@ public class InventoryTab extends JPanel implements ExportListener {
 			categories.add(1, LOW);
 			categories.add(MISC);
 
-			setModel(new DefaultComboBoxModel(categories.toArray()));
+			setModel(new DefaultComboBoxModel<CategoryInfo>(categories.toArray(new CategoryInfo[0])));
 			setEditable(false);
 
-			setRenderer(new ListCellRenderer() {
+			setRenderer(new ListCellRenderer<CategoryInfo>() {
 				private final Font orig;
 				private final Font bold;
 				private final JLabel label = new JLabel();
@@ -916,12 +912,11 @@ public class InventoryTab extends JPanel implements ExportListener {
 				}
 
 				@Override
-				public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
-					if (value == null) {
+				public Component getListCellRendererComponent(JList<? extends CategoryInfo> list, CategoryInfo category, int index, boolean selected, boolean hasFocus) {
+					if (category == null) {
 						return null;
 					}
 
-					CategoryInfo category = (CategoryInfo) value;
 					label.setText(category.getName());
 
 					ImageIcon icon = category.getIcon();

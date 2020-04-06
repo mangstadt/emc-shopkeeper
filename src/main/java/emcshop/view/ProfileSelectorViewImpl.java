@@ -18,7 +18,7 @@ import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class ProfileSelectorViewImpl extends JDialog implements IProfileSelectorView {
-	private final JComboBox profiles;
+	private final JComboBox<String> profiles;
 	private final JButton ok, quit;
 
 	public ProfileSelectorViewImpl(Window owner) {
@@ -29,7 +29,7 @@ public class ProfileSelectorViewImpl extends JDialog implements IProfileSelector
 
 		setIconImage(Images.APP_ICON.getImage());
 
-		profiles = new JComboBox();
+		profiles = new JComboBox<>();
 		profiles.setEditable(true);
 
 		ok = new JButton("OK");
@@ -64,7 +64,7 @@ public class ProfileSelectorViewImpl extends JDialog implements IProfileSelector
 
 	@Override
 	public void setAvailableProfiles(List<String> profiles) {
-		this.profiles.setModel(new DefaultComboBoxModel(new Vector<String>(profiles)));
+		this.profiles.setModel(new DefaultComboBoxModel<String>(new Vector<String>(profiles)));
 	}
 
 	@Override

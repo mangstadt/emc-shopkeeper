@@ -839,7 +839,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		}
 	}
 
-	private static class SortComboBox extends JComboBox {
+	private static class SortComboBox extends JComboBox<SortItem> {
 		public SortComboBox() {
 			super(SortItem.values());
 		}

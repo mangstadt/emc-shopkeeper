@@ -15,7 +15,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
  * @see "http://raginggoblin.wordpress.com/2010/05/04/jcombobox-with-disabled-items/"
  */
 //@formatter:on
-@SuppressWarnings("serial")
+@SuppressWarnings({ "rawtypes", "serial", "unchecked" })
 public class DisabledItemsComboBox extends JComboBox {
 	private Set<Integer> disabledItemIndexes = new HashSet<Integer>();
 

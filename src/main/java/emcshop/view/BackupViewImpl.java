@@ -38,7 +38,7 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	private final JLabel backupLoading, restoreLoading;
 	private final JNumberTextField frequency, max;
 	private final SettingsPanel settingsPanel;
-	private final JList backups;
+	private final JList<Date> backups;
 	private final List<ActionListener> deleteListeners = new ArrayList<ActionListener>();
 	private final List<ActionListener> restoreListeners = new ArrayList<ActionListener>();
 	private final List<ActionListener> exitListeners = new ArrayList<ActionListener>();
@@ -127,14 +127,13 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 			GuiUtils.fireEvents(deleteListeners);
 		});
 
-		backups = new JList();
+		backups = new JList<>();
 		backups.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		backups.setCellRenderer(new ListCellRenderer() {
+		backups.setCellRenderer(new ListCellRenderer<Date>() {
 			private final RelativeDateFormat df = new RelativeDateFormat();
 
 			@Override
-			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
-				Date date = (Date) value;
+			public Component getListCellRendererComponent(JList<? extends Date> list, Date date, int index, boolean selected, boolean hasFocus) {
 				JLabel label = new JLabel(df.format(date));
 				UIDefaultsWrapper.assignListFormats(label, selected);
 				return label;
@@ -240,9 +239,9 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 
 	@Override
 	public void setBackups(final List<Date> backups) {
-		this.backups.setModel(new AbstractListModel() {
+		this.backups.setModel(new AbstractListModel<Date>() {
 			@Override
-			public Object getElementAt(int index) {
+			public Date getElementAt(int index) {
 				return backups.get(index);
 			}
 

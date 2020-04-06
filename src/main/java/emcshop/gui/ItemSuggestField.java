@@ -32,7 +32,7 @@ public class ItemSuggestField extends JSuggestField {
 		super(parent, itemNames);
 
 		setSuggestMatcher(new ContainsMatcher());
-		setListCellRenderer(new ListCellRenderer() {
+		setListCellRenderer(new ListCellRenderer<String>() {
 			private final JLabel label = new JLabel();
 			{
 				label.setOpaque(true);
@@ -42,8 +42,7 @@ public class ItemSuggestField extends JSuggestField {
 			private final ImageIcon empty = Images.getItemImage("_empty");
 
 			@Override
-			public Component getListCellRendererComponent(JList list, Object value, int index, boolean selected, boolean hasFocus) {
-				String itemName = (String) value;
+			public Component getListCellRendererComponent(JList<? extends String> list, String itemName, int index, boolean selected, boolean hasFocus) {
 				label.setText(itemName);
 
 				ImageIcon icon = itemIcons.get(itemName);

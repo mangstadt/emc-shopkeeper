@@ -911,7 +911,7 @@ public class PaymentsTab extends JPanel {
 			}
 		}
 
-		private static class TransactionTypeComboBox extends JComboBox {
+		private static class TransactionTypeComboBox extends JComboBox<String> {
 			private static final String MY_SHOP = "My Shop";
 			private static final String OTHER_SHOP = "Other Shop";
 
