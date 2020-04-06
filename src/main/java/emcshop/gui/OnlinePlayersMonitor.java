@@ -23,7 +23,7 @@ public class OnlinePlayersMonitor {
 
 	private final EmcWebsiteConnection connection;
 	private final int refreshRate;
-	private final Map<String, EmcServer> onlinePlayers = new HashMap<String, EmcServer>();
+	private final Map<String, EmcServer> onlinePlayers = new HashMap<>();
 
 	/**
 	 * @param connection the connection to the EMC website

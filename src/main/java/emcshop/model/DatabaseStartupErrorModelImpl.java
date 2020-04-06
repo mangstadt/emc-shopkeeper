@@ -23,7 +23,7 @@ public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel
 	private final BackupManager backupManager;
 	private final ReportSender reportSender;
 	private final Throwable thrown;
-	private final List<ActionListener> restoreCompleteListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> restoreCompleteListeners = new ArrayList<>();
 
 	/**
 	 * @param thrown the exception that was thrown

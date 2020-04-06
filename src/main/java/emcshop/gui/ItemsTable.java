@@ -328,7 +328,7 @@ public class ItemsTable extends GroupableColumnsTable {
 		columnModel.getColumn(Column.PPU_SELL.ordinal()).setMaxWidth(75);
 
 		//define column groups
-		List<ColumnGroup> columnGroups = new ArrayList<ColumnGroup>();
+		List<ColumnGroup> columnGroups = new ArrayList<>();
 
 		ColumnGroup columnGroup = new ColumnGroup("Avg PPU");
 		columnGroup.add(columnModel.getColumn(Column.PPU_BUY.ordinal()));

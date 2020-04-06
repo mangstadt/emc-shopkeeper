@@ -19,9 +19,9 @@ public class FirstUpdateViewCli implements IFirstUpdateView {
 	private Integer stopAtPage, maxPaymentTransactionAge;
 	private Long estimatedTime;
 
-	private final List<ActionListener> onCancelListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> onBeginListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> onStopAtPageListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> onCancelListeners = new ArrayList<>();
+	private final List<ActionListener> onBeginListeners = new ArrayList<>();
+	private final List<ActionListener> onStopAtPageListeners = new ArrayList<>();
 
 	@Override
 	public void addOnCancelListener(ActionListener listener) {

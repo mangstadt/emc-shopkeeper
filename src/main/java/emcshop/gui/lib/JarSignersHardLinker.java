@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class JarSignersHardLinker {
 	private static final Logger logger = Logger.getLogger(JarSignersHardLinker.class.getName());
-	private static final List<Object> hardRefs = new ArrayList<Object>();
+	private static final List<Object> hardRefs = new ArrayList<>();
 
 	private static void makeHardSignersRef(JarFile jar) throws IOException {
 		logger.fine("Making hard refs for: " + jar);
@@ -126,7 +126,7 @@ public class JarSignersHardLinker {
 	 * @throws IOException if there's a problem getting the list of JARs
 	 */
 	private static Set<JarFile> getAllJarsFilesInClassPath() throws IOException {
-		Set<JarFile> jars = new LinkedHashSet<JarFile>();
+		Set<JarFile> jars = new LinkedHashSet<>();
 		for (URL url : getAllJarUrls()) {
 			try {
 				JarFile jar = getJarFile(url);
@@ -147,7 +147,7 @@ public class JarSignersHardLinker {
 	 * @throws IOException if there's a problem getting the list of JARs
 	 */
 	private static Set<URL> getAllJarUrls() throws IOException {
-		Set<URL> urls = new LinkedHashSet<URL>();
+		Set<URL> urls = new LinkedHashSet<>();
 		Enumeration<URL> mfUrls = Thread.currentThread().getContextClassLoader().getResources("META-INF/MANIFEST.MF");
 		while (mfUrls.hasMoreElements()) {
 			URL jarUrl = mfUrls.nextElement();

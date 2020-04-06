@@ -17,7 +17,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 //@formatter:on
 @SuppressWarnings({ "rawtypes", "serial", "unchecked" })
 public class DisabledItemsComboBox extends JComboBox {
-	private Set<Integer> disabledItemIndexes = new HashSet<Integer>();
+	private Set<Integer> disabledItemIndexes = new HashSet<>();
 
 	public DisabledItemsComboBox() {
 		setRenderer(new DisabledItemsRenderer());

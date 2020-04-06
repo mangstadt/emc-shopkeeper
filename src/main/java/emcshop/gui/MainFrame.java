@@ -224,7 +224,7 @@ public class MainFrame extends JFrame {
 			.parent(settingsMenu)
 			.add();
 			{
-				Map<String, Level> levels = new LinkedHashMap<String, Level>();
+				Map<String, Level> levels = new LinkedHashMap<>();
 				levels.put("Detailed", Level.FINEST);
 				levels.put("Normal", Level.INFO);
 				levels.put("Off", Level.OFF);
@@ -589,7 +589,7 @@ public class MainFrame extends JFrame {
 	public void exit() {
 		WindowState state = WindowState.of(this);
 		if (!Boolean.TRUE.equals(state.getComponentValues().get("dateRange.range"))) {
-			Map<String, Object> map = new HashMap<String, Object>(state.getComponentValues());
+			Map<String, Object> map = new HashMap<>(state.getComponentValues());
 			map.remove("dateRange.from");
 			map.remove("dateRange.to");
 			state = new WindowState(map, state.getLocation(), state.getSize(), state.getState());

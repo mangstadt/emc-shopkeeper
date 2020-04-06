@@ -108,7 +108,7 @@ public class CliController {
 		}
 
 		//sort items
-		List<ItemGroup> sortedItemGroups = new ArrayList<ItemGroup>(itemGroups);
+		List<ItemGroup> sortedItemGroups = new ArrayList<>(itemGroups);
 		Collections.sort(sortedItemGroups, (left, right) -> left.getItem().compareToIgnoreCase(right.getItem()));
 
 		if ("CSV".equalsIgnoreCase(format)) {

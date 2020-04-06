@@ -15,8 +15,8 @@ public class LoginViewCli implements ILoginView {
 
 	private String savedUsername, username, savedPassword, password;
 
-	private final List<ActionListener> onLoginListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> onCancelListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> onLoginListeners = new ArrayList<>();
+	private final List<ActionListener> onCancelListeners = new ArrayList<>();
 
 	@Override
 	public void addOnLoginListener(ActionListener listener) {

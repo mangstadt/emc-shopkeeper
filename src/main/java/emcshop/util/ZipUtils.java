@@ -25,7 +25,7 @@ public final class ZipUtils {
 	 */
 	public static void zipDirectory(File directory, File zipFile, ZipListener listener) throws IOException {
 		String rootPath = directory.getParent();
-		LinkedList<File> folders = new LinkedList<File>();
+		LinkedList<File> folders = new LinkedList<>();
 		folders.add(directory);
 
 		try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(zipFile))) {
@@ -81,7 +81,7 @@ public final class ZipUtils {
 	public static long getDirectorySize(File directory) {
 		long size = 0;
 
-		LinkedList<File> folders = new LinkedList<File>();
+		LinkedList<File> folders = new LinkedList<>();
 		folders.add(directory);
 		while (!folders.isEmpty()) {
 			File folder = folders.removeLast();

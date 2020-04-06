@@ -51,7 +51,7 @@ public class ChatLogParser {
 		Pattern fileNameRegex = Pattern.compile("^" + dateStr + "-(\\d+)\\.log\\.gz$");
 
 		//get the log files for this date
-		Map<Integer, File> logFiles = new TreeMap<Integer, File>();
+		Map<Integer, File> logFiles = new TreeMap<>();
 		for (File file : logDir.listFiles()) {
 			if (!file.isFile()) {
 				continue;
@@ -79,7 +79,7 @@ public class ChatLogParser {
 		}
 
 		//parse log files
-		List<ChatMessage> messages = new ArrayList<ChatMessage>();
+		List<ChatMessage> messages = new ArrayList<>();
 		for (File file : logFiles.values()) {
 			InputStream in = new FileInputStream(file);
 			if (file.getName().endsWith(".gz")) {

@@ -37,7 +37,7 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 	private final JLabel errorIcon, restoreLoading;
 	private final JButton quit, report, restore;
 	private final JList<Date> backups;
-	private final List<ActionListener> restoreListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> restoreListeners = new ArrayList<>();
 
 	public DatabaseStartupErrorViewImpl(Window owner) {
 		super(owner, "Error");

@@ -100,7 +100,7 @@ public class Leaf {
 	 * @return the leaf objects
 	 */
 	private List<Leaf> leavesFrom(NodeList nodeList) {
-		List<Leaf> leaves = new ArrayList<Leaf>();
+		List<Leaf> leaves = new ArrayList<>();
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
 			if (node instanceof Element) {
@@ -128,7 +128,7 @@ public class Leaf {
 	 */
 	public Map<String, String> attributes() {
 		NamedNodeMap attributes = element.getAttributes();
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Attr attribute = (Attr) attributes.item(i);
 			String key = attribute.getName();

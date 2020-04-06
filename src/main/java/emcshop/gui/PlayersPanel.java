@@ -441,7 +441,7 @@ public class PlayersPanel extends JPanel {
 			return new LinkedList<PlayerGroup>(playerGroups);
 		}
 
-		List<PlayerGroup> filteredPlayers = new LinkedList<PlayerGroup>();
+		List<PlayerGroup> filteredPlayers = new LinkedList<>();
 		for (PlayerGroup playerGroup : playerGroups) {
 			String playerName = playerGroup.getPlayer().getName();
 			if (filteredPlayerNames.isFiltered(playerName)) {
@@ -456,7 +456,7 @@ public class PlayersPanel extends JPanel {
 			return itemGroups;
 		}
 
-		List<PlayerGroup> removePlayers = new ArrayList<PlayerGroup>();
+		List<PlayerGroup> removePlayers = new ArrayList<>();
 		ListMultimap<PlayerGroup, ItemGroup> filteredItems = ArrayListMultimap.create();
 		for (PlayerGroup playerGroup : filteredPlayers) {
 			Collection<ItemGroup> itemGroups;

@@ -82,7 +82,7 @@ public class ItemIndex {
 		}
 
 		//parse categories
-		Map<Integer, CategoryInfo> categoriesById = new HashMap<Integer, CategoryInfo>();
+		Map<Integer, CategoryInfo> categoriesById = new HashMap<>();
 		{
 			List<Leaf> categoryElements = document.select("/Items/Categories/Category");
 
@@ -298,7 +298,7 @@ public class ItemIndex {
 	 * @return the item display names (sorted alphabetically)
 	 */
 	public List<String> getItemNames() {
-		List<String> names = new ArrayList<String>(byName.size());
+		List<String> names = new ArrayList<>(byName.size());
 		for (ItemInfo item : byName.values()) {
 			names.add(item.name);
 		}

@@ -60,7 +60,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 	protected Connection conn;
 	protected String jdbcUrl;
-	private Map<Integer, Date[]> firstLastSeenDates = new HashMap<Integer, Date[]>();
+	private Map<Integer, Date[]> firstLastSeenDates = new HashMap<>();
 
 	private final Map<Class<? extends RupeeTransaction>, String> bonusFeeColumnNames;
 	{
@@ -269,7 +269,7 @@ public abstract class DirbyDbDao implements DbDao {
 	public List<String> getItemNames() throws SQLException {
 		try (PreparedStatement stmt = stmt("SELECT name FROM items ORDER BY Lower(name)")) {
 			ResultSet rs = stmt.executeQuery();
-			List<String> names = new ArrayList<String>();
+			List<String> names = new ArrayList<>();
 			while (rs.next()) {
 				names.add(rs.getString("name"));
 			}
@@ -294,7 +294,7 @@ public abstract class DirbyDbDao implements DbDao {
 		for (String displayName : aliases.keySet()) {
 			Item itemOfficial = new Item(getItemId(displayName), displayName);
 
-			List<Item> itemAliases = new ArrayList<Item>();
+			List<Item> itemAliases = new ArrayList<>();
 			for (String name : aliases.get(displayName)) {
 				Integer id = getItemId(name);
 				if (id != null) {
@@ -322,7 +322,7 @@ public abstract class DirbyDbDao implements DbDao {
 			 * "official" row, and which rows need to be reassigned to point to
 			 * the "official" row and then deleted.
 			 */
-			List<Integer> idsToReassign = new ArrayList<Integer>();
+			List<Integer> idsToReassign = new ArrayList<>();
 			Integer newId;
 			if (itemOfficial.id == null) {
 				/*
@@ -463,13 +463,13 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void populateItemsTable() throws SQLException {
 		//get all existing item names
-		Set<String> existingItemNames = new HashSet<String>();
+		Set<String> existingItemNames = new HashSet<>();
 		for (String itemName : getItemNames()) {
 			existingItemNames.add(itemName.toLowerCase());
 		}
 
 		//find all items names that aren't in the database
-		List<String> toInsert = new ArrayList<String>();
+		List<String> toInsert = new ArrayList<>();
 		ItemIndex itemIndex = ItemIndex.instance();
 		for (String itemName : itemIndex.getItemNames()) {
 			if (existingItemNames.contains(itemName.toLowerCase())) {
@@ -498,7 +498,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Date getEarliestTransactionDate() throws SQLException {
-		List<Date> dates = new ArrayList<Date>();
+		List<Date> dates = new ArrayList<>();
 		String[] tables = { "transactions", "payment_transactions" };
 		for (String table : tables) {
 			try (PreparedStatement selectStmt = stmt("SELECT Min(ts) FROM " + table)) {
@@ -679,7 +679,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 		try (PreparedStatement selectStmt = stmt(sql)) {
 			ResultSet rs = selectStmt.executeQuery();
-			List<PaymentTransactionDb> transactions = new ArrayList<PaymentTransactionDb>();
+			List<PaymentTransactionDb> transactions = new ArrayList<>();
 			while (rs.next()) {
 				PaymentTransactionDb transaction = new PaymentTransactionDb(rs);
 				transactions.add(transaction);
@@ -724,7 +724,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Collection<ItemGroup> getItemGroups(Date from, Date to, ShopTransactionType transactionType) throws SQLException {
-		Map<String, ItemGroup> itemGroups = new HashMap<String, ItemGroup>();
+		Map<String, ItemGroup> itemGroups = new HashMap<>();
 
 		//@formatter:off
 		String sql =
@@ -817,7 +817,7 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public List<ShopTransactionDb> getTransactionsByDate(Date from, Date to, ShopTransactionType transactionType) throws SQLException {
 		String sql;
-		List<String> where = new ArrayList<String>();
+		List<String> where = new ArrayList<>();
 		//@formatter:off
 		if (transactionType == ShopTransactionType.MY_SHOP) {
 			sql =
@@ -852,9 +852,9 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 		sql += " ORDER BY t.ts";
 
-		List<ShopTransactionDb> transactions = new ArrayList<ShopTransactionDb>();
-		Map<String, ShopTransactionDb> lastTransactionByItem = new HashMap<String, ShopTransactionDb>();
-		Map<ShopTransactionDb, Date> dateOfLastTransaction = new HashMap<ShopTransactionDb, Date>();
+		List<ShopTransactionDb> transactions = new ArrayList<>();
+		Map<String, ShopTransactionDb> lastTransactionByItem = new HashMap<>();
+		Map<ShopTransactionDb, Date> dateOfLastTransaction = new HashMap<>();
 		try (PreparedStatement stmt = stmt(sql)) {
 			int index = 1;
 			if (from != null) {
@@ -924,10 +924,10 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Collection<PlayerGroup> getPlayerGroups(Date from, Date to, ShopTransactionType transactionType) throws SQLException {
-		Map<String, PlayerGroup> playerGroups = new HashMap<String, PlayerGroup>();
+		Map<String, PlayerGroup> playerGroups = new HashMap<>();
 
 		String sql;
-		List<String> where = new ArrayList<String>();
+		List<String> where = new ArrayList<>();
 		//@formatter:off
 		switch (transactionType){
 		case MY_SHOP:
@@ -1073,7 +1073,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Collection<Inventory> getInventory() throws SQLException {
-		Collection<Inventory> inventory = new ArrayList<Inventory>();
+		Collection<Inventory> inventory = new ArrayList<>();
 
 		try (PreparedStatement stmt = stmt("SELECT inventory.*, items.name AS item_name FROM inventory INNER JOIN items ON inventory.item = items.id")) {
 			ResultSet rs = stmt.executeQuery();
@@ -1104,7 +1104,7 @@ public abstract class DirbyDbDao implements DbDao {
 			return;
 		}
 
-		List<Integer> allIds = new ArrayList<Integer>(oldItemIds);
+		List<Integer> allIds = new ArrayList<>(oldItemIds);
 		allIds.add(newItemId);
 
 		int totalQuantity = 0;
@@ -1223,8 +1223,8 @@ public abstract class DirbyDbDao implements DbDao {
 			return;
 		}
 
-		List<Integer> values = new ArrayList<Integer>();
-		List<String> assignments = new ArrayList<String>();
+		List<Integer> values = new ArrayList<>();
+		List<String> assignments = new ArrayList<>();
 		for (Map.Entry<Class<? extends RupeeTransaction>, String> entry : bonusFeeColumnNames.entrySet()) {
 			MutableInt value = totals.get(entry.getKey());
 			if (value == null) {
@@ -1331,7 +1331,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	private Map<Date, Profits> getProfits(Date from, Date to, boolean byDay) throws SQLException {
-		Map<Date, Profits> profits = new LinkedHashMap<Date, Profits>();
+		Map<Date, Profits> profits = new LinkedHashMap<>();
 
 		//@formatter:off
 		String sql =

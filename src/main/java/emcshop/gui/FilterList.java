@@ -7,8 +7,8 @@ import java.util.List;
  * Represents a list of filtered keywords.
  */
 public class FilterList {
-	private final List<String> keywords = new ArrayList<String>();
-	private final List<Boolean> wholeMatches = new ArrayList<Boolean>();
+	private final List<String> keywords = new ArrayList<>();
+	private final List<Boolean> wholeMatches = new ArrayList<>();
 
 	/**
 	 * Adds a keyword to the list

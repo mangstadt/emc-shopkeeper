@@ -446,7 +446,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		private final JButton expand, showItemsSmall, showPlayersSmall, showTransactionsSmall;
 		private final JLabel description;
 
-		private final List<SearchListener> listeners = new ArrayList<SearchListener>();
+		private final List<SearchListener> listeners = new ArrayList<>();
 
 		public QueryPanel() {
 			fullPanel = new JPanel(new MigLayout("insets 0"));
@@ -756,8 +756,8 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		private final SortComboBox sortBy;
 		private final ExportButton export;
 
-		private final List<FilterListener> filterListeners = new ArrayList<FilterListener>();
-		private final List<SortListener> sortListeners = new ArrayList<SortListener>();
+		private final List<FilterListener> filterListeners = new ArrayList<>();
+		private final List<SortListener> sortListeners = new ArrayList<>();
 
 		public FilterPanel(ExportListener listener) {
 			filterByItem = new FilterTextField();

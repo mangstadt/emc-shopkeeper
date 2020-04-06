@@ -10,7 +10,7 @@ import java.util.List;
 public class AppContext {
 	private static AppContext INSTANCE;
 
-	private final List<Object> objects = new ArrayList<Object>();
+	private final List<Object> objects = new ArrayList<>();
 
 	AppContext() {
 		//empty

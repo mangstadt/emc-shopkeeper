@@ -33,7 +33,7 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 	private final JCheckBox paymentTransactionAgeCheckbox;
 	private final JLabel paymentTransactionAgeLabel;
 
-	private final List<ActionListener> onStopAtChanged = new ArrayList<ActionListener>();
+	private final List<ActionListener> onStopAtChanged = new ArrayList<>();
 
 	public FirstUpdateViewImpl(Window owner) {
 		super(owner, "First Update", ModalityType.APPLICATION_MODAL);

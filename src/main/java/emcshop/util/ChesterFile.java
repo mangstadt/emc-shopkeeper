@@ -53,7 +53,7 @@ public class ChesterFile {
 			double playerY = Double.parseDouble(split[1]);
 			double playerZ = Double.parseDouble(split[2]);
 
-			Map<String, Integer> items = new HashMap<String, Integer>();
+			Map<String, Integer> items = new HashMap<>();
 			while ((line = bufReader.readLine()) != null) {
 				if (line.isEmpty()) {
 					continue;

@@ -58,7 +58,7 @@ public final class ClasspathUtils {
 	 * the classpath
 	 */
 	public static List<URI> listFilesInPackage(String packageName) throws IOException {
-		List<URI> filesInPackage = new ArrayList<URI>();
+		List<URI> filesInPackage = new ArrayList<>();
 		String packagePath = packageName.replace(".", File.separator) + File.separator;
 
 		String cp = System.getProperty("java.class.path");
@@ -94,7 +94,7 @@ public final class ClasspathUtils {
 		packageName = packageName.replace(".", "/");
 
 		try (JarFile jarFile = new JarFile(jar)) {
-			List<URI> filesInPackage = new ArrayList<URI>();
+			List<URI> filesInPackage = new ArrayList<>();
 			Enumeration<JarEntry> entries = jarFile.entries();
 			while (entries.hasMoreElements()) {
 				JarEntry entry = entries.nextElement();

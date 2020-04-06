@@ -30,8 +30,8 @@ import javax.swing.table.TableColumnModel;
 public class CheckBoxColumn extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, ActionListener {
 	private final JTable table;
 	private final Action action;
-	private final Map<Integer, JCheckBox> editCheckboxes = new HashMap<Integer, JCheckBox>();
-	private final Map<Integer, JCheckBox> renderCheckboxes = new HashMap<Integer, JCheckBox>();
+	private final Map<Integer, JCheckBox> editCheckboxes = new HashMap<>();
+	private final Map<Integer, JCheckBox> renderCheckboxes = new HashMap<>();
 	private final Border originalBorder;
 
 	private Border focusBorder;
@@ -87,7 +87,7 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 	 * @return the checkbox states
 	 */
 	public Map<Integer, Boolean> getStates() {
-		Map<Integer, Boolean> states = new HashMap<Integer, Boolean>();
+		Map<Integer, Boolean> states = new HashMap<>();
 		for (Map.Entry<Integer, JCheckBox> entry : editCheckboxes.entrySet()) {
 			Integer row = entry.getKey();
 			JCheckBox checkbox = entry.getValue();
@@ -103,7 +103,7 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 	 * @return the selected rows
 	 */
 	public List<Integer> getSelectedRows() {
-		List<Integer> selectedRows = new ArrayList<Integer>();
+		List<Integer> selectedRows = new ArrayList<>();
 
 		for (Map.Entry<Integer, JCheckBox> entry : editCheckboxes.entrySet()) {
 			JCheckBox checkbox = entry.getValue();

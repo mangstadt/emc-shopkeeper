@@ -31,7 +31,7 @@ public class ReportSender {
 
 	private final String url;
 	private Integer dbVersion;
-	private final BlockingQueue<Job> queue = new LinkedBlockingQueue<Job>();
+	private final BlockingQueue<Job> queue = new LinkedBlockingQueue<>();
 
 	public ReportSender() {
 		this("http://mikeangstadt.name/emc-shopkeeper/error-report.php");

@@ -218,7 +218,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 	private class ChatLogEditorPane extends JEditorPane {
 		private final DateFormat df = new SimpleDateFormat("HH:mm:ss");
-		private final Map<String, String> channelColors = new HashMap<String, String>();
+		private final Map<String, String> channelColors = new HashMap<>();
 		{
 			channelColors.put("T", "green");
 			channelColors.put("C", "green");
@@ -422,7 +422,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		private final JLabel searchLabel;
 		private final JTextField search;
 
-		private final List<SearchListener> searchListeners = new ArrayList<SearchListener>();
+		private final List<SearchListener> searchListeners = new ArrayList<>();
 
 		public FilterPanel() {
 			searchLabel = new JLabel("Search current log:");

@@ -9,7 +9,7 @@ import java.util.Stack;
 public class BBCodeBuilder implements CharSequence {
 	private static final String NEWLINE = System.getProperty("line.separator");
 	private final StringBuilder bbCode = new StringBuilder();
-	private final Stack<String> openTags = new Stack<String>();
+	private final Stack<String> openTags = new Stack<>();
 
 	/**
 	 * Opens an underline tag.

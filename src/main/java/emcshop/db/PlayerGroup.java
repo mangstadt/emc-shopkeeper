@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public class PlayerGroup {
 	private Player player;
-	private Map<String, ItemGroup> items = new HashMap<String, ItemGroup>();
+	private Map<String, ItemGroup> items = new HashMap<>();
 
 	public Player getPlayer() {
 		return player;

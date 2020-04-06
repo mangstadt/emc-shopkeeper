@@ -17,7 +17,7 @@ public class ProfileSelectorModelImpl implements IProfileSelectorModel {
 
 	@Override
 	public List<String> getAvailableProfiles() {
-		List<String> profiles = new ArrayList<String>();
+		List<String> profiles = new ArrayList<>();
 
 		File files[] = profileRootDir.listFiles();
 		for (File file : files) {

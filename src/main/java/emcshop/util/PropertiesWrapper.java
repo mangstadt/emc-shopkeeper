@@ -110,7 +110,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	}
 
 	public Map<String, String> getMap(String keyStartsWith) {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		Pattern p = Pattern.compile("^" + Pattern.quote(keyStartsWith) + "(.*)");
 		for (Map.Entry<String, String> entry : this) {
 			String key = entry.getKey();
@@ -148,7 +148,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 			return null;
 		}
 
-		Map<String, Object> componentValues = new HashMap<String, Object>();
+		Map<String, Object> componentValues = new HashMap<>();
 		Pattern keyRegex = Pattern.compile("^" + Pattern.quote(key) + "\\.(.*?)\\.(.*)");
 		for (Map.Entry<String, String> entry : this) {
 			Matcher m = keyRegex.matcher(entry.getKey());
@@ -250,7 +250,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	 */
 	public Set<String> keySet() {
 		Set<Object> keySet = properties.keySet();
-		Set<String> set = new HashSet<String>(keySet.size());
+		Set<String> set = new HashSet<>(keySet.size());
 		for (Object k : keySet) {
 			set.add((String) k);
 		}

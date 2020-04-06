@@ -12,7 +12,7 @@ import com.google.common.collect.ForwardingSet;
  * case).
  */
 public class CaseInsensitiveHashSet extends ForwardingSet<String> {
-	private final Set<String> set = new HashSet<String>();
+	private final Set<String> set = new HashSet<>();
 
 	public static Set<String> create() {
 		return new CaseInsensitiveHashSet();
@@ -70,7 +70,7 @@ public class CaseInsensitiveHashSet extends ForwardingSet<String> {
 	}
 
 	private Collection<Object> sanitize(Collection<?> values) {
-		Collection<Object> sanitized = new ArrayList<Object>(values.size());
+		Collection<Object> sanitized = new ArrayList<>(values.size());
 		for (Object value : values) {
 			Object s = sanitize(value);
 			sanitized.add(s);
@@ -79,7 +79,7 @@ public class CaseInsensitiveHashSet extends ForwardingSet<String> {
 	}
 
 	private Collection<String> sanitizeStr(Collection<? extends String> values) {
-		Collection<String> sanitized = new ArrayList<String>(values.size());
+		Collection<String> sanitized = new ArrayList<>(values.size());
 		for (String value : values) {
 			String s = sanitize(value);
 			sanitized.add(s);

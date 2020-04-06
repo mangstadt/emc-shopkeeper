@@ -63,7 +63,7 @@ public class WindowState {
 	}
 
 	private static Map<String, Object> getComponentValues(Container container) {
-		Map<String, Object> componentValues = new HashMap<String, Object>();
+		Map<String, Object> componentValues = new HashMap<>();
 		for (Component component : new RecursiveComponentIterator(container)) {
 			String name = component.getName();
 			if (name == null) {

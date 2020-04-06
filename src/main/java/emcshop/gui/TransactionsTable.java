@@ -88,7 +88,7 @@ public class TransactionsTable extends JTable {
 	}
 
 	public List<ShopTransactionDb> getDisplayedTransactions() {
-		List<ShopTransactionDb> transactions = new ArrayList<ShopTransactionDb>(getRowCount());
+		List<ShopTransactionDb> transactions = new ArrayList<>(getRowCount());
 		for (int row = 0; row < getRowCount(); row++) {
 			int rowModel = convertRowIndexToModel(row);
 			ShopTransactionDb transaction = model.transactions.get(rowModel);
@@ -98,7 +98,7 @@ public class TransactionsTable extends JTable {
 	}
 
 	public int getDisplayedPlayersCount() {
-		Set<String> players = new HashSet<String>();
+		Set<String> players = new HashSet<>();
 		for (ShopTransactionDb transaction : getDisplayedTransactions()) {
 			String player = getPlayerName(transaction);
 			players.add(player);
@@ -139,7 +139,7 @@ public class TransactionsTable extends JTable {
 	}
 
 	private TableRowSorter<Model> createRowSorter() {
-		TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
+		TableRowSorter<Model> rowSorter = new TableRowSorter<>(model);
 
 		rowSorter.setComparator(Column.TS.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> one.getTs().compareTo(two.getTs()));
 		rowSorter.setComparator(Column.PLAYER_NAME.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> {
@@ -187,7 +187,7 @@ public class TransactionsTable extends JTable {
 			return;
 		}
 
-		RowFilter<Model, Integer> filter = new RowFilter<Model, Integer>() {
+		rowSorter.setRowFilter(new RowFilter<Model, Integer>() {
 			@Override
 			public boolean include(RowFilter.Entry<? extends Model, ? extends Integer> entry) {
 				int row = entry.getIdentifier();
@@ -204,9 +204,7 @@ public class TransactionsTable extends JTable {
 				String name = getPlayerName(transaction);
 				return filteredPlayerNames.isFiltered(name);
 			}
-
-		};
-		rowSorter.setRowFilter(filter);
+		});
 	}
 
 	public void setShowQuantitiesInStacks(boolean enable) {

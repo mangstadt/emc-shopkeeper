@@ -47,7 +47,7 @@ public class ProfileLoader {
 	private final File cacheDir;
 	private final Set<String> downloaded = CaseInsensitiveHashSet.create();
 	private final ListMultimap<String, Job> waitList = CaseInsensitiveMultimap.create();
-	private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<String>();
+	private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<>();
 	private final PlayerProfileSerializer profileSerializer = new PlayerProfileSerializer();
 
 	private final PortraitCache portraitCache = new PortraitCache();
@@ -390,7 +390,7 @@ public class ProfileLoader {
 	}
 
 	private static class ProfileCache {
-		private final Map<String, PlayerProfile> cache = new HashMap<String, PlayerProfile>();
+		private final Map<String, PlayerProfile> cache = new HashMap<>();
 
 		public synchronized PlayerProfile get(String player) {
 			return cache.get(key(player));

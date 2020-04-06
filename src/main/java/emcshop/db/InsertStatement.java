@@ -24,8 +24,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class InsertStatement {
 	private final String tableName;
-	private final Set<String> columnNames = new LinkedHashSet<String>();
-	private final List<Map<String, SqlColumn>> rows = new ArrayList<Map<String, SqlColumn>>();
+	private final Set<String> columnNames = new LinkedHashSet<>();
+	private final List<Map<String, SqlColumn>> rows = new ArrayList<>();
 	private final int supportedTypes[] = new int[] { Types.INTEGER, Types.VARCHAR, Types.DATE, Types.TIMESTAMP };
 	private Map<String, SqlColumn> currentRow;
 

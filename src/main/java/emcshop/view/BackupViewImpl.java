@@ -39,9 +39,9 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	private final JNumberTextField frequency, max;
 	private final SettingsPanel settingsPanel;
 	private final JList<Date> backups;
-	private final List<ActionListener> deleteListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> restoreListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> exitListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> deleteListeners = new ArrayList<>();
+	private final List<ActionListener> restoreListeners = new ArrayList<>();
+	private final List<ActionListener> exitListeners = new ArrayList<>();
 
 	public BackupViewImpl(Window owner) {
 		super(owner, "Database Backup Settings", ModalityType.APPLICATION_MODAL);

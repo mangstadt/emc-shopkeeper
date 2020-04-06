@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Profits {
-	private final Map<String, Integer> customerTotals = new HashMap<String, Integer>();
-	private final Map<String, Integer> supplierTotals = new HashMap<String, Integer>();
+	private final Map<String, Integer> customerTotals = new HashMap<>();
+	private final Map<String, Integer> supplierTotals = new HashMap<>();
 	private int balance;
 
 	public void addTransaction(String item, int amount) {

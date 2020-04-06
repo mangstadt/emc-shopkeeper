@@ -65,7 +65,7 @@ public class ChartsTab extends JPanel {
 	private final DbDao dao;
 	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 	private final ItemIndex index = ItemIndex.instance();
-	private final Map<String, ImageIcon> groupIcons = new HashMap<String, ImageIcon>();
+	private final Map<String, ImageIcon> groupIcons = new HashMap<>();
 	{
 		groupIcons.put("Clay", Images.getItemImage("Terracotta"));
 		groupIcons.put("Diamonds", Images.getItemImage("Diamond"));
@@ -96,7 +96,7 @@ public class ChartsTab extends JPanel {
 
 	private final JComboBox<Show> show;
 	private final JPanel showPanel;
-	private final Map<String, ImageCheckBox> itemGroupCheckboxes = new LinkedHashMap<String, ImageCheckBox>();
+	private final Map<String, ImageCheckBox> itemGroupCheckboxes = new LinkedHashMap<>();
 	private final JPanel itemGroupsPanel, itemNamesPanel;
 	private final List<ItemSuggestField> itemNames;
 
@@ -198,7 +198,7 @@ public class ChartsTab extends JPanel {
 		showPanel = new JPanel(new MigLayout("insets 0"));
 
 		ActionListener checkboxListener = event -> refreshChart();
-		List<String> groupNames = new ArrayList<String>(index.getItemGroupNames());
+		List<String> groupNames = new ArrayList<>(index.getItemGroupNames());
 		Collections.sort(groupNames);
 		for (String group : groupNames) {
 			ImageIcon icon = groupIcons.get(group);
@@ -367,7 +367,7 @@ public class ChartsTab extends JPanel {
 	}
 
 	private Map<String, Integer> organizeIntoGroups(Map<String, Integer> itemAmounts) {
-		Map<String, Integer> groupAmounts = new HashMap<String, Integer>();
+		Map<String, Integer> groupAmounts = new HashMap<>();
 
 		for (Map.Entry<String, Integer> entry : itemAmounts.entrySet()) {
 			String item = entry.getKey();
@@ -387,7 +387,7 @@ public class ChartsTab extends JPanel {
 	}
 
 	private List<String> getSelectedGroups() {
-		List<String> groups = new ArrayList<String>();
+		List<String> groups = new ArrayList<>();
 
 		for (Map.Entry<String, ImageCheckBox> entry : itemGroupCheckboxes.entrySet()) {
 			ImageCheckBox checkbox = entry.getValue();
@@ -401,7 +401,7 @@ public class ChartsTab extends JPanel {
 	}
 
 	private Set<String> getSelectedItems() {
-		Set<String> items = new HashSet<String>();
+		Set<String> items = new HashSet<>();
 
 		for (ItemSuggestField field : itemNames) {
 			String item = field.getText();
@@ -444,7 +444,7 @@ public class ChartsTab extends JPanel {
 
 		if (show.getSelectedItem() == Show.ITEM_GROUPS) {
 			//create TimeSeries for each selected group
-			Map<String, TimeSeries> series = new HashMap<String, TimeSeries>();
+			Map<String, TimeSeries> series = new HashMap<>();
 			for (String group : getSelectedGroups()) {
 				TimeSeries ts = new TimeSeries(group);
 				series.put(group, ts);
@@ -485,7 +485,7 @@ public class ChartsTab extends JPanel {
 
 		if (show.getSelectedItem() == Show.ITEMS) {
 			//create TimeSeries for each item
-			Map<String, TimeSeries> series = new HashMap<String, TimeSeries>();
+			Map<String, TimeSeries> series = new HashMap<>();
 			for (String item : getSelectedItems()) {
 				TimeSeries ts = new TimeSeries(item);
 				series.put(item.toLowerCase(), ts);

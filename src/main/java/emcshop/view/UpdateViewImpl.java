@@ -41,7 +41,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	private final JButton cancel, stop;
 	private final JLabel pagesLabel, shopTransactionsLabel, paymentTransactionsLabel, bonusFeeTransactionsLabel, timerLabel;
 	private final JCheckBox display;
-	private final List<ActionListener> reportErrorListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> reportErrorListeners = new ArrayList<>();
 
 	private int pagesCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount;
 	private Date oldestTransactionDate;

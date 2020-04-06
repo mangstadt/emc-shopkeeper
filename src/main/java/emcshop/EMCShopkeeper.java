@@ -444,7 +444,7 @@ public class EMCShopkeeper {
 		}
 
 		List<String> alreadyReported = settings.getReportedUnknownItems();
-		List<String> itemsToReport = new ArrayList<String>();
+		List<String> itemsToReport = new ArrayList<>();
 		ItemIndex itemIndex = ItemIndex.instance();
 		for (String itemName : itemNames) {
 			if (itemIndex.isUnknownItem(itemName) && !alreadyReported.contains(itemName)) {

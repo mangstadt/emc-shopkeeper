@@ -155,7 +155,7 @@ public class PaymentsTab extends JPanel {
 					}
 					latest.transaction.setAmount(amountTotal);
 
-					List<Row> toDelete = new ArrayList<Row>(selected);
+					List<Row> toDelete = new ArrayList<>(selected);
 					toDelete.remove(latest);
 
 					try {
@@ -284,7 +284,7 @@ public class PaymentsTab extends JPanel {
 		}
 
 		public List<Row> getSelected() {
-			List<Row> selected = new ArrayList<Row>();
+			List<Row> selected = new ArrayList<>();
 			for (Row row : model.data) {
 				if (row.selected) {
 					selected.add(row);
@@ -294,7 +294,7 @@ public class PaymentsTab extends JPanel {
 		}
 
 		private TableRowSorter<Model> createRowSorter() {
-			TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
+			TableRowSorter<Model> rowSorter = new TableRowSorter<>(model);
 
 			rowSorter.setSortable(Column.CHECKBOX.ordinal(), false);
 			rowSorter.setSortable(Column.SPLIT.ordinal(), false);

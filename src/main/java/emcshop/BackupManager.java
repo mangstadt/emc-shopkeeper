@@ -55,7 +55,7 @@ public class BackupManager {
 		}
 
 		Map<Date, File> backups = getBackups();
-		List<Date> dates = new ArrayList<Date>(backups.keySet());
+		List<Date> dates = new ArrayList<>(backups.keySet());
 		Collections.sort(dates, Collections.reverseOrder());
 
 		for (int i = maxBackups; i < dates.size(); i++) {
@@ -181,13 +181,13 @@ public class BackupManager {
 	 */
 	public List<Date> getBackupDates() {
 		Map<Date, File> backups = getBackups();
-		List<Date> dates = new ArrayList<Date>(backups.keySet());
+		List<Date> dates = new ArrayList<>(backups.keySet());
 		Collections.sort(dates, Collections.reverseOrder());
 		return dates;
 	}
 
 	private Map<Date, File> getBackups() {
-		Map<Date, File> backups = new HashMap<Date, File>();
+		Map<Date, File> backups = new HashMap<>();
 		if (!backupDir.isDirectory()) {
 			return backups;
 		}

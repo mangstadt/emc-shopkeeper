@@ -56,7 +56,7 @@ public abstract class GroupableColumnsTable extends JTable {
 	 */
 	public static class ColumnGroup {
 		private TableCellRenderer renderer;
-		private List<Object> v = new ArrayList<Object>();
+		private List<Object> v = new ArrayList<>();
 		private String text;
 		private int margin = 0;
 
@@ -224,7 +224,7 @@ public abstract class GroupableColumnsTable extends JTable {
 			int column = 0;
 			Dimension size = header.getSize();
 			Rectangle cellRect = new Rectangle(0, 0, size.width, size.height);
-			Map<ColumnGroup, Rectangle> h = new HashMap<ColumnGroup, Rectangle>();
+			Map<ColumnGroup, Rectangle> h = new HashMap<>();
 			int columnMargin = header.getColumnModel().getColumnMargin();
 
 			Enumeration<TableColumn> enumeration = header.getColumnModel().getColumns();

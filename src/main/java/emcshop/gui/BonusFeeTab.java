@@ -151,7 +151,7 @@ public class BonusFeeTab extends JPanel {
 		}
 
 		private TableRowSorter<Model> createRowSorter() {
-			TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
+			TableRowSorter<Model> rowSorter = new TableRowSorter<>(model);
 
 			rowSorter.setComparator(Column.DESCRIPTION.ordinal(), (Row one, Row two) -> one.description.compareToIgnoreCase(two.description));
 			rowSorter.setComparator(Column.TOTAL.ordinal(), (Row one, Row two) -> one.total - two.total);
@@ -191,7 +191,7 @@ public class BonusFeeTab extends JPanel {
 		}
 
 		private class Model extends AbstractTableModel {
-			private final List<Row> data = new ArrayList<Row>();
+			private final List<Row> data = new ArrayList<>();
 
 			@Override
 			public int getColumnCount() {

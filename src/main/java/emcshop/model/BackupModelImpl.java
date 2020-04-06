@@ -23,9 +23,9 @@ public class BackupModelImpl implements IBackupModel {
 	private final Settings settings;
 	private final BackupManager backupManager;
 
-	private final List<ActionListener> backupCompleteListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> backupPercentCompleteListeners = new ArrayList<ActionListener>();
-	private final List<ActionListener> restoreCompleteListeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> backupCompleteListeners = new ArrayList<>();
+	private final List<ActionListener> backupPercentCompleteListeners = new ArrayList<>();
+	private final List<ActionListener> restoreCompleteListeners = new ArrayList<>();
 
 	public BackupModelImpl() {
 		dao = context.get(DbDao.class);

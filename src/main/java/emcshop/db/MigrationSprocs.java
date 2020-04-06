@@ -104,9 +104,9 @@ public final class MigrationSprocs {
 			DbDao dao = new DirbyEmbeddedDbDao(conn);
 
 			//find all the bad player names
-			List<Integer> badPlayerIds = new ArrayList<Integer>();
-			List<Integer> goodPlayerIds = new ArrayList<Integer>();
-			List<String> reasons = new ArrayList<String>();
+			List<Integer> badPlayerIds = new ArrayList<>();
+			List<Integer> goodPlayerIds = new ArrayList<>();
+			List<String> reasons = new ArrayList<>();
 			try (PreparedStatement stmt = conn.prepareStatement("SELECT id, name FROM players")) {
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
@@ -142,7 +142,7 @@ public final class MigrationSprocs {
 			}
 
 			//find all transactions that are affected and determine their proper playerId
-			Map<Integer, Integer> transactionIdToNewPlayerId = new HashMap<Integer, Integer>();
+			Map<Integer, Integer> transactionIdToNewPlayerId = new HashMap<>();
 			try (PreparedStatement stmt = conn.prepareStatement("SELECT \"transaction\" FROM payment_transactions WHERE player = ? AND \"transaction\" IS NOT NULL")) {
 				for (int i = 0; i < badPlayerIds.size(); i++) {
 					Integer badPlayerId = badPlayerIds.get(i);

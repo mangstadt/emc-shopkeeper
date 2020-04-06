@@ -144,7 +144,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 				return;
 			}
 
-			List<Integer> selectedIds = new ArrayList<Integer>(selected.size());
+			List<Integer> selectedIds = new ArrayList<>(selected.size());
 			for (Row row : selected) {
 				selectedIds.add(row.inventory.getId());
 			}
@@ -410,7 +410,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 		public List<Row> getSelected() {
 			int rows = getRowCount();
-			List<Row> selected = new ArrayList<Row>();
+			List<Row> selected = new ArrayList<>();
 			for (int i = 0; i < rows; i++) {
 				int modelRow = convertRowIndexToModel(i);
 				Row row = model.data.get(modelRow);
@@ -492,7 +492,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 		private class InventoryTableModel extends AbstractTableModel {
 			//Java 7 compiler wants this field to be public
-			public final List<Row> data = new ArrayList<Row>();
+			public final List<Row> data = new ArrayList<>();
 
 			public void setData(Collection<Inventory> data) {
 				this.data.clear();
@@ -729,7 +729,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 		}
 
 		private TableRowSorter<InventoryTableModel> createRowSorter() {
-			TableRowSorter<InventoryTableModel> rowSorter = new TableRowSorter<InventoryTableModel>(model);
+			TableRowSorter<InventoryTableModel> rowSorter = new TableRowSorter<>(model);
 
 			rowSorter.setSortable(Column.CHECKBOX.ordinal(), false);
 			rowSorter.setComparator(Column.ITEM_NAME.ordinal(), (Row one, Row two) -> one.inventory.getItem().compareToIgnoreCase(two.inventory.getItem()));
@@ -868,7 +868,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 	@Override
 	public String exportData(ExportType type) {
 		int rows = table.getRowCount();
-		List<Inventory> inventory = new ArrayList<Inventory>(rows);
+		List<Inventory> inventory = new ArrayList<>(rows);
 		for (int i = 0; i < rows; i++) {
 			int modelRow = table.convertRowIndexToModel(i);
 			Row row = table.model.data.get(modelRow);
@@ -887,7 +887,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 	private class CategoryComboBox extends JComboBox<CategoryInfo> {
 		public CategoryComboBox() {
-			List<CategoryInfo> categories = new ArrayList<CategoryInfo>(index.getCategories());
+			List<CategoryInfo> categories = new ArrayList<>(index.getCategories());
 			Collections.sort(categories, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
 			//add "all" and "misc" items
@@ -949,7 +949,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 		private final CategoryComboBox category;
 		private final ExportButton export;
 
-		private final List<FilterListener> filterListeners = new ArrayList<FilterListener>();
+		private final List<FilterListener> filterListeners = new ArrayList<>();
 
 		public FilterPanel(ExportListener exportListener) {
 			delete = new JButton("Delete");
@@ -1083,7 +1083,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 		}
 
 		public Collection<Inventory> getItems() {
-			Map<String, Inventory> map = new HashMap<String, Inventory>();
+			Map<String, Inventory> map = new HashMap<>();
 
 			for (Row row : table.model.data) {
 				if (row.idUnknown) {
@@ -1145,7 +1145,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 							try {
 								ChesterFile chesterFile = ChesterFile.parse(file);
-								List<Row> rows = new ArrayList<Row>();
+								List<Row> rows = new ArrayList<>();
 								for (Map.Entry<String, Integer> entry : chesterFile.getItems().entrySet()) {
 									String id = entry.getKey();
 									Integer quantity = entry.getValue();

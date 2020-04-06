@@ -16,7 +16,7 @@ import javax.swing.JTabbedPane;
  * @author Michael Angstadt
  */
 public class RecursiveComponentIterator implements Iterator<Component>, Iterable<Component> {
-	private final List<Component> components = new ArrayList<Component>();
+	private final List<Component> components = new ArrayList<>();
 	private int curIndex = 0;
 	private Component next;
 
