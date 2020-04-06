@@ -9,7 +9,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -170,12 +169,9 @@ public class PlayersPanel extends JPanel {
 		final JList list = new JList(new Vector<PlayerGroup>(displayedPlayers));
 		list.setCellRenderer(new ListCellRenderer() {
 			private static final int profileImageSize = 32;
-			private final ProfileDownloadedListener onImageDownloaded = new ProfileDownloadedListener() {
-				@Override
-				public void onProfileDownloaded(PlayerProfile profile) {
-					synchronized (this) {
-						list.repaint();
-					}
+			private final ProfileDownloadedListener onImageDownloaded = profile -> {
+				synchronized (this) {
+					list.repaint();
 				}
 			};
 
@@ -493,79 +489,53 @@ public class PlayersPanel extends JPanel {
 		switch (sort) {
 		case PLAYER:
 			//sort by player name
-			Collections.sort(players, new Comparator<PlayerGroup>() {
-				@Override
-				public int compare(PlayerGroup a, PlayerGroup b) {
-					return a.getPlayer().getName().compareToIgnoreCase(b.getPlayer().getName());
-				}
-			});
+			Collections.sort(players, (a, b) -> a.getPlayer().getName().compareToIgnoreCase(b.getPlayer().getName()));
 
 			//sort each player's item list by item name
 			for (PlayerGroup group : players) {
-				Collections.sort(items.get(group), new Comparator<ItemGroup>() {
-					@Override
-					public int compare(ItemGroup a, ItemGroup b) {
-						return a.getItem().compareToIgnoreCase(b.getItem());
-					}
-				});
+				Collections.sort(items.get(group), (a, b) -> a.getItem().compareToIgnoreCase(b.getItem()));
 			}
 			break;
 		case SUPPLIER:
 			//sort by net sold amount ascending
-			Collections.sort(players, new Comparator<PlayerGroup>() {
-				@Override
-				public int compare(PlayerGroup a, PlayerGroup b) {
-					int netA = 0;
-					for (ItemGroup item : items.get(a)) {
-						netA += item.getNetAmount();
-					}
-
-					int netB = 0;
-					for (ItemGroup item : items.get(b)) {
-						netB += item.getNetAmount();
-					}
-
-					return netA - netB;
+			Collections.sort(players, (a, b) -> {
+				int netA = 0;
+				for (ItemGroup item : items.get(a)) {
+					netA += item.getNetAmount();
 				}
+
+				int netB = 0;
+				for (ItemGroup item : items.get(b)) {
+					netB += item.getNetAmount();
+				}
+
+				return netA - netB;
 			});
 
 			//sort each player's item list by item amount ascending
 			for (PlayerGroup group : players) {
-				Collections.sort(items.get(group), new Comparator<ItemGroup>() {
-					@Override
-					public int compare(ItemGroup a, ItemGroup b) {
-						return a.getNetAmount() - b.getNetAmount();
-					}
-				});
+				Collections.sort(items.get(group), (a, b) -> a.getNetAmount() - b.getNetAmount());
 			}
 			break;
 		case CUSTOMER:
 			//sort by net bought amount descending
-			Collections.sort(players, new Comparator<PlayerGroup>() {
-				@Override
-				public int compare(PlayerGroup a, PlayerGroup b) {
-					int netA = 0;
-					for (ItemGroup item : items.get(a)) {
-						netA += item.getNetAmount();
-					}
-
-					int netB = 0;
-					for (ItemGroup item : items.get(b)) {
-						netB += item.getNetAmount();
-					}
-
-					return netB - netA;
+			Collections.sort(players, (a, b) -> {
+				int netA = 0;
+				for (ItemGroup item : items.get(a)) {
+					netA += item.getNetAmount();
 				}
+
+				int netB = 0;
+				for (ItemGroup item : items.get(b)) {
+					netB += item.getNetAmount();
+				}
+
+				return netB - netA;
 			});
 
 			//sort each player's item list by item amount descending
 			for (PlayerGroup group : players) {
-				Collections.sort(items.get(group), new Comparator<ItemGroup>() {
-					@Override
-					public int compare(ItemGroup a, ItemGroup b) {
-						return b.getNetAmount() - a.getNetAmount();
-					}
-				});
+				Collections.sort(items.get(group), (a, b) -> b.getNetAmount() - a.getNetAmount());
 			}
 			break;
 		}

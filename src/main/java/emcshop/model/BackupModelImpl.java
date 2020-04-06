@@ -90,64 +90,58 @@ public class BackupModelImpl implements IBackupModel {
 
 	@Override
 	public Thread startBackup() {
-		Thread t = new Thread("Backup") {
-			@Override
-			public void run() {
-				try {
-					dao.close();
-					final long size = backupManager.getSizeOfDatabase();
-					backupManager.backup(new ZipListener() {
-						private long zipped = 0;
+		Thread t = new Thread(() -> {
+			try {
+				dao.close();
+				long size = backupManager.getSizeOfDatabase();
+				backupManager.backup(new ZipListener() {
+					private long zipped = 0;
 
-						@Override
-						public void onZippedFile(File file) {
-							zipped += file.length();
-							double percent = ((double) zipped / size) * 100.0;
-							GuiUtils.fireEvents(backupPercentCompleteListeners, new ActionEvent(BackupModelImpl.this, 0, percent + ""));
-						}
-					});
-				} catch (IOException e) {
-					//TODO display error
-					throw new RuntimeException(e);
-				} catch (SQLException e) {
-					//TODO display error
-					throw new RuntimeException(e);
+					@Override
+					public void onZippedFile(File file) {
+						zipped += file.length();
+						double percent = ((double) zipped / size) * 100.0;
+						GuiUtils.fireEvents(backupPercentCompleteListeners, new ActionEvent(BackupModelImpl.this, 0, percent + ""));
+					}
+				});
+			} catch (IOException e) {
+				//TODO display error
+				throw new RuntimeException(e);
+			} catch (SQLException e) {
+				//TODO display error
+				throw new RuntimeException(e);
+			} finally {
+				try {
+					GuiUtils.fireEvents(backupCompleteListeners);
 				} finally {
 					try {
-						GuiUtils.fireEvents(backupCompleteListeners);
-					} finally {
-						try {
-							dao.reconnect();
-						} catch (SQLException e) {
-							//ignore
-						}
+						dao.reconnect();
+					} catch (SQLException e) {
+						throw new RuntimeException("Could not reconnect to database after backup completed.", e);
 					}
 				}
 			}
-		};
+		});
 		t.start();
 		return t;
 	}
 
 	@Override
-	public Thread startRestore(final Date date) {
-		Thread t = new Thread("Restore") {
-			@Override
-			public void run() {
-				try {
-					dao.close();
-					backupManager.restore(date);
-				} catch (IOException e) {
-					//TODO display error
-					throw new RuntimeException(e);
-				} catch (SQLException e) {
-					//TODO display error
-					throw new RuntimeException(e);
-				} finally {
-					GuiUtils.fireEvents(restoreCompleteListeners);
-				}
+	public Thread startRestore(Date date) {
+		Thread t = new Thread(() -> {
+			try {
+				dao.close();
+				backupManager.restore(date);
+			} catch (IOException e) {
+				//TODO display error
+				throw new RuntimeException(e);
+			} catch (SQLException e) {
+				//TODO display error
+				throw new RuntimeException(e);
+			} finally {
+				GuiUtils.fireEvents(restoreCompleteListeners);
 			}
-		};
+		});
 		t.start();
 		return t;
 	}

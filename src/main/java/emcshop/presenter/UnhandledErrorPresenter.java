@@ -1,8 +1,6 @@
 package emcshop.presenter;
 
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import emcshop.model.IUnhandledErrorModel;
 import emcshop.model.UnhandledErrorModelImpl;
@@ -17,19 +15,8 @@ public class UnhandledErrorPresenter {
 		this.view = view;
 		this.model = model;
 
-		view.addSendErrorReportListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onSendErrorReport();
-			}
-		});
-
-		view.addCloseListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onClose();
-			}
-		});
+		view.addSendErrorReportListener(event -> onSendErrorReport());
+		view.addCloseListener(event -> onClose());
 
 		view.setMessage(model.getMessage());
 		view.setThrown(model.getThrown());

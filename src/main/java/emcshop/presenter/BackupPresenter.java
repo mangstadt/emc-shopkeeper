@@ -1,7 +1,5 @@
 package emcshop.presenter;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Date;
 
 import emcshop.model.IBackupModel;
@@ -16,68 +14,20 @@ public class BackupPresenter {
 		this.view = view;
 		this.model = model;
 
-		view.addStartBackupListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onStartBackup();
-			}
+		view.addStartBackupListener(event -> onStartBackup());
+		view.addStartRestoreListener(event -> onStartRestore());
+		view.addDeleteBackupListener(event -> onDeleteBackup());
+		view.addSaveSettingsListener(event -> onSaveSettings());
+		view.addCancelListener(event -> onCancel());
+		view.addExitListener(event -> onExit());
+
+		model.addBackupPercentCompleteListener(event -> {
+			double percent = Double.parseDouble(event.getActionCommand());
+			onBackupPercentComplete(percent);
 		});
 
-		view.addStartRestoreListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onStartRestore();
-			}
-		});
-
-		view.addDeleteBackupListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onDeleteBackup();
-			}
-		});
-
-		view.addSaveSettingsListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onSaveSettings();
-			}
-		});
-
-		view.addCancelListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onCancel();
-			}
-		});
-
-		view.addExitListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onExit();
-			}
-		});
-
-		model.addBackupPercentCompleteListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				onBackupPercentComplete(Double.parseDouble(event.getActionCommand()));
-			}
-		});
-
-		model.addBackupCompleteListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onBackupComplete();
-			}
-		});
-
-		model.addRestoreCompleteListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onRestoreComplete();
-			}
-		});
+		model.addBackupCompleteListener(event -> onBackupComplete());
+		model.addRestoreCompleteListener(event -> onRestoreComplete());
 
 		view.setAutoBackupEnabled(model.getAutoBackupEnabled());
 		view.setBackupFrequency(model.getBackupFrequency());

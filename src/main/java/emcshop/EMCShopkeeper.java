@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -274,16 +273,8 @@ public class EMCShopkeeper {
 		context.add(reportSender);
 
 		//set uncaught exception handler
-		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-			@Override
-			public void uncaughtException(Thread thread, final Throwable thrown) {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						UnhandledErrorPresenter.show(null, "An error occurred.", thrown);
-					}
-				});
-			}
+		Thread.setDefaultUncaughtExceptionHandler((thread, thrown) -> {
+			SwingUtilities.invokeLater(() -> UnhandledErrorPresenter.show(null, "An error occurred.", thrown));
 		});
 
 		//show splash screen

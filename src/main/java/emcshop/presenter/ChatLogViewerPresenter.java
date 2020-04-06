@@ -1,7 +1,5 @@
 package emcshop.presenter;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Date;
 
@@ -17,26 +15,9 @@ public class ChatLogViewerPresenter {
 		this.view = view;
 		this.model = model;
 
-		view.addDateChangedListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onDateChanged();
-			}
-		});
-
-		view.addLogDirectoryChanged(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onLogDirectoryChanged();
-			}
-		});
-
-		view.addCloseListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onClose();
-			}
-		});
+		view.addDateChangedListener(event -> onDateChanged());
+		view.addLogDirectoryChanged(event -> onLogDirectoryChanged());
+		view.addCloseListener(event -> onClose());
 
 		view.setLogDirectory(model.getLogDirectory());
 		view.setCurrentPlayer(model.getCurrentPlayer());

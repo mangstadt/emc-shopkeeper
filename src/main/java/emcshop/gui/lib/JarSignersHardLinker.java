@@ -188,20 +188,17 @@ public class JarSignersHardLinker {
 
 		logger.fine("Starting Resource Preloader Hardlinker");
 
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Set<JarFile> jars = getAllJarsFilesInClassPath();
-					for (JarFile jar : jars) {
-						makeHardSignersRef(jar);
-					}
-				} catch (Throwable t) {
-					logger.log(Level.SEVERE, "Problem preloading resources.", t);
+		Thread thread = new Thread(() -> {
+			try {
+				Set<JarFile> jars = getAllJarsFilesInClassPath();
+				for (JarFile jar : jars) {
+					makeHardSignersRef(jar);
 				}
+			} catch (Throwable t) {
+				logger.log(Level.SEVERE, "Problem preloading resources.", t);
 			}
 		});
-		t.setDaemon(true);
-		t.start();
+		thread.setDaemon(true);
+		thread.start();
 	}
 }

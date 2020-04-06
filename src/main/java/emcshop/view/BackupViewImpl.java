@@ -3,7 +3,6 @@ package emcshop.view;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,16 +22,14 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.gui.HelpLabel;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.UIDefaultsWrapper;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class BackupViewImpl extends JDialog implements IBackupView {
@@ -50,104 +47,84 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 		super(owner, "Database Backup Settings", ModalityType.APPLICATION_MODAL);
 		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		GuiUtils.addCloseDialogListener(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (cancel.isEnabled()) {
-					cancel.doClick();
-				}
-			}
-		});
-		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (cancel.isEnabled()) {
-					cancel.doClick();
-				}
-			}
-		});
 
 		ok = new JButton("OK");
-
 		cancel = new JButton("Cancel");
-
 		backupNow = new JButton("Backup Now");
-		backupNow.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				backupLoading.setText("0%");
-				backupLoading.setVisible(true);
-
-				cancel.setEnabled(false);
-				ok.setEnabled(false);
-				enabled.setEnabled(false);
-				settingsPanel.setEnabled(false);
-				backupNow.setEnabled(false);
-				restore.setEnabled(false);
-				delete.setEnabled(false);
-			}
-		});
-
 		backupLoading = new JLabel(Images.LOADING_SMALL, SwingConstants.LEFT);
-		backupLoading.setVisible(false);
-
 		restoreLoading = new JLabel("Working...", Images.LOADING_SMALL, SwingConstants.LEFT);
-		restoreLoading.setVisible(false);
-
 		enabled = new JCheckBox("Enable automatic database backups");
-		enabled.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				settingsPanel.setEnabled(enabled.isSelected());
-			}
-		});
 		frequency = new JNumberTextField();
 		max = new JNumberTextField();
-
 		restore = new JButton("Restore");
-		restore.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				Date selected = getSelectedBackup();
-				if (selected == null) {
-					return;
-				}
+		delete = new JButton("Delete");
+		settingsPanel = new SettingsPanel();
 
-				int result = JOptionPane.showConfirmDialog(BackupViewImpl.this, "Are you sure you want to restore this backup?", "Confirm Restore", JOptionPane.YES_NO_OPTION);
-				if (result != JOptionPane.YES_OPTION) {
-					return;
-				}
-
-				restoreLoading.setVisible(true);
-
-				cancel.setEnabled(false);
-				ok.setEnabled(false);
-				enabled.setEnabled(false);
-				settingsPanel.setEnabled(false);
-				backupNow.setEnabled(false);
-				restore.setEnabled(false);
-				delete.setEnabled(false);
-
-				GuiUtils.fireEvents(restoreListeners);
+		GuiUtils.addCloseDialogListener(this, event -> {
+			if (cancel.isEnabled()) {
+				cancel.doClick();
+			}
+		});
+		GuiUtils.onEscapeKeyPress(this, event -> {
+			if (cancel.isEnabled()) {
+				cancel.doClick();
 			}
 		});
 
-		delete = new JButton("Delete");
-		delete.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Date selected = getSelectedBackup();
-				if (selected == null) {
-					return;
-				}
+		backupNow.addActionListener(event -> {
+			backupLoading.setText("0%");
+			backupLoading.setVisible(true);
 
-				int result = JOptionPane.showConfirmDialog(BackupViewImpl.this, "Are you sure you want to delete this backup?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-				if (result != JOptionPane.YES_OPTION) {
-					return;
-				}
+			cancel.setEnabled(false);
+			ok.setEnabled(false);
+			enabled.setEnabled(false);
+			settingsPanel.setEnabled(false);
+			backupNow.setEnabled(false);
+			restore.setEnabled(false);
+			delete.setEnabled(false);
+		});
 
-				GuiUtils.fireEvents(deleteListeners);
+		backupLoading.setVisible(false);
+		restoreLoading.setVisible(false);
+
+		enabled.addChangeListener(event -> settingsPanel.setEnabled(enabled.isSelected()));
+
+		restore.addActionListener(event -> {
+			Date selected = getSelectedBackup();
+			if (selected == null) {
+				return;
 			}
+
+			int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to restore this backup?", "Confirm Restore", JOptionPane.YES_NO_OPTION);
+			if (result != JOptionPane.YES_OPTION) {
+				return;
+			}
+
+			restoreLoading.setVisible(true);
+
+			cancel.setEnabled(false);
+			ok.setEnabled(false);
+			enabled.setEnabled(false);
+			settingsPanel.setEnabled(false);
+			backupNow.setEnabled(false);
+			restore.setEnabled(false);
+			delete.setEnabled(false);
+
+			GuiUtils.fireEvents(restoreListeners);
+		});
+
+		delete.addActionListener(event -> {
+			Date selected = getSelectedBackup();
+			if (selected == null) {
+				return;
+			}
+
+			int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this backup?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+			if (result != JOptionPane.YES_OPTION) {
+				return;
+			}
+
+			GuiUtils.fireEvents(deleteListeners);
 		});
 
 		backups = new JList();
@@ -184,7 +161,6 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 
 		add(enabled, "split 2, span 2");
 		add(new HelpLabel("", "Automatic backups occur while EMC Shopkeeper is starting up.  They typically take 5-10 seconds to complete."), "wrap");
-		settingsPanel = new SettingsPanel();
 		add(settingsPanel, "span 2, gapleft 15, wrap");
 
 		add(ok, "split 2, span 2, align center");

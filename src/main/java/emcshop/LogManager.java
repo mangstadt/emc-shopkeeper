@@ -1,11 +1,9 @@
 package emcshop;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Filter;
@@ -94,25 +92,19 @@ public class LogManager {
 		 * file name also starts with the base file name that we passed into the
 		 * logging API, and ends with ".lck".
 		 */
-		List<File> files = Arrays.asList(logFile.getParentFile().listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File file) {
-				String name = file.getName();
-				return name.startsWith(logFile.getName()) && !name.endsWith(".lck");
-			}
+		List<File> files = Arrays.asList(logFile.getParentFile().listFiles(file -> {
+			String name = file.getName();
+			return name.startsWith(logFile.getName()) && !name.endsWith(".lck");
 		}));
 
 		//sort by last modified time ascending
-		Collections.sort(files, new Comparator<File>() {
-			@Override
-			public int compare(File one, File two) {
-				/*
-				 * Do not cast the difference as an int and return that, since
-				 * it's technically possible that an overflow could occur.
-				 */
-				long diff = one.lastModified() - two.lastModified();
-				return (diff < 0) ? -1 : (diff > 0) ? 1 : 0;
-			}
+		Collections.sort(files, (one, two) -> {
+			/*
+			 * Do not cast the difference as an int and return that, since it's
+			 * technically possible that an overflow could occur.
+			 */
+			long diff = one.lastModified() - two.lastModified();
+			return (diff < 0) ? -1 : (diff > 0) ? 1 : 0;
 		});
 
 		StringBuilder sb = new StringBuilder();

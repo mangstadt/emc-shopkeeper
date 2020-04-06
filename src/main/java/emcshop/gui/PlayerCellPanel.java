@@ -39,12 +39,7 @@ public class PlayerCellPanel extends JPanel {
 	}
 
 	public void setPlayer(final String playerName) {
-		setPlayer(playerName, new ProfileDownloadedListener() {
-			@Override
-			public void onProfileDownloaded(PlayerProfile profile) {
-				profileLoader.getPortrait(playerName, playerLabel, 16);
-			}
-		});
+		setPlayer(playerName, downloadedProfile -> profileLoader.getPortrait(playerName, playerLabel, 16));
 	}
 
 	public void setPlayer(String playerName, ProfileDownloadedListener listener) {

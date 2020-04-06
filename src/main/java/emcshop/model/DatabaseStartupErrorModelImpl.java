@@ -61,26 +61,23 @@ public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel
 	}
 
 	@Override
-	public Thread startRestore(final Date date) {
-		Thread t = new Thread("Restore") {
-			@Override
-			public void run() {
-				try {
-					if (dao != null) {
-						dao.close();
-					}
-					backupManager.restore(date);
-				} catch (IOException e) {
-					//TODO display error
-					throw new RuntimeException(e);
-				} catch (SQLException e) {
-					//TODO display error
-					throw new RuntimeException(e);
-				} finally {
-					GuiUtils.fireEvents(restoreCompleteListeners);
+	public Thread startRestore(Date date) {
+		Thread t = new Thread(() -> {
+			try {
+				if (dao != null) {
+					dao.close();
 				}
+				backupManager.restore(date);
+			} catch (IOException e) {
+				//TODO display error
+				throw new RuntimeException(e);
+			} catch (SQLException e) {
+				//TODO display error
+				throw new RuntimeException(e);
+			} finally {
+				GuiUtils.fireEvents(restoreCompleteListeners);
 			}
-		};
+		});
 		t.start();
 		return t;
 	}

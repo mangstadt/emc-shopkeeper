@@ -8,9 +8,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.EMCShopkeeper;
 import emcshop.gui.images.Images;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * The splash screen that is shown on startup.
@@ -43,12 +43,7 @@ public class SplashFrame extends JFrame {
 	 * Sets the text on the splash screen.
 	 * @param message the text
 	 */
-	public void setMessage(final String message) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				SplashFrame.this.message.setText(message);
-			}
-		});
+	public void setMessage(String message) {
+		SwingUtilities.invokeLater(() -> this.message.setText(message));
 	}
 }

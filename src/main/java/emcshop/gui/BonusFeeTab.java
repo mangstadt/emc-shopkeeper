@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -154,18 +153,8 @@ public class BonusFeeTab extends JPanel {
 		private TableRowSorter<Model> createRowSorter() {
 			TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
 
-			rowSorter.setComparator(Column.DESCRIPTION.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.description.compareToIgnoreCase(two.description);
-				}
-			});
-			rowSorter.setComparator(Column.TOTAL.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.total - two.total;
-				}
-			});
+			rowSorter.setComparator(Column.DESCRIPTION.ordinal(), (Row one, Row two) -> one.description.compareToIgnoreCase(two.description));
+			rowSorter.setComparator(Column.TOTAL.ordinal(), (Row one, Row two) -> one.total - two.total);
 			rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.DESCRIPTION.ordinal(), SortOrder.ASCENDING)));
 			rowSorter.setSortsOnUpdates(true);
 
@@ -195,7 +184,7 @@ public class BonusFeeTab extends JPanel {
 				RelativeDateFormat df = new RelativeDateFormat();
 				text += " (" + df.format(highestBalanceTs) + ")";
 			}
-			
+
 			model.data.add(new Row("Highest Balance", bonusFee.getHighestBalance(), text));
 
 			model.fireTableDataChanged();

@@ -23,7 +23,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -54,12 +54,7 @@ public class ProfileLoader {
 	private final ProfileCache profileCache = new ProfileCache();
 
 	private int threads = 4;
-	private EmcWebsiteSessionFactory sessionFactory = new EmcWebsiteSessionFactory() {
-		@Override
-		public CloseableHttpClient createSession() {
-			return HttpClientBuilder.create().build();
-		}
-	};
+	private EmcWebsiteSessionFactory sessionFactory = HttpClients::createDefault;
 	private PlayerProfileScraper scraper = new PlayerProfileScraper();
 
 	/**

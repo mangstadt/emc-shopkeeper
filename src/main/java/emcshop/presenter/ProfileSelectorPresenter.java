@@ -1,8 +1,5 @@
 package emcshop.presenter;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import emcshop.model.IProfileSelectorModel;
 import emcshop.view.IProfileSelectorView;
 
@@ -16,19 +13,8 @@ public class ProfileSelectorPresenter {
 		this.view = view;
 		this.model = model;
 
-		view.addProfileSelectedListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onProfileSelected();
-			}
-		});
-
-		view.addCancelListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onCancel();
-			}
-		});
+		view.addProfileSelectedListener(event -> onProfileSelected());
+		view.addCancelListener(event -> onCancel());
 
 		view.setAvailableProfiles(model.getAvailableProfiles());
 		view.display();

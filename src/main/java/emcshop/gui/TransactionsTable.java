@@ -29,9 +29,7 @@ import emcshop.ItemIndex;
 import emcshop.Settings;
 import emcshop.db.ShopTransactionDb;
 import emcshop.db.ShopTransactionType;
-import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.Images;
-import emcshop.scraper.PlayerProfile;
 import emcshop.util.QuantityFormatter;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.RupeeFormatter;
@@ -144,38 +142,15 @@ public class TransactionsTable extends JTable {
 	private TableRowSorter<Model> createRowSorter() {
 		TableRowSorter<Model> rowSorter = new TableRowSorter<Model>(model);
 
-		rowSorter.setComparator(Column.TS.ordinal(), new Comparator<ShopTransactionDb>() {
-			@Override
-			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
-				return one.getTs().compareTo(two.getTs());
-			}
+		rowSorter.setComparator(Column.TS.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> one.getTs().compareTo(two.getTs()));
+		rowSorter.setComparator(Column.PLAYER_NAME.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> {
+			String name1 = getPlayerName(one);
+			String name2 = getPlayerName(two);
+			return name1.compareToIgnoreCase(name2);
 		});
-		rowSorter.setComparator(Column.PLAYER_NAME.ordinal(), new Comparator<ShopTransactionDb>() {
-			@Override
-			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
-				String name1 = getPlayerName(one);
-				String name2 = getPlayerName(two);
-				return name1.compareToIgnoreCase(name2);
-			}
-		});
-		rowSorter.setComparator(Column.ITEM_NAME.ordinal(), new Comparator<ShopTransactionDb>() {
-			@Override
-			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
-				return one.getItem().compareToIgnoreCase(two.getItem());
-			}
-		});
-		rowSorter.setComparator(Column.QUANTITY.ordinal(), new Comparator<ShopTransactionDb>() {
-			@Override
-			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
-				return one.getQuantity() - two.getQuantity();
-			}
-		});
-		rowSorter.setComparator(Column.AMOUNT.ordinal(), new Comparator<ShopTransactionDb>() {
-			@Override
-			public int compare(ShopTransactionDb one, ShopTransactionDb two) {
-				return one.getAmount() - two.getAmount();
-			}
-		});
+		rowSorter.setComparator(Column.ITEM_NAME.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> one.getItem().compareToIgnoreCase(two.getItem()));
+		rowSorter.setComparator(Column.QUANTITY.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> one.getQuantity() - two.getQuantity());
+		rowSorter.setComparator(Column.AMOUNT.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> one.getAmount() - two.getAmount());
 		rowSorter.setSortsOnUpdates(true);
 		rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.TS.ordinal(), SortOrder.DESCENDING)));
 
@@ -292,24 +267,18 @@ public class TransactionsTable extends JTable {
 			case PLAYER_NAME:
 				component = playerPanel;
 
-				final String playerName = getPlayerName(transaction);
-				playerPanel.setPlayer(playerName, new ProfileDownloadedListener() {
-					@Override
-					public void onProfileDownloaded(PlayerProfile profile) {
-						//re-render all cells with this player when the profile is downloaded
-						SwingUtilities.invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								for (int i = 0; i < model.getRowCount(); i++) {
-									ShopTransactionDb transaction = model.transactions.get(i);
-									String name = getPlayerName(transaction);
-									if (playerName.equalsIgnoreCase(name)) {
-										model.fireTableCellUpdated(i, col);
-									}
-								}
+				String playerName = getPlayerName(transaction);
+				playerPanel.setPlayer(playerName, profile -> {
+					//re-render all cells with this player when the profile is downloaded
+					SwingUtilities.invokeLater(() -> {
+						for (int i = 0; i < model.getRowCount(); i++) {
+							ShopTransactionDb shopTransaction = model.transactions.get(i);
+							String name = getPlayerName(shopTransaction);
+							if (playerName.equalsIgnoreCase(name)) {
+								model.fireTableCellUpdated(i, col);
 							}
-						});
-					}
+						}
+					});
 				});
 				break;
 

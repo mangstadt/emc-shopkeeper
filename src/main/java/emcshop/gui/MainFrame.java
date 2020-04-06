@@ -7,9 +7,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -37,8 +34,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
 
@@ -118,12 +113,7 @@ public class MainFrame extends JFrame {
 
 		progressPanel = new InfiniteProgressPanel();
 		setGlassPane(progressPanel);
-		ignoreKeyEvents = new KeyEventDispatcher() {
-			@Override
-			public boolean dispatchKeyEvent(KeyEvent event) {
-				return true;
-			}
-		};
+		ignoreKeyEvents = event -> true;
 
 		createMenu();
 		createWidgets();
@@ -178,59 +168,40 @@ public class MainFrame extends JFrame {
 		{
 			menu.addMenuItem("Open Profile Folder...")
 			.parent(tools)
-			.add(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					try {
-						GuiUtils.openFile(logManager.getFile().getParentFile());
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
+			.add(event -> {
+				try {
+					GuiUtils.openFile(logManager.getFile().getParentFile());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
 			});
 			
 			menu.addMenuItem("Show Application Log...")
 			.parent(tools)
-			.add(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					ShowLogDialog.show(MainFrame.this);
-				}
-			});
+			.add(event -> ShowLogDialog.show(this));
 			
 			menu.addMenuItem("Chat Log Viewer...")
 			.icon(Images.CHAT_LARGE)
 			.parent(tools)
-			.add(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					IChatLogViewerView view = new ChatLogViewerViewImpl(MainFrame.this);
-					IChatLogViewerModel model = new ChatLogViewerModelImpl();
-					new ChatLogViewerPresenter(view, model);
-				}
+			.add(event -> {
+				IChatLogViewerView view = new ChatLogViewerViewImpl(this);
+				IChatLogViewerModel model = new ChatLogViewerModelImpl();
+				new ChatLogViewerPresenter(view, model);
 			});
 			
 			clearSessionMenuItem = menu.addMenuItem("Clear Saved Session")
 			.parent(tools)
-			.add(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					context.remove(EmcSession.class);
-					clearSessionMenuItem.setEnabled(false);
-					JOptionPane.showMessageDialog(MainFrame.this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
-				}
+			.add(event -> {
+				context.remove(EmcSession.class);
+				clearSessionMenuItem.setEnabled(false);
+				JOptionPane.showMessageDialog(this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
 			});
 			clearSessionMenuItem.setEnabled(context.get(EmcSession.class) != null);
 			
 			menu.addMenuItem("Wipe Database...")
 			.icon(Images.WIPE_DATABASE)
 			.parent(tools)
-			.add(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					onWipeDatabase();
-				}
-			});
+			.add(event -> onWipeDatabase());
 		}
 
 		JMenu settingsMenu = menu.addMenu("Settings")
@@ -240,15 +211,12 @@ public class MainFrame extends JFrame {
 			menu.addMenuItem("Database Backup...")
 			.icon(Images.BACKUP_DATABASE)
 			.parent(settingsMenu)
-			.add(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					IBackupView view = new BackupViewImpl(MainFrame.this);
-					IBackupModel model = new BackupModelImpl();
-					BackupPresenter presenter = new BackupPresenter(view, model);
-					if (presenter.getExit()) {
-						exit();
-					}
+			.add(event -> {
+				IBackupView view = new BackupViewImpl(this);
+				IBackupModel model = new BackupModelImpl();
+				BackupPresenter presenter = new BackupPresenter(view, model);
+				if (presenter.getExit()) {
+					exit();
 				}
 			});
 
@@ -267,14 +235,11 @@ public class MainFrame extends JFrame {
 
 					JRadioButtonMenuItem levelItem = menu.addRadioButtonMenuItem(name, group)
 					.parent(logLevel)
-					.add(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent event) {
-							logger.finest("Changing log level to " + level.getName() + ".");
-							logManager.setLevel(level);
-							settings.setLogLevel(level);
-							settings.save();
-						}
+					.add(event -> {
+						logger.finest("Changing log level to " + level.getName() + ".");
+						logManager.setLevel(level);
+						settings.setLogLevel(level);
+						settings.save();
 					});
 
 					if (logManager.getLevel().equals(level)) {
@@ -286,17 +251,14 @@ public class MainFrame extends JFrame {
 			JCheckBoxMenuItem stacks = menu.addCheckboxMenuItem("Show Quantities in Stacks")
 			.icon(Images.STACK)
 			.parent(settingsMenu)
-			.add(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					JCheckBoxMenuItem source = (JCheckBoxMenuItem) event.getSource();
-					boolean stacks = source.isSelected();
-					settings.setShowQuantitiesInStacks(stacks);
-					settings.save();
+			.add(event -> {
+				JCheckBoxMenuItem source = (JCheckBoxMenuItem) event.getSource();
+				boolean showStacks = source.isSelected();
+				settings.setShowQuantitiesInStacks(showStacks);
+				settings.save();
 
-					inventoryTab.setShowQuantitiesInStacks(stacks);
-					transactionsTab.setShowQuantitiesInStacks(stacks);
-				}
+				inventoryTab.setShowQuantitiesInStacks(showStacks);
+				transactionsTab.setShowQuantitiesInStacks(showStacks);
 			});
 			stacks.setSelected(settings.isShowQuantitiesInStacks());
 
@@ -304,13 +266,10 @@ public class MainFrame extends JFrame {
 				JCheckBoxMenuItem showProfiles = menu.addCheckboxMenuItem("Show Profiles on Startup")
 				.icon(Images.SHOW_PROFILES)
 				.parent(settingsMenu)
-				.add(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent event) {
-						JCheckBoxMenuItem source = (JCheckBoxMenuItem) event.getSource();
-						settings.setShowProfilesOnStartup(source.isSelected());
-						settings.save();
-					}
+				.add(event -> {
+					JCheckBoxMenuItem source = (JCheckBoxMenuItem) event.getSource();
+					settings.setShowProfilesOnStartup(source.isSelected());
+					settings.save();
 				});
 				showProfiles.setSelected(settings.isShowProfilesOnStartup());
 			}
@@ -318,14 +277,11 @@ public class MainFrame extends JFrame {
 			JCheckBoxMenuItem reportUnknownItems = menu.addCheckboxMenuItem("Report Unknown Items")
 			.icon(Images.REPORT_UNKNOWN_ITEMS)
 			.parent(settingsMenu)
-			.add(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					JCheckBoxMenuItem source = (JCheckBoxMenuItem) event.getSource();
-					boolean report = source.isSelected();
-					settings.setReportUnknownItems(report);
-					settings.save();
-				}
+			.add(event -> {
+				JCheckBoxMenuItem source = (JCheckBoxMenuItem) event.getSource();
+				boolean report = source.isSelected();
+				settings.setReportUnknownItems(report);
+				settings.save();
 			});
 			reportUnknownItems.setSelected(settings.isReportUnknownItems());
 		}
@@ -334,41 +290,21 @@ public class MainFrame extends JFrame {
 
 		menu.addMenuItem("Changelog")
 		.icon(Images.CHANGELOG)
-		.add(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				ChangelogDialog.show(MainFrame.this);
-			}
-		});
+		.add(event -> ChangelogDialog.show(this));
 
 		menu.addMenuItem("About")
 		.icon(Images.HELP)
-		.add(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				AboutDialog.show(MainFrame.this);
-			}
-		});
+		.add(event -> AboutDialog.show(this));
 
 		menu.addMenuItem("Exit")
-		.add(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				exit();
-			}
-		});
+		.add(event -> exit());
 		//@formatter:on
 	}
 
 	private void createWidgets() {
 		update = new JButton("Update Transactions", Images.UPDATE);
 		update.setToolTipText(toolTipText("<font size=4><b>Update Transactions</b></font><br><br>Downloads your latest transactions from the EMC website."));
-		update.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				onUpdate();
-			}
-		});
+		update.addActionListener(event -> onUpdate());
 
 		updateAvailablePanel = new JPanel(new MigLayout("insets 0"));
 
@@ -379,14 +315,10 @@ public class MainFrame extends JFrame {
 		updateRupeeBalance();
 
 		tabs = new JTabbedPane();
-		tabs.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				Component selected = tabs.getSelectedComponent();
-
-				if (selected == paymentsTab && paymentsTab.isStale()) {
-					paymentsTab.reset();
-				}
+		tabs.addChangeListener(event -> {
+			Component selected = tabs.getSelectedComponent();
+			if (selected == paymentsTab && paymentsTab.isStale()) {
+				paymentsTab.reset();
 			}
 		});
 
@@ -446,7 +378,7 @@ public class MainFrame extends JFrame {
 		EmcSession session = context.get(EmcSession.class);
 		if (session == null) {
 			//user hasn't logged in
-			LoginPresenter p = loginShower.show(MainFrame.this);
+			LoginPresenter p = loginShower.show(this);
 			if (p.isCanceled()) {
 				return;
 			}
@@ -467,7 +399,7 @@ public class MainFrame extends JFrame {
 		if (latestTransactionDate == null) {
 			//it's the first update
 
-			IFirstUpdateView view = new FirstUpdateViewImpl(MainFrame.this);
+			IFirstUpdateView view = new FirstUpdateViewImpl(this);
 			view.setMaxPaymentTransactionAge(7);
 			view.setStopAtPage(5000);
 			IFirstUpdateModel model = new FirstUpdateModelImpl();
@@ -485,7 +417,7 @@ public class MainFrame extends JFrame {
 		}
 
 		//show the update dialog
-		IUpdateView view = new UpdateViewImpl(MainFrame.this, loginShower);
+		IUpdateView view = new UpdateViewImpl(this, loginShower);
 		Integer oldestPaymentTransactionInMillis = (oldestPaymentTransactionInDays == null) ? null : oldestPaymentTransactionInDays * 24 * 60 * 60 * 1000;
 		IUpdateModel model = new UpdateModelImpl(builder, oldestPaymentTransactionInMillis);
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
@@ -500,41 +432,35 @@ public class MainFrame extends JFrame {
 	}
 
 	private void onWipeDatabase() {
-		boolean reset = ResetDatabaseDialog.show(MainFrame.this);
+		boolean reset = ResetDatabaseDialog.show(this);
 		if (!reset) {
 			return;
 		}
 
 		startProgress("Resetting Database...");
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				try {
-					dao.wipe();
-					context.remove(EmcSession.class);
-					settings.save();
+		Thread t = new Thread(() -> {
+			try {
+				dao.wipe();
+				context.remove(EmcSession.class);
+				settings.save();
 
-					SwingUtilities.invokeAndWait(new Runnable() {
-						@Override
-						public void run() {
-							clearSessionMenuItem.setEnabled(false);
-							lastUpdateDate.setText("-");
-							updateRupeeBalance(0);
-							transactionsTab.clear();
-							updatePaymentsCount(0);
-							paymentsTab.reset();
-							inventoryTab.refresh();
-							bonusFeeTab.refresh();
-							graphsTab.clear();
-						}
-					});
-				} catch (Throwable e) {
-					throw new RuntimeException(e);
-				} finally {
-					stopProgress();
-				}
+				SwingUtilities.invokeAndWait(() -> {
+					clearSessionMenuItem.setEnabled(false);
+					lastUpdateDate.setText("-");
+					updateRupeeBalance(0);
+					transactionsTab.clear();
+					updatePaymentsCount(0);
+					paymentsTab.reset();
+					inventoryTab.refresh();
+					bonusFeeTab.refresh();
+					graphsTab.clear();
+				});
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			} finally {
+				stopProgress();
 			}
-		};
+		});
 		t.start();
 	}
 
@@ -679,59 +605,50 @@ public class MainFrame extends JFrame {
 			return;
 		}
 
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				GitHubCommitsApi gitHub = new GitHubCommitsApi("mangstadt", "emc-shopkeeper");
-				try {
-					logger.finest("Checking for updates.");
-					Date latestRelease = gitHub.getDateOfLatestCommit("dist/emc-shopkeeper-full.jar");
-					if (latestRelease == null) {
-						//couldn't find the release date
-						return;
-					}
-
-					/*
-					 * Allow for a buffer of 10 minutes because there will be a
-					 * few minutes difference between the build timestamp
-					 * and the commit timestamp.
-					 */
-					long diff = latestRelease.getTime() - EMCShopkeeper.BUILT.getTime();
-					if (diff < 1000 * 60 * 10) {
-						//already running the latest version
-						logger.finest("Running latest version.");
-						return;
-					}
-
-					SwingUtilities.invokeLater(new Runnable() {
-						@Override
-						public void run() {
-							updateAvailablePanel.add(new JLabel("<html><center><b>New Version Available!</b></center></html>"), "gapleft 10, align center, wrap");
-
-							if (GuiUtils.canOpenWebPages()) {
-								JButton downloadUpdate = new JButton("Download");
-								downloadUpdate.setIcon(Images.DOWNLOAD);
-								downloadUpdate.addActionListener(new ActionListener() {
-									@Override
-									public void actionPerformed(ActionEvent event) {
-										try {
-											GuiUtils.openWebPage(URI.create("https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar"));
-										} catch (IOException e) {
-											throw new RuntimeException("Error opening webpage.", e);
-										}
-									}
-								});
-								updateAvailablePanel.add(downloadUpdate, "gapleft 10, align center");
-							}
-
-							validate();
-						}
-					});
-				} catch (Throwable e) {
-					logger.log(Level.WARNING, "Problem checking for updates.", e);
+		Thread t = new Thread(() -> {
+			GitHubCommitsApi gitHub = new GitHubCommitsApi("mangstadt", "emc-shopkeeper");
+			try {
+				logger.finest("Checking for updates.");
+				Date latestRelease = gitHub.getDateOfLatestCommit("dist/emc-shopkeeper-full.jar");
+				if (latestRelease == null) {
+					//couldn't find the release date
+					return;
 				}
+
+				/*
+				 * Allow for a buffer of 10 minutes because there will be a few
+				 * minutes difference between the build timestamp and the commit
+				 * timestamp.
+				 */
+				long diff = latestRelease.getTime() - EMCShopkeeper.BUILT.getTime();
+				if (diff < 1000 * 60 * 10) {
+					//already running the latest version
+					logger.finest("Running latest version.");
+					return;
+				}
+
+				SwingUtilities.invokeLater(() -> {
+					updateAvailablePanel.add(new JLabel("<html><center><b>New Version Available!</b></center></html>"), "gapleft 10, align center, wrap");
+
+					if (GuiUtils.canOpenWebPages()) {
+						JButton downloadUpdate = new JButton("Download");
+						downloadUpdate.setIcon(Images.DOWNLOAD);
+						downloadUpdate.addActionListener(event -> {
+							try {
+								GuiUtils.openWebPage(URI.create("https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar"));
+							} catch (IOException e) {
+								throw new RuntimeException("Error opening webpage.", e);
+							}
+						});
+						updateAvailablePanel.add(downloadUpdate, "gapleft 10, align center");
+					}
+
+					validate();
+				});
+			} catch (Exception e) {
+				logger.log(Level.WARNING, "Problem checking for updates.", e);
 			}
-		};
+		});
 		t.setDaemon(true);
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();

@@ -6,7 +6,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -267,37 +266,34 @@ public class ItemsTable extends GroupableColumnsTable {
 	}
 
 	private void sortData() {
-		Collections.sort(itemGroupsToDisplay, new Comparator<ItemGroup>() {
-			@Override
-			public int compare(ItemGroup a, ItemGroup b) {
-				if (!ascending) {
-					ItemGroup temp = a;
-					a = b;
-					b = temp;
-				}
-
-				switch (prevColumnClicked) {
-				case ITEM_NAME:
-					return a.getItem().compareToIgnoreCase(b.getItem());
-				case PPU_BUY:
-					return Double.valueOf(a.getSoldPPU()).compareTo(Double.valueOf(b.getSoldPPU()));
-				case PPU_SELL:
-					return Double.valueOf(a.getBoughtPPU()).compareTo(Double.valueOf(b.getBoughtPPU()));
-				case BOUGHT_AMT:
-					return a.getBoughtAmount() - b.getBoughtAmount();
-				case BOUGHT_QTY:
-					return a.getBoughtQuantity() - b.getBoughtQuantity();
-				case SOLD_AMT:
-					return a.getSoldAmount() - b.getSoldAmount();
-				case SOLD_QTY:
-					return a.getSoldQuantity() - b.getSoldQuantity();
-				case NET_AMT:
-					return a.getNetAmount() - b.getNetAmount();
-				case NET_QTY:
-					return a.getNetQuantity() - b.getNetQuantity();
-				}
-				return 0;
+		Collections.sort(itemGroupsToDisplay, (a, b) -> {
+			if (!ascending) {
+				ItemGroup temp = a;
+				a = b;
+				b = temp;
 			}
+
+			switch (prevColumnClicked) {
+			case ITEM_NAME:
+				return a.getItem().compareToIgnoreCase(b.getItem());
+			case PPU_BUY:
+				return Double.valueOf(a.getSoldPPU()).compareTo(Double.valueOf(b.getSoldPPU()));
+			case PPU_SELL:
+				return Double.valueOf(a.getBoughtPPU()).compareTo(Double.valueOf(b.getBoughtPPU()));
+			case BOUGHT_AMT:
+				return a.getBoughtAmount() - b.getBoughtAmount();
+			case BOUGHT_QTY:
+				return a.getBoughtQuantity() - b.getBoughtQuantity();
+			case SOLD_AMT:
+				return a.getSoldAmount() - b.getSoldAmount();
+			case SOLD_QTY:
+				return a.getSoldQuantity() - b.getSoldQuantity();
+			case NET_AMT:
+				return a.getNetAmount() - b.getNetAmount();
+			case NET_QTY:
+				return a.getNetQuantity() - b.getNetQuantity();
+			}
+			return 0;
 		});
 	}
 

@@ -3,7 +3,6 @@ package emcshop.view;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,8 +22,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import emcshop.gui.MyJScrollPane;
@@ -32,6 +29,7 @@ import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.UIDefaultsWrapper;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseStartupErrorView {
@@ -43,51 +41,26 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 
 	public DatabaseStartupErrorViewImpl(Window owner) {
 		super(owner, "Error");
+
 		setModalityType(ModalityType.DOCUMENT_MODAL); //go on top of all windows
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		GuiUtils.addCloseDialogListener(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (quit.isEnabled()) {
-					quit.doClick();
-				}
+
+		quit = new JButton("Quit");
+		GuiUtils.onEscapeKeyPress(this, quit);
+
+		GuiUtils.addCloseDialogListener(this, event -> {
+			if (quit.isEnabled()) {
+				quit.doClick();
 			}
 		});
-		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (quit.isEnabled()) {
-					quit.doClick();
-				}
+		GuiUtils.onEscapeKeyPress(this, event -> {
+			if (quit.isEnabled()) {
+				quit.doClick();
 			}
 		});
 
 		restoreLoading = new JLabel("Working...", Images.LOADING_SMALL, SwingConstants.LEFT);
 		restoreLoading.setVisible(false);
-
-		restore = new JButton("Restore Selected Backup");
-		restore.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				Date selected = getSelectedBackup();
-				if (selected == null) {
-					return;
-				}
-
-				int result = JOptionPane.showConfirmDialog(DatabaseStartupErrorViewImpl.this, "Are you sure you want to restore this backup?", "Confirm Restore", JOptionPane.YES_NO_OPTION);
-				if (result != JOptionPane.YES_OPTION) {
-					return;
-				}
-
-				restoreLoading.setVisible(true);
-				quit.setEnabled(false);
-				restore.setEnabled(false);
-				backups.setEnabled(false);
-				report.setEnabled(false);
-
-				GuiUtils.fireEvents(restoreListeners);
-			}
-		});
 
 		displayText = new JTextArea("An error occurred while starting up the database.");
 		displayText.setEditable(false);
@@ -101,9 +74,6 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 		stackTrace = new JTextArea();
 		stackTrace.setEditable(false);
 		stackTrace.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-
-		quit = new JButton("Quit");
-		GuiUtils.onEscapeKeyPress(this, quit);
 
 		report = new JButton("Send Error Report");
 
@@ -119,6 +89,27 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 				UIDefaultsWrapper.assignListFormats(label, selected);
 				return label;
 			}
+		});
+
+		restore = new JButton("Restore Selected Backup");
+		restore.addActionListener(event -> {
+			Date selected = getSelectedBackup();
+			if (selected == null) {
+				return;
+			}
+
+			int result = JOptionPane.showConfirmDialog(DatabaseStartupErrorViewImpl.this, "Are you sure you want to restore this backup?", "Confirm Restore", JOptionPane.YES_NO_OPTION);
+			if (result != JOptionPane.YES_OPTION) {
+				return;
+			}
+
+			restoreLoading.setVisible(true);
+			quit.setEnabled(false);
+			restore.setEnabled(false);
+			backups.setEnabled(false);
+			report.setEnabled(false);
+
+			GuiUtils.fireEvents(restoreListeners);
 		});
 
 		/////////////////

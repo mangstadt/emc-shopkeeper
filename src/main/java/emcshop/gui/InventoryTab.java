@@ -6,12 +6,9 @@ import static emcshop.util.GuiUtils.toolTipText;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -24,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +54,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.apache.commons.io.FileUtils;
 
 import emcshop.AppContext;
@@ -77,6 +71,7 @@ import emcshop.util.ChesterFile;
 import emcshop.util.GuiUtils;
 import emcshop.util.QuantityFormatter;
 import emcshop.util.UIDefaultsWrapper;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class InventoryTab extends JPanel implements ExportListener {
@@ -140,75 +135,61 @@ public class InventoryTab extends JPanel implements ExportListener {
 		//		}
 
 		filterPanel = new FilterPanel(this);
-		filterPanel.addFilterListener(new FilterListener() {
-			@Override
-			public void filterPerformed(FilterList items, CategoryInfo category) {
-				table.filter(items, category);
-				tableScrollPane.scrollToTop();
-			}
+		filterPanel.addFilterListener((items, category) -> {
+			table.filter(items, category);
+			tableScrollPane.scrollToTop();
 		});
-		filterPanel.addDeleteListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				List<Row> selected = table.getSelected();
-				if (selected.isEmpty()) {
-					return;
-				}
-
-				List<Integer> selectedIds = new ArrayList<Integer>(selected.size());
-				for (Row row : selected) {
-					selectedIds.add(row.inventory.getId());
-				}
-
-				try {
-					dao.deleteInventory(selectedIds);
-					dao.commit();
-				} catch (SQLException e) {
-					dao.rollback();
-					throw new RuntimeException(e);
-				}
-
-				table.model.data.removeAll(selected);
-				table.model.fireTableDataChanged();
+		filterPanel.addDeleteListener(event -> {
+			List<Row> selected = table.getSelected();
+			if (selected.isEmpty()) {
+				return;
 			}
+
+			List<Integer> selectedIds = new ArrayList<Integer>(selected.size());
+			for (Row row : selected) {
+				selectedIds.add(row.inventory.getId());
+			}
+
+			try {
+				dao.deleteInventory(selectedIds);
+				dao.commit();
+			} catch (SQLException e) {
+				dao.rollback();
+				throw new RuntimeException(e);
+			}
+
+			table.model.data.removeAll(selected);
+			table.model.fireTableDataChanged();
 		});
 		filterPanel.setDeleteEnabled(false);
 
 		addItem = new JButton("Add");
-		addItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				addItem();
-			}
-		});
+		addItem.addActionListener(event -> addItem());
 
 		chester = new JButton("Start Chester");
 		chester.setToolTipText(toolTipText("Allows you to record your shop's inventory by simply opening your shop chests in-game.  Requires the \"Chester\" mod to be installed on your Minecraft client."));
-		chester.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				ChesterDialog dialog = new ChesterDialog();
-				dialog.setVisible(true);
-				if (dialog.cancelled) {
-					return;
-				}
-
-				Collection<Inventory> items = dialog.getItems();
-				if (items.isEmpty()) {
-					return;
-				}
-
-				try {
-					for (Inventory item : items) {
-						dao.upsertInventory(item);
-					}
-					dao.commit();
-				} catch (SQLException e) {
-					dao.rollback();
-				}
-
-				refresh();
+		chester.addActionListener(event -> {
+			ChesterDialog dialog = new ChesterDialog();
+			dialog.setVisible(true);
+			if (dialog.cancelled) {
+				return;
 			}
+
+			Collection<Inventory> items = dialog.getItems();
+			if (items.isEmpty()) {
+				return;
+			}
+
+			try {
+				for (Inventory item : items) {
+					dao.upsertInventory(item);
+				}
+				dao.commit();
+			} catch (SQLException e) {
+				dao.rollback();
+			}
+
+			refresh();
 		});
 
 		item = new ItemSuggestField(owner);
@@ -475,7 +456,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 			}
 			filterPanel.setDeleteEnabled(false);
 
-			RowFilter<InventoryTableModel, Integer> filter = new RowFilter<InventoryTableModel, Integer>() {
+			rowSorter.setRowFilter(new RowFilter<InventoryTableModel, Integer>() {
 				@Override
 				public boolean include(RowFilter.Entry<? extends InventoryTableModel, ? extends Integer> entry) {
 					int row = entry.getIdentifier();
@@ -507,9 +488,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 					return false;
 				}
-
-			};
-			rowSorter.setRowFilter(filter);
+			});
 		}
 
 		private class InventoryTableModel extends AbstractTableModel {
@@ -754,24 +733,9 @@ public class InventoryTab extends JPanel implements ExportListener {
 			TableRowSorter<InventoryTableModel> rowSorter = new TableRowSorter<InventoryTableModel>(model);
 
 			rowSorter.setSortable(Column.CHECKBOX.ordinal(), false);
-			rowSorter.setComparator(Column.ITEM_NAME.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.inventory.getItem().compareToIgnoreCase(two.inventory.getItem());
-				}
-			});
-			rowSorter.setComparator(Column.REMAINING.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.inventory.getQuantity().compareTo(two.inventory.getQuantity());
-				}
-			});
-			rowSorter.setComparator(Column.LOW_THRESHOLD.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.inventory.getLowInStockThreshold().compareTo(two.inventory.getLowInStockThreshold());
-				}
-			});
+			rowSorter.setComparator(Column.ITEM_NAME.ordinal(), (Row one, Row two) -> one.inventory.getItem().compareToIgnoreCase(two.inventory.getItem()));
+			rowSorter.setComparator(Column.REMAINING.ordinal(), (Row one, Row two) -> one.inventory.getQuantity().compareTo(two.inventory.getQuantity()));
+			rowSorter.setComparator(Column.LOW_THRESHOLD.ordinal(), (Row one, Row two) -> one.inventory.getLowInStockThreshold().compareTo(two.inventory.getLowInStockThreshold()));
 			rowSorter.setSortsOnUpdates(false);
 
 			return rowSorter;
@@ -852,12 +816,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 		private class QuantityEditor extends AbstractCellEditor implements TableCellEditor {
 			private final QuantityTextField textField = new QuantityTextField();
 			{
-				textField.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent event) {
-						fireEditingStopped();
-					}
-				});
+				textField.addActionListener(event -> fireEditingStopped());
 
 				//select all the text when the textbox gains focus
 				textField.addFocusListener(new FocusListener() {
@@ -933,12 +892,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			//sort alphabetically
 			List<CategoryInfo> categories = new ArrayList<CategoryInfo>(categoriesSet);
-			Collections.sort(categories, new Comparator<CategoryInfo>() {
-				@Override
-				public int compare(CategoryInfo a, CategoryInfo b) {
-					return a.getName().compareToIgnoreCase(b.getName());
-				}
-			});
+			Collections.sort(categories, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
 			//add "all" and "misc" items
 			categories.add(0, ALL);
@@ -1007,21 +961,11 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			filterByItemLabel = new HelpLabel("<html><font size=2>Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
 			filterByItem = new FilterTextField();
-			filterByItem.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					fireFilterListeners();
-				}
-			});
+			filterByItem.addActionListener(event -> fireFilterListeners());
 
 			categoryLabel = new JLabel("<html><font size=2>Category:");
 			category = new CategoryComboBox();
-			category.addItemListener(new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent event) {
-					fireFilterListeners();
-				}
-			});
+			category.addItemListener(event -> fireFilterListeners());
 
 			export = new ExportButton(owner, exportListener);
 
@@ -1079,57 +1023,46 @@ public class InventoryTab extends JPanel implements ExportListener {
 		public ChesterDialog() {
 			super(owner, "Chester", true);
 
-			GuiUtils.onEscapeKeyPress(this, new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					cancel.doClick();
-				}
-			});
-
 			addWindowListener(new WindowAdapter() {
 				@Override
-				public void windowClosing(WindowEvent arg0) {
+				public void windowClosing(WindowEvent event) {
 					//fired when the user closes the window
 					thread.stopMe();
 					cancelled = true;
 				}
 			});
 
+			thread = new ChesterThread();
+			thread.setDaemon(true);
+
+			table = new InventoryTable();
+
 			done = new JButton("Done");
-			done.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					thread.stopMe();
-					cancelled = false;
-					dispose();
-				}
+			done.addActionListener(event -> {
+				thread.stopMe();
+				cancelled = false;
+				dispose();
 			});
 
 			cancel = new JButton("Cancel");
-			cancel.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					thread.stopMe();
-					cancelled = true;
-					dispose();
-				}
+			cancel.addActionListener(event -> {
+				thread.stopMe();
+				cancelled = true;
+				dispose();
 			});
 
 			remove = new JButton("Remove");
-			remove.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					List<Row> selected = table.getSelected();
-					if (selected.isEmpty()) {
-						return;
-					}
-
-					table.model.data.removeAll(selected);
-					table.model.fireTableDataChanged();
+			remove.addActionListener(event -> {
+				List<Row> selected = table.getSelected();
+				if (selected.isEmpty()) {
+					return;
 				}
+
+				table.model.data.removeAll(selected);
+				table.model.fireTableDataChanged();
 			});
 
-			table = new InventoryTable();
+			GuiUtils.onEscapeKeyPress(this, event -> cancel.doClick());
 
 			/////////////////////////
 
@@ -1151,8 +1084,6 @@ public class InventoryTab extends JPanel implements ExportListener {
 			setSize(500, 400);
 			setLocationRelativeTo(owner);
 
-			thread = new ChesterThread();
-			thread.setDaemon(true);
 			thread.start();
 		}
 

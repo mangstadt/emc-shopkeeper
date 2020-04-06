@@ -1,8 +1,5 @@
 package emcshop.presenter;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import emcshop.model.IDatabaseStartupErrorModel;
 import emcshop.view.IDatabaseStartupErrorView;
 
@@ -15,33 +12,10 @@ public class DatabaseStartupErrorPresenter {
 		this.view = view;
 		this.model = model;
 
-		view.addSendErrorReportListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onSendErrorReport();
-			}
-		});
-
-		view.addCloseListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onClose();
-			}
-		});
-
-		view.addStartRestoreListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onStartRestore();
-			}
-		});
-
-		model.addRestoreCompleteListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onRestoreComplete();
-			}
-		});
+		view.addSendErrorReportListener(event -> onSendErrorReport());
+		view.addCloseListener(event -> onClose());
+		view.addStartRestoreListener(event -> onStartRestore());
+		model.addRestoreCompleteListener(event -> onRestoreComplete());
 
 		view.setThrown(model.getThrown());
 		view.setBackups(model.getBackups());

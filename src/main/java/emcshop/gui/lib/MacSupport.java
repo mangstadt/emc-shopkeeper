@@ -1,7 +1,6 @@
 package emcshop.gui.lib;
 
 import java.awt.Image;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.AccessControlException;
@@ -36,24 +35,21 @@ public class MacSupport {
 
 			//create an implementation of the ApplicationListener interface
 			Class<?> applicationListenerInterface = Class.forName("com.apple.eawt.ApplicationListener");
-			Object applicationListenerInstance = Proxy.newProxyInstance(MacSupport.class.getClassLoader(), new Class<?>[] { applicationListenerInterface }, new InvocationHandler() {
-				@Override
-				public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
-					// the name of the invoked method
-					String methodName = method.getName();
+			Object applicationListenerInstance = Proxy.newProxyInstance(MacSupport.class.getClassLoader(), new Class<?>[] { applicationListenerInterface }, (proxy, method, arguments) -> {
+				// the name of the invoked method
+				String methodName = method.getName();
 
-					// the com.apple.eawt.ApplicationEvent object
-					Object applicationEvent = arguments[0];
+				// the com.apple.eawt.ApplicationEvent object
+				Object applicationEvent = arguments[0];
 
-					if (methodName.equals("handleQuit")) {
-						handler.handleQuit(applicationEvent);
-					} else if (methodName.equals("handleAbout")) {
-						handler.internalHandleAbout(applicationEvent);
-					} else if (methodName.equals("handlePreferences")) {
-						handler.handlePreferences(applicationEvent);
-					}
-					return null;
+				if (methodName.equals("handleQuit")) {
+					handler.handleQuit(applicationEvent);
+				} else if (methodName.equals("handleAbout")) {
+					handler.internalHandleAbout(applicationEvent);
+				} else if (methodName.equals("handlePreferences")) {
+					handler.handlePreferences(applicationEvent);
 				}
+				return null;
 			});
 
 			//equivalent to: Application applicationInstance = Application.getApplication();

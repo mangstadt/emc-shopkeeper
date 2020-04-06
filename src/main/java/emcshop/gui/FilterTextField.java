@@ -1,6 +1,5 @@
 package emcshop.gui;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
@@ -14,15 +13,12 @@ public class FilterTextField extends JTextField {
 	{
 		clearButton = new JButton(Images.CLEAR);
 		clearButton.setToolTipText("Clear");
-		clearButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (getText().isEmpty()) {
-					return;
-				}
-				setText("");
-				fireActionEvent();
+		clearButton.addActionListener(event -> {
+			if (getText().isEmpty()) {
+				return;
 			}
+			setText("");
+			fireActionEvent();
 		});
 	}
 

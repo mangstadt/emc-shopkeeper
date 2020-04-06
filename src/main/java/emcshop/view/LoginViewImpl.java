@@ -3,7 +3,6 @@ package emcshop.view;
 import static emcshop.util.GuiUtils.shake;
 
 import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
@@ -17,11 +16,11 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.gui.HelpLabel;
 import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
 import emcshop.util.Listeners;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class LoginViewImpl extends JDialog implements ILoginView {
@@ -39,40 +38,6 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		setModal(true);
 		setResizable(false);
 
-		login = new JButton("Login");
-		login.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				if (origUsername != null && !origUsername.equalsIgnoreCase(username.getText())) {
-					boolean cancel = !showUsernameChangedDialog();
-					if (cancel) {
-						return;
-					}
-				}
-
-				messagePanel.removeAll();
-				messagePanel.add(loading);
-
-				login.setEnabled(false);
-				username.setEnabled(false);
-				password.setEnabled(false);
-				savePassword.setEnabled(false);
-
-				pack();
-				validate();
-
-				Thread t = new Thread() {
-					@Override
-					public void run() {
-						loginListeners.fire();
-					}
-				};
-				t.setDaemon(true);
-				t.start();
-			}
-		});
-		GuiUtils.onKeyPress(this, KeyEvent.VK_ENTER, login);
-
 		cancel = new JButton("Cancel");
 		GuiUtils.onEscapeKeyPress(this, cancel);
 
@@ -81,6 +46,32 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		password = new JPasswordField();
 		savePassword = new JCheckBox("Save password");
 		loading = new JLabel("Logging in...", Images.LOADING_SMALL, SwingConstants.CENTER);
+
+		login = new JButton("Login");
+		login.addActionListener(event -> {
+			if (origUsername != null && !origUsername.equalsIgnoreCase(username.getText())) {
+				boolean cancel = !showUsernameChangedDialog();
+				if (cancel) {
+					return;
+				}
+			}
+
+			messagePanel.removeAll();
+			messagePanel.add(loading);
+
+			login.setEnabled(false);
+			username.setEnabled(false);
+			password.setEnabled(false);
+			savePassword.setEnabled(false);
+
+			pack();
+			validate();
+
+			Thread t = new Thread(loginListeners::fire);
+			t.setDaemon(true);
+			t.start();
+		});
+		GuiUtils.onKeyPress(this, KeyEvent.VK_ENTER, login);
 
 		///////////////////////
 

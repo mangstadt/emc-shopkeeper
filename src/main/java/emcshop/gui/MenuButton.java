@@ -2,7 +2,6 @@ package emcshop.gui;
 
 import java.awt.Font;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.ButtonGroup;
@@ -19,8 +18,8 @@ import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.gui.images.Images;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * A "main menu" button that displays a popup menu when clicked.
@@ -66,26 +65,23 @@ public class MenuButton extends JToggleButton {
 			}
 		});
 
-		addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				if (System.currentTimeMillis() - popupMenuCanceled < 100) {
-					popupMenuCanceled = 0;
-					setSelected(false);
-					return;
-				}
-
-				Point buttonScreenLocation = getLocationOnScreen();
-				int x = buttonScreenLocation.x;
-				int y = buttonScreenLocation.y + getHeight();
-
-				//"show()" is supposed to set the location of the menu relative to the parent component, but it never seems to set the location correctly for some reason
-				//however, we still need to call "show()" because the menu won't work right otherwise
-				popupMenu.show(MenuButton.this, x, y);
-
-				//this sets the menu's on-screen location (what we want)
-				popupMenu.setLocation(x, y);
+		addActionListener(event -> {
+			if (System.currentTimeMillis() - popupMenuCanceled < 100) {
+				popupMenuCanceled = 0;
+				setSelected(false);
+				return;
 			}
+
+			Point buttonScreenLocation = getLocationOnScreen();
+			int x = buttonScreenLocation.x;
+			int y = buttonScreenLocation.y + getHeight();
+
+			//"show()" is supposed to set the location of the menu relative to the parent component, but it never seems to set the location correctly for some reason
+			//however, we still need to call "show()" because the menu won't work right otherwise
+			popupMenu.show(MenuButton.this, x, y);
+
+			//this sets the menu's on-screen location (what we want)
+			popupMenu.setLocation(x, y);
 		});
 	}
 

@@ -1,7 +1,5 @@
 package emcshop.presenter;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import emcshop.model.ILoginModel;
@@ -18,19 +16,8 @@ public class LoginPresenter {
 		this.view = view;
 		this.model = model;
 
-		view.addOnLoginListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onLogin();
-			}
-		});
-
-		view.addOnCancelListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onCancel();
-			}
-		});
+		view.addOnLoginListener(event -> onLogin());
+		view.addOnCancelListener(event -> onCancel());
 
 		String username = model.getSavedUsername();
 		view.setUsername(username);

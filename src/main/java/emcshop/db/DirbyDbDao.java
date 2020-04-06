@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,17 +88,14 @@ public abstract class DirbyDbDao implements DbDao {
 		logger.info("Starting database...");
 
 		//create shutdown hook to shutdown Derby when the program terminates
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				logger.fine("Shutting down the database...");
-				try {
-					close();
-				} catch (SQLException e) {
-					logger.log(Level.SEVERE, "Error stopping database.", e);
-				}
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			logger.fine("Shutting down the database...");
+			try {
+				close();
+			} catch (SQLException e) {
+				logger.log(Level.SEVERE, "Error stopping database.", e);
 			}
-		});
+		}));
 
 		//create the connection
 		createConnection(create);
@@ -319,12 +315,7 @@ public abstract class DirbyDbDao implements DbDao {
 			 * have been in the database longer and are therefore likely to have
 			 * been referenced by more rows throughout the database.
 			 */
-			Collections.sort(itemAliases, new Comparator<Item>() {
-				@Override
-				public int compare(Item o1, Item o2) {
-					return o1.id - o2.id;
-				}
-			});
+			Collections.sort(itemAliases, (o1, o2) -> o1.id - o2.id);
 
 			/*
 			 * Determine what row in the "items" table will act as the

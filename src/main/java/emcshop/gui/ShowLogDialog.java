@@ -2,8 +2,6 @@ package emcshop.gui;
 
 import java.awt.Font;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -44,12 +42,7 @@ public class ShowLogDialog extends JDialog {
 		log.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 
 		JButton close = new JButton("Close");
-		close.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		});
+		close.addActionListener(event -> dispose());
 
 		setLayout(new MigLayout());
 		add(location, "w 100:100%:100%, wrap");

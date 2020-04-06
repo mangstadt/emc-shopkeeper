@@ -1,7 +1,6 @@
 package emcshop.view;
 
 import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -14,14 +13,13 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import emcshop.gui.HelpLabel;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.GuiUtils;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
@@ -92,28 +90,21 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 		});
 
 		stopAtCheckBox = new JCheckBox("Stop at page:");
-		stopAtCheckBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				boolean selected = stopAtCheckBox.isSelected();
-				stopAt.setEnabled(selected);
-				estimate.setEnabled(selected);
-			}
-		});
-
-		paymentTransactionAgeCheckbox = new JCheckBox("Ignore payment transactions older than:");
-		paymentTransactionAgeCheckbox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				boolean selected = paymentTransactionAgeCheckbox.isSelected();
-				paymentTransactionAge.setEnabled(selected);
-				paymentTransactionAgeLabel.setEnabled(selected);
-			}
+		stopAtCheckBox.addActionListener(event -> {
+			boolean selected = stopAtCheckBox.isSelected();
+			stopAt.setEnabled(selected);
+			estimate.setEnabled(selected);
 		});
 
 		paymentTransactionAge = new JNumberTextField();
-
 		paymentTransactionAgeLabel = new JLabel("days");
+
+		paymentTransactionAgeCheckbox = new JCheckBox("Ignore payment transactions older than:");
+		paymentTransactionAgeCheckbox.addActionListener(event -> {
+			boolean selected = paymentTransactionAgeCheckbox.isSelected();
+			paymentTransactionAge.setEnabled(selected);
+			paymentTransactionAgeLabel.setEnabled(selected);
+		});
 
 		setLayout(new MigLayout());
 

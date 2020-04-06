@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -73,39 +72,26 @@ public class TransactionsTab extends JPanel implements ExportListener {
 	public TransactionsTab(MainFrame owner) {
 		this.owner = owner;
 
-		queryPanel = new QueryPanel();
-		queryPanel.addSearchListener(new SearchListener() {
-			@Override
-			public void searchPerformed(DateRange range, SearchType type, ShopTransactionType transactionType) {
-				filterPanel.clear();
-
-				switch (type) {
-				case ITEMS:
-					showItems(range, transactionType);
-					break;
-
-				case PLAYERS:
-					showPlayers(range, transactionType);
-					break;
-
-				case DATES:
-					showTransactions(range, transactionType);
-					break;
-				}
-			}
-		});
-
 		filterPanel = new FilterPanel(this);
-		filterPanel.addFilterListener(new FilterListener() {
-			@Override
-			public void filterPerformed(FilterList items, FilterList players) {
-				filter(items, players);
-			}
-		});
-		filterPanel.addSortListener(new SortListener() {
-			@Override
-			public void sortPerformed(SortItem sort) {
-				sort(sort);
+		filterPanel.addFilterListener(this::filter);
+		filterPanel.addSortListener(this::sort);
+
+		queryPanel = new QueryPanel();
+		queryPanel.addSearchListener((range, type, transactionType) -> {
+			filterPanel.clear();
+
+			switch (type) {
+			case ITEMS:
+				showItems(range, transactionType);
+				break;
+
+			case PLAYERS:
+				showPlayers(range, transactionType);
+				break;
+
+			case DATES:
+				showTransactions(range, transactionType);
+				break;
 			}
 		});
 
@@ -208,154 +194,131 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 	public void showItems(final DateRange range, final ShopTransactionType transactionType) {
 		owner.startProgress("Querying...");
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				try {
+		Thread t = new Thread(() -> {
+			try {
+				//query database
+				List<ItemGroup> itemGroupsList;
+				{
 					//query database
-					final List<ItemGroup> itemGroupsList;
-					{
-						//query database
-						itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo(), transactionType));
+					itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo(), transactionType));
 
-						//sort by item name
-						Collections.sort(itemGroupsList, new Comparator<ItemGroup>() {
-							@Override
-							public int compare(ItemGroup a, ItemGroup b) {
-								return a.getItem().compareToIgnoreCase(b.getItem());
-							}
-						});
-					}
-
-					SwingUtilities.invokeAndWait(new Runnable() {
-						@Override
-						public void run() {
-							//reset GUI
-							filterPanel.removeAll();
-							filterPanel.validate();
-							tablePanel.removeAll();
-							tablePanel.validate();
-
-							playersPanel = null;
-							transactionsTable = null;
-							transactionsTableScrollPane = null;
-
-							//render filter panel
-							filterPanel.setVisible(true, false, false);
-
-							//render table
-							itemsTable = new ItemsTable(itemGroupsList, transactionType, context.get(Settings.class).isShowQuantitiesInStacks());
-							itemsTable.setFillsViewportHeight(true);
-							itemsTableScrollPane = new MyJScrollPane(itemsTable);
-							tablePanel.add(itemsTableScrollPane, "grow, w 100%, h 100%, wrap");
-							tablePanel.validate();
-
-							updateNetTotal();
-							updateCustomers();
-						}
-					});
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				} finally {
-					owner.stopProgress();
-					validate();
+					//sort by item name
+					Collections.sort(itemGroupsList, (a, b) -> a.getItem().compareToIgnoreCase(b.getItem()));
 				}
+
+				SwingUtilities.invokeAndWait(() -> {
+					//reset GUI
+					filterPanel.removeAll();
+					filterPanel.validate();
+					tablePanel.removeAll();
+					tablePanel.validate();
+
+					playersPanel = null;
+					transactionsTable = null;
+					transactionsTableScrollPane = null;
+
+					//render filter panel
+					filterPanel.setVisible(true, false, false);
+
+					//render table
+					itemsTable = new ItemsTable(itemGroupsList, transactionType, context.get(Settings.class).isShowQuantitiesInStacks());
+					itemsTable.setFillsViewportHeight(true);
+					itemsTableScrollPane = new MyJScrollPane(itemsTable);
+					tablePanel.add(itemsTableScrollPane, "grow, w 100%, h 100%, wrap");
+					tablePanel.validate();
+
+					updateNetTotal();
+					updateCustomers();
+				});
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			} finally {
+				owner.stopProgress();
+				validate();
 			}
-		};
+		});
 		t.start();
 	}
 
 	public void showPlayers(final DateRange range, final ShopTransactionType transactionType) {
 		owner.startProgress("Querying...");
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				try {
-					//query database
-					final Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), transactionType);
+		Thread t = new Thread(() -> {
+			try {
+				//query database
+				Collection<PlayerGroup> playerGroups = dao.getPlayerGroups(range.getFrom(), range.getTo(), transactionType);
 
-					SwingUtilities.invokeAndWait(new Runnable() {
-						@Override
-						public void run() {
-							//reset GUI
-							filterPanel.removeAll();
-							filterPanel.validate();
-							tablePanel.removeAll();
-							tablePanel.validate();
+				SwingUtilities.invokeAndWait(() -> {
+					//reset GUI
+					filterPanel.removeAll();
+					filterPanel.validate();
+					tablePanel.removeAll();
+					tablePanel.validate();
 
-							itemsTable = null;
-							itemsTableScrollPane = null;
-							transactionsTable = null;
-							transactionsTableScrollPane = null;
+					itemsTable = null;
+					itemsTableScrollPane = null;
+					transactionsTable = null;
+					transactionsTableScrollPane = null;
 
-							//render filter panel
-							filterPanel.setVisible(true, true, true);
+					//render filter panel
+					filterPanel.setVisible(true, true, true);
 
-							//render table
-							playersPanel = new PlayersPanel(playerGroups, transactionType);
-							playersPanel.setShowFirstLastSeen(transactionType != ShopTransactionType.OTHER_SHOPS);
-							tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
-							tablePanel.validate();
+					//render table
+					playersPanel = new PlayersPanel(playerGroups, transactionType);
+					playersPanel.setShowFirstLastSeen(transactionType != ShopTransactionType.OTHER_SHOPS);
+					tablePanel.add(playersPanel, "grow, w 100%, h 100%, wrap");
+					tablePanel.validate();
 
-							updateNetTotal();
-							updateCustomers();
-						}
-					});
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				} finally {
-					owner.stopProgress();
-					validate();
-				}
+					updateNetTotal();
+					updateCustomers();
+				});
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			} finally {
+				owner.stopProgress();
+				validate();
 			}
-		};
+		});
 		t.start();
 	}
 
 	private void showTransactions(final DateRange range, final ShopTransactionType transactionType) {
 		owner.startProgress("Querying...");
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				try {
-					//query database
-					final List<ShopTransactionDb> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), transactionType);
+		Thread t = new Thread(() -> {
+			try {
+				//query database
+				List<ShopTransactionDb> transactions = dao.getTransactionsByDate(range.getFrom(), range.getTo(), transactionType);
 
-					SwingUtilities.invokeAndWait(new Runnable() {
-						@Override
-						public void run() {
-							//reset GUI
-							filterPanel.removeAll();
-							filterPanel.validate();
-							tablePanel.removeAll();
-							tablePanel.validate();
+				SwingUtilities.invokeAndWait(() -> {
+					//reset GUI
+					filterPanel.removeAll();
+					filterPanel.validate();
+					tablePanel.removeAll();
+					tablePanel.validate();
 
-							itemsTable = null;
-							itemsTableScrollPane = null;
-							playersPanel = null;
+					itemsTable = null;
+					itemsTableScrollPane = null;
+					playersPanel = null;
 
-							//render filter panel
-							filterPanel.setVisible(true, true, false);
+					//render filter panel
+					filterPanel.setVisible(true, true, false);
 
-							//render table
-							transactionsTable = new TransactionsTable(transactions, transactionType);
-							transactionsTable.setFillsViewportHeight(true);
-							transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
-							tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
-							tablePanel.validate();
+					//render table
+					transactionsTable = new TransactionsTable(transactions, transactionType);
+					transactionsTable.setFillsViewportHeight(true);
+					transactionsTableScrollPane = new MyJScrollPane(transactionsTable);
+					tablePanel.add(transactionsTableScrollPane, "grow, w 100%, h 100%, wrap");
+					tablePanel.validate();
 
-							updateNetTotal();
-							updateCustomers();
-						}
-					});
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				} finally {
-					owner.stopProgress();
-					validate();
-				}
+					updateNetTotal();
+					updateCustomers();
+				});
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			} finally {
+				owner.stopProgress();
+				validate();
 			}
-		};
+		});
 		t.start();
 	}
 
@@ -490,12 +453,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			{
 				ButtonGroup dateRangeGroup = new ButtonGroup();
 
-				final ActionListener radioButtonListener = new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent event) {
-						updateState();
-					}
-				};
+				ActionListener radioButtonListener = event -> updateState();
 
 				entireHistory = new JRadioButton();
 				entireHistory.setName("dateRange.entireHistory");
@@ -541,36 +499,16 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 				compress = new JButton(Images.UP_ARROW);
 				compress.setToolTipText("Hide search controls.");
-				compress.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						setCompressed(true);
-					}
-				});
+				compress.addActionListener(event -> setCompressed(true));
 
 				showItems = new JButton("By Item", Images.SEARCH_ITEMS);
-				showItems.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						onSearch(SearchType.ITEMS);
-					}
-				});
+				showItems.addActionListener(event -> onSearch(SearchType.ITEMS));
 
 				showPlayers = new JButton("By Player", Images.SEARCH_PLAYERS);
-				showPlayers.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						onSearch(SearchType.PLAYERS);
-					}
-				});
+				showPlayers.addActionListener(event -> onSearch(SearchType.PLAYERS));
 
 				showTransactions = new JButton("By Date", Images.SEARCH_DATE);
-				showTransactions.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						onSearch(SearchType.DATES);
-					}
-				});
+				showTransactions.addActionListener(event -> onSearch(SearchType.DATES));
 
 				//////////////////////
 
@@ -602,12 +540,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			{
 				expand = new JButton(Images.DOWN_ARROW);
 				expand.setToolTipText("Show search controls.");
-				expand.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						setCompressed(false);
-					}
-				});
+				expand.addActionListener(event -> setCompressed(false));
 
 				description = new JLabel();
 				description.addMouseListener(new MouseAdapter() {
@@ -618,28 +551,13 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				});
 
 				showItemsSmall = new JButton("Item", Images.SEARCH_ITEMS);
-				showItemsSmall.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						onSearch(SearchType.ITEMS);
-					}
-				});
+				showItemsSmall.addActionListener(event -> onSearch(SearchType.ITEMS));
 
 				showPlayersSmall = new JButton("Player", Images.SEARCH_PLAYERS);
-				showPlayersSmall.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						onSearch(SearchType.PLAYERS);
-					}
-				});
+				showPlayersSmall.addActionListener(event -> onSearch(SearchType.PLAYERS));
 
 				showTransactionsSmall = new JButton("Date", Images.SEARCH_DATE);
-				showTransactionsSmall.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						onSearch(SearchType.DATES);
-					}
-				});
+				showTransactionsSmall.addActionListener(event -> onSearch(SearchType.DATES));
 
 				///////////////////
 
@@ -842,21 +760,19 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		private final List<SortListener> sortListeners = new ArrayList<SortListener>();
 
 		public FilterPanel(ExportListener listener) {
-			ActionListener filterAction = new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					for (FilterListener listener : filterListeners) {
-						listener.filterPerformed(filterByItem.getNames(), filterByPlayer.getNames());
-					}
+			filterByItem = new FilterTextField();
+			filterByPlayer = new FilterTextField();
+
+			ActionListener filterAction = event -> {
+				for (FilterListener filterListener : filterListeners) {
+					filterListener.filterPerformed(filterByItem.getNames(), filterByPlayer.getNames());
 				}
 			};
 
 			filterByItemLabel = new HelpLabel("<html><font size=2>Filter by item(s):", "<b>Filters the table by item.</b>\n<b>Example</b>: <code>wool,\"book\"</code>\n\nMultiple item names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the item name(s), press [<code>Enter</code>] to perform the filtering operation.");
-			filterByItem = new FilterTextField();
 			filterByItem.addActionListener(filterAction);
 
 			filterByPlayerLabel = new HelpLabel("<html><font size=2>Filter by player(s):", "<b>Filters the table by player.</b>\n<b>Example</b>: <code>aikar,max</code>\n\nMultiple player names can be entered, separated by commas.\n\nExact name matches will be peformed on names that are enclosed in double quotes.  Otherwise, partial name matches will be performed.\n\nAfter entering the player name(s), press [<code>Enter</code>] to perform the filtering operation.");
-			filterByPlayer = new FilterTextField();
 			filterByPlayer.addActionListener(filterAction);
 
 			sortByLabel = new JLabel("<html><font size=2>Sort by:");

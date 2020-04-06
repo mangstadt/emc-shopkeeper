@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -110,12 +109,7 @@ public class CliController {
 
 		//sort items
 		List<ItemGroup> sortedItemGroups = new ArrayList<ItemGroup>(itemGroups);
-		Collections.sort(sortedItemGroups, new Comparator<ItemGroup>() {
-			@Override
-			public int compare(ItemGroup left, ItemGroup right) {
-				return left.getItem().compareToIgnoreCase(right.getItem());
-			}
-		});
+		Collections.sort(sortedItemGroups, (left, right) -> left.getItem().compareToIgnoreCase(right.getItem()));
 
 		if ("CSV".equalsIgnoreCase(format)) {
 			//calculate net total

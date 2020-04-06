@@ -3,7 +3,6 @@ package emcshop.view;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml3;
 
 import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -63,21 +62,13 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		setTitle("Chat Log Viewer");
 		setModal(true);
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		GuiUtils.addCloseDialogListener(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				closeListeners.fire();
-			}
-		});
-		GuiUtils.onEscapeKeyPress(this, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				closeListeners.fire();
-			}
-		});
+
+		GuiUtils.addCloseDialogListener(this, event -> closeListeners.fire());
+		GuiUtils.onEscapeKeyPress(this, event -> closeListeners.fire());
+
 		addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowOpened(WindowEvent arg0) {
+			public void windowOpened(WindowEvent event) {
 				messages.setChatMessages(chatMessages, paymentTransaction);
 
 				messages.requestFocusInWindow();
@@ -89,15 +80,10 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 		//////////////////////////////////////////////////
 
-		logDir = new JTextField();
-		logDir.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				loadLogDir.doClick();
-			}
-		});
-
 		loadLogDir = new JButton("Reload");
+
+		logDir = new JTextField();
+		logDir.addActionListener(event -> loadLogDir.doClick());
 
 		datePicker = new DatePicker();
 		datePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
@@ -105,47 +91,34 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		datePicker.setShowTodayButton(true);
 		datePicker.setStripTime(true);
 
+		Calendar c = Calendar.getInstance();
+
 		prevDay = new JButton("<");
 		prevDay.setToolTipText("Previous day");
-		prevDay.addActionListener(new ActionListener() {
-			private final Calendar c = Calendar.getInstance();
+		prevDay.addActionListener(event -> {
+			c.setTime(datePicker.getDate());
+			c.add(Calendar.DATE, -1);
+			setDate(c.getTime());
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				c.setTime(datePicker.getDate());
-				c.add(Calendar.DATE, -1);
-				setDate(c.getTime());
-
-				dateChangedListeners.fire();
-			}
+			dateChangedListeners.fire();
 		});
 
 		nextDay = new JButton(">");
 		nextDay.setToolTipText("Next day");
-		nextDay.addActionListener(new ActionListener() {
-			private final Calendar c = Calendar.getInstance();
+		nextDay.addActionListener(event -> {
+			c.setTime(datePicker.getDate());
+			c.add(Calendar.DATE, 1);
+			setDate(c.getTime());
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				c.setTime(datePicker.getDate());
-				c.add(Calendar.DATE, 1);
-				setDate(c.getTime());
-
-				dateChangedListeners.fire();
-			}
-		});
-
-		filterPanel = new FilterPanel();
-		filterPanel.addSearchListener(new SearchListener() {
-			@Override
-			public void searchPerformed(String keyword) {
-				messages.update();
-			}
+			dateChangedListeners.fire();
 		});
 
 		messages = new ChatLogEditorPane();
 		messages.setEditable(false);
 		messages.setText("<center>Loading...</center>");
+
+		filterPanel = new FilterPanel();
+		filterPanel.addSearchListener(keyword -> messages.update());
 
 		//////////////////////////////////////////////////
 
@@ -455,13 +428,10 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			searchLabel = new JLabel("Search current log:");
 
 			search = new JTextField();
-			search.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					String keyword = search.getText();
-					for (SearchListener listener : searchListeners) {
-						listener.searchPerformed(keyword);
-					}
+			search.addActionListener(event -> {
+				String keyword = search.getText();
+				for (SearchListener listener : searchListeners) {
+					listener.searchPerformed(keyword);
 				}
 			});
 

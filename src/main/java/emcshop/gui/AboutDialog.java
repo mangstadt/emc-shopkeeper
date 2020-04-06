@@ -1,8 +1,6 @@
 package emcshop.gui;
 
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -60,12 +58,7 @@ public class AboutDialog extends JDialog {
 		//@formatter:on
 
 		JButton close = new JButton("Close");
-		close.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		});
+		close.addActionListener(event -> dispose());
 
 		setLayout(new MigLayout());
 		add(titleLabel, "split 2, w 100%");

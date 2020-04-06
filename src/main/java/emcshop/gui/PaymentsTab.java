@@ -9,8 +9,6 @@ import java.awt.Cursor;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -19,7 +17,6 @@ import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -42,19 +39,16 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.AppContext;
 import emcshop.ItemIndex;
 import emcshop.db.DbDao;
 import emcshop.db.PaymentTransactionDb;
 import emcshop.db.ShopTransactionDb;
-import emcshop.gui.ProfileLoader.ProfileDownloadedListener;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.model.ChatLogViewerModelImpl;
 import emcshop.model.IChatLogViewerModel;
 import emcshop.presenter.ChatLogViewerPresenter;
-import emcshop.scraper.PlayerProfile;
 import emcshop.util.BaseFormatter;
 import emcshop.util.GuiUtils;
 import emcshop.util.RelativeDateFormat;
@@ -62,6 +56,7 @@ import emcshop.util.RupeeFormatter;
 import emcshop.util.UIDefaultsWrapper;
 import emcshop.view.ChatLogViewerViewImpl;
 import emcshop.view.IChatLogViewerView;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class PaymentsTab extends JPanel {
@@ -93,105 +88,98 @@ public class PaymentsTab extends JPanel {
 
 				delete = new JButton("Delete");
 				delete.setEnabled(false);
-				delete.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent event) {
-						List<Row> selected = paymentsTable.getSelected();
-						if (selected.isEmpty()) {
-							return;
-						}
-
-						int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to delete the selected payment transactions?", "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-						if (result != JOptionPane.YES_OPTION) {
-							return;
-						}
-
-						//update database
-						try {
-							for (Row row : selected) {
-								dao.ignorePaymentTransaction(row.transaction.getId());
-							}
-							dao.commit();
-						} catch (SQLException e) {
-							dao.rollback();
-							throw new RuntimeException(e);
-						}
-
-						//update table
-						paymentsTable.model.data.removeAll(selected);
-						paymentsTable.model.fireTableDataChanged();
-
-						delete.setEnabled(false);
-
-						owner.updatePaymentsCount();
+				delete.addActionListener(event -> {
+					List<Row> selected = paymentsTable.getSelected();
+					if (selected.isEmpty()) {
+						return;
 					}
 
+					int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to delete the selected payment transactions?", "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+					if (result != JOptionPane.YES_OPTION) {
+						return;
+					}
+
+					//update database
+					try {
+						for (Row row : selected) {
+							dao.ignorePaymentTransaction(row.transaction.getId());
+						}
+						dao.commit();
+					} catch (SQLException e) {
+						dao.rollback();
+						throw new RuntimeException(e);
+					}
+
+					//update table
+					paymentsTable.model.data.removeAll(selected);
+					paymentsTable.model.fireTableDataChanged();
+
+					delete.setEnabled(false);
+
+					owner.updatePaymentsCount();
 				});
 				shrinkFont(delete);
 				inner.add(delete, "split 2");
 
 				merge = new JButton("Merge");
 				merge.setEnabled(false);
-				merge.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent event) {
-						//at least two rows must be selected
-						List<Row> selected = paymentsTable.getSelected();
-						if (selected.size() < 2) {
-							return;
-						}
-
-						//are all the player names the same?
-						String name = null;
-						for (Row row : selected) {
-							if (name == null) {
-								name = row.transaction.getPlayer();
-							} else if (!name.equalsIgnoreCase(row.transaction.getPlayer())) {
-								return;
-							}
-						}
-
-						int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to merge these payment transactions?", "Confirm Merge", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-						if (result != JOptionPane.YES_OPTION) {
-							return;
-						}
-
-						Row latest = null;
-						int amountTotal = 0;
-						for (Row row : selected) {
-							amountTotal += row.transaction.getAmount();
-							if (latest == null || row.transaction.getTs().after(latest.transaction.getTs())) {
-								latest = row;
-							}
-						}
-						latest.transaction.setAmount(amountTotal);
-
-						List<Row> toDelete = new ArrayList<Row>(selected);
-						toDelete.remove(latest);
-
-						try {
-							//update the merged transaction
-							dao.upsertPaymentTransaction(latest.transaction);
-
-							//delete the other transactions
-							for (Row row : toDelete) {
-								dao.deletePaymentTransaction(row.transaction);
-							}
-
-							dao.commit();
-						} catch (SQLException e) {
-							dao.rollback();
-							throw new RuntimeException(e);
-						}
-
-						//update table
-						paymentsTable.model.data.removeAll(toDelete);
-						paymentsTable.model.fireTableDataChanged();
-
-						merge.setEnabled(false);
-
-						owner.updatePaymentsCount();
+				merge.addActionListener(event -> {
+					//at least two rows must be selected
+					List<Row> selected = paymentsTable.getSelected();
+					if (selected.size() < 2) {
+						return;
 					}
+
+					//are all the player names the same?
+					String name = null;
+					for (Row row : selected) {
+						if (name == null) {
+							name = row.transaction.getPlayer();
+						} else if (!name.equalsIgnoreCase(row.transaction.getPlayer())) {
+							return;
+						}
+					}
+
+					int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to merge these payment transactions?", "Confirm Merge", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+					if (result != JOptionPane.YES_OPTION) {
+						return;
+					}
+
+					Row latest = null;
+					int amountTotal = 0;
+					for (Row row : selected) {
+						amountTotal += row.transaction.getAmount();
+						if (latest == null || row.transaction.getTs().after(latest.transaction.getTs())) {
+							latest = row;
+						}
+					}
+					latest.transaction.setAmount(amountTotal);
+
+					List<Row> toDelete = new ArrayList<Row>(selected);
+					toDelete.remove(latest);
+
+					try {
+						//update the merged transaction
+						dao.upsertPaymentTransaction(latest.transaction);
+
+						//delete the other transactions
+						for (Row row : toDelete) {
+							dao.deletePaymentTransaction(row.transaction);
+						}
+
+						dao.commit();
+					} catch (SQLException e) {
+						dao.rollback();
+						throw new RuntimeException(e);
+					}
+
+					//update table
+					paymentsTable.model.data.removeAll(toDelete);
+					paymentsTable.model.fireTableDataChanged();
+
+					merge.setEnabled(false);
+
+					owner.updatePaymentsCount();
 				});
 				shrinkFont(merge);
 				inner.add(merge, "wrap");
@@ -312,30 +300,10 @@ public class PaymentsTab extends JPanel {
 			rowSorter.setSortable(Column.SPLIT.ordinal(), false);
 			rowSorter.setSortable(Column.ASSIGN.ordinal(), false);
 			rowSorter.setSortable(Column.CHAT_LOG.ordinal(), false);
-			rowSorter.setComparator(Column.TIME.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.transaction.getTs().compareTo(two.transaction.getTs());
-				}
-			});
-			rowSorter.setComparator(Column.PLAYER.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.transaction.getPlayer().compareToIgnoreCase(two.transaction.getPlayer());
-				}
-			});
-			rowSorter.setComparator(Column.REASON.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.transaction.getReason().compareToIgnoreCase(two.transaction.getReason());
-				}
-			});
-			rowSorter.setComparator(Column.AMOUNT.ordinal(), new Comparator<Row>() {
-				@Override
-				public int compare(Row one, Row two) {
-					return one.transaction.getAmount() - two.transaction.getAmount();
-				}
-			});
+			rowSorter.setComparator(Column.TIME.ordinal(), (Row one, Row two) -> one.transaction.getTs().compareTo(two.transaction.getTs()));
+			rowSorter.setComparator(Column.PLAYER.ordinal(), (Row one, Row two) -> one.transaction.getPlayer().compareToIgnoreCase(two.transaction.getPlayer()));
+			rowSorter.setComparator(Column.REASON.ordinal(), (Row one, Row two) -> one.transaction.getReason().compareToIgnoreCase(two.transaction.getReason()));
+			rowSorter.setComparator(Column.AMOUNT.ordinal(), (Row one, Row two) -> one.transaction.getAmount() - two.transaction.getAmount());
 			rowSorter.setSortsOnUpdates(true);
 			rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.TIME.ordinal(), SortOrder.DESCENDING)));
 
@@ -419,23 +387,17 @@ public class PaymentsTab extends JPanel {
 					component = playerPanel;
 
 					final String playerName = transaction.getPlayer();
-					playerPanel.setPlayer(playerName, new ProfileDownloadedListener() {
-						@Override
-						public void onProfileDownloaded(PlayerProfile profile) {
-							//re-render all cells with this player name when the profile is downloaded
-							SwingUtilities.invokeLater(new Runnable() {
-								@Override
-								public void run() {
-									for (int i = 0; i < model.getRowCount(); i++) {
-										Row r = model.data.get(i);
-										String name = r.transaction.getPlayer();
-										if (playerName.equalsIgnoreCase(name)) {
-											model.fireTableCellUpdated(i, col);
-										}
-									}
+					playerPanel.setPlayer(playerName, downloadedProfile -> {
+						//re-render all cells with this player name when the profile is downloaded
+						SwingUtilities.invokeLater(() -> {
+							for (int i = 0; i < model.getRowCount(); i++) {
+								Row r = model.data.get(i);
+								String name = r.transaction.getPlayer();
+								if (playerName.equalsIgnoreCase(name)) {
+									model.fireTableCellUpdated(i, col);
 								}
-							});
-						}
+							}
+						});
 					});
 					break;
 
@@ -802,26 +764,12 @@ public class PaymentsTab extends JPanel {
 			});
 
 			//cancel when escape is pressed
-			GuiUtils.onEscapeKeyPress(this, new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					cancel();
-				}
-			});
-
-			item = new ItemSuggestField(this);
-			quantity = new QuantityTextField();
-			quantity.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					ok.doClick();
-				}
-			});
+			GuiUtils.onEscapeKeyPress(this, event -> cancel());
 
 			ok = new JButton("OK");
 			ok.addActionListener(new ActionListener() {
 				@Override
-				public void actionPerformed(ActionEvent arg0) {
+				public void actionPerformed(ActionEvent event) {
 					if (item.getText().isEmpty()) {
 						showError("No item specified.");
 						return;
@@ -852,25 +800,21 @@ public class PaymentsTab extends JPanel {
 				}
 			});
 
+			item = new ItemSuggestField(this);
+			quantity = new QuantityTextField();
+			quantity.addActionListener(event -> ok.doClick());
+
 			cancel = new JButton("Cancel");
-			cancel.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					cancel();
-				}
-			});
+			cancel.addActionListener(event -> cancel());
 
 			updateInventory = new JCheckBox("Apply to Inventory", true);
 			updateInventoryHelp = new HelpLabel("", "Check this box to apply this transaction to your shop's inventory.");
 
 			transactionType = new TransactionTypeComboBox();
-			transactionType.addItemListener(new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					boolean visible = transactionType.isMyShopSelected();
-					updateInventory.setVisible(visible);
-					updateInventoryHelp.setVisible(visible);
-				}
+			transactionType.addItemListener(event -> {
+				boolean visible = transactionType.isMyShopSelected();
+				updateInventory.setVisible(visible);
+				updateInventoryHelp.setVisible(visible);
 			});
 
 			JLabel quantityLabel = new HelpLabel("Qty:", "In addition to specifying the exact number of items, you can also specify the quantity in stacks.\n\n<b>Examples</b>:\n\"264\" (264 items total)\n\"4/10\" (4 stacks, plus 10 more)\n\"4/\" (4 stacks)\n\nNote that <b>stack size varies depending on the item</b>!  Most items can hold 64 in a stack, but some can only hold 16 (like Signs) and others are not stackable at all (like armor)!");

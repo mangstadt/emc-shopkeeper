@@ -4,7 +4,6 @@ import static emcshop.util.GuiUtils.toolTipText;
 
 import java.awt.Font;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -25,8 +24,6 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.BevelBorder;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
@@ -35,6 +32,7 @@ import emcshop.presenter.LoginPresenter;
 import emcshop.scraper.EmcSession;
 import emcshop.util.GuiUtils;
 import emcshop.util.TimeUtils;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class UpdateViewImpl extends JDialog implements IUpdateView {
@@ -287,32 +285,21 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 			stackTrace.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 
 			final JButton report = new JButton("Send Error Report");
-			report.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					GuiUtils.fireEvents(reportErrorListeners);
-					report.setEnabled(false);
-					report.setText("Reported");
-					JOptionPane.showMessageDialog(UpdateErrorDialog.this, "Error report sent.  Thanks!");
-				}
+			report.addActionListener(event -> {
+				GuiUtils.fireEvents(reportErrorListeners);
+				report.setEnabled(false);
+				report.setText("Reported");
+				JOptionPane.showMessageDialog(UpdateErrorDialog.this, "Error report sent.  Thanks!");
 			});
 
 			JButton save = new JButton("Save Transactions");
-			save.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					saveTransactions = true;
-					dispose();
-				}
+			save.addActionListener(event -> {
+				saveTransactions = true;
+				dispose();
 			});
 
 			JButton discard = new JButton("Discard transactions");
-			discard.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					dispose();
-				}
-			});
+			discard.addActionListener(event -> dispose());
 
 			setLayout(new MigLayout());
 			add(errorIcon, "split 2");

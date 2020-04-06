@@ -1,8 +1,6 @@
 package emcshop.gui;
 
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -10,11 +8,10 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.ScrollPaneConstants;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.apache.commons.io.IOUtils;
 
 import emcshop.util.GuiUtils;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Displays the changelog.
@@ -39,12 +36,7 @@ public class ChangelogDialog extends JDialog {
 		JLabel changelog = new JLabel("<html><div width=470>" + changelogText + "</div></html>");
 
 		JButton close = new JButton("Close");
-		close.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		});
+		close.addActionListener(event -> dispose());
 
 		setLayout(new MigLayout());
 		MyJScrollPane scroll = new MyJScrollPane(changelog);

@@ -1,8 +1,5 @@
 package emcshop.presenter;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import emcshop.model.IFirstUpdateModel;
 import emcshop.view.IFirstUpdateView;
 
@@ -18,26 +15,9 @@ public class FirstUpdatePresenter {
 		this.view = view;
 		this.model = model;
 
-		view.addOnBeginListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onBegin();
-			}
-		});
-
-		view.addOnCancelListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onCancel();
-			}
-		});
-
-		view.addStopAtPageChangedListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				onStopAtPageChanged();
-			}
-		});
+		view.addOnBeginListener(event -> onBegin());
+		view.addOnCancelListener(event -> onCancel());
+		view.addStopAtPageChangedListener(event -> onStopAtPageChanged());
 
 		onStopAtPageChanged();
 		view.display();

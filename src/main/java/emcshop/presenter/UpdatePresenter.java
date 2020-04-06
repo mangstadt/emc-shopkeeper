@@ -1,7 +1,5 @@
 package emcshop.presenter;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Date;
 
 import emcshop.model.IUpdateModel;
@@ -18,54 +16,14 @@ public class UpdatePresenter {
 		this.view = view;
 		this.model = model;
 
-		view.addCancelListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onCancel();
-			}
-		});
+		view.addCancelListener(event -> onCancel());
+		view.addStopListener(event -> onStop());
+		view.addReportErrorListener(event -> onReportError());
 
-		view.addStopListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onStop();
-			}
-		});
-
-		view.addReportErrorListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onReportError();
-			}
-		});
-
-		model.addPageDownloadedListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onPageDownloaded();
-			}
-		});
-
-		model.addBadSessionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onBadSession();
-			}
-		});
-
-		model.addDownloadErrorListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onDownloadError();
-			}
-		});
-
-		model.addDownloadCompleteListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				onDownloadComplete();
-			}
-		});
+		model.addPageDownloadedListener(event -> onPageDownloaded());
+		model.addBadSessionListener(event -> onBadSession());
+		model.addDownloadErrorListener(event -> onDownloadError());
+		model.addDownloadCompleteListener(event -> onDownloadComplete());
 
 		view.setFirstUpdate(model.isFirstUpdate());
 		view.setEstimatedTime(model.getEstimatedTime());

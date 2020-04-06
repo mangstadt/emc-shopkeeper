@@ -108,13 +108,8 @@ public final class GuiUtils {
 	 * Configures a dialog to close when the escape key is pressed.
 	 * @param dialog the dialog
 	 */
-	public static void closeOnEscapeKeyPress(final JDialog dialog) {
-		onEscapeKeyPress(dialog, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dialog.dispose();
-			}
-		});
+	public static void closeOnEscapeKeyPress(JDialog dialog) {
+		onEscapeKeyPress(dialog, event -> dialog.dispose());
 	}
 
 	/**
@@ -133,13 +128,10 @@ public final class GuiUtils {
 	 * @param dialog the dialog
 	 * @param button the button
 	 */
-	public static void onEscapeKeyPress(JDialog dialog, final AbstractButton button) {
-		onKeyPress(dialog, KeyEvent.VK_ESCAPE, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				for (ActionListener listener : button.getActionListeners()) {
-					listener.actionPerformed(e);
-				}
+	public static void onEscapeKeyPress(JDialog dialog, AbstractButton button) {
+		onKeyPress(dialog, KeyEvent.VK_ESCAPE, event -> {
+			for (ActionListener listener : button.getActionListeners()) {
+				listener.actionPerformed(event);
 			}
 		});
 	}
@@ -150,10 +142,10 @@ public final class GuiUtils {
 	 * @param dialog the dialog
 	 * @param listener the listener
 	 */
-	public static void addCloseDialogListener(JDialog dialog, final ActionListener listener) {
+	public static void addCloseDialogListener(JDialog dialog, ActionListener listener) {
 		dialog.addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowClosing(WindowEvent arg0) {
+			public void windowClosing(WindowEvent event) {
 				listener.actionPerformed(null);
 			}
 		});
@@ -176,13 +168,10 @@ public final class GuiUtils {
 	 * @param key the key (see constants in {@link KeyEvent})
 	 * @param button the button
 	 */
-	public static void onKeyPress(JDialog dialog, int key, final AbstractButton button) {
-		dialog.getRootPane().registerKeyboardAction(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				for (ActionListener listener : button.getActionListeners()) {
-					listener.actionPerformed(e);
-				}
+	public static void onKeyPress(JDialog dialog, int key, AbstractButton button) {
+		dialog.getRootPane().registerKeyboardAction(event -> {
+			for (ActionListener listener : button.getActionListeners()) {
+				listener.actionPerformed(event);
 			}
 		}, KeyStroke.getKeyStroke(key, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
@@ -220,13 +209,8 @@ public final class GuiUtils {
 	 * Fires a list of events using {@link SwingUtilities#invokeLater}.
 	 * @param listeners the events to fire
 	 */
-	public static void fireEventsLater(final List<ActionListener> listeners) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				fireEvents(listeners);
-			}
-		});
+	public static void fireEventsLater(List<ActionListener> listeners) {
+		SwingUtilities.invokeLater(() -> fireEvents(listeners));
 	}
 
 	/**

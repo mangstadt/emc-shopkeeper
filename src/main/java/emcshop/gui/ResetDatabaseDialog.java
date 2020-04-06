@@ -4,8 +4,6 @@ import static emcshop.util.GuiUtils.boldFont;
 
 import java.awt.Color;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -15,9 +13,9 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
 import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Confirmation dialog for when the user chooses to wipe the database.
@@ -46,21 +44,15 @@ public class ResetDatabaseDialog extends JDialog {
 		JButton resetButton = new JButton("Reset Database");
 		resetButton.setForeground(new Color(128, 0, 0));
 		boldFont(resetButton);
-		resetButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				result = true;
-				dispose();
-			}
+		resetButton.addActionListener(event -> {
+			result = true;
+			dispose();
 		});
 
 		JButton cancel = new JButton("Cancel");
-		cancel.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				result = false;
-				dispose();
-			}
+		cancel.addActionListener(event -> {
+			result = false;
+			dispose();
 		});
 		GuiUtils.onEscapeKeyPress(this, cancel);
 

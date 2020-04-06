@@ -2,7 +2,6 @@ package emcshop.gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -151,22 +150,6 @@ public class ChartsTab extends JPanel {
 			//ignore
 		}
 
-		String text = "entire history";
-		if (earliestTransactionDate != null) {
-			text += " (since " + df.format(earliestTransactionDate) + ")";
-		}
-		entireHistory = new JCheckBox(text);
-		entireHistory.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				boolean enableDatePickers = !entireHistory.isSelected();
-				fromDatePickerLabel.setEnabled(enableDatePickers);
-				fromDatePicker.setEnabled(enableDatePickers);
-				toDatePickerLabel.setEnabled(enableDatePickers);
-				toDatePicker.setEnabled(enableDatePickers);
-			}
-		});
-
 		fromDatePickerLabel = new JLabel("Start:");
 		fromDatePicker = new DatePicker();
 		fromDatePicker.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
@@ -181,18 +164,28 @@ public class ChartsTab extends JPanel {
 		toDatePicker.setShowTodayButton(true);
 		toDatePicker.setStripTime(true);
 
+		String text = "entire history";
+		if (earliestTransactionDate != null) {
+			text += " (since " + df.format(earliestTransactionDate) + ")";
+		}
+		entireHistory = new JCheckBox(text);
+		entireHistory.addActionListener(event -> {
+			boolean enableDatePickers = !entireHistory.isSelected();
+			fromDatePickerLabel.setEnabled(enableDatePickers);
+			fromDatePicker.setEnabled(enableDatePickers);
+			toDatePickerLabel.setEnabled(enableDatePickers);
+			toDatePicker.setEnabled(enableDatePickers);
+		});
+
 		groupBy = new JComboBox(GroupBy.values());
 		groupBy.setEditable(false);
 
 		loadData = new JButton("Load Data", Images.SEARCH);
-		loadData.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (!checkDateRange()) {
-					return;
-				}
-				showProfits();
+		loadData.addActionListener(event -> {
+			if (!checkDateRange()) {
+				return;
 			}
+			showProfits();
 		});
 
 		graphPanel = new JPanel(new MigLayout("width 100%, height 100%, fillx, insets 0"));
@@ -202,39 +195,9 @@ public class ChartsTab extends JPanel {
 		netTotalLabelLabel = new JLabel("<html><font size=5>Net Profit:</font></html>");
 		netTotalLabel = new JLabel();
 
-		show = new JComboBox(Show.values());
-		show.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				Show selected = (Show) show.getSelectedItem();
-
-				showPanel.removeAll();
-				switch (selected) {
-				case NET_PROFITS:
-				case RUPEE_BALANCE:
-					break;
-				case ITEM_GROUPS:
-					showPanel.add(new MyJScrollPane(itemGroupsPanel), "w 100%");
-					break;
-				case ITEMS:
-					showPanel.add(itemNamesPanel, "w 100%");
-					break;
-				}
-				showPanel.validate();
-				showPanel.repaint();
-
-				refreshChart();
-			}
-		});
-
 		showPanel = new JPanel(new MigLayout("insets 0"));
 
-		ActionListener checkboxListener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				refreshChart();
-			}
-		};
+		ActionListener checkboxListener = event -> refreshChart();
 		List<String> groupNames = new ArrayList<String>(index.getItemGroupNames());
 		Collections.sort(groupNames);
 		for (String group : groupNames) {
@@ -284,6 +247,28 @@ public class ChartsTab extends JPanel {
 			itemNames.add(f);
 			itemNamesPanel.add(f, "w 150" + wrap);
 		}
+
+		show = new JComboBox(Show.values());
+		show.addActionListener(event -> {
+			Show selected = (Show) show.getSelectedItem();
+
+			showPanel.removeAll();
+			switch (selected) {
+			case NET_PROFITS:
+			case RUPEE_BALANCE:
+				break;
+			case ITEM_GROUPS:
+				showPanel.add(new MyJScrollPane(itemGroupsPanel), "w 100%");
+				break;
+			case ITEMS:
+				showPanel.add(itemNamesPanel, "w 100%");
+				break;
+			}
+			showPanel.validate();
+			showPanel.repaint();
+
+			refreshChart();
+		});
 
 		///////////////////////////////////////
 
@@ -339,28 +324,22 @@ public class ChartsTab extends JPanel {
 
 	private void showProfits(final Date from, final Date to) {
 		owner.startProgress("Querying...");
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				try {
-					//query database
-					profitsGroupBy = (GroupBy) groupBy.getSelectedItem();
-					profits = (profitsGroupBy == GroupBy.DAY) ? dao.getProfitsByDay(from, to) : dao.getProfitsByMonth(from, to);
+		Thread t = new Thread(() -> {
+			try {
+				//query database
+				profitsGroupBy = (GroupBy) groupBy.getSelectedItem();
+				profits = (profitsGroupBy == GroupBy.DAY) ? dao.getProfitsByDay(from, to) : dao.getProfitsByMonth(from, to);
 
-					SwingUtilities.invokeAndWait(new Runnable() {
-						@Override
-						public void run() {
-							updateDateRangeLabel(from, to);
-							refreshChart();
-						}
-					});
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				} finally {
-					owner.stopProgress();
-				}
+				SwingUtilities.invokeAndWait(() -> {
+					updateDateRangeLabel(from, to);
+					refreshChart();
+				});
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			} finally {
+				owner.stopProgress();
 			}
-		};
+		});
 		t.start();
 	}
 
