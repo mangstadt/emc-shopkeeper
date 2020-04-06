@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -25,13 +24,11 @@ public final class ZipUtils {
 	 * @throws IOException if there's a problem creating the ZIP file
 	 */
 	public static void zipDirectory(File directory, File zipFile, ZipListener listener) throws IOException {
-		ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(zipFile));
-
 		String rootPath = directory.getParent();
 		LinkedList<File> folders = new LinkedList<File>();
 		folders.add(directory);
 
-		try {
+		try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(zipFile))) {
 			while (!folders.isEmpty()) {
 				File folder = folders.removeLast();
 
@@ -64,20 +61,15 @@ public final class ZipUtils {
 						continue;
 					}
 
-					FileInputStream in = new FileInputStream(file);
-					try {
+					try (FileInputStream in = new FileInputStream(file)) {
 						zip.putNextEntry(new ZipEntry(folderPath + file.getName()));
 						IOUtils.copy(in, zip);
 						if (listener != null) {
 							listener.onZippedFile(file);
 						}
-					} finally {
-						in.close();
 					}
 				}
 			}
-		} finally {
-			zip.close();
 		}
 	}
 
@@ -114,9 +106,7 @@ public final class ZipUtils {
 	 * @throws IOException if there's a problem extracting the ZIP file
 	 */
 	public static void unzip(File destinationDir, File zipFile) throws IOException {
-		InputStream in = new BufferedInputStream(new FileInputStream(zipFile));
-		ZipInputStream zin = new ZipInputStream(in);
-		try {
+		try (ZipInputStream zin = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)))) {
 			byte[] buffer = new byte[4096];
 			ZipEntry entry;
 			while ((entry = zin.getNextEntry()) != null) {
@@ -132,19 +122,14 @@ public final class ZipUtils {
 				}
 
 				//create the file
-				FileOutputStream fos = new FileOutputStream(file);
-				try {
+				try (FileOutputStream fos = new FileOutputStream(file)) {
 					//note: IOUtils.copy() doesn't work for some reason
 					int len;
 					while ((len = zin.read(buffer)) > 0) {
 						fos.write(buffer, 0, len);
 					}
-				} finally {
-					fos.close();
 				}
 			}
-		} finally {
-			IOUtils.closeQuietly(zin);
 		}
 	}
 

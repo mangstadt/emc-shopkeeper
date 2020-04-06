@@ -15,7 +15,6 @@ import javax.swing.ImageIcon;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -48,8 +47,7 @@ public class ItemIndex {
 	 */
 	public static synchronized ItemIndex instance() {
 		if (INSTANCE == null) {
-			InputStream in = ItemIndex.class.getResourceAsStream("items.xml");
-			try {
+			try (InputStream in = ItemIndex.class.getResourceAsStream("items.xml")) {
 				INSTANCE = new ItemIndex(in);
 			} catch (IOException e) {
 				//the program should terminate if this file can't be read!
@@ -57,8 +55,6 @@ public class ItemIndex {
 			} catch (SAXException e) {
 				//the program should terminate if this file can't be parsed!
 				throw new RuntimeException(e);
-			} finally {
-				IOUtils.closeQuietly(in);
 			}
 		}
 

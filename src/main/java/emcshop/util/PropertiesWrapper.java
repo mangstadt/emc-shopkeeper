@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import emcshop.gui.WindowState;
@@ -39,12 +38,8 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	}
 
 	public PropertiesWrapper(File file) throws IOException {
-		Reader reader = null;
-		try {
-			reader = new FileReader(file);
+		try (Reader reader = new FileReader(file)) {
 			properties.load(reader);
-		} finally {
-			IOUtils.closeQuietly(reader);
 		}
 	}
 
@@ -244,12 +239,8 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	}
 
 	public void store(File file, String comment) throws IOException {
-		Writer writer = null;
-		try {
-			writer = new FileWriter(file);
+		try (Writer writer = new FileWriter(file)) {
 			properties.store(writer, comment);
-		} finally {
-			IOUtils.closeQuietly(writer);
 		}
 	}
 

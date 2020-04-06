@@ -21,7 +21,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -89,14 +88,11 @@ public class EMCShopkeeper {
 	public static final String CACHE_VERSION = "1";
 
 	static {
-		InputStream in = EMCShopkeeper.class.getResourceAsStream("/info.properties");
 		Properties props = new Properties();
-		try {
+		try (InputStream in = EMCShopkeeper.class.getResourceAsStream("/info.properties")) {
 			props.load(in);
 		} catch (Throwable t) {
 			throw new ExceptionInInitializerError(t);
-		} finally {
-			IOUtils.closeQuietly(in);
 		}
 
 		VERSION = props.getProperty("version");

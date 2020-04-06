@@ -8,8 +8,6 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
-
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -28,11 +26,8 @@ public class ChesterFile {
 	 * @throws IllegalArgumentException if the file couldn't be parsed
 	 */
 	public static ChesterFile parse(File file) throws IOException {
-		Reader reader = new FileReader(file);
-		try {
+		try (Reader reader = new FileReader(file)) {
 			return parse(reader);
-		} finally {
-			IOUtils.closeQuietly(reader);
 		}
 	}
 

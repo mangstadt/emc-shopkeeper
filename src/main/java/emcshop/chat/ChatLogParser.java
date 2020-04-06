@@ -20,8 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.commons.io.IOUtils;
-
 /**
  * Parses chat logs.
  */
@@ -88,8 +86,7 @@ public class ChatLogParser {
 				in = new GZIPInputStream(in);
 			}
 
-			BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-			try {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
 				Calendar cal = Calendar.getInstance();
 				String line;
 				while ((line = reader.readLine()) != null) {
@@ -106,8 +103,6 @@ public class ChatLogParser {
 
 					messages.add(new ChatMessage(ts, parsedLine.message));
 				}
-			} finally {
-				IOUtils.closeQuietly(reader);
 			}
 		}
 

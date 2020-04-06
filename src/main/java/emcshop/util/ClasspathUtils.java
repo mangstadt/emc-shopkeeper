@@ -93,8 +93,7 @@ public final class ClasspathUtils {
 	static List<URI> listFilesInPackageFromJar(File jar, String packageName) throws IOException {
 		packageName = packageName.replace(".", "/");
 
-		JarFile jarFile = new JarFile(jar);
-		try {
+		try (JarFile jarFile = new JarFile(jar)) {
 			List<URI> filesInPackage = new ArrayList<URI>();
 			Enumeration<JarEntry> entries = jarFile.entries();
 			while (entries.hasMoreElements()) {
@@ -110,8 +109,6 @@ public final class ClasspathUtils {
 				}
 			}
 			return filesInPackage;
-		} finally {
-			jarFile.close();
 		}
 	}
 

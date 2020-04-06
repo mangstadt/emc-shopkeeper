@@ -208,7 +208,7 @@ public class ProfileLoader {
 					profileCache.set(playerName, profile);
 				}
 			} catch (IOException e) {
-				//ignore
+				logger.log(Level.WARNING, "Problem loading profile properties file for player \"" + playerName + "\". Profile information will be downloaded instead.", e);
 			}
 		}
 		if (profile != null) {
@@ -356,11 +356,9 @@ public class ProfileLoader {
 			HttpGet request = new HttpGet(url);
 			HttpResponse response = client.execute(request);
 			HttpEntity entity = response.getEntity();
-			InputStream in = entity.getContent();
-			try {
+
+			try (InputStream in = entity.getContent()) {
 				return Jsoup.parse(in, "UTF-8", "https://empireminecraft.com");
-			} finally {
-				IOUtils.closeQuietly(in);
 			}
 		}
 	}

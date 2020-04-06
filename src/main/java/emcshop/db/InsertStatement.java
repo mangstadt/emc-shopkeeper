@@ -207,17 +207,11 @@ public class InsertStatement {
 	 * @throws SQLException if there was a problem executing the query
 	 */
 	public Integer execute(Connection conn) throws SQLException {
-		PreparedStatement stmt = null;
-		try {
-			stmt = toStatement(conn);
+		try (PreparedStatement stmt = toStatement(conn)) {
 			stmt.execute();
 
 			ResultSet rs = stmt.getGeneratedKeys();
 			return rs.next() ? rs.getInt(1) : null; //this only returns one ID, even if multiple rows are inserted
-		} finally {
-			if (stmt != null) {
-				stmt.close();
-			}
 		}
 	}
 

@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.derby.jdbc.EmbeddedDriver;
@@ -143,19 +142,15 @@ public abstract class DirbyDbDao implements DbDao {
 
 		logger.info("Database schema out of date.  Upgrading from version " + curVersion + " to " + latestVersion + ".");
 		String sql = null;
-		Statement statement = conn.createStatement();
-		try {
+		try (Statement statement = conn.createStatement()) {
 			while (curVersion < latestVersion) {
 				logger.info("Performing schema update from version " + curVersion + " to " + (curVersion + 1) + ".");
 
-				SQLStatementReader in = new SQLStatementReader(getMigrationScript(curVersion));
-				try {
+				try (SQLStatementReader in = new SQLStatementReader(getMigrationScript(curVersion))) {
 					while ((sql = in.readStatement()) != null) {
 						statement.execute(sql);
 					}
 					sql = null;
-				} finally {
-					IOUtils.closeQuietly(in);
 				}
 
 				curVersion++;
@@ -170,8 +165,6 @@ public abstract class DirbyDbDao implements DbDao {
 				throw e;
 			}
 			throw new SQLException("Error executing SQL statement during schema update: " + sql, e);
-		} finally {
-			closeStatements(statement);
 		}
 		commit();
 	}
@@ -194,26 +187,20 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public int selectDbVersion() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT db_schema_version FROM meta");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT db_schema_version FROM meta")) {
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() ? rs.getInt(1) : 0;
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	@Override
 	public void upsertDbVersion(int version) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE meta SET db_schema_version = ?");
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE meta SET db_schema_version = ?")) {
 			stmt.setInt(1, version);
 			int updated = stmt.executeUpdate();
 			if (updated > 0) {
 				return;
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 
 		InsertStatement insertStmt = new InsertStatement("meta");
@@ -223,30 +210,23 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public int selectRupeeBalanceMeta() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT rupee_balance FROM meta");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT rupee_balance FROM meta")) {
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() ? rs.getInt(1) : 0;
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	@Override
 	public Integer selectRupeeBalance() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT rupee_balance FROM update_log ORDER BY ts DESC");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT rupee_balance FROM update_log ORDER BY ts DESC")) {
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() ? rs.getInt(1) : null;
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	@Override
 	public Player selsertPlayer(String name) throws SQLException {
-		PreparedStatement stmt = stmt("SELECT * FROM players WHERE Lower(name) = Lower(?)");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT * FROM players WHERE Lower(name) = Lower(?)")) {
 			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
@@ -257,8 +237,6 @@ public abstract class DirbyDbDao implements DbDao {
 				player.setLastSeen(toDate(rs.getTimestamp("last_seen")));
 				return player;
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 
 		InsertStatement insertStmt = new InsertStatement("players");
@@ -273,13 +251,10 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Integer getItemId(String name) throws SQLException {
-		PreparedStatement stmt = stmt("SELECT id FROM items WHERE Lower(name) = Lower(?)");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT id FROM items WHERE Lower(name) = Lower(?)")) {
 			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() ? rs.getInt(1) : null;
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -296,16 +271,13 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public List<String> getItemNames() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT name FROM items ORDER BY Lower(name)");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT name FROM items ORDER BY Lower(name)")) {
 			ResultSet rs = stmt.executeQuery();
 			List<String> names = new ArrayList<String>();
 			while (rs.next()) {
 				names.add(rs.getString("name"));
 			}
 			return names;
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -420,13 +392,10 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	private void updateItemName(Integer id, String newName) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE items SET name = ? WHERE id = ?");
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE items SET name = ? WHERE id = ?")) {
 			stmt.setString(1, newName);
 			stmt.setInt(2, id);
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -442,14 +411,11 @@ public abstract class DirbyDbDao implements DbDao {
 			int oldNameId = selsertItem(oldName); //e.g. smooth sandstone
 			int newNameId = selsertItem(newName); //e.g. cut sandstone
 
-			PreparedStatement stmt = stmt("UPDATE transactions SET item = ? WHERE item = ? AND ts < ?");
-			try {
+			try (PreparedStatement stmt = stmt("UPDATE transactions SET item = ? WHERE item = ? AND ts < ?")) {
 				stmt.setInt(1, newNameId);
 				stmt.setInt(2, oldNameId);
 				stmt.setTimestamp(3, toTimestamp(date));
 				stmt.executeUpdate();
-			} finally {
-				closeStatements(stmt);
 			}
 		}
 	}
@@ -457,9 +423,8 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void removeDuplicateItems() throws SQLException {
 		//get the ID(s) of each item
-		PreparedStatement stmt = stmt("SELECT id, name FROM items");
 		ListMultimap<String, Integer> itemIds = ArrayListMultimap.create();
-		try {
+		try (PreparedStatement stmt = stmt("SELECT id, name FROM items")) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				Integer id = rs.getInt("id");
@@ -467,8 +432,6 @@ public abstract class DirbyDbDao implements DbDao {
 
 				itemIds.put(name, id);
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 
 		int dbVersion = selectDbVersion();
@@ -497,15 +460,12 @@ public abstract class DirbyDbDao implements DbDao {
 			return;
 		}
 
-		PreparedStatement stmt = stmt("DELETE FROM items WHERE id " + in(itemIds.size()));
-		try {
+		try (PreparedStatement stmt = stmt("DELETE FROM items WHERE id " + in(itemIds.size()))) {
 			int i = 1;
 			for (Integer id : itemIds) {
 				stmt.setInt(i++, id);
 			}
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -550,8 +510,7 @@ public abstract class DirbyDbDao implements DbDao {
 		List<Date> dates = new ArrayList<Date>();
 		String[] tables = { "transactions", "payment_transactions" };
 		for (String table : tables) {
-			PreparedStatement selectStmt = stmt("SELECT Min(ts) FROM " + table);
-			try {
+			try (PreparedStatement selectStmt = stmt("SELECT Min(ts) FROM " + table)) {
 				ResultSet rs = selectStmt.executeQuery();
 				if (!rs.next()) {
 					continue;
@@ -563,8 +522,6 @@ public abstract class DirbyDbDao implements DbDao {
 				}
 
 				dates.add(toDate(ts));
-			} finally {
-				closeStatements(selectStmt);
 			}
 		}
 
@@ -581,16 +538,13 @@ public abstract class DirbyDbDao implements DbDao {
 			return;
 		}
 
-		PreparedStatement stmt = stmt("UPDATE transactions SET item = ? WHERE item " + in(oldItemIds.size()));
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE transactions SET item = ? WHERE item " + in(oldItemIds.size()))) {
 			int i = 1;
 			stmt.setInt(i++, newItemId);
 			for (Integer oldItemId : oldItemIds) {
 				stmt.setInt(i++, oldItemId);
 			}
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -657,12 +611,9 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void deletePaymentTransaction(PaymentTransactionDb transaction) throws SQLException {
-		PreparedStatement stmt = stmt("DELETE FROM payment_transactions WHERE id = ?");
-		try {
+		try (PreparedStatement stmt = stmt("DELETE FROM payment_transactions WHERE id = ?")) {
 			stmt.setInt(1, transaction.getId());
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -682,14 +633,11 @@ public abstract class DirbyDbDao implements DbDao {
 			id = stmt.execute(conn);
 			transaction.setId(id);
 		} else {
-			PreparedStatement stmt = stmt("UPDATE payment_transactions SET amount = ?, balance = ? WHERE id = ?");
-			try {
+			try (PreparedStatement stmt = stmt("UPDATE payment_transactions SET amount = ?, balance = ? WHERE id = ?")) {
 				stmt.setInt(1, transaction.getAmount());
 				stmt.setInt(2, transaction.getBalance());
 				stmt.setInt(3, id);
 				stmt.executeUpdate();
-			} finally {
-				closeStatements(stmt);
 			}
 		}
 	}
@@ -708,8 +656,7 @@ public abstract class DirbyDbDao implements DbDao {
 		String queries[] = { "SELECT Max(ts) FROM transactions", "SELECT Max(ts) FROM payment_transactions", "SELECT latest_transaction_ts FROM bonuses_fees" };
 		for (String query : queries) {
 			Date date;
-			PreparedStatement stmt = stmt(query);
-			try {
+			try (PreparedStatement stmt = stmt(query)) {
 				ResultSet rs = stmt.executeQuery();
 				if (!rs.next()) {
 					return null;
@@ -717,8 +664,6 @@ public abstract class DirbyDbDao implements DbDao {
 
 				Timestamp ts = rs.getTimestamp(1);
 				date = toDate(ts);
-			} finally {
-				closeStatements(stmt);
 			}
 
 			if (date != null && (latest == null || date.after(latest))) {
@@ -741,8 +686,7 @@ public abstract class DirbyDbDao implements DbDao {
 		"ORDER BY pt.ts DESC ";
 		//@formatter:on
 
-		PreparedStatement selectStmt = stmt(sql);
-		try {
+		try (PreparedStatement selectStmt = stmt(sql)) {
 			ResultSet rs = selectStmt.executeQuery();
 			List<PaymentTransactionDb> transactions = new ArrayList<PaymentTransactionDb>();
 			while (rs.next()) {
@@ -750,8 +694,6 @@ public abstract class DirbyDbDao implements DbDao {
 				transactions.add(transaction);
 			}
 			return transactions;
-		} finally {
-			closeStatements(selectStmt);
 		}
 	}
 
@@ -765,36 +707,27 @@ public abstract class DirbyDbDao implements DbDao {
 		"AND ignore = false";
 		//@formatter:on
 
-		PreparedStatement selectStmt = stmt(sql);
-		try {
+		try (PreparedStatement selectStmt = stmt(sql)) {
 			ResultSet rs = selectStmt.executeQuery();
 			return rs.next() ? rs.getInt(1) : 0;
-		} finally {
-			closeStatements(selectStmt);
 		}
 	}
 
 	@Override
 	public void ignorePaymentTransaction(Integer id) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE payment_transactions SET ignore = ? WHERE id = ?");
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE payment_transactions SET ignore = ? WHERE id = ?")) {
 			stmt.setBoolean(1, true);
 			stmt.setInt(2, id);
 			stmt.execute();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	@Override
 	public void assignPaymentTransaction(Integer paymentId, Integer transactionId) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE payment_transactions SET \"transaction\" = ? WHERE id = ?");
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE payment_transactions SET \"transaction\" = ? WHERE id = ?")) {
 			stmt.setInt(1, transactionId);
 			stmt.setInt(2, paymentId);
 			stmt.execute();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -824,8 +757,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 		sql += "GROUP BY i.name";
 
-		PreparedStatement stmt = stmt(sql);
-		try {
+		try (PreparedStatement stmt = stmt(sql)) {
 			int index = 1;
 			if (from != null) {
 				stmt.setTimestamp(index++, toTimestamp(from));
@@ -842,8 +774,6 @@ public abstract class DirbyDbDao implements DbDao {
 
 				itemGroups.put(itemGroup.getItem(), itemGroup);
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 
 		//@formatter:off
@@ -868,8 +798,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 		sql += "GROUP BY i.name";
 
-		stmt = stmt(sql);
-		try {
+		try (PreparedStatement stmt = stmt(sql)) {
 			int index = 1;
 			if (from != null) {
 				stmt.setTimestamp(index++, toTimestamp(from));
@@ -889,8 +818,6 @@ public abstract class DirbyDbDao implements DbDao {
 				itemGroup.setBoughtAmount(rs.getInt("amountSum"));
 				itemGroup.setBoughtQuantity(rs.getInt("quantitySum"));
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 
 		return itemGroups.values();
@@ -934,11 +861,10 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 		sql += " ORDER BY t.ts";
 
-		PreparedStatement stmt = stmt(sql);
 		List<ShopTransactionDb> transactions = new ArrayList<ShopTransactionDb>();
 		Map<String, ShopTransactionDb> lastTransactionByItem = new HashMap<String, ShopTransactionDb>();
 		Map<ShopTransactionDb, Date> dateOfLastTransaction = new HashMap<ShopTransactionDb, Date>();
-		try {
+		try (PreparedStatement stmt = stmt(sql)) {
 			int index = 1;
 			if (from != null) {
 				stmt.setTimestamp(index++, toTimestamp(from));
@@ -1000,8 +926,6 @@ public abstract class DirbyDbDao implements DbDao {
 				dateOfLastTransaction.put(transaction, ts);
 				transactions.add(transaction);
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 
 		return transactions;
@@ -1051,8 +975,7 @@ public abstract class DirbyDbDao implements DbDao {
 			sql += " WHERE " + StringUtils.join(where, " AND ");
 		}
 
-		PreparedStatement stmt = stmt(sql);
-		try {
+		try (PreparedStatement stmt = stmt(sql)) {
 			int index = 1;
 			if (from != null) {
 				stmt.setTimestamp(index++, toTimestamp(from));
@@ -1127,27 +1050,21 @@ public abstract class DirbyDbDao implements DbDao {
 					itemGroup.setBoughtQuantity(itemGroup.getBoughtQuantity() + quantity);
 				}
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 
 		return playerGroups.values();
 	}
 
 	private String getPlayerName(Integer id) throws SQLException {
-		PreparedStatement stmt = stmt("SELECT name FROM players WHERE id = ?");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT name FROM players WHERE id = ?")) {
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() ? rs.getString(1) : null;
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	private Player getPlayer(Integer id) throws SQLException {
-		PreparedStatement stmt = stmt("SELECT name, first_seen, last_seen FROM players WHERE id = ?");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT name, first_seen, last_seen FROM players WHERE id = ?")) {
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			if (!rs.next()) {
@@ -1160,17 +1077,14 @@ public abstract class DirbyDbDao implements DbDao {
 			player.setFirstSeen(toDate(rs.getTimestamp("first_seen")));
 			player.setLastSeen(toDate(rs.getTimestamp("last_seen")));
 			return player;
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	@Override
 	public Collection<Inventory> getInventory() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT inventory.*, items.name AS item_name FROM inventory INNER JOIN items ON inventory.item = items.id");
 		Collection<Inventory> inventory = new ArrayList<Inventory>();
 
-		try {
+		try (PreparedStatement stmt = stmt("SELECT inventory.*, items.name AS item_name FROM inventory INNER JOIN items ON inventory.item = items.id")) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				Inventory inv = new Inventory();
@@ -1181,21 +1095,16 @@ public abstract class DirbyDbDao implements DbDao {
 				inv.setLowInStockThreshold(rs.getInt("low_threshold"));
 				inventory.add(inv);
 			}
-			return inventory;
-		} finally {
-			closeStatements(stmt);
 		}
+
+		return inventory;
 	}
 
 	private void addToInventory(Integer itemId, Integer quantityToAdd) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE inventory SET quantity = quantity + ? WHERE item = ?");
-
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE inventory SET quantity = quantity + ? WHERE item = ?")) {
 			stmt.setInt(1, quantityToAdd);
 			stmt.setInt(2, itemId);
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -1208,8 +1117,7 @@ public abstract class DirbyDbDao implements DbDao {
 		allIds.add(newItemId);
 
 		int totalQuantity = 0;
-		PreparedStatement stmt = stmt("SELECT Sum(quantity) FROM inventory WHERE item " + in(allIds.size()));
-		try {
+		try (PreparedStatement stmt = stmt("SELECT Sum(quantity) FROM inventory WHERE item " + in(allIds.size()))) {
 			int i = 1;
 			for (Integer id : allIds) {
 				stmt.setInt(i++, id);
@@ -1217,30 +1125,22 @@ public abstract class DirbyDbDao implements DbDao {
 
 			ResultSet rs = stmt.executeQuery();
 			totalQuantity = rs.next() ? rs.getInt(1) : 0;
-		} finally {
-			closeStatements(stmt);
 		}
 
 		//update the quantity
-		stmt = stmt("UPDATE inventory SET quantity = ? WHERE item = ?");
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE inventory SET quantity = ? WHERE item = ?")) {
 			stmt.setInt(1, totalQuantity);
 			stmt.setInt(2, newItemId);
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 
 		//delete the old entries
-		stmt = stmt("DELETE FROM inventory WHERE item " + in(oldItemIds.size()));
-		try {
+		try (PreparedStatement stmt = stmt("DELETE FROM inventory WHERE item " + in(oldItemIds.size()))) {
 			int i = 1;
 			for (Integer id : oldItemIds) {
 				stmt.setInt(i++, id);
 			}
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -1253,14 +1153,11 @@ public abstract class DirbyDbDao implements DbDao {
 	public int upsertInventory(String item, Integer quantity, boolean add) throws SQLException {
 		int itemId = selsertItem(item);
 
-		PreparedStatement stmt = stmt("SELECT id FROM inventory WHERE item = ?");
 		Integer invId;
-		try {
+		try (PreparedStatement stmt = stmt("SELECT id FROM inventory WHERE item = ?")) {
 			stmt.setInt(1, itemId);
 			ResultSet rs = stmt.executeQuery();
 			invId = rs.next() ? rs.getInt("id") : null;
-		} finally {
-			closeStatements(stmt);
 		}
 
 		if (invId == null) {
@@ -1277,13 +1174,10 @@ public abstract class DirbyDbDao implements DbDao {
 			sql = "UPDATE inventory SET quantity = ? WHERE id = ?";
 		}
 
-		PreparedStatement stmt2 = stmt(sql);
-		try {
-			stmt2.setInt(1, quantity);
-			stmt2.setInt(2, invId);
-			stmt2.executeUpdate();
-		} finally {
-			closeStatements(stmt2);
+		try (PreparedStatement stmt = stmt(sql)) {
+			stmt.setInt(1, quantity);
+			stmt.setInt(2, invId);
+			stmt.executeUpdate();
 		}
 
 		return invId;
@@ -1293,13 +1187,10 @@ public abstract class DirbyDbDao implements DbDao {
 	public void updateInventoryLowThreshold(String item, int threshold) throws SQLException {
 		int itemId = selsertItem(item);
 
-		PreparedStatement stmt = stmt("UPDATE inventory SET low_threshold = ? WHERE item = ?");
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE inventory SET low_threshold = ? WHERE item = ?")) {
 			stmt.setInt(1, threshold);
 			stmt.setInt(2, itemId);
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -1321,15 +1212,12 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 
 		//execute statement
-		PreparedStatement stmt = stmt(sb.toString());
-		try {
+		try (PreparedStatement stmt = stmt(sb.toString())) {
 			int i = 1;
 			for (Integer id : ids) {
 				stmt.setInt(i++, id);
 			}
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -1358,49 +1246,39 @@ public abstract class DirbyDbDao implements DbDao {
 			assignments.add(columnName + " = " + columnName + " + ?");
 		}
 
-		PreparedStatement stmt = stmt("UPDATE bonuses_fees SET " + StringUtils.join(assignments, ", "));
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET " + StringUtils.join(assignments, ", "))) {
 			int i = 1;
 			for (Integer value : values) {
 				stmt.setInt(i++, value);
 			}
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	@Override
 	public void updateBonusesFeesLatestTransactionDate(Date newLatest) throws SQLException {
 		Date oldLatest = null;
-		PreparedStatement selectStmt = stmt("SELECT latest_transaction_ts FROM bonuses_fees");
-		try {
-			ResultSet rs = selectStmt.executeQuery();
+		try (PreparedStatement stmt = stmt("SELECT latest_transaction_ts FROM bonuses_fees")) {
+			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				Timestamp ts = rs.getTimestamp(1);
 				oldLatest = toDate(ts);
 			}
-		} finally {
-			closeStatements(selectStmt);
 		}
 
 		if (oldLatest != null && newLatest.before(oldLatest)) {
 			return;
 		}
 
-		PreparedStatement updateStmt = stmt("UPDATE bonuses_fees SET latest_transaction_ts = ?");
-		try {
-			updateStmt.setTimestamp(1, toTimestamp(newLatest));
-			updateStmt.executeUpdate();
-		} finally {
-			closeStatements(updateStmt);
+		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET latest_transaction_ts = ?")) {
+			stmt.setTimestamp(1, toTimestamp(newLatest));
+			stmt.executeUpdate();
 		}
 	}
 
 	@Override
 	public BonusFee getBonusesFees() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT * FROM bonuses_fees");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT * FROM bonuses_fees")) {
 			ResultSet rs = stmt.executeQuery();
 			if (!rs.next()) {
 				return null;
@@ -1419,46 +1297,35 @@ public abstract class DirbyDbDao implements DbDao {
 			bonusesFees.setHighestBalanceTs(toDate(rs.getTimestamp("highest_balance_ts")));
 
 			return bonusesFees;
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	@Override
 	public void updateBonusesFeesSince(Date since) throws SQLException {
-		PreparedStatement stmt = stmt("UPDATE bonuses_fees SET since = ? WHERE since IS NULL");
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET since = ? WHERE since IS NULL")) {
 			stmt.setTimestamp(1, toTimestamp(since));
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	@Override
 	public void updateBonusesFeesHighestBalance(RupeeTransaction transaction) throws SQLException {
 		int highestBalance = 0;
-		PreparedStatement selectStmt = stmt("SELECT highest_balance FROM bonuses_fees");
-		try {
-			ResultSet rs = selectStmt.executeQuery();
+		try (PreparedStatement stmt = stmt("SELECT highest_balance FROM bonuses_fees")) {
+			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				highestBalance = rs.getInt(1);
 			}
-		} finally {
-			closeStatements(selectStmt);
 		}
 
 		if (transaction.getBalance() <= highestBalance) {
 			return;
 		}
 
-		PreparedStatement updateStmt = stmt("UPDATE bonuses_fees SET highest_balance = ?, highest_balance_ts = ?");
-		try {
-			updateStmt.setInt(1, transaction.getBalance());
-			updateStmt.setTimestamp(2, toTimestamp(transaction.getTs()));
-			updateStmt.executeUpdate();
-		} finally {
-			closeStatements(updateStmt);
+		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET highest_balance = ?, highest_balance_ts = ?")) {
+			stmt.setInt(1, transaction.getBalance());
+			stmt.setTimestamp(2, toTimestamp(transaction.getTs()));
+			stmt.executeUpdate();
 		}
 	}
 
@@ -1490,8 +1357,7 @@ public abstract class DirbyDbDao implements DbDao {
 			sql += "WHERE t.ts < ?";
 		}
 
-		PreparedStatement stmt = stmt(sql);
-		try {
+		try (PreparedStatement stmt = stmt(sql)) {
 			int index = 1;
 			if (from != null) {
 				stmt.setTimestamp(index++, toTimestamp(from));
@@ -1532,8 +1398,6 @@ public abstract class DirbyDbDao implements DbDao {
 					profit.setBalance(balance);
 				}
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 
 		return profits;
@@ -1542,8 +1406,8 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void wipe() throws SQLException, IOException {
 		logger.info("Wiping transactions...");
-		Statement stmt = conn.createStatement();
-		try {
+
+		try (Statement stmt = conn.createStatement()) {
 			stmt.execute("DELETE FROM inventory");
 			stmt.execute("DELETE FROM payment_transactions");
 			stmt.execute("DELETE FROM transactions");
@@ -1562,8 +1426,6 @@ public abstract class DirbyDbDao implements DbDao {
 			populateItemsTable();
 
 			commit();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -1627,8 +1489,7 @@ public abstract class DirbyDbDao implements DbDao {
 		"GROUP BY player";
 		//@formatter:on
 
-		PreparedStatement stmt = stmt(sql);
-		try {
+		try (PreparedStatement stmt = stmt(sql)) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				int player = rs.getInt("player");
@@ -1636,8 +1497,6 @@ public abstract class DirbyDbDao implements DbDao {
 				Date lastSeen = toDate(rs.getTimestamp("lastSeen"));
 				updateFirstLastSeen(player, firstSeen, lastSeen);
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -1645,8 +1504,7 @@ public abstract class DirbyDbDao implements DbDao {
 	public void findHighestBalance() throws SQLException {
 		int highestBalance = 0;
 		Timestamp highestBalanceTs = null;
-		PreparedStatement stmt = stmt("SELECT ts, balance FROM transactions");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT ts, balance FROM transactions")) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				int balance = rs.getInt("balance");
@@ -1655,17 +1513,12 @@ public abstract class DirbyDbDao implements DbDao {
 					highestBalanceTs = rs.getTimestamp("ts");
 				}
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 
-		stmt = stmt("UPDATE bonuses_fees SET highest_balance = ?, highest_balance_ts = ?");
-		try {
+		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET highest_balance = ?, highest_balance_ts = ?")) {
 			stmt.setInt(1, highestBalance);
 			stmt.setTimestamp(2, highestBalanceTs);
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -1689,8 +1542,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 		sql += "WHERE id = ?";
 
-		PreparedStatement stmt = stmt(sql);
-		try {
+		try (PreparedStatement stmt = stmt(sql)) {
 			int index = 1;
 			if (firstSeen != null) {
 				stmt.setTimestamp(index++, toTimestamp(firstSeen));
@@ -1701,8 +1553,6 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.setInt(index++, playerId);
 
 			stmt.executeUpdate();
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
@@ -1723,19 +1573,15 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public Date getLatestUpdateDate() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT Max(ts) FROM update_log");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT Max(ts) FROM update_log")) {
 			ResultSet rs = stmt.executeQuery();
 			return rs.next() ? toDate(rs.getTimestamp(1)) : null;
-		} finally {
-			closeStatements(stmt);
 		}
 	}
 
 	@Override
 	public Date getSecondLatestUpdateDate() throws SQLException {
-		PreparedStatement stmt = stmt("SELECT ts FROM update_log ORDER BY ts DESC");
-		try {
+		try (PreparedStatement stmt = stmt("SELECT ts FROM update_log ORDER BY ts DESC")) {
 			ResultSet rs = stmt.executeQuery();
 			int count = 0;
 			while (rs.next()) {
@@ -1744,8 +1590,6 @@ public abstract class DirbyDbDao implements DbDao {
 					return toDate(rs.getTimestamp(1));
 				}
 			}
-		} finally {
-			closeStatements(stmt);
 		}
 		return null;
 	}
@@ -1766,24 +1610,6 @@ public abstract class DirbyDbDao implements DbDao {
 	 */
 	protected Timestamp toTimestamp(Date date) {
 		return (date == null) ? null : new Timestamp(date.getTime());
-	}
-
-	/**
-	 * Closes {@link Statement} objects.
-	 * @param statements the statements to close (nulls are ignored)
-	 */
-	protected void closeStatements(Statement... statements) {
-		for (Statement statement : statements) {
-			if (statement == null) {
-				continue;
-			}
-
-			try {
-				statement.close();
-			} catch (SQLException e) {
-				//ignore
-			}
-		}
 	}
 
 	/**
@@ -1815,12 +1641,11 @@ public abstract class DirbyDbDao implements DbDao {
 	 */
 	protected void createSchema() throws SQLException {
 		String sql = null;
-		SQLStatementReader in = null;
 		String schemaFileName = "schema.sql";
-		Statement statement = null;
-		try {
-			in = new SQLStatementReader(new InputStreamReader(ClasspathUtils.getResourceAsStream(schemaFileName, getClass())));
-			statement = conn.createStatement();
+		try (
+			Statement statement = conn.createStatement();
+			SQLStatementReader in = new SQLStatementReader(new InputStreamReader(ClasspathUtils.getResourceAsStream(schemaFileName, getClass())))
+		) {
 			while ((sql = in.readStatement()) != null) {
 				statement.execute(sql);
 			}
@@ -1833,9 +1658,6 @@ public abstract class DirbyDbDao implements DbDao {
 				throw e;
 			}
 			throw new SQLException("Error executing SQL statement: " + sql, e);
-		} finally {
-			IOUtils.closeQuietly(in);
-			closeStatements(statement);
 		}
 		commit();
 	}

@@ -1,6 +1,5 @@
 package emcshop;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -8,6 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.ListMultimap;
@@ -57,11 +57,9 @@ public final class QueryExporter {
 		}
 		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL, "", "", "", "", "", netTotal + "" });
 
-		try {
-			writer.close();
-		} catch (IOException e) {
-			//writing to string
-		}
+		//writing to a string
+		IOUtils.closeQuietly(writer);
+
 		return sw.toString();
 	}
 
@@ -198,11 +196,9 @@ public final class QueryExporter {
 		}
 		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL });
 
-		try {
-			writer.close();
-		} catch (IOException e) {
-			//writing to string
-		}
+		//writing to a string
+		IOUtils.closeQuietly(writer);
+
 		return sw.toString();
 	}
 
@@ -331,11 +327,9 @@ public final class QueryExporter {
 		}
 		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL, "", "", "", netTotal + "" });
 
-		try {
-			writer.close();
-		} catch (IOException e) {
-			//writing to string
-		}
+		//writing to a string
+		IOUtils.closeQuietly(writer);
+
 		return sw.toString();
 	}
 
@@ -354,11 +348,9 @@ public final class QueryExporter {
 		}
 		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL });
 
-		try {
-			writer.close();
-		} catch (IOException e) {
-			//writing to string
-		}
+		//writing to a string
+		IOUtils.closeQuietly(writer);
+
 		return sw.toString();
 	}
 

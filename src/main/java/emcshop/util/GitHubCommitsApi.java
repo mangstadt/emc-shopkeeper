@@ -14,7 +14,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -75,16 +75,13 @@ public class GitHubCommitsApi {
 		URIBuilder builder = new URIBuilder(uri);
 		builder.addParameter("path", filePath);
 
-		CloseableHttpClient client = HttpClientBuilder.create().build();
-		try {
+		try (CloseableHttpClient client = HttpClients.createDefault()) {
 			HttpGet request = new HttpGet(builder.build());
 			HttpResponse response = client.execute(request);
 			HttpEntity entity = response.getEntity();
 			return EntityUtils.toString(entity);
 		} catch (URISyntaxException ignore) {
 			throw new IOException(ignore);
-		} finally {
-			client.close();
 		}
 	}
 

@@ -12,8 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
 /**
  * Contains stored procedure code for calling from the SQL scripts.
@@ -36,13 +36,9 @@ public final class MigrationSprocs {
 			return;
 		}
 
-		Connection conn = conn();
-		DbDao dao = new DirbyEmbeddedDbDao(conn);
-
-		try {
+		try (Connection conn = conn()) {
+			DbDao dao = new DirbyEmbeddedDbDao(conn);
 			dao.populateItemsTable();
-		} finally {
-			conn.close();
 		}
 
 		populateItemsTableCalled = true;
@@ -59,13 +55,9 @@ public final class MigrationSprocs {
 			return;
 		}
 
-		Connection conn = conn();
-		DbDao dao = new DirbyEmbeddedDbDao(conn);
-
-		try {
+		try (Connection conn = conn()) {
+			DbDao dao = new DirbyEmbeddedDbDao(conn);
 			dao.updateItemNamesAndAliases();
-		} finally {
-			conn.close();
 		}
 
 		updateItemNamesCalled = true;
@@ -76,13 +68,9 @@ public final class MigrationSprocs {
 	 * @throws SQLException if there's a database problem
 	 */
 	public static void calculatePlayersFirstLastSeenDates() throws SQLException {
-		Connection conn = conn();
-		DbDao dao = new DirbyEmbeddedDbDao(conn);
-
-		try {
+		try (Connection conn = conn()) {
+			DbDao dao = new DirbyEmbeddedDbDao(conn);
 			dao.calculatePlayersFirstLastSeenDates();
-		} finally {
-			conn.close();
 		}
 	}
 
@@ -91,13 +79,9 @@ public final class MigrationSprocs {
 	 * @throws SQLException if there's a database problem
 	 */
 	public static void removeDuplicateItemNames() throws SQLException {
-		Connection conn = conn();
-		DbDao dao = new DirbyEmbeddedDbDao(conn);
-
-		try {
+		try (Connection conn = conn()) {
+			DbDao dao = new DirbyEmbeddedDbDao(conn);
 			dao.removeDuplicateItems();
-		} finally {
-			conn.close();
 		}
 	}
 
@@ -116,17 +100,14 @@ public final class MigrationSprocs {
 	 * @throws SQLException
 	 */
 	public static void fixPaymentTransactionReason() throws SQLException {
-		Connection conn = conn();
-
-		try {
+		try (Connection conn = conn()) {
 			DbDao dao = new DirbyEmbeddedDbDao(conn);
 
 			//find all the bad player names
 			List<Integer> badPlayerIds = new ArrayList<Integer>();
 			List<Integer> goodPlayerIds = new ArrayList<Integer>();
 			List<String> reasons = new ArrayList<String>();
-			{
-				PreparedStatement stmt = conn.prepareStatement("SELECT id, name FROM players");
+			try (PreparedStatement stmt = conn.prepareStatement("SELECT id, name FROM players")) {
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
 					String name = rs.getString("name");
@@ -162,8 +143,7 @@ public final class MigrationSprocs {
 
 			//find all transactions that are affected and determine their proper playerId
 			Map<Integer, Integer> transactionIdToNewPlayerId = new HashMap<Integer, Integer>();
-			{
-				PreparedStatement stmt = conn.prepareStatement("SELECT \"transaction\" FROM payment_transactions WHERE player = ? AND \"transaction\" IS NOT NULL");
+			try (PreparedStatement stmt = conn.prepareStatement("SELECT \"transaction\" FROM payment_transactions WHERE player = ? AND \"transaction\" IS NOT NULL")) {
 				for (int i = 0; i < badPlayerIds.size(); i++) {
 					Integer badPlayerId = badPlayerIds.get(i);
 					Integer goodPlayerId = goodPlayerIds.get(i);
@@ -178,51 +158,53 @@ public final class MigrationSprocs {
 			}
 
 			//assign the correct playerId and reason to each payment_transaction
-			PreparedStatement stmt = conn.prepareStatement("UPDATE payment_transactions SET player = ?, reason = ? WHERE player = ?");
-			for (int i = 0; i < badPlayerIds.size(); i++) {
-				Integer goodPlayerId = goodPlayerIds.get(i);
-				String reason = reasons.get(i);
-				Integer badPlayerId = badPlayerIds.get(i);
+			try (PreparedStatement stmt = conn.prepareStatement("UPDATE payment_transactions SET player = ?, reason = ? WHERE player = ?")) {
+				for (int i = 0; i < badPlayerIds.size(); i++) {
+					Integer goodPlayerId = goodPlayerIds.get(i);
+					String reason = reasons.get(i);
+					Integer badPlayerId = badPlayerIds.get(i);
 
-				stmt.setInt(1, goodPlayerId);
+					stmt.setInt(1, goodPlayerId);
 
-				//if (reason == null) {
-				//stmt.setNull(2, Types.VARCHAR);
-				//} else {
-				stmt.setString(2, reason);
-				//}
-				stmt.setInt(3, badPlayerId);
-				stmt.executeUpdate();
+					//if (reason == null) {
+					//stmt.setNull(2, Types.VARCHAR);
+					//} else {
+					stmt.setString(2, reason);
+					//}
+					stmt.setInt(3, badPlayerId);
+					stmt.executeUpdate();
+				}
 			}
 
 			//assign the correct playerId to each transaction
-			stmt = conn.prepareStatement("UPDATE transactions SET player = ? WHERE id = ? AND player IS NOT NULL");
-			for (Entry<Integer, Integer> entry : transactionIdToNewPlayerId.entrySet()) {
-				Integer transactionId = entry.getKey();
-				Integer newPlayerId = entry.getValue();
+			try (PreparedStatement stmt = conn.prepareStatement("UPDATE transactions SET player = ? WHERE id = ? AND player IS NOT NULL")) {
+				for (Entry<Integer, Integer> entry : transactionIdToNewPlayerId.entrySet()) {
+					Integer transactionId = entry.getKey();
+					Integer newPlayerId = entry.getValue();
 
-				stmt.setInt(1, newPlayerId);
-				stmt.setInt(2, transactionId);
-				stmt.executeUpdate();
+					stmt.setInt(1, newPlayerId);
+					stmt.setInt(2, transactionId);
+					stmt.executeUpdate();
+				}
 			}
-			stmt = conn.prepareStatement("UPDATE transactions SET shop_owner = ? WHERE id = ? AND shop_owner IS NOT NULL");
-			for (Entry<Integer, Integer> entry : transactionIdToNewPlayerId.entrySet()) {
-				Integer transactionId = entry.getKey();
-				Integer newPlayerId = entry.getValue();
+			try (PreparedStatement stmt = conn.prepareStatement("UPDATE transactions SET shop_owner = ? WHERE id = ? AND shop_owner IS NOT NULL")) {
+				for (Entry<Integer, Integer> entry : transactionIdToNewPlayerId.entrySet()) {
+					Integer transactionId = entry.getKey();
+					Integer newPlayerId = entry.getValue();
 
-				stmt.setInt(1, newPlayerId);
-				stmt.setInt(2, transactionId);
-				stmt.executeUpdate();
+					stmt.setInt(1, newPlayerId);
+					stmt.setInt(2, transactionId);
+					stmt.executeUpdate();
+				}
 			}
 
 			//delete all of the bad player names
-			stmt = conn.prepareStatement("DELETE FROM players WHERE id = ?");
-			for (Integer badPlayerId : badPlayerIds) {
-				stmt.setInt(1, badPlayerId);
-				stmt.executeUpdate();
+			try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM players WHERE id = ?")) {
+				for (Integer badPlayerId : badPlayerIds) {
+					stmt.setInt(1, badPlayerId);
+					stmt.executeUpdate();
+				}
 			}
-		} finally {
-			conn.close();
 		}
 	}
 
@@ -232,13 +214,9 @@ public final class MigrationSprocs {
 	 * @throws SQLException if there's a database problem
 	 */
 	public static void findHighestBalance() throws SQLException {
-		Connection conn = conn();
-		DbDao dao = new DirbyEmbeddedDbDao(conn);
-
-		try {
+		try (Connection conn = conn()) {
+			DbDao dao = new DirbyEmbeddedDbDao(conn);
 			dao.findHighestBalance();
-		} finally {
-			conn.close();
 		}
 	}
 
@@ -268,13 +246,9 @@ public final class MigrationSprocs {
 			date = c.getTime();
 		}
 
-		Connection conn = conn();
-		DbDao dao = new DirbyEmbeddedDbDao(conn);
-
-		try {
+		try (Connection conn = conn()) {
+			DbDao dao = new DirbyEmbeddedDbDao(conn);
 			dao.updateItemsWhoseOldNamesAreUsedByExistingItems(oldNames, newNames, date);
-		} finally {
-			conn.close();
 		}
 	}
 
