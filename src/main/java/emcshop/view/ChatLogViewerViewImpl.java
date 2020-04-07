@@ -12,13 +12,13 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -218,30 +218,6 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 	private class ChatLogEditorPane extends JEditorPane {
 		private final DateFormat df = new SimpleDateFormat("HH:mm:ss");
-		private final Map<String, String> channelColors = new HashMap<>();
-		{
-			channelColors.put("T", "green");
-			channelColors.put("C", "green");
-			channelColors.put("L", "#cccc00");
-			channelColors.put("S", "#00cccc");
-			channelColors.put("R", "blue");
-			channelColors.put("G", "#009999");
-			channelColors.put("E", "#00cc00");
-		}
-		private final Pattern chatRegex;
-		{
-			StringBuilder sb = new StringBuilder("^(");
-
-			sb.append('[');
-			for (String channel : channelColors.keySet()) {
-				sb.append(channel);
-			}
-			sb.append(']');
-
-			sb.append("|From|To) ");
-
-			chatRegex = Pattern.compile(sb.toString());
-		}
 		private final Pattern gaveRupeesRegex = Pattern.compile("^You paid ([\\d,]+) rupees to (.*)");
 		private final Pattern receivedRupeesRegex = Pattern.compile("^You just received ([\\d,]+) rupees from (.*)");
 
@@ -331,15 +307,18 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				}
 
 				//color the chat message
-				boolean isChat = chatRegex.matcher(message).find();
-				if (isChat) {
-					if (escapedMessage.startsWith("To") || escapedMessage.startsWith("From")) {
-						escapedMessage = "<span style=\"color:purple\">" + escapedMessage + "</span>";
-					} else {
-						char channel = escapedMessage.charAt(0);
-						String color = channelColors.get(channel + "");
-						if (color != null) {
-							escapedMessage = "<span style=\"color:" + color + "\"><b>" + channel + "</b></span>" + escapedMessage.substring(1);
+				boolean isChatMessage = false;
+				if (escapedMessage.startsWith("To ") || escapedMessage.startsWith("From ")) {
+					escapedMessage = "<span style=\"color:purple\">" + escapedMessage + "</span>";
+					isChatMessage = true;
+				} else {
+					int spacePos = escapedMessage.indexOf(' ');
+					if (spacePos >= 0) {
+						String channelCode = escapedMessage.substring(0, spacePos);
+						ChatChannel channel = ChatChannel.find(channelCode);
+						if (channel != null) {
+							escapedMessage = "<span style=\"color:" + channel.getColor() + "\"><b>" + channelCode + "</b></span>" + escapedMessage.substring(spacePos);
+							isChatMessage = true;
 						}
 					}
 				}
@@ -360,7 +339,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				}
 
 				//grey out hidden messages
-				boolean hide = (!isChat && !isPaymentTransaction);
+				boolean hide = (!isChatMessage && !isPaymentTransaction);
 				if (hide) {
 					sb.append("<span style=\"color:#cccccc\">");
 				}
@@ -415,6 +394,46 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 		public boolean foundPaymentTransaction() {
 			return foundPaymentTransaction;
+		}
+	}
+
+	private enum ChatChannel {
+		/*
+		 * Used to be called Town chat.
+		 */
+		COMMUNITY("[CT](-[1-9U])?", "green"),
+
+		/*
+		 * Used to be called Economy chat.
+		 */
+		MARKET("[EM](-[1-9U])?", "#00cc00"),
+
+		/*
+		 * Used to be labeled "S", but this is used by Server chat now.
+		 */
+		SUPPORTER("Sup(-[1-9U])?", "#00cccc"),
+
+		LOCAL("L", "#cccc00"), //@formatter:off
+		RESIDENCE("R", "blue"),
+		GROUP("G", "#009999"),
+		SERVER("S", "red"); //@formatter:on
+
+		private final Predicate<String> regex;
+		private final String color;
+
+		private ChatChannel(String regex, String color) {
+			this.regex = Pattern.compile("^(" + regex + ")$").asPredicate();
+			this.color = color;
+		}
+
+		public String getColor() {
+			return color;
+		}
+
+		public static ChatChannel find(String code) {
+			return Arrays.stream(values()) //@formatter:off
+				.filter(c -> c.regex.test(code))
+			.findFirst().orElse(null); //@formatter:on
 		}
 	}
 
