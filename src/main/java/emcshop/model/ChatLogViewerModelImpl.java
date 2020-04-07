@@ -2,7 +2,7 @@ package emcshop.model;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import emcshop.AppContext;
@@ -45,7 +45,7 @@ public class ChatLogViewerModelImpl implements IChatLogViewerModel {
 	}
 
 	@Override
-	public List<ChatMessage> getChatMessages(Date date) {
+	public List<ChatMessage> getChatMessages(LocalDate date) {
 		try {
 			return parser.getLog(date);
 		} catch (IOException e) {

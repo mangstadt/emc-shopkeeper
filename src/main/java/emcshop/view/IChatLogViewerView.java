@@ -2,7 +2,7 @@ package emcshop.view;
 
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import emcshop.chat.ChatMessage;
@@ -21,9 +21,9 @@ public interface IChatLogViewerView {
 
 	void setPaymentTransaction(PaymentTransactionDb paymentTransaction);
 
-	Date getDate();
+	LocalDate getDate();
 
-	void setDate(Date dateToDisplay);
+	void setDate(LocalDate dateToDisplay);
 
 	void setChatMessages(List<ChatMessage> chatMessages);
 

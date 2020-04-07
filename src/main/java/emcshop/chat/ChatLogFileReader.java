@@ -9,9 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import java.time.LocalTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -25,7 +23,7 @@ import emcshop.util.OS;
 public class ChatLogFileReader implements Closeable {
 	private static final Pattern lineRegex = Pattern.compile("^\\[(\\d\\d):(\\d\\d):(\\d\\d)\\].*?\\[CHAT\\](.*)");
 	private final BufferedReader reader;
-	private final LocalDateTime startOfDay;
+	private final LocalDate date;
 
 	/**
 	 * @param file the file to read
@@ -52,7 +50,7 @@ public class ChatLogFileReader implements Closeable {
 		String charset = OS.isWindows() ? "Windows-1252" : "UTF-8";
 		reader = new BufferedReader(new InputStreamReader(in, charset));
 
-		startOfDay = date.atStartOfDay();
+		this.date = date;
 	}
 
 	/**
@@ -81,10 +79,10 @@ public class ChatLogFileReader implements Closeable {
 		int second = Integer.parseInt(m.group(3));
 		String message = m.group(4).trim();
 
-		int totalSeconds = (hour * 60 * 60) + (minute * 60) + second;
-		LocalDateTime ts = startOfDay.plus(totalSeconds, ChronoUnit.SECONDS);
+		LocalTime time = LocalTime.of(hour, minute, second);
+		LocalDateTime ts = LocalDateTime.of(date, time);
 
-		return new ChatMessage(Date.from(ts.atZone(ZoneId.systemDefault()).toInstant()), message);
+		return new ChatMessage(ts, message);
 	}
 
 	@Override

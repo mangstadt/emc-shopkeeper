@@ -1,20 +1,20 @@
 package emcshop.chat;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Represents a chat message.
  */
 public class ChatMessage {
-	private final Date date;
+	private final LocalDateTime date;
 	private final String message;
 
-	public ChatMessage(Date date, String message) {
+	public ChatMessage(LocalDateTime date, String message) {
 		this.date = date;
 		this.message = message;
 	}
 
-	public Date getDate() {
+	public LocalDateTime getDate() {
 		return date;
 	}
 

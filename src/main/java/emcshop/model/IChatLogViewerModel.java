@@ -1,7 +1,7 @@
 package emcshop.model;
 
 import java.io.File;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import emcshop.chat.ChatMessage;
@@ -14,7 +14,7 @@ public interface IChatLogViewerModel {
 
 	PaymentTransactionDb getPaymentTransaction();
 
-	List<ChatMessage> getChatMessages(Date date);
+	List<ChatMessage> getChatMessages(LocalDate date);
 
 	String getCurrentPlayer();
 }

@@ -5,12 +5,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,10 +38,8 @@ public class ChatLogParser {
 	 * @param date the date
 	 * @return the chat messages
 	 */
-	public List<ChatMessage> getLog(Date date) throws IOException {
-		LocalDate localDate = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
-
-		String dateStr = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+	public List<ChatMessage> getLog(LocalDate date) throws IOException {
+		String dateStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 		Pattern fileNameRegex = Pattern.compile("^" + dateStr + "-(\\d+)\\.log\\.gz$");
 
 		/*
@@ -66,14 +62,14 @@ public class ChatLogParser {
 
 		//should the "latest.log" file be parsed as well?
 		Path latest = logDir.resolve("latest.log");
-		if (lastModifiedTimeMatches(latest, localDate)) {
+		if (lastModifiedTimeMatches(latest, date)) {
 			logFiles.add(latest);
 		}
 
 		//parse each log file
 		List<ChatMessage> messages = new ArrayList<>();
 		for (Path file : logFiles) {
-			try (ChatLogFileReader reader = new ChatLogFileReader(file, localDate)) {
+			try (ChatLogFileReader reader = new ChatLogFileReader(file, date)) {
 				ChatMessage message;
 				while ((message = reader.readNext()) != null) {
 					messages.add(message);

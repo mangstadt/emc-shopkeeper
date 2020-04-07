@@ -1,6 +1,5 @@
 package emcshop.chat;
 
-import static emcshop.util.TestUtils.date;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -11,6 +10,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Iterator;
@@ -37,7 +37,7 @@ public class ChatLogParserTest {
 	@Test
 	public void getLog_no_logs_found() throws Exception {
 		ChatLogParser parser = new ChatLogParser(folder.getRoot());
-		List<ChatMessage> messages = parser.getLog(date("2020-03-01"));
+		List<ChatMessage> messages = parser.getLog(LocalDate.of(2020, 3, 1));
 
 		assertTrue(messages.isEmpty());
 	}
@@ -55,19 +55,19 @@ public class ChatLogParserTest {
 		//without latest.log
 		{
 			ChatLogParser parser = new ChatLogParser(folder.getRoot());
-			Iterator<ChatMessage> messages = parser.getLog(date("2020-04-01")).iterator();
+			Iterator<ChatMessage> messages = parser.getLog(LocalDate.of(2020, 4, 1)).iterator();
 
 			ChatMessage message = messages.next();
 			assertEquals("Log file 1", message.getMessage());
-			assertEquals(date("2020-04-01 01:11:12"), message.getDate());
+			assertEquals(LocalDateTime.of(2020, 4, 1, 1, 11, 12), message.getDate());
 
 			message = messages.next();
 			assertEquals("Log file 2", message.getMessage());
-			assertEquals(date("2020-04-01 02:11:12"), message.getDate());
+			assertEquals(LocalDateTime.of(2020, 4, 1, 2, 11, 12), message.getDate());
 
 			message = messages.next();
 			assertEquals("Log file 10", message.getMessage());
-			assertEquals(date("2020-04-01 10:11:12"), message.getDate());
+			assertEquals(LocalDateTime.of(2020, 4, 1, 10, 11, 12), message.getDate());
 
 			assertFalse(messages.hasNext());
 		}
@@ -78,23 +78,23 @@ public class ChatLogParserTest {
 			Files.setLastModifiedTime(latest, filetime(LocalDateTime.of(2020, 4, 1, 12, 0, 0)));
 
 			ChatLogParser parser = new ChatLogParser(folder.getRoot());
-			Iterator<ChatMessage> messages = parser.getLog(date("2020-04-01")).iterator();
+			Iterator<ChatMessage> messages = parser.getLog(LocalDate.of(2020, 4, 1)).iterator();
 
 			ChatMessage message = messages.next();
 			assertEquals("Log file 1", message.getMessage());
-			assertEquals(date("2020-04-01 01:11:12"), message.getDate());
+			assertEquals(LocalDateTime.of(2020, 4, 1, 1, 11, 12), message.getDate());
 
 			message = messages.next();
 			assertEquals("Log file 2", message.getMessage());
-			assertEquals(date("2020-04-01 02:11:12"), message.getDate());
+			assertEquals(LocalDateTime.of(2020, 4, 1, 2, 11, 12), message.getDate());
 
 			message = messages.next();
 			assertEquals("Log file 10", message.getMessage());
-			assertEquals(date("2020-04-01 10:11:12"), message.getDate());
+			assertEquals(LocalDateTime.of(2020, 4, 1, 10, 11, 12), message.getDate());
 
 			message = messages.next();
 			assertEquals("Log file latest", message.getMessage());
-			assertEquals(date("2020-04-01 20:11:12"), message.getDate());
+			assertEquals(LocalDateTime.of(2020, 4, 1, 20, 11, 12), message.getDate());
 
 			assertFalse(messages.hasNext());
 		}

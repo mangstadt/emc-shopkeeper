@@ -1,10 +1,11 @@
 package emcshop.presenter;
 
 import java.io.File;
-import java.util.Date;
+import java.time.LocalDate;
 
 import emcshop.db.PaymentTransactionDb;
 import emcshop.model.IChatLogViewerModel;
+import emcshop.util.TimeUtils;
 import emcshop.view.IChatLogViewerView;
 
 public class ChatLogViewerPresenter {
@@ -25,7 +26,7 @@ public class ChatLogViewerPresenter {
 		PaymentTransactionDb paymentTransaction = model.getPaymentTransaction();
 		view.setPaymentTransaction(paymentTransaction);
 
-		Date dateToDisplay = (paymentTransaction == null) ? new Date() : paymentTransaction.getTs();
+		LocalDate dateToDisplay = (paymentTransaction == null) ? LocalDate.now() : TimeUtils.toLocalDate(paymentTransaction.getTs());
 		view.setDate(dateToDisplay);
 		view.setChatMessages(model.getChatMessages(dateToDisplay));
 
@@ -33,7 +34,7 @@ public class ChatLogViewerPresenter {
 	}
 
 	private void onDateChanged() {
-		Date date = view.getDate();
+		LocalDate date = view.getDate();
 		view.setChatMessages(model.getChatMessages(date));
 	}
 

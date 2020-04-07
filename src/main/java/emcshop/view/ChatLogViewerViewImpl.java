@@ -8,14 +8,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
 import java.io.File;
-import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
@@ -40,6 +42,7 @@ import emcshop.db.PaymentTransactionDb;
 import emcshop.gui.MyJScrollPane;
 import emcshop.util.GuiUtils;
 import emcshop.util.Listeners;
+import emcshop.util.TimeUtils;
 import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
@@ -91,14 +94,11 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		datePicker.setShowTodayButton(true);
 		datePicker.setStripTime(true);
 
-		Calendar c = Calendar.getInstance();
-
 		prevDay = new JButton("<");
 		prevDay.setToolTipText("Previous day");
 		prevDay.addActionListener(event -> {
-			c.setTime(datePicker.getDate());
-			c.add(Calendar.DATE, -1);
-			setDate(c.getTime());
+			LocalDate date = getDate();
+			setDate(date.minusDays(1));
 
 			dateChangedListeners.fire();
 		});
@@ -106,9 +106,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		nextDay = new JButton(">");
 		nextDay.setToolTipText("Next day");
 		nextDay.addActionListener(event -> {
-			c.setTime(datePicker.getDate());
-			c.add(Calendar.DATE, 1);
-			setDate(c.getTime());
+			LocalDate date = getDate();
+			setDate(date.plusDays(1));
 
 			dateChangedListeners.fire();
 		});
@@ -175,16 +174,15 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 	}
 
 	@Override
-	public Date getDate() {
-		return datePicker.getDate();
+	public LocalDate getDate() {
+		return TimeUtils.toLocalDate(datePicker.getDate());
 	}
 
 	@Override
-	public void setDate(Date date) {
+	public void setDate(LocalDate date) {
 		try {
-			datePicker.setDate(date);
-		} catch (PropertyVetoException e) {
-			//ignore
+			datePicker.setDate(TimeUtils.toDate(date));
+		} catch (PropertyVetoException ignore) {
 		}
 	}
 
@@ -217,7 +215,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 	}
 
 	private class ChatLogEditorPane extends JEditorPane {
-		private final DateFormat df = new SimpleDateFormat("HH:mm:ss");
+		private final DateTimeFormatter df = DateTimeFormatter.ofPattern("HH:mm:ss");
 		private final Pattern gaveRupeesRegex = Pattern.compile("^You paid ([\\d,]+) rupees to (.*)");
 		private final Pattern receivedRupeesRegex = Pattern.compile("^You just received ([\\d,]+) rupees from (.*)");
 
@@ -272,7 +270,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				message = message.trim();
 				message = message.replaceAll("\\s{2,}", " ");
 
-				Date date = chatMessage.getDate();
+				LocalDateTime date = chatMessage.getDate();
 
 				String escapedMessage = escapeHtml3(message);
 
@@ -327,8 +325,9 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				//TODO http://stackoverflow.com/questions/9388264/jeditorpane-with-inline-image
 				boolean highlight;
 				if (paymentTransaction != null && isPaymentTransaction) {
-					long diff = Math.abs(paymentTransaction.getTs().getTime() - date.getTime());
-					highlight = (diff < 1000 * 60 && paymentTransaction.getAmount() == paymentTransactionAmount && paymentTransaction.getPlayer().equalsIgnoreCase(paymentTransactionPlayer));
+					LocalDateTime paymentTransactionTs = TimeUtils.toLocalDateTime(paymentTransaction.getTs());
+					long minutesDifference = Math.abs(date.until(paymentTransactionTs, ChronoUnit.MINUTES));
+					highlight = (minutesDifference < 1 && paymentTransaction.getAmount() == paymentTransactionAmount && paymentTransaction.getPlayer().equalsIgnoreCase(paymentTransactionPlayer));
 				} else {
 					highlight = false;
 				}
@@ -362,19 +361,16 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			//search for the payment transaction in the "Document" object's text in order to find the caret position
 			int caretPosition = 1;
 			if (paymentTransaction != null) {
+				LocalDateTime paymentTransactionTs = TimeUtils.toLocalDateTime(paymentTransaction.getTs());
 				String text = getDocumentText();
-
-				Calendar c = Calendar.getInstance();
-				c.setTime(datePicker.getDate());
+				LocalDate date = getDate();
 
 				Matcher m = paymentTransactionRegex.matcher(text);
 				while (m.find()) {
-					c.set(Calendar.HOUR, Integer.parseInt(m.group(1)));
-					c.set(Calendar.MINUTE, Integer.parseInt(m.group(2)));
-					c.set(Calendar.SECOND, Integer.parseInt(m.group(3)));
-					Date messageDate = c.getTime();
-					long diff = Math.abs(paymentTransaction.getTs().getTime() - messageDate.getTime());
-					if (diff < 1000 * 60) {
+					LocalTime time = LocalTime.of(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3)));
+					LocalDateTime messageDate = LocalDateTime.of(date, time);
+					long minutesDifference = Math.abs(messageDate.until(paymentTransactionTs, ChronoUnit.MINUTES));
+					if (minutesDifference < 1) {
 						caretPosition = m.start();
 						break;
 					}
