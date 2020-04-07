@@ -1,37 +1,38 @@
 package emcshop.chat;
 
-import static emcshop.util.TimeUtils.zeroOutTime;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
 
 /**
- * Parses chat logs.
+ * Extracts chat messages from the Minecraft log files.
+ * @author Michael Angstadt
  */
 public class ChatLogParser {
-	private final File logDir;
+	private final Path logDir;
 
 	/**
-	 * Creates a chat log parser.
-	 * @param logDir the "logs" directory
+	 * @param logDir the path to the directory that contains the log files
+	 * @throws IllegalArgumentException if the given path is not a directory
 	 */
 	public ChatLogParser(File logDir) {
-		this.logDir = logDir;
+		if (!logDir.isDirectory()) {
+			throw new IllegalArgumentException("The specified path is not a directory: " + logDir);
+		}
+		this.logDir = logDir.toPath();
 	}
 
 	/**
@@ -40,68 +41,42 @@ public class ChatLogParser {
 	 * @return the chat messages
 	 */
 	public List<ChatMessage> getLog(Date date) throws IOException {
-		if (!logDir.isDirectory()) {
-			return Collections.emptyList();
-		}
+		LocalDate localDate = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
 
-		//zero-out time values of date
-		date = zeroOutTime(date);
-
-		String dateStr = new SimpleDateFormat("yyyy-MM-dd").format(date);
+		String dateStr = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 		Pattern fileNameRegex = Pattern.compile("^" + dateStr + "-(\\d+)\\.log\\.gz$");
 
-		//get the log files for this date
-		Map<Integer, File> logFiles = new TreeMap<>();
-		for (File file : logDir.listFiles()) {
-			if (!file.isFile()) {
-				continue;
+		/*
+		 * Find all the log files that are named after the given date, and keep
+		 * them in the correct order.
+		 * 
+		 * The file paths are stored in a TreeMap because sorting by filename
+		 * can result in incorrect ordering (e.g. "2020-04-01-10" would come
+		 * before "2020-04-01-2")
+		 */
+		Map<Integer, Path> logFilesMap = new TreeMap<>();
+		Files.walk(logDir, 1).forEach(file -> {
+			Matcher m = fileNameRegex.matcher(file.getFileName().toString());
+			if (m.find()) {
+				Integer num = Integer.valueOf(m.group(1));
+				logFilesMap.put(num, file);
 			}
+		});
+		List<Path> logFiles = new ArrayList<>(logFilesMap.values());
 
-			String fileName = file.getName();
-			if (fileName.equals("latest.log")) {
-				//if "latest.log" was last modified at the given date, then include it
-				Date lastModified = new Date(file.lastModified());
-				lastModified = zeroOutTime(lastModified);
-				if (lastModified.equals(date)) {
-					logFiles.put(Integer.MAX_VALUE, file);
-				}
-				continue;
-			}
-
-			Matcher m = fileNameRegex.matcher(fileName);
-			if (!m.find()) {
-				//file name doesn't match pattern
-				continue;
-			}
-
-			Integer num = Integer.valueOf(m.group(1));
-			logFiles.put(num, file);
+		//should the "latest.log" file be parsed as well?
+		Path latest = logDir.resolve("latest.log");
+		if (lastModifiedTimeMatches(latest, localDate)) {
+			logFiles.add(latest);
 		}
 
-		//parse log files
+		//parse each log file
 		List<ChatMessage> messages = new ArrayList<>();
-		for (File file : logFiles.values()) {
-			InputStream in = new FileInputStream(file);
-			if (file.getName().endsWith(".gz")) {
-				in = new GZIPInputStream(in);
-			}
-
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
-				Calendar cal = Calendar.getInstance();
-				String line;
-				while ((line = reader.readLine()) != null) {
-					Line parsedLine = Line.parse(line);
-					if (parsedLine == null) {
-						continue;
-					}
-
-					cal.setTime(date);
-					cal.add(Calendar.HOUR_OF_DAY, parsedLine.hour);
-					cal.add(Calendar.MINUTE, parsedLine.minute);
-					cal.add(Calendar.SECOND, parsedLine.second);
-					Date ts = cal.getTime();
-
-					messages.add(new ChatMessage(ts, parsedLine.message));
+		for (Path file : logFiles) {
+			try (ChatLogFileReader reader = new ChatLogFileReader(file, localDate)) {
+				ChatMessage message;
+				while ((message = reader.readNext()) != null) {
+					messages.add(message);
 				}
 			}
 		}
@@ -109,31 +84,12 @@ public class ChatLogParser {
 		return messages;
 	}
 
-	private static class Line {
-		private final int hour, minute, second;
-		private final String message;
-
-		public Line(int hour, int minute, int second, String message) {
-			this.hour = hour;
-			this.minute = minute;
-			this.second = second;
-			this.message = message;
+	private boolean lastModifiedTimeMatches(Path file, LocalDate date) throws IOException {
+		if (!Files.exists(file)) {
+			return false;
 		}
-
-		private static final Pattern lineRegex = Pattern.compile("^\\[(\\d\\d):(\\d\\d):(\\d\\d)\\].*?\\[CHAT\\](.*)");
-
-		public static Line parse(String line) {
-			Matcher m = lineRegex.matcher(line);
-			if (!m.find()) {
-				return null;
-			}
-
-			int hour = Integer.parseInt(m.group(1));
-			int minute = Integer.parseInt(m.group(2));
-			int second = Integer.parseInt(m.group(3));
-			String message = m.group(4).trim();
-
-			return new Line(hour, minute, second, message);
-		}
+		FileTime modified = Files.getLastModifiedTime(file);
+		LocalDate modifiedLocalDate = modified.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		return modifiedLocalDate.equals(date);
 	}
 }
