@@ -1,13 +1,13 @@
 package emcshop.model;
 
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IDatabaseStartupErrorModel {
 	void addRestoreCompleteListener(ActionListener listener);
 
-	List<Date> getBackups();
+	List<LocalDateTime> getBackups();
 
 	/**
 	 * Gets the exception that was thrown.
@@ -25,5 +25,5 @@ public interface IDatabaseStartupErrorModel {
 	 */
 	void sendErrorReport();
 
-	Thread startRestore(Date date);
+	Thread startRestore(LocalDateTime date);
 }

@@ -1,43 +1,62 @@
 package emcshop.util;
 
-import java.text.DateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 /**
  * Formats dates relative to the current time.
+ * @author Michael Angstadt
  */
 public class RelativeDateFormat {
-	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-	private final DateFormat tf = DateFormat.getTimeInstance(DateFormat.SHORT);
+	private final DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
+	private final DateTimeFormatter tf = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 
 	/**
-	 * Formats a date
-	 * @param date the date or format
+	 * Formats a date.
+	 * @param date the date to format (this method assumes that this date is
+	 * less than or equal to the current date)
 	 * @return the formatted date (e.g. "Today at 1:00 PM")
 	 */
 	public String format(Date date) {
-		Date now = new Date();
+		return format(TimeUtils.toLocalDateTime(date));
+	}
 
-		long diff = now.getTime() - date.getTime();
-		if (diff <= 60 * 1000) {
+	/**
+	 * Formats a date.
+	 * @param date the date to format (this method assumes that this date is
+	 * less than or equal to the current date)
+	 * @return the formatted date (e.g. "Today at 1:00 PM")
+	 */
+	public String format(LocalDate date) {
+		return format(date.atStartOfDay());
+	}
+
+	/**
+	 * Formats a date.
+	 * @param date the date to format (this method assumes that this date is
+	 * less than or equal to the current date)
+	 * @return the formatted date (e.g. "Today at 1:00 PM")
+	 */
+	public String format(LocalDateTime date) {
+		LocalDateTime now = LocalDateTime.now();
+
+		long minutesAgo = date.until(now, ChronoUnit.MINUTES);
+		if (minutesAgo <= 1) {
 			return "A moment ago";
 		}
-
-		if (diff <= 60 * 60 * 1000) {
-			return (diff / (60 * 1000)) + " minutes ago";
+		if (minutesAgo <= 60) {
+			return minutesAgo + " minutes ago";
 		}
 
-		Calendar dateCal = Calendar.getInstance();
-		dateCal.setTime(date);
-		Calendar nowCal = Calendar.getInstance();
-		nowCal.setTime(now);
-		int dayDiff = (nowCal.get(Calendar.YEAR) - dateCal.get(Calendar.YEAR)) * 365 + (nowCal.get(Calendar.DAY_OF_YEAR) - dateCal.get(Calendar.DAY_OF_YEAR));
-
-		if (dayDiff == 0) {
+		long daysAgo = date.until(now, ChronoUnit.DAYS);
+		if (daysAgo == 0) {
 			return "Today at " + tf.format(date);
 		}
-		if (dayDiff == 1) {
+		if (daysAgo == 1) {
 			return "Yesterday at " + tf.format(date);
 		}
 		return df.format(date);

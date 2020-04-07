@@ -1,27 +1,30 @@
 package emcshop.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
-import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * @author Michael Angstadt
+ */
 public class RelativeDateFormatTest {
-	private final RelativeDateFormat relativeDf = new RelativeDateFormat();
-
 	@Test
 	public void format() {
-		Calendar c = Calendar.getInstance();
-		assertEquals("A moment ago", relativeDf.format(c.getTime()));
+		RelativeDateFormat df = new RelativeDateFormat();
 
-		c.add(Calendar.MINUTE, -30);
-		Assert.assertTrue(relativeDf.format(c.getTime()).matches("\\d+ minutes ago"));
+		LocalDateTime date = LocalDateTime.now();
+		assertEquals("A moment ago", df.format(date));
 
-		c.add(Calendar.HOUR, -1);
-		Assert.assertTrue(relativeDf.format(c.getTime()).matches("Today at .*"));
+		date = date.minusMinutes(30);
+		assertTrue(df.format(date).matches("\\d+ minutes ago"));
 
-		c.add(Calendar.DATE, -1);
-		Assert.assertTrue(relativeDf.format(c.getTime()).matches("Yesterday at .*"));
+		date = date.minusHours(1);
+		assertTrue(df.format(date).matches("Today at .*"));
+
+		date = date.minusDays(1);
+		assertTrue(df.format(date).matches("Yesterday at .*"));
 	}
 }

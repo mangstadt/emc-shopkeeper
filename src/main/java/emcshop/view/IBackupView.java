@@ -1,7 +1,7 @@
 package emcshop.view;
 
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IBackupView {
@@ -23,7 +23,7 @@ public interface IBackupView {
 
 	Integer getMaxBackups();
 
-	Date getSelectedBackup();
+	LocalDateTime getSelectedBackup();
 
 	void setAutoBackupEnabled(boolean enabled);
 
@@ -31,7 +31,7 @@ public interface IBackupView {
 
 	void setMaxBackups(Integer days);
 
-	void setBackups(List<Date> backups);
+	void setBackups(List<LocalDateTime> backups);
 
 	void setBackupPercentComplete(double percent);
 

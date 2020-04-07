@@ -12,10 +12,9 @@ import static org.mockito.Mockito.verify;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,8 +31,6 @@ import emcshop.util.ZipUtils.ZipListener;
 public class BackupManagerTest {
 	@Rule
 	public final TemporaryFolder temp = new TemporaryFolder();
-
-	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private File root, dbDir, dbBackupDir;
 
@@ -114,7 +111,7 @@ public class BackupManagerTest {
 		touch(file3);
 
 		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
-		bm.delete(df.parse("2013-01-02 00:00:00"));
+		bm.delete(LocalDateTime.of(2013, 1, 2, 0, 0, 0));
 
 		assertTrue(file1.exists());
 		assertFalse(file2.exists());
@@ -131,7 +128,7 @@ public class BackupManagerTest {
 		touch(file3);
 
 		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
-		bm.delete(df.parse("2013-06-20 00:00:00"));
+		bm.delete(LocalDateTime.of(2013, 6, 20, 0, 0, 0));
 		//nothing should happen
 
 		assertTrue(file1.exists());
@@ -170,8 +167,8 @@ public class BackupManagerTest {
 	@Test
 	public void shouldBackup_frequency_not_exceeded() throws Throwable {
 		dbDir.mkdir();
-		DateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-		touch(new File(dbBackupDir, "db-" + df.format(new Date()) + ".backup.zip"));
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
+		touch(new File(dbBackupDir, "db-" + df.format(LocalDateTime.now()) + ".backup.zip"));
 
 		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
 		assertFalse(bm.shouldBackup());
@@ -252,7 +249,7 @@ public class BackupManagerTest {
 		zout.close();
 
 		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
-		bm.restore(df.parse("2013-01-01 00:00:00"));
+		bm.restore(LocalDateTime.of(2013, 1, 1, 0, 0, 0));
 
 		assertDirectoryContents(root, dbDir.getName(), dbBackupDir.getName());
 
@@ -282,7 +279,7 @@ public class BackupManagerTest {
 		dbBackupDir.mkdir();
 		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
 		try {
-			bm.restore(df.parse("2013-01-01 00:00:00"));
+			bm.restore(LocalDateTime.of(2013, 1, 1, 0, 0, 0));
 			fail();
 		} catch (FileNotFoundException e) {
 			//should be thrown
@@ -304,8 +301,12 @@ public class BackupManagerTest {
 		touch(new File(dbBackupDir, "foo.txt"));
 
 		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
-		List<Date> actual = bm.getBackupDates();
-		List<Date> expected = Arrays.asList(df.parse("2013-01-03 00:00:00"), df.parse("2013-01-02 00:00:00"), df.parse("2013-01-01 00:00:00"));
+		List<LocalDateTime> actual = bm.getBackupDates();
+		List<LocalDateTime> expected = Arrays.asList( //@formatter:off
+			LocalDateTime.of(2013, 1, 3, 0, 0, 0),
+			LocalDateTime.of(2013, 1, 2, 0, 0, 0),
+			LocalDateTime.of(2013, 1, 1, 0, 0, 0)
+		); //@formatter:on
 		assertEquals(expected, actual);
 	}
 

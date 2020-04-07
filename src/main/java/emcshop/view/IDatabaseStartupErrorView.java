@@ -1,7 +1,7 @@
 package emcshop.view;
 
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IDatabaseStartupErrorView {
@@ -19,9 +19,9 @@ public interface IDatabaseStartupErrorView {
 	 */
 	void addCloseListener(ActionListener listener);
 
-	Date getSelectedBackup();
+	LocalDateTime getSelectedBackup();
 
-	void setBackups(List<Date> backups);
+	void setBackups(List<LocalDateTime> backups);
 
 	/**
 	 * Sets the exception that was thrown.

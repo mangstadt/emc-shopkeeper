@@ -1,6 +1,6 @@
 package emcshop.presenter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import emcshop.model.IBackupModel;
 import emcshop.view.IBackupView;
@@ -59,7 +59,7 @@ public class BackupPresenter {
 	}
 
 	private void onDeleteBackup() {
-		Date date = view.getSelectedBackup();
+		LocalDateTime date = view.getSelectedBackup();
 		model.deleteBackup(date);
 		view.setBackups(model.getBackups());
 	}

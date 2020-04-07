@@ -3,8 +3,8 @@ package emcshop.model;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,12 +56,12 @@ public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel
 	}
 
 	@Override
-	public List<Date> getBackups() {
+	public List<LocalDateTime> getBackups() {
 		return backupManager.getBackupDates();
 	}
 
 	@Override
-	public Thread startRestore(Date date) {
+	public Thread startRestore(LocalDateTime date) {
 		Thread t = new Thread(() -> {
 			try {
 				if (dao != null) {

@@ -5,8 +5,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import emcshop.AppContext;
@@ -79,7 +79,7 @@ public class BackupModelImpl implements IBackupModel {
 	}
 
 	@Override
-	public List<Date> getBackups() {
+	public List<LocalDateTime> getBackups() {
 		return backupManager.getBackupDates();
 	}
 
@@ -127,7 +127,7 @@ public class BackupModelImpl implements IBackupModel {
 	}
 
 	@Override
-	public Thread startRestore(Date date) {
+	public Thread startRestore(LocalDateTime date) {
 		Thread t = new Thread(() -> {
 			try {
 				dao.close();
@@ -147,7 +147,7 @@ public class BackupModelImpl implements IBackupModel {
 	}
 
 	@Override
-	public void deleteBackup(Date date) {
+	public void deleteBackup(LocalDateTime date) {
 		backupManager.delete(date);
 	}
 }

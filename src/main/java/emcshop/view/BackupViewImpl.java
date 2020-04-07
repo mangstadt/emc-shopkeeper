@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.ActionListener;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
@@ -38,7 +38,7 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	private final JLabel backupLoading, restoreLoading;
 	private final JNumberTextField frequency, max;
 	private final SettingsPanel settingsPanel;
-	private final JList<Date> backups;
+	private final JList<LocalDateTime> backups;
 	private final List<ActionListener> deleteListeners = new ArrayList<>();
 	private final List<ActionListener> restoreListeners = new ArrayList<>();
 	private final List<ActionListener> exitListeners = new ArrayList<>();
@@ -90,7 +90,7 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 		enabled.addChangeListener(event -> settingsPanel.setEnabled(enabled.isSelected()));
 
 		restore.addActionListener(event -> {
-			Date selected = getSelectedBackup();
+			LocalDateTime selected = getSelectedBackup();
 			if (selected == null) {
 				return;
 			}
@@ -114,7 +114,7 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 		});
 
 		delete.addActionListener(event -> {
-			Date selected = getSelectedBackup();
+			LocalDateTime selected = getSelectedBackup();
 			if (selected == null) {
 				return;
 			}
@@ -129,11 +129,11 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 
 		backups = new JList<>();
 		backups.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		backups.setCellRenderer(new ListCellRenderer<Date>() {
+		backups.setCellRenderer(new ListCellRenderer<LocalDateTime>() {
 			private final RelativeDateFormat df = new RelativeDateFormat();
 
 			@Override
-			public Component getListCellRendererComponent(JList<? extends Date> list, Date date, int index, boolean selected, boolean hasFocus) {
+			public Component getListCellRendererComponent(JList<? extends LocalDateTime> list, LocalDateTime date, int index, boolean selected, boolean hasFocus) {
 				JLabel label = new JLabel(df.format(date));
 				UIDefaultsWrapper.assignListFormats(label, selected);
 				return label;
@@ -217,8 +217,8 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	}
 
 	@Override
-	public Date getSelectedBackup() {
-		return (Date) backups.getSelectedValue();
+	public LocalDateTime getSelectedBackup() {
+		return (LocalDateTime) backups.getSelectedValue();
 	}
 
 	@Override
@@ -238,10 +238,10 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	}
 
 	@Override
-	public void setBackups(final List<Date> backups) {
-		this.backups.setModel(new AbstractListModel<Date>() {
+	public void setBackups(List<LocalDateTime> backups) {
+		this.backups.setModel(new AbstractListModel<LocalDateTime>() {
 			@Override
-			public Date getElementAt(int index) {
+			public LocalDateTime getElementAt(int index) {
 				return backups.get(index);
 			}
 

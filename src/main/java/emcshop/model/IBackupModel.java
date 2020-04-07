@@ -1,7 +1,7 @@
 package emcshop.model;
 
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IBackupModel {
@@ -23,13 +23,13 @@ public interface IBackupModel {
 
 	void setMaxBackups(Integer days);
 
-	List<Date> getBackups();
+	List<LocalDateTime> getBackups();
 
 	void saveSettings();
 
 	Thread startBackup();
 
-	Thread startRestore(Date date);
+	Thread startRestore(LocalDateTime date);
 
-	void deleteBackup(Date date);
+	void deleteBackup(LocalDateTime date);
 }

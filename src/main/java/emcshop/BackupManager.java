@@ -2,16 +2,14 @@ package emcshop;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +25,7 @@ public class BackupManager {
 	private final File dbDir, backupDir;
 	private final boolean backupsEnabled;
 	private final Integer backupFrequency, maxBackups;
-	private final DateFormat backupFileNameDateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+	private final DateTimeFormatter backupFileNameDateFormat = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 	private final Pattern backupFileNameRegex = Pattern.compile("^db-(\\d{8}T\\d{6})\\.backup\\.zip$");
 
 	/**
@@ -54,12 +52,12 @@ public class BackupManager {
 			return;
 		}
 
-		Map<Date, File> backups = getBackups();
-		List<Date> dates = new ArrayList<>(backups.keySet());
+		Map<LocalDateTime, File> backups = getBackups();
+		List<LocalDateTime> dates = new ArrayList<>(backups.keySet());
 		Collections.sort(dates, Collections.reverseOrder());
 
 		for (int i = maxBackups; i < dates.size(); i++) {
-			Date date = dates.get(i);
+			LocalDateTime date = dates.get(i);
 			File file = backups.get(date);
 			file.delete();
 		}
@@ -74,13 +72,13 @@ public class BackupManager {
 			return false;
 		}
 
-		Date latestBackup = getLatestBackupDate();
+		LocalDateTime latestBackup = getLatestBackupDate();
 		if (latestBackup == null) {
 			return true;
 		}
 
-		Date oldest = new Date(System.currentTimeMillis() - backupFrequency * TimeUnit.DAYS.toMillis(1));
-		return latestBackup.before(oldest);
+		long daysAgo = latestBackup.until(LocalDateTime.now(), ChronoUnit.DAYS);
+		return (daysAgo >= backupFrequency);
 	}
 
 	/**
@@ -99,19 +97,16 @@ public class BackupManager {
 	 */
 	public void backup(ZipListener listener) throws IOException {
 		backupDir.mkdirs();
-		File zip = getBackupFile(new Date());
+		File zip = getBackupFile(LocalDateTime.now());
 		try {
 			ZipUtils.zipDirectory(dbDir, zip, listener);
-		} catch (Throwable t) {
-			//delete the zip file if anything goes wrong
+		} catch (IOException | RuntimeException e) {
+			/*
+			 * If the zip operation fails, delete the zip file and rethrow the
+			 * exception.
+			 */
 			zip.delete();
-
-			if (t instanceof IOException) {
-				throw (IOException) t;
-			}
-			if (t instanceof RuntimeException) {
-				throw (RuntimeException) t;
-			}
+			throw e;
 		}
 	}
 
@@ -120,7 +115,7 @@ public class BackupManager {
 	 * @param date the date of the backup
 	 * @throws IOException if there's a problem restoring the database
 	 */
-	public void restore(Date date) throws IOException {
+	public void restore(LocalDateTime date) throws IOException {
 		//rename the live database directory
 		File dbDirMoved = new File(dbDir.getParent(), dbDir.getName() + ".tmp");
 		dbDir.renameTo(dbDirMoved);
@@ -157,12 +152,12 @@ public class BackupManager {
 	 * Deletes a backup.
 	 * @param date the backup to delete
 	 */
-	public void delete(Date date) {
+	public void delete(LocalDateTime date) {
 		File zipFile = getBackupFile(date);
 		zipFile.delete();
 	}
 
-	private File getBackupFile(Date date) {
+	private File getBackupFile(LocalDateTime date) {
 		return new File(backupDir, "db-" + backupFileNameDateFormat.format(date) + ".backup.zip");
 	}
 
@@ -170,8 +165,8 @@ public class BackupManager {
 	 * Gets the date of the latest backup.
 	 * @return the date or null if there are no backups
 	 */
-	private Date getLatestBackupDate() {
-		List<Date> dates = getBackupDates();
+	private LocalDateTime getLatestBackupDate() {
+		List<LocalDateTime> dates = getBackupDates();
 		return dates.isEmpty() ? null : dates.get(0);
 	}
 
@@ -179,15 +174,15 @@ public class BackupManager {
 	 * Gets the dates of all backups in descending order.
 	 * @return the backup dates
 	 */
-	public List<Date> getBackupDates() {
-		Map<Date, File> backups = getBackups();
-		List<Date> dates = new ArrayList<>(backups.keySet());
+	public List<LocalDateTime> getBackupDates() {
+		Map<LocalDateTime, File> backups = getBackups();
+		List<LocalDateTime> dates = new ArrayList<>(backups.keySet());
 		Collections.sort(dates, Collections.reverseOrder());
 		return dates;
 	}
 
-	private Map<Date, File> getBackups() {
-		Map<Date, File> backups = new HashMap<>();
+	private Map<LocalDateTime, File> getBackups() {
+		Map<LocalDateTime, File> backups = new HashMap<>();
 		if (!backupDir.isDirectory()) {
 			return backups;
 		}
@@ -198,14 +193,7 @@ public class BackupManager {
 				continue;
 			}
 
-			Date date;
-			try {
-				date = backupFileNameDateFormat.parse(m.group(1));
-			} catch (ParseException e) {
-				//should never be thrown because of the regex
-				continue;
-			}
-
+			LocalDateTime date = LocalDateTime.from(backupFileNameDateFormat.parse(m.group(1)));
 			backups.put(date, file);
 		}
 
