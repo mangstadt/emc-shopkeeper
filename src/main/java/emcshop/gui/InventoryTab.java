@@ -15,8 +15,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,9 +28,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -1107,77 +1114,101 @@ public class InventoryTab extends JPanel implements ExportListener {
 		}
 
 		private class ChesterThread extends Thread {
-			private final long started = System.currentTimeMillis();
+			private final Instant started = Instant.now();
 			private volatile boolean running = true;
 
 			public void stopMe() {
 				running = false;
 				try {
 					join();
-				} catch (InterruptedException e) {
-					//ignore
+				} catch (InterruptedException ignore) {
 				}
 			}
 
 			@Override
 			public void run() {
-				File dir = new File(FileUtils.getUserDirectory(), ".chester");
+				Path dir = FileUtils.getUserDirectory().toPath().resolve(".chester");
 				ItemIndex index = ItemIndex.instance();
 				Pattern idRegex = Pattern.compile("[\\d]+(:[\\d]+)?");
+
+				Predicate<Path> modifiedSinceStartup = file -> {
+					try {
+						return Files.getLastModifiedTime(file).toInstant().isAfter(started);
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+				};
+				Predicate<Path> isChesterFile = file -> file.getFileName().toString().endsWith(".chester");
+				Function<Path, ChesterFile> parseFile = file -> {
+					ChesterFile chesterFile;
+					try {
+						chesterFile = ChesterFile.parse(file);
+					} catch (IllegalArgumentException e) {
+						logger.log(Level.SEVERE, "Problem parsing Chester file.", e);
+						chesterFile = null;
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+
+					try {
+						Files.delete(file);
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+
+					return chesterFile;
+				};
+
 				while (running) {
+					if (!Files.exists(dir)) {
+						continue;
+					}
+
+					List<ChesterFile> files;
+					try {
+						files = Files.list(dir) //@formatter:off
+							.filter(modifiedSinceStartup)
+							.filter(isChesterFile)
+							.map(parseFile)
+							.filter(file -> file != null)
+						.collect(Collectors.toList()); //@formatter:on
+					} catch (Exception e) {
+						throw new RuntimeException("Problem getting list of Chester files.", e);
+					}
+
+					for (ChesterFile file : files) {
+						List<Row> rows = new ArrayList<>();
+						for (Map.Entry<String, Integer> entry : file.getItems().entrySet()) {
+							String id = entry.getKey();
+							Integer quantity = entry.getValue();
+
+							String name;
+							boolean idUnknown;
+							if (idRegex.matcher(id).matches()) {
+								name = index.getDisplayNameFromMinecraftId(id);
+								idUnknown = (name == null);
+								if (idUnknown) {
+									name = id;
+								}
+							} else {
+								//it's an EMC-exclusive item, like Zombie Virus
+								name = id;
+								idUnknown = false;
+							}
+
+							Inventory item = new Inventory();
+							item.setItem(name);
+							item.setQuantity(quantity);
+
+							Row row = new Row(item);
+							row.idUnknown = idUnknown;
+							rows.add(row);
+						}
+						table.addAll(rows);
+					}
+
 					try {
 						Thread.sleep(100);
-
-						if (!dir.exists()) {
-							continue;
-						}
-
-						for (File file : dir.listFiles()) {
-							if (file.lastModified() < started) {
-								//file was there before EMC Shopkeeper started listening for files
-								continue;
-							}
-
-							if (!file.getName().endsWith(".chester")) {
-								//file is not a Chester file
-								continue;
-							}
-
-							try {
-								ChesterFile chesterFile = ChesterFile.parse(file);
-								List<Row> rows = new ArrayList<>();
-								for (Map.Entry<String, Integer> entry : chesterFile.getItems().entrySet()) {
-									String id = entry.getKey();
-									Integer quantity = entry.getValue();
-
-									String name;
-									boolean idUnknown;
-									if (idRegex.matcher(id).matches()) {
-										name = index.getDisplayNameFromMinecraftId(id);
-										idUnknown = (name == null);
-										if (idUnknown) {
-											name = id;
-										}
-									} else {
-										//it's an EMC-exclusive item, like Zombie Virus
-										name = id;
-										idUnknown = false;
-									}
-
-									Inventory item = new Inventory();
-									item.setItem(name);
-									item.setQuantity(quantity);
-
-									Row row = new Row(item);
-									row.idUnknown = idUnknown;
-									rows.add(row);
-								}
-								table.addAll(rows);
-							} catch (Throwable t) {
-								logger.log(Level.SEVERE, "Problem reading Chester file.", t);
-							}
-							file.delete();
-						}
 					} catch (InterruptedException e) {
 						running = false;
 					}

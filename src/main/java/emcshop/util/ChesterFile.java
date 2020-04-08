@@ -1,10 +1,11 @@
 package emcshop.util;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,8 +26,8 @@ public class ChesterFile {
 	 * @throws IOException if the file couldn't be read
 	 * @throws IllegalArgumentException if the file couldn't be parsed
 	 */
-	public static ChesterFile parse(File file) throws IOException {
-		try (Reader reader = new FileReader(file)) {
+	public static ChesterFile parse(Path file) throws IOException {
+		try (Reader reader = new InputStreamReader(Files.newInputStream(file))) {
 			return parse(reader);
 		}
 	}
@@ -70,9 +71,7 @@ public class ChesterFile {
 			}
 
 			return new ChesterFile(version, playerX, playerY, playerZ, items);
-		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException(e);
-		} catch (IndexOutOfBoundsException e) {
+		} catch (NumberFormatException | IndexOutOfBoundsException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
