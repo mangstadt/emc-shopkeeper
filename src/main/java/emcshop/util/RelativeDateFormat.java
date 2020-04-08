@@ -6,14 +6,33 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.function.Supplier;
 
 /**
  * Formats dates relative to the current time.
  * @author Michael Angstadt
  */
 public class RelativeDateFormat {
+	private static final RelativeDateFormat INSTANCE = new RelativeDateFormat(LocalDateTime::now);
+
+	private final Supplier<LocalDateTime> now;
 	private final DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
 	private final DateTimeFormatter tf = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
+
+	/**
+	 * Gets the singleton instance of this class. This class is thread-safe.
+	 * @return the instance
+	 */
+	public static RelativeDateFormat instance() {
+		return INSTANCE;
+	}
+
+	/**
+	 * This constructor is here for unit testing.
+	 */
+	RelativeDateFormat(Supplier<LocalDateTime> now) {
+		this.now = now;
+	}
 
 	/**
 	 * Formats a date.
@@ -42,7 +61,7 @@ public class RelativeDateFormat {
 	 * @return the formatted date (e.g. "Today at 1:00 PM")
 	 */
 	public String format(LocalDateTime date) {
-		LocalDateTime now = now();
+		LocalDateTime now = this.now.get();
 
 		long minutesAgo = date.until(now, ChronoUnit.MINUTES);
 		if (minutesAgo <= 1) {
@@ -68,12 +87,5 @@ public class RelativeDateFormat {
 			return "Yesterday at " + tf.format(date);
 		}
 		return df.format(date);
-	}
-
-	/**
-	 * For unit testing.
-	 */
-	LocalDateTime now() {
-		return LocalDateTime.now();
 	}
 }

@@ -1,6 +1,5 @@
 package emcshop.view;
 
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionListener;
@@ -17,7 +16,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
@@ -79,15 +77,11 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 
 		backups = new JList<>();
 		backups.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		backups.setCellRenderer(new ListCellRenderer<LocalDateTime>() {
-			private final RelativeDateFormat df = new RelativeDateFormat();
-
-			@Override
-			public Component getListCellRendererComponent(JList<? extends LocalDateTime> list, LocalDateTime date, int index, boolean selected, boolean hasFocus) {
-				JLabel label = new JLabel(df.format(date));
-				UIDefaultsWrapper.assignListFormats(label, selected);
-				return label;
-			}
+		backups.setCellRenderer((list, date, index, selected, hasFocus) -> {
+			RelativeDateFormat df = RelativeDateFormat.instance();
+			JLabel label = new JLabel(df.format(date));
+			UIDefaultsWrapper.assignListFormats(label, selected);
+			return label;
 		});
 
 		restore = new JButton("Restore Selected Backup");

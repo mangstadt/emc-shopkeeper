@@ -18,12 +18,7 @@ public class RelativeDateFormatTest {
 	@Test
 	public void format() {
 		LocalDateTime now = LocalDateTime.of(2020, 4, 8, 12, 0, 0);
-		RelativeDateFormat df = new RelativeDateFormat() {
-			@Override
-			LocalDateTime now() {
-				return now;
-			}
-		};
+		RelativeDateFormat df = new RelativeDateFormat(() -> now);
 
 		LocalDateTime ts = now;
 		assertEquals("A moment ago", df.format(ts));

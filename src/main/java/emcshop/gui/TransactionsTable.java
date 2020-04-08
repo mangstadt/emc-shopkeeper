@@ -221,7 +221,6 @@ public class TransactionsTable extends JTable {
 		private final Color evenRowColor = new Color(255, 255, 255);
 		private final Color oddRowColor = new Color(240, 240, 240);
 		private final ItemIndex index = ItemIndex.instance();
-		private final RelativeDateFormat df = new RelativeDateFormat();
 
 		private final JLabel label = new JLabel();
 		{
@@ -257,6 +256,7 @@ public class TransactionsTable extends JTable {
 			case TS:
 				component = label;
 
+				RelativeDateFormat df = RelativeDateFormat.instance();
 				Date ts = transaction.getTs();
 				label.setText(df.format(ts));
 				break;

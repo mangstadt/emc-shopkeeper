@@ -434,7 +434,6 @@ public class TransactionsTab extends JPanel implements ExportListener {
 	private class QueryPanel extends JPanel {
 		private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
 		private final DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-		private final RelativeDateFormat relativeFormat = new RelativeDateFormat();
 
 		private final JPanel fullPanel;
 		private final JRadioButton entireHistory, showSinceLastUpdate, dateRange;
@@ -707,7 +706,8 @@ public class TransactionsTab extends JPanel implements ExportListener {
 
 			StringBuilder sb = new StringBuilder("since previous update");
 			if (date != null) {
-				sb.append(" (").append(relativeFormat.format(date)).append(")");
+				RelativeDateFormat df = RelativeDateFormat.instance();
+				sb.append(" (").append(df.format(date)).append(")");
 			}
 
 			showSinceLastUpdate.setText(sb.toString());
@@ -723,7 +723,8 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				sb.append("entire history");
 			} else if (from != null && to == null) {
 				if (showSinceLastUpdate.isSelected()) {
-					sb.append("since last update (" + relativeFormat.format(from) + ")");
+					RelativeDateFormat df = RelativeDateFormat.instance();
+					sb.append("since last update (" + df.format(from) + ")");
 				} else {
 					sb.append("since " + dateFormat.format(from));
 				}

@@ -311,7 +311,6 @@ public class PaymentsTab extends JPanel {
 		}
 
 		private class Renderer implements TableCellRenderer {
-			private final RelativeDateFormat df = new RelativeDateFormat();
 			private final Color evenRowColor = new Color(255, 255, 255);
 			private final Color oddRowColor = new Color(240, 240, 240);
 
@@ -380,6 +379,7 @@ public class PaymentsTab extends JPanel {
 				case TIME:
 					component = label;
 
+					RelativeDateFormat df = RelativeDateFormat.instance();
 					label.setText(df.format(transaction.getTs()));
 					break;
 
@@ -741,7 +741,6 @@ public class PaymentsTab extends JPanel {
 	}
 
 	private static class AssignDialog extends JDialog {
-		private final RelativeDateFormat df = new RelativeDateFormat();
 		private final ItemSuggestField item;
 		private final QuantityTextField quantity;
 		private final JButton ok, cancel;
@@ -829,6 +828,7 @@ public class PaymentsTab extends JPanel {
 			top.add(new JLabel("<html><b>Player:"));
 			top.add(new JLabel("<html><b>Amount:"), "wrap");
 
+			RelativeDateFormat df = RelativeDateFormat.instance();
 			top.add(new JLabel(df.format(paymentTransaction.getTs())), "gapright 10");
 			PlayerCellPanel p = new PlayerCellPanel();
 			p.setPlayer(paymentTransaction.getPlayer());

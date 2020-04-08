@@ -181,7 +181,7 @@ public class BonusFeeTab extends JPanel {
 			String text = rf.format(bonusFee.getHighestBalance());
 			Date highestBalanceTs = bonusFee.getHighestBalanceTs();
 			if (highestBalanceTs != null) {
-				RelativeDateFormat df = new RelativeDateFormat();
+				RelativeDateFormat df = RelativeDateFormat.instance();
 				text += " (" + df.format(highestBalanceTs) + ")";
 			}
 

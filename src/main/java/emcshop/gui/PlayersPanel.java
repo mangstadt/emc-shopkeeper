@@ -61,7 +61,6 @@ public class PlayersPanel extends JPanel {
 	private final ShopTransactionType shopTransactionType;
 
 	private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-	private final RelativeDateFormat relativeDateFormat = new RelativeDateFormat();
 	private final ListMultimap<PlayerGroup, ItemGroup> itemGroups = ArrayListMultimap.create();
 	private List<PlayerGroup> displayedPlayers;
 	private ListMultimap<PlayerGroup, ItemGroup> displayedItems;
@@ -360,16 +359,18 @@ public class PlayersPanel extends JPanel {
 		}
 
 		if (showFirstLastSeen) {
+			RelativeDateFormat df = RelativeDateFormat.instance();
+
 			Date firstSeen = player.getFirstSeen();
 			if (firstSeen != null) {
 				header.add(new JLabel("First seen:"));
-				header.add(new JLabel(relativeDateFormat.format(firstSeen)), "wrap");
+				header.add(new JLabel(df.format(firstSeen)), "wrap");
 			}
 
 			Date lastSeen = player.getLastSeen();
 			if (lastSeen != null) {
 				header.add(new JLabel("Last seen:"));
-				header.add(new JLabel(relativeDateFormat.format(lastSeen)));
+				header.add(new JLabel(df.format(lastSeen)));
 			}
 		}
 
