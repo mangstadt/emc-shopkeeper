@@ -1,7 +1,8 @@
 package emcshop;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -10,6 +11,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,7 +25,9 @@ import emcshop.util.ZipUtils.ZipListener;
  * Manages database backups.
  */
 public class BackupManager {
-	private final File dbDir, backupDir;
+	private static final Logger logger = Logger.getLogger(BackupManager.class.getName());
+
+	private final Path dbDir, backupDir;
 	private final boolean backupsEnabled;
 	private final Integer backupFrequency, maxBackups;
 	private final DateTimeFormatter backupFileNameDateFormat = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
@@ -36,7 +41,7 @@ public class BackupManager {
 	 * @param maxBackups the max number of backups to keep, or null to never
 	 * delete
 	 */
-	public BackupManager(File dbDir, File backupDir, boolean backupsEnabled, Integer backupFrequency, Integer maxBackups) {
+	public BackupManager(Path dbDir, Path backupDir, boolean backupsEnabled, Integer backupFrequency, Integer maxBackups) {
 		this.dbDir = dbDir;
 		this.backupDir = backupDir;
 		this.backupsEnabled = backupsEnabled;
@@ -46,29 +51,31 @@ public class BackupManager {
 
 	/**
 	 * Deletes old backups.
+	 * @throws IOException if there's a problem deleting any of the backups
 	 */
-	public void cleanup() {
+	public void cleanup() throws IOException {
 		if (!backupsEnabled || maxBackups == null) {
 			return;
 		}
 
-		Map<LocalDateTime, File> backups = getBackups();
+		Map<LocalDateTime, Path> backups = getBackups();
 		List<LocalDateTime> dates = new ArrayList<>(backups.keySet());
 		Collections.sort(dates, Collections.reverseOrder());
 
 		for (int i = maxBackups; i < dates.size(); i++) {
 			LocalDateTime date = dates.get(i);
-			File file = backups.get(date);
-			file.delete();
+			Path file = backups.get(date);
+			Files.delete(file);
 		}
 	}
 
 	/**
 	 * Determines if a backup should be performed.
 	 * @return true if a backup is needed, false if not
+	 * @throws IOException if there's a problem reading the backup data
 	 */
-	public boolean shouldBackup() {
-		if (!backupsEnabled || !dbDir.exists()) {
+	public boolean shouldBackup() throws IOException {
+		if (!backupsEnabled || !Files.exists(dbDir)) {
 			return false;
 		}
 
@@ -84,20 +91,21 @@ public class BackupManager {
 	/**
 	 * Gets the size of the live database.
 	 * @return the database size in bytes
+	 * @throws IOException if there's a problem getting the database size
 	 */
-	public long getSizeOfDatabase() {
+	public long getSizeOfDatabase() throws IOException {
 		return ZipUtils.getDirectorySize(dbDir);
 	}
 
 	/**
 	 * Backs up the database.
 	 * @param listener invoked every time a database file is added to the ZIP
-	 * archive
+	 * archive (may be null)
 	 * @throws IOException if there's a problem backing up the database
 	 */
 	public void backup(ZipListener listener) throws IOException {
-		backupDir.mkdirs();
-		File zip = getBackupFile(LocalDateTime.now());
+		Files.createDirectories(backupDir);
+		Path zip = getBackupFilePath(LocalDateTime.now());
 		try {
 			ZipUtils.zipDirectory(dbDir, zip, listener);
 		} catch (IOException | RuntimeException e) {
@@ -105,7 +113,10 @@ public class BackupManager {
 			 * If the zip operation fails, delete the zip file and rethrow the
 			 * exception.
 			 */
-			zip.delete();
+			try {
+				Files.delete(zip);
+			} catch (IOException ignore) {
+			}
 			throw e;
 		}
 	}
@@ -117,55 +128,53 @@ public class BackupManager {
 	 */
 	public void restore(LocalDateTime date) throws IOException {
 		//rename the live database directory
-		File dbDirMoved = new File(dbDir.getParent(), dbDir.getName() + ".tmp");
-		dbDir.renameTo(dbDirMoved);
+		Path dbDirMoved = dbDir.resolveSibling(dbDir.getFileName() + ".tmp");
+		Files.move(dbDir, dbDirMoved);
 
-		File zipFile = getBackupFile(date);
+		Path zipFile = getBackupFilePath(date);
 		try {
-			ZipUtils.unzip(dbDir.getParentFile(), zipFile);
+			ZipUtils.unzip(dbDir.getParent(), zipFile);
 
 			//delete the old live database
 			try {
-				FileUtils.deleteDirectory(dbDirMoved);
+				FileUtils.deleteDirectory(dbDirMoved.toFile());
 			} catch (IOException e) {
-				//ignore
+				logger.log(Level.WARNING, "Unable to delete old database directory after restore operation completed successfully: " + dbDirMoved, e);
 			}
-		} catch (Throwable t) {
+		} catch (IOException | RuntimeException e) {
 			//if an error occurs, restore the original database
 			try {
-				FileUtils.deleteDirectory(dbDir);
-			} catch (IOException e) {
-				//ignore
+				FileUtils.deleteDirectory(dbDir.toFile());
+			} catch (IOException e2) {
+				logger.log(Level.WARNING, "Unable to delete the folder of the restored database after restore operation failed: " + dbDir, e2);
 			}
-			dbDirMoved.renameTo(dbDir);
+			Files.move(dbDirMoved, dbDir);
 
-			if (t instanceof IOException) {
-				throw (IOException) t;
-			}
-			if (t instanceof RuntimeException) {
-				throw (RuntimeException) t;
-			}
+			throw e;
 		}
 	}
 
 	/**
 	 * Deletes a backup.
 	 * @param date the backup to delete
+	 * @throws IOException if there's a problem deleting the backup
 	 */
-	public void delete(LocalDateTime date) {
-		File zipFile = getBackupFile(date);
-		zipFile.delete();
+	public void delete(LocalDateTime date) throws IOException {
+		Path zipFile = getBackupFilePath(date);
+		Files.delete(zipFile);
 	}
 
-	private File getBackupFile(LocalDateTime date) {
-		return new File(backupDir, "db-" + backupFileNameDateFormat.format(date) + ".backup.zip");
+	private Path getBackupFilePath(LocalDateTime date) {
+		return backupDir.resolve("db-" + backupFileNameDateFormat.format(date) + ".backup.zip");
 	}
 
 	/**
 	 * Gets the date of the latest backup.
 	 * @return the date or null if there are no backups
+	 * @throws IOException if there's a problem getting the list of available
+	 * backups
 	 */
-	private LocalDateTime getLatestBackupDate() {
+	private LocalDateTime getLatestBackupDate() throws IOException {
 		List<LocalDateTime> dates = getBackupDates();
 		return dates.isEmpty() ? null : dates.get(0);
 	}
@@ -173,29 +182,31 @@ public class BackupManager {
 	/**
 	 * Gets the dates of all backups in descending order.
 	 * @return the backup dates
+	 * @throws IOException if there's a problem getting the list of available
+	 * backups
 	 */
-	public List<LocalDateTime> getBackupDates() {
-		Map<LocalDateTime, File> backups = getBackups();
+	public List<LocalDateTime> getBackupDates() throws IOException {
+		Map<LocalDateTime, Path> backups = getBackups();
 		List<LocalDateTime> dates = new ArrayList<>(backups.keySet());
 		Collections.sort(dates, Collections.reverseOrder());
 		return dates;
 	}
 
-	private Map<LocalDateTime, File> getBackups() {
-		Map<LocalDateTime, File> backups = new HashMap<>();
-		if (!backupDir.isDirectory()) {
+	private Map<LocalDateTime, Path> getBackups() throws IOException {
+		Map<LocalDateTime, Path> backups = new HashMap<>();
+		if (!Files.isDirectory(backupDir)) {
 			return backups;
 		}
 
-		for (File file : backupDir.listFiles()) {
-			Matcher m = backupFileNameRegex.matcher(file.getName());
+		Files.list(backupDir).forEach(file -> {
+			Matcher m = backupFileNameRegex.matcher(file.getFileName().toString());
 			if (!m.find()) {
-				continue;
+				return;
 			}
 
 			LocalDateTime date = LocalDateTime.from(backupFileNameDateFormat.parse(m.group(1)));
 			backups.put(date, file);
-		}
+		});
 
 		return backups;
 	}

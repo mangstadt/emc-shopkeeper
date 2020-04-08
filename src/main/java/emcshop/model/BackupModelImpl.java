@@ -2,7 +2,6 @@ package emcshop.model;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -14,7 +13,6 @@ import emcshop.BackupManager;
 import emcshop.Settings;
 import emcshop.db.DbDao;
 import emcshop.util.GuiUtils;
-import emcshop.util.ZipUtils.ZipListener;
 
 public class BackupModelImpl implements IBackupModel {
 	private static final AppContext context = AppContext.instance();
@@ -80,7 +78,11 @@ public class BackupModelImpl implements IBackupModel {
 
 	@Override
 	public List<LocalDateTime> getBackups() {
-		return backupManager.getBackupDates();
+		try {
+			return backupManager.getBackupDates();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -93,21 +95,10 @@ public class BackupModelImpl implements IBackupModel {
 		Thread t = new Thread(() -> {
 			try {
 				dao.close();
-				long size = backupManager.getSizeOfDatabase();
-				backupManager.backup(new ZipListener() {
-					private long zipped = 0;
-
-					@Override
-					public void onZippedFile(File file) {
-						zipped += file.length();
-						double percent = ((double) zipped / size) * 100.0;
-						GuiUtils.fireEvents(backupPercentCompleteListeners, new ActionEvent(BackupModelImpl.this, 0, percent + ""));
-					}
+				backupManager.backup((file, percent) -> {
+					GuiUtils.fireEvents(backupPercentCompleteListeners, new ActionEvent(this, 0, percent + ""));
 				});
-			} catch (IOException e) {
-				//TODO display error
-				throw new RuntimeException(e);
-			} catch (SQLException e) {
+			} catch (IOException | SQLException e) {
 				//TODO display error
 				throw new RuntimeException(e);
 			} finally {
@@ -132,10 +123,7 @@ public class BackupModelImpl implements IBackupModel {
 			try {
 				dao.close();
 				backupManager.restore(date);
-			} catch (IOException e) {
-				//TODO display error
-				throw new RuntimeException(e);
-			} catch (SQLException e) {
+			} catch (IOException | SQLException e) {
 				//TODO display error
 				throw new RuntimeException(e);
 			} finally {
@@ -148,6 +136,10 @@ public class BackupModelImpl implements IBackupModel {
 
 	@Override
 	public void deleteBackup(LocalDateTime date) {
-		backupManager.delete(date);
+		try {
+			backupManager.delete(date);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

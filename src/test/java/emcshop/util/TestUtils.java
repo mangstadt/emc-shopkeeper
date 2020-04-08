@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.intThat;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -64,5 +67,54 @@ public class TestUtils {
 				return i >= value;
 			}
 		});
+	}
+
+	/**
+	 * Creates an empty file.
+	 * @param parent the parent folder
+	 * @param name the file name
+	 * @return the file
+	 * @throws IOException if there's a problem creating the file
+	 */
+	public static Path mkfile(Path parent, String name) throws IOException {
+		return mkfile(parent, name, "");
+	}
+
+	/**
+	 * Creates a file.
+	 * @param parent the parent folder
+	 * @param name the file name
+	 * @param content the file content
+	 * @return the file
+	 * @throws IOException if there's a problem creating the file
+	 */
+	public static Path mkfile(Path parent, String name, String content) throws IOException {
+		Path file = parent.resolve(name);
+		Files.write(file, content.getBytes());
+		return file;
+	}
+
+	/**
+	 * Creates a directory.
+	 * @param parent the parent directory
+	 * @param name the directory name
+	 * @return the directory
+	 * @throws IOException if there's a problem creating the directory
+	 */
+	public static Path mkdir(Path parent, String name) throws IOException {
+		Path folder = parent.resolve(name);
+		Files.createDirectory(folder);
+		return folder;
+	}
+
+	/**
+	 * Asserts the contents of a text file.
+	 * @param path the file
+	 * @param expectedContent the expected content
+	 * @throws IOException if there's a problem reading the file
+	 */
+	public static void assertFileContent(Path path, String expectedContent) throws IOException {
+		String actualContent = new String(Files.readAllBytes(path));
+		assertEquals(expectedContent, actualContent);
 	}
 }

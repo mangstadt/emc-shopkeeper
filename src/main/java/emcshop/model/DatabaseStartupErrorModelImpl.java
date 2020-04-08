@@ -57,7 +57,11 @@ public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel
 
 	@Override
 	public List<LocalDateTime> getBackups() {
-		return backupManager.getBackupDates();
+		try {
+			return backupManager.getBackupDates();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -68,10 +72,7 @@ public class DatabaseStartupErrorModelImpl implements IDatabaseStartupErrorModel
 					dao.close();
 				}
 				backupManager.restore(date);
-			} catch (IOException e) {
-				//TODO display error
-				throw new RuntimeException(e);
-			} catch (SQLException e) {
+			} catch (IOException | SQLException e) {
 				//TODO display error
 				throw new RuntimeException(e);
 			} finally {

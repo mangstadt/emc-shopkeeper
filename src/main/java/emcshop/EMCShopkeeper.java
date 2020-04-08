@@ -50,7 +50,6 @@ import emcshop.presenter.ProfileSelectorPresenter;
 import emcshop.presenter.UnhandledErrorPresenter;
 import emcshop.scraper.EmcSession;
 import emcshop.util.GuiUtils;
-import emcshop.util.ZipUtils.ZipListener;
 import emcshop.view.DatabaseStartupErrorViewImpl;
 import emcshop.view.IDatabaseStartupErrorView;
 import emcshop.view.IProfileSelectorView;
@@ -283,7 +282,7 @@ public class EMCShopkeeper {
 
 		//create the backup manager
 		File dbBackupDir = new File(profileDir, "db-backups");
-		BackupManager backupManager = new BackupManager(dbDir, dbBackupDir, settings.getBackupsEnabled(), settings.getBackupFrequency(), settings.getMaxBackups());
+		BackupManager backupManager = new BackupManager(dbDir.toPath(), dbBackupDir.toPath(), settings.getBackupsEnabled(), settings.getBackupFrequency(), settings.getMaxBackups());
 		context.add(backupManager);
 
 		//delete old backups
@@ -292,16 +291,8 @@ public class EMCShopkeeper {
 		//backup the database if a backup is due
 		boolean backedup = false;
 		if (backupManager.shouldBackup()) {
-			final long databaseSize = backupManager.getSizeOfDatabase();
-			backupManager.backup(new ZipListener() {
-				private long zipped = 0;
-
-				@Override
-				public void onZippedFile(File file) {
-					zipped += file.length();
-					int percent = (int) ((double) zipped / databaseSize * 100.0);
-					splash.setMessage("Backing up database... (" + percent + "%)");
-				}
+			backupManager.backup((file, percent) -> {
+				splash.setMessage("Backing up database... (" + percent + "%)");
 			});
 
 			backedup = true;
@@ -372,16 +363,8 @@ public class EMCShopkeeper {
 				if (!backedup && DirbyDbDao.schemaVersion > startingDbVersion) {
 					dao.close();
 
-					final long size = backupManager.getSizeOfDatabase();
-					backupManager.backup(new ZipListener() {
-						private long zipped = 0;
-
-						@Override
-						public void onZippedFile(File file) {
-							zipped += file.length();
-							int percent = (int) ((double) zipped / size * 100.0);
-							splash.setMessage("Backing up database... (" + percent + "%)");
-						}
+					backupManager.backup((file, percent) -> {
+						splash.setMessage("Backing up database... (" + percent + "%)");
 					});
 
 					backedup = true;

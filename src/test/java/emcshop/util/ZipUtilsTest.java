@@ -1,108 +1,217 @@
 package emcshop.util;
 
+import static emcshop.util.TestUtils.assertFileContent;
+import static emcshop.util.TestUtils.mkfile;
+import static emcshop.util.TestUtils.mkdir;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
-import java.util.Enumeration;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import emcshop.util.ZipUtils.ZipListener;
 
+/**
+ * @author Michael Angstadt
+ */
 public class ZipUtilsTest {
 	@Rule
 	public TemporaryFolder temp = new TemporaryFolder();
 
 	@Test
-	public void getDirectorySize() throws Throwable {
-		File root = temp.getRoot();
+	public void getDirectorySize() throws Exception {
+		Path root = temp.getRoot().toPath();
 
-		File file = new File(root, "file1.txt");
-		FileUtils.write(file, "a");
-
-		file = new File(root, "file2.txt");
-		FileUtils.write(file, "ab");
-
-		File dir = new File(root, "dir");
-		dir.mkdir();
-
-		file = new File(dir, "file3.txt");
-		FileUtils.write(file, "abc");
+		mkfile(root, "file1.txt", "a");
+		mkfile(root, "file2.txt", "ab");
+		Path dir = mkdir(root, "dir");
+		mkfile(dir, "file3.txt", "abc");
 
 		assertEquals(6, ZipUtils.getDirectorySize(root));
 	}
 
 	@Test
-	public void zipAndUnzipDirectory() throws Throwable {
-		File root = temp.getRoot();
-		File zip = new File(root, "zip.zip");
+	public void zipAndUnzipDirectory() throws Exception {
+		Path root = temp.getRoot().toPath();
+		Path zip = root.resolve("zip.zip");
+
+		//create directory structure for testing
+		//@formatter:off
+		Path dir = mkdir(root, "zipMe");
+			Path file1 = mkfile(dir, "file1.txt", "data1");
+			Path file2 = mkfile(dir, "file2.txt", "data2");
+			Path dir2 = mkdir(dir, "folder2");
+				Path file3 = mkfile(dir2, "file3.txt", "data3");
+			Path dir3 = mkdir(dir, "folder3");
+		//@formatter:on
 
 		{
-			File dir = new File(root, "zipMe");
-			dir.mkdir();
-
-			File file1 = new File(dir, "file1.txt");
-			FileUtils.write(file1, "data1");
-
-			File file2 = new File(dir, "file2.txt");
-			FileUtils.write(file2, "data2");
-
-			File dir2 = new File(dir, "folder2");
-			dir2.mkdir();
-
-			File file3 = new File(dir2, "file3.txt");
-			FileUtils.write(file3, "data3");
-
-			File dir3 = new File(dir, "folder3");
-			dir3.mkdir();
-
 			ZipListener listener = mock(ZipListener.class);
 			ZipUtils.zipDirectory(dir, zip, listener);
 
-			verify(listener).onZippedFile(file1);
-			verify(listener).onZippedFile(file2);
-			verify(listener).onZippedFile(file3);
+			verify(listener).onZippedFile(file1, 33);
+			verify(listener).onZippedFile(file2, 66);
+			verify(listener).onZippedFile(file3, 100);
 
-			Set<String> actualPaths = new HashSet<String>();
-			ZipFile zipFile = new ZipFile(zip);
-			Enumeration<? extends ZipEntry> entries = zipFile.entries();
-			while (entries.hasMoreElements()) {
-				ZipEntry entry = entries.nextElement();
-				actualPaths.add(entry.getName());
+			Set<String> actualPaths;
+			try (FileSystem zipFs = ZipUtils.openExistingZipFile(zip)) {
+				actualPaths = Files.walk(zipFs.getPath("/")) //@formatter:off
+					.map(Path::toString)
+				.collect(Collectors.toSet()); //@formatter:on
 			}
-			zipFile.close();
 
-			Set<String> expectedPaths = new HashSet<String>();
-			expectedPaths.add("/" + dir.getName() + "/" + file1.getName());
-			expectedPaths.add("/" + dir.getName() + "/" + file2.getName());
-			expectedPaths.add("\\" + dir.getName() + "/" + dir2.getName() + "/" + file3.getName()); //on Windows, this path starts with a backslash for some reason
-			expectedPaths.add("\\" + dir.getName() + "/" + dir3.getName() + "/empty"); //on Windows, this path starts with a backslash for some reason
+			Set<String> expectedPaths = new HashSet<String>(Arrays.asList( //@formatter:off
+				"/",
+				"/" + dir.getFileName() + "/",
+				"/" + dir.getFileName() + "/" + file1.getFileName(),
+				"/" + dir.getFileName() + "/" + file2.getFileName(),
+				"/" + dir.getFileName() + "/" + dir2.getFileName() + "/",
+				"/" + dir.getFileName() + "/" + dir2.getFileName() + "/" + file3.getFileName(),
+				"/" + dir.getFileName() + "/" + dir3.getFileName() + "/"
+			)); //@formatter:on
 
 			assertEquals(expectedPaths, actualPaths);
 		}
 
 		{
-			File destinationDir = new File(root, "destination");
+			Path destinationDir = root.resolve("destination");
 
 			ZipUtils.unzip(destinationDir, zip);
 
-			assertEquals("data1", FileUtils.readFileToString(new File(destinationDir, "zipMe/file1.txt")));
-			assertEquals("data2", FileUtils.readFileToString(new File(destinationDir, "zipMe/file2.txt")));
-			assertEquals("data3", FileUtils.readFileToString(new File(destinationDir, "zipMe/folder2/file3.txt")));
-			assertTrue(new File(destinationDir, "zipMe/folder3").isDirectory());
-			assertFalse(new File(destinationDir, "zipMe/folder3/empty").exists());
+			Set<Path> actualPaths = Files.walk(destinationDir).collect(Collectors.toSet());
+
+			Set<Path> expectedPaths = new HashSet<Path>(Arrays.asList( //@formatter:off
+				destinationDir,
+				destinationDir.resolve(dir.getFileName()),
+				destinationDir.resolve(dir.getFileName() + "/" + file1.getFileName()),
+				destinationDir.resolve(dir.getFileName() + "/" + file2.getFileName()),
+				destinationDir.resolve(dir.getFileName() + "/" + dir2.getFileName()),
+				destinationDir.resolve(dir.getFileName() + "/" + dir2.getFileName() + "/" + file3.getFileName()),
+				destinationDir.resolve(dir.getFileName() + "/" + dir3.getFileName())
+			)); //@formatter:on
+
+			assertEquals(expectedPaths, actualPaths);
+
+			assertFileContent(destinationDir.resolve(dir.getFileName() + "/" + file1.getFileName()), "data1");
+			assertFileContent(destinationDir.resolve(dir.getFileName() + "/" + file2.getFileName()), "data2");
+			assertFileContent(destinationDir.resolve(dir.getFileName() + "/" + dir2.getFileName() + "/" + file3.getFileName()), "data3");
+		}
+	}
+
+	@Test
+	public void repairCorruptedZipFile() throws Exception {
+		Path root = temp.getRoot().toPath();
+		Path zip = root.resolve("zip.zip");
+
+		//create directory structure for testing
+		//@formatter:off
+		Path dir = mkdir(root, "zipMe");
+			Path file1 = mkfile(dir, "file1.txt", "data1");
+			Path file2 = mkfile(dir, "file2.txt", "data2");
+			Path dir2 = mkdir(dir, "folder2");
+				Path file3 = mkfile(dir2, "file3.txt", "data3");
+			Path dir3 = mkdir(dir, "folder3");
+		//@formatter:on
+
+		oldZipMethod(dir.toFile(), zip.toFile());
+
+		try (FileSystem zipFs = ZipUtils.openExistingZipFile(zip)) {
+			Files.walk(zipFs.getPath("/")).collect(Collectors.toSet());
+			fail("Files.walk() method was supposed to throw an exception.");
+		} catch (UncheckedIOException expected) {
 		}
 
+		ZipUtils.repairCorruptedZipFile(zip);
+
+		Set<Path> actualPaths;
+		try (FileSystem zipFs = ZipUtils.openExistingZipFile(zip)) {
+			actualPaths = Files.walk(zipFs.getPath("/")).collect(Collectors.toSet());
+
+			assertFileContent(zipFs.getPath(dir.getFileName() + "/" + file1.getFileName()), "data1");
+			assertFileContent(zipFs.getPath(dir.getFileName() + "/" + file2.getFileName()), "data2");
+			assertFileContent(zipFs.getPath(dir.getFileName() + "/" + dir2.getFileName() + "/" + file3.getFileName()), "data3");
+		}
+
+		Set<String> expectedPaths = new HashSet<String>(Arrays.asList( //@formatter:off
+			"/",
+			"/" + dir.getFileName() + "/",
+			"/" + dir.getFileName() + "/" + file1.getFileName(),
+			"/" + dir.getFileName() + "/" + file2.getFileName(),
+			"/" + dir.getFileName() + "/" + dir2.getFileName() + "/",
+			"/" + dir.getFileName() + "/" + dir2.getFileName() + "/" + file3.getFileName(),
+			"/" + dir.getFileName() + "/" + dir3.getFileName() + "/"
+		)); //@formatter:on
+
+		assertEquals(expectedPaths, actualPaths.stream().map(Path::toString).collect(Collectors.toSet()));
+	}
+
+	/**
+	 * This is the old method that used to be used to zip directories.
+	 */
+	private static void oldZipMethod(File directory, File zipFile) throws IOException {
+		String rootPath = directory.getParent();
+		LinkedList<File> folders = new LinkedList<>();
+		folders.add(directory);
+
+		try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(zipFile))) {
+			while (!folders.isEmpty()) {
+				File folder = folders.removeLast();
+
+				String folderPath;
+				{
+					String zipParent;
+					String folderParent = folder.getParent();
+					if (folderParent == null) {
+						zipParent = "";
+					} else {
+						zipParent = folderParent;
+						if (rootPath != null) {
+							zipParent = zipParent.substring(rootPath.length());
+						}
+					}
+					folderPath = zipParent + "/" + folder.getName() + "/";
+				}
+
+				File files[] = folder.listFiles();
+				if (files.length == 0) {
+					//add folder to zip
+					zip.putNextEntry(new ZipEntry(folderPath + "empty")); //empty dirs are not being added, so add an empty file to the folder
+					continue;
+				}
+
+				//add files to zip
+				for (File file : files) {
+					if (file.isDirectory()) {
+						folders.add(file);
+						continue;
+					}
+
+					try (FileInputStream in = new FileInputStream(file)) {
+						zip.putNextEntry(new ZipEntry(folderPath + file.getName()));
+						IOUtils.copy(in, zip);
+					}
+				}
+			}
+		}
 	}
 }
