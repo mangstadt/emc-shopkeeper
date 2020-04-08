@@ -1,30 +1,46 @@
 package emcshop.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 /**
  * @author Michael Angstadt
  */
 public class RelativeDateFormatTest {
+	@Rule
+	public final DefaultLocaleRule rule = new DefaultLocaleRule(Locale.US);
+
 	@Test
 	public void format() {
-		RelativeDateFormat df = new RelativeDateFormat();
+		LocalDateTime now = LocalDateTime.of(2020, 4, 8, 12, 0, 0);
+		RelativeDateFormat df = new RelativeDateFormat() {
+			@Override
+			LocalDateTime now() {
+				return now;
+			}
+		};
 
-		LocalDateTime date = LocalDateTime.now();
-		assertEquals("A moment ago", df.format(date));
+		LocalDateTime ts = now;
+		assertEquals("A moment ago", df.format(ts));
 
-		date = date.minusMinutes(30);
-		assertTrue(df.format(date).matches("\\d+ minutes ago"));
+		ts = ts.minusMinutes(30);
+		assertEquals(df.format(ts), "30 minutes ago");
 
-		date = date.minusHours(1);
-		assertTrue(df.format(date).matches("Today at .*"));
+		ts = ts.minusHours(1);
+		assertEquals(df.format(ts), "Today at 10:30 AM");
 
-		date = date.minusDays(1);
-		assertTrue(df.format(date).matches("Yesterday at .*"));
+		ts = ts.minusDays(1).withHour(23);
+		assertEquals(df.format(ts), "Yesterday at 11:30 PM");
+
+		ts = ts.withHour(1);
+		assertEquals(df.format(ts), "Yesterday at 1:30 AM");
+
+		ts = ts.minusDays(1);
+		assertEquals(df.format(ts), "Apr 6, 2020 1:30 AM");
 	}
 }

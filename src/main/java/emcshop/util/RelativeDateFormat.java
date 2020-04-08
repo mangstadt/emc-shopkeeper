@@ -42,7 +42,7 @@ public class RelativeDateFormat {
 	 * @return the formatted date (e.g. "Today at 1:00 PM")
 	 */
 	public String format(LocalDateTime date) {
-		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime now = now();
 
 		long minutesAgo = date.until(now, ChronoUnit.MINUTES);
 		if (minutesAgo <= 1) {
@@ -52,7 +52,15 @@ public class RelativeDateFormat {
 			return minutesAgo + " minutes ago";
 		}
 
-		long daysAgo = date.until(now, ChronoUnit.DAYS);
+		/*
+		 * Convert to LocalDate instances so that only the date components are
+		 * taken into consideration.
+		 * 
+		 * For example, if it's 4/5/2020 12PM now, we want 4/4/2020 6PM to be
+		 * considered "yesterday", even though it is less than 24 hours ago.
+		 */
+		long daysAgo = date.toLocalDate().until(now.toLocalDate(), ChronoUnit.DAYS);
+
 		if (daysAgo == 0) {
 			return "Today at " + tf.format(date);
 		}
@@ -60,5 +68,12 @@ public class RelativeDateFormat {
 			return "Yesterday at " + tf.format(date);
 		}
 		return df.format(date);
+	}
+
+	/**
+	 * For unit testing.
+	 */
+	LocalDateTime now() {
+		return LocalDateTime.now();
 	}
 }
