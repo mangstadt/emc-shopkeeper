@@ -442,8 +442,8 @@
 	<Item name="Mycel" id="110" emcNames="Mycelium" />
 	<Item name="Name Tag" id="421" categories="0" />
 	<Item name="Nautilus Shell" />
-	<Item name="Nethbrick" id="405" categories="10" />
-	<Item name="Nether Brick" id="112" categories="10" />
+	<Item name="Nether Brick" id="405" categories="10" emcNames="Nethbrick" />
+	<Item name="Nether Brick Block" id="112" categories="10" emcNames="Nether Bricks" />
 	<Item name="Nether Brick Stairs" id="114" emcNames="Nether Stairs,Nether Brick St" categories="10" />
 	<Item name="Nether Brick Slab" id="44:6" emcNames="Nethbrick Slab" categories="10" />
 	<Item name="Nether Brick Wall" />
@@ -563,7 +563,8 @@
 	<Item name="Red Glazed Terracotta" id="249" group="Clay" categories="2" />
 	<Item name="Red Huge Mushroom" id="100" emcNames="Huge Mushroom 2" />
 	<Item name="Red Mushroom" id="40" categories="6" />
-	<Item name="Red Nether Brick" id="215" categories="10" />
+	<Item name="Red Nether Brick" categories="10" />
+	<Item name="Red Nether Brick Block" id="215" categories="10" emcNames="Red Nether Bricks" />
 	<Item name="Red Nether Brick Stairs" categories="10" />
 	<Item name="Red Nether Brick Wall" categories="10" />
 	<Item name="Red Sand" id="12:1" />
