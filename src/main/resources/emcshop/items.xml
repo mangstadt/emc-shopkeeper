@@ -606,6 +606,7 @@
 	<Item name="Slime Block" id="165" />
 	<Item name="Smithing Table" />
 	<Item name="Smoker" />
+	<Item name="Smooth Quartz" group="Quartz" categories="10,11" />
 	<Item name="Smooth Quartz Slab" group="Quartz" categories="10,11" />
 	<Item name="Smooth Quartz Stairs" group="Quartz" categories="10,11" />
 	<Item name="Smooth Red Sandstone" />
