@@ -677,7 +677,7 @@
 	<Item name="Terracotta" id="172" group="Clay" categories="2" emcNames="Hard Clay,Hardened Clay" />
 	<Item name="Tnt" id="46" categories="13" />
 	<Item name="Torch" id="50" />
-	<Item name="Totem of Undying" id="449" />
+	<Item name="Totem of Undying" stack="1" id="449" />
 	<Item name="Trapped Chest" id="146" group="Wood" categories="13,17" />
 	<Item name="Trident" stack="1" categories="16" />
 	<Item name="Tripwire Hook" id="131" group="Iron" categories="13" />
