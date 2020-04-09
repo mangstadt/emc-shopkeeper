@@ -11,6 +11,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -169,8 +170,13 @@ public class MainFrame extends JFrame {
 			menu.addMenuItem("Open Profile Folder...")
 			.parent(tools)
 			.add(event -> {
+				Path folder = logManager.getFile().getParent();
+				if (folder == null) {
+					folder = logManager.getFile().resolveSibling(".");
+				}
+				
 				try {
-					GuiUtils.openFile(logManager.getFile().getParentFile());
+					GuiUtils.openFile(folder.toFile());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

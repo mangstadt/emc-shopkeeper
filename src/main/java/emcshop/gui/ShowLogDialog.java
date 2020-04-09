@@ -2,6 +2,7 @@ package emcshop.gui;
 
 import java.awt.Font;
 import java.awt.Window;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -28,13 +29,18 @@ public class ShowLogDialog extends JDialog {
 
 		LogManager logManager = AppContext.instance().get(LogManager.class);
 
-		JTextArea location = new JTextArea("Location: " + logManager.getFile().getAbsolutePath());
+		JTextArea location = new JTextArea("Location: " + logManager.getFile().toAbsolutePath());
 		location.setLineWrap(true);
 		location.setWrapStyleWord(true);
 		location.setEditable(false);
 		location.setBackground(getBackground());
 
-		String logText = logManager.getEntireLog();
+		String logText;
+		try {
+			logText = logManager.getCombinedLogFiles();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		JTextArea log = new JTextArea(logText);
 		log.setLineWrap(true);
 		log.setWrapStyleWord(true);
