@@ -3,10 +3,11 @@ package emcshop.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.sql.SQLException;
-import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -28,7 +29,7 @@ import net.miginfocom.swing.MigLayout;
 @SuppressWarnings("serial")
 public class BonusFeeTab extends JPanel {
 	private final DbDao dao;
-	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	private final DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
 
 	private final JLabel since;
 	private final BonusFeeTable table;
@@ -79,7 +80,7 @@ public class BonusFeeTab extends JPanel {
 			throw new RuntimeException(e);
 		}
 
-		Date sinceDate = bonusFee.getSince();
+		LocalDateTime sinceDate = bonusFee.getSince();
 		since.setText("<html><b><i><font color=navy>" + ((sinceDate == null) ? "never" : df.format(sinceDate)) + "</font></i></b></html>");
 
 		table.setData(bonusFee);
@@ -179,7 +180,7 @@ public class BonusFeeTab extends JPanel {
 			rf.setPlus(false);
 			rf.setColor(false);
 			String text = rf.format(bonusFee.getHighestBalance());
-			Date highestBalanceTs = bonusFee.getHighestBalanceTs();
+			LocalDateTime highestBalanceTs = bonusFee.getHighestBalanceTs();
 			if (highestBalanceTs != null) {
 				RelativeDateFormat df = RelativeDateFormat.instance();
 				text += " (" + df.format(highestBalanceTs) + ")";

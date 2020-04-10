@@ -3,11 +3,11 @@ package emcshop.util;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -42,7 +42,7 @@ public class GitHubCommitsApi {
 	 * @return the commit date or null if no commits can be found
 	 * @throws IOException if there's a problem querying the API
 	 */
-	public Date getDateOfLatestCommit(String filePath) throws IOException {
+	public LocalDateTime getDateOfLatestCommit(String filePath) throws IOException {
 		String json = getCommits(filePath);
 		JsonNode node = parseJson(json);
 
@@ -59,7 +59,7 @@ public class GitHubCommitsApi {
 
 		try {
 			return parseDate(dateStr);
-		} catch (ParseException e) {
+		} catch (DateTimeException e) {
 			throw new IOException("Date not in recognizable format: " + dateStr);
 		}
 	}
@@ -90,9 +90,9 @@ public class GitHubCommitsApi {
 		return mapper.readTree(jsonStr);
 	}
 
-	private Date parseDate(String dateStr) throws ParseException {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-		df.setTimeZone(TimeZone.getTimeZone("GMT"));
-		return df.parse(dateStr);
+	private LocalDateTime parseDate(String dateStr) {
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneId.of("GMT"));
+		Instant instant = Instant.from(df.parse(dateStr));
+		return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
 	}
 }

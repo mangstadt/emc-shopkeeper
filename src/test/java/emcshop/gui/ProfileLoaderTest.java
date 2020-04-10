@@ -20,7 +20,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Properties;
 
 import javax.swing.Icon;
@@ -58,7 +60,7 @@ public class ProfileLoaderTest {
 		.private_(false)
 		.rank("Gold Supporter", null)
 		.portraitUrl("http://empireminecraft.com/data/avatars/l/12/12110.jpg?1389141773")
-		.joined(new Date())
+		.joined(LocalDate.now())
 	.build();
 	//@formatter:on
 
@@ -79,7 +81,7 @@ public class ProfileLoaderTest {
 		listener = mock(ProfileDownloadedListener.class);
 		label = mock(JLabel.class);
 		scraper = mock(PlayerProfileScraper.class);
-		profileImageLoader = create(temp.getRoot(), scraper);
+		profileImageLoader = create(temp.getRoot().toPath(), scraper);
 	}
 
 	@Test
@@ -122,7 +124,7 @@ public class ProfileLoaderTest {
 		String player = profile.getPlayerName();
 
 		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);
-		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
+		when(scraper.downloadPortrait(eq(profile), isNull(Instant.class), any(HttpClient.class))).thenReturn(portrait);
 
 		profileImageLoader.getPortrait(player, label, 16, listener);
 		wait(profileImageLoader);
@@ -153,7 +155,7 @@ public class ProfileLoaderTest {
 		verify(listener, never()).onProfileDownloaded(any(PlayerProfile.class));
 
 		//the portrait should have only been downloaded once
-		verify(scraper).downloadPortrait(any(PlayerProfile.class), any(Date.class), any(HttpClient.class));
+		verify(scraper).downloadPortrait(any(PlayerProfile.class), any(Instant.class), any(HttpClient.class));
 	}
 
 	@Test
@@ -161,7 +163,7 @@ public class ProfileLoaderTest {
 		String player = profile.getPlayerName();
 		temp.newFile(player);
 		temp.newFile(player + ".properties");
-		Date lastModified = new Date();
+		Instant lastModified = Instant.now();
 
 		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);
 		when(scraper.downloadPortrait(eq(profile), eq(lastModified), any(HttpClient.class))).thenReturn(null);
@@ -188,7 +190,7 @@ public class ProfileLoaderTest {
 		String player = profile.getPlayerName();
 
 		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);
-		when(scraper.downloadPortrait(eq(profile), isNull(Date.class), any(HttpClient.class))).thenReturn(portrait);
+		when(scraper.downloadPortrait(eq(profile), isNull(Instant.class), any(HttpClient.class))).thenReturn(portrait);
 
 		for (int i = 0; i < 100; i++) {
 			profileImageLoader.getPortrait(player, label, 16, listener);
@@ -216,7 +218,7 @@ public class ProfileLoaderTest {
 		}
 	}
 
-	private ProfileLoader create(File cacheDir, PlayerProfileScraper scraper) {
+	private ProfileLoader create(Path cacheDir, PlayerProfileScraper scraper) {
 		ProfileLoader loader = new ProfileLoader(cacheDir);
 		loader.setSessionFactory(new ProfileLoader.EmcWebsiteSessionFactory() {
 			@Override

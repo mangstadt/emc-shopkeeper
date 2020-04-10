@@ -1,5 +1,7 @@
 package emcshop.db;
 
+import static emcshop.util.TimeUtils.toLocalDate;
+import static emcshop.util.TimeUtils.toLocalDateTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -9,8 +11,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.apache.derby.jdbc.EmbeddedDriver;
 import org.junit.After;
@@ -108,12 +110,10 @@ public class InsertStatementTest {
 
 	@Test
 	public void execute_one_row() throws Exception {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
 		InsertStatement stmt = new InsertStatement("test");
 
-		stmt.setTimestamp("timestampCol", df.parse("2013-03-07 20:33"));
-		stmt.setDate("dateCol", df.parse("2013-03-06 00:00:00"));
+		stmt.setTimestamp("timestampCol", LocalDateTime.of(2013, 3, 7, 20, 33, 0));
+		stmt.setDate("dateCol", LocalDate.of(2013, 3, 6));
 		stmt.setInt("intCol", 5);
 		stmt.setString("stringCol", "value1");
 		assertEquals(Integer.valueOf(1), stmt.execute(conn));
@@ -123,8 +123,8 @@ public class InsertStatementTest {
 
 		rs.next();
 		assertEquals(1, rs.getInt("id"));
-		assertEquals(df.parse("2013-03-07 20:33").getTime(), rs.getTimestamp("timestampCol").getTime());
-		assertEquals(df.parse("2013-03-06 00:00:00"), rs.getDate("dateCol"));
+		assertEquals(LocalDateTime.of(2013, 3, 7, 20, 33, 0), toLocalDateTime(rs.getTimestamp("timestampCol")));
+		assertEquals(LocalDate.of(2013, 3, 6), toLocalDate(rs.getDate("dateCol")));
 		assertEquals(5, rs.getInt("intCol"));
 		assertEquals("value1", rs.getString("stringCol"));
 
@@ -135,18 +135,16 @@ public class InsertStatementTest {
 
 	@Test
 	public void execute_multiple_rows() throws Exception {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
 		InsertStatement stmt = new InsertStatement("test");
 
 		//leaving out columns (same as using null values)
-		stmt.setTimestamp("timestampCol", df.parse("2013-03-04 8:33"));
+		stmt.setTimestamp("timestampCol", LocalDateTime.of(2013, 3, 4, 8, 33, 0));
 		stmt.setInt("intCol", 10);
 		stmt.nextRow();
 
 		//null values
 		stmt.setTimestamp("timestampCol", null);
-		stmt.setDate("dateCol", df.parse("2013-03-05 00:00:00"));
+		stmt.setDate("dateCol", LocalDate.of(2013, 3, 5));
 		stmt.setInt("intCol", null);
 		stmt.setString("stringCol", "value2");
 		stmt.nextRow();
@@ -155,8 +153,8 @@ public class InsertStatementTest {
 		stmt.nextRow();
 
 		//all have values
-		stmt.setTimestamp("timestampCol", df.parse("2013-03-07 20:33"));
-		stmt.setDate("dateCol", df.parse("2013-03-06 00:00:00"));
+		stmt.setTimestamp("timestampCol", LocalDateTime.of(2013, 3, 7, 20, 33, 0));
+		stmt.setDate("dateCol", LocalDate.of(2013, 3, 6));
 		stmt.setInt("intCol", 5);
 		stmt.setString("stringCol", "value1");
 		stmt.nextRow();
@@ -179,7 +177,7 @@ public class InsertStatementTest {
 
 		rs.next();
 		assertEquals(id++, rs.getInt("id"));
-		assertEquals(df.parse("2013-03-04 8:33").getTime(), rs.getTimestamp("timestampCol").getTime());
+		assertEquals(LocalDateTime.of(2013, 3, 4, 8, 33, 0), toLocalDateTime(rs.getTimestamp("timestampCol")));
 		assertNull(rs.getDate("dateCol"));
 		assertEquals(10, rs.getInt("intCol"));
 		assertNull(rs.getString("stringCol"));
@@ -187,14 +185,14 @@ public class InsertStatementTest {
 		rs.next();
 		assertEquals(id++, rs.getInt("id"));
 		assertNull(rs.getTimestamp("timestampCol"));
-		assertEquals(df.parse("2013-03-05 00:00:00"), rs.getDate("dateCol"));
+		assertEquals(LocalDate.of(2013, 3, 5), toLocalDate(rs.getDate("dateCol")));
 		assertNull(rs.getObject("intCol"));
 		assertEquals("value2", rs.getString("stringCol"));
 
 		rs.next();
 		assertEquals(id++, rs.getInt("id"));
-		assertEquals(df.parse("2013-03-07 20:33").getTime(), rs.getTimestamp("timestampCol").getTime());
-		assertEquals(df.parse("2013-03-06 00:00:00"), rs.getDate("dateCol"));
+		assertEquals(LocalDateTime.of(2013, 3, 7, 20, 33, 0), toLocalDateTime(rs.getTimestamp("timestampCol")));
+		assertEquals(LocalDate.of(2013, 3, 6), toLocalDate(rs.getDate("dateCol")));
 		assertEquals(5, rs.getInt("intCol"));
 		assertEquals("value1", rs.getString("stringCol"));
 

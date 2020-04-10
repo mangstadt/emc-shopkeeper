@@ -1,6 +1,6 @@
 package emcshop.db;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Represents a row in the "players" table.
@@ -9,8 +9,8 @@ import java.util.Date;
 public class Player {
 	private Integer id;
 	private String name;
-	private Date firstSeen;
-	private Date lastSeen;
+	private LocalDateTime firstSeen;
+	private LocalDateTime lastSeen;
 
 	public Integer getId() {
 		return id;
@@ -28,20 +28,19 @@ public class Player {
 		this.name = name;
 	}
 
-	public Date getFirstSeen() {
+	public LocalDateTime getFirstSeen() {
 		return firstSeen;
 	}
 
-	public void setFirstSeen(Date firstSeen) {
+	public void setFirstSeen(LocalDateTime firstSeen) {
 		this.firstSeen = firstSeen;
 	}
 
-	public Date getLastSeen() {
+	public LocalDateTime getLastSeen() {
 		return lastSeen;
 	}
 
-	public void setLastSeen(Date lastSeen) {
+	public void setLastSeen(LocalDateTime lastSeen) {
 		this.lastSeen = lastSeen;
 	}
-
 }

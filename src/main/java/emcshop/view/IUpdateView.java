@@ -1,7 +1,7 @@
 package emcshop.view;
 
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import emcshop.scraper.EmcSession;
 
@@ -69,7 +69,7 @@ public interface IUpdateView {
 	 * Sets the date of the oldest parsed transaction.
 	 * @param date the date
 	 */
-	void setOldestParsedTransactonDate(Date date);
+	void setOldestParsedTransactonDate(LocalDateTime date);
 
 	/**
 	 * Sets the number of pages that have been downloaded so far.

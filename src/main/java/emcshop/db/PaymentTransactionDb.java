@@ -1,14 +1,16 @@
 package emcshop.db;
 
+import static emcshop.util.TimeUtils.toLocalDateTime;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.github.mangstadt.emc.rupees.dto.PaymentTransaction;
 
 public class PaymentTransactionDb {
 	private Integer id;
-	private Date ts;
+	private LocalDateTime ts;
 	private int amount, balance;
 	private String player, reason;
 
@@ -21,7 +23,7 @@ public class PaymentTransactionDb {
 		amount = rs.getInt("amount");
 		balance = rs.getInt("balance");
 		player = rs.getString("playerName");
-		ts = rs.getTimestamp("ts"); //TODO do I need to do a new Date() here?
+		ts = toLocalDateTime(rs.getTimestamp("ts"));
 		reason = rs.getString("reason");
 		if (reason == null) {
 			//the rest of the app assumes reason will never be null
@@ -30,7 +32,7 @@ public class PaymentTransactionDb {
 	}
 
 	public PaymentTransactionDb(PaymentTransaction transaction) {
-		ts = transaction.getTs();
+		ts = toLocalDateTime(transaction.getTs());
 		amount = transaction.getAmount();
 		balance = transaction.getBalance();
 		player = transaction.getPlayer();
@@ -45,11 +47,11 @@ public class PaymentTransactionDb {
 		this.id = id;
 	}
 
-	public Date getTs() {
+	public LocalDateTime getTs() {
 		return ts;
 	}
 
-	public void setTs(Date ts) {
+	public void setTs(LocalDateTime ts) {
 		this.ts = ts;
 	}
 
@@ -100,37 +102,24 @@ public class PaymentTransactionDb {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		PaymentTransactionDb other = (PaymentTransactionDb) obj;
-		if (amount != other.amount)
-			return false;
-		if (balance != other.balance)
-			return false;
+		if (amount != other.amount) return false;
+		if (balance != other.balance) return false;
 		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
+			if (other.id != null) return false;
+		} else if (!id.equals(other.id)) return false;
 		if (player == null) {
-			if (other.player != null)
-				return false;
-		} else if (!player.equals(other.player))
-			return false;
+			if (other.player != null) return false;
+		} else if (!player.equals(other.player)) return false;
 		if (reason == null) {
-			if (other.reason != null)
-				return false;
-		} else if (!reason.equals(other.reason))
-			return false;
+			if (other.reason != null) return false;
+		} else if (!reason.equals(other.reason)) return false;
 		if (ts == null) {
-			if (other.ts != null)
-				return false;
-		} else if (!ts.equals(other.ts))
-			return false;
+			if (other.ts != null) return false;
+		} else if (!ts.equals(other.ts)) return false;
 		return true;
 	}
 }

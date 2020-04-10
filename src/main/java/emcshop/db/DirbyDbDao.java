@@ -1,5 +1,7 @@
 package emcshop.db;
 
+import static emcshop.util.TimeUtils.toLocalDateTime;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -10,11 +12,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -60,7 +64,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 	protected Connection conn;
 	protected String jdbcUrl;
-	private Map<Integer, Date[]> firstLastSeenDates = new HashMap<>();
+	private Map<Integer, LocalDateTime[]> firstLastSeenDates = new HashMap<>();
 
 	private final Map<Class<? extends RupeeTransaction>, String> bonusFeeColumnNames;
 	{
@@ -229,8 +233,8 @@ public abstract class DirbyDbDao implements DbDao {
 				Player player = new Player();
 				player.setId(rs.getInt("id"));
 				player.setName(rs.getString("name"));
-				player.setFirstSeen(toDate(rs.getTimestamp("first_seen")));
-				player.setLastSeen(toDate(rs.getTimestamp("last_seen")));
+				player.setFirstSeen(toLocalDateTime(rs.getTimestamp("first_seen")));
+				player.setLastSeen(toLocalDateTime(rs.getTimestamp("last_seen")));
 				return player;
 			}
 		}
@@ -391,7 +395,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void updateItemsWhoseOldNamesAreUsedByExistingItems(List<String> oldNames, List<String> newNames, Date date) throws SQLException {
+	public void updateItemsWhoseOldNamesAreUsedByExistingItems(List<String> oldNames, List<String> newNames, LocalDateTime date) throws SQLException {
 		if (oldNames.size() != newNames.size()) {
 			throw new IllegalArgumentException("oldNames and newNames lists must be the same size.");
 		}
@@ -497,8 +501,8 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public Date getEarliestTransactionDate() throws SQLException {
-		List<Date> dates = new ArrayList<>();
+	public LocalDateTime getEarliestTransactionDate() throws SQLException {
+		List<LocalDateTime> dates = new ArrayList<>();
 		String[] tables = { "transactions", "payment_transactions" };
 		for (String table : tables) {
 			try (PreparedStatement selectStmt = stmt("SELECT Min(ts) FROM " + table)) {
@@ -512,7 +516,7 @@ public abstract class DirbyDbDao implements DbDao {
 					continue;
 				}
 
-				dates.add(toDate(ts));
+				dates.add(toLocalDateTime(ts));
 			}
 		}
 
@@ -548,24 +552,24 @@ public abstract class DirbyDbDao implements DbDao {
 		Player owner = (ownerName == null) ? null : selsertPlayer(ownerName);
 
 		Integer itemId = selsertItem(transaction.getItem());
-		Date ts = transaction.getTs();
+		LocalDateTime ts = transaction.getTs();
 
 		//keep track of the first/last seen dates so they can be updated (in "commit()")
 		//don't record this if this is not a transaction from the player's own shop
 		if (player != null) {
-			Date dates[] = firstLastSeenDates.get(player.getId());
+			LocalDateTime dates[] = firstLastSeenDates.get(player.getId());
 			if (dates == null) {
-				dates = new Date[] { player.getFirstSeen(), player.getLastSeen() };
+				dates = new LocalDateTime[] { player.getFirstSeen(), player.getLastSeen() };
 				firstLastSeenDates.put(player.getId(), dates);
 			}
 
-			Date earliest = dates[0];
-			if (earliest == null || ts.getTime() < earliest.getTime()) {
+			LocalDateTime earliest = dates[0];
+			if (earliest == null || ts.isBefore(earliest)) {
 				dates[0] = ts;
 			}
 
-			Date latest = dates[1];
-			if (latest == null || ts.getTime() > latest.getTime()) {
+			LocalDateTime latest = dates[1];
+			if (latest == null || ts.isAfter(latest)) {
 				dates[1] = ts;
 			}
 		}
@@ -642,22 +646,26 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public Date getLatestTransactionDate() throws SQLException {
-		Date latest = null;
+	public LocalDateTime getLatestTransactionDate() throws SQLException {
+		LocalDateTime latest = null;
 		String queries[] = { "SELECT Max(ts) FROM transactions", "SELECT Max(ts) FROM payment_transactions", "SELECT latest_transaction_ts FROM bonuses_fees" };
 		for (String query : queries) {
-			Date date;
+			LocalDateTime date;
 			try (PreparedStatement stmt = stmt(query)) {
 				ResultSet rs = stmt.executeQuery();
 				if (!rs.next()) {
-					return null;
+					continue;
 				}
 
 				Timestamp ts = rs.getTimestamp(1);
-				date = toDate(ts);
+				if (ts == null) {
+					continue;
+				}
+
+				date = toLocalDateTime(ts);
 			}
 
-			if (date != null && (latest == null || date.after(latest))) {
+			if (latest == null || date.isAfter(latest)) {
 				latest = date;
 			}
 		}
@@ -723,7 +731,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public Collection<ItemGroup> getItemGroups(Date from, Date to, ShopTransactionType transactionType) throws SQLException {
+	public Collection<ItemGroup> getItemGroups(LocalDateTime from, LocalDateTime to, ShopTransactionType transactionType) throws SQLException {
 		Map<String, ItemGroup> itemGroups = new HashMap<>();
 
 		//@formatter:off
@@ -815,7 +823,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public List<ShopTransactionDb> getTransactionsByDate(Date from, Date to, ShopTransactionType transactionType) throws SQLException {
+	public List<ShopTransactionDb> getTransactionsByDate(LocalDateTime from, LocalDateTime to, ShopTransactionType transactionType) throws SQLException {
 		String sql;
 		List<String> where = new ArrayList<>();
 		//@formatter:off
@@ -854,7 +862,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 		List<ShopTransactionDb> transactions = new ArrayList<>();
 		Map<String, ShopTransactionDb> lastTransactionByItem = new HashMap<>();
-		Map<ShopTransactionDb, Date> dateOfLastTransaction = new HashMap<>();
+		Map<ShopTransactionDb, LocalDateTime> dateOfLastTransaction = new HashMap<>();
 		try (PreparedStatement stmt = stmt(sql)) {
 			int index = 1;
 			if (from != null) {
@@ -865,7 +873,7 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				Date ts = toDate(rs.getTimestamp("ts"));
+				LocalDateTime ts = toLocalDateTime(rs.getTimestamp("ts"));
 				String shopCustomer, shopOwner;
 				switch (transactionType) {
 				case MY_SHOP:
@@ -896,9 +904,16 @@ public abstract class DirbyDbDao implements DbDao {
 				String key = ((shopCustomer == null) ? shopOwner : shopCustomer) + ":" + item;
 				ShopTransactionDb transaction = lastTransactionByItem.get(key);
 				if (transaction != null) {
-					long diff = ts.getTime() - dateOfLastTransaction.get(transaction).getTime();
-					if (diff <= 1000 * 60 * 2) {
-						//if the transactions occurred within 2 minutes of the last one, then consider it part of the same, consolidated transaction
+					/*
+					 * If the transactions occurred within 2 minutes of the last
+					 * one, then consider it part of the same, consolidated
+					 * transaction.
+					 * 
+					 * Note: "diff.toMinutes() <= 2" will return true for values
+					 * such as 2:10.
+					 */
+					Duration diff = Duration.between(dateOfLastTransaction.get(transaction), ts);
+					if (diff.toMinutes() < 2) {
 						transaction.setAmount(transaction.getAmount() + amount);
 						transaction.setQuantity(transaction.getQuantity() + quantity);
 						dateOfLastTransaction.put(transaction, ts);
@@ -923,7 +938,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public Collection<PlayerGroup> getPlayerGroups(Date from, Date to, ShopTransactionType transactionType) throws SQLException {
+	public Collection<PlayerGroup> getPlayerGroups(LocalDateTime from, LocalDateTime to, ShopTransactionType transactionType) throws SQLException {
 		Map<String, PlayerGroup> playerGroups = new HashMap<>();
 
 		String sql;
@@ -978,19 +993,19 @@ public abstract class DirbyDbDao implements DbDao {
 			while (rs.next()) {
 				String playerName;
 				Integer playerId;
-				Date firstSeen, lastSeen;
+				LocalDateTime firstSeen, lastSeen;
 				switch (transactionType) {
 				case MY_SHOP:
 					playerName = rs.getString("playerName");
 					playerId = rs.getInt("player");
-					firstSeen = toDate(rs.getTimestamp("first_seen"));
-					lastSeen = toDate(rs.getTimestamp("last_seen"));
+					firstSeen = toLocalDateTime(rs.getTimestamp("first_seen"));
+					lastSeen = toLocalDateTime(rs.getTimestamp("last_seen"));
 					break;
 				case OTHER_SHOPS:
 					playerName = rs.getString("shopOwnerName");
 					playerId = rs.getInt("shop_owner");
-					firstSeen = toDate(rs.getTimestamp("first_seen"));
-					lastSeen = toDate(rs.getTimestamp("last_seen"));
+					firstSeen = toLocalDateTime(rs.getTimestamp("first_seen"));
+					lastSeen = toLocalDateTime(rs.getTimestamp("last_seen"));
 					break;
 				default:
 					playerId = (Integer) rs.getObject("player");
@@ -1065,8 +1080,8 @@ public abstract class DirbyDbDao implements DbDao {
 			Player player = new Player();
 			player.setId(id);
 			player.setName(rs.getString("name"));
-			player.setFirstSeen(toDate(rs.getTimestamp("first_seen")));
-			player.setLastSeen(toDate(rs.getTimestamp("last_seen")));
+			player.setFirstSeen(toLocalDateTime(rs.getTimestamp("first_seen")));
+			player.setLastSeen(toLocalDateTime(rs.getTimestamp("last_seen")));
 			return player;
 		}
 	}
@@ -1247,17 +1262,17 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void updateBonusesFeesLatestTransactionDate(Date newLatest) throws SQLException {
-		Date oldLatest = null;
+	public void updateBonusesFeesLatestTransactionDate(LocalDateTime newLatest) throws SQLException {
+		LocalDateTime oldLatest = null;
 		try (PreparedStatement stmt = stmt("SELECT latest_transaction_ts FROM bonuses_fees")) {
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				Timestamp ts = rs.getTimestamp(1);
-				oldLatest = toDate(ts);
+				oldLatest = toLocalDateTime(ts);
 			}
 		}
 
-		if (oldLatest != null && newLatest.before(oldLatest)) {
+		if (oldLatest != null && newLatest.isBefore(oldLatest)) {
 			return;
 		}
 
@@ -1276,7 +1291,7 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 
 			BonusFee bonusesFees = new BonusFee();
-			bonusesFees.setSince(toDate(rs.getTimestamp("since")));
+			bonusesFees.setSince(toLocalDateTime(rs.getTimestamp("since")));
 			bonusesFees.setEggify(rs.getInt("eggify"));
 			bonusesFees.setHorse(rs.getInt("horse"));
 			bonusesFees.setLock(rs.getInt("lock"));
@@ -1285,14 +1300,14 @@ public abstract class DirbyDbDao implements DbDao {
 			bonusesFees.setVote(rs.getInt("vote"));
 			bonusesFees.setMail(rs.getInt("mail"));
 			bonusesFees.setHighestBalance(rs.getInt("highest_balance"));
-			bonusesFees.setHighestBalanceTs(toDate(rs.getTimestamp("highest_balance_ts")));
+			bonusesFees.setHighestBalanceTs(toLocalDateTime(rs.getTimestamp("highest_balance_ts")));
 
 			return bonusesFees;
 		}
 	}
 
 	@Override
-	public void updateBonusesFeesSince(Date since) throws SQLException {
+	public void updateBonusesFeesSince(LocalDateTime since) throws SQLException {
 		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET since = ? WHERE since IS NULL")) {
 			stmt.setTimestamp(1, toTimestamp(since));
 			stmt.executeUpdate();
@@ -1315,23 +1330,23 @@ public abstract class DirbyDbDao implements DbDao {
 
 		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET highest_balance = ?, highest_balance_ts = ?")) {
 			stmt.setInt(1, transaction.getBalance());
-			stmt.setTimestamp(2, toTimestamp(transaction.getTs()));
+			stmt.setTimestamp(2, toTimestamp(toLocalDateTime(transaction.getTs())));
 			stmt.executeUpdate();
 		}
 	}
 
 	@Override
-	public Map<Date, Profits> getProfitsByDay(Date from, Date to) throws SQLException {
+	public Map<LocalDate, Profits> getProfitsByDay(LocalDate from, LocalDate to) throws SQLException {
 		return getProfits(from, to, true);
 	}
 
 	@Override
-	public Map<Date, Profits> getProfitsByMonth(Date from, Date to) throws SQLException {
+	public Map<LocalDate, Profits> getProfitsByMonth(LocalDate from, LocalDate to) throws SQLException {
 		return getProfits(from, to, false);
 	}
 
-	private Map<Date, Profits> getProfits(Date from, Date to, boolean byDay) throws SQLException {
-		Map<Date, Profits> profits = new LinkedHashMap<>();
+	private Map<LocalDate, Profits> getProfits(LocalDate from, LocalDate to, boolean byDay) throws SQLException {
+		Map<LocalDate, Profits> profits = new LinkedHashMap<>();
 
 		//@formatter:off
 		String sql =
@@ -1358,18 +1373,11 @@ public abstract class DirbyDbDao implements DbDao {
 			}
 
 			ResultSet rs = stmt.executeQuery();
-			Calendar c = Calendar.getInstance();
 			while (rs.next()) {
-				Date ts = toDate(rs.getTimestamp("ts"));
-				c.setTime(ts);
+				LocalDate date = toLocalDateTime(rs.getTimestamp("ts")).toLocalDate();
 				if (!byDay) {
-					c.set(Calendar.DATE, 1);
+					date = date.withDayOfMonth(1);
 				}
-				c.set(Calendar.HOUR_OF_DAY, 0);
-				c.set(Calendar.MINUTE, 0);
-				c.set(Calendar.SECOND, 0);
-				c.set(Calendar.MILLISECOND, 0);
-				Date date = c.getTime();
 
 				Profits profit = profits.get(date);
 				if (profit == null) {
@@ -1377,8 +1385,8 @@ public abstract class DirbyDbDao implements DbDao {
 					profits.put(date, profit);
 				}
 
-				if (rs.getObject("player") != null) {
-					//only include shop transactions
+				boolean isShopTransaction = (rs.getObject("player") != null);
+				if (isShopTransaction) {
 					int amount = rs.getInt("amount");
 					String item = rs.getString("item");
 					profit.addTransaction(item, amount);
@@ -1423,10 +1431,10 @@ public abstract class DirbyDbDao implements DbDao {
 	@Override
 	public void commit() throws SQLException {
 		//update first/last seen dates if transactions were inserted
-		for (Map.Entry<Integer, Date[]> entry : firstLastSeenDates.entrySet()) {
+		for (Map.Entry<Integer, LocalDateTime[]> entry : firstLastSeenDates.entrySet()) {
 			Integer playerId = entry.getKey();
-			Date firstSeen = entry.getValue()[0];
-			Date lastSeen = entry.getValue()[1];
+			LocalDateTime firstSeen = entry.getValue()[0];
+			LocalDateTime lastSeen = entry.getValue()[1];
 
 			updateFirstLastSeen(playerId, firstSeen, lastSeen);
 		}
@@ -1484,8 +1492,8 @@ public abstract class DirbyDbDao implements DbDao {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				int player = rs.getInt("player");
-				Date firstSeen = toDate(rs.getTimestamp("firstSeen"));
-				Date lastSeen = toDate(rs.getTimestamp("lastSeen"));
+				LocalDateTime firstSeen = toLocalDateTime(rs.getTimestamp("firstSeen"));
+				LocalDateTime lastSeen = toLocalDateTime(rs.getTimestamp("lastSeen"));
 				updateFirstLastSeen(player, firstSeen, lastSeen);
 			}
 		}
@@ -1520,7 +1528,7 @@ public abstract class DirbyDbDao implements DbDao {
 	 * @param lastSeen the "last seen" date
 	 * @throws SQLException
 	 */
-	private void updateFirstLastSeen(Integer playerId, Date firstSeen, Date lastSeen) throws SQLException {
+	private void updateFirstLastSeen(Integer playerId, LocalDateTime firstSeen, LocalDateTime lastSeen) throws SQLException {
 		String sql = "UPDATE players SET ";
 		if (firstSeen != null) {
 			sql += "first_seen = ? ";
@@ -1548,9 +1556,9 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void insertUpdateLog(Date ts, Integer rupeeBalance, int transactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, long timeTaken) throws SQLException {
+	public void insertUpdateLog(LocalDateTime ts, Integer rupeeBalance, int transactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, Duration timeTaken) throws SQLException {
 		InsertStatement stmt = new InsertStatement("update_log");
-		stmt.setTimestamp("ts", toTimestamp(ts));
+		stmt.setTimestamp("ts", ts);
 		if (rupeeBalance == null) {
 			rupeeBalance = 0;
 		}
@@ -1558,27 +1566,27 @@ public abstract class DirbyDbDao implements DbDao {
 		stmt.setInt("transaction_count", transactionCount);
 		stmt.setInt("payment_transaction_count", paymentTransactionCount);
 		stmt.setInt("bonus_fee_transaction_count", bonusFeeTransactionCount);
-		stmt.setInt("time_taken", (int) timeTaken);
+		stmt.setInt("time_taken", (int) timeTaken.toMillis());
 		stmt.execute(conn);
 	}
 
 	@Override
-	public Date getLatestUpdateDate() throws SQLException {
+	public LocalDateTime getLatestUpdateDate() throws SQLException {
 		try (PreparedStatement stmt = stmt("SELECT Max(ts) FROM update_log")) {
 			ResultSet rs = stmt.executeQuery();
-			return rs.next() ? toDate(rs.getTimestamp(1)) : null;
+			return rs.next() ? toLocalDateTime(rs.getTimestamp(1)) : null;
 		}
 	}
 
 	@Override
-	public Date getSecondLatestUpdateDate() throws SQLException {
+	public LocalDateTime getSecondLatestUpdateDate() throws SQLException {
 		try (PreparedStatement stmt = stmt("SELECT ts FROM update_log ORDER BY ts DESC")) {
 			ResultSet rs = stmt.executeQuery();
 			int count = 0;
 			while (rs.next()) {
 				count++;
 				if (count == 2) {
-					return toDate(rs.getTimestamp(1));
+					return toLocalDateTime(rs.getTimestamp(1));
 				}
 			}
 		}
@@ -1586,21 +1594,21 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	/**
-	 * Converts a {@link Timestamp} to a {@link Date}
-	 * @param timestamp the timestamp
-	 * @return the date
-	 */
-	protected Date toDate(Timestamp timestamp) {
-		return (timestamp == null) ? null : new Date(timestamp.getTime());
-	}
-
-	/**
-	 * Converts a {@link Date} to a {@link Timestamp}.
+	 * Converts a {@link LocalDate} to a {@link Timestamp}.
 	 * @param date the date
 	 * @return the timestamp
 	 */
-	protected Timestamp toTimestamp(Date date) {
-		return (date == null) ? null : new Timestamp(date.getTime());
+	protected Timestamp toTimestamp(LocalDate date) {
+		return (date == null) ? null : Timestamp.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	}
+
+	/**
+	 * Converts a {@link LocalDateTime} to a {@link Timestamp}.
+	 * @param date the date
+	 * @return the timestamp
+	 */
+	protected Timestamp toTimestamp(LocalDateTime date) {
+		return (date == null) ? null : Timestamp.from(date.atZone(ZoneId.systemDefault()).toInstant());
 	}
 
 	/**

@@ -149,7 +149,7 @@ public class PaymentsTab extends JPanel {
 					int amountTotal = 0;
 					for (Row row : selected) {
 						amountTotal += row.transaction.getAmount();
-						if (latest == null || row.transaction.getTs().after(latest.transaction.getTs())) {
+						if (latest == null || row.transaction.getTs().isAfter(latest.transaction.getTs())) {
 							latest = row;
 						}
 					}

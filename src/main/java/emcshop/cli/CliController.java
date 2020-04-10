@@ -1,13 +1,14 @@
 package emcshop.cli;
 
 import java.io.PrintStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -32,6 +33,7 @@ import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
 import emcshop.util.QuantityFormatter;
 import emcshop.util.RupeeFormatter;
+import emcshop.util.TimeUtils;
 import emcshop.view.IUpdateView;
 
 public class CliController {
@@ -45,15 +47,15 @@ public class CliController {
 	}
 
 	public void update(Integer startAtPage, Integer stopAtPage) throws Throwable {
-		Date latestTransactionDateFromDb = dao.getLatestTransactionDate();
+		LocalDateTime latestTransactionDateFromDb = dao.getLatestTransactionDate();
 		boolean firstUpdate = (latestTransactionDateFromDb == null);
-		Integer oldestAllowablePaymentTransactionAge = null;
+		Duration oldestAllowablePaymentTransactionAge = null;
 
 		//set configuration settings for puller
 		if (firstUpdate) {
 			FirstUpdateViewCli view = new FirstUpdateViewCli();
 			view.setStopAtPage(stopAtPage);
-			view.setMaxPaymentTransactionAge(7);
+			view.setMaxPaymentTransactionAge(Duration.ofDays(7));
 			FirstUpdateModelImpl model = new FirstUpdateModelImpl();
 			FirstUpdatePresenter presenter = new FirstUpdatePresenter(view, model);
 			if (presenter.isCanceled()) {
@@ -77,11 +79,7 @@ public class CliController {
 			builder.stop(stopAtPage);
 			builder.start(startAtPage);
 		} else {
-			builder.stop(latestTransactionDateFromDb);
-		}
-
-		if (oldestAllowablePaymentTransactionAge != null) {
-			oldestAllowablePaymentTransactionAge *= 24 * 60 * 60 * 1000;
+			builder.stop(TimeUtils.toDate(latestTransactionDateFromDb));
 		}
 
 		//start the update
@@ -90,18 +88,18 @@ public class CliController {
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 		int transactions = presenter.getShopTransactions() + presenter.getPaymentTransactions() + presenter.getBonusFeeTransactions();
-		out.println("\n" + presenter.getPageCount() + " pages processed and " + transactions + " transactions saved in " + (presenter.getTimeTaken() / 1000) + " seconds.");
-		logger.info(presenter.getPageCount() + " pages processed and " + transactions + " transactions saved in " + (presenter.getTimeTaken() / 1000) + " seconds.");
+		out.println("\n" + presenter.getPageCount() + " pages processed and " + transactions + " transactions saved in " + presenter.getTimeTaken().getSeconds() + " seconds.");
+		logger.info(presenter.getPageCount() + " pages processed and " + transactions + " transactions saved in " + presenter.getTimeTaken().getSeconds() + " seconds.");
 	}
 
-	public void query(String query, String format) throws Throwable {
+	public void query(String query, String format) throws Exception {
 		Collection<ItemGroup> itemGroups;
-		Date from, to;
+		LocalDateTime from, to;
 		if (query.isEmpty()) {
 			itemGroups = dao.getItemGroups(null, null, ShopTransactionType.MY_SHOP);
 			from = to = null;
 		} else {
-			Date range[] = parseDateRange(query);
+			LocalDateTime range[] = parseDateRange(query);
 			from = range[0];
 			to = range[1];
 			itemGroups = dao.getItemGroups(from, to, ShopTransactionType.MY_SHOP);
@@ -198,48 +196,47 @@ public class CliController {
 		return value.substring(0, maxWidth);
 	}
 
-	protected static Date[] parseDateRange(String dateRangeStr) throws ParseException {
+	protected static LocalDateTime[] parseDateRange(String dateRangeStr) {
 		dateRangeStr = dateRangeStr.trim().toLowerCase();
 
-		Date from, to;
+		LocalDateTime from, to;
 		if ("today".equals(dateRangeStr)) {
-			Calendar c = Calendar.getInstance();
-			c.set(Calendar.MILLISECOND, 0);
-			c.set(Calendar.SECOND, 0);
-			c.set(Calendar.MINUTE, 0);
-			c.set(Calendar.HOUR_OF_DAY, 0);
-			from = c.getTime();
-
-			to = new Date();
+			to = LocalDateTime.now();
+			from = to.truncatedTo(ChronoUnit.DAYS);
 		} else {
 			String split[] = dateRangeStr.split("\\s+to\\s+");
-			from = parseDate(split[0], false);
+			from = parseFrom(split[0]);
 
 			if (split.length == 1 || "today".equals(split[1])) {
-				to = new Date();
+				to = LocalDateTime.now();
 			} else {
-				to = parseDate(split[1], true);
+				to = parseTo(split[1]);
 			}
 		}
 
-		return new Date[] { from, to };
+		return new LocalDateTime[] { from, to };
 	}
 
-	private static Date parseDate(String s, boolean to) throws ParseException {
+	private static LocalDateTime parseFrom(String s) {
+		return parseDate(s, false);
+	}
+
+	private static LocalDateTime parseTo(String s) {
+		return parseDate(s, true);
+	}
+
+	private static LocalDateTime parseDate(String s, boolean to) {
 		int colonCount = StringUtils.countMatches(s, ":");
 		if (colonCount == 0) {
-			Date date = new SimpleDateFormat("yyyy-MM-dd").parse(s);
+			LocalDateTime date = LocalDate.from(DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(s)).atStartOfDay();
 			if (to) {
-				Calendar c = Calendar.getInstance();
-				c.setTime(date);
-				c.add(Calendar.DATE, 1);
-				date = c.getTime();
+				date = date.plusDays(1);
 			}
 			return date;
 		} else if (colonCount == 1) {
-			return new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(s);
+			return LocalDateTime.from(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").parse(s));
 		} else {
-			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(s);
+			return LocalDateTime.from(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").parse(s));
 		}
 	}
 }

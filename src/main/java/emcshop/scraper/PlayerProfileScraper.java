@@ -1,12 +1,12 @@
 package emcshop.scraper;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,8 +24,12 @@ import org.jsoup.select.Elements;
 
 /**
  * Scrapes information from player profile pages.
+ * @author Michael Angstadt
  */
 public class PlayerProfileScraper {
+	private final DateTimeFormatter ifModifiedSinceHeaderDateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'").withZone(ZoneId.of("GMT"));
+	private final DateTimeFormatter joinedDateFormat = DateTimeFormatter.ofPattern("MMM d, yyyy").withLocale(Locale.US);
+
 	/**
 	 * Scrapes a player's profile page.
 	 * @param playerName the player name
@@ -68,7 +72,7 @@ public class PlayerProfileScraper {
 	 * image could not be fetched
 	 * @throws IOException if there's a problem downloading the profile
 	 */
-	public byte[] downloadPortrait(PlayerProfile profile, Date lastModified, HttpClient client) throws IOException {
+	public byte[] downloadPortrait(PlayerProfile profile, Instant lastModified, HttpClient client) throws IOException {
 		String url = profile.getPortraitUrl();
 		if (url == null) {
 			return null;
@@ -76,9 +80,7 @@ public class PlayerProfileScraper {
 
 		HttpGet request = new HttpGet(url);
 		if (lastModified != null) {
-			DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
-			df.setTimeZone(TimeZone.getTimeZone("GMT"));
-			request.addHeader("If-Modified-Since", df.format(lastModified));
+			request.addHeader("If-Modified-Since", ifModifiedSinceHeaderDateFormat.format(lastModified));
 		}
 
 		HttpResponse response = client.execute(request);
@@ -151,7 +153,7 @@ public class PlayerProfileScraper {
 		}
 	}
 
-	private Date scrapeJoined(Document document) {
+	private LocalDate scrapeJoined(Document document) {
 		Elements elements = document.select(".infoblock .secondaryContent");
 		if (elements.isEmpty()) {
 			return null;
@@ -168,10 +170,9 @@ public class PlayerProfileScraper {
 				}
 
 				if (parseNextElement) {
-					DateFormat df = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
 					try {
-						return df.parse(text);
-					} catch (ParseException e) {
+						return LocalDate.from(joinedDateFormat.parse(text));
+					} catch (DateTimeException e) {
 						return null;
 					}
 				}

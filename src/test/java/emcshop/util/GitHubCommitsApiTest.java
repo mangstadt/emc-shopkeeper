@@ -5,8 +5,9 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -31,8 +32,8 @@ public class GitHubCommitsApiTest {
 			}
 		};
 
-		Date actual = api.getDateOfLatestCommit("foo/bar.txt");
-		Date expected = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z").parse("5/15/2018 15:52:59 GMT");
+		LocalDateTime actual = api.getDateOfLatestCommit("foo/bar.txt");
+		LocalDateTime expected = LocalDateTime.ofInstant(ZonedDateTime.of(2018, 5, 15, 15, 52, 59, 0, ZoneId.of("GMT")).toInstant(), ZoneId.systemDefault());
 		assertEquals(expected, actual);
 	}
 
@@ -46,7 +47,7 @@ public class GitHubCommitsApiTest {
 			}
 		};
 
-		Date actual = api.getDateOfLatestCommit("foo/bar.txt");
+		LocalDateTime actual = api.getDateOfLatestCommit("foo/bar.txt");
 		assertNull(actual);
 	}
 

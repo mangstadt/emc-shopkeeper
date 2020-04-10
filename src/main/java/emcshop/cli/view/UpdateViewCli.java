@@ -3,7 +3,7 @@ package emcshop.cli.view;
 import java.awt.event.ActionListener;
 import java.io.PrintStream;
 import java.text.NumberFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -70,7 +70,7 @@ public class UpdateViewCli implements IUpdateView {
 	}
 
 	@Override
-	public void setOldestParsedTransactonDate(Date date) {
+	public void setOldestParsedTransactonDate(LocalDateTime date) {
 		//empty
 	}
 

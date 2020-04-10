@@ -10,11 +10,11 @@ import java.beans.PropertyVetoException;
 import java.io.File;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -325,9 +325,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				//TODO http://stackoverflow.com/questions/9388264/jeditorpane-with-inline-image
 				boolean highlight;
 				if (paymentTransaction != null && isPaymentTransaction) {
-					LocalDateTime paymentTransactionTs = TimeUtils.toLocalDateTime(paymentTransaction.getTs());
-					long minutesDifference = Math.abs(date.until(paymentTransactionTs, ChronoUnit.MINUTES));
-					highlight = (minutesDifference < 1 && paymentTransaction.getAmount() == paymentTransactionAmount && paymentTransaction.getPlayer().equalsIgnoreCase(paymentTransactionPlayer));
+					Duration diff = Duration.between(date, paymentTransaction.getTs()).abs();
+					highlight = (diff.toMinutes() < 1 && paymentTransaction.getAmount() == paymentTransactionAmount && paymentTransaction.getPlayer().equalsIgnoreCase(paymentTransactionPlayer));
 				} else {
 					highlight = false;
 				}
@@ -361,7 +360,6 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 			//search for the payment transaction in the "Document" object's text in order to find the caret position
 			int caretPosition = 1;
 			if (paymentTransaction != null) {
-				LocalDateTime paymentTransactionTs = TimeUtils.toLocalDateTime(paymentTransaction.getTs());
 				String text = getDocumentText();
 				LocalDate date = getDate();
 
@@ -369,8 +367,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				while (m.find()) {
 					LocalTime time = LocalTime.of(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3)));
 					LocalDateTime messageDate = LocalDateTime.of(date, time);
-					long minutesDifference = Math.abs(messageDate.until(paymentTransactionTs, ChronoUnit.MINUTES));
-					if (minutesDifference < 1) {
+					Duration diff = Duration.between(messageDate, paymentTransaction.getTs()).abs();
+					if (diff.toMinutes() < 1) {
 						caretPosition = m.start();
 						break;
 					}

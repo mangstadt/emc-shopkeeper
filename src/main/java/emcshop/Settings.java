@@ -4,9 +4,11 @@ import static emcshop.util.MinecraftUtils.getDefaultMinecraftFolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,24 +22,24 @@ public class Settings {
 	private static final Logger logger = Logger.getLogger(Settings.class.getName());
 	private static final int CURRENT_VERSION = 1;
 
-	private final File file;
+	private final Path file;
 
 	private Integer version, rupeeBalance, backupFrequency, maxBackups;
 	private WindowState windowState;
-	private Date previousUpdate, lastUpdated;
+	private LocalDateTime previousUpdate, lastUpdated;
 	private String username, password;
 	private Level logLevel;
 	private boolean showProfilesOnStartup, showQuantitiesInStacks, backupsEnabled, reportUnknownItems;
 	private File chatLogDir;
 	private List<String> reportedUnknownItems;
 
-	public Settings(File file) throws IOException {
+	public Settings(Path file) throws IOException {
 		this.file = file;
 
-		if (file.exists()) {
+		if (Files.exists(file)) {
 			load();
 		} else {
-			logger.info("Creating settings file: " + file.getAbsolutePath());
+			logger.info("Creating settings file: " + file.toAbsolutePath());
 			defaults();
 			save();
 		}
@@ -60,12 +62,12 @@ public class Settings {
 	}
 
 	//Removed from properties file in DB version 18.
-	public Date getLastUpdated() {
+	public LocalDateTime getLastUpdated() {
 		return lastUpdated;
 	}
 
 	//Removed from properties file in DB version 18.
-	public Date getPreviousUpdate() {
+	public LocalDateTime getPreviousUpdate() {
 		return previousUpdate;
 	}
 
@@ -225,14 +227,14 @@ public class Settings {
 
 		try {
 			lastUpdated = props.getDate("lastUpdated");
-		} catch (ParseException e) {
+		} catch (DateTimeException e) {
 			logger.log(Level.WARNING, "Problem parsing date in \"lastUpdated\" property.", e);
 			lastUpdated = null;
 		}
 
 		try {
 			previousUpdate = props.getDate("previousUpdate");
-		} catch (ParseException e) {
+		} catch (DateTimeException e) {
 			logger.log(Level.WARNING, "Problem parsing date in \"previousUpdate\" property.", e);
 			previousUpdate = null;
 		}

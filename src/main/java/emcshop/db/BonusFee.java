@@ -1,16 +1,16 @@
 package emcshop.db;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class BonusFee {
-	private Date since, highestBalanceTs;
+	private LocalDateTime since, highestBalanceTs;
 	private int horse, lock, eggify, vault, signIn, vote, mail, highestBalance;
 
-	public Date getSince() {
+	public LocalDateTime getSince() {
 		return since;
 	}
 
-	public void setSince(Date since) {
+	public void setSince(LocalDateTime since) {
 		this.since = since;
 	}
 
@@ -70,11 +70,11 @@ public class BonusFee {
 		this.mail = mail;
 	}
 
-	public Date getHighestBalanceTs() {
+	public LocalDateTime getHighestBalanceTs() {
 		return highestBalanceTs;
 	}
 
-	public void setHighestBalanceTs(Date highestBalanceTs) {
+	public void setHighestBalanceTs(LocalDateTime highestBalanceTs) {
 		this.highestBalanceTs = highestBalanceTs;
 	}
 

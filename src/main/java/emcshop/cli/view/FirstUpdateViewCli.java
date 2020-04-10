@@ -3,6 +3,7 @@ package emcshop.cli.view;
 import java.awt.event.ActionListener;
 import java.io.Console;
 import java.io.PrintStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,8 @@ public class FirstUpdateViewCli implements IFirstUpdateView {
 	private final Console console = System.console();
 	private final String NEWLINE = System.getProperty("line.separator");
 
-	private Integer stopAtPage, maxPaymentTransactionAge;
+	private Integer stopAtPage;
+	private Duration maxPaymentTransactionAge;
 	private Long estimatedTime;
 
 	private final List<ActionListener> onCancelListeners = new ArrayList<>();
@@ -49,12 +51,12 @@ public class FirstUpdateViewCli implements IFirstUpdateView {
 	}
 
 	@Override
-	public Integer getMaxPaymentTransactionAge() {
+	public Duration getMaxPaymentTransactionAge() {
 		return maxPaymentTransactionAge;
 	}
 
 	@Override
-	public void setMaxPaymentTransactionAge(Integer age) {
+	public void setMaxPaymentTransactionAge(Duration age) {
 		maxPaymentTransactionAge = age;
 	}
 

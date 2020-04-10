@@ -1,15 +1,17 @@
 package emcshop;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -78,7 +80,7 @@ public class EMCShopkeeper {
 	/**
 	 * The date the application was built.
 	 */
-	public static final Date BUILT;
+	public static final LocalDateTime BUILT;
 
 	/**
 	 * The version of the cache;
@@ -96,19 +98,19 @@ public class EMCShopkeeper {
 		VERSION = props.getProperty("version");
 		URL = props.getProperty("url");
 
-		Date built;
+		LocalDateTime built;
 		try {
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-			built = df.parse(props.getProperty("built"));
-		} catch (ParseException e) {
+			DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
+			built = LocalDateTime.from(df.parse(props.getProperty("built")));
+		} catch (DateTimeException e) {
 			//this could happen during development if the properties file is not filtered by Maven
 			logger.log(Level.SEVERE, "Could not parse built date.", e);
-			built = new Date();
+			built = LocalDateTime.now();
 		}
 		BUILT = built;
 	}
 
-	private static final File defaultProfileRootDir = new File(FileUtils.getUserDirectory(), ".emc-shopkeeper");
+	private static final Path defaultProfileRootDir = FileUtils.getUserDirectory().toPath().resolve(".emc-shopkeeper");
 	public static final String defaultProfileName = "default";
 	private static final Integer defaultStartPage = 1;
 	private static final String defaultFormat = "TABLE";
@@ -130,7 +132,7 @@ public class EMCShopkeeper {
 
 		//print help
 		if (arguments.help()) {
-			String help = arguments.printHelp(defaultProfileName, defaultProfileRootDir.getAbsolutePath(), defaultStartPage, defaultFormat);
+			String help = arguments.printHelp(defaultProfileName, defaultProfileRootDir.toAbsolutePath().toString(), defaultStartPage, defaultFormat);
 			out.println(help);
 			return;
 		}
@@ -143,7 +145,7 @@ public class EMCShopkeeper {
 
 		//get profile root dir
 		String profileRootDirStr = arguments.profileDir();
-		File profileRootDir = (profileRootDirStr == null) ? defaultProfileRootDir : new File(profileRootDirStr);
+		Path profileRootDir = (profileRootDirStr == null) ? defaultProfileRootDir : Paths.get(profileRootDirStr);
 
 		//get profile
 		boolean profileSpecified = true;
@@ -154,22 +156,24 @@ public class EMCShopkeeper {
 		}
 
 		//create profile dir
-		File profileDir = new File(profileRootDir, profile);
-		if (profileDir.exists()) {
-			if (!profileDir.isDirectory()) {
-				out.println("Error: Profile directory is not a directory!  Path: " + profileDir.getAbsolutePath());
+		Path profileDir = profileRootDir.resolve(profile);
+		if (Files.exists(profileDir)) {
+			if (!Files.isDirectory(profileDir)) {
+				out.println("Error: Profile directory is not a directory!  Path: " + profileDir.toAbsolutePath());
 				System.exit(1);
 			}
 		} else {
-			logger.info("Creating new profile: " + profileDir.getAbsolutePath());
-			if (!profileDir.mkdirs()) {
-				out.println("Error: Could not create profile folder!  Path: " + profileDir.getAbsolutePath());
+			logger.info("Creating new profile: " + profileDir.toAbsolutePath());
+			try {
+				Files.createDirectories(profileDir);
+			} catch (IOException e) {
+				out.println("Error: Could not create profile folder!  Path: " + profileDir.toAbsolutePath());
 				System.exit(1);
 			}
 		}
 
 		//load settings
-		Settings settings = new Settings(new File(profileDir, "settings.properties"));
+		Settings settings = new Settings(profileDir.resolve("settings.properties"));
 
 		//show the "choose profile" dialog
 		boolean cliMode = arguments.query() != null || arguments.update();
@@ -187,13 +191,13 @@ public class EMCShopkeeper {
 			}
 
 			//reset the profile dir
-			profileDir = new File(profileRootDir, selectedProfile);
-			settings = new Settings(new File(profileDir, "settings.properties"));
+			profileDir = profileRootDir.resolve(selectedProfile);
+			settings = new Settings(profileDir.resolve("settings.properties"));
 		}
 
 		//get database dir
 		String dbDirStr = arguments.db();
-		File dbDir = (dbDirStr == null) ? new File(profileDir, "db") : new File(dbDirStr);
+		Path dbDir = (dbDirStr == null) ? profileDir.resolve("db") : Paths.get(dbDirStr);
 
 		//get log level
 		Level logLevel = null;
@@ -207,7 +211,7 @@ public class EMCShopkeeper {
 			System.exit(1);
 		}
 
-		LogManager logManager = new LogManager(logLevel, new File(profileDir, "app.log"));
+		LogManager logManager = new LogManager(logLevel, profileDir.resolve("app.log"));
 
 		if (!arguments.update() && arguments.query() == null) {
 			launchGui(profileDir, dbDir, settings, logManager);
@@ -216,8 +220,11 @@ public class EMCShopkeeper {
 		}
 	}
 
-	private static void launchCli(File dbDir, Settings settings, EmcShopArguments args) throws Throwable {
-		final DbDao dao = new DirbyEmbeddedDbDao(dbDir);
+	private static void launchCli(Path dbDir, Settings settings, EmcShopArguments args) throws Throwable {
+		AppContext context = AppContext.instance();
+		context.add(settings);
+
+		DbDao dao = new DirbyEmbeddedDbDao(dbDir);
 
 		int startingDbVersion = dao.selectDbVersion();
 		Integer currentRupeeBalance = prepareForUpdateLogConversion(startingDbVersion, dao, settings);
@@ -258,7 +265,7 @@ public class EMCShopkeeper {
 		}
 	}
 
-	private static void launchGui(File profileDir, File dbDir, final Settings settings, LogManager logManager) throws Throwable {
+	private static void launchGui(Path profileDir, Path dbDir, Settings settings, LogManager logManager) throws Throwable {
 		initializeMac();
 
 		//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -281,8 +288,8 @@ public class EMCShopkeeper {
 		splash.setVisible(true);
 
 		//create the backup manager
-		File dbBackupDir = new File(profileDir, "db-backups");
-		BackupManager backupManager = new BackupManager(dbDir.toPath(), dbBackupDir.toPath(), settings.getBackupsEnabled(), settings.getBackupFrequency(), settings.getMaxBackups());
+		Path dbBackupDir = profileDir.resolve("db-backups");
+		BackupManager backupManager = new BackupManager(dbDir, dbBackupDir, settings.getBackupsEnabled(), settings.getBackupFrequency(), settings.getMaxBackups());
 		context.add(backupManager);
 
 		//delete old backups
@@ -299,7 +306,7 @@ public class EMCShopkeeper {
 		}
 
 		//initialize the cache
-		File cacheDir = new File(profileDir, "cache");
+		Path cacheDir = profileDir.resolve("cache");
 		initCacheDir(cacheDir);
 
 		//start the profile image loader
@@ -416,7 +423,7 @@ public class EMCShopkeeper {
 		reportUnknownItems(itemNames, settings, reportSender);
 		ItemSuggestField.init(itemNames);
 
-		mainFrame = new MainFrame(profileDir.getName());
+		mainFrame = new MainFrame(profileDir.getFileName().toString());
 		mainFrame.setVisible(true);
 		splash.dispose();
 	}
@@ -518,14 +525,14 @@ public class EMCShopkeeper {
 			return;
 		}
 
-		Date previousUpdate = settings.getPreviousUpdate();
+		LocalDateTime previousUpdate = settings.getPreviousUpdate();
 		if (previousUpdate != null) {
-			dao.insertUpdateLog(previousUpdate, 0, 0, 0, 0, 0);
+			dao.insertUpdateLog(previousUpdate, 0, 0, 0, 0, Duration.ZERO);
 		}
 
-		Date lastUpdated = settings.getLastUpdated();
+		LocalDateTime lastUpdated = settings.getLastUpdated();
 		if (lastUpdated != null) {
-			dao.insertUpdateLog(lastUpdated, currentRupeeBalance, 0, 0, 0, 0);
+			dao.insertUpdateLog(lastUpdated, currentRupeeBalance, 0, 0, 0, Duration.ZERO);
 		}
 
 		dao.commit();
@@ -554,27 +561,25 @@ public class EMCShopkeeper {
 	 * @param cacheDir the path to the cache directory
 	 * @throws IOException
 	 */
-	private static void initCacheDir(File cacheDir) throws IOException {
-		File versionFile = new File(cacheDir, "_cache-version");
+	private static void initCacheDir(Path cacheDir) throws IOException {
+		Path versionFile = cacheDir.resolve("_cache-version");
 		boolean clearCache = false;
-		if (!cacheDir.isDirectory()) {
+		if (!Files.isDirectory(cacheDir)) {
 			//create the cache dir if it doesn't exist
 			clearCache = true;
 		} else {
 			//clear the cache dir on update
-			String version = versionFile.exists() ? FileUtils.readFileToString(versionFile) : null;
+			String version = Files.exists(versionFile) ? new String(Files.readAllBytes(versionFile)) : null;
 			clearCache = (version == null || !version.equals(CACHE_VERSION));
 		}
 
 		//clear the cache if it's out of date
 		if (clearCache) {
 			logger.info("Clearing the cache.");
-			if (!cacheDir.isDirectory() || FileUtils.deleteQuietly(cacheDir)) {
-				if (!cacheDir.mkdir()) {
-					throw new IOException("Could not create cache directory: " + cacheDir.getAbsolutePath());
-				}
+			if (!Files.isDirectory(cacheDir) || FileUtils.deleteQuietly(cacheDir.toFile())) {
+				Files.createDirectory(cacheDir);
 			}
-			FileUtils.writeStringToFile(versionFile, CACHE_VERSION);
+			Files.write(versionFile, CACHE_VERSION.getBytes());
 		}
 	}
 }

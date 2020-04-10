@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.junit.Test;
 
@@ -177,7 +177,7 @@ public class UpdatePresenterTest {
 		verify(view, times(3)).setShopTransactions(anyInt());
 		verify(view, times(3)).setPaymentTransactions(anyInt());
 		verify(view, times(3)).setBonusFeeTransactions(anyInt());
-		verify(view, times(3)).setOldestParsedTransactonDate(any(Date.class));
+		verify(view, times(3)).setOldestParsedTransactonDate(any(LocalDateTime.class));
 		verify(model).saveTransactions();
 		verify(view).close();
 		assertFalse(presenter.isCanceled());

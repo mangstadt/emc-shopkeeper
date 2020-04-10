@@ -1,10 +1,9 @@
 package emcshop;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -69,10 +68,7 @@ public class ReportSender {
 	}
 
 	private class SenderThread extends Thread {
-		private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss'Z'");
-		{
-			df.setTimeZone(TimeZone.getTimeZone("GMT"));
-		}
+		private final DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss'Z'").withZone(ZoneId.of("GMT"));
 
 		private final HttpClient client = HttpClientBuilder.create().build();
 
@@ -144,7 +140,7 @@ public class ReportSender {
 	private static class Job {
 		private final String message;
 		private final Throwable throwable;
-		private final Date received = new Date();
+		private final Instant received = Instant.now();
 
 		public Job(String message, Throwable throwable) {
 			this.message = message;

@@ -8,8 +8,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,6 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+
+import emcshop.util.TimeUtils;
 
 /**
  * Represents an INSERT statement.
@@ -63,7 +66,7 @@ public class InsertStatement {
 	 * @param value the column value
 	 * @return this
 	 */
-	public InsertStatement setDate(String columnName, Date value) {
+	public InsertStatement setDate(String columnName, LocalDate value) {
 		return set(columnName, value, Types.DATE);
 	}
 
@@ -73,7 +76,7 @@ public class InsertStatement {
 	 * @param value the column value
 	 * @return this
 	 */
-	public InsertStatement setTimestamp(String columnName, Date value) {
+	public InsertStatement setTimestamp(String columnName, LocalDateTime value) {
 		return set(columnName, value, Types.TIMESTAMP);
 	}
 
@@ -180,12 +183,12 @@ public class InsertStatement {
 							stmt.setString(index, (String) value);
 							break;
 						case Types.DATE:
-							Date date = (Date) value;
-							stmt.setDate(index, new java.sql.Date(date.getTime()));
+							LocalDate date = (LocalDate) value;
+							stmt.setDate(index, new java.sql.Date(TimeUtils.toDate(date).getTime()));
 							break;
 						case Types.TIMESTAMP:
-							Date timestamp = (Date) value;
-							stmt.setTimestamp(index, new Timestamp(timestamp.getTime()));
+							LocalDateTime timestamp = (LocalDateTime) value;
+							stmt.setTimestamp(index, new Timestamp(TimeUtils.toDate(timestamp).getTime()));
 							break;
 						default:
 							throw new UnsupportedOperationException("Unable to handle SQL type " + sqlType + ".");

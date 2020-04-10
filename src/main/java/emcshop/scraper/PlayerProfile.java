@@ -1,6 +1,6 @@
 package emcshop.scraper;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * Contains the information found in a player's profile page. This class is
@@ -10,7 +10,7 @@ import java.util.Date;
 public class PlayerProfile {
 	private final String playerName, portraitUrl, rank, rankColor, title;
 	private final boolean private_;
-	private final Date joined;
+	private final LocalDate joined;
 
 	private PlayerProfile(Builder builder) {
 		playerName = builder.playerName;
@@ -19,7 +19,7 @@ public class PlayerProfile {
 		rankColor = builder.rankColor;
 		title = builder.title;
 		private_ = builder.private_;
-		joined = (builder.joined == null) ? null : new Date(builder.joined.getTime());
+		joined = builder.joined;
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class PlayerProfile {
 	 * Gets the date the player joined EMC.
 	 * @return the join date or null if not found
 	 */
-	public Date getJoined() {
+	public LocalDate getJoined() {
 		return joined;
 	}
 
@@ -88,7 +88,7 @@ public class PlayerProfile {
 	public static class Builder {
 		private String playerName, portraitUrl, rank, rankColor, title;
 		private boolean private_;
-		private Date joined;
+		private LocalDate joined;
 
 		public Builder() {
 			//empty
@@ -125,7 +125,7 @@ public class PlayerProfile {
 			return this;
 		}
 
-		public Builder joined(Date joined) {
+		public Builder joined(LocalDate joined) {
 			this.joined = joined;
 			return this;
 		}

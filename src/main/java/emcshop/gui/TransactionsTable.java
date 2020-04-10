@@ -2,9 +2,9 @@ package emcshop.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -257,7 +257,7 @@ public class TransactionsTable extends JTable {
 				component = label;
 
 				RelativeDateFormat df = RelativeDateFormat.instance();
-				Date ts = transaction.getTs();
+				LocalDateTime ts = transaction.getTs();
 				label.setText(df.format(ts));
 				break;
 

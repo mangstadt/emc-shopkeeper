@@ -1,8 +1,10 @@
 package emcshop.db;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
+
+import emcshop.util.TimeUtils;
 
 /**
  * Represents a shop transaction that is stored, or will be stored, in the
@@ -11,7 +13,7 @@ import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
  */
 public class ShopTransactionDb {
 	private Integer id;
-	private Date ts;
+	private LocalDateTime ts;
 	private int amount, balance, quantity;
 	private String shopCustomer, shopOwner, item;
 
@@ -25,7 +27,7 @@ public class ShopTransactionDb {
 	 * @param itemName the item name to assign to the database object
 	 */
 	public ShopTransactionDb(ShopTransaction transaction, String itemName) {
-		ts = transaction.getTs();
+		ts = TimeUtils.toLocalDateTime(transaction.getTs());
 		amount = transaction.getAmount();
 		balance = transaction.getBalance();
 		shopCustomer = transaction.getShopCustomer();
@@ -42,11 +44,11 @@ public class ShopTransactionDb {
 		this.id = id;
 	}
 
-	public Date getTs() {
+	public LocalDateTime getTs() {
 		return ts;
 	}
 
-	public void setTs(Date ts) {
+	public void setTs(LocalDateTime ts) {
 		this.ts = ts;
 	}
 

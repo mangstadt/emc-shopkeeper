@@ -1,6 +1,7 @@
 package emcshop.view;
 
 import java.awt.event.ActionListener;
+import java.time.Duration;
 
 public interface IFirstUpdateView {
 	void addOnCancelListener(ActionListener listener);
@@ -13,9 +14,9 @@ public interface IFirstUpdateView {
 
 	void setStopAtPage(Integer stopAtPage);
 
-	Integer getMaxPaymentTransactionAge();
+	Duration getMaxPaymentTransactionAge();
 
-	void setMaxPaymentTransactionAge(Integer age);
+	void setMaxPaymentTransactionAge(Duration age);
 
 	void setEstimatedTime(Long estimatedTime);
 

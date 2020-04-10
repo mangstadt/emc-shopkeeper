@@ -5,15 +5,15 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TimeZone;
 
 /**
  * Contains stored procedure code for calling from the SQL scripts.
@@ -227,19 +227,9 @@ public final class MigrationSprocs {
 	public static void updateItemsWhoseOldNamesAreUsedByExistingItemsIn1_15() throws SQLException {
 		List<String> oldNames = Arrays.asList("Smooth Sandstone", "Smooth Red Sandstone", "Stone Slab");
 		List<String> newNames = Arrays.asList("Cut Sandstone", "Cut Red Sandstone", "Smooth Stone Slab");
-		Date date;
-		{
-			TimeZone emcTime = TimeZone.getTimeZone("America/New_York");
-			Calendar c = Calendar.getInstance(emcTime);
-			c.set(Calendar.YEAR, 2020);
-			c.set(Calendar.MONTH, Calendar.MARCH);
-			c.set(Calendar.DATE, 15);
-			c.set(Calendar.HOUR_OF_DAY, 13);
-			c.set(Calendar.MINUTE, 0);
-			c.set(Calendar.SECOND, 0);
-			c.set(Calendar.MILLISECOND, 0);
-			date = c.getTime();
-		}
+
+		ZoneId emcTime = ZoneId.of("America/New_York");
+		LocalDateTime date = ZonedDateTime.of(2020, 3, 15, 12, 0, 0, 0, emcTime).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
 
 		try (Connection conn = conn()) {
 			DbDao dao = new DirbyEmbeddedDbDao(conn);

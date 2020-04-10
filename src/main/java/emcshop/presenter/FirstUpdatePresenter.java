@@ -1,5 +1,7 @@
 package emcshop.presenter;
 
+import java.time.Duration;
+
 import emcshop.model.IFirstUpdateModel;
 import emcshop.view.IFirstUpdateView;
 
@@ -8,7 +10,7 @@ public class FirstUpdatePresenter {
 	private final IFirstUpdateModel model;
 
 	private Integer stopAtPage;
-	private Integer maxPaymentTransactionAge;
+	private Duration maxPaymentTransactionAge;
 	private boolean canceled;
 
 	public FirstUpdatePresenter(IFirstUpdateView view, IFirstUpdateModel model) {
@@ -44,7 +46,7 @@ public class FirstUpdatePresenter {
 		return stopAtPage;
 	}
 
-	public Integer getMaxPaymentTransactionAge() {
+	public Duration getMaxPaymentTransactionAge() {
 		return maxPaymentTransactionAge;
 	}
 

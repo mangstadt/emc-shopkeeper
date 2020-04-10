@@ -1,10 +1,10 @@
 package emcshop;
 
 import java.io.StringWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -35,8 +35,8 @@ public final class QueryExporter {
 	 * @param to the end date or null if there is no end date
 	 * @return the CSV string
 	 */
-	public static String generateItemsCsv(Collection<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	public static String generateItemsCsv(Collection<ItemGroup> itemGroups, int netTotal, LocalDateTime from, LocalDateTime to) {
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
 		CSVWriter writer = new CSVWriter(sw);
 
@@ -71,8 +71,8 @@ public final class QueryExporter {
 	 * @param to the end date or null if there is no end date
 	 * @return the BBCode string
 	 */
-	public static String generateItemsBBCode(Collection<ItemGroup> itemGroups, int netTotal, Date from, Date to) {
-		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	public static String generateItemsBBCode(Collection<ItemGroup> itemGroups, int netTotal, LocalDateTime from, LocalDateTime to) {
+		DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
 		bbCode.font("courier new");
@@ -168,8 +168,8 @@ public final class QueryExporter {
 		}
 	}
 
-	public static String generatePlayersCsv(List<PlayerGroup> players, ListMultimap<PlayerGroup, ItemGroup> items, Date from, Date to) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	public static String generatePlayersCsv(List<PlayerGroup> players, ListMultimap<PlayerGroup, ItemGroup> items, LocalDateTime from, LocalDateTime to) {
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
 		CSVWriter writer = new CSVWriter(sw);
 
@@ -202,8 +202,8 @@ public final class QueryExporter {
 		return sw.toString();
 	}
 
-	public static String generatePlayersBBCode(List<PlayerGroup> playerGroups, ListMultimap<PlayerGroup, ItemGroup> itemGroups, Date from, Date to) {
-		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	public static String generatePlayersBBCode(List<PlayerGroup> playerGroups, ListMultimap<PlayerGroup, ItemGroup> itemGroups, LocalDateTime from, LocalDateTime to) {
+		DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
 		bbCode.font("courier new");
@@ -238,8 +238,8 @@ public final class QueryExporter {
 		return bbCode.toString();
 	}
 
-	public static String generateTransactionsBBCode(Collection<ShopTransactionDb> transactions, int netTotal, Date from, Date to) {
-		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	public static String generateTransactionsBBCode(Collection<ShopTransactionDb> transactions, int netTotal, LocalDateTime from, LocalDateTime to) {
+		DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
 		BBCodeBuilder bbCode = new BBCodeBuilder();
 
 		bbCode.font("courier new");
@@ -264,10 +264,10 @@ public final class QueryExporter {
 		qf.setPlus(true);
 		RupeeFormatter rf = new RupeeFormatter();
 		rf.setPlus(true);
-		DateFormat transactionDf = new SimpleDateFormat("MMM dd, HH:mm");
+		DateTimeFormatter transactionDf = DateTimeFormatter.ofPattern("MMM dd, HH:mm");
 		bbCode.u("Date").text("- - - - - | ").u("Player").text(" - - - - | ").u("Item").text(" - - - - - - | ").u("Quantity").text(" | ").u("Amount").nl();
 		for (ShopTransactionDb transaction : transactions) {
-			Date ts = transaction.getTs();
+			LocalDateTime ts = transaction.getTs();
 			bbCodeColumn(transactionDf.format(ts), 13, bbCode);
 			bbCode.text(" | ");
 
@@ -307,8 +307,8 @@ public final class QueryExporter {
 		return bbCode.toString();
 	}
 
-	public static String generateTransactionsCsv(Collection<ShopTransactionDb> transactions, int netTotal, Date from, Date to) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	public static String generateTransactionsCsv(Collection<ShopTransactionDb> transactions, int netTotal, LocalDateTime from, LocalDateTime to) {
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
 		CSVWriter writer = new CSVWriter(sw);
 

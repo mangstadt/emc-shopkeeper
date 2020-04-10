@@ -1,10 +1,13 @@
 package emcshop.gui;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
-import java.util.Date;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +19,6 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -44,7 +46,7 @@ import emcshop.util.PropertiesWrapper;
 public class ProfileLoader {
 	private static final Logger logger = Logger.getLogger(ProfileLoader.class.getName());
 
-	private final File cacheDir;
+	private final Path cacheDir;
 	private final Set<String> downloaded = CaseInsensitiveHashSet.create();
 	private final ListMultimap<String, Job> waitList = CaseInsensitiveMultimap.create();
 	private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<>();
@@ -67,7 +69,7 @@ public class ProfileLoader {
 	 * Creates a profile image loader.
 	 * @param cacheDir the directory where the images are cached
 	 */
-	public ProfileLoader(File cacheDir) {
+	public ProfileLoader(Path cacheDir) {
 		this.cacheDir = cacheDir;
 	}
 
@@ -165,15 +167,15 @@ public class ProfileLoader {
 			return image;
 		}
 
-		File file = portraitFile(playerName);
-		if (!file.exists()) {
+		Path file = portraitFile(playerName);
+		if (!Files.exists(file)) {
 			return null;
 		}
 
 		//load the image from the file cache
 		byte data[] = null;
 		try {
-			data = FileUtils.readFileToByteArray(file);
+			data = Files.readAllBytes(file);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
 		}
@@ -245,8 +247,8 @@ public class ProfileLoader {
 	 * @param playerName the player name
 	 * @return the file path
 	 */
-	private File portraitFile(String playerName) {
-		return new File(cacheDir, playerName.toLowerCase());
+	private Path portraitFile(String playerName) {
+		return cacheDir.resolve(playerName.toLowerCase());
 	}
 
 	/**
@@ -272,17 +274,17 @@ public class ProfileLoader {
 				}
 
 				//scrape the profile page
-				PlayerProfile profile = null;
+				PlayerProfile profile;
 				CloseableHttpClient client = sessionFactory.createSession(); //get the session information each time so the user's login session token can be used
 				try {
 					try {
 						Document page = getProfilePage(playerName, client);
 						profile = scraper.scrapeProfile(playerName, page);
 					} catch (IOException e) {
+						profile = null;
 						logger.log(Level.WARNING, "Problem downloading player profile page.", e);
 					}
 
-					byte[] data = null;
 					if (profile != null) {
 						//save profile data
 						try {
@@ -294,19 +296,27 @@ public class ProfileLoader {
 
 						//download portrait
 						if (!profile.isPrivate()) {
-							//download image
-							File file = portraitFile(playerName);
-							Date lastModified = file.exists() ? new Date(file.lastModified()) : null;
+							Path cachedFile = portraitFile(playerName);
+							Instant lastModified;
+							try {
+								lastModified = Files.exists(cachedFile) ? Files.getLastModifiedTime(cachedFile).toInstant() : null;
+							} catch (IOException e) {
+								logger.log(Level.WARNING, "Problem determining last modified time of cached profile image.", e);
+								lastModified = null;
+							}
+
+							byte[] data;
 							try {
 								data = scraper.downloadPortrait(profile, lastModified, client);
 							} catch (IOException e) {
+								data = null;
 								logger.log(Level.WARNING, "Problem downloading profile image.", e);
 							}
 
 							//save to cache
 							if (data != null) {
 								try {
-									FileUtils.writeByteArrayToFile(file, data);
+									Files.write(cachedFile, data);
 								} catch (IOException e) {
 									logger.log(Level.WARNING, "Problem saving image to cache.", e);
 								}
@@ -407,17 +417,18 @@ public class ProfileLoader {
 
 	private class PlayerProfileSerializer {
 		public PlayerProfile load(String playerName) throws IOException {
-			File file = file(playerName);
-			if (!file.exists()) {
+			Path file = file(playerName);
+			if (!Files.exists(file)) {
 				return null;
 			}
 
 			PropertiesWrapper properties = new PropertiesWrapper(file);
 
-			Date joined;
+			LocalDate joined;
 			try {
-				joined = properties.getDate("joined");
-			} catch (ParseException e) {
+				LocalDateTime date = properties.getDate("joined");
+				joined = (date == null) ? null : date.toLocalDate();
+			} catch (DateTimeException e) {
 				joined = null;
 			}
 
@@ -437,17 +448,20 @@ public class ProfileLoader {
 
 			properties.set("name", profile.getPlayerName());
 			properties.set("private", profile.isPrivate());
-			properties.setDate("joined", profile.getJoined());
+
+			LocalDate joined = profile.getJoined();
+			properties.setDate("joined", (joined == null) ? null : joined.atStartOfDay());
+
 			properties.set("rank", profile.getRank());
 			properties.set("rankColor", profile.getRankColor());
 			properties.set("title", profile.getTitle());
 
-			File file = file(profile.getPlayerName());
+			Path file = file(profile.getPlayerName());
 			properties.store(file, "");
 		}
 
-		private File file(String playerName) {
-			return new File(cacheDir, playerName.toLowerCase() + ".properties");
+		private Path file(String playerName) {
+			return cacheDir.resolve(playerName.toLowerCase() + ".properties");
 		}
 	}
 

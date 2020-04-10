@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 import emcshop.db.PaymentTransactionDb;
 import emcshop.model.IChatLogViewerModel;
-import emcshop.util.TimeUtils;
 import emcshop.view.IChatLogViewerView;
 
 public class ChatLogViewerPresenter {
@@ -26,7 +25,7 @@ public class ChatLogViewerPresenter {
 		PaymentTransactionDb paymentTransaction = model.getPaymentTransaction();
 		view.setPaymentTransaction(paymentTransaction);
 
-		LocalDate dateToDisplay = (paymentTransaction == null) ? LocalDate.now() : TimeUtils.toLocalDate(paymentTransaction.getTs());
+		LocalDate dateToDisplay = (paymentTransaction == null) ? LocalDate.now() : paymentTransaction.getTs().toLocalDate();
 		view.setDate(dateToDisplay);
 		view.setChatMessages(model.getChatMessages(dateToDisplay));
 

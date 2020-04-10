@@ -9,10 +9,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -45,6 +46,7 @@ import emcshop.gui.lib.GroupPanel;
 import emcshop.util.DateRange;
 import emcshop.util.RelativeDateFormat;
 import emcshop.util.RupeeFormatter;
+import emcshop.util.TimeUtils;
 import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
@@ -432,8 +434,8 @@ public class TransactionsTab extends JPanel implements ExportListener {
 	}
 
 	private class QueryPanel extends JPanel {
-		private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-		private final DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+		private final DateTimeFormatter dateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
+		private final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
 
 		private final JPanel fullPanel;
 		private final JRadioButton entireHistory, showSinceLastUpdate, dateRange;
@@ -653,7 +655,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		 * @return the date range
 		 */
 		public DateRange getDateRange() {
-			Date from, to;
+			LocalDateTime from, to;
 			if (showSinceLastUpdate.isSelected()) {
 				try {
 					from = dao.getSecondLatestUpdateDate();
@@ -664,14 +666,11 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			} else if (entireHistory.isSelected()) {
 				from = to = null;
 			} else {
-				from = fromDatePicker.getDate();
+				from = TimeUtils.toLocalDateTime(fromDatePicker.getDate());
 
-				to = toDatePicker.getDate();
+				to = TimeUtils.toLocalDateTime(toDatePicker.getDate());
 				if (to != null) {
-					Calendar c = Calendar.getInstance();
-					c.setTime(to);
-					c.add(Calendar.DATE, 1);
-					to = c.getTime();
+					to = to.plusDays(1);
 				}
 			}
 
@@ -679,7 +678,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		}
 
 		private void updateEntireHistoryCheckbox() {
-			Date earliestTransactionDate;
+			LocalDateTime earliestTransactionDate;
 			try {
 				earliestTransactionDate = dao.getEarliestTransactionDate();
 			} catch (SQLException e) {
@@ -694,7 +693,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		}
 
 		private void updateSinceLastUpdateCheckbox() {
-			Date date;
+			LocalDateTime date;
 			try {
 				date = dao.getSecondLatestUpdateDate();
 				if (date == null) {
@@ -714,8 +713,8 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		}
 
 		private void setDescription(SearchType type, DateRange range) {
-			Date from = range.getFrom();
-			Date to = range.getTo();
+			LocalDateTime from = range.getFrom();
+			LocalDateTime to = range.getTo();
 
 			StringBuilder sb = new StringBuilder("<html><b><i><font color=navy>");
 
@@ -731,7 +730,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			} else if (from == null && to != null) {
 				sb.append("up to " + dateFormat.format(to));
 			} else if (from != null && to != null) {
-				Date toMod = new Date(to.getTime() - 1);
+				LocalDateTime toMod = to.minusSeconds(1);
 				sb.append(dateFormat.format(from)).append(" to ").append(dateFormat.format(toMod));
 			}
 

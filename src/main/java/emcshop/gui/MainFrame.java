@@ -13,10 +13,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -393,20 +395,20 @@ public class MainFrame extends JFrame {
 
 		clearSessionMenuItem.setEnabled(true);
 
-		Date latestTransactionDate;
+		LocalDateTime latestTransactionDate;
 		try {
 			latestTransactionDate = dao.getLatestTransactionDate();
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
 
-		Integer oldestPaymentTransactionInDays = null;
+		Duration maxPaymentTransactionAge = null;
 		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getUsername(), session.getPassword());
 		if (latestTransactionDate == null) {
 			//it's the first update
 
 			IFirstUpdateView view = new FirstUpdateViewImpl(this);
-			view.setMaxPaymentTransactionAge(7);
+			view.setMaxPaymentTransactionAge(Duration.ofDays(7));
 			view.setStopAtPage(5000);
 			IFirstUpdateModel model = new FirstUpdateModelImpl();
 			FirstUpdatePresenter presenter = new FirstUpdatePresenter(view, model);
@@ -417,15 +419,14 @@ public class MainFrame extends JFrame {
 			Integer stopAtPage = presenter.getStopAtPage();
 			builder.stop(stopAtPage);
 
-			oldestPaymentTransactionInDays = presenter.getMaxPaymentTransactionAge();
+			maxPaymentTransactionAge = presenter.getMaxPaymentTransactionAge();
 		} else {
-			builder.stop(latestTransactionDate);
+			builder.stop(TimeUtils.toDate(latestTransactionDate));
 		}
 
 		//show the update dialog
 		IUpdateView view = new UpdateViewImpl(this, loginShower);
-		Integer oldestPaymentTransactionInMillis = (oldestPaymentTransactionInDays == null) ? null : oldestPaymentTransactionInDays * 24 * 60 * 60 * 1000;
-		IUpdateModel model = new UpdateModelImpl(builder, oldestPaymentTransactionInMillis);
+		IUpdateModel model = new UpdateModelImpl(builder, maxPaymentTransactionAge);
 		UpdatePresenter presenter = new UpdatePresenter(view, model);
 
 		if (!presenter.isCanceled()) {
@@ -503,7 +504,7 @@ public class MainFrame extends JFrame {
 	 * Called after an update has completed.
 	 * @throws SQLException
 	 */
-	private void updateSuccessful(Date started, Integer rupeeTotal, long time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int pageCount, boolean showResults) throws SQLException {
+	private void updateSuccessful(LocalDateTime started, Integer rupeeTotal, Duration time, int shopTransactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, int pageCount, boolean showResults) throws SQLException {
 		int totalTransactions = shopTransactionCount + paymentTransactionCount + bonusFeeTransactionCount;
 		String message;
 		if (totalTransactions == 0) {
@@ -550,7 +551,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void updateLastUpdateDate() {
-		Date date;
+		LocalDateTime date;
 		try {
 			date = dao.getLatestUpdateDate();
 		} catch (SQLException e) {
@@ -560,12 +561,12 @@ public class MainFrame extends JFrame {
 		updateLastUpdateDate(date);
 	}
 
-	private void updateLastUpdateDate(Date date) {
+	private void updateLastUpdateDate(LocalDateTime date) {
 		String text;
 		if (date == null) {
 			text = "-";
 		} else {
-			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+			DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
 			text = df.format(date);
 		}
 
@@ -615,7 +616,7 @@ public class MainFrame extends JFrame {
 			GitHubCommitsApi gitHub = new GitHubCommitsApi("mangstadt", "emc-shopkeeper");
 			try {
 				logger.finest("Checking for updates.");
-				Date latestRelease = gitHub.getDateOfLatestCommit("dist/emc-shopkeeper-full.jar");
+				LocalDateTime latestRelease = gitHub.getDateOfLatestCommit("dist/emc-shopkeeper-full.jar");
 				if (latestRelease == null) {
 					//couldn't find the release date
 					return;
@@ -626,8 +627,8 @@ public class MainFrame extends JFrame {
 				 * minutes difference between the build timestamp and the commit
 				 * timestamp.
 				 */
-				long diff = latestRelease.getTime() - EMCShopkeeper.BUILT.getTime();
-				if (diff < 1000 * 60 * 10) {
+				Duration diff = Duration.between(EMCShopkeeper.BUILT, latestRelease);
+				if (diff.toMinutes() < 10) {
 					//already running the latest version
 					logger.finest("Running latest version.");
 					return;

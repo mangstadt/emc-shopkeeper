@@ -2,15 +2,15 @@ package emcshop.util;
 
 import java.awt.Dimension;
 import java.awt.Point;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -31,14 +31,14 @@ import emcshop.gui.WindowState;
 
 public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	private final Properties properties = new Properties();
-	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private final DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	public PropertiesWrapper() {
 		// empty
 	}
 
-	public PropertiesWrapper(File file) throws IOException {
-		try (Reader reader = new FileReader(file)) {
+	public PropertiesWrapper(Path file) throws IOException {
+		try (Reader reader = Files.newBufferedReader(file)) {
 			properties.load(reader);
 		}
 	}
@@ -85,15 +85,15 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 		set(key, value);
 	}
 
-	public Date getDate(String key) throws ParseException {
+	public LocalDateTime getDate(String key) throws DateTimeException {
 		String value = get(key);
 		if (value == null) {
 			return null;
 		}
-		return df.parse(value);
+		return LocalDateTime.from(df.parse(value));
 	}
 
-	public void setDate(String key, Date value) {
+	public void setDate(String key, LocalDateTime value) {
 		set(key, (value == null) ? null : df.format(value));
 	}
 
@@ -162,9 +162,10 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 			if ("boolean".equals(type)) {
 				guiValue = Boolean.valueOf(value);
 			} else if ("date".equals(type)) {
+				//the date picker controls use java.util.Date
 				try {
-					guiValue = df.parse(value);
-				} catch (ParseException e) {
+					guiValue = TimeUtils.toDate(LocalDateTime.from(df.parse(value)));
+				} catch (DateTimeException e) {
 					continue;
 				}
 			} else if ("string".equals(type)) {
@@ -215,8 +216,10 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 				type = "boolean";
 				strValue = value.toString();
 			} else if (value instanceof Date) {
+				//the date picker controls use java.util.Date
 				type = "date";
-				strValue = df.format(value);
+				LocalDateTime date = TimeUtils.toLocalDateTime((Date) value);
+				strValue = df.format(date);
 			} else {
 				type = "string";
 				strValue = value.toString();
@@ -238,8 +241,8 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 		set(key + ".window.state", state2);
 	}
 
-	public void store(File file, String comment) throws IOException {
-		try (Writer writer = new FileWriter(file)) {
+	public void store(Path file, String comment) throws IOException {
+		try (Writer writer = Files.newBufferedWriter(file, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
 			properties.store(writer, comment);
 		}
 	}

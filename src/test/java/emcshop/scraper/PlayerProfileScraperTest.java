@@ -7,16 +7,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Test;
 
 public class PlayerProfileScraperTest {
-	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-
 	@Test
 	public void scrapeProfile() throws Throwable {
 		PlayerProfile profile = scrape("the_boulder");
@@ -26,7 +23,7 @@ public class PlayerProfileScraperTest {
 		assertEquals("Senior Staff", profile.getRank());
 		assertEquals("#49FF40", profile.getRankColor());
 		assertEquals("Revered Member", profile.getTitle());
-		assertEquals(df.parse("2012-01-26"), profile.getJoined());
+		assertEquals(LocalDate.of(2012, 1, 26), profile.getJoined());
 	}
 
 	@Test
@@ -38,7 +35,7 @@ public class PlayerProfileScraperTest {
 		assertNull(profile.getRank());
 		assertNull(profile.getRankColor());
 		assertEquals("Dedicated Member", profile.getTitle());
-		assertEquals(df.parse("2012-02-03"), profile.getJoined());
+		assertEquals(LocalDate.of(2012, 2, 3), profile.getJoined());
 	}
 
 	@Test

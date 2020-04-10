@@ -3,7 +3,8 @@ package emcshop.model;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -27,6 +28,7 @@ import emcshop.db.PaymentTransactionDb;
 import emcshop.db.ShopTransactionDb;
 import emcshop.scraper.EmcSession;
 import emcshop.util.Listeners;
+import emcshop.util.TimeUtils;
 
 public class UpdateModelImpl implements IUpdateModel {
 	private static final Logger logger = Logger.getLogger(UpdateModelImpl.class.getName());
@@ -35,7 +37,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	private final ItemIndex itemIndex = ItemIndex.instance();
 	private final boolean firstUpdate;
 	private final RupeeTransactionReader.Builder builder;
-	private final Integer oldestAllowablePaymentTransactionAge;
+	private final Duration oldestAllowablePaymentTransactionAge;
 	private final DbDao dao;
 	private final ReportSender reportSender;
 
@@ -45,9 +47,10 @@ public class UpdateModelImpl implements IUpdateModel {
 	private final Listeners downloadCompleteListeners = new Listeners();
 
 	private RupeeTransactionReader reader;
-	private long started, timeTaken;
+	private LocalDateTime started;
+	private Duration timeTaken;
 	private int transactionsCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, pagesCount;
-	private Date earliestParsedTransactionDate, latestParsedBonusFeeDate;
+	private LocalDateTime earliestParsedTransactionDate, latestParsedBonusFeeDate;
 	private RupeeTransaction highestBalance;
 	private Map<Class<? extends RupeeTransaction>, MutableInt> bonusFeeTotals;
 	private boolean downloadStopped = false;
@@ -58,10 +61,10 @@ public class UpdateModelImpl implements IUpdateModel {
 	 * @param builder the builder object for constructing new
 	 * {@link RupeeTransactionReader} instances.
 	 * @param oldestPaymentTransactionAge ignore all payment transactions that
-	 * are older than this age (in milliseconds) or null to parse all payment
-	 * transactions regardless of age
+	 * are older than this age or null to parse all payment transactions
+	 * regardless of age
 	 */
-	public UpdateModelImpl(RupeeTransactionReader.Builder builder, Integer oldestAllowablePaymentTransactionAge) {
+	public UpdateModelImpl(RupeeTransactionReader.Builder builder, Duration oldestAllowablePaymentTransactionAge) {
 		this.builder = builder;
 		this.oldestAllowablePaymentTransactionAge = oldestAllowablePaymentTransactionAge;
 
@@ -127,13 +130,13 @@ public class UpdateModelImpl implements IUpdateModel {
 	}
 
 	@Override
-	public Date getOldestParsedTransactionDate() {
+	public LocalDateTime getOldestParsedTransactionDate() {
 		return earliestParsedTransactionDate;
 	}
 
 	@Override
 	public Thread startDownload() {
-		started = System.currentTimeMillis();
+		started = LocalDateTime.now();
 		bonusFeeTotals = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
 
 		DownloadThread thread = new DownloadThread();
@@ -145,7 +148,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	@Override
 	public synchronized void stopDownload() {
 		downloadStopped = true;
-		timeTaken = System.currentTimeMillis() - started;
+		timeTaken = Duration.between(started, LocalDateTime.now());
 	}
 
 	@Override
@@ -159,12 +162,12 @@ public class UpdateModelImpl implements IUpdateModel {
 	}
 
 	@Override
-	public Date getStarted() {
-		return new Date(started);
+	public LocalDateTime getStarted() {
+		return started;
 	}
 
 	@Override
-	public long getTimeTaken() {
+	public Duration getTimeTaken() {
 		return timeTaken;
 	}
 
@@ -197,7 +200,7 @@ public class UpdateModelImpl implements IUpdateModel {
 			}
 
 			//log the update operation
-			dao.insertUpdateLog(new Date(started), getRupeeBalance(), shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, timeTaken);
+			dao.insertUpdateLog(started, getRupeeBalance(), shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount, timeTaken);
 
 			dao.commit();
 		} catch (SQLException e) {
@@ -235,13 +238,14 @@ public class UpdateModelImpl implements IUpdateModel {
 				throw new RuntimeException(e);
 			}
 
-			Long earliestAllowedPaymentTransaction = (oldestAllowablePaymentTransactionAge == null) ? null : started - oldestAllowablePaymentTransactionAge;
+			LocalDateTime earliestAllowedPaymentTransaction = (oldestAllowablePaymentTransactionAge == null) ? null : started.minus(oldestAllowablePaymentTransactionAge);
 
 			try {
 				highestBalance = null;
 				RupeeTransaction transaction;
 				int curPage = reader.getCurrentPageNumber();
 				while ((transaction = reader.next()) != null) {
+					LocalDateTime transactionTs = TimeUtils.toLocalDateTime(transaction.getTs());
 					rupeeBalance = reader.getRupeeBalance();
 					int page = reader.getCurrentPageNumber();
 					synchronized (UpdateModelImpl.this) {
@@ -256,7 +260,7 @@ public class UpdateModelImpl implements IUpdateModel {
 						}
 
 						//keep track of the oldest transaction date
-						earliestParsedTransactionDate = transaction.getTs();
+						earliestParsedTransactionDate = transactionTs;
 
 						//keep track of the transaction with the highest balance
 						if (highestBalance == null || transaction.getBalance() > highestBalance.getBalance()) {
@@ -270,7 +274,7 @@ public class UpdateModelImpl implements IUpdateModel {
 							shopTransactionsCount++;
 							transactionsCount++;
 						} else if (transaction instanceof PaymentTransaction) {
-							if (earliestAllowedPaymentTransaction != null && transaction.getTs().getTime() < earliestAllowedPaymentTransaction) {
+							if (earliestAllowedPaymentTransaction != null && transactionTs.isBefore(earliestAllowedPaymentTransaction)) {
 								//ignore old payment transactions
 								continue;
 							}
@@ -281,7 +285,7 @@ public class UpdateModelImpl implements IUpdateModel {
 							transactionsCount++;
 						} else if (dao.isBonusFeeTransaction(transaction)) {
 							if (latestParsedBonusFeeDate == null) {
-								latestParsedBonusFeeDate = transaction.getTs();
+								latestParsedBonusFeeDate = transactionTs;
 							}
 
 							Class<? extends RupeeTransaction> clazz = transaction.getClass();
@@ -305,7 +309,7 @@ public class UpdateModelImpl implements IUpdateModel {
 					}
 					pagesCount++;
 					pageDownloadedListeners.fire();
-					timeTaken = System.currentTimeMillis() - started;
+					timeTaken = Duration.between(started, LocalDateTime.now());
 				}
 
 				downloadCompleteListeners.fire();

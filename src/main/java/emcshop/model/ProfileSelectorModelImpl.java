@@ -1,43 +1,48 @@
 package emcshop.model;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProfileSelectorModelImpl implements IProfileSelectorModel {
-	private final File profileRootDir;
+	private final Path profileRootDir;
 
 	/**
 	 * @param profileRootDir the directory where the profiles are kept
 	 */
-	public ProfileSelectorModelImpl(File profileRootDir) {
+	public ProfileSelectorModelImpl(Path profileRootDir) {
 		this.profileRootDir = profileRootDir;
 	}
 
 	@Override
 	public List<String> getAvailableProfiles() {
-		List<String> profiles = new ArrayList<>();
-
-		File files[] = profileRootDir.listFiles();
-		for (File file : files) {
-			if (file.isDirectory()) {
-				profiles.add(file.getName());
-			}
+		try {
+			return Files.list(profileRootDir) //@formatter:off
+				.filter(Files::isDirectory)
+				.map(Path::getFileName)
+				.map(Path::toString)
+				.sorted()
+			.collect(Collectors.toList()); //@formatter:on
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-
-		Collections.sort(profiles);
-		return profiles;
 	}
 
 	@Override
 	public boolean createProfile(String profile) {
-		File profileDir = new File(profileRootDir, profile);
-		if (profileDir.isDirectory()) {
+		Path profileDir = profileRootDir.resolve(profile);
+		if (Files.isDirectory(profileDir)) {
 			//already created
 			return true;
 		}
 
-		return profileDir.mkdir();
+		try {
+			Files.createDirectory(profileDir);
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
 	}
 }

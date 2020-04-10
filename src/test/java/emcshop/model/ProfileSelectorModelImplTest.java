@@ -24,7 +24,7 @@ public class ProfileSelectorModelImplTest {
 		temp.newFolder("four");
 		temp.newFile("five");
 
-		ProfileSelectorModelImpl model = new ProfileSelectorModelImpl(temp.getRoot());
+		ProfileSelectorModelImpl model = new ProfileSelectorModelImpl(temp.getRoot().toPath());
 		List<String> expected = Arrays.asList("four", "one", "three", "two");
 		List<String> actual = model.getAvailableProfiles();
 		assertEquals(expected, actual);
@@ -35,7 +35,7 @@ public class ProfileSelectorModelImplTest {
 		temp.newFolder("one");
 		temp.newFile("two");
 
-		ProfileSelectorModelImpl model = new ProfileSelectorModelImpl(temp.getRoot());
+		ProfileSelectorModelImpl model = new ProfileSelectorModelImpl(temp.getRoot().toPath());
 		assertTrue(model.createProfile("one"));
 		assertFalse(model.createProfile("two"));
 		assertTrue(model.createProfile("three"));

@@ -7,12 +7,14 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.beans.PropertyVetoException;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -57,13 +59,14 @@ import emcshop.db.Profits;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.ImageCheckBox;
 import emcshop.util.RupeeFormatter;
+import emcshop.util.TimeUtils;
 import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class ChartsTab extends JPanel {
 	private final MainFrame owner;
 	private final DbDao dao;
-	private final DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+	private final DateTimeFormatter df = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
 	private final ItemIndex index = ItemIndex.instance();
 	private final Map<String, ImageIcon> groupIcons = new HashMap<>();
 	{
@@ -105,7 +108,7 @@ public class ChartsTab extends JPanel {
 	private final JLabel netTotalLabelLabel;
 	private final JLabel netTotalLabel;
 
-	private Map<Date, Profits> profits;
+	private Map<LocalDate, Profits> profits;
 	private GroupBy profitsGroupBy;
 	private int netTotal = 0;
 
@@ -143,7 +146,7 @@ public class ChartsTab extends JPanel {
 		this.owner = owner;
 		this.dao = dao;
 
-		Date earliestTransactionDate = null;
+		LocalDateTime earliestTransactionDate = null;
 		try {
 			earliestTransactionDate = dao.getEarliestTransactionDate();
 		} catch (SQLException e) {
@@ -318,11 +321,11 @@ public class ChartsTab extends JPanel {
 	}
 
 	private void showProfits() {
-		Date range[] = getQueryDateRange();
+		LocalDate range[] = getQueryDateRange();
 		showProfits(range[0], range[1]);
 	}
 
-	private void showProfits(final Date from, final Date to) {
+	private void showProfits(LocalDate from, LocalDate to) {
 		owner.startProgress("Querying...");
 		Thread t = new Thread(() -> {
 			try {
@@ -413,7 +416,7 @@ public class ChartsTab extends JPanel {
 		return items;
 	}
 
-	private XYDataset createDataset(Map<Date, Profits> profits) {
+	private XYDataset createDataset(Map<LocalDate, Profits> profits) {
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
 
 		if (show.getSelectedItem() == Show.NET_PROFITS) {
@@ -421,14 +424,14 @@ public class ChartsTab extends JPanel {
 			TimeSeries suppliersSeries = new TimeSeries("Suppliers");
 			TimeSeries netProfitSeries = new TimeSeries("Net Profit");
 
-			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
+			for (Map.Entry<LocalDate, Profits> entry : profits.entrySet()) {
 				Profits p = entry.getValue();
 				if (!p.hasTransactions()) {
 					continue;
 				}
 
-				Date date = entry.getKey();
-				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
+				LocalDate date = entry.getKey();
+				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(TimeUtils.toDate(date)) : new Month(TimeUtils.toDate(date));
 
 				customersSeries.add(timePeriod, p.getCustomerTotal());
 				suppliersSeries.add(timePeriod, p.getSupplierTotal());
@@ -451,14 +454,14 @@ public class ChartsTab extends JPanel {
 				dataset.addSeries(ts);
 			}
 
-			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
+			for (Map.Entry<LocalDate, Profits> entry : profits.entrySet()) {
 				Profits p = entry.getValue();
 				if (!p.hasTransactions()) {
 					continue;
 				}
 
-				Date date = entry.getKey();
-				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
+				LocalDate date = entry.getKey();
+				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(TimeUtils.toDate(date)) : new Month(TimeUtils.toDate(date));
 
 				Map<String, Integer> customerGroupTotals = organizeIntoGroups(p.getCustomerTotals());
 				Map<String, Integer> supplierGroupTotals = organizeIntoGroups(p.getSupplierTotals());
@@ -492,14 +495,14 @@ public class ChartsTab extends JPanel {
 				dataset.addSeries(ts);
 			}
 
-			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
+			for (Map.Entry<LocalDate, Profits> entry : profits.entrySet()) {
 				Profits p = entry.getValue();
 				if (!p.hasTransactions()) {
 					continue;
 				}
 
-				Date date = entry.getKey();
-				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
+				LocalDate date = entry.getKey();
+				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(TimeUtils.toDate(date)) : new Month(TimeUtils.toDate(date));
 
 				for (Map.Entry<String, TimeSeries> tsEntry : series.entrySet()) {
 					String item = tsEntry.getKey();
@@ -525,10 +528,10 @@ public class ChartsTab extends JPanel {
 		if (show.getSelectedItem() == Show.RUPEE_BALANCE) {
 			TimeSeries balanceSeries = new TimeSeries("Rupee Balance");
 
-			for (Map.Entry<Date, Profits> entry : profits.entrySet()) {
-				Date date = entry.getKey();
+			for (Map.Entry<LocalDate, Profits> entry : profits.entrySet()) {
+				LocalDate date = entry.getKey();
 				Profits p = entry.getValue();
-				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(date) : new Month(date);
+				RegularTimePeriod timePeriod = (profitsGroupBy == GroupBy.DAY) ? new Day(TimeUtils.toDate(date)) : new Month(TimeUtils.toDate(date));
 
 				balanceSeries.add(timePeriod, p.getBalance());
 			}
@@ -583,7 +586,7 @@ public class ChartsTab extends JPanel {
 		return chart;
 	}
 
-	private void updateDateRangeLabel(Date from, Date to) {
+	private void updateDateRangeLabel(LocalDate from, LocalDate to) {
 		String dateRangeStr;
 		final String startFont = "<b><i><font color=navy>";
 		final String endFont = "</font></i></b>";
@@ -647,22 +650,19 @@ public class ChartsTab extends JPanel {
 	 * various input elements on the panel.
 	 * @return the date range
 	 */
-	private Date[] getQueryDateRange() {
-		Date from, to;
+	private LocalDate[] getQueryDateRange() {
+		LocalDate from, to;
 		if (entireHistory.isSelected()) {
 			from = to = null;
 		} else {
-			from = fromDatePicker.getDate();
+			from = TimeUtils.toLocalDate(fromDatePicker.getDate());
 
-			to = toDatePicker.getDate();
+			to = TimeUtils.toLocalDate(toDatePicker.getDate());
 			if (to != null) {
-				Calendar c = Calendar.getInstance();
-				c.setTime(to);
-				c.add(Calendar.DATE, 1);
-				to = c.getTime();
+				to = to.plusDays(1);
 			}
 		}
 
-		return new Date[] { from, to };
+		return new LocalDate[] { from, to };
 	}
 }

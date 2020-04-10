@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.function.Supplier;
 
 /**
@@ -32,16 +31,6 @@ public class RelativeDateFormat {
 	 */
 	RelativeDateFormat(Supplier<LocalDateTime> now) {
 		this.now = now;
-	}
-
-	/**
-	 * Formats a date.
-	 * @param date the date to format (this method assumes that this date is
-	 * less than or equal to the current date)
-	 * @return the formatted date (e.g. "Today at 1:00 PM")
-	 */
-	public String format(Date date) {
-		return format(TimeUtils.toLocalDateTime(date));
 	}
 
 	/**

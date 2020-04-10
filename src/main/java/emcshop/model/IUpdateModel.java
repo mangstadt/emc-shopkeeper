@@ -1,7 +1,8 @@
 package emcshop.model;
 
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import emcshop.scraper.EmcSession;
 
@@ -86,19 +87,19 @@ public interface IUpdateModel {
 	 * Gets the date of the oldest parsed transaction.
 	 * @return the date of the oldest transaction
 	 */
-	Date getOldestParsedTransactionDate();
+	LocalDateTime getOldestParsedTransactionDate();
 
 	/**
 	 * Gets the time that the download started.
 	 * @return the download start time
 	 */
-	Date getStarted();
+	LocalDateTime getStarted();
 
 	/**
-	 * Gets the amount of time the download took.
-	 * @return the amount of time in milliseconds
+	 * Gets the amount of time the download took to complete.
+	 * @return the amount of time
 	 */
-	long getTimeTaken();
+	Duration getTimeTaken();
 
 	/**
 	 * Gets the player's parsed rupee balance.

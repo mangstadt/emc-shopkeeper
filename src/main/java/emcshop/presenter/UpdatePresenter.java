@@ -1,6 +1,7 @@
 package emcshop.presenter;
 
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import emcshop.model.IUpdateModel;
 import emcshop.scraper.EmcSession;
@@ -107,11 +108,11 @@ public class UpdatePresenter {
 		return model.getBonusFeeTransactionsDownloaded();
 	}
 
-	public Date getStarted() {
+	public LocalDateTime getStarted() {
 		return model.getStarted();
 	}
 
-	public long getTimeTaken() {
+	public Duration getTimeTaken() {
 		return model.getTimeTaken();
 	}
 

@@ -5,11 +5,14 @@ import static emcshop.util.GuiUtils.toolTipText;
 import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionListener;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -44,7 +47,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	private final List<ActionListener> reportErrorListeners = new ArrayList<>();
 
 	private int pagesCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount;
-	private Date oldestTransactionDate;
+	private LocalDateTime oldestTransactionDate;
 
 	private Long estimatedTime;
 	private Integer stopAtPage;
@@ -192,7 +195,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	}
 
 	@Override
-	public void setOldestParsedTransactonDate(Date date) {
+	public void setOldestParsedTransactonDate(LocalDateTime date) {
 		oldestTransactionDate = date;
 	}
 
@@ -241,11 +244,11 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 		@Override
 		public void run() {
 			final String estimatedTimeDisplay = (estimatedTime == null) ? null : DurationFormatUtils.formatDuration(estimatedTime, "HH:mm:ss", true);
-			final long start = System.currentTimeMillis();
+			final Instant start = Instant.now();
 			final NumberFormat nf = new DecimalFormat("00");
 
 			while (isDisplayable()) {
-				long elapsed = System.currentTimeMillis() - start;
+				Duration elapsed = Duration.between(start, Instant.now());
 				long components[] = TimeUtils.parseTimeComponents(elapsed);
 
 				String timerText = nf.format(components[3]) + ":" + nf.format(components[2]) + ":" + nf.format(components[1]);
@@ -311,7 +314,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 			add(report, "align right, wrap");
 
 			int transactionsCount = shopTransactionsCount + paymentTransactionsCount + bonusFeeTransactionsCount;
-			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+			DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
 			//@formatter:off
 			add(new JLabel(
 			"<html>" +

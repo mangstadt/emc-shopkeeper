@@ -1,11 +1,13 @@
 package emcshop.cli.model;
 
+import java.time.Duration;
+
 import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
 
 import emcshop.model.UpdateModelImpl;
 
 public class UpdateModelCli extends UpdateModelImpl {
-	public UpdateModelCli(RupeeTransactionReader.Builder builder, Integer oldestAllowablePaymentTransactionAge) {
+	public UpdateModelCli(RupeeTransactionReader.Builder builder, Duration oldestAllowablePaymentTransactionAge) {
 		super(builder, oldestAllowablePaymentTransactionAge);
 	}
 

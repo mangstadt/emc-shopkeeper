@@ -4,6 +4,7 @@ import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -161,13 +162,13 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 	}
 
 	@Override
-	public Integer getMaxPaymentTransactionAge() {
-		return paymentTransactionAgeCheckbox.isSelected() ? paymentTransactionAge.getInteger() : null;
+	public Duration getMaxPaymentTransactionAge() {
+		return paymentTransactionAgeCheckbox.isSelected() ? Duration.ofDays(paymentTransactionAge.getInteger()) : null;
 	}
 
 	@Override
-	public void setMaxPaymentTransactionAge(Integer age) {
-		paymentTransactionAge.setNumber(age);
+	public void setMaxPaymentTransactionAge(Duration age) {
+		paymentTransactionAge.setNumber(age.toDays());
 		paymentTransactionAgeCheckbox.setSelected(age != null);
 	}
 

@@ -11,6 +11,9 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import org.hamcrest.BaseMatcher;
@@ -40,12 +43,22 @@ public class TestUtils {
 		assertEquals(Integer.valueOf(expected), actual);
 	}
 
-	public static Timestamp timestamp(Date date) {
-		return (date == null) ? null : new Timestamp(date.getTime());
+	/**
+	 * Converts a {@link LocalDate} to a {@link Timestamp}.
+	 * @param date the date
+	 * @return the timestamp
+	 */
+	public static Timestamp timestamp(LocalDate date) {
+		return (date == null) ? null : Timestamp.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
 	}
 
-	public static Date date(Timestamp timestamp) {
-		return (timestamp == null) ? null : new Date(timestamp.getTime());
+	/**
+	 * Converts a {@link LocalDateTime} to a {@link Timestamp}.
+	 * @param date the date
+	 * @return the timestamp
+	 */
+	public static Timestamp timestamp(LocalDateTime date) {
+		return (date == null) ? null : Timestamp.from(date.atZone(ZoneId.systemDefault()).toInstant());
 	}
 
 	/**

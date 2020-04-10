@@ -1,6 +1,5 @@
 package emcshop;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -29,16 +28,16 @@ public class LogManager {
 	 * @param baseLogFile the path to the log file
 	 * @throws IOException if there's a problem starting the logger
 	 */
-	public LogManager(Level level, File baseLogFile) throws IOException {
+	public LogManager(Level level, Path baseLogFile) throws IOException {
 		this.level = level;
-		this.baseLogFile = baseLogFile.toPath();
+		this.baseLogFile = baseLogFile;
 
 		java.util.logging.LogManager.getLogManager().reset();
 
 		global = Logger.getLogger("");
 		global.setLevel(level);
 
-		FileHandler handler = new FileHandler(baseLogFile.getAbsolutePath(), 1_000_000, 5, true);
+		FileHandler handler = new FileHandler(baseLogFile.toAbsolutePath().toString(), 1_000_000, 5, true);
 		handler.setFormatter(new SimpleFormatter());
 
 		//only log messages from this app

@@ -2,8 +2,10 @@ package emcshop.db;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +78,7 @@ public interface DbDao {
 	 * @return the date
 	 * @throws SQLException
 	 */
-	Date getEarliestTransactionDate() throws SQLException;
+	LocalDateTime getEarliestTransactionDate() throws SQLException;
 
 	/**
 	 * Gets the ID of an item.
@@ -186,7 +188,7 @@ public interface DbDao {
 	 * transactions
 	 * @throws SQLException
 	 */
-	Date getLatestTransactionDate() throws SQLException;
+	LocalDateTime getLatestTransactionDate() throws SQLException;
 
 	/**
 	 * Computes the net gains/losses for each item over a date range.
@@ -196,7 +198,7 @@ public interface DbDao {
 	 * @return the net gains/losses for each item
 	 * @throws SQLException
 	 */
-	Collection<ItemGroup> getItemGroups(Date from, Date to, ShopTransactionType transactionType) throws SQLException;
+	Collection<ItemGroup> getItemGroups(LocalDateTime from, LocalDateTime to, ShopTransactionType transactionType) throws SQLException;
 
 	/**
 	 * Gets all transactions by date, consolidating them so consecutive
@@ -207,7 +209,7 @@ public interface DbDao {
 	 * @return the transactions
 	 * @throws SQLException
 	 */
-	List<ShopTransactionDb> getTransactionsByDate(Date from, Date to, ShopTransactionType transactionType) throws SQLException;
+	List<ShopTransactionDb> getTransactionsByDate(LocalDateTime from, LocalDateTime to, ShopTransactionType transactionType) throws SQLException;
 
 	/**
 	 * Computes what each player bought/sold over a date range.
@@ -217,7 +219,7 @@ public interface DbDao {
 	 * @return the player activity
 	 * @throws SQLException
 	 */
-	Collection<PlayerGroup> getPlayerGroups(Date from, Date to, ShopTransactionType transactionType) throws SQLException;
+	Collection<PlayerGroup> getPlayerGroups(LocalDateTime from, LocalDateTime to, ShopTransactionType transactionType) throws SQLException;
 
 	/**
 	 * Gets the player's shop inventory.
@@ -279,14 +281,14 @@ public interface DbDao {
 	 * @param since the date
 	 * @throws SQLException
 	 */
-	void updateBonusesFeesSince(Date since) throws SQLException;
+	void updateBonusesFeesSince(LocalDateTime since) throws SQLException;
 
 	/**
 	 * Updates the date of the latest bonus/fee transaction.
 	 * @param latestParsedBonusFeeDate the date
 	 * @throws SQLException
 	 */
-	void updateBonusesFeesLatestTransactionDate(Date latestParsedBonusFeeDate) throws SQLException;
+	void updateBonusesFeesLatestTransactionDate(LocalDateTime latestParsedBonusFeeDate) throws SQLException;
 
 	/**
 	 * Updates the player's highest rupee balance after an update operation.
@@ -308,7 +310,7 @@ public interface DbDao {
 	 * @param date the date the server was updated
 	 * @throws SQLException
 	 */
-	void updateItemsWhoseOldNamesAreUsedByExistingItems(List<String> oldNames, List<String> newNames, Date date) throws SQLException;
+	void updateItemsWhoseOldNamesAreUsedByExistingItems(List<String> oldNames, List<String> newNames, LocalDateTime date) throws SQLException;
 
 	/**
 	 * Determines if this DAO considers the given rupee transaction to be a
@@ -325,7 +327,7 @@ public interface DbDao {
 	 * @return the profits
 	 * @throws SQLException
 	 */
-	Map<Date, Profits> getProfitsByDay(Date from, Date to) throws SQLException;
+	Map<LocalDate, Profits> getProfitsByDay(LocalDate from, LocalDate to) throws SQLException;
 
 	/**
 	 * Tallies up the profits by month.
@@ -334,7 +336,7 @@ public interface DbDao {
 	 * @return the profits
 	 * @throws SQLException
 	 */
-	Map<Date, Profits> getProfitsByMonth(Date from, Date to) throws SQLException;
+	Map<LocalDate, Profits> getProfitsByMonth(LocalDate from, LocalDate to) throws SQLException;
 
 	/**
 	 * Re-calculates the "first_seen" and "last_seen" dates of all players.
@@ -358,24 +360,24 @@ public interface DbDao {
 	 * were parsed
 	 * @param bonusFeeTransactionCount the number of bonus fee transactions that
 	 * were parsed
-	 * @param timeTaken the time the update took in milliseconds
+	 * @param timeTaken the time the update took to complete
 	 * @throws SQLException
 	 */
-	void insertUpdateLog(Date ts, Integer rupeeBalance, int transactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, long timeTaken) throws SQLException;
+	void insertUpdateLog(LocalDateTime ts, Integer rupeeBalance, int transactionCount, int paymentTransactionCount, int bonusFeeTransactionCount, Duration timeTaken) throws SQLException;
 
 	/**
 	 * Gets the timestamp of the most recent update.
 	 * @return the timestamp or null if the update log is empty
 	 * @throws SQLException
 	 */
-	Date getLatestUpdateDate() throws SQLException;
+	LocalDateTime getLatestUpdateDate() throws SQLException;
 
 	/**
 	 * Gets the timestamp of the second most recent update.
 	 * @return the timestamp or null if the update log is empty
 	 * @throws SQLException
 	 */
-	Date getSecondLatestUpdateDate() throws SQLException;
+	LocalDateTime getSecondLatestUpdateDate() throws SQLException;
 
 	/**
 	 * Deletes all data in the database.

@@ -5,11 +5,13 @@ import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -60,7 +62,7 @@ public class PlayersPanel extends JPanel {
 	private boolean showQuantitiesInStacks, showFirstLastSeen = true;
 	private final ShopTransactionType shopTransactionType;
 
-	private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+	private final DateTimeFormatter joinedFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
 	private final ListMultimap<PlayerGroup, ItemGroup> itemGroups = ArrayListMultimap.create();
 	private List<PlayerGroup> displayedPlayers;
 	private ListMultimap<PlayerGroup, ItemGroup> displayedItems;
@@ -295,7 +297,7 @@ public class PlayersPanel extends JPanel {
 		String playerName = player.getName();
 		String rank = null, rankColor = null;
 		String title = null;
-		Date joined = null;
+		LocalDate joined = null;
 		PlayerProfile profile = profileLoader.getProfile(playerName, null);
 		if (profile != null) {
 			rank = profile.getRank();
@@ -355,19 +357,19 @@ public class PlayersPanel extends JPanel {
 
 		if (joined != null) {
 			header.add(new JLabel("Joined:"));
-			header.add(new JLabel(dateFormat.format(joined)), "wrap");
+			header.add(new JLabel(joinedFormat.format(joined)), "wrap");
 		}
 
 		if (showFirstLastSeen) {
 			RelativeDateFormat df = RelativeDateFormat.instance();
 
-			Date firstSeen = player.getFirstSeen();
+			LocalDateTime firstSeen = player.getFirstSeen();
 			if (firstSeen != null) {
 				header.add(new JLabel("First seen:"));
 				header.add(new JLabel(df.format(firstSeen)), "wrap");
 			}
 
-			Date lastSeen = player.getLastSeen();
+			LocalDateTime lastSeen = player.getLastSeen();
 			if (lastSeen != null) {
 				header.add(new JLabel("Last seen:"));
 				header.add(new JLabel(df.format(lastSeen)));
