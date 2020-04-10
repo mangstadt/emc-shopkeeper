@@ -95,19 +95,6 @@ public final class QueryExporter {
 		//item table
 		generateItemsTableBBCode(itemGroups, bbCode, true);
 
-		//footer and total
-		String footer = "EMC Shopkeeper v" + EMCShopkeeper.VERSION;
-		bbCode.url(EMCShopkeeper.URL, footer);
-		bbCode.text(" ");
-		bbCode.text(StringUtils.repeat('_', 44 - footer.length()));
-		bbCode.b(" Total").text(" | ");
-		bbCode.b();
-		RupeeFormatter rf = new RupeeFormatter();
-		rf.setPlus(true);
-		String netTotalStr = rf.format(netTotal);
-		colorize(netTotal, netTotalStr, bbCode);
-		bbCode.close(); //close "b"
-
 		bbCode.close(); //close "font"
 
 		return bbCode.toString();

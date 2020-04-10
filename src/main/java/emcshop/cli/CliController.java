@@ -31,6 +31,7 @@ import emcshop.model.IUpdateModel;
 import emcshop.presenter.FirstUpdatePresenter;
 import emcshop.presenter.UpdatePresenter;
 import emcshop.scraper.EmcSession;
+import emcshop.util.OS;
 import emcshop.util.QuantityFormatter;
 import emcshop.util.RupeeFormatter;
 import emcshop.util.TimeUtils;
@@ -69,12 +70,10 @@ public class CliController {
 
 		//log user in
 		LoginShower loginShower = new LoginShower();
-		EmcSession session = AppContext.instance().get(EmcSession.class);
-		if (session == null) {
-			loginShower.show();
-		}
+		loginShower.show();
 
-		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getUsername(), session.getPassword());
+		EmcSession session = AppContext.instance().get(EmcSession.class);
+		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getCookieStore());
 		if (firstUpdate) {
 			builder.stop(stopAtPage);
 			builder.start(startAtPage);
@@ -128,8 +127,7 @@ public class CliController {
 			//generate BBCode
 			out.println(QueryExporter.generateItemsBBCode(sortedItemGroups, netTotal, from, to));
 		} else {
-			//ANSI escape codes: http://ascii-table.com/ansi-escape-sequences.php
-			final String reset = "\u001B[0m";
+			ANSI ansi = OS.isWindows() ? new ANSINotSupported() : new ANSIImpl();
 			ItemIndex index = ItemIndex.instance();
 
 			out.println("Item                                   |Net Quantity       |Net Amount          ");
@@ -144,13 +142,13 @@ public class CliController {
 				out.print('|');
 
 				int netQuantity = itemGroup.getNetQuantity();
-				String color = getColor(netQuantity);
-				out.print(color + fixedLength(qf.format(itemGroup.getNetQuantity(), index.getStackSize(itemGroup.getItem())), 19) + reset);
+				String color = ansi.getColor(netQuantity);
+				out.print(color + fixedLength(qf.format(itemGroup.getNetQuantity(), index.getStackSize(itemGroup.getItem())), 19) + ansi.getReset());
 				out.print('|');
 
 				int netAmount = itemGroup.getNetAmount();
-				color = getColor(netAmount);
-				out.print(color + fixedLength(rf.format(itemGroup.getNetAmount()), 19) + reset);
+				color = ansi.getColor(netAmount);
+				out.print(color + fixedLength(rf.format(itemGroup.getNetAmount()), 19) + ansi.getReset());
 
 				out.println();
 
@@ -159,33 +157,64 @@ public class CliController {
 
 			out.print(StringUtils.repeat(' ', 53));
 			out.print("Total: ");
-			String color = getBoldColor(totalAmount);
-			out.println(color + rf.format(totalAmount) + reset);
+			String color = ansi.getBoldColor(totalAmount);
+			out.println(color + rf.format(totalAmount) + ansi.getReset());
 		}
 	}
 
-	private static String getColor(int number) {
-		if (number > 0) {
-			return "\u001B[32m"; //green
+	/**
+	 * @author Michael Angstadt
+	 * @see "http://ascii-table.com/ansi-escape-sequences.php"
+	 */
+	private static interface ANSI {
+		default String getBoldColor(int rupeeAmount) {
+			if (rupeeAmount > 0) {
+				return "\u001B[32;1m"; //green
+			}
+
+			if (rupeeAmount < 0) {
+				return "\u001B[31;1m"; //red
+			}
+
+			return "";
 		}
 
-		if (number < 0) {
-			return "\u001B[31m"; //red
+		default String getColor(int rupeeAmount) {
+			if (rupeeAmount > 0) {
+				return "\u001B[32m"; //green
+			}
+
+			if (rupeeAmount < 0) {
+				return "\u001B[31m"; //red
+			}
+
+			return "";
 		}
 
-		return "";
+		default String getReset() {
+			return "\u001B[0m";
+		}
 	}
 
-	private static String getBoldColor(int number) {
-		if (number > 0) {
-			return "\u001B[32;1m"; //green
+	private static class ANSIImpl implements ANSI {
+		//empty
+	}
+
+	private static class ANSINotSupported implements ANSI {
+		@Override
+		public String getBoldColor(int rupeeAmount) {
+			return "";
 		}
 
-		if (number < 0) {
-			return "\u001B[31;1m"; //red
+		@Override
+		public String getColor(int rupeeAmount) {
+			return "";
 		}
 
-		return "";
+		@Override
+		public String getReset() {
+			return "";
+		}
 	}
 
 	private static String fixedLength(String value, int maxWidth) {

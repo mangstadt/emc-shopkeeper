@@ -14,6 +14,7 @@ public class LoginViewCli implements ILoginView {
 	private final Console console = System.console();
 
 	private String savedUsername, username, savedPassword, password;
+	private boolean savePassword;
 
 	private final List<ActionListener> onLoginListeners = new ArrayList<>();
 	private final List<ActionListener> onCancelListeners = new ArrayList<>();
@@ -55,18 +56,18 @@ public class LoginViewCli implements ILoginView {
 
 	@Override
 	public boolean getSavePassword() {
-		return false;
+		return savePassword;
 	}
 
 	@Override
 	public void networkError() {
-		out.println("Network error.  Please try again.");
+		out.println("Network error. Please try again.");
 		prompt();
 	}
 
 	@Override
 	public void badLogin() {
-		out.println("Login failed.  Please try again.");
+		out.println("Login failed. Please try again.");
 		prompt();
 	}
 
@@ -77,7 +78,7 @@ public class LoginViewCli implements ILoginView {
 
 	@Override
 	public void close() {
-		//empty
+		//do nothing
 	}
 
 	private void prompt() {
@@ -90,13 +91,21 @@ public class LoginViewCli implements ILoginView {
 			}
 		}
 
+		boolean promptToSavePassword = true;
 		if (savedPassword == null) {
 			password = new String(console.readPassword("Password: "));
 		} else {
 			password = new String(console.readPassword("Password [press enter to use saved password]: "));
 			if (password.isEmpty()) {
 				password = savedPassword;
+				promptToSavePassword = false;
 			}
+		}
+
+		savePassword = true;
+		if (promptToSavePassword) {
+			String answer = console.readLine("Would you like to save your password for future logins? [y/N]: ");
+			savePassword = answer.equalsIgnoreCase("y");
 		}
 
 		out.println("Logging in...");

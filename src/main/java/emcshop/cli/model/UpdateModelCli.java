@@ -16,8 +16,7 @@ public class UpdateModelCli extends UpdateModelImpl {
 		Thread thread = super.startDownload();
 		try {
 			thread.join();
-		} catch (InterruptedException e) {
-			//ignore
+		} catch (InterruptedException ignore) {
 		}
 		return thread;
 	}

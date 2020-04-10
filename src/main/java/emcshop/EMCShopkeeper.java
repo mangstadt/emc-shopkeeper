@@ -225,6 +225,7 @@ public class EMCShopkeeper {
 		context.add(settings);
 
 		DbDao dao = new DirbyEmbeddedDbDao(dbDir);
+		context.add(dao);
 
 		int startingDbVersion = dao.selectDbVersion();
 		Integer currentRupeeBalance = prepareForUpdateLogConversion(startingDbVersion, dao, settings);
