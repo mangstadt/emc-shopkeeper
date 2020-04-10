@@ -84,7 +84,7 @@ public class FirstUpdateViewCli implements IFirstUpdateView {
 		} else {
 			out.println(stopAtPage + " pages will be parsed.");
 			if (estimatedTime != null) {
-				out.println("Estimated time: " + DurationFormatUtils.formatDuration(estimatedTime.toMillis() * 1000, "HH:mm:ss", true));
+				out.println("Estimated time: " + DurationFormatUtils.formatDuration(estimatedTime.toMillis(), "HH:mm:ss", true));
 			}
 		}
 

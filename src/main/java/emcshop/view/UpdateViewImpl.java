@@ -241,12 +241,12 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	private class TimerThread extends Thread {
 		@Override
 		public void run() {
-			final String estimatedTimeDisplay = (estimatedTime == null) ? null : DurationFormatUtils.formatDuration(estimatedTime.getSeconds() * 1000, "HH:mm:ss", true);
+			final String estimatedTimeDisplay = (estimatedTime == null) ? null : DurationFormatUtils.formatDuration(estimatedTime.toMillis(), "HH:mm:ss", true);
 			final Instant start = Instant.now();
 
 			while (isDisplayable()) {
 				Duration elapsed = Duration.between(start, Instant.now());
-				String timerText = DurationFormatUtils.formatDuration(elapsed.getSeconds() * 1000, "HH:mm:ss", true);
+				String timerText = DurationFormatUtils.formatDuration(elapsed.toMillis(), "HH:mm:ss", true);
 
 				if (estimatedTimeDisplay != null) {
 					timerText += " / " + estimatedTimeDisplay;

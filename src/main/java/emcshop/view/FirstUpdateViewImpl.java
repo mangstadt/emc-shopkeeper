@@ -180,7 +180,7 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 		} else if (estimatedTime.toDays() > 0) {
 			text = "over a day";
 		} else {
-			text = DurationFormatUtils.formatDuration(estimatedTime.getSeconds() * 1000, "HH:mm:ss", true);
+			text = DurationFormatUtils.formatDuration(estimatedTime.toMillis(), "HH:mm:ss", true);
 		}
 		estimate.setText(text);
 	}
