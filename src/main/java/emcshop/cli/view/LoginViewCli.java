@@ -93,7 +93,7 @@ public class LoginViewCli implements ILoginView {
 		if (savedPassword == null) {
 			password = new String(console.readPassword("Password: "));
 		} else {
-			password = new String(console.readPassword("Password [" + savedPassword + "]: "));
+			password = new String(console.readPassword("Password [press enter to use saved password]: "));
 			if (password.isEmpty()) {
 				password = savedPassword;
 			}
