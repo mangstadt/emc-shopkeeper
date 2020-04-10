@@ -1,31 +1,32 @@
 package emcshop.util;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 
 /**
  * Misc Minecraft-related utilities.
+ * @author Michael Angstadt
  */
 public final class MinecraftUtils {
 	/**
 	 * Gets the location of the default Minecraft installation.
 	 * @return the Minecraft directory or null if unknown
 	 */
-	public static File getDefaultMinecraftFolder() {
+	public static Path getDefaultMinecraftFolder() {
 		if (OS.isWindows()) {
-			String appData = System.getenv("appdata");
-			return new File(appData, ".minecraft");
+			return Paths.get(System.getenv("appdata"), ".minecraft");
 		}
 
+		Path userDir = FileUtils.getUserDirectory().toPath();
+
 		if (OS.isMac()) {
-			File library = new File(FileUtils.getUserDirectory(), "Library");
-			File applicationSupport = new File(library, "Application Support");
-			return new File(applicationSupport, "minecraft");
+			return userDir.resolve(Paths.get("Library", "Application Support", "minecraft"));
 		}
 
 		if (OS.isLinux()) {
-			return new File(FileUtils.getUserDirectory(), ".minecraft");
+			return userDir.resolve(".minecraft");
 		}
 
 		return null;

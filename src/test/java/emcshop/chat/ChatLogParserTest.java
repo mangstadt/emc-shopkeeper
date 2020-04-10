@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -30,13 +29,13 @@ public class ChatLogParserTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void not_a_directory() throws Exception {
-		File file = folder.newFile();
+		Path file = folder.newFile().toPath();
 		new ChatLogParser(file);
 	}
 
 	@Test
 	public void getLog_no_logs_found() throws Exception {
-		ChatLogParser parser = new ChatLogParser(folder.getRoot());
+		ChatLogParser parser = new ChatLogParser(folder.getRoot().toPath());
 		List<ChatMessage> messages = parser.getLog(LocalDate.of(2020, 3, 1));
 
 		assertTrue(messages.isEmpty());
@@ -54,7 +53,7 @@ public class ChatLogParserTest {
 
 		//without latest.log
 		{
-			ChatLogParser parser = new ChatLogParser(folder.getRoot());
+			ChatLogParser parser = new ChatLogParser(folder.getRoot().toPath());
 			Iterator<ChatMessage> messages = parser.getLog(LocalDate.of(2020, 4, 1)).iterator();
 
 			ChatMessage message = messages.next();
@@ -77,7 +76,7 @@ public class ChatLogParserTest {
 			//set last modified date of "latest.log" to 4/1/2020
 			Files.setLastModifiedTime(latest, filetime(LocalDateTime.of(2020, 4, 1, 12, 0, 0)));
 
-			ChatLogParser parser = new ChatLogParser(folder.getRoot());
+			ChatLogParser parser = new ChatLogParser(folder.getRoot().toPath());
 			Iterator<ChatMessage> messages = parser.getLog(LocalDate.of(2020, 4, 1)).iterator();
 
 			ChatMessage message = messages.next();

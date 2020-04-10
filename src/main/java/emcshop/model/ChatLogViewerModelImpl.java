@@ -1,7 +1,7 @@
 package emcshop.model;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,12 +28,12 @@ public class ChatLogViewerModelImpl implements IChatLogViewerModel {
 	}
 
 	@Override
-	public File getLogDirectory() {
+	public Path getLogDirectory() {
 		return settings.getChatLogDir();
 	}
 
 	@Override
-	public void setLogDirectory(File dir) {
+	public void setLogDirectory(Path dir) {
 		parser = new ChatLogParser(dir);
 		settings.setChatLogDir(dir);
 		settings.save();

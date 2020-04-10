@@ -7,7 +7,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -158,13 +159,13 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 	}
 
 	@Override
-	public File getLogDirectory() {
-		return new File(logDir.getText());
+	public Path getLogDirectory() {
+		return Paths.get(logDir.getText());
 	}
 
 	@Override
-	public void setLogDirectory(File logDirectory) {
-		String text = (logDirectory == null) ? "" : logDirectory.getAbsolutePath();
+	public void setLogDirectory(Path logDirectory) {
+		String text = (logDirectory == null) ? "" : logDirectory.toAbsolutePath().toString();
 		logDir.setText(text);
 	}
 
@@ -265,6 +266,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 			foundPaymentTransaction = false;
 			StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
+			System.out.println(LocalDateTime.now());
 			for (ChatMessage chatMessage : chatMessages) {
 				String message = chatMessage.getMessage();
 				message = message.trim();
@@ -354,8 +356,11 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 				sb.append("<br>");
 			}
+			System.out.println(LocalDateTime.now());
 
 			setText(sb.toString());
+
+			System.out.println(LocalDateTime.now());
 
 			//search for the payment transaction in the "Document" object's text in order to find the caret position
 			int caretPosition = 1;

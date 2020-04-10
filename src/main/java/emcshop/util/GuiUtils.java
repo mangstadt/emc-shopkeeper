@@ -14,9 +14,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.List;
 
 import javax.swing.AbstractButton;
@@ -58,12 +58,12 @@ public final class GuiUtils {
 	 * @param file the file to open
 	 * @throws IOException if there's a problem opening the file
 	 */
-	public static void openFile(File file) throws IOException {
+	public static void openFile(Path file) throws IOException {
 		if (!canOpenFiles()) {
 			return;
 		}
 
-		desktop.open(file);
+		desktop.open(file.toFile());
 	}
 
 	/**

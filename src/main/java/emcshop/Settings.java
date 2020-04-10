@@ -2,10 +2,10 @@ package emcshop;
 
 import static emcshop.util.MinecraftUtils.getDefaultMinecraftFolder;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class Settings {
 	private String username, password;
 	private Level logLevel;
 	private boolean showProfilesOnStartup, showQuantitiesInStacks, backupsEnabled, reportUnknownItems;
-	private File chatLogDir;
+	private Path chatLogDir;
 	private List<String> reportedUnknownItems;
 
 	public Settings(Path file) throws IOException {
@@ -140,11 +140,11 @@ public class Settings {
 		this.maxBackups = maxBackups;
 	}
 
-	public File getChatLogDir() {
+	public Path getChatLogDir() {
 		return chatLogDir;
 	}
 
-	public void setChatLogDir(File chatLogDir) {
+	public void setChatLogDir(Path chatLogDir) {
 		this.chatLogDir = chatLogDir;
 	}
 
@@ -182,11 +182,11 @@ public class Settings {
 		backupFrequency = 7;
 		maxBackups = 10;
 
-		File minecraft = getDefaultMinecraftFolder();
+		Path minecraft = getDefaultMinecraftFolder();
 		if (minecraft == null) {
-			minecraft = new File("");
+			minecraft = Paths.get(".");
 		}
-		chatLogDir = new File(minecraft, "logs");
+		chatLogDir = minecraft.resolve("logs");
 	}
 
 	public void load() throws IOException {
@@ -290,13 +290,13 @@ public class Settings {
 
 		String value = props.get("chatLogDir");
 		if (value == null) {
-			File minecraft = getDefaultMinecraftFolder();
+			Path minecraft = getDefaultMinecraftFolder();
 			if (minecraft == null) {
-				minecraft = new File("");
+				minecraft = Paths.get(".");
 			}
-			chatLogDir = new File(minecraft, "logs");
+			chatLogDir = minecraft.resolve("logs");
 		} else {
-			chatLogDir = new File(value);
+			chatLogDir = Paths.get(value);
 		}
 	}
 
@@ -323,7 +323,7 @@ public class Settings {
 		}
 
 		if (chatLogDir != null) {
-			props.set("chatLogDir", chatLogDir.getAbsolutePath());
+			props.set("chatLogDir", chatLogDir.toAbsolutePath().toString());
 		}
 	}
 }

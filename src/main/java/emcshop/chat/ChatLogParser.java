@@ -1,6 +1,5 @@
 package emcshop.chat;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,11 +25,11 @@ public class ChatLogParser {
 	 * @param logDir the path to the directory that contains the log files
 	 * @throws IllegalArgumentException if the given path is not a directory
 	 */
-	public ChatLogParser(File logDir) {
-		if (!logDir.isDirectory()) {
+	public ChatLogParser(Path logDir) {
+		if (!Files.isDirectory(logDir)) {
 			throw new IllegalArgumentException("The specified path is not a directory: " + logDir);
 		}
-		this.logDir = logDir.toPath();
+		this.logDir = logDir;
 	}
 
 	/**

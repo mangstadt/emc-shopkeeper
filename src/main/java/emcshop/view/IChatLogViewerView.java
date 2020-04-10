@@ -1,7 +1,7 @@
 package emcshop.view;
 
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -15,9 +15,9 @@ public interface IChatLogViewerView {
 
 	void addCloseListener(ActionListener listener);
 
-	File getLogDirectory();
+	Path getLogDirectory();
 
-	void setLogDirectory(File logDirectory);
+	void setLogDirectory(Path logDirectory);
 
 	void setPaymentTransaction(PaymentTransactionDb paymentTransaction);
 

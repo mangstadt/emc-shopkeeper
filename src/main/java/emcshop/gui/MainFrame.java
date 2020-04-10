@@ -179,7 +179,7 @@ public class MainFrame extends JFrame {
 				}
 				
 				try {
-					GuiUtils.openFile(folder.toFile());
+					GuiUtils.openFile(folder);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

@@ -1,6 +1,7 @@
 package emcshop.presenter;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 
 import emcshop.db.PaymentTransactionDb;
@@ -38,12 +39,12 @@ public class ChatLogViewerPresenter {
 	}
 
 	private void onLogDirectoryChanged() {
-		File dir = view.getLogDirectory();
-		if (!dir.exists()) {
+		Path dir = view.getLogDirectory();
+		if (!Files.exists(dir)) {
 			view.showError("The specified log directory does not exist.");
 			return;
 		}
-		if (!dir.isDirectory()) {
+		if (!Files.isDirectory(dir)) {
 			view.showError("The specified path is not a directory.");
 			return;
 		}
