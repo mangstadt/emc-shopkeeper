@@ -83,10 +83,10 @@ public class ChartsTab extends JPanel {
 		groupIcons.put("Leather", Images.getItemImage("Leather"));
 		groupIcons.put("Potions", Images.getItemImage("Potion of Health"));
 		groupIcons.put("Quartz", Images.getItemImage("Quartz"));
-		groupIcons.put("Spawn Eggs", Images.getItemImage("Pig Egg"));
-		groupIcons.put("Stone", Images.getItemImage("Cobblestone"));
+		groupIcons.put("Spawn Eggs", Images.getItemImage("Pig Spawn Egg"));
+		groupIcons.put("Stone", Images.getItemImage("Stone"));
 		groupIcons.put("Wool", Images.getItemImage("White Wool"));
-		groupIcons.put("Wood", Images.getItemImage("Oak Plank"));
+		groupIcons.put("Wood", Images.getItemImage("Oak Log"));
 	}
 
 	private final JCheckBox entireHistory;
