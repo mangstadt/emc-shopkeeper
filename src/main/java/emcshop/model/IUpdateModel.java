@@ -45,7 +45,7 @@ public interface IUpdateModel {
 	 * @return the estimated time in milliseconds or null if it can't be
 	 * computed
 	 */
-	Long getEstimatedTime();
+	Duration getEstimatedTime();
 
 	/**
 	 * Gets the page that the downloader is configured to stop at.

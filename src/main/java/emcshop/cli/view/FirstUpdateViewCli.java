@@ -15,11 +15,10 @@ import emcshop.view.IFirstUpdateView;
 public class FirstUpdateViewCli implements IFirstUpdateView {
 	private final PrintStream out = System.out;
 	private final Console console = System.console();
-	private final String NEWLINE = System.getProperty("line.separator");
+	private final String NEWLINE = System.lineSeparator();
 
 	private Integer stopAtPage;
-	private Duration maxPaymentTransactionAge;
-	private Long estimatedTime;
+	private Duration maxPaymentTransactionAge, estimatedTime;
 
 	private final List<ActionListener> onCancelListeners = new ArrayList<>();
 	private final List<ActionListener> onBeginListeners = new ArrayList<>();
@@ -61,7 +60,7 @@ public class FirstUpdateViewCli implements IFirstUpdateView {
 	}
 
 	@Override
-	public void setEstimatedTime(Long estimatedTime) {
+	public void setEstimatedTime(Duration estimatedTime) {
 		this.estimatedTime = estimatedTime;
 	}
 
@@ -85,7 +84,7 @@ public class FirstUpdateViewCli implements IFirstUpdateView {
 		} else {
 			out.println(stopAtPage + " pages will be parsed.");
 			if (estimatedTime != null) {
-				out.println("Estimated time: " + DurationFormatUtils.formatDuration(estimatedTime, "HH:mm:ss", true));
+				out.println("Estimated time: " + DurationFormatUtils.formatDuration(estimatedTime.toMillis() * 1000, "HH:mm:ss", true));
 			}
 		}
 

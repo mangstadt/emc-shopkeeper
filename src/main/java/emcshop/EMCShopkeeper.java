@@ -543,17 +543,17 @@ public class EMCShopkeeper {
 	 * Estimates the time it will take to download a given number of transaction
 	 * pages.
 	 * @param stopPage the page to stop at
-	 * @return the estimated processing time (in milliseconds)
+	 * @return the estimated processing time
 	 */
-	public static long estimateUpdateTime(Integer stopPage) {
-		int totalMs = 10000;
-		int last = 10000;
+	public static Duration estimateUpdateTime(Integer stopPage) {
+		long totalMs = 10_000;
+		long last = 10_000;
 		for (int i = 100; i < stopPage; i += 100) {
-			int cur = last + 1550;
+			long cur = last + 1550;
 			totalMs += cur;
 			last = cur;
 		}
-		return totalMs;
+		return Duration.ofMillis(totalMs);
 	}
 
 	/**

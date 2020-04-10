@@ -173,8 +173,15 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 	}
 
 	@Override
-	public void setEstimatedTime(Long estimatedTime) {
-		String text = (estimatedTime == null) ? "-" : DurationFormatUtils.formatDuration(estimatedTime, "HH:mm:ss", true);
+	public void setEstimatedTime(Duration estimatedTime) {
+		String text;
+		if (estimatedTime == null) {
+			text = "-";
+		} else if (estimatedTime.toDays() > 0) {
+			text = "over a day";
+		} else {
+			text = DurationFormatUtils.formatDuration(estimatedTime.getSeconds() * 1000, "HH:mm:ss", true);
+		}
 		estimate.setText(text);
 	}
 

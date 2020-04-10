@@ -99,7 +99,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	}
 
 	@Override
-	public Long getEstimatedTime() {
+	public Duration getEstimatedTime() {
 		Integer stopAtPage = getStopAtPage();
 		return (stopAtPage == null) ? null : EMCShopkeeper.estimateUpdateTime(stopAtPage);
 	}

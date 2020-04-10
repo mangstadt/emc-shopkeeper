@@ -1,5 +1,7 @@
 package emcshop.model;
 
+import java.time.Duration;
+
 public interface IFirstUpdateModel {
-	long getEstimatedTime(Integer stopAtPage);
+	Duration getEstimatedTime(Integer stopAtPage);
 }

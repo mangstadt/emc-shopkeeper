@@ -18,7 +18,7 @@ public interface IFirstUpdateView {
 
 	void setMaxPaymentTransactionAge(Duration age);
 
-	void setEstimatedTime(Long estimatedTime);
+	void setEstimatedTime(Duration estimatedTime);
 
 	void display();
 

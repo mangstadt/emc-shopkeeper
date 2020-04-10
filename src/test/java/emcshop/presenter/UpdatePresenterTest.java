@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.awt.event.ActionListener;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import org.junit.Test;
@@ -24,7 +25,7 @@ public class UpdatePresenterTest {
 	public void init() {
 		IUpdateModel model = mock(IUpdateModel.class);
 		when(model.isFirstUpdate()).thenReturn(true);
-		when(model.getEstimatedTime()).thenReturn(123L);
+		when(model.getEstimatedTime()).thenReturn(Duration.ofMillis(123));
 		when(model.getStopAtPage()).thenReturn(3000);
 
 		IUpdateView view = mock(IUpdateView.class);
@@ -34,7 +35,7 @@ public class UpdatePresenterTest {
 		verify(view).addCancelListener(any(ActionListener.class));
 		verify(view).addStopListener(any(ActionListener.class));
 		verify(view).setFirstUpdate(true);
-		verify(view).setEstimatedTime(123L);
+		verify(view).setEstimatedTime(Duration.ofMillis(123));
 		verify(view).setStopAtPage(3000);
 		verify(model).addBadSessionListener(any(ActionListener.class));
 		verify(model).addDownloadCompleteListener(any(ActionListener.class));

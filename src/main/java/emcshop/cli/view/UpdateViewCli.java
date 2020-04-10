@@ -3,6 +3,7 @@ package emcshop.cli.view;
 import java.awt.event.ActionListener;
 import java.io.PrintStream;
 import java.text.NumberFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -60,7 +61,7 @@ public class UpdateViewCli implements IUpdateView {
 	}
 
 	@Override
-	public void setEstimatedTime(Long estimatedTime) {
+	public void setEstimatedTime(Duration estimatedTime) {
 		//empty
 	}
 

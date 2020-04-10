@@ -5,7 +5,6 @@ import static emcshop.util.GuiUtils.toolTipText;
 import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -34,7 +33,6 @@ import emcshop.gui.images.Images;
 import emcshop.presenter.LoginPresenter;
 import emcshop.scraper.EmcSession;
 import emcshop.util.GuiUtils;
-import emcshop.util.TimeUtils;
 import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
@@ -49,7 +47,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	private int pagesCount, shopTransactionsCount, paymentTransactionsCount, bonusFeeTransactionsCount;
 	private LocalDateTime oldestTransactionDate;
 
-	private Long estimatedTime;
+	private Duration estimatedTime;
 	private Integer stopAtPage;
 	private TimerThread timer;
 
@@ -144,7 +142,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	}
 
 	@Override
-	public void setEstimatedTime(Long estimatedTime) {
+	public void setEstimatedTime(Duration estimatedTime) {
 		this.estimatedTime = estimatedTime;
 	}
 
@@ -243,15 +241,13 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	private class TimerThread extends Thread {
 		@Override
 		public void run() {
-			final String estimatedTimeDisplay = (estimatedTime == null) ? null : DurationFormatUtils.formatDuration(estimatedTime, "HH:mm:ss", true);
+			final String estimatedTimeDisplay = (estimatedTime == null) ? null : DurationFormatUtils.formatDuration(estimatedTime.getSeconds() * 1000, "HH:mm:ss", true);
 			final Instant start = Instant.now();
-			final NumberFormat nf = new DecimalFormat("00");
 
 			while (isDisplayable()) {
 				Duration elapsed = Duration.between(start, Instant.now());
-				long components[] = TimeUtils.parseTimeComponents(elapsed);
+				String timerText = DurationFormatUtils.formatDuration(elapsed.getSeconds() * 1000, "HH:mm:ss", true);
 
-				String timerText = nf.format(components[3]) + ":" + nf.format(components[2]) + ":" + nf.format(components[1]);
 				if (estimatedTimeDisplay != null) {
 					timerText += " / " + estimatedTimeDisplay;
 				}

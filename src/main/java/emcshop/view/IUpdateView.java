@@ -1,6 +1,7 @@
 package emcshop.view;
 
 import java.awt.event.ActionListener;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import emcshop.scraper.EmcSession;
@@ -54,10 +55,9 @@ public interface IUpdateView {
 
 	/**
 	 * Sets the estimated amount of time the download will take.
-	 * @param estimatedTime the estimated time in milliseconds or null if there
-	 * is no estimate
+	 * @param estimatedTime the estimated time or null if there is no estimate
 	 */
-	void setEstimatedTime(Long estimatedTime);
+	void setEstimatedTime(Duration estimatedTime);
 
 	/**
 	 * Sets the page that the downloader will stop at.

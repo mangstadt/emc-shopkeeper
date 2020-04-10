@@ -38,7 +38,7 @@ public class FirstUpdatePresenter {
 
 	private void onStopAtPageChanged() {
 		Integer stopAtPage = view.getStopAtPage();
-		Long estimatedTime = (stopAtPage == null) ? null : model.getEstimatedTime(stopAtPage);
+		Duration estimatedTime = (stopAtPage == null) ? null : model.getEstimatedTime(stopAtPage);
 		view.setEstimatedTime(estimatedTime);
 	}
 
