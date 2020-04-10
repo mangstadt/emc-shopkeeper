@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -528,19 +529,19 @@ public class MainFrame extends JFrame {
 			inventoryTab.refresh();
 			bonusFeeTab.refresh();
 
-			long components[] = TimeUtils.parseTimeComponents(time);
+			Map<ChronoUnit, Long> components = TimeUtils.parseTimeComponents(time);
 			NumberFormat nf = NumberFormat.getInstance();
 			StringBuilder sb = new StringBuilder();
 			sb.append("Update complete.\n");
 			sb.append(nf.format(pageCount)).append(" pages parsed and ");
 			sb.append(nf.format(totalTransactions)).append(" transactions parsed in ");
-			if (components[3] > 0) {
-				sb.append(components[3]).append(" hours, ");
+			if (components.get(ChronoUnit.HOURS) > 0) {
+				sb.append(components.get(ChronoUnit.HOURS)).append(" hours, ");
 			}
-			if (components[3] > 0 || components[2] > 0) {
-				sb.append(components[2]).append(" minutes and ");
+			if (components.get(ChronoUnit.HOURS) > 0 || components.get(ChronoUnit.MINUTES) > 0) {
+				sb.append(components.get(ChronoUnit.MINUTES)).append(" minutes and ");
 			}
-			sb.append(components[1]).append(" seconds.");
+			sb.append(components.get(ChronoUnit.SECONDS)).append(" seconds.");
 			message = sb.toString();
 
 			updateLastUpdateDate(started);
