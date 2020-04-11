@@ -165,7 +165,10 @@ public final class ZipUtils {
 				Path dest = destZip.getPath(src);
 
 				//create all non-existent parent folders
-				Files.createDirectories(dest.getParent());
+				Path destParent = dest.getParent();
+				if (destParent != null) {
+					Files.createDirectories(destParent);
+				}
 
 				//ignore the "empty" files that were added to empty directories
 				if (entry.getCompressedSize() <= 0 && dest.getFileName().toString().equals("empty")) {
