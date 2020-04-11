@@ -266,7 +266,6 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 			foundPaymentTransaction = false;
 			StringBuilder sb = new StringBuilder("<html><span style=\"font-family:monospace; font-size:14pt\">");
-			System.out.println(LocalDateTime.now());
 			for (ChatMessage chatMessage : chatMessages) {
 				String message = chatMessage.getMessage();
 				message = message.trim();
@@ -356,11 +355,8 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 				sb.append("<br>");
 			}
-			System.out.println(LocalDateTime.now());
 
 			setText(sb.toString());
-
-			System.out.println(LocalDateTime.now());
 
 			//search for the payment transaction in the "Document" object's text in order to find the caret position
 			int caretPosition = 1;
