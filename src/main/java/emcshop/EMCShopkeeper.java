@@ -296,6 +296,14 @@ public class EMCShopkeeper {
 		//delete old backups
 		backupManager.cleanup();
 
+		//repair corrupted backup files that were created with old, buggy code
+		if (backupManager.getVersion() == 0) {
+			backupManager.repairBackups((done, total) -> {
+				splash.setMessage("Repairing old backups (" + done + " / " + total + ")...");
+			});
+			backupManager.setVersionToLatest();
+		}
+
 		//backup the database if a backup is due
 		boolean backedup = false;
 		if (backupManager.shouldBackup()) {
@@ -356,7 +364,7 @@ public class EMCShopkeeper {
 					throw e;
 				}
 
-				//check to see an old version of the app is being run
+				//check to see if an old version of the app is being run
 				int startingDbVersion = dao.selectDbVersion();
 				if (startingDbVersion > dao.getAppDbVersion()) {
 					splash.dispose();

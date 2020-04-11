@@ -1,5 +1,6 @@
 package emcshop;
 
+import static emcshop.util.TestUtils.assertFileContent;
 import static emcshop.util.TestUtils.mkdir;
 import static emcshop.util.TestUtils.mkfile;
 import static org.junit.Assert.assertEquals;
@@ -46,6 +47,88 @@ public class BackupManagerTest {
 		root = temp.getRoot().toPath();
 		dbDir = mkdir(root, "db");
 		dbBackupDir = mkdir(root, "db-backup");
+	}
+
+	@Test
+	public void constructor_backups_folder_does_not_exist() throws Exception {
+		Path dbBackupDir = dbDir.resolveSibling("backups-folder");
+		Path versionFile = dbBackupDir.resolve("version");
+		assertFalse(Files.isDirectory(dbBackupDir));
+
+		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
+
+		assertTrue(Files.isDirectory(dbBackupDir));
+		assertEquals(1, bm.getVersion());
+		assertFileContent(versionFile, "1");
+	}
+
+	@Test
+	public void constructor_backups_folder_exists_without_version_file() throws Exception {
+		Path dbBackupDir = dbDir.resolveSibling("backups-folder");
+		Path versionFile = dbBackupDir.resolve("version");
+		Files.createDirectory(dbBackupDir);
+
+		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
+
+		assertEquals(0, bm.getVersion());
+
+		/*
+		 * Version file is not created until setVersionToLatest() is called.
+		 */
+		assertFalse(Files.exists(versionFile));
+	}
+
+	@Test
+	public void constructor_backups_folder_exists_with_version_file() throws Exception {
+		Path dbBackupDir = dbDir.resolveSibling("backups-folder");
+		Path versionFile = dbBackupDir.resolve("version");
+		Files.createDirectory(dbBackupDir);
+		Files.write(versionFile, "1".getBytes());
+
+		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
+
+		assertEquals(1, bm.getVersion());
+	}
+
+	@Test
+	public void constructor_backups_folder_exists_with_version_file_bad_value() throws Exception {
+		Path dbBackupDir = dbDir.resolveSibling("backups-folder");
+		Path versionFile = dbBackupDir.resolve("version");
+		Files.createDirectory(dbBackupDir);
+		Files.write(versionFile, "bad".getBytes());
+
+		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
+
+		assertEquals(0, bm.getVersion());
+	}
+
+	@Test
+	public void setVersionToLatest_without_existing_version_file() throws Exception {
+		Path dbBackupDir = dbDir.resolveSibling("backups-folder");
+		Path versionFile = dbBackupDir.resolve("version");
+		Files.createDirectory(dbBackupDir);
+
+		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
+		assertEquals(0, bm.getVersion());
+
+		bm.setVersionToLatest();
+		assertEquals(1, bm.getVersion());
+		assertFileContent(versionFile, "1");
+	}
+	
+	@Test
+	public void setVersionToLatest_with_existing_version_file() throws Exception {
+		Path dbBackupDir = dbDir.resolveSibling("backups-folder");
+		Path versionFile = dbBackupDir.resolve("version");
+		Files.createDirectory(dbBackupDir);
+		Files.write(versionFile, "0".getBytes());
+
+		BackupManager bm = new BackupManager(dbDir, dbBackupDir, true, 1, 2);
+		assertEquals(0, bm.getVersion());
+
+		bm.setVersionToLatest();
+		assertEquals(1, bm.getVersion());
+		assertFileContent(versionFile, "1");
 	}
 
 	@Test

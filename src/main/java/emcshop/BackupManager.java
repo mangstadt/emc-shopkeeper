@@ -3,14 +3,17 @@ package emcshop;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -27,11 +30,14 @@ import emcshop.util.ZipUtils.ZipListener;
 public class BackupManager {
 	private static final Logger logger = Logger.getLogger(BackupManager.class.getName());
 
-	private final Path dbDir, backupDir;
+	private final int latestVersion = 1;
+	private final Path dbDir, backupDir, versionFile;
 	private final boolean backupsEnabled;
 	private final Integer backupFrequency, maxBackups;
 	private final DateTimeFormatter backupFileNameDateFormat = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 	private final Pattern backupFileNameRegex = Pattern.compile("^db-(\\d{8}T\\d{6})\\.backup\\.zip$");
+
+	private int currentVersion;
 
 	/**
 	 * @param dbDir the live database directory
@@ -40,13 +46,48 @@ public class BackupManager {
 	 * @param backupFrequency how often backups should be made (in days)
 	 * @param maxBackups the max number of backups to keep, or null to never
 	 * delete
+	 * @throws IOException if there's a problem initializing the backup
+	 * directory or reading the backup version file
 	 */
-	public BackupManager(Path dbDir, Path backupDir, boolean backupsEnabled, Integer backupFrequency, Integer maxBackups) {
+	public BackupManager(Path dbDir, Path backupDir, boolean backupsEnabled, Integer backupFrequency, Integer maxBackups) throws IOException {
 		this.dbDir = dbDir;
 		this.backupDir = backupDir;
+		versionFile = backupDir.resolve("version");
 		this.backupsEnabled = backupsEnabled;
 		this.backupFrequency = backupFrequency;
 		this.maxBackups = maxBackups;
+
+		if (Files.isDirectory(backupDir)) {
+			if (Files.exists(versionFile)) {
+				try {
+					currentVersion = Integer.parseInt(new String(Files.readAllBytes(versionFile)));
+				} catch (NumberFormatException e) {
+					currentVersion = 0;
+				}
+			} else {
+				currentVersion = 0;
+			}
+		} else {
+			Files.createDirectories(backupDir);
+			setVersionToLatest();
+		}
+	}
+
+	/**
+	 * Gets the current version of the backup directory.
+	 * @return the version
+	 */
+	public int getVersion() {
+		return currentVersion;
+	}
+
+	/**
+	 * Sets the version of the backup directory to the latest version.
+	 * @throws IOException if there's a problem setting the version
+	 */
+	public void setVersionToLatest() throws IOException {
+		Files.write(versionFile, Integer.toString(latestVersion).getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		currentVersion = latestVersion;
 	}
 
 	/**
@@ -60,7 +101,6 @@ public class BackupManager {
 
 		Map<LocalDateTime, Path> backups = getBackups();
 		List<LocalDateTime> dates = new ArrayList<>(backups.keySet());
-		Collections.sort(dates, Collections.reverseOrder());
 
 		for (int i = maxBackups; i < dates.size(); i++) {
 			LocalDateTime date = dates.get(i);
@@ -104,7 +144,6 @@ public class BackupManager {
 	 * @throws IOException if there's a problem backing up the database
 	 */
 	public void backup(ZipListener listener) throws IOException {
-		Files.createDirectories(backupDir);
 		Path zip = getBackupFilePath(LocalDateTime.now());
 		try {
 			ZipUtils.zipDirectory(dbDir, zip, listener);
@@ -180,20 +219,23 @@ public class BackupManager {
 	}
 
 	/**
-	 * Gets the dates of all backups in descending order.
-	 * @return the backup dates
+	 * Gets the dates of all existing backups.
+	 * @return the backup dates (in descending order).
 	 * @throws IOException if there's a problem getting the list of available
 	 * backups
 	 */
 	public List<LocalDateTime> getBackupDates() throws IOException {
 		Map<LocalDateTime, Path> backups = getBackups();
-		List<LocalDateTime> dates = new ArrayList<>(backups.keySet());
-		Collections.sort(dates, Collections.reverseOrder());
-		return dates;
+		return new ArrayList<>(backups.keySet());
 	}
 
+	/**
+	 * Gets a listing of all existing backups.
+	 * @return the backups (sorted by date descending)
+	 * @throws IOException if there's a problem getting the list
+	 */
 	private Map<LocalDateTime, Path> getBackups() throws IOException {
-		Map<LocalDateTime, Path> backups = new HashMap<>();
+		Map<LocalDateTime, Path> backups = new TreeMap<>(Collections.reverseOrder());
 		if (!Files.isDirectory(backupDir)) {
 			return backups;
 		}
@@ -209,5 +251,32 @@ public class BackupManager {
 		});
 
 		return backups;
+	}
+
+	/**
+	 * <p>
+	 * Fixes corrupted backup files that were created with bugged code. If an
+	 * error occurs while repairing a backup, it is skipped.
+	 * </p>
+	 * <p>
+	 * See the {@link ZipUtils#repairCorruptedZipFile} javadoc for more
+	 * information.
+	 * </p>
+	 * @param callback called when a backup file has been repaired
+	 * @throws IOException if there's a problem getting the list of existing
+	 * backups
+	 */
+	public void repairBackups(BiConsumer<Integer, Integer> callback) throws IOException {
+		Collection<Path> backups = getBackups().values();
+		int cur = 1, total = backups.size();
+
+		for (Path file : backups) {
+			callback.accept(cur++, total);
+			try {
+				ZipUtils.repairCorruptedZipFile(file);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Error repairing backup file: " + file, e);
+			}
+		}
 	}
 }
