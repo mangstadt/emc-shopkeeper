@@ -1,6 +1,5 @@
 package emcshop.model;
 
-import static emcshop.util.TimeUtils.toLocalDateTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -210,7 +209,7 @@ public class UpdateModelImplTest {
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
 		assertEquals(0, model.getPagesDownloaded()); //it never finished downloading the first page
-		assertEquals(toLocalDateTime(t3.getTs()), model.getOldestParsedTransactionDate());
+		assertEquals(t3.getTs(), model.getOldestParsedTransactionDate());
 		assertSame(thrown, model.getDownloadError());
 
 		verfyUncaughtExceptionHandlerCalled(false);
@@ -238,7 +237,7 @@ public class UpdateModelImplTest {
 			 * database *should* be rolled-back if an error occurs.
 			 */
 			RupeeTransactionReader.Builder builder = new MockBuilder(reader);
-			builder.stop(dg.nextAsDate());
+			builder.stop(dg.next());
 
 			model = new UpdateModelImpl(builder, null);
 		}
@@ -275,7 +274,7 @@ public class UpdateModelImplTest {
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
 		assertEquals(0, model.getPagesDownloaded());
-		assertEquals(toLocalDateTime(t3.getTs()), model.getOldestParsedTransactionDate());
+		assertEquals(t3.getTs(), model.getOldestParsedTransactionDate());
 		assertNull(model.getDownloadError());
 	}
 
@@ -333,7 +332,7 @@ public class UpdateModelImplTest {
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
 		assertEquals(1, model.getBonusFeeTransactionsDownloaded());
 		assertEquals(1, model.getPagesDownloaded());
-		assertEquals(toLocalDateTime(t5.getTs()), model.getOldestParsedTransactionDate());
+		assertEquals(t5.getTs(), model.getOldestParsedTransactionDate());
 		assertNull(model.getDownloadError());
 		verfyUncaughtExceptionHandlerCalled(false);
 	}
@@ -393,7 +392,7 @@ public class UpdateModelImplTest {
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
 		assertEquals(1, model.getBonusFeeTransactionsDownloaded());
 		assertEquals(2, model.getPagesDownloaded());
-		assertEquals(toLocalDateTime(t5.getTs()), model.getOldestParsedTransactionDate());
+		assertEquals(t5.getTs(), model.getOldestParsedTransactionDate());
 		assertNull(model.getDownloadError());
 		verfyUncaughtExceptionHandlerCalled(false);
 	}
@@ -444,7 +443,7 @@ public class UpdateModelImplTest {
 		assertEquals(1, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
 		assertEquals(1, model.getPagesDownloaded());
-		assertEquals(toLocalDateTime(t3.getTs()), model.getOldestParsedTransactionDate());
+		assertEquals(t3.getTs(), model.getOldestParsedTransactionDate());
 		assertNull(model.getDownloadError());
 		verfyUncaughtExceptionHandlerCalled(false);
 	}
@@ -503,7 +502,7 @@ public class UpdateModelImplTest {
 		assertEquals(0, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
 		assertEquals(0, model.getPagesDownloaded());
-		assertEquals(toLocalDateTime(t2.getTs()), model.getOldestParsedTransactionDate());
+		assertEquals(t2.getTs(), model.getOldestParsedTransactionDate());
 		assertNull(model.getDownloadError());
 		verfyUncaughtExceptionHandlerCalled(false);
 	}
@@ -540,7 +539,7 @@ public class UpdateModelImplTest {
 
 		model.saveTransactions();
 
-		verify(dao).updateBonusesFeesSince(toLocalDateTime(t3.getTs()));
+		verify(dao).updateBonusesFeesSince(t3.getTs());
 		verify(dao).updateBonusesFeesHighestBalance(t1);
 		verify(dao).insertUpdateLog(any(LocalDateTime.class), eq(123), eq(1), eq(1), eq(0), any(Duration.class));
 		verify(dao).commit();
@@ -581,8 +580,8 @@ public class UpdateModelImplTest {
 
 		model.saveTransactions();
 
-		verify(dao).updateBonusesFeesSince(toLocalDateTime(t4.getTs()));
-		verify(dao).updateBonusesFeesLatestTransactionDate(toLocalDateTime(t4.getTs()));
+		verify(dao).updateBonusesFeesSince(t4.getTs());
+		verify(dao).updateBonusesFeesLatestTransactionDate(t4.getTs());
 
 		Map<Class<? extends RupeeTransaction>, MutableInt> totals = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
 		totals.put(DailySigninBonus.class, new MutableInt(100));
@@ -633,8 +632,8 @@ public class UpdateModelImplTest {
 
 		model.saveTransactions();
 
-		verify(dao).updateBonusesFeesSince(toLocalDateTime(t6.getTs()));
-		verify(dao).updateBonusesFeesLatestTransactionDate(toLocalDateTime(t4.getTs()));
+		verify(dao).updateBonusesFeesSince(t6.getTs());
+		verify(dao).updateBonusesFeesLatestTransactionDate(t4.getTs());
 
 		Map<Class<? extends RupeeTransaction>, MutableInt> totals = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
 		totals.put(DailySigninBonus.class, new MutableInt(100));
@@ -649,9 +648,9 @@ public class UpdateModelImplTest {
 
 	@Test
 	public void item_name_translation() throws Throwable {
-		final ShopTransaction t1 = new ShopTransaction.Builder().ts(dg.nextAsDate()).item("Apple").build();
-		final ShopTransaction t2 = new ShopTransaction.Builder().ts(dg.nextAsDate()).item("Black Stn Glass").build();
-		final ShopTransaction t3 = new ShopTransaction.Builder().ts(dg.nextAsDate()).item("FooBar").build();
+		final ShopTransaction t1 = new ShopTransaction.Builder().ts(dg.next()).item("Apple").build();
+		final ShopTransaction t2 = new ShopTransaction.Builder().ts(dg.next()).item("Black Stn Glass").build();
+		final ShopTransaction t3 = new ShopTransaction.Builder().ts(dg.next()).item("FooBar").build();
 
 		UpdateModelImpl model;
 		{
@@ -682,7 +681,7 @@ public class UpdateModelImplTest {
 			@Override
 			public boolean matches(Object argument) {
 				ShopTransactionDb arg = (ShopTransactionDb) argument;
-				return arg.getTs().equals(toLocalDateTime(t1.getTs())) && arg.getItem().equals("Apple");
+				return arg.getTs().equals(t1.getTs()) && arg.getItem().equals("Apple");
 			}
 		}), eq(true));
 
@@ -690,7 +689,7 @@ public class UpdateModelImplTest {
 			@Override
 			public boolean matches(Object argument) {
 				ShopTransactionDb arg = (ShopTransactionDb) argument;
-				return arg.getTs().equals(toLocalDateTime(t2.getTs())) && arg.getItem().equals("Black Glass");
+				return arg.getTs().equals(t2.getTs()) && arg.getItem().equals("Black Glass");
 			}
 		}), eq(true));
 
@@ -698,7 +697,7 @@ public class UpdateModelImplTest {
 			@Override
 			public boolean matches(Object argument) {
 				ShopTransactionDb arg = (ShopTransactionDb) argument;
-				return arg.getTs().equals(toLocalDateTime(t3.getTs())) && arg.getItem().equals("FooBar");
+				return arg.getTs().equals(t3.getTs()) && arg.getItem().equals("FooBar");
 			}
 		}), eq(true));
 
@@ -711,23 +710,23 @@ public class UpdateModelImplTest {
 	}
 
 	private ShopTransaction shop() {
-		return new ShopTransaction.Builder().ts(dg.nextAsDate()).item("Apple").build();
+		return new ShopTransaction.Builder().ts(dg.next()).item("Apple").build();
 	}
 
 	private RupeeTransaction raw() {
-		return new RupeeTransaction.Builder<RupeeTransaction.Builder<?>>().ts(dg.nextAsDate()).build();
+		return new RupeeTransaction.Builder<RupeeTransaction.Builder<?>>().ts(dg.next()).build();
 	}
 
 	private PaymentTransaction payment() {
-		return new PaymentTransaction.Builder().ts(dg.nextAsDate()).build();
+		return new PaymentTransaction.Builder().ts(dg.next()).build();
 	}
 
 	private DailySigninBonus signinBonus() {
-		return new DailySigninBonus.Builder().amount(100).ts(dg.nextAsDate()).build();
+		return new DailySigninBonus.Builder().amount(100).ts(dg.next()).build();
 	}
 
 	private HorseSummonFee horseFee() {
-		return new HorseSummonFee.Builder().amount(100).ts(dg.nextAsDate()).build();
+		return new HorseSummonFee.Builder().amount(100).ts(dg.next()).build();
 	}
 
 	private static ShopTransactionDb trans(final ShopTransaction transaction) {
@@ -735,7 +734,7 @@ public class UpdateModelImplTest {
 			@Override
 			public boolean matches(Object argument) {
 				ShopTransactionDb arg = (ShopTransactionDb) argument;
-				return arg.getTs().equals(toLocalDateTime(transaction.getTs()));
+				return arg.getTs().equals(transaction.getTs());
 			}
 		});
 	}
@@ -745,7 +744,7 @@ public class UpdateModelImplTest {
 			@Override
 			public boolean matches(Object argument) {
 				PaymentTransactionDb arg = (PaymentTransactionDb) argument;
-				return arg.getTs().equals(toLocalDateTime(transaction.getTs()));
+				return arg.getTs().equals(transaction.getTs());
 			}
 		});
 	}

@@ -3,7 +3,6 @@ package emcshop.util;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class DateGenerator {
@@ -33,14 +32,6 @@ public class DateGenerator {
 		date = date.plus(amount, field);
 		generated.add(date);
 		return date;
-	}
-
-	/**
-	 * Gets the next generated date.
-	 * @return the next date
-	 */
-	public Date nextAsDate() {
-		return TimeUtils.toDate(next());
 	}
 
 	/**

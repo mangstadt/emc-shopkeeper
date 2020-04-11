@@ -1330,7 +1330,7 @@ public abstract class DirbyDbDao implements DbDao {
 
 		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET highest_balance = ?, highest_balance_ts = ?")) {
 			stmt.setInt(1, transaction.getBalance());
-			stmt.setTimestamp(2, toTimestamp(toLocalDateTime(transaction.getTs())));
+			stmt.setTimestamp(2, toTimestamp(transaction.getTs()));
 			stmt.executeUpdate();
 		}
 	}

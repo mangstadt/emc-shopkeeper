@@ -34,7 +34,6 @@ import emcshop.scraper.EmcSession;
 import emcshop.util.OS;
 import emcshop.util.QuantityFormatter;
 import emcshop.util.RupeeFormatter;
-import emcshop.util.TimeUtils;
 import emcshop.view.IUpdateView;
 
 public class CliController {
@@ -78,7 +77,7 @@ public class CliController {
 			builder.stop(stopAtPage);
 			builder.start(startAtPage);
 		} else {
-			builder.stop(TimeUtils.toDate(latestTransactionDateFromDb));
+			builder.stop(latestTransactionDateFromDb);
 		}
 
 		//start the update

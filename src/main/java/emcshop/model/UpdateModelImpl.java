@@ -28,7 +28,6 @@ import emcshop.db.PaymentTransactionDb;
 import emcshop.db.ShopTransactionDb;
 import emcshop.scraper.EmcSession;
 import emcshop.util.Listeners;
-import emcshop.util.TimeUtils;
 
 public class UpdateModelImpl implements IUpdateModel {
 	private static final Logger logger = Logger.getLogger(UpdateModelImpl.class.getName());
@@ -245,7 +244,7 @@ public class UpdateModelImpl implements IUpdateModel {
 				RupeeTransaction transaction;
 				int curPage = reader.getCurrentPageNumber();
 				while ((transaction = reader.next()) != null) {
-					LocalDateTime transactionTs = TimeUtils.toLocalDateTime(transaction.getTs());
+					LocalDateTime transactionTs = transaction.getTs();
 					rupeeBalance = reader.getRupeeBalance();
 					int page = reader.getCurrentPageNumber();
 					synchronized (UpdateModelImpl.this) {

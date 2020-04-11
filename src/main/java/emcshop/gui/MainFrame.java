@@ -422,7 +422,7 @@ public class MainFrame extends JFrame {
 
 			maxPaymentTransactionAge = presenter.getMaxPaymentTransactionAge();
 		} else {
-			builder.stop(TimeUtils.toDate(latestTransactionDate));
+			builder.stop(latestTransactionDate);
 		}
 
 		//show the update dialog

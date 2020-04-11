@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 
 import com.github.mangstadt.emc.rupees.dto.ShopTransaction;
 
-import emcshop.util.TimeUtils;
-
 /**
  * Represents a shop transaction that is stored, or will be stored, in the
  * database.
@@ -27,7 +25,7 @@ public class ShopTransactionDb {
 	 * @param itemName the item name to assign to the database object
 	 */
 	public ShopTransactionDb(ShopTransaction transaction, String itemName) {
-		ts = TimeUtils.toLocalDateTime(transaction.getTs());
+		ts = transaction.getTs();
 		amount = transaction.getAmount();
 		balance = transaction.getBalance();
 		shopCustomer = transaction.getShopCustomer();

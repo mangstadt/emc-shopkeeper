@@ -32,7 +32,7 @@ public class PaymentTransactionDb {
 	}
 
 	public PaymentTransactionDb(PaymentTransaction transaction) {
-		ts = toLocalDateTime(transaction.getTs());
+		ts = transaction.getTs();
 		amount = transaction.getAmount();
 		balance = transaction.getBalance();
 		player = transaction.getPlayer();
