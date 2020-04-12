@@ -8,31 +8,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 
 public class TestUtils {
-	private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-	public static Date date(String date) {
-		if (date.length() == 10) {
-			date += " 00:00:00";
-		}
-		try {
-			return df.parse(date);
-		} catch (ParseException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	public static void assertIntEquals(Integer expected, int actual) {
 		assertNotNull(expected);
 		assertEquals(expected.intValue(), actual);
