@@ -30,7 +30,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -638,7 +637,11 @@ public class ChartsTab extends JPanel {
 		}
 
 		if (from.compareTo(to) > 0) {
-			JOptionPane.showMessageDialog(this, "Invalid date range: \"Start\" date must come before \"End\" date.", "Invalid date range", JOptionPane.INFORMATION_MESSAGE);
+			DialogBuilder.info() //@formatter:off
+				.parent(this)
+				.title("Invalid date range")
+				.text("Invalid date range: \"Start\" date must come before \"End\" date.")
+			.show(); //@formatter:on
 			return false;
 		}
 

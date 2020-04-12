@@ -17,7 +17,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
@@ -34,6 +33,7 @@ import emcshop.db.DbListener;
 import emcshop.db.DirbyDbDao;
 import emcshop.db.DirbyEmbeddedDbDao;
 import emcshop.gui.AboutDialog;
+import emcshop.gui.DialogBuilder;
 import emcshop.gui.ItemSuggestField;
 import emcshop.gui.MainFrame;
 import emcshop.gui.OnlinePlayersMonitor;
@@ -358,7 +358,12 @@ public class EMCShopkeeper {
 				} catch (SQLException e) {
 					if ("XJ040".equals(e.getSQLState())) {
 						splash.dispose();
-						JOptionPane.showMessageDialog(null, "EMC Shopkeeper is already running.", "Already running", JOptionPane.ERROR_MESSAGE);
+
+						DialogBuilder.error() //@formatter:off
+							.title("Already running")
+							.text("EMC Shopkeeper is already running.")
+						.show(); //@formatter:on
+
 						return;
 					}
 					throw e;
@@ -368,7 +373,15 @@ public class EMCShopkeeper {
 				int startingDbVersion = dao.selectDbVersion();
 				if (startingDbVersion > dao.getAppDbVersion()) {
 					splash.dispose();
-					JOptionPane.showMessageDialog(null, "The version of your EMC Shopkeeper database is newer than the EMC Shopkeeper application.  Please download the latest version of EMC Shopkeeper and run that.", "Outdated version", JOptionPane.ERROR_MESSAGE);
+
+					DialogBuilder.error() //@formatter:off
+						.title("Outdated version")
+						.text(
+							"The version of your EMC Shopkeeper database is newer than the EMC Shopkeeper application.",
+							"",
+							"Please download the latest version of EMC Shopkeeper and run that.")
+					.show(); //@formatter:on
+
 					return;
 				}
 

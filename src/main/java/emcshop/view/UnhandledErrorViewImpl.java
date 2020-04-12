@@ -7,17 +7,16 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import emcshop.gui.DialogBuilder;
 import emcshop.gui.MyJScrollPane;
 import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
+import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 public class UnhandledErrorViewImpl extends JDialog implements IUnhandledErrorView {
@@ -86,7 +85,11 @@ public class UnhandledErrorViewImpl extends JDialog implements IUnhandledErrorVi
 	public void errorReportSent() {
 		report.setEnabled(false);
 		report.setText("Reported");
-		JOptionPane.showMessageDialog(UnhandledErrorViewImpl.this, "Error report sent.  Thanks!");
+
+		DialogBuilder.info() //@formatter:off
+			.parent(this)
+			.text("Error report sent. Thanks!")
+		.show(); //@formatter:on
 	}
 
 	@Override

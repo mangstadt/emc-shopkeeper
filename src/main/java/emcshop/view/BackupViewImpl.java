@@ -22,6 +22,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
+import emcshop.gui.DialogBuilder;
 import emcshop.gui.HelpLabel;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.JNumberTextField;
@@ -94,7 +95,13 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 				return;
 			}
 
-			int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to restore this backup?", "Confirm Restore", JOptionPane.YES_NO_OPTION);
+			int result = DialogBuilder.info() //@formatter:off
+				.parent(this)
+				.title("Confirm Restore")
+				.text("Are you sure you want to restore this backup?")
+				.buttons(JOptionPane.YES_NO_OPTION)
+			.show(); //@formatter:on
+
 			if (result != JOptionPane.YES_OPTION) {
 				return;
 			}
@@ -118,7 +125,13 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 				return;
 			}
 
-			int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this backup?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+			int result = DialogBuilder.info() //@formatter:off
+				.parent(this)
+				.title("Confirm Delete")
+				.text("Are you sure you want to delete this backup?")
+				.buttons(JOptionPane.YES_NO_OPTION)
+			.show(); //@formatter:on
+
 			if (result != JOptionPane.YES_OPTION) {
 				return;
 			}
@@ -267,7 +280,11 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 		restore.setEnabled(true);
 		delete.setEnabled(true);
 
-		JOptionPane.showMessageDialog(this, "Backup complete.", "Backup complete", JOptionPane.INFORMATION_MESSAGE);
+		DialogBuilder.info() //@formatter:off
+			.parent(this)
+			.title("Backup complete")
+			.text("Backup complete.")
+		.show(); //@formatter:on
 	}
 
 	@Override
@@ -284,19 +301,40 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 		restore.setEnabled(true);
 		delete.setEnabled(true);
 
-		JOptionPane.showMessageDialog(this, "The database has been restored successfully.  When you click OK, EMC Shopkeeper will exit.  Please start EMC Shopkeeper again.", "Database Restore Complete", JOptionPane.INFORMATION_MESSAGE);
+		DialogBuilder.info() //@formatter:off
+			.parent(this)
+			.title("Database Restore Complete")
+			.text(
+				"The database has been restored successfully.",
+				"",
+				"When you click \"Exit\", EMC Shopkeeper will close.",
+				"",
+				"When you restart EMC Shopkeeper, the restored database will be active.")
+			.buttons(JOptionPane.OK_OPTION, "Exit")
+		.show(); //@formatter:on
+
 		GuiUtils.fireEvents(exitListeners);
 	}
 
 	@Override
 	public void invalidFrequency() {
-		JOptionPane.showMessageDialog(this, "The backup frequency must be 1 or greater.", "Error", JOptionPane.ERROR_MESSAGE);
+		DialogBuilder.error() //@formatter:off
+			.parent(this)
+			.title("Error")
+			.text("The backup frequency must be 1 or greater.")
+		.show(); //@formatter:on
+
 		frequency.requestFocus();
 	}
 
 	@Override
 	public void invalidMax() {
-		JOptionPane.showMessageDialog(this, "The max number of backups must be 1 or greater.", "Error", JOptionPane.ERROR_MESSAGE);
+		DialogBuilder.error() //@formatter:off
+			.parent(this)
+			.title("Error")
+			.text("The max number of backups must be 1 or greater.")
+		.show(); //@formatter:on
+
 		max.requestFocus();
 	}
 

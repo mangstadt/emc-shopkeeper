@@ -29,7 +29,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -40,6 +39,7 @@ import com.michaelbaranov.microba.calendar.DatePicker;
 
 import emcshop.chat.ChatMessage;
 import emcshop.db.PaymentTransactionDb;
+import emcshop.gui.DialogBuilder;
 import emcshop.gui.MyJScrollPane;
 import emcshop.util.GuiUtils;
 import emcshop.util.Listeners;
@@ -77,7 +77,10 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 				messages.requestFocusInWindow();
 				if (paymentTransaction != null && !messages.foundPaymentTransaction()) {
-					JOptionPane.showMessageDialog(ChatLogViewerViewImpl.this, "Payment transaction not found in chat log.");
+					DialogBuilder.info() //@formatter:off
+						.parent(ChatLogViewerViewImpl.this)
+						.text("Payment transaction not found in chat log.")
+					.show(); //@formatter:on
 				}
 			}
 		});
@@ -202,7 +205,11 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 
 	@Override
 	public void showError(String message) {
-		JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+		DialogBuilder.error() //@formatter:off
+			.parent(this)
+			.title("Error")
+			.text(message)
+		.show(); //@formatter:on
 	}
 
 	@Override

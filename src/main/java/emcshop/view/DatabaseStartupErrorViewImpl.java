@@ -22,6 +22,7 @@ import javax.swing.WindowConstants;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import emcshop.gui.DialogBuilder;
 import emcshop.gui.MyJScrollPane;
 import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
@@ -91,7 +92,13 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 				return;
 			}
 
-			int result = JOptionPane.showConfirmDialog(DatabaseStartupErrorViewImpl.this, "Are you sure you want to restore this backup?", "Confirm Restore", JOptionPane.YES_NO_OPTION);
+			int result = DialogBuilder.info() //@formatter:off
+				.parent(this)
+				.title("Confirm Restore")
+				.text("Are you sure you want to restore this backup?")
+				.buttons(JOptionPane.YES_NO_OPTION)
+			.show(); //@formatter:on
+
 			if (result != JOptionPane.YES_OPTION) {
 				return;
 			}
@@ -173,7 +180,11 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 	public void errorReportSent() {
 		report.setEnabled(false);
 		report.setText("Reported");
-		JOptionPane.showMessageDialog(DatabaseStartupErrorViewImpl.this, "Error report sent.  Thanks!");
+
+		DialogBuilder.info() //@formatter:off
+			.parent(this)
+			.text("Error report sent. Thanks!")
+		.show(); //@formatter:on
 	}
 
 	@Override

@@ -45,7 +45,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
@@ -270,7 +269,12 @@ public class InventoryTab extends JPanel implements ExportListener {
 		try {
 			qty = quantity.getQuantity(stackSize);
 		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
+			DialogBuilder.error() //@formatter:off
+				.parent(this)
+				.title("Error")
+				.text("Invalid quantity value.")
+			.show(); //@formatter:on
+
 			quantity.requestFocusInWindow();
 			return;
 		}
@@ -280,7 +284,12 @@ public class InventoryTab extends JPanel implements ExportListener {
 		try {
 			threshold = lowThreshold.getQuantity(stackSize);
 		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(this, "Invalid threshold value.", "Error", JOptionPane.ERROR_MESSAGE);
+			DialogBuilder.error() //@formatter:off
+				.parent(this)
+				.title("Error")
+				.text("Invalid threshold value.")
+			.show(); //@formatter:on
+
 			lowThreshold.requestFocusInWindow();
 			return;
 		}
@@ -568,7 +577,11 @@ public class InventoryTab extends JPanel implements ExportListener {
 					try {
 						quantity = textField.getQuantity(index.getStackSize(item));
 					} catch (NumberFormatException e) {
-						JOptionPane.showMessageDialog(InventoryTab.this, "Invalid quantity value.", "Error", JOptionPane.ERROR_MESSAGE);
+						DialogBuilder.error() //@formatter:off
+							.parent(InventoryTab.this)
+							.title("Error")
+							.text("Invalid quantity value.")
+						.show(); //@formatter:on
 						return;
 					}
 
@@ -601,7 +614,11 @@ public class InventoryTab extends JPanel implements ExportListener {
 					try {
 						threshold = textField.getQuantity(index.getStackSize(item));
 					} catch (NumberFormatException e) {
-						JOptionPane.showMessageDialog(InventoryTab.this, "Invalid threshold value.", "Error", JOptionPane.ERROR_MESSAGE);
+						DialogBuilder.error() //@formatter:off
+							.parent(InventoryTab.this)
+							.title("Error")
+							.text("Invalid threshold value.")
+						.show(); //@formatter:on
 						return;
 					}
 

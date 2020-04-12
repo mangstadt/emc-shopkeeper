@@ -16,6 +16,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import emcshop.gui.DialogBuilder;
 import emcshop.gui.HelpLabel;
 import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
@@ -188,24 +189,21 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	 * @return true to continue, false to cancel
 	 */
 	private boolean showUsernameChangedDialog() {
-		//@formatter:off
-		int choice = JOptionPane.showOptionDialog(
-			LoginViewImpl.this,
-			
-			"You have changed the username to something different!\n\n" +
-			"If you want to download the transactions of an alt account, you have to create a separate profile!\n\n" +
-			"1. Go to [Menu Button > Settings] and click the \"Show Profiles on Startup\" menu item.\n" +
-			"2. Restart EMC Shopkeeper.\n" +
-			"3. At the \"Choose Profile\" dialog, type a name for your new profile in the textbox and click OK.",
-			
-			"Warning",
-			JOptionPane.YES_NO_OPTION,
-			JOptionPane.WARNING_MESSAGE,
-			null,
-			new Object[]{"Continue (not recommended)", "Cancel"},
-			"Cancel"
-		);
-		//@formatter:on
+		int choice = DialogBuilder.warning() //@formatter:off
+			.parent(LoginViewImpl.this)
+			.title("Warning")
+			.text(
+				"You have changed the username to something different!",
+				"",
+				"If your Minecraft username changed, you can safely continue.",
+				"",
+				"But if you're trying to download the transactions of an alt account, you should create a separate profile:",
+				"1. Go to [Menu Button > Settings] and click \"Show Profiles on Startup\".",
+				"2. Restart EMC Shopkeeper.",
+				"3. At the \"Choose Profile\" dialog, type a name for your new profile in the textbox and click OK.",
+				"4. You can now safely download the transactions of your alt account on this new profile.")
+			.buttons(JOptionPane.YES_NO_OPTION, "Continue", "*Cancel")
+		.show(); //@formatter:on
 
 		return choice == JOptionPane.YES_OPTION;
 	}

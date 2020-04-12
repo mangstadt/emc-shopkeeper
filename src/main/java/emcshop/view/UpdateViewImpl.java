@@ -19,7 +19,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -29,6 +28,7 @@ import javax.swing.border.BevelBorder;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import emcshop.gui.DialogBuilder;
 import emcshop.gui.images.Images;
 import emcshop.presenter.LoginPresenter;
 import emcshop.scraper.EmcSession;
@@ -288,7 +288,11 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 				GuiUtils.fireEvents(reportErrorListeners);
 				report.setEnabled(false);
 				report.setText("Reported");
-				JOptionPane.showMessageDialog(UpdateErrorDialog.this, "Error report sent.  Thanks!");
+
+				DialogBuilder.info() //@formatter:off
+					.parent(this)
+					.text("Error report sent. Thanks!")
+				.show(); //@formatter:on
 			});
 
 			JButton save = new JButton("Save Transactions");

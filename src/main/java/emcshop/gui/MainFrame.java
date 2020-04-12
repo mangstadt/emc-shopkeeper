@@ -33,7 +33,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
@@ -203,7 +202,12 @@ public class MainFrame extends JFrame {
 			.add(event -> {
 				context.remove(EmcSession.class);
 				clearSessionMenuItem.setEnabled(false);
-				JOptionPane.showMessageDialog(this, "Session has been cleared.", "Session cleared", JOptionPane.INFORMATION_MESSAGE);
+				
+				DialogBuilder.info()
+					.parent(this)
+					.title("Session cleared")
+					.text("Session has been cleared.")
+				.show();
 			});
 			clearSessionMenuItem.setEnabled(context.get(EmcSession.class) != null);
 			
@@ -548,7 +552,11 @@ public class MainFrame extends JFrame {
 			updateRupeeBalance(rupeeTotal);
 		}
 
-		JOptionPane.showMessageDialog(this, message, "Update complete", JOptionPane.INFORMATION_MESSAGE);
+		DialogBuilder.info() //@formatter:off
+			.parent(this)
+			.title("Update complete")
+			.text(message)
+		.show(); //@formatter:on
 	}
 
 	private void updateLastUpdateDate() {

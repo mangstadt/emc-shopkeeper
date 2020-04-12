@@ -8,7 +8,6 @@ import java.awt.event.MouseEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import emcshop.ExportType;
@@ -33,7 +32,11 @@ public class ExportButton extends JButton {
 				public void actionPerformed(ActionEvent e) {
 					String text = listener.exportData(type);
 					GuiUtils.copyToClipboard(text);
-					JOptionPane.showMessageDialog(owner, "Copied to clipboard.");
+
+					DialogBuilder.info() //@formatter:off
+						.parent(owner)
+						.text("Copied to clipboard.")
+					.show(); //@formatter:on
 				}
 			};
 			action.putValue(Action.NAME, type.toString());

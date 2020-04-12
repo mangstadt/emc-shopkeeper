@@ -94,7 +94,13 @@ public class PaymentsTab extends JPanel {
 						return;
 					}
 
-					int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to delete the selected payment transactions?", "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+					int result = DialogBuilder.question() //@formatter:off
+						.parent(owner)
+						.title("Confirm Deletion")
+						.text("Are you sure you want to delete the selected payment transactions?")
+						.buttons(JOptionPane.YES_NO_OPTION)
+					.show(); //@formatter:on
+
 					if (result != JOptionPane.YES_OPTION) {
 						return;
 					}
@@ -140,7 +146,13 @@ public class PaymentsTab extends JPanel {
 						}
 					}
 
-					int result = JOptionPane.showConfirmDialog(owner, "Are you sure you want to merge these payment transactions?", "Confirm Merge", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+					int result = DialogBuilder.question() //@formatter:off
+						.parent(owner)
+						.title("Confirm Merge")
+						.text("Are you sure you want to merge these payment transactions?")
+						.buttons(JOptionPane.YES_NO_OPTION)
+					.show(); //@formatter:on
+
 					if (result != JOptionPane.YES_OPTION) {
 						return;
 					}
@@ -694,18 +706,17 @@ public class PaymentsTab extends JPanel {
 	private Integer showSplitDialog(PaymentTransactionDb transaction) {
 		int origAmount = Math.abs(transaction.getAmount());
 		do {
-			//@formatter:off
-			String amountStr = JOptionPane.showInputDialog(
-				owner,
-				"Enter the number of rupees you'd like to subtract\n" +
-					"from this payment transaction.  A new payment transaction\n" +
-					"will then be created with the value you enter.\n" +
-					"\n" +
-					"Enter a value between 1 and " + (origAmount - 1) + ":",
-				"Split Payment Transaction",
-				JOptionPane.QUESTION_MESSAGE
-			);
-			//@formatter:on
+			String amountStr = DialogBuilder.question() //@formatter:off
+				.parent(owner)
+				.title("Split Payment Transaction")
+				.text(
+					"Enter the number of rupees you'd like to subtract",
+					"from this payment transaction. A new payment transaction",
+					"will then be created with the value you enter.",
+					"",
+					"Enter a value between 1 and " + (origAmount - 1) + ":")
+			.showInput(); //@formatter:on
+
 			if (amountStr == null) {
 				//user canceled dialog
 				return null;
@@ -715,24 +726,23 @@ public class PaymentsTab extends JPanel {
 			try {
 				amountInt = Integer.valueOf(amountStr);
 			} catch (NumberFormatException e) {
-				//@formatter:off
-				JOptionPane.showMessageDialog(owner,
-					"Invalid number.",
-					"Error",
-					JOptionPane.ERROR_MESSAGE
-				);
+				DialogBuilder.error() //@formatter:off
+					.parent(owner)
+					.title("Error")
+					.text("Invalid number.")
+				.show(); //@formatter:on
 				//@formatter:on
+
 				continue;
 			}
 
 			if (amountInt <= 0 || amountInt >= origAmount) {
-				//@formatter:off
-				JOptionPane.showMessageDialog(owner,
-					"Amount must be between 1 and " + (origAmount - 1) + ".",
-					"Error",
-					JOptionPane.ERROR_MESSAGE
-				);
-				//@formatter:on
+				DialogBuilder.error() //@formatter:off
+					.parent(owner)
+					.title("Error")
+					.text("Amount must be between 1 and " + (origAmount - 1) + ".")
+				.show(); //@formatter:on
+
 				continue;
 			}
 
@@ -788,14 +798,11 @@ public class PaymentsTab extends JPanel {
 				}
 
 				private void showError(String message) {
-					//@formatter:off
-					JOptionPane.showMessageDialog(
-						AssignDialog.this,
-						message,
-						"Error",
-						JOptionPane.ERROR_MESSAGE
-					);
-					//@formatter:on
+					DialogBuilder.error() //@formatter:off
+						.parent(AssignDialog.this)
+						.title("Error")
+						.text(message)
+					.show(); //@formatter:on
 				}
 			});
 

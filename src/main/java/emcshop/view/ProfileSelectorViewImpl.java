@@ -10,8 +10,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 
+import emcshop.gui.DialogBuilder;
 import emcshop.gui.images.Images;
 import emcshop.util.GuiUtils;
 import net.miginfocom.swing.MigLayout;
@@ -74,7 +74,11 @@ public class ProfileSelectorViewImpl extends JDialog implements IProfileSelector
 
 	@Override
 	public void showValidationError(String message) {
-		JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+		DialogBuilder.error() //@formatter:off
+			.parent(this)
+			.title("Error")
+			.text(message)
+		.show(); //@formatter:on
 	}
 
 	@Override
