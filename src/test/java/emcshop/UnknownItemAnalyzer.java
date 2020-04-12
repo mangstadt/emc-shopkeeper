@@ -1,13 +1,13 @@
 package emcshop;
 
-import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.google.common.io.Files;
 
 /**
  * Utility program that reads the unknown item error reports from the error logs
@@ -25,7 +25,7 @@ public class UnknownItemAnalyzer {
 		 */
 		Charset errorLogCharset = Charset.forName("ISO-8859-1");
 
-		String errorLogContent = Files.toString(new File(ERROR_LOG_PATH), errorLogCharset);
+		String errorLogContent = new String(Files.readAllBytes(Paths.get(ERROR_LOG_PATH)), errorLogCharset);
 
 		Pattern p = Pattern.compile("Unknown items: \\[(.*)\\]</Message></Error>");
 		Matcher m = p.matcher(errorLogContent);
@@ -33,19 +33,14 @@ public class UnknownItemAnalyzer {
 		Set<String> unknownItems = new TreeSet<>();
 		while (m.find()) {
 			String names[] = m.group(1).split(", ");
-			for (String name : names) {
-				if (goodItem(name)) {
-					unknownItems.add(name);
-				}
-			}
+
+			Arrays.stream(names) //@formatter:off
+				.filter(UnknownItemAnalyzer::isNotACustomNamedItem)
+				.filter(UnknownItemAnalyzer::isNotInKnownItemsList)
+			.forEach(unknownItems::add); //@formatter:on
 		}
 
-		ItemIndex index = ItemIndex.instance();
 		for (String unknownItem : unknownItems) {
-			if (index.isEmcNameRecognized(unknownItem)) {
-				continue;
-			}
-
 			/*
 			 * Remove the color formatting codes.
 			 */
@@ -71,7 +66,7 @@ public class UnknownItemAnalyzer {
 		}
 	}
 
-	private static boolean goodItem(String name) {
+	private static boolean isNotACustomNamedItem(String name) {
 		/*
 		 * Ignore named books. For example:
 		 * 
@@ -82,5 +77,9 @@ public class UnknownItemAnalyzer {
 		}
 
 		return true;
+	}
+
+	private static boolean isNotInKnownItemsList(String name) {
+		return !ItemIndex.instance().isEmcNameRecognized(name);
 	}
 }
