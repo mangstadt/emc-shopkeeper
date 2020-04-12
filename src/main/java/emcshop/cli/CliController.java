@@ -46,7 +46,7 @@ public class CliController {
 		this.dao = dao;
 	}
 
-	public void update(Integer startAtPage, Integer stopAtPage) throws Throwable {
+	public void update(Integer startAtPage, Integer stopAtPage) throws Exception {
 		LocalDateTime latestTransactionDateFromDb = dao.getLatestTransactionDate();
 		boolean firstUpdate = (latestTransactionDateFromDb == null);
 		Duration oldestAllowablePaymentTransactionAge = null;

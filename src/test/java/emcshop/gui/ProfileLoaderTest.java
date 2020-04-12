@@ -85,7 +85,7 @@ public class ProfileLoaderTest {
 	}
 
 	@Test
-	public void non_existent_user() throws Throwable {
+	public void non_existent_user() throws Exception {
 		String player = profile.getPlayerName();
 
 		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(null);
@@ -100,7 +100,7 @@ public class ProfileLoaderTest {
 	}
 
 	@Test
-	public void private_profile() throws Throwable {
+	public void private_profile() throws Exception {
 		String player = profile.getPlayerName();
 
 		PlayerProfile profile = new PlayerProfile.Builder().playerName(player).private_(true).build();
@@ -120,7 +120,7 @@ public class ProfileLoaderTest {
 	}
 
 	@Test
-	public void image_downloaded() throws Throwable {
+	public void image_downloaded() throws Exception {
 		String player = profile.getPlayerName();
 
 		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);
@@ -159,7 +159,7 @@ public class ProfileLoaderTest {
 	}
 
 	@Test
-	public void image_not_modified() throws Throwable {
+	public void image_not_modified() throws Exception {
 		String player = profile.getPlayerName();
 		temp.newFile(player);
 		temp.newFile(player + ".properties");
@@ -186,7 +186,7 @@ public class ProfileLoaderTest {
 	}
 
 	@Test
-	public void stress_test() throws Throwable {
+	public void stress_test() throws Exception {
 		String player = profile.getPlayerName();
 
 		when(scraper.scrapeProfile(eq(player), any(Document.class))).thenReturn(profile);

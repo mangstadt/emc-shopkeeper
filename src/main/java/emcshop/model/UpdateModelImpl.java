@@ -53,7 +53,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	private RupeeTransaction highestBalance;
 	private Map<Class<? extends RupeeTransaction>, MutableInt> bonusFeeTotals;
 	private boolean downloadStopped = false;
-	private Throwable thrown;
+	private Exception thrown;
 	private Integer rupeeBalance;
 
 	/**
@@ -156,7 +156,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	}
 
 	@Override
-	public Throwable getDownloadError() {
+	public Exception getDownloadError() {
 		return thrown;
 	}
 
@@ -312,18 +312,18 @@ public class UpdateModelImpl implements IUpdateModel {
 				}
 
 				downloadCompleteListeners.fire();
-			} catch (Throwable t) {
+			} catch (Exception e) {
 				//an error occurred during the update
 				synchronized (UpdateModelImpl.this) {
 					stopDownload();
 
 					if (!firstUpdate || transactionsCount == 0) {
 						dao.rollback();
-						throw new RuntimeException(t);
+						throw new RuntimeException(e);
 					}
 
-					thrown = t;
-					logger.log(Level.SEVERE, "Error downloading transactions.", t);
+					thrown = e;
+					logger.log(Level.SEVERE, "Error downloading transactions.", e);
 				}
 
 				downloadErrorListeners.fire();

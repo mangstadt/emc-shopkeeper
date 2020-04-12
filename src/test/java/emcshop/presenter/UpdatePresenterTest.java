@@ -86,7 +86,7 @@ public class UpdatePresenterTest {
 		IUpdateModel model = mock(IUpdateModel.class);
 		ListenerAnswer downloadError = new ListenerAnswer();
 		doAnswer(downloadError).when(model).addDownloadErrorListener(any(ActionListener.class));
-		Throwable thrown = new Throwable();
+		Exception thrown = new Exception();
 		when(model.getDownloadError()).thenReturn(thrown);
 
 		IUpdateView view = mock(IUpdateView.class);
@@ -106,7 +106,7 @@ public class UpdatePresenterTest {
 		IUpdateModel model = mock(IUpdateModel.class);
 		ListenerAnswer downloadError = new ListenerAnswer();
 		doAnswer(downloadError).when(model).addDownloadErrorListener(any(ActionListener.class));
-		Throwable thrown = new Throwable();
+		Exception thrown = new Exception();
 		when(model.getDownloadError()).thenReturn(thrown);
 
 		IUpdateView view = mock(IUpdateView.class);

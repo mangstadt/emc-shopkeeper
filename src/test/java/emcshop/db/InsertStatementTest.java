@@ -24,7 +24,7 @@ public class InsertStatementTest {
 	private static Connection conn;
 
 	@BeforeClass
-	public static void beforeClass() throws Throwable {
+	public static void beforeClass() throws Exception {
 		conn = startMemoryDb();
 
 		//@formatter:off
@@ -47,7 +47,7 @@ public class InsertStatementTest {
 	}
 
 	@AfterClass
-	public static void afterClass() throws Throwable {
+	public static void afterClass() throws Exception {
 		conn.close();
 	}
 
@@ -208,7 +208,7 @@ public class InsertStatementTest {
 		statement.close();
 	}
 
-	private static Connection startMemoryDb() throws Throwable {
+	private static Connection startMemoryDb() throws Exception {
 		Class.forName(EmbeddedDriver.class.getName()).newInstance();
 
 		String jdbcUrl = "jdbc:derby:memory:emc-shopkeeper;create=true";

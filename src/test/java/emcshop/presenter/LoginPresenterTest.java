@@ -38,7 +38,7 @@ public class LoginPresenterTest {
 	}
 
 	@Test
-	public void network_error() throws Throwable {
+	public void network_error() throws Exception {
 		IOException e = new IOException();
 		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(anyString(), anyString())).thenThrow(e);
@@ -54,7 +54,7 @@ public class LoginPresenterTest {
 	}
 
 	@Test
-	public void bad_login() throws Throwable {
+	public void bad_login() throws Exception {
 		ILoginModel model = mock(ILoginModel.class);
 		when(model.login(anyString(), anyString())).thenReturn(null);
 
@@ -68,7 +68,7 @@ public class LoginPresenterTest {
 	}
 
 	@Test
-	public void valid_login_save_password() throws Throwable {
+	public void valid_login_save_password() throws Exception {
 		ILoginModel model = mock(ILoginModel.class);
 		EmcSession session = new EmcSession("username", "password", new BasicCookieStore());
 		when(model.login("username", "password")).thenReturn(session);
@@ -88,7 +88,7 @@ public class LoginPresenterTest {
 	}
 
 	@Test
-	public void valid_login_do_not_save_password() throws Throwable {
+	public void valid_login_do_not_save_password() throws Exception {
 		ILoginModel model = mock(ILoginModel.class);
 		EmcSession session = new EmcSession("username", "password", new BasicCookieStore());
 		when(model.login("username", "password")).thenReturn(session);
@@ -108,7 +108,7 @@ public class LoginPresenterTest {
 	}
 
 	@Test
-	public void cancel_login() throws Throwable {
+	public void cancel_login() throws Exception {
 		ILoginModel model = mock(ILoginModel.class);
 		EmcSession session = new EmcSession("username", "password", new BasicCookieStore());
 		when(model.login("username", "password")).thenReturn(session);
@@ -128,11 +128,11 @@ public class LoginPresenterTest {
 	}
 
 	@Test
-	public void cancel_login_while_logging_in() throws Throwable {
+	public void cancel_login_while_logging_in() throws Exception {
 		ILoginModel model = mock(ILoginModel.class);
 		stub(model.login(anyString(), anyString())).toAnswer(new Answer<EmcSession>() {
 			@Override
-			public EmcSession answer(InvocationOnMock invocation) throws Throwable {
+			public EmcSession answer(InvocationOnMock invocation) throws Exception {
 				Thread.sleep(300); //simulate network latency
 				return new EmcSession("", "", new BasicCookieStore());
 			}

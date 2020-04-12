@@ -205,7 +205,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	}
 
 	@Override
-	public boolean showDownloadError(Throwable thrown) {
+	public boolean showDownloadError(Exception thrown) {
 		stopTimer();
 		cancel.setEnabled(false);
 		stop.setEnabled(false);
@@ -265,7 +265,7 @@ public class UpdateViewImpl extends JDialog implements IUpdateView {
 	private class UpdateErrorDialog extends JDialog {
 		private boolean saveTransactions = false;
 
-		private UpdateErrorDialog(final Throwable thrown) {
+		private UpdateErrorDialog(Exception thrown) {
 			super(UpdateViewImpl.this, "Error");
 			setModal(true);
 			setDefaultCloseOperation(DISPOSE_ON_CLOSE);

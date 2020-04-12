@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class PlayerProfileScraperTest {
 	@Test
-	public void scrapeProfile() throws Throwable {
+	public void scrapeProfile() throws Exception {
 		PlayerProfile profile = scrape("the_boulder");
 		assertEquals("The_Boulder", profile.getPlayerName());
 		assertFalse(profile.isPrivate());
@@ -27,7 +27,7 @@ public class PlayerProfileScraperTest {
 	}
 
 	@Test
-	public void scrapeProfile_no_rank() throws Throwable {
+	public void scrapeProfile_no_rank() throws Exception {
 		PlayerProfile profile = scrape("shavingfoam");
 		assertEquals("shavingfoam", profile.getPlayerName());
 		assertFalse(profile.isPrivate());
@@ -39,13 +39,13 @@ public class PlayerProfileScraperTest {
 	}
 
 	@Test
-	public void scrapeProfile_player_does_not_exist() throws Throwable {
+	public void scrapeProfile_player_does_not_exist() throws Exception {
 		PlayerProfile profile = scrape("does-not-exist");
 		assertNull(profile);
 	}
 
 	@Test
-	public void scrapeProfile_private_profile() throws Throwable {
+	public void scrapeProfile_private_profile() throws Exception {
 		PlayerProfile profile = scrape("private");
 		assertEquals("private", profile.getPlayerName());
 		assertTrue(profile.isPrivate());
@@ -56,13 +56,13 @@ public class PlayerProfileScraperTest {
 	}
 
 	@Test
-	public void scrapeProfile_missing_join_date() throws Throwable {
+	public void scrapeProfile_missing_join_date() throws Exception {
 		PlayerProfile profile = scrape("no-join-date");
 		assertNull(profile.getJoined());
 	}
 
 	@Test
-	public void scrapeProfile_bad_join_date() throws Throwable {
+	public void scrapeProfile_bad_join_date() throws Exception {
 		PlayerProfile profile = scrape("bad-join-date");
 		assertNull(profile.getJoined());
 	}

@@ -2,13 +2,13 @@ package emcshop;
 
 public class ReportSenderTest {
 	//Tests this class and the PHP script.
-	public static void main(String args[]) throws Throwable {
+	public static void main(String args[]) throws Exception {
 		ReportSender rs = new ReportSender();
 
 		try {
 			Integer.parseInt("test");
-		} catch (Throwable t) {
-			rs.report(null, t);
+		} catch (Exception e) {
+			rs.report(null, e);
 		}
 
 		System.in.read(); //stop the program from terminating

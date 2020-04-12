@@ -19,7 +19,7 @@ public interface IUpdateView {
 	 * @return true if the user wants to save the transactions that have been
 	 * parsed so false, false if the user wants to discard them
 	 */
-	boolean showDownloadError(Throwable thrown);
+	boolean showDownloadError(Exception thrown);
 
 	/**
 	 * Registers a listener that is called when the user cancels the download.

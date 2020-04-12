@@ -29,7 +29,7 @@ public class UpdateViewCli implements IUpdateView {
 	}
 
 	@Override
-	public boolean showDownloadError(Throwable thrown) {
+	public boolean showDownloadError(Exception thrown) {
 		out.println("Error downloading transactions.  Download will be canceled.");
 		out.println(ExceptionUtils.getStackTrace(thrown));
 		return false;

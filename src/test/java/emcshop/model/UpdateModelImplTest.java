@@ -76,7 +76,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Before
-	public void before() throws Throwable {
+	public void before() throws Exception {
 		uncaughtExceptionHandler = mock(UncaughtExceptionHandler.class);
 		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
 
@@ -85,7 +85,7 @@ public class UpdateModelImplTest {
 		dao = mock(DbDao.class);
 		when(dao.isBonusFeeTransaction(any(RupeeTransaction.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
-			public Boolean answer(InvocationOnMock invocation) throws Throwable {
+			public Boolean answer(InvocationOnMock invocation) throws Exception {
 				Object arg = invocation.getArguments()[0];
 				return arg instanceof DailySigninBonus || arg instanceof HorseSummonFee;
 			}
@@ -95,7 +95,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void startDownload_bad_session() throws Throwable {
+	public void startDownload_bad_session() throws Exception {
 		UpdateModelImpl model;
 		{
 			RupeeTransactionReader.Builder builder = new MockBuilder(new InvalidCredentialsException("username", "password"));
@@ -124,7 +124,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void startDownload_IOException_on_build_reader() throws Throwable {
+	public void startDownload_IOException_on_build_reader() throws Exception {
 		UpdateModelImpl model;
 		{
 			RupeeTransactionReader.Builder builder = new MockBuilder(new IOException());
@@ -153,7 +153,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void startDownload_error_during_first_update() throws Throwable {
+	public void startDownload_error_during_first_update() throws Exception {
 		ShopTransaction t1 = shop();
 		RupeeTransaction t2 = raw();
 		PaymentTransaction t3 = payment();
@@ -216,7 +216,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void startDownload_error() throws Throwable {
+	public void startDownload_error() throws Exception {
 		ShopTransaction t1 = shop();
 		RupeeTransaction t2 = raw();
 		PaymentTransaction t3 = payment();
@@ -279,7 +279,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void startDownload_completed() throws Throwable {
+	public void startDownload_completed() throws Exception {
 		ShopTransaction t1 = shop();
 		RupeeTransaction t2 = raw();
 		PaymentTransaction t3 = payment();
@@ -338,7 +338,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void startDownload_multiple_pages() throws Throwable {
+	public void startDownload_multiple_pages() throws Exception {
 		ShopTransaction t1 = shop();
 		RupeeTransaction t2 = raw();
 		PaymentTransaction t3 = payment();
@@ -398,7 +398,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void startDownload_ignore_old_payment_transactions() throws Throwable {
+	public void startDownload_ignore_old_payment_transactions() throws Exception {
 		PaymentTransaction t1 = payment();
 		PaymentTransaction t2 = payment();
 		PaymentTransaction t3 = payment();
@@ -449,7 +449,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void stopDownload() throws Throwable {
+	public void stopDownload() throws Exception {
 		ShopTransaction t1 = shop();
 		RupeeTransaction t2 = raw();
 		PaymentTransaction t3 = payment();
@@ -508,7 +508,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void saveTransactions_no_bonus_fees() throws Throwable {
+	public void saveTransactions_no_bonus_fees() throws Exception {
 		ShopTransaction t1 = shop();
 		RupeeTransaction t2 = raw();
 		PaymentTransaction t3 = payment();
@@ -547,7 +547,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void saveTransactions_one_bonus_fee() throws Throwable {
+	public void saveTransactions_one_bonus_fee() throws Exception {
 		ShopTransaction t1 = shop();
 		RupeeTransaction t2 = raw();
 		PaymentTransaction t3 = payment();
@@ -595,7 +595,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void saveTransactions_multiple_bonus_fees() throws Throwable {
+	public void saveTransactions_multiple_bonus_fees() throws Exception {
 		ShopTransaction t1 = shop();
 		RupeeTransaction t2 = raw();
 		PaymentTransaction t3 = payment();
@@ -647,7 +647,7 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
-	public void item_name_translation() throws Throwable {
+	public void item_name_translation() throws Exception {
 		final ShopTransaction t1 = new ShopTransaction.Builder().ts(dg.next()).item("Apple").build();
 		final ShopTransaction t2 = new ShopTransaction.Builder().ts(dg.next()).item("Black Stn Glass").build();
 		final ShopTransaction t3 = new ShopTransaction.Builder().ts(dg.next()).item("FooBar").build();
@@ -803,7 +803,7 @@ public class UpdateModelImplTest {
 
 			when(reader.getCurrentPageNumber()).thenAnswer(new Answer<Integer>() {
 				@Override
-				public Integer answer(InvocationOnMock invocation) throws Throwable {
+				public Integer answer(InvocationOnMock invocation) throws Exception {
 					return curPage + 1;
 				}
 			});

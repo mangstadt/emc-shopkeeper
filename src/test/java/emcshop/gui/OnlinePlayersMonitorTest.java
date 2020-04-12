@@ -19,7 +19,7 @@ import com.github.mangstadt.emc.net.EmcWebsiteConnection;
  */
 public class OnlinePlayersMonitorTest {
 	@Test
-	public void getPlayerServer() throws Throwable {
+	public void getPlayerServer() throws Exception {
 		EmcWebsiteConnection connection = mock(EmcWebsiteConnection.class);
 		when(connection.getOnlinePlayers(any(EmcServer.class))).thenReturn(Collections.<String> emptyList());
 		when(connection.getOnlinePlayers(EmcServer.SMP1)).thenReturn(Arrays.asList("Notch"));

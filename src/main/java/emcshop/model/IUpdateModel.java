@@ -109,9 +109,9 @@ public interface IUpdateModel {
 
 	/**
 	 * Gets the error that occurred during the update, if any.
-	 * @return the error or null if no error occured
+	 * @return the error or null if no error occurred
 	 */
-	Throwable getDownloadError();
+	Exception getDownloadError();
 
 	/**
 	 * Starts the download. This call is non-blocking.

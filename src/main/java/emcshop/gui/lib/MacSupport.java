@@ -87,8 +87,7 @@ public class MacSupport {
 			 * sets the title and the dock icon image. An application with full
 			 * permissions may not throw this exception.
 			 */
-		} catch (Throwable t) {
-			//ignore
+		} catch (Exception ignore) {
 		}
 	}
 
@@ -100,7 +99,7 @@ public class MacSupport {
 		try {
 			Class.forName("com.apple.eawt.Application");
 			return true;
-		} catch (Throwable t) {
+		} catch (Exception e) {
 			return false;
 		}
 	}

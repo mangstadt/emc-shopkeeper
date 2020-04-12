@@ -72,7 +72,7 @@ public class UpdatePresenter {
 	}
 
 	private void onDownloadError() {
-		Throwable thrown = model.getDownloadError();
+		Exception thrown = model.getDownloadError();
 		boolean saveTransactions = view.showDownloadError(thrown);
 		if (saveTransactions) {
 			model.saveTransactions();

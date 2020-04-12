@@ -17,7 +17,7 @@ public class ProfileSelectorModelImplTest {
 	public TemporaryFolder temp = new TemporaryFolder();
 
 	@Test
-	public void getAvailableProfiles() throws Throwable {
+	public void getAvailableProfiles() throws Exception {
 		temp.newFolder("one");
 		temp.newFolder("two");
 		temp.newFolder("three");
@@ -31,7 +31,7 @@ public class ProfileSelectorModelImplTest {
 	}
 
 	@Test
-	public void createProfile() throws Throwable {
+	public void createProfile() throws Exception {
 		temp.newFolder("one");
 		temp.newFile("two");
 

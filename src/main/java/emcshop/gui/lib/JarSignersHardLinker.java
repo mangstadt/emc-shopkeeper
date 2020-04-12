@@ -79,8 +79,8 @@ public class JarSignersHardLinker {
 			SoftReference<?> r = (SoftReference<?>) o;
 			Object o2 = r.get();
 			hardRefs.add(o2);
-		} catch (Throwable t) {
-			logger.log(Level.FINE, "Problem accessing field: " + fieldName, t);
+		} catch (Exception e) {
+			logger.log(Level.FINE, "Problem accessing field: " + fieldName, e);
 		}
 	}
 
@@ -96,8 +96,8 @@ public class JarSignersHardLinker {
 			m.setAccessible(true);
 
 			m.invoke(instance);
-		} catch (Throwable t) {
-			logger.log(Level.FINE, "Problem calling method: " + methodName, t);
+		} catch (Exception e) {
+			logger.log(Level.FINE, "Problem calling method: " + methodName, e);
 		}
 	}
 
@@ -194,8 +194,8 @@ public class JarSignersHardLinker {
 				for (JarFile jar : jars) {
 					makeHardSignersRef(jar);
 				}
-			} catch (Throwable t) {
-				logger.log(Level.SEVERE, "Problem preloading resources.", t);
+			} catch (Exception e) {
+				logger.log(Level.SEVERE, "Problem preloading resources.", e);
 			}
 		});
 		thread.setDaemon(true);

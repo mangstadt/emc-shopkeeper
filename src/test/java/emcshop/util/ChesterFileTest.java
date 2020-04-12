@@ -10,7 +10,7 @@ import org.junit.Test;
 
 public class ChesterFileTest {
 	@Test
-	public void parse() throws Throwable {
+	public void parse() throws Exception {
 		//@formatter:off
 		String text =
 		"1\n" +
@@ -34,7 +34,7 @@ public class ChesterFileTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void parse_invalid_player_coords() throws Throwable {
+	public void parse_invalid_player_coords() throws Exception {
 		//@formatter:off
 		String text =
 		"1\n" +
@@ -47,7 +47,7 @@ public class ChesterFileTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void parse_too_few_player_coords() throws Throwable {
+	public void parse_too_few_player_coords() throws Exception {
 		//@formatter:off
 		String text =
 		"1\n" +
@@ -60,7 +60,7 @@ public class ChesterFileTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void parse_invalid_item_quantity() throws Throwable {
+	public void parse_invalid_item_quantity() throws Exception {
 		//@formatter:off
 		String text =
 		"1\n" +
@@ -73,7 +73,7 @@ public class ChesterFileTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void parse_missing_item_quantity() throws Throwable {
+	public void parse_missing_item_quantity() throws Exception {
 		//@formatter:off
 		String text =
 		"1\n" +
@@ -86,7 +86,7 @@ public class ChesterFileTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void parse_no_player_coords() throws Throwable {
+	public void parse_no_player_coords() throws Exception {
 		//@formatter:off
 		String text =
 		"1";
@@ -96,7 +96,7 @@ public class ChesterFileTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void parse_empty() throws Throwable {
+	public void parse_empty() throws Exception {
 		//@formatter:off
 		String text =
 		"";

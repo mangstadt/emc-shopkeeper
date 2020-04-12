@@ -91,8 +91,8 @@ public class EMCShopkeeper {
 		Properties props = new Properties();
 		try (InputStream in = EMCShopkeeper.class.getResourceAsStream("/info.properties")) {
 			props.load(in);
-		} catch (Throwable t) {
-			throw new ExceptionInInitializerError(t);
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError(e);
 		}
 
 		VERSION = props.getProperty("version");
@@ -118,7 +118,7 @@ public class EMCShopkeeper {
 
 	private static MainFrame mainFrame;
 
-	public static void main(String[] args) throws Throwable {
+	public static void main(String[] args) throws Exception {
 		//stop the random SecurityExceptions from being thrown
 		JarSignersHardLinker.go();
 
@@ -220,7 +220,7 @@ public class EMCShopkeeper {
 		}
 	}
 
-	private static void launchCli(Path dbDir, Settings settings, EmcShopArguments args) throws Throwable {
+	private static void launchCli(Path dbDir, Settings settings, EmcShopArguments args) throws Exception {
 		AppContext context = AppContext.instance();
 		context.add(settings);
 
@@ -266,7 +266,7 @@ public class EMCShopkeeper {
 		}
 	}
 
-	private static void launchGui(Path profileDir, Path dbDir, Settings settings, LogManager logManager) throws Throwable {
+	private static void launchGui(Path profileDir, Path dbDir, Settings settings, LogManager logManager) throws Exception {
 		initializeMac();
 
 		//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
