@@ -5,11 +5,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 /**
  * Contains classpath-related utility methods.
@@ -62,25 +67,24 @@ public final class ClasspathUtils {
 		String packagePath = packageName.replace(".", File.separator) + File.separator;
 
 		String cp = System.getProperty("java.class.path");
-		String paths[] = cp.split(File.pathSeparator);
-		for (String path : paths) {
-			File file = new File(path);
-			if (!file.exists()) {
-				continue;
-			}
+		List<Path> files = Arrays.stream(cp.split(File.pathSeparator)) //@formatter:off
+			.map(Paths::get)
+			.filter(Files::exists)
+		.collect(Collectors.toList()); //@formatter:on
 
-			if (file.isDirectory()) {
-				File dir = new File(file, packagePath);
-				File dirFiles[] = dir.listFiles();
-				if (dirFiles != null) {
-					for (File f : dirFiles) {
-						filesInPackage.add(f.toURI());
-					}
+		for (Path file : files) {
+			if (Files.isDirectory(file)) {
+				Path dir = file.resolve(packagePath);
+				if (Files.isDirectory(dir)) {
+					Files.list(dir) //@formatter:off
+						.map(Path::toUri)
+					.forEach(filesInPackage::add); //@formatter:on
 				}
+
 				continue;
 			}
 
-			if (file.getName().endsWith(".jar")) {
+			if (file.getFileName().toString().endsWith(".jar")) {
 				filesInPackage.addAll(listFilesInPackageFromJar(file, packageName));
 				continue;
 			}
@@ -90,10 +94,10 @@ public final class ClasspathUtils {
 	}
 
 	//this is in its own method so it can be unit tested (I can't add a JAR to the classpath when the unit tests are run)
-	static List<URI> listFilesInPackageFromJar(File jar, String packageName) throws IOException {
+	static List<URI> listFilesInPackageFromJar(Path jar, String packageName) throws IOException {
 		packageName = packageName.replace(".", "/");
 
-		try (JarFile jarFile = new JarFile(jar)) {
+		try (JarFile jarFile = new JarFile(jar.toFile())) {
 			List<URI> filesInPackage = new ArrayList<>();
 			Enumeration<JarEntry> entries = jarFile.entries();
 			while (entries.hasMoreElements()) {
@@ -103,7 +107,7 @@ public final class ClasspathUtils {
 				String entryName = entry.getName();
 
 				if (!entry.isDirectory() && entryName.startsWith(packageName)) {
-					URI uri = jar.toURI();
+					URI uri = jar.toUri();
 					uri = URI.create("jar:" + uri.getPath() + "!/" + entryName);
 					filesInPackage.add(uri);
 				}

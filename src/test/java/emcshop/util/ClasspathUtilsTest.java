@@ -4,9 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.Test;
@@ -51,17 +52,17 @@ public class ClasspathUtilsTest {
 	public void listFilesInPackage() throws Exception {
 		List<URI> actual = ClasspathUtils.listFilesInPackage("emcshop.util.cp");
 		assertEquals(2, actual.size());
-		assertTrue(actual.toString(), actual.contains(new File("target/test-classes/emcshop/util/cp/test1").toURI()));
-		assertTrue(actual.toString(), actual.contains(new File("target/test-classes/emcshop/util/cp/test2").toURI()));
+		assertTrue(actual.toString(), actual.contains(Paths.get("target", "test-classes", "emcshop", "util", "cp", "test1").toUri()));
+		assertTrue(actual.toString(), actual.contains(Paths.get("target", "test-classes", "emcshop", "util", "cp", "test2").toUri()));
 	}
 
 	@Test
 	public void listFilesInPackageFromJar() throws Exception {
-		File jarFile = new File("src/test/resources/emcshop/util/test.jar");
+		Path jarFile = Paths.get("src", "test", "resources", "emcshop", "util", "test.jar");
 		List<URI> actual = ClasspathUtils.listFilesInPackageFromJar(jarFile, "emcshop.util.cp");
 		assertEquals(1, actual.size());
 
-		URI jarFileUri = jarFile.toURI();
+		URI jarFileUri = jarFile.toUri();
 		assertTrue(actual.toString(), actual.contains(URI.create("jar:" + jarFileUri.getPath() + "!/emcshop/util/cp/test3")));
 	}
 }

@@ -16,10 +16,9 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -64,7 +63,7 @@ public class ProfileLoaderTest {
 	.build();
 	//@formatter:on
 
-	private File portraitFile, propertiesFile;
+	private Path portraitFile, propertiesFile;
 	private ProfileDownloadedListener listener;
 	private JLabel label;
 	private PlayerProfileScraper scraper = mock(PlayerProfileScraper.class);
@@ -75,8 +74,9 @@ public class ProfileLoaderTest {
 
 	@Before
 	public void before() {
-		portraitFile = new File(temp.getRoot(), profile.getPlayerName());
-		propertiesFile = new File(temp.getRoot(), profile.getPlayerName() + ".properties");
+		Path root = temp.getRoot().toPath();
+		portraitFile = root.resolve(profile.getPlayerName());
+		propertiesFile = root.resolve(profile.getPlayerName() + ".properties");
 
 		listener = mock(ProfileDownloadedListener.class);
 		label = mock(JLabel.class);
@@ -95,8 +95,8 @@ public class ProfileLoaderTest {
 
 		verify(label).setIcon(any(Icon.class));
 		verify(listener, never()).onProfileDownloaded(any(PlayerProfile.class));
-		assertFalse(portraitFile.exists());
-		assertFalse(propertiesFile.exists());
+		assertFalse(Files.exists(portraitFile));
+		assertFalse(Files.exists(propertiesFile));
 	}
 
 	@Test
@@ -111,10 +111,12 @@ public class ProfileLoaderTest {
 
 		verify(label).setIcon(any(Icon.class));
 		verify(listener).onProfileDownloaded(profile);
-		assertFalse(portraitFile.exists());
+		assertFalse(Files.exists(portraitFile));
 
 		Properties props = new Properties();
-		props.load(new FileInputStream(propertiesFile));
+		try (InputStream in = Files.newInputStream(propertiesFile)) {
+			props.load(in);
+		}
 		assertEquals(2, props.size());
 		assertEquals("true", props.get("private"));
 	}
@@ -133,11 +135,13 @@ public class ProfileLoaderTest {
 		verify(listener).onProfileDownloaded(profile);
 
 		byte[] expected = portrait;
-		byte[] actual = IOUtils.toByteArray(new FileInputStream(portraitFile));
+		byte[] actual = Files.readAllBytes(portraitFile);
 		assertArrayEquals(expected, actual);
 
 		Properties props = new Properties();
-		props.load(new FileInputStream(propertiesFile));
+		try (InputStream in = Files.newInputStream(propertiesFile)) {
+			props.load(in);
+		}
 		assertEquals(4, props.size());
 		assertEquals("false", props.get("private"));
 		assertEquals("Gold Supporter", props.get("rank"));
@@ -174,11 +178,13 @@ public class ProfileLoaderTest {
 		verify(label).setIcon(any(Icon.class));
 		verify(listener).onProfileDownloaded(profile);
 
-		assertEquals(0, portraitFile.length()); //file should not have been modified
+		assertEquals(0, Files.size(portraitFile)); //file should not have been modified
 
 		//properties file should have been modified, though
 		Properties props = new Properties();
-		props.load(new FileInputStream(propertiesFile));
+		try (InputStream in = Files.newInputStream(propertiesFile)) {
+			props.load(in);
+		}
 		assertEquals(4, props.size());
 		assertEquals("false", props.get("private"));
 		assertEquals("Gold Supporter", props.get("rank"));
@@ -201,11 +207,13 @@ public class ProfileLoaderTest {
 		verify(listener, atLeastOnce()).onProfileDownloaded(profile);
 
 		byte[] expected = portrait;
-		byte[] actual = IOUtils.toByteArray(new FileInputStream(portraitFile));
+		byte[] actual = Files.readAllBytes(portraitFile);
 		assertArrayEquals(expected, actual);
 
 		Properties props = new Properties();
-		props.load(new FileInputStream(propertiesFile));
+		try (InputStream in = Files.newInputStream(propertiesFile)) {
+			props.load(in);
+		}
 		assertEquals(4, props.size());
 		assertEquals("false", props.get("private"));
 		assertEquals("Gold Supporter", props.get("rank"));
@@ -235,8 +243,7 @@ public class ProfileLoaderTest {
 				when(client.execute(any(HttpUriRequest.class))).thenReturn(response);
 				when(response.getEntity()).thenReturn(entity);
 				when(entity.getContent()).thenReturn(in);
-			} catch (Exception e) {
-				//ignore
+			} catch (Exception ignore) {
 			}
 
 			return client;
