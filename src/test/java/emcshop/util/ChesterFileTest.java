@@ -26,7 +26,7 @@ public class ChesterFileTest {
 		assertEquals(20.0, file.getPlayerY(), 0.1);
 		assertEquals(30.0, file.getPlayerZ(), 0.1);
 
-		Map<String, Integer> expectedItems = new HashMap<String, Integer>();
+		Map<String, Integer> expectedItems = new HashMap<>();
 		expectedItems.put("19", 64);
 		expectedItems.put("5:3", 12);
 		expectedItems.put("Zombie Virus", 5);

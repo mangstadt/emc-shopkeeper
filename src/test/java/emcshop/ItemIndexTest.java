@@ -109,8 +109,8 @@ public class ItemIndexTest {
 
 	@Test
 	public void getItemNames() {
-		Set<String> actual = new HashSet<String>(mockIndex.getItemNames());
-		Set<String> expected = new HashSet<String>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion", "Oak Log", "Ender Pearl", "Diamond Chestplate"));
+		Set<String> actual = new HashSet<>(mockIndex.getItemNames());
+		Set<String> expected = new HashSet<>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion", "Oak Log", "Ender Pearl", "Diamond Chestplate"));
 		assertEquals(expected, actual);
 	}
 
@@ -126,8 +126,8 @@ public class ItemIndexTest {
 	 */
 	@Test
 	public void validate_no_duplicate_names() {
-		Set<String> names = new HashSet<String>();
-		Set<String> duplicates = new HashSet<String>();
+		Set<String> names = new HashSet<>();
+		Set<String> duplicates = new HashSet<>();
 		List<Leaf> itemElements = liveIndex.select("/Items/Item");
 		for (Leaf itemElement : itemElements) {
 			String name = itemElement.attribute("name");
@@ -159,7 +159,7 @@ public class ItemIndexTest {
 			}
 		}
 
-		List<Map.Entry<String, Collection<String>>> problemItems = new ArrayList<Map.Entry<String, Collection<String>>>();
+		List<Map.Entry<String, Collection<String>>> problemItems = new ArrayList<>();
 		for (Map.Entry<String, Collection<String>> entry : emcNameToDisplayNames.asMap().entrySet()) {
 			Collection<String> displayNames = entry.getValue();
 			if (displayNames.size() > 1) {
@@ -196,7 +196,7 @@ public class ItemIndexTest {
 			idToDisplayNames.put(id, name);
 		}
 
-		List<Map.Entry<String, Collection<String>>> problemItems = new ArrayList<Map.Entry<String, Collection<String>>>();
+		List<Map.Entry<String, Collection<String>>> problemItems = new ArrayList<>();
 		for (Map.Entry<String, Collection<String>> entry : idToDisplayNames.asMap().entrySet()) {
 			Collection<String> displayNames = entry.getValue();
 			if (displayNames.size() > 1) {

@@ -249,7 +249,7 @@ public class ItemsTable extends GroupableColumnsTable {
 			itemGroupsToDisplay = itemGroups;
 			sortData();
 		} else {
-			itemGroupsToDisplay = new ArrayList<ItemGroup>();
+			itemGroupsToDisplay = new ArrayList<>();
 			for (ItemGroup itemGroup : itemGroups) {
 				String itemName = itemGroup.getItem();
 				if (filterList.isFiltered(itemName)) {

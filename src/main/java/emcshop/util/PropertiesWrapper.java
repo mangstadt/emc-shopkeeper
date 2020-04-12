@@ -50,7 +50,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	public List<String> list(String key) {
 		String value = get(key);
 		String split[] = (value == null || value.isEmpty()) ? new String[0] : value.split("\\s*,\\s*");
-		return new ArrayList<String>(Arrays.asList(split));
+		return new ArrayList<>(Arrays.asList(split));
 	}
 
 	public void list(String key, List<String> list) {

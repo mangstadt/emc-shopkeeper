@@ -110,7 +110,7 @@ public abstract class GroupableColumnsTable extends JTable {
 
 			for (Object obj : v) {
 				if (obj instanceof ColumnGroup) {
-					List<ColumnGroup> groups = ((ColumnGroup) obj).getColumnGroups(c, new ArrayList<ColumnGroup>(g));
+					List<ColumnGroup> groups = ((ColumnGroup) obj).getColumnGroups(c, new ArrayList<>(g));
 					if (groups != null) {
 						return groups;
 					}
@@ -180,7 +180,7 @@ public abstract class GroupableColumnsTable extends JTable {
 
 		public void addColumnGroup(ColumnGroup g) {
 			if (columnGroups == null) {
-				columnGroups = new ArrayList<ColumnGroup>();
+				columnGroups = new ArrayList<>();
 			}
 			columnGroups.add(g);
 		}
@@ -191,7 +191,7 @@ public abstract class GroupableColumnsTable extends JTable {
 			}
 
 			for (ColumnGroup cGroup : columnGroups) {
-				List<ColumnGroup> v_ret = cGroup.getColumnGroups(col, new ArrayList<ColumnGroup>());
+				List<ColumnGroup> v_ret = cGroup.getColumnGroups(col, new ArrayList<>());
 				if (v_ret != null) {
 					return v_ret;
 				}

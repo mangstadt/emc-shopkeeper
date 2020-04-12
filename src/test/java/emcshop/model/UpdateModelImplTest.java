@@ -583,7 +583,7 @@ public class UpdateModelImplTest {
 		verify(dao).updateBonusesFeesSince(t4.getTs());
 		verify(dao).updateBonusesFeesLatestTransactionDate(t4.getTs());
 
-		Map<Class<? extends RupeeTransaction>, MutableInt> totals = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
+		Map<Class<? extends RupeeTransaction>, MutableInt> totals = new HashMap<>();
 		totals.put(DailySigninBonus.class, new MutableInt(100));
 		verify(dao).updateBonusFeeTotals(totals);
 
@@ -635,7 +635,7 @@ public class UpdateModelImplTest {
 		verify(dao).updateBonusesFeesSince(t6.getTs());
 		verify(dao).updateBonusesFeesLatestTransactionDate(t4.getTs());
 
-		Map<Class<? extends RupeeTransaction>, MutableInt> totals = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
+		Map<Class<? extends RupeeTransaction>, MutableInt> totals = new HashMap<>();
 		totals.put(DailySigninBonus.class, new MutableInt(100));
 		totals.put(HorseSummonFee.class, new MutableInt(200));
 		verify(dao).updateBonusFeeTotals(totals);
@@ -714,7 +714,7 @@ public class UpdateModelImplTest {
 	}
 
 	private RupeeTransaction raw() {
-		return new RupeeTransaction.Builder<RupeeTransaction.Builder<?>>().ts(dg.next()).build();
+		return new RupeeTransaction.Builder<>().ts(dg.next()).build();
 	}
 
 	private PaymentTransaction payment() {
@@ -750,9 +750,9 @@ public class UpdateModelImplTest {
 	}
 
 	private class MockReaderBuilder {
-		private final List<List<RupeeTransaction>> pages = new ArrayList<List<RupeeTransaction>>();
-		private final Map<Integer, IOException> exceptions = new HashMap<Integer, IOException>();
-		private final Map<Integer, Integer> pauses = new HashMap<Integer, Integer>();
+		private final List<List<RupeeTransaction>> pages = new ArrayList<>();
+		private final Map<Integer, IOException> exceptions = new HashMap<>();
+		private final Map<Integer, Integer> pauses = new HashMap<>();
 		private int curPage = 0;
 
 		public MockReaderBuilder exception(IOException t) {

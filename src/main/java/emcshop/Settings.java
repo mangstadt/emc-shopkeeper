@@ -176,7 +176,7 @@ public class Settings {
 		showProfilesOnStartup = false;
 		showQuantitiesInStacks = false;
 		reportUnknownItems = false;
-		reportedUnknownItems = new ArrayList<String>();
+		reportedUnknownItems = new ArrayList<>();
 
 		backupsEnabled = true;
 		backupFrequency = 7;

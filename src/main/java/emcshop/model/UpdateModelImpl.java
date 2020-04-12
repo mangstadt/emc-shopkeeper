@@ -136,7 +136,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	@Override
 	public Thread startDownload() {
 		started = LocalDateTime.now();
-		bonusFeeTotals = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
+		bonusFeeTotals = new HashMap<>();
 
 		DownloadThread thread = new DownloadThread();
 		thread.setDaemon(true);

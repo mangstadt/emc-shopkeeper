@@ -100,7 +100,7 @@ public class InsertStatement {
 	 * @return this
 	 */
 	public InsertStatement nextRow() {
-		currentRow = new HashMap<String, SqlColumn>();
+		currentRow = new HashMap<>();
 		rows.add(currentRow);
 		return this;
 	}

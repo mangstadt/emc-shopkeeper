@@ -202,7 +202,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 				List<ItemGroup> itemGroupsList;
 				{
 					//query database
-					itemGroupsList = new ArrayList<ItemGroup>(dao.getItemGroups(range.getFrom(), range.getTo(), transactionType));
+					itemGroupsList = new ArrayList<>(dao.getItemGroups(range.getFrom(), range.getTo(), transactionType));
 
 					//sort by item name
 					Collections.sort(itemGroupsList, (a, b) -> a.getItem().compareToIgnoreCase(b.getItem()));

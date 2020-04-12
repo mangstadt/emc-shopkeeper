@@ -115,7 +115,7 @@ public class BackupManagerTest {
 		assertEquals(1, bm.getVersion());
 		assertFileContent(versionFile, "1");
 	}
-	
+
 	@Test
 	public void setVersionToLatest_with_existing_version_file() throws Exception {
 		Path dbBackupDir = dbDir.resolveSibling("backups-folder");
@@ -375,7 +375,7 @@ public class BackupManagerTest {
 
 	private static void assertDirectoryContents(Path directory, String... expectedFileAndFolderNames) throws IOException {
 		Set<String> actual = Files.list(directory).map(Path::getFileName).map(Path::toString).collect(Collectors.toSet());
-		Set<String> expected = new HashSet<String>(Arrays.asList(expectedFileAndFolderNames));
+		Set<String> expected = new HashSet<>(Arrays.asList(expectedFileAndFolderNames));
 		assertEquals(expected, actual);
 	}
 }

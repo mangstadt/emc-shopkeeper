@@ -7,7 +7,7 @@ import java.util.List;
 
 public class DateGenerator {
 	private LocalDateTime date = LocalDateTime.now();
-	private final List<LocalDateTime> generated = new ArrayList<LocalDateTime>();
+	private final List<LocalDateTime> generated = new ArrayList<>();
 	private final ChronoUnit field;
 	private final int amount;
 

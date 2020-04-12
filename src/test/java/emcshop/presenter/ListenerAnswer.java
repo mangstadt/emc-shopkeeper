@@ -12,7 +12,7 @@ import org.mockito.stubbing.Answer;
  * {@link ActionListener} objects that a presenter sends to a view or model.
  */
 public class ListenerAnswer implements Answer<Object> {
-	private final List<ActionListener> listeners = new ArrayList<ActionListener>();
+	private final List<ActionListener> listeners = new ArrayList<>();
 
 	@Override
 	public Object answer(InvocationOnMock invocation) {

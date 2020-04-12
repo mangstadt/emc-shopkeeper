@@ -902,7 +902,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 			categories.add(1, LOW);
 			categories.add(MISC);
 
-			setModel(new DefaultComboBoxModel<CategoryInfo>(categories.toArray(new CategoryInfo[0])));
+			setModel(new DefaultComboBoxModel<>(categories.toArray(new CategoryInfo[0])));
 			setEditable(false);
 
 			setRenderer(new ListCellRenderer<CategoryInfo>() {

@@ -63,7 +63,7 @@ public class ItemSuggestField extends JSuggestField {
 	 * @param itemNames the item names to populate this control with
 	 */
 	public static void init(List<String> itemNames) throws SQLException {
-		ItemSuggestField.itemNames = new Vector<String>(itemNames);
+		ItemSuggestField.itemNames = new Vector<>(itemNames);
 
 		ImmutableMap.Builder<String, ImageIcon> builder = ImmutableMap.builder();
 		for (String itemName : itemNames) {

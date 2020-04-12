@@ -1,8 +1,8 @@
 package emcshop.util;
 
 import static emcshop.util.TestUtils.assertFileContent;
-import static emcshop.util.TestUtils.mkfile;
 import static emcshop.util.TestUtils.mkdir;
+import static emcshop.util.TestUtils.mkfile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -80,7 +80,7 @@ public class ZipUtilsTest {
 				.collect(Collectors.toSet()); //@formatter:on
 			}
 
-			Set<String> expectedPaths = new HashSet<String>(Arrays.asList( //@formatter:off
+			Set<String> expectedPaths = new HashSet<>(Arrays.asList( //@formatter:off
 				"/",
 				"/" + dir.getFileName() + "/",
 				"/" + dir.getFileName() + "/" + file1.getFileName(),
@@ -100,7 +100,7 @@ public class ZipUtilsTest {
 
 			Set<Path> actualPaths = Files.walk(destinationDir).collect(Collectors.toSet());
 
-			Set<Path> expectedPaths = new HashSet<Path>(Arrays.asList( //@formatter:off
+			Set<Path> expectedPaths = new HashSet<>(Arrays.asList( //@formatter:off
 				destinationDir,
 				destinationDir.resolve(dir.getFileName()),
 				destinationDir.resolve(dir.getFileName() + "/" + file1.getFileName()),
@@ -152,7 +152,7 @@ public class ZipUtilsTest {
 			assertFileContent(zipFs.getPath(dir.getFileName() + "/" + dir2.getFileName() + "/" + file3.getFileName()), "data3");
 		}
 
-		Set<String> expectedPaths = new HashSet<String>(Arrays.asList( //@formatter:off
+		Set<String> expectedPaths = new HashSet<>(Arrays.asList( //@formatter:off
 			"/",
 			"/" + dir.getFileName() + "/",
 			"/" + dir.getFileName() + "/" + file1.getFileName(),

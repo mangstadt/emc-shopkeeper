@@ -79,7 +79,7 @@ public class PlayersPanel extends JPanel {
 		super(new MigLayout("fillx, insets 0"));
 
 		//add all the data to Lists so they can be sorted
-		this.playerGroups = new ArrayList<PlayerGroup>(playerGroups);
+		this.playerGroups = new ArrayList<>(playerGroups);
 		for (PlayerGroup playerGroup : playerGroups) {
 			Collection<ItemGroup> itemGroups = playerGroup.getItems().values();
 			this.itemGroups.putAll(playerGroup, itemGroups);
@@ -167,7 +167,7 @@ public class PlayersPanel extends JPanel {
 		removeAll();
 		table = null;
 
-		final JList<PlayerGroup> list = new JList<>(new Vector<PlayerGroup>(displayedPlayers));
+		final JList<PlayerGroup> list = new JList<>(new Vector<>(displayedPlayers));
 		list.setCellRenderer(new ListCellRenderer<PlayerGroup>() {
 			private static final int profileImageSize = 32;
 			private final ProfileDownloadedListener onImageDownloaded = profile -> {
@@ -441,7 +441,7 @@ public class PlayersPanel extends JPanel {
 
 	private List<PlayerGroup> filterPlayers() {
 		if (filteredPlayerNames.isEmpty()) {
-			return new LinkedList<PlayerGroup>(playerGroups);
+			return new LinkedList<>(playerGroups);
 		}
 
 		List<PlayerGroup> filteredPlayers = new LinkedList<>();
@@ -467,7 +467,7 @@ public class PlayersPanel extends JPanel {
 				itemGroups = this.itemGroups.get(playerGroup);
 				filteredItems.putAll(playerGroup, itemGroups);
 			} else {
-				itemGroups = new ArrayList<ItemGroup>();
+				itemGroups = new ArrayList<>();
 				for (ItemGroup itemGroup : this.itemGroups.get(playerGroup)) {
 					String itemName = itemGroup.getItem();
 					if (filteredItemNames.isFiltered(itemName)) {

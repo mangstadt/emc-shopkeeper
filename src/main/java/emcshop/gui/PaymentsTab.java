@@ -442,7 +442,7 @@ public class PaymentsTab extends JPanel {
 			private final List<Row> data;
 
 			public Model(List<PaymentTransactionDb> data) {
-				this.data = new ArrayList<Row>(data.size());
+				this.data = new ArrayList<>(data.size());
 				for (PaymentTransactionDb transaction : data) {
 					Row row = new Row(transaction);
 					this.data.add(row);

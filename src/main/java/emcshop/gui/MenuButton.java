@@ -100,7 +100,7 @@ public class MenuButton extends JToggleButton {
 	 * @return an object for customizing the menu item
 	 */
 	public MenuItemAdder<JMenuItem> addMenuItem(String text) {
-		return new MenuItemAdder<JMenuItem>(new JMenuItem(text));
+		return new MenuItemAdder<>(new JMenuItem(text));
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class MenuButton extends JToggleButton {
 	 * @return an object for customizing the menu item
 	 */
 	public MenuItemAdder<JCheckBoxMenuItem> addCheckboxMenuItem(String text) {
-		return new MenuItemAdder<JCheckBoxMenuItem>(new JCheckBoxMenuItem(text));
+		return new MenuItemAdder<>(new JCheckBoxMenuItem(text));
 	}
 
 	/**
@@ -121,7 +121,7 @@ public class MenuButton extends JToggleButton {
 	public MenuItemAdder<JRadioButtonMenuItem> addRadioButtonMenuItem(String text, ButtonGroup group) {
 		JRadioButtonMenuItem item = new JRadioButtonMenuItem(text);
 		group.add(item);
-		return new MenuItemAdder<JRadioButtonMenuItem>(item);
+		return new MenuItemAdder<>(item);
 	}
 
 	/**

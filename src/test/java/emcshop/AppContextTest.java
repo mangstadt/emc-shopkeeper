@@ -17,8 +17,8 @@ public class AppContextTest {
 	public void test() {
 		AppContext context = new AppContext();
 
-		ArrayList<Object> arrayList = new ArrayList<Object>();
-		LinkedList<Object> linkedList = new LinkedList<Object>();
+		ArrayList<Object> arrayList = new ArrayList<>();
+		LinkedList<Object> linkedList = new LinkedList<>();
 		context.add(arrayList);
 		context.add(linkedList);
 

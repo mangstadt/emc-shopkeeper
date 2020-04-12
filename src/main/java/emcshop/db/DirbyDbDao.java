@@ -353,7 +353,7 @@ public abstract class DirbyDbDao implements DbDao {
 					 * of the aliases, then it has been here the longest. Simply
 					 * reassign everything to point to this row.
 					 */
-					idsToReassign = new ArrayList<Integer>();
+					idsToReassign = new ArrayList<>();
 					for (Item item : itemAliases) {
 						idsToReassign.add(item.id);
 					}

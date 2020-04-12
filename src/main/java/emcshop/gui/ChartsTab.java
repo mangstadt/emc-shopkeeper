@@ -226,7 +226,7 @@ public class ChartsTab extends JPanel {
 		}
 
 		itemNamesPanel = new JPanel(new MigLayout("insets 0"));
-		itemNames = new ArrayList<ItemSuggestField>();
+		itemNames = new ArrayList<>();
 		for (int i = 0; i < 6; i++) {
 			String wrap = (i % 2 == 1) ? ", wrap" : "";
 

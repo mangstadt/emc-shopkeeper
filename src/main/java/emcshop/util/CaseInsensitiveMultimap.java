@@ -17,7 +17,7 @@ public class CaseInsensitiveMultimap<V> extends ForwardingListMultimap<String, V
 	private final ListMultimap<String, V> map = ArrayListMultimap.create();
 
 	public static <V> ListMultimap<String, V> create() {
-		return new CaseInsensitiveMultimap<V>();
+		return new CaseInsensitiveMultimap<>();
 	}
 
 	@Override

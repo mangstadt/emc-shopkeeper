@@ -10,7 +10,7 @@ import javax.swing.ImageIcon;
  * Caches images.
  */
 public class ImageCache {
-	protected final Map<String, ImageIcon> cache = Collections.synchronizedMap(new HashMap<String, ImageIcon>());
+	protected final Map<String, ImageIcon> cache = Collections.synchronizedMap(new HashMap<>());
 
 	public ImageIcon get(String name, int maxSize) {
 		return cache.get(key(name, maxSize));

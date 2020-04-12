@@ -30,7 +30,7 @@ public class UnknownItemAnalyzer {
 		Pattern p = Pattern.compile("Unknown items: \\[(.*)\\]</Message></Error>");
 		Matcher m = p.matcher(errorLogContent);
 
-		Set<String> unknownItems = new TreeSet<String>();
+		Set<String> unknownItems = new TreeSet<>();
 		while (m.find()) {
 			String names[] = m.group(1).split(", ");
 			for (String name : names) {

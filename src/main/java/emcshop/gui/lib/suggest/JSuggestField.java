@@ -100,9 +100,9 @@ public class JSuggestField extends JTextField {
 	 */
 	public JSuggestField(Window owner) {
 		super();
-		data = new Vector<String>();
-		suggestions = new Vector<String>();
-		listeners = new LinkedList<ActionListener>();
+		data = new Vector<>();
+		suggestions = new Vector<>();
+		listeners = new LinkedList<>();
 		owner.addComponentListener(new ComponentListener() {
 			@Override
 			public void componentShown(ComponentEvent e) {

@@ -253,7 +253,7 @@ public class DirbyDbDaoTest {
 
 	@Test
 	public void getItemNames() throws Exception {
-		List<String> expected = new ArrayList<String>(ItemIndex.instance().getItemNames());
+		List<String> expected = new ArrayList<>(ItemIndex.instance().getItemNames());
 		expected.add("item");
 		Collections.sort(expected, String.CASE_INSENSITIVE_ORDER);
 
@@ -311,7 +311,7 @@ public class DirbyDbDaoTest {
 		assertFalse(rs.next());
 
 		Map<Integer, Integer> invActual = inventory().all();
-		Map<Integer, Integer> invExpected = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> invExpected = new HashMap<>();
 		invExpected.put(a, 6);
 		invExpected.put(d, 4);
 		assertEquals(invExpected, invActual);
@@ -409,7 +409,7 @@ public class DirbyDbDaoTest {
 		dao.insertTransaction(transaction, true);
 
 		Map<Integer, Integer> actual = inventory().all();
-		Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> expected = new HashMap<>();
 		expected.put(appleId, 90);
 		expected.put(diamondId, 20);
 		assertEquals(expected, actual);
@@ -867,7 +867,7 @@ public class DirbyDbDaoTest {
 		inventory().item(appleId).quantity(5).insert();
 		inventory().item(diamondId).quantity(10).insert();
 
-		List<Inventory> inventory = new ArrayList<Inventory>(dao.getInventory());
+		List<Inventory> inventory = new ArrayList<>(dao.getInventory());
 		assertEquals(2, inventory.size());
 		Collections.sort(inventory, new Comparator<Inventory>() {
 			@Override
@@ -903,7 +903,7 @@ public class DirbyDbDaoTest {
 		dao.upsertInventory("Diamond", 1, true);
 
 		Map<Integer, Integer> actual = inventory().all();
-		Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> expected = new HashMap<>();
 		expected.put(appleId, 7);
 		expected.put(diamondId, 1);
 		assertEquals(expected, actual);
@@ -921,7 +921,7 @@ public class DirbyDbDaoTest {
 		dao.deleteInventory(Arrays.asList(ai, ci));
 
 		Map<Integer, Integer> actual = inventory().all();
-		Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> expected = new HashMap<>();
 		expected.put(b, 2);
 		assertEquals(expected, actual);
 
@@ -937,7 +937,7 @@ public class DirbyDbDaoTest {
 
 		bonusesFees().test();
 
-		Map<Class<? extends RupeeTransaction>, MutableInt> map = new HashMap<Class<? extends RupeeTransaction>, MutableInt>();
+		Map<Class<? extends RupeeTransaction>, MutableInt> map = new HashMap<>();
 		map.put(DailySigninBonus.class, new MutableInt(800));
 		map.put(HorseSummonFee.class, new MutableInt(-200));
 		map.put(LockTransaction.class, new MutableInt(-500));
@@ -1586,7 +1586,7 @@ public class DirbyDbDaoTest {
 		}
 
 		public Map<Integer, String> all() throws SQLException {
-			Map<Integer, String> map = new HashMap<Integer, String>();
+			Map<Integer, String> map = new HashMap<>();
 			ResultSet rs = query("SELECT id, name FROM items");
 			while (rs.next()) {
 				map.put(rs.getInt("id"), rs.getString("name"));
@@ -1667,7 +1667,7 @@ public class DirbyDbDaoTest {
 		}
 
 		public List<String> names() throws SQLException {
-			List<String> players = new ArrayList<String>();
+			List<String> players = new ArrayList<>();
 			ResultSet rs = query("SELECT name FROM players ORDER BY id");
 			while (rs.next()) {
 				players.add(rs.getString(1));
@@ -1715,7 +1715,7 @@ public class DirbyDbDaoTest {
 		}
 
 		public Map<Integer, Integer> all() throws SQLException {
-			Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+			Map<Integer, Integer> map = new HashMap<>();
 			ResultSet rs = query("SELECT item, quantity FROM inventory");
 			while (rs.next()) {
 				map.put(rs.getInt("item"), rs.getInt("quantity"));
@@ -1964,7 +1964,7 @@ public class DirbyDbDaoTest {
 	}
 
 	private static Map<String, ItemGroup> itemMap(Collection<ItemGroup> itemGroups) {
-		Map<String, ItemGroup> map = new HashMap<String, ItemGroup>();
+		Map<String, ItemGroup> map = new HashMap<>();
 		for (ItemGroup itemGroup : itemGroups) {
 			map.put(itemGroup.getItem(), itemGroup);
 		}
@@ -1972,7 +1972,7 @@ public class DirbyDbDaoTest {
 	}
 
 	private static Map<String, PlayerGroup> playerMap(Collection<PlayerGroup> playerGroups) {
-		Map<String, PlayerGroup> map = new HashMap<String, PlayerGroup>();
+		Map<String, PlayerGroup> map = new HashMap<>();
 		for (PlayerGroup playerGroup : playerGroups) {
 			map.put(playerGroup.getPlayer().getName(), playerGroup);
 		}
