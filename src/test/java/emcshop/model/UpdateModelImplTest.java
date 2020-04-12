@@ -83,12 +83,9 @@ public class UpdateModelImplTest {
 		dg = new DateGenerator(ChronoUnit.HOURS, -1);
 
 		dao = mock(DbDao.class);
-		when(dao.isBonusFeeTransaction(any(RupeeTransaction.class))).thenAnswer(new Answer<Boolean>() {
-			@Override
-			public Boolean answer(InvocationOnMock invocation) throws Exception {
-				Object arg = invocation.getArguments()[0];
-				return arg instanceof DailySigninBonus || arg instanceof HorseSummonFee;
-			}
+		when(dao.isBonusFeeTransaction(any(RupeeTransaction.class))).thenAnswer(invocation -> {
+			Object arg = invocation.getArguments()[0];
+			return arg instanceof DailySigninBonus || arg instanceof HorseSummonFee;
 		});
 
 		AppContext.init(reportSender, dao, session);
@@ -801,13 +798,7 @@ public class UpdateModelImplTest {
 				}
 			});
 
-			when(reader.getCurrentPageNumber()).thenAnswer(new Answer<Integer>() {
-				@Override
-				public Integer answer(InvocationOnMock invocation) throws Exception {
-					return curPage + 1;
-				}
-			});
-
+			when(reader.getCurrentPageNumber()).thenAnswer(invocation -> curPage + 1);
 			when(reader.getRupeeBalance()).thenReturn(123);
 
 			return reader;

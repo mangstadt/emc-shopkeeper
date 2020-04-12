@@ -14,8 +14,6 @@ import java.io.IOException;
 
 import org.apache.http.impl.client.BasicCookieStore;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import emcshop.model.ILoginModel;
 import emcshop.scraper.EmcSession;
@@ -130,24 +128,17 @@ public class LoginPresenterTest {
 	@Test
 	public void cancel_login_while_logging_in() throws Exception {
 		ILoginModel model = mock(ILoginModel.class);
-		stub(model.login(anyString(), anyString())).toAnswer(new Answer<EmcSession>() {
-			@Override
-			public EmcSession answer(InvocationOnMock invocation) throws Exception {
-				Thread.sleep(300); //simulate network latency
-				return new EmcSession("", "", new BasicCookieStore());
-			}
+		stub(model.login(anyString(), anyString())).toAnswer(invocation -> {
+			Thread.sleep(300); //simulate network latency
+			return new EmcSession("", "", new BasicCookieStore());
+
 		});
 
 		ILoginView view = mock(ILoginView.class);
 
 		final LoginPresenter presenter = new LoginPresenter(view, model);
 
-		Thread t = new Thread() {
-			@Override
-			public void run() {
-				presenter.onLogin();
-			}
-		};
+		Thread t = new Thread(() -> presenter.onLogin());
 		t.start();
 
 		Thread.sleep(100);

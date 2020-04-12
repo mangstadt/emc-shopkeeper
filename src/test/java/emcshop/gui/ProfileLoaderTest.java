@@ -220,29 +220,26 @@ public class ProfileLoaderTest {
 
 	private ProfileLoader create(Path cacheDir, PlayerProfileScraper scraper) {
 		ProfileLoader loader = new ProfileLoader(cacheDir);
-		loader.setSessionFactory(new ProfileLoader.EmcWebsiteSessionFactory() {
-			@Override
-			public CloseableHttpClient createSession() {
-				/*
-				 * Create a mock client that just returns empty HTML pages. This
-				 * has to be done, otherwise Jsoup.parse() will go into an
-				 * infinite loop when a mocked InputStream is passed into it.
-				 */
-				CloseableHttpClient client = mock(CloseableHttpClient.class, withSettings().defaultAnswer(RETURNS_MOCKS));
-				CloseableHttpResponse response = mock(CloseableHttpResponse.class, withSettings().defaultAnswer(RETURNS_MOCKS));
-				HttpEntity entity = mock(HttpEntity.class, withSettings().defaultAnswer(RETURNS_MOCKS));
-				InputStream in = new ByteArrayInputStream("<html />".getBytes());
+		loader.setSessionFactory(() -> {
+			/*
+			 * Create a mock client that just returns empty HTML pages. This has
+			 * to be done, otherwise Jsoup.parse() will go into an infinite loop
+			 * when a mocked InputStream is passed into it.
+			 */
+			CloseableHttpClient client = mock(CloseableHttpClient.class, withSettings().defaultAnswer(RETURNS_MOCKS));
+			CloseableHttpResponse response = mock(CloseableHttpResponse.class, withSettings().defaultAnswer(RETURNS_MOCKS));
+			HttpEntity entity = mock(HttpEntity.class, withSettings().defaultAnswer(RETURNS_MOCKS));
+			InputStream in = new ByteArrayInputStream("<html />".getBytes());
 
-				try {
-					when(client.execute(any(HttpUriRequest.class))).thenReturn(response);
-					when(response.getEntity()).thenReturn(entity);
-					when(entity.getContent()).thenReturn(in);
-				} catch (Exception e) {
-					//ignore
-				}
-
-				return client;
+			try {
+				when(client.execute(any(HttpUriRequest.class))).thenReturn(response);
+				when(response.getEntity()).thenReturn(entity);
+				when(entity.getContent()).thenReturn(in);
+			} catch (Exception e) {
+				//ignore
 			}
+
+			return client;
 		});
 		loader.setProfilePageScraper(scraper);
 		loader.start();

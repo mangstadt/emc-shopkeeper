@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -869,12 +868,7 @@ public class DirbyDbDaoTest {
 
 		List<Inventory> inventory = new ArrayList<>(dao.getInventory());
 		assertEquals(2, inventory.size());
-		Collections.sort(inventory, new Comparator<Inventory>() {
-			@Override
-			public int compare(Inventory a, Inventory b) {
-				return a.getItem().compareTo(b.getItem());
-			}
-		});
+		Collections.sort(inventory, (a, b) -> a.getItem().compareTo(b.getItem()));
 
 		Iterator<Inventory> it = inventory.iterator();
 
