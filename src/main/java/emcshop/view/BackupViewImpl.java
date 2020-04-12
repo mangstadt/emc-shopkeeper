@@ -170,12 +170,12 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 	}
 
 	@Override
-	public void addStartRestoreListener(final ActionListener listener) {
+	public void addStartRestoreListener(ActionListener listener) {
 		restoreListeners.add(listener);
 	}
 
 	@Override
-	public void addDeleteBackupListener(final ActionListener listener) {
+	public void addDeleteBackupListener(ActionListener listener) {
 		deleteListeners.add(listener);
 	}
 

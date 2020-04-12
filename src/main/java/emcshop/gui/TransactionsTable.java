@@ -242,7 +242,7 @@ public class TransactionsTable extends JTable {
 		}
 
 		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, final int row, final int col) {
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, final int col) {
 			if (value == null) {
 				return null;
 			}

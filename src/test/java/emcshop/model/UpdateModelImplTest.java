@@ -726,7 +726,7 @@ public class UpdateModelImplTest {
 		return new HorseSummonFee.Builder().amount(100).ts(dg.next()).build();
 	}
 
-	private static ShopTransactionDb trans(final ShopTransaction transaction) {
+	private static ShopTransactionDb trans(ShopTransaction transaction) {
 		return argThat(new ArgumentMatcher<ShopTransactionDb>() {
 			@Override
 			public boolean matches(Object argument) {
@@ -736,7 +736,7 @@ public class UpdateModelImplTest {
 		});
 	}
 
-	private static PaymentTransactionDb trans(final PaymentTransaction transaction) {
+	private static PaymentTransactionDb trans(PaymentTransaction transaction) {
 		return argThat(new ArgumentMatcher<PaymentTransactionDb>() {
 			@Override
 			public boolean matches(Object argument) {

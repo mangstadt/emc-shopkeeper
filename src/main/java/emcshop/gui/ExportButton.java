@@ -18,11 +18,11 @@ import emcshop.util.GuiUtils;
 public class ExportButton extends JButton {
 	private final JPopupMenu exportMenu;
 
-	public ExportButton(final Window owner, final ExportListener listener) {
+	public ExportButton(Window owner, ExportListener listener) {
 		setText("<html><font size=2>Export \u00bb");
 
 		exportMenu = new JPopupMenu();
-		for (final ExportType type : ExportType.values()) {
+		for (ExportType type : ExportType.values()) {
 			AbstractAction action = new AbstractAction() {
 				@Override
 				public String toString() {

@@ -51,7 +51,7 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
 	 * @param action the Action to be invoked when the button is invoked
 	 * @param column the column to which the button renderer/editor is added
 	 */
-	public ButtonColumn(final JTable table, Action action, int column) {
+	public ButtonColumn(JTable table, Action action, int column) {
 		this.table = table;
 		this.action = action;
 

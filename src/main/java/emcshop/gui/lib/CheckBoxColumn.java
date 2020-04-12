@@ -47,7 +47,7 @@ public class CheckBoxColumn extends AbstractCellEditor implements TableCellRende
 	 * @param action the Action to be invoked when the button is invoked
 	 * @param column the column to which the button renderer/editor is added
 	 */
-	public CheckBoxColumn(final JTable table, Action action, int column) {
+	public CheckBoxColumn(JTable table, Action action, int column) {
 		this.table = table;
 		this.action = action;
 

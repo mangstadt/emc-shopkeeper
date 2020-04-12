@@ -25,7 +25,7 @@ public class MacSupport {
 	 * image.
 	 * @param handler handles the various Mac events
 	 */
-	public static void init(String title, boolean enablePreferences, Image dockImage, final MacHandler handler) {
+	public static void init(String title, boolean enablePreferences, Image dockImage, MacHandler handler) {
 		try {
 			//enable Mac menu bar
 			System.setProperty("apple.laf.useScreenMenuBar", "true");

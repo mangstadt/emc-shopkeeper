@@ -38,7 +38,7 @@ public class PlayerCellPanel extends JPanel {
 		add(serverLabel);
 	}
 
-	public void setPlayer(final String playerName) {
+	public void setPlayer(String playerName) {
 		setPlayer(playerName, downloadedProfile -> profileLoader.getPortrait(playerName, playerLabel, 16));
 	}
 

@@ -337,7 +337,7 @@ public class PaymentsTab extends JPanel {
 			}
 
 			@Override
-			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, final int col) {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 				if (value == null) {
 					return null;
 				}
@@ -749,7 +749,7 @@ public class PaymentsTab extends JPanel {
 		private final TransactionTypeComboBox transactionType;
 		private boolean canceled = false;
 
-		public AssignDialog(Window owner, final PaymentTransactionDb paymentTransaction) {
+		public AssignDialog(Window owner, PaymentTransactionDb paymentTransaction) {
 			super(owner, "Assign Payment Transaction");
 			setModal(true);
 			setResizable(false);

@@ -37,13 +37,13 @@ public class DisabledItemsComboBox extends JComboBox {
 	}
 
 	@Override
-	public void removeItemAt(final int anIndex) {
+	public void removeItemAt(int anIndex) {
 		super.removeItemAt(anIndex);
 		disabledItemIndexes.remove(anIndex);
 	}
 
 	@Override
-	public void removeItem(final Object anObject) {
+	public void removeItem(Object anObject) {
 		for (int i = 0; i < getItemCount(); i++) {
 			if (getItemAt(i) == anObject) {
 				disabledItemIndexes.remove(i);

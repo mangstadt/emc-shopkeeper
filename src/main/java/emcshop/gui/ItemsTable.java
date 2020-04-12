@@ -76,7 +76,7 @@ public class ItemsTable extends GroupableColumnsTable {
 	 * @param showQtyInStacks true to display item quantities in stacks, false
 	 * not to
 	 */
-	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending, final ShopTransactionType shopTransactionType, boolean showQtyInStacks) {
+	public ItemsTable(List<ItemGroup> itemGroups, Column sortedBy, boolean sortedByAscending, ShopTransactionType shopTransactionType, boolean showQtyInStacks) {
 		this.itemGroups = itemGroups;
 		this.itemGroupsToDisplay = itemGroups;
 		prevColumnClicked = sortedBy;

@@ -128,7 +128,7 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 	}
 
 	@Override
-	public void addStartRestoreListener(final ActionListener listener) {
+	public void addStartRestoreListener(ActionListener listener) {
 		restoreListeners.add(listener);
 	}
 

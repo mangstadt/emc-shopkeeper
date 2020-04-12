@@ -33,7 +33,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	private final JPanel messagePanel;
 	private String origUsername;
 
-	public LoginViewImpl(final Window owner) {
+	public LoginViewImpl(Window owner) {
 		super(owner, "Login");
 		setModal(true);
 		setResizable(false);

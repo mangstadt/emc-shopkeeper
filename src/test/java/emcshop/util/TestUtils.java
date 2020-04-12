@@ -50,7 +50,7 @@ public class TestUtils {
 	 * @param value the value
 	 * @return the value to pass to Mockito
 	 */
-	public static int gte(final int value) {
+	public static int gte(int value) {
 		return intThat(new BaseMatcher<Integer>() {
 			@Override
 			public void describeTo(Description description) {

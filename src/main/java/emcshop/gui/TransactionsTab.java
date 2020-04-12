@@ -194,7 +194,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		}
 	}
 
-	public void showItems(final DateRange range, final ShopTransactionType transactionType) {
+	public void showItems(DateRange range, final ShopTransactionType transactionType) {
 		owner.startProgress("Querying...");
 		Thread t = new Thread(() -> {
 			try {
@@ -242,7 +242,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		t.start();
 	}
 
-	public void showPlayers(final DateRange range, final ShopTransactionType transactionType) {
+	public void showPlayers(DateRange range, final ShopTransactionType transactionType) {
 		owner.startProgress("Querying...");
 		Thread t = new Thread(() -> {
 			try {
@@ -283,7 +283,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 		t.start();
 	}
 
-	private void showTransactions(final DateRange range, final ShopTransactionType transactionType) {
+	private void showTransactions(DateRange range, final ShopTransactionType transactionType) {
 		owner.startProgress("Querying...");
 		Thread t = new Thread(() -> {
 			try {

@@ -487,7 +487,7 @@ public class PlayersPanel extends JPanel {
 		return filteredItems;
 	}
 
-	private void sortData(List<PlayerGroup> players, final ListMultimap<PlayerGroup, ItemGroup> items) {
+	private void sortData(List<PlayerGroup> players, ListMultimap<PlayerGroup, ItemGroup> items) {
 		switch (sort) {
 		case PLAYER:
 			//sort by player name

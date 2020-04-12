@@ -227,7 +227,7 @@ public final class GuiUtils {
 	 * "Shakes" a dialog box, like Mac OSX does when you enter a wrong password.
 	 * @param dialog the dialog to shake
 	 */
-	public static void shake(final JDialog dialog) {
+	public static void shake(JDialog dialog) {
 		final int SHAKE_DISTANCE = 20;
 		final double SHAKE_CYCLE = 50;
 		final int SHAKE_DURATION = 200;

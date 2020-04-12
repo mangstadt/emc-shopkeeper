@@ -451,7 +451,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 			model.setData(inventory);
 		}
 
-		private void filter(final FilterList filterItems, final CategoryInfo filterCategory) {
+		private void filter(FilterList filterItems, final CategoryInfo filterCategory) {
 			if (filterItems.isEmpty() && filterCategory == ALL) {
 				rowSorter.setRowFilter(null);
 				return;

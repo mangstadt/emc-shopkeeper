@@ -57,7 +57,7 @@ public class ProfileSelectorViewImpl extends JDialog implements IProfileSelector
 	}
 
 	@Override
-	public void addCancelListener(final ActionListener listener) {
+	public void addCancelListener(ActionListener listener) {
 		quit.addActionListener(listener);
 		GuiUtils.addCloseDialogListener(this, listener);
 	}
