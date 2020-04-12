@@ -118,7 +118,7 @@ public class InsertStatement {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO ").append(tableName).append(' ');
-		sql.append('(').append(StringUtils.join(columnNames, ", ")).append(')');
+		sql.append('(').append(String.join(", ", columnNames)).append(')');
 		sql.append(" VALUES ");
 
 		int nonEmptyRows = 0;

@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
@@ -856,7 +855,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 
 		if (!where.isEmpty()) {
-			sql += " WHERE " + StringUtils.join(where, " AND ");
+			sql += " WHERE " + String.join(" AND ", where);
 		}
 		sql += " ORDER BY t.ts";
 
@@ -978,7 +977,7 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 
 		if (!where.isEmpty()) {
-			sql += " WHERE " + StringUtils.join(where, " AND ");
+			sql += " WHERE " + String.join(" AND ", where);
 		}
 
 		try (PreparedStatement stmt = stmt(sql)) {
@@ -1252,7 +1251,7 @@ public abstract class DirbyDbDao implements DbDao {
 			assignments.add(columnName + " = " + columnName + " + ?");
 		}
 
-		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET " + StringUtils.join(assignments, ", "))) {
+		try (PreparedStatement stmt = stmt("UPDATE bonuses_fees SET " + String.join(", ", assignments))) {
 			int i = 1;
 			for (Integer value : values) {
 				stmt.setInt(i++, value);

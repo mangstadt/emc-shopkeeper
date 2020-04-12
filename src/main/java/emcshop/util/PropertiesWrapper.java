@@ -25,8 +25,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-
 import emcshop.gui.WindowState;
 
 public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
@@ -54,7 +52,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	}
 
 	public void list(String key, List<String> list) {
-		set(key, StringUtils.join(list, ","));
+		set(key, String.join(", ", list));
 	}
 
 	public void set(String key, Object value) {
