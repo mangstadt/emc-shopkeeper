@@ -35,9 +35,8 @@ public class PlayerProfileScraper {
 	 * @param playerName the player name
 	 * @param document the profile page
 	 * @return the scraped page or null if the player does not exist
-	 * @throws IOException if there's a problem downloading the profile
 	 */
-	public PlayerProfile scrapeProfile(String playerName, Document document) throws IOException {
+	public PlayerProfile scrapeProfile(String playerName, Document document) {
 		boolean isPrivate = isPrivate(document);
 		String scrapedPlayerName = scrapePlayerName(document);
 		if (!isPrivate && scrapedPlayerName == null) {

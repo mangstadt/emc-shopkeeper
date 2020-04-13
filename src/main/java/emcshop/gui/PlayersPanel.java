@@ -265,7 +265,7 @@ public class PlayersPanel extends JPanel {
 	}
 
 	private ImageIcon buildProfilePortrait(String playerName) {
-		ImageIcon portrait = profileLoader.getPortrait(playerName, profileImageSize);
+		ImageIcon portrait = profileLoader.getPortraitFromCache(playerName, profileImageSize);
 		if (portrait == null) {
 			//user has no portrait
 			return null;

@@ -145,7 +145,7 @@ public class ProfileLoader {
 	 * @param listener invoked when the image has been assigned to the label
 	 */
 	public void getPortrait(String playerName, JLabel label, int maxSize, ProfileDownloadedListener listener) {
-		ImageIcon image = getPortrait(playerName, maxSize);
+		ImageIcon image = getPortraitFromCache(playerName, maxSize);
 		if (image == null) {
 			image = portraitCache.unknown(maxSize);
 		}
@@ -161,7 +161,7 @@ public class ProfileLoader {
 	 * @param playerName the player name
 	 * @return the cached image or null if no image exists in the cache
 	 */
-	public ImageIcon getPortrait(String playerName, int maxSize) {
+	public ImageIcon getPortraitFromCache(String playerName, int maxSize) {
 		ImageIcon image = portraitCache.get(playerName, maxSize);
 		if (image != null) {
 			return image;
@@ -178,7 +178,9 @@ public class ProfileLoader {
 			data = Files.readAllBytes(file);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Problem loading profile image from cache.", e);
+			return null;
 		}
+
 		image = new ImageIcon(data);
 		image = Images.scale(image, maxSize);
 		portraitCache.put(playerName, maxSize, image);
@@ -232,7 +234,13 @@ public class ProfileLoader {
 					jobsBeingProcessed++;
 					downloadQueue.put(job.playerName);
 				} catch (InterruptedException e) {
-					//should never be thrown because the queue doesn't have a max size
+					/*
+					 * The "put" method will wait until there is enough room in
+					 * the queue before adding it to the queue. While it's
+					 * waiting, an InterruptedException could be thrown.
+					 * However, this should never happen because the queue
+					 * doesn't have a max size.
+					 */
 					logger.log(Level.SEVERE, "Queue's \"put\" operation was interrupted.", e);
 				}
 			}
@@ -317,6 +325,7 @@ public class ProfileLoader {
 							if (data != null) {
 								try {
 									Files.write(cachedFile, data);
+									portraitCache.clear(playerName);
 								} catch (IOException e) {
 									logger.log(Level.WARNING, "Problem saving image to cache.", e);
 								}
@@ -333,8 +342,11 @@ public class ProfileLoader {
 
 					waiting = waitList.get(playerName);
 					if (waiting.isEmpty()) {
-						//there are no labels waiting to be updated
-						//should never happen, there should always be at least 1 label waiting to be updated
+						/*
+						 * There are no labels waiting to be updated. This
+						 * should never happen; there should always be at least
+						 * 1 label waiting to be updated.
+						 */
 						continue;
 					}
 				}
@@ -381,7 +393,7 @@ public class ProfileLoader {
 	public interface ProfileDownloadedListener {
 		/**
 		 * Called when a player's profile page is downloaded.
-		 * @param label the label that was updated
+		 * @param profile the profile that was downloaded
 		 */
 		void onProfileDownloaded(PlayerProfile profile);
 	}
