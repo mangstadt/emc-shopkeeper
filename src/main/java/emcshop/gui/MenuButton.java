@@ -78,7 +78,7 @@ public class MenuButton extends JToggleButton {
 
 			//"show()" is supposed to set the location of the menu relative to the parent component, but it never seems to set the location correctly for some reason
 			//however, we still need to call "show()" because the menu won't work right otherwise
-			popupMenu.show(MenuButton.this, x, y);
+			popupMenu.show(this, x, y);
 
 			//this sets the menu's on-screen location (what we want)
 			popupMenu.setLocation(x, y);
