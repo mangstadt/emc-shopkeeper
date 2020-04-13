@@ -1,10 +1,12 @@
 package emcshop.cli;
 
 import java.io.PrintStream;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -91,17 +93,16 @@ public class CliController {
 	}
 
 	public void query(String query, String format) throws Exception {
-		Collection<ItemGroup> itemGroups;
 		LocalDateTime from, to;
 		if (query.isEmpty()) {
-			itemGroups = dao.getItemGroups(null, null, ShopTransactionType.MY_SHOP);
 			from = to = null;
 		} else {
-			LocalDateTime range[] = parseDateRange(query);
+			LocalDateTime range[] = parseDateRange(query, dao);
 			from = range[0];
 			to = range[1];
-			itemGroups = dao.getItemGroups(from, to, ShopTransactionType.MY_SHOP);
 		}
+
+		Collection<ItemGroup> itemGroups = dao.getItemGroups(from, to, ShopTransactionType.MY_SHOP);
 
 		//sort items
 		List<ItemGroup> sortedItemGroups = new ArrayList<>(itemGroups);
@@ -129,6 +130,9 @@ public class CliController {
 			ANSI ansi = OS.isWindows() ? new ANSINotSupported() : new ANSIImpl();
 			ItemIndex index = ItemIndex.instance();
 
+			DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
+			out.println("Start date: " + df.format(from));
+			out.println("End date: " + df.format(to));
 			out.println("Item                                   |Net Quantity       |Net Amount          ");
 			out.println("--------------------------------------------------------------------------------");
 			int totalAmount = 0;
@@ -224,13 +228,16 @@ public class CliController {
 		return value.substring(0, maxWidth);
 	}
 
-	protected static LocalDateTime[] parseDateRange(String dateRangeStr) {
+	static LocalDateTime[] parseDateRange(String dateRangeStr, DbDao dao) throws SQLException {
 		dateRangeStr = dateRangeStr.trim().toLowerCase();
 
 		LocalDateTime from, to;
 		if ("today".equals(dateRangeStr)) {
 			to = LocalDateTime.now();
 			from = to.truncatedTo(ChronoUnit.DAYS);
+		} else if ("since last update".equals(dateRangeStr)) {
+			to = dao.getLatestUpdateDate();
+			from = dao.getSecondLatestUpdateDate();
 		} else {
 			String split[] = dateRangeStr.split("\\s+to\\s+");
 			from = parseFrom(split[0]);

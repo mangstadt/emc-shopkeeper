@@ -122,10 +122,11 @@ public class EmcShopArguments {
 		nl +
 		"--query=QUERY" + nl +
 		"  Shows the net gains/losses of each item.  Examples:" + nl +
-		"  All data:           --query" + nl +
-		"  Today's data:       --query=\"today\"" + nl +
-		"  Three days of data: --query=\"2013-03-07 to 2013-03-09\"" + nl +
-		"  Data up to today:   --query=\"2013-03-07 to today\"" + nl +
+		"  All data:               --query" + nl +
+		"  Today's data:           --query=\"today\"" + nl +
+		"  Data since last update: --query=\"since last update\"" + nl +
+		"  Three days of data:     --query=\"2013-03-07 to 2013-03-09\"" + nl +
+		"  Data up to today:       --query=\"2013-03-07 to today\"" + nl +
 		"--format=TABLE|CSV|BBCODE" + nl +
 		"  Specifies how to render the queried transaction data (defaults to " + defaultFormat + ")." + nl +
 		nl +
