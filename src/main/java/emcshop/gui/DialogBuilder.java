@@ -24,11 +24,19 @@ public class DialogBuilder {
 	private String title, text;
 	private int messageType, optionType = JOptionPane.DEFAULT_OPTION;
 	private Icon icon;
-	private String[] buttonLabels;
-	private String defaultButton;
+	private String[] choices;
+	private String defaultChoice;
 
 	/**
-	 * Shows a dialog box that asks a question.
+	 * Shows a dialog box without an icon.
+	 * @return the builder
+	 */
+	public static DialogBuilder plain() {
+		return new DialogBuilder().messageType(JOptionPane.PLAIN_MESSAGE);
+	}
+
+	/**
+	 * Shows a dialog box that uses a "question" icon.
 	 * @return the builder
 	 */
 	public static DialogBuilder question() {
@@ -36,7 +44,7 @@ public class DialogBuilder {
 	}
 
 	/**
-	 * Shows an informational dialog box.
+	 * Shows a dialog box that uses an "information" icon.
 	 * @return the builder
 	 */
 	public static DialogBuilder info() {
@@ -44,7 +52,7 @@ public class DialogBuilder {
 	}
 
 	/**
-	 * Shows a warning dialog box.
+	 * Shows a dialog box that uses a "warning" icon.
 	 * @return the builder
 	 */
 	public static DialogBuilder warning() {
@@ -52,7 +60,7 @@ public class DialogBuilder {
 	}
 
 	/**
-	 * Shows an error dialog box.
+	 * Shows a dialog box that uses an "error" icon.
 	 * @return the builder
 	 */
 	public static DialogBuilder error() {
@@ -129,7 +137,10 @@ public class DialogBuilder {
 
 	/**
 	 * <p>
-	 * Defines what kind of buttons the dialog box should have.
+	 * Defines what kind of buttons the dialog box should have. This method
+	 * should only be used if {@link #show} is going to be called. If you are
+	 * creating an input dialog box using {@link #showInput}, then the buttons
+	 * cannot be customized.
 	 * </p>
 	 * <p>
 	 * <b>Available option types:</b>
@@ -155,22 +166,34 @@ public class DialogBuilder {
 	 */
 	public DialogBuilder buttons(int optionType, String... buttonLabels) {
 		this.optionType = optionType;
-		if (buttonLabels.length > 0) {
-			this.buttonLabels = new String[buttonLabels.length];
-			for (int i = 0; i < buttonLabels.length; i++) {
-				String label = buttonLabels[i];
-				if (!label.isEmpty() && label.charAt(0) == '*') {
+		return choices(buttonLabels);
+	}
+
+	/**
+	 * Causes a drop down list to be displayed instead of a text box. This
+	 * method should only be used if {@link #showInput} is going to be called.
+	 * @param choices the items to add to the drop down list. To specify which
+	 * item will selected by default, place an asterisk character at the
+	 * beginning of the string.
+	 * @return this
+	 */
+	public DialogBuilder choices(String... choices) {
+		if (choices.length > 0) {
+			this.choices = new String[choices.length];
+			for (int i = 0; i < choices.length; i++) {
+				String label = choices[i];
+				if (label.startsWith("*")) {
 					label = label.substring(1);
-					defaultButton = label;
+					defaultChoice = label;
 				}
-				this.buttonLabels[i] = label;
+				this.choices[i] = label;
 			}
 		}
 		return this;
 	}
 
 	/**
-	 * Shows the dialog box.
+	 * Creates the dialog box and displays it. This method is blocking.
 	 * @return the user's choice (one of the constants in the
 	 * {@link JOptionPane} class).
 	 */
@@ -182,21 +205,25 @@ public class DialogBuilder {
 			optionType,
 			messageType,
 			icon,
-			buttonLabels,
-			defaultButton
+			choices,
+			defaultChoice
 		); //@formatter:on
 	}
 
 	/**
-	 * Shows the dialog box containing an input text box.
+	 * Creates the dialog box as an input dialog and displays it. This method is
+	 * blocking.
 	 * @return the value the user entered or null if they cancelled it
 	 */
 	public String showInput() {
-		return JOptionPane.showInputDialog( //@formatter:off
+		return (String) JOptionPane.showInputDialog( //@formatter:off
 			parent,
 			text,
 			title,
-			messageType
+			messageType,
+			icon,
+			choices,
+			defaultChoice
 		); //@formatter:on
 	}
 }
