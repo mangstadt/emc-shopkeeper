@@ -227,8 +227,7 @@ public class ProfileLoaderTest {
 	}
 
 	private ProfileLoader create(Path cacheDir, PlayerProfileScraper scraper) {
-		ProfileLoader loader = new ProfileLoader(cacheDir);
-		loader.setSessionFactory(() -> {
+		ProfileLoader loader = new ProfileLoader(cacheDir, () -> {
 			/*
 			 * Create a mock client that just returns empty HTML pages. This has
 			 * to be done, otherwise Jsoup.parse() will go into an infinite loop

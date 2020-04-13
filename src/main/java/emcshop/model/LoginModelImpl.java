@@ -10,6 +10,7 @@ import com.github.mangstadt.emc.net.InvalidCredentialsException;
 
 import emcshop.AppContext;
 import emcshop.Settings;
+import emcshop.gui.ProfileLoader;
 import emcshop.scraper.EmcSession;
 
 public class LoginModelImpl implements ILoginModel {
@@ -56,6 +57,12 @@ public class LoginModelImpl implements ILoginModel {
 	@Override
 	public void setSession(EmcSession session) {
 		context.set(session);
+
+		ProfileLoader profileLoader = context.get(ProfileLoader.class);
+		if (profileLoader != null) {
+			//CLI does not have a profile loader
+			profileLoader.clearPrivateProfilesFromCache();
+		}
 	}
 
 	@Override

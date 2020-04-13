@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -25,7 +26,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -47,6 +47,7 @@ public class ProfileLoader {
 	private static final Logger logger = Logger.getLogger(ProfileLoader.class.getName());
 
 	private final Path cacheDir;
+	private final EmcWebsiteSessionFactory sessionFactory;
 	private final Set<String> downloaded = CaseInsensitiveHashSet.create();
 	private final ListMultimap<String, Job> waitList = CaseInsensitiveMultimap.create();
 	private final LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<>();
@@ -56,7 +57,7 @@ public class ProfileLoader {
 	private final ProfileCache profileCache = new ProfileCache();
 
 	private int threads = 4;
-	private EmcWebsiteSessionFactory sessionFactory = HttpClients::createDefault;
+
 	private PlayerProfileScraper scraper = new PlayerProfileScraper();
 
 	/**
@@ -68,9 +69,12 @@ public class ProfileLoader {
 	/**
 	 * Creates a profile image loader.
 	 * @param cacheDir the directory where the images are cached
+	 * @param sessionFactory creates an HTTP connection that is used to download
+	 * profiles from the EMC website
 	 */
-	public ProfileLoader(Path cacheDir) {
+	public ProfileLoader(Path cacheDir, EmcWebsiteSessionFactory sessionFactory) {
 		this.cacheDir = cacheDir;
+		this.sessionFactory = sessionFactory;
 	}
 
 	/**
@@ -87,15 +91,6 @@ public class ProfileLoader {
 	 */
 	public void setThreads(int threads) {
 		this.threads = threads;
-	}
-
-	/**
-	 * Sets the factory used to retrieve EMC webiste session information, which
-	 * is used to download private profile pages.
-	 * @param sessionFactory the factory
-	 */
-	public void setSessionFactory(EmcWebsiteSessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
 	}
 
 	/**
@@ -220,6 +215,19 @@ public class ProfileLoader {
 		return null;
 	}
 
+	/**
+	 * Clears all private profiles from the in-memory cache. This should be
+	 * called after the user logs into the EMC website after running an update.
+	 */
+	public void clearPrivateProfilesFromCache() {
+		List<String> playerNames = profileCache.getPlayerNamesOfPrivateProfiles();
+		synchronized (downloaded) {
+			downloaded.removeAll(playerNames);
+		}
+
+		profileCache.clearPrivateProfiles();
+	}
+
 	private void queueJob(Job job) {
 		synchronized (downloaded) {
 			if (wasDownloaded(job.playerName)) {
@@ -286,7 +294,7 @@ public class ProfileLoader {
 				CloseableHttpClient client = sessionFactory.createSession(); //get the session information each time so the user's login session token can be used
 				try {
 					try {
-						Document page = getProfilePage(playerName, client);
+						Document page = downloadProfilePage(playerName, client);
 						profile = scraper.scrapeProfile(playerName, page);
 					} catch (IOException e) {
 						profile = null;
@@ -364,7 +372,7 @@ public class ProfileLoader {
 			}
 		}
 
-		private Document getProfilePage(String playerName, HttpClient client) throws IOException {
+		private Document downloadProfilePage(String playerName, HttpClient client) throws IOException {
 			/*
 			 * EmcWebsiteConnection#getPlayerProfile cannot be used because its
 			 * HttpClient is configured to IGNORE redirects!
@@ -414,12 +422,29 @@ public class ProfileLoader {
 	private static class ProfileCache {
 		private final Map<String, PlayerProfile> cache = new HashMap<>();
 
-		public synchronized PlayerProfile get(String player) {
-			return cache.get(key(player));
+		public PlayerProfile get(String player) {
+			String key = key(player);
+			synchronized (this) {
+				return cache.get(key);
+			}
 		}
 
-		public synchronized void set(String player, PlayerProfile profile) {
-			cache.put(key(player), profile);
+		public void set(String player, PlayerProfile profile) {
+			String key = key(player);
+			synchronized (this) {
+				cache.put(key, profile);
+			}
+		}
+
+		public synchronized void clearPrivateProfiles() {
+			cache.values().removeIf(value -> value.isPrivate());
+		}
+
+		public synchronized List<String> getPlayerNamesOfPrivateProfiles() {
+			return cache.values().stream() //@formatter:off
+				.filter(value -> value.isPrivate())
+				.map(value -> value.getPlayerName())
+			.collect(Collectors.toList()); //@formatter:on
 		}
 
 		private String key(String player) {

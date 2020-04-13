@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -23,6 +24,7 @@ import javax.swing.ToolTipManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 
 import com.github.mangstadt.emc.net.EmcWebsiteConnectionImpl;
 
@@ -319,9 +321,16 @@ public class EMCShopkeeper {
 		initCacheDir(cacheDir);
 
 		//start the profile image loader
-		ProfileLoader profileLoader = new ProfileLoader(cacheDir);
-		profileLoader.setSessionFactory(() -> {
+		ProfileLoader profileLoader = new ProfileLoader(cacheDir, () -> {
 			HttpClientBuilder builder = HttpClients.custom();
+
+			/*
+			 * Gravatar requires a User-Agent header to be defined. Otherwise,
+			 * it returns a 403 response.
+			 */
+			builder.setDefaultHeaders(Arrays.asList( //@formatter:off
+				new BasicHeader("User-Agent", "EMC Shopkeeper v" + VERSION)
+			)); //@formatter:on
 
 			EmcSession session = context.get(EmcSession.class);
 			if (session != null) {
