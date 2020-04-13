@@ -190,7 +190,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	 */
 	private boolean showUsernameChangedDialog() {
 		int choice = DialogBuilder.warning() //@formatter:off
-			.parent(LoginViewImpl.this)
+			.parent(this)
 			.title("Warning")
 			.text(
 				"You have changed the username to something different!",
@@ -201,7 +201,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 				"1. Go to [Menu Button > Settings] and click \"Show Profiles on Startup\".",
 				"2. Restart EMC Shopkeeper.",
 				"3. At the \"Choose Profile\" dialog, type a name for your new profile in the textbox and click OK.",
-				"4. You can now safely download the transactions of your alt account on this new profile.")
+				"4. EMC Shopkeeper will create a new profile and load into it. You can now safely download the transactions of your alt account on this new profile.")
 			.buttons(JOptionPane.YES_NO_OPTION, "Continue", "*Cancel")
 		.show(); //@formatter:on
 
