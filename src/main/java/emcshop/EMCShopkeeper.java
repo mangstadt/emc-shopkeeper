@@ -21,8 +21,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 
 import com.github.mangstadt.emc.net.EmcWebsiteConnectionImpl;
 
@@ -320,18 +320,15 @@ public class EMCShopkeeper {
 
 		//start the profile image loader
 		ProfileLoader profileLoader = new ProfileLoader(cacheDir);
-		profileLoader.setSessionFactory(new ProfileLoader.EmcWebsiteSessionFactory() {
-			@Override
-			public CloseableHttpClient createSession() {
-				HttpClientBuilder builder = HttpClientBuilder.create();
+		profileLoader.setSessionFactory(() -> {
+			HttpClientBuilder builder = HttpClients.custom();
 
-				EmcSession session = context.get(EmcSession.class);
-				if (session != null) {
-					builder.setDefaultCookieStore(session.getCookieStore());
-				}
-
-				return builder.build();
+			EmcSession session = context.get(EmcSession.class);
+			if (session != null) {
+				builder.setDefaultCookieStore(session.getCookieStore());
 			}
+
+			return builder.build();
 		});
 		profileLoader.start();
 		context.add(profileLoader);
