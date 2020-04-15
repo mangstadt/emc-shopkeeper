@@ -2,6 +2,9 @@ package emcshop.model;
 
 import java.io.IOException;
 
+import com.github.mangstadt.emc.net.InvalidCredentialsException;
+import com.github.mangstadt.emc.net.TwoFactorAuthException;
+
 import emcshop.scraper.EmcSession;
 
 public interface ILoginModel {
@@ -9,10 +12,15 @@ public interface ILoginModel {
 	 * Logs a user into EMC
 	 * @param username the username
 	 * @param password the password
-	 * @return the session token or null if the credentials were invalid
-	 * @throws IOException
+	 * @param twoFactorAuthCode the two-factor authentication code or null if
+	 * the user does not have two-factor authentication enabled
+	 * @return the session token
+	 * @throws InvalidCredentialsException if the username/password is incorrect
+	 * @throws TwoFactorAuthException if a two-factor authentication code is
+	 * required or if the provided code is invalid
+	 * @throws IOException if there's a problem contacting the EMC website
 	 */
-	EmcSession login(String username, String password) throws IOException;
+	EmcSession login(String username, String password, String twoFactorAuthCode) throws InvalidCredentialsException, TwoFactorAuthException, IOException;
 
 	/**
 	 * Gets the saved username.

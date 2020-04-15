@@ -408,7 +408,7 @@ public class MainFrame extends JFrame {
 		}
 
 		Duration maxPaymentTransactionAge = null;
-		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getUsername(), session.getPassword());
+		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getCookieStore());
 		if (latestTransactionDate == null) {
 			//it's the first update
 

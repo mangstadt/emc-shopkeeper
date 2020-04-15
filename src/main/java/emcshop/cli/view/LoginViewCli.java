@@ -13,7 +13,7 @@ public class LoginViewCli implements ILoginView {
 	private final PrintStream out = System.out;
 	private final Console console = System.console();
 
-	private String savedUsername, username, savedPassword, password;
+	private String savedUsername, username, savedPassword, password, twoFactorAuthCode;
 	private boolean savePassword;
 
 	private final List<ActionListener> onLoginListeners = new ArrayList<>();
@@ -60,6 +60,11 @@ public class LoginViewCli implements ILoginView {
 	}
 
 	@Override
+	public String getTwoFactorAuthCode() {
+		return twoFactorAuthCode;
+	}
+
+	@Override
 	public void networkError() {
 		out.println("Network error. Please try again.");
 		prompt();
@@ -69,6 +74,18 @@ public class LoginViewCli implements ILoginView {
 	public void badLogin() {
 		out.println("Login failed. Please try again.");
 		prompt();
+	}
+
+	@Override
+	public void twoFactorAuthCodeRequired() {
+		twoFactorAuthCode = console.readLine("2FA code: ");
+		GuiUtils.fireEvents(onLoginListeners);
+	}
+
+	@Override
+	public void badTwoFactorAuthCode() {
+		out.println("Invalid 2FA code.");
+		twoFactorAuthCodeRequired();
 	}
 
 	@Override
@@ -111,4 +128,5 @@ public class LoginViewCli implements ILoginView {
 		out.println("Logging in...");
 		GuiUtils.fireEvents(onLoginListeners);
 	}
+
 }

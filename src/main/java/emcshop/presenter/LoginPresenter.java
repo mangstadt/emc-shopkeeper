@@ -2,6 +2,9 @@ package emcshop.presenter;
 
 import java.io.IOException;
 
+import com.github.mangstadt.emc.net.InvalidCredentialsException;
+import com.github.mangstadt.emc.net.TwoFactorAuthException;
+
 import emcshop.model.ILoginModel;
 import emcshop.scraper.EmcSession;
 import emcshop.view.ILoginView;
@@ -30,22 +33,28 @@ public class LoginPresenter {
 	void onLogin() {
 		String username = view.getUsername();
 		String password = view.getPassword();
-		boolean savePassword = view.getSavePassword();
+		String twoFactorAuthCode = view.getTwoFactorAuthCode();
 
 		EmcSession session;
 		try {
-			session = model.login(username, password);
+			session = model.login(username, password, twoFactorAuthCode);
+		} catch (InvalidCredentialsException e) {
+			view.badLogin();
+			return;
+		} catch (TwoFactorAuthException e) {
+			if (twoFactorAuthCode == null) {
+				view.twoFactorAuthCodeRequired();
+			} else {
+				view.badTwoFactorAuthCode();
+			}
+			return;
 		} catch (IOException e) {
 			model.logNetworkError(e);
 			view.networkError();
 			return;
 		}
 
-		if (session == null) {
-			view.badLogin();
-			return;
-		}
-
+		boolean savePassword = view.getSavePassword();
 		synchronized (this) {
 			if (canceled) {
 				return;

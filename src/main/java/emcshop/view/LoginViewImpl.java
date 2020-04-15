@@ -27,7 +27,7 @@ import net.miginfocom.swing.MigLayout;
 public class LoginViewImpl extends JDialog implements ILoginView {
 	private final Listeners loginListeners = new Listeners();
 	private final JButton login, cancel;
-	private final JTextField username;
+	private final JTextField username, twoFactorAuthCode;
 	private final JPasswordField password;
 	private final JCheckBox savePassword;
 	private final JLabel loading;
@@ -46,6 +46,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		username = new JTextField();
 		password = new JPasswordField();
 		savePassword = new JCheckBox("Save password");
+		twoFactorAuthCode = new JTextField();
 		loading = new JLabel("Logging in...", Images.LOADING_SMALL, SwingConstants.CENTER);
 
 		login = new JButton("Login");
@@ -64,6 +65,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 			username.setEnabled(false);
 			password.setEnabled(false);
 			savePassword.setEnabled(false);
+			twoFactorAuthCode.setEnabled(false);
 
 			pack();
 			validate();
@@ -88,7 +90,9 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		p.add(new JLabel("Username:"), "align right");
 		p.add(username, "w 150, wrap");
 		p.add(new JLabel("Password:"), "align right");
-		p.add(password, "w 150");
+		p.add(password, "w 150, wrap");
+		p.add(new JLabel("2FA Code:"), "align right");
+		p.add(twoFactorAuthCode, "w 150");
 		add(p, "align center, wrap");
 
 		add(savePassword, "split 2, align center");
@@ -139,6 +143,12 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 	}
 
 	@Override
+	public String getTwoFactorAuthCode() {
+		String code = twoFactorAuthCode.getText().trim();
+		return code.isEmpty() ? null : code;
+	}
+
+	@Override
 	public boolean getSavePassword() {
 		return savePassword.isSelected();
 	}
@@ -160,6 +170,19 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		password.selectAll();
 	}
 
+	@Override
+	public void twoFactorAuthCodeRequired() {
+		showError("2FA code is required.");
+		twoFactorAuthCode.requestFocus();
+	}
+
+	@Override
+	public void badTwoFactorAuthCode() {
+		showError("2FA code is invalid.");
+		twoFactorAuthCode.requestFocus();
+		twoFactorAuthCode.selectAll();
+	}
+
 	private void showError(String text) {
 		messagePanel.removeAll();
 
@@ -170,6 +193,7 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		username.setEnabled(true);
 		password.setEnabled(true);
 		savePassword.setEnabled(true);
+		twoFactorAuthCode.setEnabled(true);
 
 		validate();
 		shake(this);

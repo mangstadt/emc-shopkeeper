@@ -40,6 +40,12 @@ public interface ILoginView {
 	void setPassword(String password);
 
 	/**
+	 * Gets the two-factor authentication code.
+	 * @return the code or null if the user didn't enter one
+	 */
+	String getTwoFactorAuthCode();
+
+	/**
 	 * Sets whether the user wants to save his password.
 	 * @param savePassword true to remember the password, false not to
 	 */
@@ -60,6 +66,17 @@ public interface ILoginView {
 	 * Called if the login credentials are invalid.
 	 */
 	void badLogin();
+
+	/**
+	 * Called if the user didn't enter a two-factor authentication code and one
+	 * is required.
+	 */
+	void twoFactorAuthCodeRequired();
+
+	/**
+	 * Called if the two-factor authentication code the user entered is invalid.
+	 */
+	void badTwoFactorAuthCode();
 
 	/**
 	 * Closes the dialog.

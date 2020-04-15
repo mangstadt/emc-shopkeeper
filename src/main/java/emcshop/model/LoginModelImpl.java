@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import com.github.mangstadt.emc.net.EmcWebsiteConnection;
 import com.github.mangstadt.emc.net.EmcWebsiteConnectionImpl;
 import com.github.mangstadt.emc.net.InvalidCredentialsException;
+import com.github.mangstadt.emc.net.TwoFactorAuthException;
 
 import emcshop.AppContext;
 import emcshop.Settings;
@@ -24,11 +25,9 @@ public class LoginModelImpl implements ILoginModel {
 	}
 
 	@Override
-	public EmcSession login(String username, String password) throws IOException {
-		try (EmcWebsiteConnection connection = new EmcWebsiteConnectionImpl(username, password)) {
+	public EmcSession login(String username, String password, String twoFactorAuthCode) throws InvalidCredentialsException, TwoFactorAuthException, IOException {
+		try (EmcWebsiteConnection connection = new EmcWebsiteConnectionImpl(username, password, twoFactorAuthCode)) {
 			return new EmcSession(username, password, connection.getCookieStore());
-		} catch (InvalidCredentialsException e) {
-			return null;
 		}
 	}
 
