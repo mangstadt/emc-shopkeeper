@@ -19,6 +19,7 @@ import javax.swing.SwingConstants;
 import emcshop.gui.DialogBuilder;
 import emcshop.gui.HelpLabel;
 import emcshop.gui.images.Images;
+import emcshop.gui.lib.GroupPanel;
 import emcshop.util.GuiUtils;
 import emcshop.util.Listeners;
 import net.miginfocom.swing.MigLayout;
@@ -91,8 +92,13 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		p.add(username, "w 150, wrap");
 		p.add(new JLabel("Password:"), "align right");
 		p.add(password, "w 150, wrap");
-		p.add(new JLabel("2FA Code:"), "align right");
-		p.add(twoFactorAuthCode, "w 150");
+
+		JPanel twoFactorAuthPanel = new GroupPanel("");
+		twoFactorAuthPanel.add(new JLabel("<html><p align=\"center\">If your account uses two-factor authentication, enter the code below:</p>"), "w 100%, wrap");
+		twoFactorAuthPanel.add(new JLabel("2FA Code:"), "split 2, align right");
+		twoFactorAuthPanel.add(twoFactorAuthCode, "w 150, align left, wrap");
+		p.add(twoFactorAuthPanel, "span 2");
+
 		add(p, "align center, wrap");
 
 		add(savePassword, "split 2, align center");
@@ -102,6 +108,14 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		add(cancel);
 
 		pack();
+
+		/*
+		 * The label in the 2FA panel wraps to two lines. The pack() method does
+		 * not take this into account, so underestimates the height of the
+		 * window.
+		 */
+		setSize(getWidth(), getHeight() + 20);
+
 		setLocationRelativeTo(owner);
 	}
 
