@@ -403,17 +403,17 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 		/*
 		 * Used to be called Town chat.
 		 */
-		COMMUNITY("[CT](-[1-9U])?", "green"),
+		COMMUNITY("[CT](-[1-9UG])?", "green"),
 
 		/*
 		 * Used to be called Economy chat.
 		 */
-		MARKET("[EM](-[1-9U])?", "#00cc00"),
+		MARKET("[EM](-[1-9UG])?", "#00cc00"),
 
 		/*
 		 * Used to be labeled "S", but this is used by Server chat now.
 		 */
-		SUPPORTER("Sup(-[1-9U])?", "#00cccc"),
+		SUPPORTER("Sup(-[1-9UG])?", "#00cccc"),
 
 		LOCAL("L", "#cccc00"), //@formatter:off
 		RESIDENCE("R", "blue"),
