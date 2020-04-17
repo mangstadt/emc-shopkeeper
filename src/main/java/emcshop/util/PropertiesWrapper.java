@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -36,7 +37,11 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	}
 
 	public PropertiesWrapper(Path file) throws IOException {
-		try (Reader reader = Files.newBufferedReader(file)) {
+		this(file, Charset.defaultCharset());
+	}
+
+	public PropertiesWrapper(Path file, Charset charset) throws IOException {
+		try (Reader reader = Files.newBufferedReader(file, charset)) {
 			properties.load(reader);
 		}
 	}

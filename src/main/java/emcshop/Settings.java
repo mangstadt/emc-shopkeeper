@@ -3,6 +3,8 @@ package emcshop;
 import static emcshop.util.MinecraftUtils.getDefaultMinecraftFolder;
 
 import java.io.IOException;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -190,7 +192,30 @@ public class Settings {
 	}
 
 	public void load() throws IOException {
-		PropertiesWrapper props = new PropertiesWrapper(file);
+		PropertiesWrapper props;
+		try {
+			props = new PropertiesWrapper(file);
+		} catch (CharacterCodingException e) {
+			/*
+			 * 4/16/2020: Someone experienced an issue where a
+			 * MalformedInputException was being thrown here, which was
+			 * preventing EMC Shopkeeper from starting up. The workaround was to
+			 * delete the settings.properties file so the app could re-create
+			 * it.
+			 * 
+			 * The exception was being thrown because it couldn't read the §
+			 * characters in the "unknownItems.reportedItems" property. EMC uses
+			 * this character to add color formatting to promo items. I don't
+			 * know why it couldn't read this character, since it was able to
+			 * write the character to the file without issue.
+			 * 
+			 * It seems to have no trouble reading the character using the
+			 * ISO-8859-1 encoding. After that, the file can be written and read
+			 * using the default character encoding (at least, this worked on my
+			 * system where UTF-8 is the default).
+			 */
+			props = new PropertiesWrapper(file, StandardCharsets.ISO_8859_1);
+		}
 
 		version = props.getInteger("version", null);
 		if (version != null && version < CURRENT_VERSION) {
