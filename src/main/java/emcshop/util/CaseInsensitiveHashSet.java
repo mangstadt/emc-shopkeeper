@@ -1,9 +1,9 @@
 package emcshop.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ForwardingSet;
 
@@ -70,20 +70,14 @@ public class CaseInsensitiveHashSet extends ForwardingSet<String> {
 	}
 
 	private Collection<Object> sanitize(Collection<?> values) {
-		Collection<Object> sanitized = new ArrayList<>(values.size());
-		for (Object value : values) {
-			Object s = sanitize(value);
-			sanitized.add(s);
-		}
-		return sanitized;
+		return values.stream() //@formatter:off
+			.map(this::sanitize)
+		.collect(Collectors.toList()); //@formatter:on
 	}
 
 	private Collection<String> sanitizeStr(Collection<? extends String> values) {
-		Collection<String> sanitized = new ArrayList<>(values.size());
-		for (String value : values) {
-			String s = sanitize(value);
-			sanitized.add(s);
-		}
-		return sanitized;
+		return values.stream() //@formatter:off
+			.map(this::sanitize)
+		.collect(Collectors.toList()); //@formatter:on
 	}
 }
