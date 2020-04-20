@@ -283,13 +283,25 @@ public final class GuiUtils {
 	 * @param component the component
 	 */
 	public static void boldFont(Component component) {
+		setFontStyle(component, Font.BOLD);
+	}
+
+	/**
+	 * Removes bold styling from the font of a component.
+	 * @param component the component
+	 */
+	public static void unboldFont(Component component) {
+		setFontStyle(component, Font.PLAIN);
+	}
+
+	private static void setFontStyle(Component component, int style) {
 		Font font = component.getFont();
 		if (font == null) {
 			return;
 		}
 
-		Font bold = new Font(font.getName(), Font.BOLD, font.getSize());
-		component.setFont(bold);
+		font = new Font(font.getName(), style, font.getSize());
+		component.setFont(font);
 	}
 
 	private GuiUtils() {

@@ -1,5 +1,7 @@
 package emcshop.view;
 
+import static emcshop.util.GuiUtils.unboldFont;
+
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -13,10 +15,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
-import emcshop.gui.HelpLabel;
 import emcshop.gui.lib.GroupPanel;
 import emcshop.gui.lib.JNumberTextField;
 import emcshop.util.GuiUtils;
@@ -38,7 +40,12 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 
 	public FirstUpdateViewImpl(Window owner) {
 		super(owner, "First Update", ModalityType.APPLICATION_MODAL);
-		setResizable(false);
+
+		/*
+		 * Allow user to resize the window in case any of the controls are being
+		 * cut off (see note above the setSize() method call).
+		 */
+		//setResizable(false);
 
 		begin = new JButton("Begin");
 
@@ -109,24 +116,38 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 
 		setLayout(new MigLayout());
 
-		JPanel settings = new GroupPanel("First Update Settings");
+		add(new JLabel("<html><b><font color=#aa0000 size=4>This is the first time you are running an update!</font></b>", SwingConstants.CENTER), "w 100%, wrap");
+		add(new JLabel("<html><center>Review the settings below, then click \"Begin\" to start downloading your transactions."), "w 100%, wrap");
 
-		settings.add(new HelpLabel(null, "The higher a transaction page number is, the longer it takes for the page to be downloaded.  For example, page 2000 takes longer to load than page 20.<br><br>Therefore, it is recommended that you stop around page 5000, but you may change or disable this setting if you wish.  During the update operation, you can also click the \"Stop\" button, which will halt the update process and keep all transactions that were downloaded."), "split 4");
-		settings.add(stopAtCheckBox);
-		settings.add(stopAt, "w 75");
-		settings.add(estimate, "wrap");
+		JPanel stopAtPagePanel = new GroupPanel("Stop At Page");
+		JLabel stopAtPageDescription = new JLabel("<html>The higher a transaction page number is, the longer it takes for the page to be downloaded.  For example, page 2000 takes longer to download than page 20. Therefore, it is recommended that you stop around page 5000, but you may change or disable this setting if you wish.  During the update operation, you can also click the \"Stop\" button, which will cause it to stop at whatever page it is on.");
+		unboldFont(stopAtPageDescription);
+		stopAtPagePanel.add(stopAtPageDescription, "wrap");
+		stopAtPagePanel.add(stopAtCheckBox, "split 3");
+		stopAtPagePanel.add(stopAt, "w 75");
+		stopAtPagePanel.add(estimate);
+		add(stopAtPagePanel, "w 450, wrap");
 
-		settings.add(new HelpLabel(null, "This setting causes the updater to ignore old payment transactions that don't have a reason associated with them, since it might be hard to remember what they were for.<br><br>A payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command. The command lets you assign an optional free-form note to the transaction, called a \"reason\", to help you remember what the payment was for."), "split 4");
-		settings.add(paymentTransactionAgeCheckbox);
-		settings.add(paymentTransactionAge, "w 50");
-		settings.add(paymentTransactionAgeLabel, "wrap");
-
-		add(settings, "growx, wrap");
+		JPanel paymentTransactionsPanel = new GroupPanel("Payment Transactions");
+		JLabel paymentTransactionsLabel = new JLabel("<html>This setting causes the updater to ignore old payment transactions that don't have a reason associated with them, since it might be hard to remember what they were for. A payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command. The command lets you assign an optional free-form note to the transaction, called a \"reason\", to help you remember what the payment was for.");
+		unboldFont(paymentTransactionsLabel);
+		paymentTransactionsPanel.add(paymentTransactionsLabel, "wrap");
+		paymentTransactionsPanel.add(paymentTransactionAgeCheckbox, "split 3");
+		paymentTransactionsPanel.add(paymentTransactionAge, "w 50");
+		paymentTransactionsPanel.add(paymentTransactionAgeLabel);
+		add(paymentTransactionsPanel, "w 450, wrap");
 
 		add(begin, "split 2, align center");
 		add(cancel);
 
 		pack();
+
+		/*
+		 * Many of the labels wrap to multiple lines. The pack() method does not
+		 * take this into account, so underestimates the height of the window.
+		 */
+		setSize(getWidth(), (int) (getHeight() * 1.7));
+
 		setLocationRelativeTo(owner);
 	}
 
