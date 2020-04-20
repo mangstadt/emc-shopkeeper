@@ -84,7 +84,7 @@ public class EmcShopArguments {
 	}
 
 	public String printHelp(String defaultProfileName, String defaultProfileRoot, int defaultStartPage, String defaultFormat) {
-		final String nl = System.getProperty("line.separator");
+		final String nl = System.lineSeparator();
 
 		//@formatter:off
 		return

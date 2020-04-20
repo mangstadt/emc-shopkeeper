@@ -7,7 +7,7 @@ import java.util.Stack;
  * @author Michael Angstadt
  */
 public class BBCodeBuilder implements CharSequence {
-	private static final String NEWLINE = System.getProperty("line.separator");
+	private static final String NEWLINE = System.lineSeparator();
 	private final StringBuilder bbCode = new StringBuilder();
 	private final Stack<String> openTags = new Stack<>();
 
