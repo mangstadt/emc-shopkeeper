@@ -1,7 +1,5 @@
 package emcshop;
 
-import static emcshop.util.MinecraftUtils.getDefaultMinecraftFolder;
-
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +16,7 @@ import java.util.logging.Logger;
 import org.apache.commons.codec.binary.Base64;
 
 import emcshop.gui.WindowState;
+import emcshop.util.MinecraftUtils;
 import emcshop.util.PropertiesWrapper;
 
 public class Settings {
@@ -184,11 +183,10 @@ public class Settings {
 		backupFrequency = 7;
 		maxBackups = 10;
 
-		Path minecraft = getDefaultMinecraftFolder();
-		if (minecraft == null) {
-			minecraft = Paths.get(".");
+		chatLogDir = MinecraftUtils.getLogFolder();
+		if (chatLogDir == null) {
+			chatLogDir = Paths.get("logs");
 		}
-		chatLogDir = minecraft.resolve("logs");
 	}
 
 	public void load() throws IOException {
@@ -315,11 +313,10 @@ public class Settings {
 
 		String value = props.get("chatLogDir");
 		if (value == null) {
-			Path minecraft = getDefaultMinecraftFolder();
-			if (minecraft == null) {
-				minecraft = Paths.get(".");
+			chatLogDir = MinecraftUtils.getLogFolder();
+			if (chatLogDir == null) {
+				chatLogDir = Paths.get("logs");
 			}
-			chatLogDir = minecraft.resolve("logs");
 		} else {
 			chatLogDir = Paths.get(value);
 		}

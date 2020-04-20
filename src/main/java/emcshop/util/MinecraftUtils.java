@@ -32,6 +32,15 @@ public final class MinecraftUtils {
 		return null;
 	}
 
+	/**
+	 * Gets the location of the Minecraft logs folder.
+	 * @return the folder or null if unknown
+	 */
+	public static Path getLogFolder() {
+		Path path = getDefaultMinecraftFolder();
+		return (path == null) ? null : path.resolve("logs");
+	}
+
 	private MinecraftUtils() {
 		//hide
 	}
