@@ -594,7 +594,6 @@
 	<Item name="Seagrass" categories="6" emcNames="Sea Grass" />
 	<Item name="Sea Lantern" id="169" />
 	<Item name="Sea Pickle" />
-	<Item name="Seeds" id="295" categories="0,6" />
 	<Item name="Scute" categories="0,9" />
 	<Item name="Shears" id="359" stack="1" group="Iron" categories="16" />
 	<Item name="Sheep Spawn Egg" id="383:91" group="Spawn Eggs" categories="0" emcNames="Spawn Sheep,Sheep Egg" />
@@ -695,6 +694,7 @@
 	<Item name="Water Bucket" id="326" stack="1" group="Iron" categories="16" />
 	<Item name="Wet Sponge" id="19:1" />
 	<Item name="Wheat" id="296" categories="0,6" />
+	<Item name="Wheat Seeds" id="295" categories="0,6" emcNames="Seeds" />
 	<Item name="White Bed" id="355" stack="1" />
 	<Item name="White Concrete" id="251" categories="19" />
 	<Item name="White Concrete Powder" id="252" categories="19" />
