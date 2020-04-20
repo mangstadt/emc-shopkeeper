@@ -398,7 +398,7 @@ public class UpdateModelImplTest {
 	public void startDownload_ignore_old_payment_transactions() throws Exception {
 		PaymentTransaction t1 = payment();
 		PaymentTransaction t2 = payment();
-		PaymentTransaction t3 = payment();
+		PaymentTransaction t3 = payment("Exceeds max age, but contains a reason.");
 
 		UpdateModelImpl model;
 		{
@@ -427,6 +427,7 @@ public class UpdateModelImplTest {
 
 		//verify all the transactions were inserted into the DAO
 		verify(dao).insertPaymentTransaction(trans(t1));
+		verify(dao).insertPaymentTransaction(trans(t3));
 		verify(dao, atMost(3)).isBonusFeeTransaction(any(RupeeTransaction.class));
 		verifyNoMoreInteractions(dao);
 
@@ -437,7 +438,7 @@ public class UpdateModelImplTest {
 		verify(downloadErrorListener, never()).actionPerformed(null);
 
 		assertEquals(0, model.getShopTransactionsDownloaded());
-		assertEquals(1, model.getPaymentTransactionsDownloaded());
+		assertEquals(2, model.getPaymentTransactionsDownloaded());
 		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
 		assertEquals(1, model.getPagesDownloaded());
 		assertEquals(t3.getTs(), model.getOldestParsedTransactionDate());
@@ -716,6 +717,10 @@ public class UpdateModelImplTest {
 
 	private PaymentTransaction payment() {
 		return new PaymentTransaction.Builder().ts(dg.next()).build();
+	}
+
+	private PaymentTransaction payment(String reason) {
+		return new PaymentTransaction.Builder().ts(dg.next()).reason(reason).build();
 	}
 
 	private DailySigninBonus signinBonus() {

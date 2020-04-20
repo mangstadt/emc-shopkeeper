@@ -100,7 +100,7 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 		paymentTransactionAge = new JNumberTextField();
 		paymentTransactionAgeLabel = new JLabel("days");
 
-		paymentTransactionAgeCheckbox = new JCheckBox("Ignore payment transactions older than:");
+		paymentTransactionAgeCheckbox = new JCheckBox("Ignore reason-less payment transactions older than:");
 		paymentTransactionAgeCheckbox.addActionListener(event -> {
 			boolean selected = paymentTransactionAgeCheckbox.isSelected();
 			paymentTransactionAge.setEnabled(selected);
@@ -116,7 +116,7 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 		settings.add(stopAt, "w 75");
 		settings.add(estimate, "wrap");
 
-		settings.add(new HelpLabel(null, "This setting causes the updater to ignore old payment transactions, since it might be hard to remember what they were for.<br><br>A payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command."), "split 4");
+		settings.add(new HelpLabel(null, "This setting causes the updater to ignore old payment transactions that don't have a reason associated with them, since it might be hard to remember what they were for.<br><br>A payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command. The command lets you assign an optional free-form note to the transaction, called a \"reason\", to help you remember what the payment was for."), "split 4");
 		settings.add(paymentTransactionAgeCheckbox);
 		settings.add(paymentTransactionAge, "w 50");
 		settings.add(paymentTransactionAgeLabel, "wrap");

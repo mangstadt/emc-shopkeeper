@@ -273,12 +273,12 @@ public class UpdateModelImpl implements IUpdateModel {
 							shopTransactionsCount++;
 							transactionsCount++;
 						} else if (transaction instanceof PaymentTransaction) {
-							if (earliestAllowedPaymentTransaction != null && transactionTs.isBefore(earliestAllowedPaymentTransaction)) {
-								//ignore old payment transactions
+							PaymentTransaction paymentTransaction = (PaymentTransaction) transaction;
+							if (paymentTransaction.getReason() == null && earliestAllowedPaymentTransaction != null && transactionTs.isBefore(earliestAllowedPaymentTransaction)) {
+								//ignore old payment transactions that don't have reasons
 								continue;
 							}
 
-							PaymentTransaction paymentTransaction = (PaymentTransaction) transaction;
 							dao.insertPaymentTransaction(new PaymentTransactionDb(paymentTransaction));
 							paymentTransactionsCount++;
 							transactionsCount++;
