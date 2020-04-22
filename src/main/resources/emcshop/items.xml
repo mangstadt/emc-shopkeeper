@@ -114,8 +114,8 @@
 	<Item name="Brown Concrete Powder" id="252:12" categories="19" />
 	<Item name="Brown Dye" group="Dyes" categories="4" />
 	<Item name="Brown Glazed Terracotta" id="247" group="Clay" categories="2" />
-	<Item name="Brown Huge Mushroom" id="99" emcNames="Huge Mushroom 1" />
 	<Item name="Brown Mushroom" id="39" categories="6" />
+	<Item name="Brown Mushroom Block" id="99" emcNames="Huge Mushroom 1,Brown Huge Mushroom" />
 	<Item name="Brown Shulker Box" emcNames="Brown Shulkbox" />
 	<Item name="Brown Terracotta" id="159:12" group="Clay" categories="2" emcNames="Brown Clay,Brown Stclay,Brown Stained Clay,Brown Hardened Clay" />
 	<Item name="Brown Wool" id="35:12" group="Wool" categories="18" />
@@ -561,8 +561,8 @@
 	<Item name="Red Concrete Powder" id="252:14" categories="19" />
 	<Item name="Red Dye" id="351:1" group="Dyes" categories="4" emcNames="Rose Red" />
 	<Item name="Red Glazed Terracotta" id="249" group="Clay" categories="2" />
-	<Item name="Red Huge Mushroom" id="100" emcNames="Huge Mushroom 2" />
 	<Item name="Red Mushroom" id="40" categories="6" />
+	<Item name="Red Mushroom Block" id="100" emcNames="Huge Mushroom 2,Red Huge Mushroom" />
 	<Item name="Red Nether Brick" categories="10" />
 	<Item name="Red Nether Brick Block" id="215" categories="10" emcNames="Red Nether Bricks" />
 	<Item name="Red Nether Brick Stairs" categories="10" />
