@@ -261,7 +261,7 @@
 	<Item name="Fermented Spider Eye" id="376" categories="12" />
 	<Item name="Fern" id="31:2" categories="6" />
 	<Item name="Fire Charge" id="385" emcNames="Firework Charge" />
-	<Item name="Firework" id="401" />
+	<Item name="Firework Rocket" id="401" emcNames="Firework" />
 	<Item name="Firework Star" id="402" />
 	<Item name="Fishing Rod" id="346" stack="1" categories="16" />
 	<Item name="Fletching Table" />
