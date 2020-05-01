@@ -386,6 +386,32 @@ public class MainFrame extends JFrame {
 	}
 
 	private void onUpdate() {
+		LocalDateTime latestTransactionDate;
+		try {
+			latestTransactionDate = dao.getLatestTransactionDate();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+
+		Duration maxPaymentTransactionAge = null;
+		Integer stopAtPage = null;
+		boolean isFirstUpdate = (latestTransactionDate == null);
+		if (isFirstUpdate) {
+			IFirstUpdateView view = new FirstUpdateViewImpl(this);
+			view.setMaxPaymentTransactionAge(Duration.ofDays(7));
+			view.setStopAtPage(5000);
+
+			IFirstUpdateModel model = new FirstUpdateModelImpl();
+
+			FirstUpdatePresenter presenter = new FirstUpdatePresenter(view, model);
+			if (presenter.isCanceled()) {
+				return;
+			}
+
+			stopAtPage = presenter.getStopAtPage();
+			maxPaymentTransactionAge = presenter.getMaxPaymentTransactionAge();
+		}
+
 		LoginShower loginShower = new LoginShower();
 
 		EmcSession session = context.get(EmcSession.class);
@@ -397,35 +423,14 @@ public class MainFrame extends JFrame {
 			}
 			session = p.getSession();
 		}
-
+		
 		clearSessionMenuItem.setEnabled(true);
 
-		LocalDateTime latestTransactionDate;
-		try {
-			latestTransactionDate = dao.getLatestTransactionDate();
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-
-		Duration maxPaymentTransactionAge = null;
 		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getCookieStore());
-		if (latestTransactionDate == null) {
-			//it's the first update
-
-			IFirstUpdateView view = new FirstUpdateViewImpl(this);
-			view.setMaxPaymentTransactionAge(Duration.ofDays(7));
-			view.setStopAtPage(5000);
-			IFirstUpdateModel model = new FirstUpdateModelImpl();
-			FirstUpdatePresenter presenter = new FirstUpdatePresenter(view, model);
-			if (presenter.isCanceled()) {
-				return;
-			}
-
-			Integer stopAtPage = presenter.getStopAtPage();
+		if (stopAtPage != null) {
 			builder.stop(stopAtPage);
-
-			maxPaymentTransactionAge = presenter.getMaxPaymentTransactionAge();
-		} else {
+		}
+		if (latestTransactionDate != null) {
 			builder.stop(latestTransactionDate);
 		}
 
