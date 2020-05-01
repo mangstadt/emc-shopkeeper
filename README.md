@@ -6,7 +6,7 @@ For more information, see the project's [Github.io page][6].
 
 Requires:
 
-* Java 6 or higher
+* Java 8 or higher
 * Maven
 
 1. Install the "lib/microba-0.4.4.3.jar" library into your local Maven repository.  This must be done because this library does not exist on Maven Central:  
@@ -55,6 +55,7 @@ EMC Shopkeeper includes a limited command-line interface:
       Shows the net gains/losses of each item.  Examples:
       All data:           --query
       Today's data:       --query="today"
+      Data since last update: --query="since last update"
       Three days of data: --query="2013-03-07 to 2013-03-09"
       Data up to today:   --query="2013-03-07 to today"
     --format=TABLE|CSV|BBCODE
