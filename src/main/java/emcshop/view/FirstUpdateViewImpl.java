@@ -129,7 +129,7 @@ public class FirstUpdateViewImpl extends JDialog implements IFirstUpdateView {
 		add(stopAtPagePanel, "w 450, wrap");
 
 		JPanel paymentTransactionsPanel = new GroupPanel("Payment Transactions");
-		JLabel paymentTransactionsLabel = new JLabel("<html>This setting causes the updater to ignore old payment transactions that don't have a reason associated with them, since it might be hard to remember what they were for. A payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command. The command lets you assign an optional free-form note to the transaction, called a \"reason\", to help you remember what the payment was for.");
+		JLabel paymentTransactionsLabel = new JLabel("<html>A payment transaction occurs when a player gives rupees to another player using the <code>\"/r pay\"</code> command. The command lets you assign an optional free-form note to the transaction, called a \"reason\", to help you remember what the payment was for. This setting causes the updater to ignore old payment transactions that don't have a reason associated with them, since it might be hard to remember what they were for.");
 		unboldFont(paymentTransactionsLabel);
 		paymentTransactionsPanel.add(paymentTransactionsLabel, "wrap");
 		paymentTransactionsPanel.add(paymentTransactionAgeCheckbox, "split 3");
