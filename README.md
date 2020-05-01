@@ -53,11 +53,11 @@ EMC Shopkeeper includes a limited command-line interface:
 
     --query=QUERY
       Shows the net gains/losses of each item.  Examples:
-      All data:           --query
-      Today's data:       --query="today"
+      All data:               --query
+      Today's data:           --query="today"
       Data since last update: --query="since last update"
-      Three days of data: --query="2013-03-07 to 2013-03-09"
-      Data up to today:   --query="2013-03-07 to today"
+      Three days of data:     --query="2013-03-07 to 2013-03-09"
+      Data up to today:       --query="2013-03-07 to today"
     --format=TABLE|CSV|BBCODE
       Specifies how to render the queried transaction data (defaults to TABLE).
 
