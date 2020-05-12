@@ -19,7 +19,7 @@
 		<jar href="deps/commons-lang3-3.4.jar"/>
 		<jar href="deps/commons-logging-1.2.jar"/>
 		<jar href="deps/derby-10.11.1.1.jar"/>
-		<jar href="deps/emc-rupee-transaction-downloader-2.1.jar"/>
+		<jar href="deps/emc-rupee-transaction-downloader-2.1.1.jar"/>
 		<jar href="deps/guava-18.0.jar"/>
 		<jar href="deps/httpclient-4.5.jar"/>
 		<jar href="deps/httpcore-4.4.1.jar"/>
