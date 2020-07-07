@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.DateTimeException;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class EMCShopkeeper {
 	/**
 	 * The date the application was built.
 	 */
-	public static final LocalDateTime BUILT;
+	public static final Instant BUILT;
 
 	/**
 	 * The version of the cache;
@@ -98,14 +99,14 @@ public class EMCShopkeeper {
 		VERSION = props.getProperty("version");
 		URL = props.getProperty("url");
 
-		LocalDateTime built;
+		Instant built;
 		try {
 			DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
-			built = LocalDateTime.from(df.parse(props.getProperty("built")));
+			built = Instant.from(df.parse(props.getProperty("built")));
 		} catch (DateTimeException e) {
 			//this could happen during development if the properties file is not filtered by Maven
 			logger.log(Level.SEVERE, "Could not parse built date.", e);
-			built = LocalDateTime.now();
+			built = Instant.now();
 		}
 		BUILT = built;
 	}

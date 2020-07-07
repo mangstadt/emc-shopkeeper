@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -23,17 +23,14 @@ public class GitHubCommitsApiTest {
 			String getCommits(String filePath) throws IOException {
 				assertEquals("foo/bar.txt", filePath);
 
-				InputStream in = GitHubCommitsApiTest.class.getResourceAsStream("github-commits-api-response.json");
-				try {
+				try (InputStream in = GitHubCommitsApiTest.class.getResourceAsStream("github-commits-api-response.json")) {
 					return IOUtils.toString(in);
-				} finally {
-					IOUtils.closeQuietly(in);
 				}
 			}
 		};
 
-		LocalDateTime actual = api.getDateOfLatestCommit("foo/bar.txt");
-		LocalDateTime expected = LocalDateTime.ofInstant(ZonedDateTime.of(2018, 5, 15, 15, 52, 59, 0, ZoneId.of("GMT")).toInstant(), ZoneId.systemDefault());
+		Instant actual = api.getDateOfLatestCommit("foo/bar.txt");
+		Instant expected = ZonedDateTime.of(2018, 5, 15, 15, 52, 59, 0, ZoneId.of("GMT")).toInstant();
 		assertEquals(expected, actual);
 	}
 
@@ -47,7 +44,7 @@ public class GitHubCommitsApiTest {
 			}
 		};
 
-		LocalDateTime actual = api.getDateOfLatestCommit("foo/bar.txt");
+		Instant actual = api.getDateOfLatestCommit("foo/bar.txt");
 		assertNull(actual);
 	}
 

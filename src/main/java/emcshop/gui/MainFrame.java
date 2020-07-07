@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -630,7 +631,7 @@ public class MainFrame extends JFrame {
 			GitHubCommitsApi gitHub = new GitHubCommitsApi("mangstadt", "emc-shopkeeper");
 			try {
 				logger.finest("Checking for updates.");
-				LocalDateTime latestRelease = gitHub.getDateOfLatestCommit("dist/emc-shopkeeper-full.jar");
+				Instant latestRelease = gitHub.getDateOfLatestCommit("dist/emc-shopkeeper-full.jar");
 				if (latestRelease == null) {
 					//couldn't find the release date
 					return;
