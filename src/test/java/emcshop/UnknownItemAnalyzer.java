@@ -1,6 +1,7 @@
 package emcshop;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -23,7 +24,7 @@ public class UnknownItemAnalyzer {
 		 * server's PHP installation. There are some characters that only appear
 		 * in this charset (notably: §).
 		 */
-		Charset errorLogCharset = Charset.forName("ISO-8859-1");
+		Charset errorLogCharset = StandardCharsets.ISO_8859_1;
 
 		String errorLogContent = new String(Files.readAllBytes(Paths.get(ERROR_LOG_PATH)), errorLogCharset);
 
