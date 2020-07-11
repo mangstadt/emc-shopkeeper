@@ -74,7 +74,7 @@ public class JNumberTextField extends JTextField {
 			return null;
 		}
 
-		return (format == NUMERIC) ? new Integer(text) : new Double(text);
+		return (format == NUMERIC) ? Integer.valueOf(text) : Double.valueOf(text);
 	}
 
 	public void setNumber(Number value) {
@@ -168,11 +168,11 @@ public class JNumberTextField extends JTextField {
 			try {
 				if (format == NUMERIC) {
 					if (!((text.equals(negativeChars)) && (text.length() == 1))) {
-						new Long(text);
+						Long.valueOf(text);
 					}
 				} else if (format == DECIMAL) {
 					if (!((text.equals(negativeChars)) && (text.length() == 1))) {
-						new Double(text);
+						Double.valueOf(text);
 					}
 
 					int dotIndex = text.indexOf(DOT);

@@ -1619,7 +1619,7 @@ public abstract class DirbyDbDao implements DbDao {
 	protected void createConnection(boolean createDb) throws SQLException {
 		//load the driver
 		try {
-			Class.forName(EmbeddedDriver.class.getName()).newInstance();
+			Class.forName(EmbeddedDriver.class.getName()).getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			throw new SQLException("Database driver not on classpath.", e);
 		}

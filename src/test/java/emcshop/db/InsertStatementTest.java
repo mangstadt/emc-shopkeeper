@@ -209,7 +209,7 @@ public class InsertStatementTest {
 	}
 
 	private static Connection startMemoryDb() throws Exception {
-		Class.forName(EmbeddedDriver.class.getName()).newInstance();
+		Class.forName(EmbeddedDriver.class.getName()).getDeclaredConstructor().newInstance();
 
 		String jdbcUrl = "jdbc:derby:memory:emc-shopkeeper;create=true";
 		return DriverManager.getConnection(jdbcUrl);
