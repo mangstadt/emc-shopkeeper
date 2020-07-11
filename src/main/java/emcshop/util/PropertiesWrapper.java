@@ -109,7 +109,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	}
 
 	public void setBoolean(String key, Boolean value) {
-		set(key, (value == null) ? null : value);
+		set(key, value);
 	}
 
 	public Map<String, String> getMap(String keyStartsWith) {
