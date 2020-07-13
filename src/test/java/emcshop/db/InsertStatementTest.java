@@ -216,11 +216,8 @@ public class InsertStatementTest {
 	}
 
 	private static void execute(String sql) throws SQLException {
-		Statement stmt = conn.createStatement();
-		try {
+		try (Statement stmt = conn.createStatement()) {
 			stmt.execute(sql);
-		} finally {
-			stmt.close();
 		}
 	}
 }

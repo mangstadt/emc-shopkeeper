@@ -74,11 +74,8 @@ public class PlayerProfileScraperTest {
 	}
 
 	private Document load(String file) throws IOException {
-		InputStream in = getClass().getResourceAsStream(file);
-		try {
+		try (InputStream in = getClass().getResourceAsStream(file)) {
 			return Jsoup.parse(in, "UTF-8", "https://empireminecraft.com");
-		} finally {
-			in.close();
 		}
 	}
 }
