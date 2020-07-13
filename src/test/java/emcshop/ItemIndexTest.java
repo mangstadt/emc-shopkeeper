@@ -2,6 +2,7 @@ package emcshop;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -94,7 +95,7 @@ public class ItemIndexTest {
 		assertEquals("Orange Clay", mockIndex.getDisplayNameFromMinecraftId("159:1"));
 		assertEquals("Potion of Fire Resistance", mockIndex.getDisplayNameFromMinecraftId("373:8195"));
 		assertEquals("Potion of Fire Resistance", mockIndex.getDisplayNameFromMinecraftId("373:8227"));
-		assertEquals(null, mockIndex.getDisplayNameFromMinecraftId("22"));
+		assertNull(mockIndex.getDisplayNameFromMinecraftId("22"));
 	}
 
 	@Test

@@ -5,6 +5,7 @@ import static emcshop.util.TestUtils.timestamp;
 import static emcshop.util.TimeUtils.toLocalDateTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -327,7 +328,7 @@ public class DirbyDbDaoTest {
 		items().name("Apple").delete();
 		dao.populateItemsTable();
 		assertNotNull(items().name("Apple").id());
-		assertFalse(appleId == items().name("Apple").id());
+		assertNotEquals(appleId, (int) items().name("Apple").id());
 	}
 
 	@Test
