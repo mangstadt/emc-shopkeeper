@@ -277,9 +277,9 @@ public class ItemsTable extends GroupableColumnsTable {
 			case ITEM_NAME:
 				return a.getItem().compareToIgnoreCase(b.getItem());
 			case PPU_BUY:
-				return Double.valueOf(a.getSoldPPU()).compareTo(Double.valueOf(b.getSoldPPU()));
+				return Double.compare(a.getSoldPPU(), b.getSoldPPU());
 			case PPU_SELL:
-				return Double.valueOf(a.getBoughtPPU()).compareTo(Double.valueOf(b.getBoughtPPU()));
+				return Double.compare(a.getBoughtPPU(), b.getBoughtPPU());
 			case BOUGHT_AMT:
 				return a.getBoughtAmount() - b.getBoughtAmount();
 			case BOUGHT_QTY:

@@ -149,7 +149,7 @@ public class ItemIndex {
 		String image = value.isEmpty() ? imageFileName(name) : value;
 
 		value = element.attribute("stack");
-		int stackSize = value.isEmpty() ? DEFAULT_STACK_SIZE : Integer.valueOf(value);
+		int stackSize = value.isEmpty() ? DEFAULT_STACK_SIZE : Integer.parseInt(value);
 
 		value = element.attribute("group");
 		String groups[] = splitValues(value);

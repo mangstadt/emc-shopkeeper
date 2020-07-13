@@ -32,8 +32,8 @@ public class QuantityTextField extends JTextField {
 			return Integer.valueOf(split[0]);
 		}
 
-		int remainder = split[1].isEmpty() ? 0 : Integer.valueOf(split[1]);
-		return Integer.valueOf(split[0]) * stackSize + remainder;
+		int remainder = split[1].isEmpty() ? 0 : Integer.parseInt(split[1]);
+		return Integer.parseInt(split[0]) * stackSize + remainder;
 	}
 
 	/**

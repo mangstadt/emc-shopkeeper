@@ -289,7 +289,7 @@ public class ChatLogViewerViewImpl extends JDialog implements IChatLogViewerView
 				Matcher m = gaveRupeesRegex.matcher(escapedMessage);
 				if (m.find()) {
 					isPaymentTransaction = true;
-					paymentTransactionAmount = Integer.valueOf(m.group(1).replace(",", "")) * -1;
+					paymentTransactionAmount = Integer.parseInt(m.group(1).replace(",", "")) * -1;
 					escapedMessage = escapedMessage.replace(m.group(1), "<span style=\"color:red\"><b>" + m.group(1) + "</b></span>");
 					paymentTransactionPlayer = m.group(2);
 				}
