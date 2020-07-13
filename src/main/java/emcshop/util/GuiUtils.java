@@ -238,27 +238,25 @@ public final class GuiUtils {
 		final long startTime = System.currentTimeMillis();
 
 		final Timer shakeTimer = new Timer(SHAKE_UPDATE, null);
-		shakeTimer.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// calculate elapsed time
-				long elapsed = System.currentTimeMillis() - startTime;
-				// use sin to calculate an x-offset
-				double waveOffset = (elapsed % SHAKE_CYCLE) / SHAKE_CYCLE;
-				double angle = waveOffset * TWO_PI;
+		shakeTimer.addActionListener(e -> {
+			// calculate elapsed time
+			long elapsed = System.currentTimeMillis() - startTime;
+			// use sin to calculate an x-offset
+			double waveOffset = (elapsed % SHAKE_CYCLE) / SHAKE_CYCLE;
+			double angle = waveOffset * TWO_PI;
 
-				// offset the x-location by an amount 
-				// proportional to the sine, up to
-				// shake_distance
-				int shakenX = (int) ((Math.sin(angle) * SHAKE_DISTANCE) + naturalLocation.x);
-				dialog.setLocation(shakenX, naturalLocation.y);
+			// offset the x-location by an amount
+			// proportional to the sine, up to
+			// shake_distance
+			int shakenX = (int) ((Math.sin(angle) * SHAKE_DISTANCE) + naturalLocation.x);
+			dialog.setLocation(shakenX, naturalLocation.y);
+			dialog.repaint();
+
+			// should we stop timer?
+			if (elapsed >= SHAKE_DURATION) {
+				shakeTimer.stop();
+				dialog.setLocation(naturalLocation);
 				dialog.repaint();
-
-				// should we stop timer?
-				if (elapsed >= SHAKE_DURATION) {
-					shakeTimer.stop();
-					dialog.setLocation(naturalLocation);
-					dialog.repaint();
-				}
 			}
 		});
 		shakeTimer.start();
