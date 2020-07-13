@@ -38,7 +38,7 @@ public class GitHubCommitsApiTest {
 	public void getDateOfLatestCommit_file_not_found() throws Exception {
 		GitHubCommitsApi api = new GitHubCommitsApi("author", "project") {
 			@Override
-			String getCommits(String filePath) throws IOException {
+			String getCommits(String filePath) {
 				assertEquals("foo/bar.txt", filePath);
 				return "[ ]";
 			}
@@ -52,7 +52,7 @@ public class GitHubCommitsApiTest {
 	public void getDateOfLatestCommit_bad_date() throws Exception {
 		GitHubCommitsApi api = new GitHubCommitsApi("author", "project") {
 			@Override
-			String getCommits(String filePath) throws IOException {
+			String getCommits(String filePath) {
 				assertEquals("foo/bar.txt", filePath);
 
 				//@formatter:off
@@ -77,7 +77,7 @@ public class GitHubCommitsApiTest {
 	public void getDateOfLatestCommit_different_kind_of_empty_response() throws Exception {
 		GitHubCommitsApi api = new GitHubCommitsApi("author", "project") {
 			@Override
-			String getCommits(String filePath) throws IOException {
+			String getCommits(String filePath) {
 				assertEquals("foo/bar.txt", filePath);
 				return "\"\"";
 			}
@@ -90,7 +90,7 @@ public class GitHubCommitsApiTest {
 	public void getDateOfLatestCommit_json_fields_not_found() throws Exception {
 		GitHubCommitsApi api = new GitHubCommitsApi("author", "project") {
 			@Override
-			String getCommits(String filePath) throws IOException {
+			String getCommits(String filePath) {
 				assertEquals("foo/bar.txt", filePath);
 				return "[ { \"some\" : \"other JSON file\" } ]";
 			}
@@ -103,7 +103,7 @@ public class GitHubCommitsApiTest {
 	public void getDateOfLatestCommit_invalid_json() throws Exception {
 		GitHubCommitsApi api = new GitHubCommitsApi("author", "project") {
 			@Override
-			String getCommits(String filePath) throws IOException {
+			String getCommits(String filePath) {
 				assertEquals("foo/bar.txt", filePath);
 				return "not JSON";
 			}

@@ -105,7 +105,7 @@ public class MainFrame extends JFrame {
 	private final LogManager logManager;
 	private final String profile;
 
-	public MainFrame(String profile) throws SQLException {
+	public MainFrame(String profile) {
 		this.profile = profile;
 		dao = context.get(DbDao.class);
 		settings = context.get(Settings.class);

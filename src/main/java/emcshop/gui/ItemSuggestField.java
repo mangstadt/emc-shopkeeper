@@ -62,7 +62,7 @@ public class ItemSuggestField extends JSuggestField {
 	 * method should be called only once during application startup.
 	 * @param itemNames the item names to populate this control with
 	 */
-	public static void init(List<String> itemNames) throws SQLException {
+	public static void init(List<String> itemNames) {
 		ItemSuggestField.itemNames = new Vector<>(itemNames);
 
 		ImmutableMap.Builder<String, ImageIcon> builder = ImmutableMap.builder();

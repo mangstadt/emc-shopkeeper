@@ -29,7 +29,7 @@ public class JarSignersHardLinker {
 	private static final Logger logger = Logger.getLogger(JarSignersHardLinker.class.getName());
 	private static final List<Object> hardRefs = new ArrayList<>();
 
-	private static void makeHardSignersRef(JarFile jar) throws IOException {
+	private static void makeHardSignersRef(JarFile jar) {
 		logger.fine("Making hard refs for: " + jar);
 		if (!jar.getClass().getName().equals("com.sun.deploy.cache.CachedJarFile")) {
 			return;

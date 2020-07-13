@@ -384,7 +384,7 @@ public interface DbDao {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	void wipe() throws IOException, SQLException;
+	void wipe() throws SQLException;
 
 	/**
 	 * Commits the current database transaction.

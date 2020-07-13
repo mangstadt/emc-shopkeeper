@@ -1914,7 +1914,7 @@ public class DirbyDbDaoTest {
 			assertEquals(ignore, rs.getBoolean("ignore"));
 		}
 
-		public void test(PaymentTransactionDb transaction) throws SQLException {
+		public void test(PaymentTransactionDb transaction) {
 			if (id != null) {
 				assertEquals(id, transaction.getId());
 			}

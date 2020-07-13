@@ -1402,7 +1402,7 @@ public abstract class DirbyDbDao implements DbDao {
 	}
 
 	@Override
-	public void wipe() throws SQLException, IOException {
+	public void wipe() throws SQLException {
 		logger.info("Wiping transactions...");
 
 		try (Statement stmt = conn.createStatement()) {
