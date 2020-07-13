@@ -10,7 +10,6 @@ import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -106,7 +105,7 @@ public class CliController {
 
 		//sort items
 		List<ItemGroup> sortedItemGroups = new ArrayList<>(itemGroups);
-		Collections.sort(sortedItemGroups, (left, right) -> left.getItem().compareToIgnoreCase(right.getItem()));
+		sortedItemGroups.sort((left, right) -> left.getItem().compareToIgnoreCase(right.getItem()));
 
 		if ("CSV".equalsIgnoreCase(format)) {
 			//calculate net total

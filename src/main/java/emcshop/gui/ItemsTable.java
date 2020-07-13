@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -266,7 +265,7 @@ public class ItemsTable extends GroupableColumnsTable {
 	}
 
 	private void sortData() {
-		Collections.sort(itemGroupsToDisplay, (a, b) -> {
+		itemGroupsToDisplay.sort((a, b) -> {
 			if (!ascending) {
 				ItemGroup temp = a;
 				a = b;

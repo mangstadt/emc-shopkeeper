@@ -11,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -491,16 +490,16 @@ public class PlayersPanel extends JPanel {
 		switch (sort) {
 		case PLAYER:
 			//sort by player name
-			Collections.sort(players, (a, b) -> a.getPlayer().getName().compareToIgnoreCase(b.getPlayer().getName()));
+			players.sort((a, b) -> a.getPlayer().getName().compareToIgnoreCase(b.getPlayer().getName()));
 
 			//sort each player's item list by item name
 			for (PlayerGroup group : players) {
-				Collections.sort(items.get(group), (a, b) -> a.getItem().compareToIgnoreCase(b.getItem()));
+				items.get(group).sort((a, b) -> a.getItem().compareToIgnoreCase(b.getItem()));
 			}
 			break;
 		case SUPPLIER:
 			//sort by net sold amount ascending
-			Collections.sort(players, (a, b) -> {
+			players.sort((a, b) -> {
 				int netA = 0;
 				for (ItemGroup item : items.get(a)) {
 					netA += item.getNetAmount();
@@ -516,12 +515,12 @@ public class PlayersPanel extends JPanel {
 
 			//sort each player's item list by item amount ascending
 			for (PlayerGroup group : players) {
-				Collections.sort(items.get(group), (a, b) -> a.getNetAmount() - b.getNetAmount());
+				items.get(group).sort((a, b) -> a.getNetAmount() - b.getNetAmount());
 			}
 			break;
 		case CUSTOMER:
 			//sort by net bought amount descending
-			Collections.sort(players, (a, b) -> {
+			players.sort((a, b) -> {
 				int netA = 0;
 				for (ItemGroup item : items.get(a)) {
 					netA += item.getNetAmount();
@@ -537,7 +536,7 @@ public class PlayersPanel extends JPanel {
 
 			//sort each player's item list by item amount descending
 			for (PlayerGroup group : players) {
-				Collections.sort(items.get(group), (a, b) -> b.getNetAmount() - a.getNetAmount());
+				items.get(group).sort((a, b) -> b.getNetAmount() - a.getNetAmount());
 			}
 			break;
 		}

@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -912,7 +911,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 	private class CategoryComboBox extends JComboBox<CategoryInfo> {
 		public CategoryComboBox() {
 			List<CategoryInfo> categories = new ArrayList<>(index.getCategories());
-			Collections.sort(categories, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+			categories.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
 			//add "all" and "misc" items
 			categories.add(0, ALL);

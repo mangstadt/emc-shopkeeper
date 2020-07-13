@@ -15,7 +15,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -204,7 +203,7 @@ public class TransactionsTab extends JPanel implements ExportListener {
 					itemGroupsList = new ArrayList<>(dao.getItemGroups(range.getFrom(), range.getTo(), transactionType));
 
 					//sort by item name
-					Collections.sort(itemGroupsList, (a, b) -> a.getItem().compareToIgnoreCase(b.getItem()));
+					itemGroupsList.sort((a, b) -> a.getItem().compareToIgnoreCase(b.getItem()));
 				}
 
 				SwingUtilities.invokeAndWait(() -> {

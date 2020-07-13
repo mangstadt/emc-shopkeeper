@@ -255,7 +255,7 @@ public class DirbyDbDaoTest {
 	public void getItemNames() throws Exception {
 		List<String> expected = new ArrayList<>(ItemIndex.instance().getItemNames());
 		expected.add("item");
-		Collections.sort(expected, String.CASE_INSENSITIVE_ORDER);
+		expected.sort(String.CASE_INSENSITIVE_ORDER);
 
 		items().name("item").insert();
 		List<String> actual = dao.getItemNames();
@@ -869,7 +869,7 @@ public class DirbyDbDaoTest {
 
 		List<Inventory> inventory = new ArrayList<>(dao.getInventory());
 		assertEquals(2, inventory.size());
-		Collections.sort(inventory, (a, b) -> a.getItem().compareTo(b.getItem()));
+		inventory.sort((a, b) -> a.getItem().compareTo(b.getItem()));
 
 		Iterator<Inventory> it = inventory.iterator();
 
