@@ -722,7 +722,7 @@ public class PaymentsTab extends JPanel {
 				return null;
 			}
 
-			Integer amountInt;
+			int amountInt;
 			try {
 				amountInt = Integer.valueOf(amountStr);
 			} catch (NumberFormatException e) {
