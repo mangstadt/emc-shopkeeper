@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -141,15 +142,15 @@ public class TransactionsTable extends JTable {
 	private TableRowSorter<Model> createRowSorter() {
 		TableRowSorter<Model> rowSorter = new TableRowSorter<>(model);
 
-		rowSorter.setComparator(Column.TS.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> one.getTs().compareTo(two.getTs()));
+		rowSorter.setComparator(Column.TS.ordinal(), Comparator.comparing(ShopTransactionDb::getTs));
 		rowSorter.setComparator(Column.PLAYER_NAME.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> {
 			String name1 = getPlayerName(one);
 			String name2 = getPlayerName(two);
 			return name1.compareToIgnoreCase(name2);
 		});
 		rowSorter.setComparator(Column.ITEM_NAME.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> one.getItem().compareToIgnoreCase(two.getItem()));
-		rowSorter.setComparator(Column.QUANTITY.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> one.getQuantity() - two.getQuantity());
-		rowSorter.setComparator(Column.AMOUNT.ordinal(), (ShopTransactionDb one, ShopTransactionDb two) -> one.getAmount() - two.getAmount());
+		rowSorter.setComparator(Column.QUANTITY.ordinal(), Comparator.comparingInt(ShopTransactionDb::getQuantity));
+		rowSorter.setComparator(Column.AMOUNT.ordinal(), Comparator.comparingInt(ShopTransactionDb::getAmount));
 		rowSorter.setSortsOnUpdates(true);
 		rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.TS.ordinal(), SortOrder.DESCENDING)));
 

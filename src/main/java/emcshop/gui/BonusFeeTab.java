@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -155,7 +156,7 @@ public class BonusFeeTab extends JPanel {
 			TableRowSorter<Model> rowSorter = new TableRowSorter<>(model);
 
 			rowSorter.setComparator(Column.DESCRIPTION.ordinal(), (Row one, Row two) -> one.description.compareToIgnoreCase(two.description));
-			rowSorter.setComparator(Column.TOTAL.ordinal(), (Row one, Row two) -> one.total - two.total);
+			rowSorter.setComparator(Column.TOTAL.ordinal(), Comparator.comparingInt((Row r) -> r.total));
 			rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.DESCRIPTION.ordinal(), SortOrder.ASCENDING)));
 			rowSorter.setSortsOnUpdates(true);
 

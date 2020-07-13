@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -318,7 +319,7 @@ public abstract class DirbyDbDao implements DbDao {
 			 * have been in the database longer and are therefore likely to have
 			 * been referenced by more rows throughout the database.
 			 */
-			itemAliases.sort((o1, o2) -> o1.id - o2.id);
+			itemAliases.sort(Comparator.comparingInt(o -> o.id));
 
 			/*
 			 * Determine what row in the "items" table will act as the

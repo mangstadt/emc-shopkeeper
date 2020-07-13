@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -515,7 +516,7 @@ public class PlayersPanel extends JPanel {
 
 			//sort each player's item list by item amount ascending
 			for (PlayerGroup group : players) {
-				items.get(group).sort((a, b) -> a.getNetAmount() - b.getNetAmount());
+				items.get(group).sort(Comparator.comparingInt(ItemGroup::getNetAmount));
 			}
 			break;
 		case CUSTOMER:

@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -756,8 +757,8 @@ public class InventoryTab extends JPanel implements ExportListener {
 
 			rowSorter.setSortable(Column.CHECKBOX.ordinal(), false);
 			rowSorter.setComparator(Column.ITEM_NAME.ordinal(), (Row one, Row two) -> one.inventory.getItem().compareToIgnoreCase(two.inventory.getItem()));
-			rowSorter.setComparator(Column.REMAINING.ordinal(), (Row one, Row two) -> one.inventory.getQuantity().compareTo(two.inventory.getQuantity()));
-			rowSorter.setComparator(Column.LOW_THRESHOLD.ordinal(), (Row one, Row two) -> one.inventory.getLowInStockThreshold().compareTo(two.inventory.getLowInStockThreshold()));
+			rowSorter.setComparator(Column.REMAINING.ordinal(), Comparator.comparing((Row r) -> r.inventory.getQuantity()));
+			rowSorter.setComparator(Column.LOW_THRESHOLD.ordinal(), Comparator.comparing((Row r) -> r.inventory.getLowInStockThreshold()));
 			rowSorter.setSortsOnUpdates(false);
 
 			return rowSorter;

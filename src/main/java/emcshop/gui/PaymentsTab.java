@@ -17,6 +17,7 @@ import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -312,10 +313,10 @@ public class PaymentsTab extends JPanel {
 			rowSorter.setSortable(Column.SPLIT.ordinal(), false);
 			rowSorter.setSortable(Column.ASSIGN.ordinal(), false);
 			rowSorter.setSortable(Column.CHAT_LOG.ordinal(), false);
-			rowSorter.setComparator(Column.TIME.ordinal(), (Row one, Row two) -> one.transaction.getTs().compareTo(two.transaction.getTs()));
+			rowSorter.setComparator(Column.TIME.ordinal(), Comparator.comparing((Row r) -> r.transaction.getTs()));
 			rowSorter.setComparator(Column.PLAYER.ordinal(), (Row one, Row two) -> one.transaction.getPlayer().compareToIgnoreCase(two.transaction.getPlayer()));
 			rowSorter.setComparator(Column.REASON.ordinal(), (Row one, Row two) -> one.transaction.getReason().compareToIgnoreCase(two.transaction.getReason()));
-			rowSorter.setComparator(Column.AMOUNT.ordinal(), (Row one, Row two) -> one.transaction.getAmount() - two.transaction.getAmount());
+			rowSorter.setComparator(Column.AMOUNT.ordinal(), Comparator.comparingInt((Row r) -> r.transaction.getAmount()));
 			rowSorter.setSortsOnUpdates(true);
 			rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.TIME.ordinal(), SortOrder.DESCENDING)));
 
