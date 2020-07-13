@@ -49,11 +49,8 @@ public class ItemIndex {
 		if (INSTANCE == null) {
 			try (InputStream in = ItemIndex.class.getResourceAsStream("items.xml")) {
 				INSTANCE = new ItemIndex(in);
-			} catch (IOException e) {
+			} catch (IOException | SAXException e) {
 				//the program should terminate if this file can't be read!
-				throw new RuntimeException(e);
-			} catch (SAXException e) {
-				//the program should terminate if this file can't be parsed!
 				throw new RuntimeException(e);
 			}
 		}
