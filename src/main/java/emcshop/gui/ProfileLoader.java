@@ -437,13 +437,13 @@ public class ProfileLoader {
 		}
 
 		public synchronized void clearPrivateProfiles() {
-			cache.values().removeIf(value -> value.isPrivate());
+			cache.values().removeIf(PlayerProfile::isPrivate);
 		}
 
 		public synchronized List<String> getPlayerNamesOfPrivateProfiles() {
 			return cache.values().stream() //@formatter:off
-				.filter(value -> value.isPrivate())
-				.map(value -> value.getPlayerName())
+				.filter(PlayerProfile::isPrivate)
+				.map(PlayerProfile::getPlayerName)
 			.collect(Collectors.toList()); //@formatter:on
 		}
 

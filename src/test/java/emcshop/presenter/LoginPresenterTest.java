@@ -175,7 +175,7 @@ public class LoginPresenterTest {
 
 		final LoginPresenter presenter = new LoginPresenter(view, model);
 
-		Thread t = new Thread(() -> presenter.onLogin());
+		Thread t = new Thread(presenter::onLogin);
 		t.start();
 
 		Thread.sleep(100);

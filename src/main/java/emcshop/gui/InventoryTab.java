@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -1187,7 +1188,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 							.filter(modifiedSinceStartup)
 							.filter(isChesterFile)
 							.map(parseFile)
-							.filter(file -> file != null)
+							.filter(Objects::nonNull)
 						.collect(Collectors.toList()); //@formatter:on
 					} catch (Exception e) {
 						throw new RuntimeException("Problem getting list of Chester files.", e);
