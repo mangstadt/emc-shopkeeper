@@ -557,11 +557,7 @@ public abstract class DirbyDbDao implements DbDao {
 		//keep track of the first/last seen dates so they can be updated (in "commit()")
 		//don't record this if this is not a transaction from the player's own shop
 		if (player != null) {
-			LocalDateTime dates[] = firstLastSeenDates.get(player.getId());
-			if (dates == null) {
-				dates = new LocalDateTime[] { player.getFirstSeen(), player.getLastSeen() };
-				firstLastSeenDates.put(player.getId(), dates);
-			}
+			LocalDateTime dates[] = firstLastSeenDates.computeIfAbsent(player.getId(), k -> new LocalDateTime[] { player.getFirstSeen(), player.getLastSeen() });
 
 			LocalDateTime earliest = dates[0];
 			if (earliest == null || ts.isBefore(earliest)) {
