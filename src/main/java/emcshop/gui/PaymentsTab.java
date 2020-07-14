@@ -725,7 +725,7 @@ public class PaymentsTab extends JPanel {
 
 			int amountInt;
 			try {
-				amountInt = Integer.valueOf(amountStr);
+				amountInt = Integer.parseInt(amountStr);
 			} catch (NumberFormatException e) {
 				DialogBuilder.error() //@formatter:off
 					.parent(owner)
