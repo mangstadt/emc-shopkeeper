@@ -69,12 +69,14 @@ public class JNumberTextField extends JTextField {
 	}
 
 	public Number getNumber() {
-		String text = getText();
-		if (text.isEmpty()) {
-			return null;
+		/*
+		 * Using a ternary expression here causes it to always return a Double object.
+		 */
+		if (format == NUMERIC) {
+			return getInteger();
+		} else {
+			return getDouble();
 		}
-
-		return (format == NUMERIC) ? Integer.valueOf(text) : Double.valueOf(text);
 	}
 
 	public void setNumber(Number value) {
