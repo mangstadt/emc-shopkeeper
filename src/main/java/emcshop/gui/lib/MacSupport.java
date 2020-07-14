@@ -42,12 +42,16 @@ public class MacSupport {
 				// the com.apple.eawt.ApplicationEvent object
 				Object applicationEvent = arguments[0];
 
-				if (methodName.equals("handleQuit")) {
+				switch (methodName) {
+				case "handleQuit":
 					handler.handleQuit(applicationEvent);
-				} else if (methodName.equals("handleAbout")) {
+					break;
+				case "handleAbout":
 					handler.internalHandleAbout(applicationEvent);
-				} else if (methodName.equals("handlePreferences")) {
+					break;
+				case "handlePreferences":
 					handler.handlePreferences(applicationEvent);
+					break;
 				}
 				return null;
 			});

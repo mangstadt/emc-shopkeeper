@@ -162,18 +162,22 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 			String value = entry.getValue();
 			String type = m.group(1).toLowerCase();
 			Object guiValue;
-			if ("boolean".equals(type)) {
+			switch (type) {
+			case "boolean":
 				guiValue = Boolean.valueOf(value);
-			} else if ("date".equals(type)) {
+				break;
+			case "date":
 				//the date picker controls use java.util.Date
 				try {
 					guiValue = TimeUtils.toDate(LocalDateTime.from(df.parse(value)));
 				} catch (DateTimeException e) {
 					continue;
 				}
-			} else if ("string".equals(type)) {
+				break;
+			case "string":
 				guiValue = value;
-			} else {
+				break;
+			default:
 				continue;
 			}
 
