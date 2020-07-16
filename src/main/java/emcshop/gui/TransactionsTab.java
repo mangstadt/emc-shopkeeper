@@ -726,12 +726,12 @@ public class TransactionsTab extends JPanel implements ExportListener {
 			} else if (from != null && to == null) {
 				if (showSinceLastUpdate.isSelected()) {
 					RelativeDateFormat df = RelativeDateFormat.instance();
-					sb.append("since last update (" + df.format(from) + ")");
+					sb.append("since last update (").append(df.format(from)).append(")");
 				} else {
-					sb.append("since " + dateFormat.format(from));
+					sb.append("since ").append(dateFormat.format(from));
 				}
 			} else if (from == null && to != null) {
-				sb.append("up to " + dateFormat.format(to));
+				sb.append("up to ").append(dateFormat.format(to));
 			} else if (from != null && to != null) {
 				LocalDateTime toMod = to.minusSeconds(1);
 				sb.append(dateFormat.format(from)).append(" to ").append(dateFormat.format(toMod));
