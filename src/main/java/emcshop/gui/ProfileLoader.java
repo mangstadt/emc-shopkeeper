@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -64,7 +65,7 @@ public class ProfileLoader {
 	 * The number of items on the queue, plus the number of jobs currently being
 	 * processed by the threads (for unit testing purposes).
 	 */
-	volatile int jobsBeingProcessed = 0;
+	AtomicInteger jobsBeingProcessed = new AtomicInteger();
 
 	/**
 	 * Creates a profile image loader.
@@ -239,7 +240,7 @@ public class ProfileLoader {
 			if (!waitList.containsKey(job.playerName)) {
 				//player name is not queued for download, so add it to the queue
 				try {
-					jobsBeingProcessed++;
+					jobsBeingProcessed.incrementAndGet();
 					downloadQueue.put(job.playerName);
 				} catch (InterruptedException e) {
 					/*
@@ -278,7 +279,7 @@ public class ProfileLoader {
 				if (first) {
 					first = false;
 				} else {
-					jobsBeingProcessed--;
+					jobsBeingProcessed.decrementAndGet();
 				}
 
 				//get the next player name

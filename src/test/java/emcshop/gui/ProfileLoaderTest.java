@@ -221,7 +221,7 @@ public class ProfileLoaderTest {
 	}
 
 	private static void wait(ProfileLoader profileImageLoader) throws InterruptedException {
-		while (profileImageLoader.jobsBeingProcessed > 0) {
+		while (profileImageLoader.jobsBeingProcessed.get() > 0) {
 			Thread.sleep(100);
 		}
 	}
