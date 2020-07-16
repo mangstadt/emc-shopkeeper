@@ -61,7 +61,7 @@ public final class Images {
 
 	/**
 	 * Gets the platform's error icon.
-	 * @see http://stackoverflow.com/q/1196797/
+	 * @see "http://stackoverflow.com/q/1196797/"
 	 * @return the error icon
 	 */
 	public static Icon getErrorIcon() {
@@ -70,7 +70,7 @@ public final class Images {
 
 	/**
 	 * Gets the platform's warning icon.
-	 * @see http://stackoverflow.com/q/1196797/
+	 * @see "http://stackoverflow.com/q/1196797/"
 	 * @return the error icon
 	 */
 	public static Icon getWarningIcon() {

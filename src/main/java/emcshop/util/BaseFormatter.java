@@ -39,7 +39,7 @@ public class BaseFormatter {
 
 	/**
 	 * Formats the value.
-	 * @param amount the value to format
+	 * @param value the value to format
 	 * @return the formatted value
 	 */
 	public String format(double value) {

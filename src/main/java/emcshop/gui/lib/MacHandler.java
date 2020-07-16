@@ -18,7 +18,7 @@ public abstract class MacHandler {
 	}
 
 	/**
-	 * Used for internal purposes. Override {@link handleAbout} instead.
+	 * Used for internal purposes. Override {@link #handleAbout} instead.
 	 * @param applicationEvent the "com.apple.eawt.ApplicationEvent" object that
 	 * accompanies the event
 	 */

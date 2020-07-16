@@ -59,7 +59,7 @@ public class UpdateModelImpl implements IUpdateModel {
 	/**
 	 * @param builder the builder object for constructing new
 	 * {@link RupeeTransactionReader} instances.
-	 * @param oldestPaymentTransactionAge ignore all payment transactions that
+	 * @param oldestAllowablePaymentTransactionAge ignore all payment transactions that
 	 * are older than this age or null to parse all payment transactions
 	 * regardless of age
 	 */
