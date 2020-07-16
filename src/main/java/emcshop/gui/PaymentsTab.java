@@ -16,7 +16,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -318,7 +318,7 @@ public class PaymentsTab extends JPanel {
 			rowSorter.setComparator(Column.REASON.ordinal(), (Row one, Row two) -> one.transaction.getReason().compareToIgnoreCase(two.transaction.getReason()));
 			rowSorter.setComparator(Column.AMOUNT.ordinal(), Comparator.comparingInt((Row r) -> r.transaction.getAmount()));
 			rowSorter.setSortsOnUpdates(true);
-			rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.TIME.ordinal(), SortOrder.DESCENDING)));
+			rowSorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(Column.TIME.ordinal(), SortOrder.DESCENDING)));
 
 			return rowSorter;
 		}

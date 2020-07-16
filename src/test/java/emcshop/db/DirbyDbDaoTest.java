@@ -921,7 +921,7 @@ public class DirbyDbDaoTest {
 		expected.put(b, 2);
 		assertEquals(expected, actual);
 
-		dao.deleteInventory(Arrays.<Integer> asList());
+		dao.deleteInventory(Collections.<Integer>emptyList());
 
 		actual = inventory().all();
 		assertEquals(expected, actual);

@@ -6,7 +6,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -22,9 +21,9 @@ public class OnlinePlayersMonitorTest {
 	public void getPlayerServer() throws Exception {
 		EmcWebsiteConnection connection = mock(EmcWebsiteConnection.class);
 		when(connection.getOnlinePlayers(any(EmcServer.class))).thenReturn(Collections.<String> emptyList());
-		when(connection.getOnlinePlayers(EmcServer.SMP1)).thenReturn(Arrays.asList("Notch"));
-		when(connection.getOnlinePlayers(EmcServer.SMP5)).thenReturn(Arrays.asList("Jeb"));
-		when(connection.getOnlinePlayers(EmcServer.UTOPIA)).thenReturn(Arrays.asList("Dinnerbone"));
+		when(connection.getOnlinePlayers(EmcServer.SMP1)).thenReturn(Collections.singletonList("Notch"));
+		when(connection.getOnlinePlayers(EmcServer.SMP5)).thenReturn(Collections.singletonList("Jeb"));
+		when(connection.getOnlinePlayers(EmcServer.UTOPIA)).thenReturn(Collections.singletonList("Dinnerbone"));
 
 		OnlinePlayersMonitor monitor = new OnlinePlayersMonitor(connection, 1000);
 

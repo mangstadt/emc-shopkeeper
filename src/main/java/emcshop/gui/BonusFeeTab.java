@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -157,7 +157,7 @@ public class BonusFeeTab extends JPanel {
 
 			rowSorter.setComparator(Column.DESCRIPTION.ordinal(), (Row one, Row two) -> one.description.compareToIgnoreCase(two.description));
 			rowSorter.setComparator(Column.TOTAL.ordinal(), Comparator.comparingInt((Row r) -> r.total));
-			rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.DESCRIPTION.ordinal(), SortOrder.ASCENDING)));
+			rowSorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(Column.DESCRIPTION.ordinal(), SortOrder.ASCENDING)));
 			rowSorter.setSortsOnUpdates(true);
 
 			return rowSorter;

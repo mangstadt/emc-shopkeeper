@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -152,7 +152,7 @@ public class TransactionsTable extends JTable {
 		rowSorter.setComparator(Column.QUANTITY.ordinal(), Comparator.comparingInt(ShopTransactionDb::getQuantity));
 		rowSorter.setComparator(Column.AMOUNT.ordinal(), Comparator.comparingInt(ShopTransactionDb::getAmount));
 		rowSorter.setSortsOnUpdates(true);
-		rowSorter.setSortKeys(Arrays.asList(new RowSorter.SortKey(Column.TS.ordinal(), SortOrder.DESCENDING)));
+		rowSorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(Column.TS.ordinal(), SortOrder.DESCENDING)));
 
 		return rowSorter;
 	}
