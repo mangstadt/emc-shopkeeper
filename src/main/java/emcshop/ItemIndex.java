@@ -337,7 +337,7 @@ public class ItemIndex {
 	 */
 	public Collection<String> getGroups(String itemName) {
 		ItemInfo item = byName.get(itemName.toLowerCase());
-		return (item == null) ? Collections.<String> emptyList() : Arrays.asList(item.groups);
+		return (item == null) ? Collections.emptyList() : Arrays.asList(item.groups);
 	}
 
 	/**

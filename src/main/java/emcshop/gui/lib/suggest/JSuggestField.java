@@ -178,8 +178,8 @@ public class JSuggestField extends JTextField {
 			public void mouseReleased(MouseEvent e) {
 				if (selected == list.getSelectedIndex()) {
 					// provide double-click for selecting a suggestion
-					setText((String) list.getSelectedValue());
-					lastChosenExistingVariable = list.getSelectedValue().toString();
+					setText(list.getSelectedValue());
+					lastChosenExistingVariable = list.getSelectedValue();
 					fireActionEvent();
 					dropDownList.setVisible(false);
 				}
@@ -218,8 +218,8 @@ public class JSuggestField extends JTextField {
 				}
 
 				if (e.getKeyCode() == KeyEvent.VK_ENTER && list.getSelectedIndex() != -1 && suggestions.size() > 0) {
-					setText((String) list.getSelectedValue());
-					lastChosenExistingVariable = list.getSelectedValue().toString();
+					setText(list.getSelectedValue());
+					lastChosenExistingVariable = list.getSelectedValue();
 					fireActionEvent();
 					dropDownList.setVisible(false);
 					return;

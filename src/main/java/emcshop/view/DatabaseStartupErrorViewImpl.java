@@ -141,7 +141,7 @@ public class DatabaseStartupErrorViewImpl extends JDialog implements IDatabaseSt
 
 	@Override
 	public LocalDateTime getSelectedBackup() {
-		return (LocalDateTime) backups.getSelectedValue();
+		return backups.getSelectedValue();
 	}
 
 	@Override

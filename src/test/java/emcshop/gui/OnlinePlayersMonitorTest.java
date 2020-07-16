@@ -20,7 +20,7 @@ public class OnlinePlayersMonitorTest {
 	@Test
 	public void getPlayerServer() throws Exception {
 		EmcWebsiteConnection connection = mock(EmcWebsiteConnection.class);
-		when(connection.getOnlinePlayers(any(EmcServer.class))).thenReturn(Collections.<String> emptyList());
+		when(connection.getOnlinePlayers(any(EmcServer.class))).thenReturn(Collections.emptyList());
 		when(connection.getOnlinePlayers(EmcServer.SMP1)).thenReturn(Collections.singletonList("Notch"));
 		when(connection.getOnlinePlayers(EmcServer.SMP5)).thenReturn(Collections.singletonList("Jeb"));
 		when(connection.getOnlinePlayers(EmcServer.UTOPIA)).thenReturn(Collections.singletonList("Dinnerbone"));

@@ -929,7 +929,7 @@ public class DirbyDbDaoTest {
 
 	@Test
 	public void updateBonusesFeeTotals() throws Exception {
-		dao.updateBonusFeeTotals(Collections.<Class<? extends RupeeTransaction>, MutableInt> emptyMap());
+		dao.updateBonusFeeTotals(Collections.emptyMap());
 
 		bonusesFees().test();
 

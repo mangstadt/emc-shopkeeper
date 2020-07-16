@@ -125,7 +125,7 @@ public class MainFrame extends JFrame {
 
 		WindowState state = settings.getWindowState();
 		if (state == null) {
-			state = new WindowState(Collections.<String, Object> emptyMap(), null, new Dimension(800, 600), null);
+			state = new WindowState(Collections.emptyMap(), null, new Dimension(800, 600), null);
 		}
 		state.applyTo(this);
 		transactionsTab.afterPopulate();

@@ -226,7 +226,7 @@ public class BackupViewImpl extends JDialog implements IBackupView {
 
 	@Override
 	public LocalDateTime getSelectedBackup() {
-		return (LocalDateTime) backups.getSelectedValue();
+		return backups.getSelectedValue();
 	}
 
 	@Override
