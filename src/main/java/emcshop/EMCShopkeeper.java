@@ -225,7 +225,15 @@ public class EMCShopkeeper {
 		AppContext context = AppContext.instance();
 		context.add(settings);
 
-		DbDao dao = new DirbyEmbeddedDbDao(dbDir);
+		DbDao dao = null;
+		try {
+			dao = new DirbyEmbeddedDbDao(dbDir);
+		} catch (SQLException e){
+			if ("XJ040".equals(e.getSQLState())) {
+				out.println("It looks like you have EMC Shopkeeper open in the background? Please close EMC Shopkeeper and try again.");
+				System.exit(1);
+			}
+		}
 		context.add(dao);
 
 		int startingDbVersion = dao.selectDbVersion();
