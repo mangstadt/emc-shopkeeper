@@ -130,8 +130,8 @@ public class CliController {
 			ItemIndex index = ItemIndex.instance();
 
 			DateTimeFormatter df = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT);
-			out.println("Start date: " + df.format(from));
-			out.println("End date: " + df.format(to));
+			out.println("Start date: " + ((from == null) ? "not specified" : df.format(from)));
+			out.println("End date: " + ((to == null) ? "not specified" : df.format(to)));
 			out.println("Item                                   |Net Quantity       |Net Amount          ");
 			out.println("--------------------------------------------------------------------------------");
 			int totalAmount = 0;
