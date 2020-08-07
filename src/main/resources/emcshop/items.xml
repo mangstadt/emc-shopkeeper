@@ -286,7 +286,7 @@
 	<Item name="Gold Chestplate" id="315" stack="1" group="Gold" categories="16" emcNames="Gold Chest,Golden Chestplate" />
 	<Item name="Gold Helmet" id="314" stack="1" group="Gold" categories="16" emcNames="Golden Helmet" />
 	<Item name="Gold Hoe" id="294" stack="1" group="Gold" categories="6,16" emcNames="Golden Hoe" />
-	<Item name="Gold Horse Armor" id="418" stack="1" categories="16" emcNames="Gold Barding" />
+	<Item name="Gold Horse Armor" id="418" stack="1" categories="16" emcNames="Gold Barding,Golden Horse Armor" />
 	<Item name="Gold Ingot" id="266" group="Gold" categories="11" />
 	<Item name="Gold Leggings" id="316" stack="1" group="Gold" categories="16" emcNames="Golden Leggings" />
 	<Item name="Gold Nugget" id="371" group="Gold" categories="9,11" />
@@ -653,6 +653,7 @@
 	<Item name="Stone Brick" id="98" group="Stone" categories="14" emcNames="Stone Bricks" />
 	<Item name="Stone Brick Slab" id="44:5" emcNames="Stonebrick Slab,Stone Bricks Slab" group="Stone" categories="14" />
 	<Item name="Stone Brick Stairs" id="109" group="Stone" categories="14" emcNames="Stone Brick Sta" />
+	<Item name="Stone Brick Wall" group="Stone" categories="14" />
 	<Item name="Stone Hoe" id="291" stack="1" group="Stone" categories="6,16" />
 	<Item name="Stone Pickaxe" id="274" stack="1" group="Stone" categories="16" />
 	<Item name="Stone Plate" id="70" group="Stone" categories="13" emcNames="Stone Pressure Plate" />
@@ -863,6 +864,7 @@
 	<Item name="Empire Firework" image="firework.png" emcNames="Firework - §aEmpire Firework,§aEmpire Firework - §aEmpire Firework" categories="5" />
 	<Item name="Empire Firework (New Year 2014)" image="firework.png" emcNames="Firework - §b§l*§9§lEmpire Firework§b§l*,§b§l*§9§lEmpire Firework§b§l* - §b§l*§9§lEmpire Firework§b§l*" categories="5" />
 	<Item name="Empire Firework (New Year 2015)" image="firework.png" emcNames="Firework - §a#§2§lEmpire Firework§a#,§a#§2§lEmpire Firework§a# - §a#§2§lEmpire Firework§a#" categories="5" />
+	<Item name="*Empire Firework*" image="firework.png" emcNames="Firework - §5§l*§e§lEmpire Firework§5§l*" categories="5" />
 	<Item name="Independence Day Firework" image="firework.png" emcNames="Firework - §cIndependence §fDay §9Firework,§cIndependence §fDay §9Firework - §cIndependence §fDay §9Firework" categories="5" />
 	<!-- 
 	Don't know what year these are for:
@@ -934,7 +936,7 @@
 	<Item name="Bionic Pants" stack="1" image="diamond_leggings_enchanted.png" emcNames="§6Bionic Pants - §6Bionic Pants" categories="5,16" />
 	<Item name="Bonus Chest" image="chest.png" emcNames="Chest - §6Bonus Chest,§6Bonus Chest - §6Bonus Chest" categories="5" />
 	<Item name="Can Opener" stack="1" image="diamond_pickaxe_enchanted.png" emcNames="§6Can Opener - §6Can Opener,Diamond Pickaxe - §6Can Opener" categories="5,16" />
-	<Item name="Candy Cane Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="§4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le §f§lS§4§lw§f§lo§4§lr§f§ld - §4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le §f§lS§4§lw§f§lo§4§lr§f§ld" categories="5,16" />
+	<Item name="Candy Cane Sword" stack="1" image="diamond_sword_enchanted.png" emcNames="§4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le §f§lS§4§lw§f§lo§4§lr§f§ld - §4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le §f§lS§4§lw§f§lo§4§lr§f§ld,Diamond Sword - §4§lC§f§la§4§ln§f§ld§4§ly §f§lC§4§la§f§ln§4§le §f§lS§4§lw§f§lo§4§lr§f§ld" categories="5,16" />
 	<Item name="Chicken Skewer" stack="1" image="diamond_sword_enchanted.png" emcNames="Diamond Sword - §6Chicken Skewer,§6Chicken Skewer - §6Chicken Skewer" categories="5,16" />
 	<Item name="Chocolate Bunny" image="rabbit_egg.png" emcNames="§5§lChocolate Bunny - §5§lChocolate Bunny" categories="0,5" />
 	<Item name="Cooked Turkey" image="cooked_chicken.png" emcNames="Cooked Chicken - §eCooked Turkey,§eCooked Turkey - §eCooked Turkey" categories="5,7" />
