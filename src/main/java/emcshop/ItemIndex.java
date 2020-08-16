@@ -56,6 +56,15 @@ public class ItemIndex {
 			.put("f", "000000") //white, can't see, real color code: FFFFFF
 		.build(); //@formatter:on
 	}
+	private static final Map<String, String> TAGS;
+	static {
+		TAGS = ImmutableMap.<String, String>builder() //@formatter:off
+			.put("l", "b")
+			.put("m", "s")
+			.put("n", "u")
+			.put("o", "i")
+		.build(); //@formatter:on
+	}
 
 	private final Map<String, ItemInfo> byName;
 	private final Map<String, ItemInfo> byEmcName;
@@ -199,26 +208,40 @@ public class ItemIndex {
 		colorized.append("<html>");
 
 		boolean code = false;
-		int colorsDeep = 0;
+		List<String> openTags = new ArrayList<>();
 		for (int i = 0; i < itemName.length(); i++) {
 			char c = itemName.charAt(i);
 
 			if (code) {
 				code = false;
 
-				if (c == 'r') {
-					for (int j = 0; j < colorsDeep; j++) {
-						colorized.append("</font>");
-					}
-					colorsDeep = 0;
-				} else {
-					String hex = COLORS.get(c + "");
-					if (hex != null) {
-						colorized.append("<font color=\"#").append(hex).append("\">");
-						colorsDeep++;
-					}
+				//color
+				String hex = COLORS.get(c + "");
+				if (hex != null) {
+					colorized.append("<font color=\"#").append(hex).append("\">");
+					openTags.add("font");
+					continue;
 				}
 
+				//bold, italic, underline, strikethrough
+				String tag = TAGS.get(c + "");
+				if (tag != null) {
+					colorized.append("<").append(tag).append(">");
+					openTags.add(tag);
+					continue;
+				}
+
+				//reset
+				if (c == 'r') {
+					Collections.reverse(openTags);
+					for (String openTag : openTags) {
+						colorized.append("</").append(openTag).append(">");
+					}
+					openTags.clear();
+					continue;
+				}
+
+				//code not recognized, ignore it
 				continue;
 			}
 
