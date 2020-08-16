@@ -169,7 +169,9 @@ public class ItemIndex {
 		String name = element.attribute("name");
 
 		String nameColored = element.attribute("nameColored");
-		nameColored = nameColored.isEmpty() ? name : emcFormattingToHtml(nameColored);
+		if (nameColored.isEmpty()) {
+			nameColored = name;
+		}
 
 		String value = element.attribute("emcNames");
 		String emcNames[] = splitValues(value);
@@ -200,10 +202,11 @@ public class ItemIndex {
 	/**
 	 * Converts the EMC color codes to HTML.
 	 * @param itemName the item name using EMC color codes (e.g. §5§lDragon Stone)
+	 * @param includeColor true to include color, false not to
 	 * @return the HTML-formatted item name
 	 * @see "https://empireminecraft.com/wiki/formatted-signs/"
 	 */
-	private static String emcFormattingToHtml(String itemName) {
+	private static String emcFormattingToHtml(String itemName, boolean includeColor) {
 		StringBuilder colorized = new StringBuilder();
 		colorized.append("<html>");
 
@@ -216,11 +219,13 @@ public class ItemIndex {
 				code = false;
 
 				//color
-				String hex = COLORS.get(c + "");
-				if (hex != null) {
-					colorized.append("<font color=\"#").append(hex).append("\">");
-					openTags.add("font");
-					continue;
+				if (includeColor) {
+					String hex = COLORS.get(c + "");
+					if (hex != null) {
+						colorized.append("<font color=\"#").append(hex).append("\">");
+						openTags.add("font");
+						continue;
+					}
 				}
 
 				//bold, italic, underline, strikethrough
@@ -317,13 +322,14 @@ public class ItemIndex {
 	}
 
 	/**
-	 * Gets the colorized version of an item's name, formatted in HTML.
+	 * Gets the item's name with formatting included.
 	 * @param itemName the item name
-	 * @return the colored version or the passed-in itemName string if the item was not recognized
+	 * @param renderColor include color
+	 * @return the formatted version in HTML or the passed-in itemName string if the item was not recognized
 	 */
-	public String getItemNameColored(String itemName) {
+	public String getItemNameFormatted(String itemName, boolean renderColor) {
 		ItemInfo info = byName.get(itemName.toLowerCase());
-		return (info == null) ? itemName : info.nameColored;
+		return (info == null) ? itemName : emcFormattingToHtml(info.nameColored, renderColor);
 	}
 
 	/**

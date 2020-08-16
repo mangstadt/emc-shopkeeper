@@ -44,6 +44,7 @@ public class ItemIndexTest {
 			"<Item name=\"Oak Log\" id=\"17:0\" />" +
 			"<Item name=\"Ender Pearl\" id=\"368\" stack=\"16\" />" +
 			"<Item name=\"Diamond Chestplate\" emcNames=\"Diamond Chest\" />" +
+			"<Item name=\"Super Pick Axe\" nameColored=\"§lSuper§r §1§2Pick§r §2Axe\" />" +
 		"</Items>";
 		//@formatter:on
 
@@ -112,7 +113,7 @@ public class ItemIndexTest {
 	@Test
 	public void getItemNames() {
 		Set<String> actual = new HashSet<>(mockIndex.getItemNames());
-		Set<String> expected = new HashSet<>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion", "Oak Log", "Ender Pearl", "Diamond Chestplate"));
+		Set<String> expected = new HashSet<>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion", "Oak Log", "Ender Pearl", "Diamond Chestplate", "Super Pick Axe"));
 		assertEquals(expected, actual);
 	}
 
@@ -121,6 +122,27 @@ public class ItemIndexTest {
 		assertEquals(16, mockIndex.getStackSize("Ender Pearl"));
 		assertEquals(64, mockIndex.getStackSize("Diamond"));
 		assertEquals(64, mockIndex.getStackSize("unknown"));
+	}
+
+	@Test
+	public void getItemNameFormatted_attribute_not_specified() {
+		String actual = mockIndex.getItemNameFormatted("Diamond", false);
+		String expected = "<html>Diamond";
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void getItemNameFormatted_without_color() {
+		String actual = mockIndex.getItemNameFormatted("Super Pick Axe", false);
+		String expected = "<html><b>Super</b> Pick Axe";
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void getItemNameFormatted_with_color() {
+		String actual = mockIndex.getItemNameFormatted("Super Pick Axe", true);
+		String expected = "<html><b>Super</b> <font color=\"#0000BF\"><font color=\"#00BF00\">Pick</font></font> <font color=\"#00BF00\">Axe";
+		assertEquals(expected, actual);
 	}
 
 	/**

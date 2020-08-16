@@ -189,7 +189,7 @@ public class ItemsTable extends GroupableColumnsTable {
 			public String getText(ItemGroup group, Column column) {
 				switch (column) {
 				case ITEM_NAME:
-					return group.getItem();
+					return ItemIndex.instance().getItemNameFormatted(group.getItem(), true);
 				case PPU_BUY:
 					switch (shopTransactionType) {
 					case OTHER_SHOPS:

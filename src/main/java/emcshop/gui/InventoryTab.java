@@ -707,8 +707,10 @@ public class InventoryTab extends JPanel implements ExportListener {
 							label.setForeground(Color.RED);
 						}
 					} else {
+						boolean includeColor = !rowObj.selected;
+						label.setText(ItemIndex.instance().getItemNameFormatted(inv.getItem(), includeColor));
+
 						ImageIcon img = Images.getItemImage(inv.getItem());
-						label.setText(inv.getItem());
 						label.setIcon(img);
 					}
 					break;
