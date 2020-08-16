@@ -8,6 +8,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -214,6 +215,30 @@ public class ItemIndexTest {
 			}
 
 			fail(sb.toString());
+		}
+	}
+
+	/**
+	 * Checks the live "items.xml" file for images that don't exist.
+	 */
+	@Test
+	public void validate_images_exist() {
+		Set<String> notFound = new HashSet<>();
+		List<Leaf> itemElements = liveIndex.select("/Items/Item");
+		for (Leaf itemElement : itemElements) {
+			String image = itemElement.attribute("image");
+			if (image.isEmpty()) {
+				continue;
+			}
+
+			URL url = getClass().getResource("gui/images/items/" + image);
+			if (url == null){
+				notFound.add(image);
+			}
+		}
+
+		if (!notFound.isEmpty()) {
+			fail("The following item images were not found: " + notFound);
 		}
 	}
 }

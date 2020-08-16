@@ -34,6 +34,29 @@ public class ItemIndex {
 	private static ItemIndex INSTANCE;
 	private static final int DEFAULT_STACK_SIZE = 64;
 
+	private static final char FORMAT_ESCAPE_CHAR = '§';
+	private static final Map<String, String> COLORS;
+	static {
+		COLORS = ImmutableMap.<String, String>builder() //@formatter:off
+			.put("0", "000000")
+			.put("1", "0000BF")
+			.put("2", "00BF00")
+			.put("3", "00BFBF")
+			.put("4", "BF0000")
+			.put("5", "BF00BF")
+			.put("6", "BFBF00")
+			.put("7", "BFBFBF")
+			.put("8", "404040")
+			.put("9", "4040FF")
+			.put("a", "49FF40")
+			.put("b", "40FFFF")
+			.put("c", "FF4040")
+			.put("d", "FF40FF")
+			.put("e", "BFBF00") //bright yellow, too hard to see, real color code: FFFF40
+			.put("f", "000000") //white, can't see, real color code: FFFFFF
+		.build(); //@formatter:on
+	}
+
 	private final Map<String, ItemInfo> byName;
 	private final Map<String, ItemInfo> byEmcName;
 	private final Map<String, ItemInfo> byId;
@@ -136,6 +159,9 @@ public class ItemIndex {
 	private static ItemInfo parseItem(Leaf element, Map<Integer, CategoryInfo> categoriesById) {
 		String name = element.attribute("name");
 
+		String nameColored = element.attribute("nameColored");
+		nameColored = nameColored.isEmpty() ? name : emcFormattingToHtml(nameColored);
+
 		String value = element.attribute("emcNames");
 		String emcNames[] = splitValues(value);
 
@@ -159,7 +185,52 @@ public class ItemIndex {
 			categories[i] = categoriesById.get(id);
 		}
 
-		return new ItemInfo(name, emcNames, ids, image, stackSize, groups, categories);
+		return new ItemInfo(name, nameColored, emcNames, ids, image, stackSize, groups, categories);
+	}
+
+	/**
+	 * Converts the EMC color codes to HTML.
+	 * @param itemName the item name using EMC color codes (e.g. §5§lDragon Stone)
+	 * @return the HTML-formatted item name
+	 * @see "https://empireminecraft.com/wiki/formatted-signs/"
+	 */
+	private static String emcFormattingToHtml(String itemName) {
+		StringBuilder colorized = new StringBuilder();
+		colorized.append("<html>");
+
+		boolean code = false;
+		int colorsDeep = 0;
+		for (int i = 0; i < itemName.length(); i++) {
+			char c = itemName.charAt(i);
+
+			if (code) {
+				code = false;
+
+				if (c == 'r') {
+					for (int j = 0; j < colorsDeep; j++) {
+						colorized.append("</font>");
+					}
+					colorsDeep = 0;
+				} else {
+					String hex = COLORS.get(c + "");
+					if (hex != null) {
+						colorized.append("<font color=\"#").append(hex).append("\">");
+						colorsDeep++;
+					}
+				}
+
+				continue;
+			}
+
+			if (c == FORMAT_ESCAPE_CHAR) {
+				code = true;
+				continue;
+			}
+
+			colorized.append(c);
+		}
+
+		return colorized.toString();
 	}
 
 	private static String[] splitValues(String value) {
@@ -220,6 +291,16 @@ public class ItemIndex {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Gets the colorized version of an item's name, formatted in HTML.
+	 * @param itemName the item name
+	 * @return the colored version or the passed-in itemName string if the item was not recognized
+	 */
+	public String getItemNameColored(String itemName) {
+		ItemInfo info = byName.get(itemName.toLowerCase());
+		return (info == null) ? itemName : info.nameColored;
 	}
 
 	/**
@@ -345,6 +426,7 @@ public class ItemIndex {
 	 */
 	private static class ItemInfo {
 		private final String name;
+		private final String nameColored;
 		private final String emcNames[];
 		private final String ids[];
 		private final String image;
@@ -352,8 +434,9 @@ public class ItemIndex {
 		private final String[] groups;
 		private final CategoryInfo[] categories;
 
-		public ItemInfo(String name, String[] emcNames, String[] ids, String image, int stackSize, String[] groups, CategoryInfo[] categories) {
+		public ItemInfo(String name, String nameColored, String[] emcNames, String[] ids, String image, int stackSize, String[] groups, CategoryInfo[] categories) {
 			this.name = name;
+			this.nameColored = nameColored;
 			this.emcNames = emcNames;
 			this.ids = ids;
 			this.image = image;

@@ -2,7 +2,6 @@ package emcshop.gui;
 
 import java.awt.Component;
 import java.awt.Window;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -15,6 +14,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.google.common.collect.ImmutableMap;
 
+import emcshop.ItemIndex;
 import emcshop.gui.images.Images;
 import emcshop.gui.lib.suggest.ContainsMatcher;
 import emcshop.gui.lib.suggest.JSuggestField;
@@ -43,7 +43,7 @@ public class ItemSuggestField extends JSuggestField {
 
 			@Override
 			public Component getListCellRendererComponent(JList<? extends String> list, String itemName, int index, boolean selected, boolean hasFocus) {
-				label.setText(itemName);
+				label.setText(selected ? itemName : ItemIndex.instance().getItemNameColored(itemName));
 
 				ImageIcon icon = itemIcons.get(itemName);
 				if (icon == null) {
