@@ -1,5 +1,6 @@
 package emcshop;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -59,6 +60,37 @@ public final class QueryExporter {
 
 		//writing to a string
 		IOUtils.closeQuietly(writer);
+
+		return sw.toString();
+	}
+
+	/**
+	 * Generates a CSV string containing data from a list of transactions.
+	 * @param transactions the shop transactions
+	 * @param from the start date or null if there is no start date
+	 * @param to the end date or null if there is no end date
+	 * @return the CSV string
+	 */
+	public static String generateExportCsv(Collection<ShopTransactionDb> transactions, LocalDateTime from, LocalDateTime to) {
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+		StringWriter sw = new StringWriter();
+		try (CSVWriter writer = new CSVWriter(sw)) {
+			writer.writeNext(new String[] { (from == null) ? "no start date" : df.format(from), (to == null) ? "no end date" : df.format(to) });
+			writer.writeNext(new String[] { "Timestamp", "Customer", "Shop Owner", "Item", "Quantity", "Amount" });
+			for (ShopTransactionDb transaction : transactions) {
+				writer.writeNext(new String[] { //@formatter:off
+					df.format(transaction.getTs()),
+					transaction.getShopCustomer(),
+					transaction.getShopOwner(),
+					transaction.getItem() + "",
+					transaction.getQuantity() + "",
+					transaction.getAmount() + ""
+				}); //@formatter:on
+			}
+			writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL});
+		} catch (IOException ignore) {
+			//writing to a string
+		}
 
 		return sw.toString();
 	}

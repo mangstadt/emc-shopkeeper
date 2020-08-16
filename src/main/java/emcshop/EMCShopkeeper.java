@@ -214,7 +214,7 @@ public class EMCShopkeeper {
 
 		LogManager logManager = new LogManager(logLevel, profileDir.resolve("app.log"));
 
-		if (!arguments.update() && arguments.query() == null) {
+		if (!arguments.update() && arguments.query() == null && arguments.export() == null) {
 			launchGui(profileDir, dbDir, settings, logManager);
 		} else {
 			launchCli(dbDir, settings, arguments);
@@ -272,6 +272,11 @@ public class EMCShopkeeper {
 				format = defaultFormat;
 			}
 			cli.query(query, format);
+		}
+
+		String export = args.export();
+		if (export != null) {
+			cli.export(export);
 		}
 	}
 

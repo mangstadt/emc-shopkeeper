@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
+import emcshop.db.ShopTransactionDb;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.mangstadt.emc.rupees.RupeeTransactionReader;
@@ -162,6 +163,20 @@ public class CliController {
 			String color = ansi.getBoldColor(totalAmount);
 			out.println(color + rf.format(totalAmount) + ansi.getReset());
 		}
+	}
+
+	public void export(String query) throws Exception {
+		LocalDateTime from, to;
+		if (query.isEmpty()) {
+			from = to = null;
+		} else {
+			LocalDateTime range[] = parseDateRange(query, dao);
+			from = range[0];
+			to = range[1];
+		}
+
+		List<ShopTransactionDb> transactions = dao.getTransactionsByDate(from, to, ShopTransactionType.ALL);
+		out.println(QueryExporter.generateExportCsv(transactions, from, to));
 	}
 
 	/**

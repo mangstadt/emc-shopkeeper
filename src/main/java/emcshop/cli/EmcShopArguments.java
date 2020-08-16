@@ -19,6 +19,7 @@ public class EmcShopArguments {
 		parser.accepts("stop-page").withRequiredArg().ofType(Integer.class);
 		parser.accepts("start-page").withRequiredArg().ofType(Integer.class);
 		parser.accepts("query").withOptionalArg();
+		parser.accepts("export").withOptionalArg();
 		parser.accepts("format").withRequiredArg();
 		parser.accepts("version");
 		parser.accepts("help");
@@ -56,6 +57,18 @@ public class EmcShopArguments {
 		}
 
 		return (String) options.valueOf("query");
+	}
+
+	public String export() {
+		if (!options.has("export")) {
+			return null;
+		}
+
+		if (!options.hasArgument("export")) {
+			return "";
+		}
+
+		return (String) options.valueOf("export");
 	}
 
 	public String format() {
@@ -129,6 +142,14 @@ public class EmcShopArguments {
 		"  Data up to today:       --query=\"2013-03-07 to today\"" + nl +
 		"--format=TABLE|CSV|BBCODE" + nl +
 		"  Specifies how to render the queried transaction data (defaults to " + defaultFormat + ")." + nl +
+		nl +
+		"--export=QUERY" + nl +
+		"  Outputs every transaction in chronological order in CSV format.  Examples:" + nl +
+		"  All data:               --export" + nl +
+		"  Today's data:           --export=\"today\"" + nl +
+		"  Data since last update: --export=\"since last update\"" + nl +
+		"  Three days of data:     --export=\"2013-03-07 to 2013-03-09\"" + nl +
+		"  Data up to today:       --export=\"2013-03-07 to today\"" + nl +
 		nl +
 		"--version" + nl +
 		"  Prints the version of this program." + nl +
