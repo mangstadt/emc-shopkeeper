@@ -8,7 +8,6 @@ import java.time.format.FormatStyle;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.ListMultimap;
@@ -39,27 +38,25 @@ public final class QueryExporter {
 	public static String generateItemsCsv(Collection<ItemGroup> itemGroups, int netTotal, LocalDateTime from, LocalDateTime to) {
 		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
-		CSVWriter writer = new CSVWriter(sw);
-
-		writer.writeNext(new String[] { (from == null) ? "no start date" : df.format(from), (to == null) ? "no end date" : df.format(to) });
-		writer.writeNext(new String[] { "Item", "Sold Quantity", "Sold Amount", "Bought Quantity", "Bought Amount", "Net Quantity", "Net Amount" });
-		for (ItemGroup group : itemGroups) {
-			//@formatter:off
-			writer.writeNext(new String[]{
-				group.getItem(),
-				group.getSoldQuantity() + "",
-				group.getSoldAmount() + "",
-				group.getBoughtQuantity() + "",
-				group.getBoughtAmount() + "",
-				group.getNetQuantity() + "",
-				group.getNetAmount() + ""
-			});
-			//@formatter:on
+		try (CSVWriter writer = new CSVWriter(sw)) {
+			writer.writeNext(new String[] { (from == null) ? "no start date" : df.format(from), (to == null) ? "no end date" : df.format(to) });
+			writer.writeNext(new String[] { "Item", "Sold Quantity", "Sold Amount", "Bought Quantity", "Bought Amount", "Net Quantity", "Net Amount" });
+			for (ItemGroup group : itemGroups) {
+				writer.writeNext(new String[] { //@formatter:off
+					group.getItem(),
+					group.getSoldQuantity() + "",
+					group.getSoldAmount() + "",
+					group.getBoughtQuantity() + "",
+					group.getBoughtAmount() + "",
+					group.getNetQuantity() + "",
+					group.getNetAmount() + ""
+				}); //@formatter:on
+			}
+			writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL, "", "", "", "", "", netTotal + "" });
+		} catch (IOException ignore) {
+			//should never be thrown, writing to a string
+			throw new RuntimeException(ignore);
 		}
-		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL, "", "", "", "", "", netTotal + "" });
-
-		//writing to a string
-		IOUtils.closeQuietly(writer);
 
 		return sw.toString();
 	}
@@ -89,7 +86,8 @@ public final class QueryExporter {
 			}
 			writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL});
 		} catch (IOException ignore) {
-			//writing to a string
+			//should never be thrown, writing to a string
+			throw new RuntimeException(ignore);
 		}
 
 		return sw.toString();
@@ -190,33 +188,31 @@ public final class QueryExporter {
 	public static String generatePlayersCsv(List<PlayerGroup> players, ListMultimap<PlayerGroup, ItemGroup> items, LocalDateTime from, LocalDateTime to) {
 		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
-		CSVWriter writer = new CSVWriter(sw);
-
-		writer.writeNext(new String[] { (from == null) ? "" : df.format(from), (to == null) ? "" : df.format(to) });
-		writer.writeNext(new String[] { "Player", "First Seen", "Last Seen", "Item", "Sold Quantity", "Sold Amount", "Bought Quantity", "Bought Amount", "Net Quantity", "Net Amount" });
-		for (PlayerGroup player : players) {
-			Player p = player.getPlayer();
-			for (ItemGroup group : items.get(player)) {
-				//@formatter:off
-				writer.writeNext(new String[]{
-					p.getName(),
-					(p.getFirstSeen() == null) ? "" : df.format(p.getFirstSeen()),
-					(p.getLastSeen() == null) ? "" : df.format(p.getLastSeen()),
-					group.getItem(),
-					group.getSoldQuantity() + "",
-					group.getSoldAmount() + "",
-					group.getBoughtQuantity() + "",
-					group.getBoughtAmount() + "",
-					group.getNetQuantity() + "",
-					group.getNetAmount() + ""
-				});
-				//@formatter:on
+		try (CSVWriter writer = new CSVWriter(sw)) {
+			writer.writeNext(new String[] { (from == null) ? "" : df.format(from), (to == null) ? "" : df.format(to) });
+			writer.writeNext(new String[] { "Player", "First Seen", "Last Seen", "Item", "Sold Quantity", "Sold Amount", "Bought Quantity", "Bought Amount", "Net Quantity", "Net Amount" });
+			for (PlayerGroup player : players) {
+				Player p = player.getPlayer();
+				for (ItemGroup group : items.get(player)) {
+					writer.writeNext(new String[] { //@formatter:off
+						p.getName(),
+						(p.getFirstSeen() == null) ? "" : df.format(p.getFirstSeen()),
+						(p.getLastSeen() == null) ? "" : df.format(p.getLastSeen()),
+						group.getItem(),
+						group.getSoldQuantity() + "",
+						group.getSoldAmount() + "",
+						group.getBoughtQuantity() + "",
+						group.getBoughtAmount() + "",
+						group.getNetQuantity() + "",
+						group.getNetAmount() + ""
+					}); //@formatter:on
+				}
 			}
+			writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL });
+		} catch (IOException ignore) {
+			//should never be thrown, writing to a string
+			throw new RuntimeException(ignore);
 		}
-		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL });
-
-		//writing to a string
-		IOUtils.closeQuietly(writer);
 
 		return sw.toString();
 	}
@@ -329,46 +325,42 @@ public final class QueryExporter {
 	public static String generateTransactionsCsv(Collection<ShopTransactionDb> transactions, int netTotal, LocalDateTime from, LocalDateTime to) {
 		DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 		StringWriter sw = new StringWriter();
-		CSVWriter writer = new CSVWriter(sw);
-
-		writer.writeNext(new String[] { (from == null) ? "no start date" : df.format(from), (to == null) ? "no end date" : df.format(to) });
-		writer.writeNext(new String[] { "Date", "Player", "Item", "Quantity", "Amount" });
-		for (ShopTransactionDb group : transactions) {
-			//@formatter:off
-			writer.writeNext(new String[]{
-				df.format(group.getTs()),
-				group.getShopCustomer(),
-				group.getItem(),
-				group.getQuantity() + "",
-				group.getAmount() + ""
-			});
-			//@formatter:on
+		try (CSVWriter writer = new CSVWriter(sw)) {
+			writer.writeNext(new String[] { (from == null) ? "no start date" : df.format(from), (to == null) ? "no end date" : df.format(to) });
+			writer.writeNext(new String[] { "Date", "Player", "Item", "Quantity", "Amount" });
+			for (ShopTransactionDb group : transactions) {
+				writer.writeNext(new String[] { //@formatter:off
+					df.format(group.getTs()),
+					group.getShopCustomer(),
+					group.getItem(),
+					group.getQuantity() + "",
+					group.getAmount() + ""
+				}); //@formatter:on
+			}
+			writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL, "", "", "", netTotal + "" });
+		} catch (IOException ignore) {
+			//should never be thrown, writing to a string
+			throw new RuntimeException(ignore);
 		}
-		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL, "", "", "", netTotal + "" });
-
-		//writing to a string
-		IOUtils.closeQuietly(writer);
 
 		return sw.toString();
 	}
 
 	public static String generateInventoryCsv(Collection<Inventory> inventory) {
 		StringWriter sw = new StringWriter();
-		CSVWriter writer = new CSVWriter(sw);
-
-		writer.writeNext(new String[] { "Item", "Remaining" });
-		for (Inventory inv : inventory) {
-			//@formatter:off
-			writer.writeNext(new String[]{
-				inv.getItem(),
-				inv.getQuantity() + ""
-			});
-			//@formatter:on
+		try (CSVWriter writer = new CSVWriter(sw)) {
+			writer.writeNext(new String[] { "Item", "Remaining" });
+			for (Inventory inv : inventory) {
+				writer.writeNext(new String[] { //@formatter:off
+					inv.getItem(),
+					inv.getQuantity() + ""
+				}); //@formatter:on
+			}
+			writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL });
+		} catch (IOException ignore) {
+			//should never be thrown, writing to a string
+			throw new RuntimeException(ignore);
 		}
-		writer.writeNext(new String[] { "EMC Shopkeeper v" + EMCShopkeeper.VERSION + " - " + EMCShopkeeper.URL });
-
-		//writing to a string
-		IOUtils.closeQuietly(writer);
 
 		return sw.toString();
 	}
