@@ -66,18 +66,15 @@ public abstract class DirbyDbDao implements DbDao {
 	protected String jdbcUrl;
 	private Map<Integer, LocalDateTime[]> firstLastSeenDates = new HashMap<>();
 
-	private final Map<Class<? extends RupeeTransaction>, String> bonusFeeColumnNames;
-	{
-		ImmutableMap.Builder<Class<? extends RupeeTransaction>, String> builder = ImmutableMap.builder();
-		builder.put(DailySigninBonus.class, "sign_in");
-		builder.put(EggifyFee.class, "eggify");
-		builder.put(HorseSummonFee.class, "horse");
-		builder.put(LockTransaction.class, "lock");
-		builder.put(MailFee.class, "mail");
-		builder.put(VaultFee.class, "vault");
-		builder.put(VoteBonus.class, "vote");
-		bonusFeeColumnNames = builder.build();
-	}
+	private final Map<Class<? extends RupeeTransaction>, String> bonusFeeColumnNames = ImmutableMap.<Class<? extends RupeeTransaction>, String>builder() //@formatter:off
+		.put(DailySigninBonus.class, "sign_in")
+		.put(EggifyFee.class, "eggify")
+		.put(HorseSummonFee.class, "horse")
+		.put(LockTransaction.class, "lock")
+		.put(MailFee.class, "mail")
+		.put(VaultFee.class, "vault")
+		.put(VoteBonus.class, "vote")
+	.build(); //@formatter:on
 
 	/**
 	 * Connects to the database and creates the database from scratch if it

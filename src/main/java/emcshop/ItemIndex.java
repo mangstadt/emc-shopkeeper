@@ -35,36 +35,30 @@ public class ItemIndex {
 	private static final int DEFAULT_STACK_SIZE = 64;
 
 	private static final char FORMAT_ESCAPE_CHAR = '§';
-	private static final Map<String, String> COLORS;
-	static {
-		COLORS = ImmutableMap.<String, String>builder() //@formatter:off
-			.put("0", "000000")
-			.put("1", "0000BF")
-			.put("2", "00BF00")
-			.put("3", "00BFBF")
-			.put("4", "BF0000")
-			.put("5", "BF00BF")
-			.put("6", "BFBF00")
-			.put("7", "BFBFBF")
-			.put("8", "404040")
-			.put("9", "4040FF")
-			.put("a", "49FF40")
-			.put("b", "40FFFF")
-			.put("c", "FF4040")
-			.put("d", "FF40FF")
-			.put("e", "BFBF00") //bright yellow, too hard to see, real color code: FFFF40
-			.put("f", "000000") //white, can't see, real color code: FFFFFF
-		.build(); //@formatter:on
-	}
-	private static final Map<String, String> TAGS;
-	static {
-		TAGS = ImmutableMap.<String, String>builder() //@formatter:off
-			.put("l", "b")
-			.put("m", "s")
-			.put("n", "u")
-			.put("o", "i")
-		.build(); //@formatter:on
-	}
+	private static final Map<String, String> COLORS = ImmutableMap.<String, String>builder() //@formatter:off
+		.put("0", "000000")
+		.put("1", "0000BF")
+		.put("2", "00BF00")
+		.put("3", "00BFBF")
+		.put("4", "BF0000")
+		.put("5", "BF00BF")
+		.put("6", "BFBF00")
+		.put("7", "BFBFBF")
+		.put("8", "404040")
+		.put("9", "4040FF")
+		.put("a", "49FF40")
+		.put("b", "40FFFF")
+		.put("c", "FF4040")
+		.put("d", "FF40FF")
+		.put("e", "BFBF00") //bright yellow, too hard to see, real color code: FFFF40
+		.put("f", "000000") //white, can't see, real color code: FFFFFF
+	.build(); //@formatter:on
+	private static final Map<String, String> TAGS = ImmutableMap.<String, String>builder() //@formatter:off
+		.put("l", "b")
+		.put("m", "s")
+		.put("n", "u")
+		.put("o", "i")
+	.build(); //@formatter:on
 
 	private final Map<String, ItemInfo> byName;
 	private final Map<String, ItemInfo> byEmcName;
