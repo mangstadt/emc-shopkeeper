@@ -61,6 +61,14 @@ EMC Shopkeeper includes a limited command-line interface:
     --format=TABLE|CSV|BBCODE
       Specifies how to render the queried transaction data (defaults to TABLE).
 
+    --export=QUERY
+      Outputs every transaction in chronological order in CSV format.  Examples:
+      All data:               --export
+      Today's data:           --export="today"
+      Data since last update: --export="since last update"
+      Three days of data:     --export="2013-03-07 to 2013-03-09"
+      Data up to today:       --export="2013-03-07 to today"
+
     --version
       Prints the version of this program.
 
