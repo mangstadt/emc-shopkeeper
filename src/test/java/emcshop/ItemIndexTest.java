@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +37,7 @@ public class ItemIndexTest {
 	{
 		//@formatter:off
 		String sample =
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 		"<Items>" +
 			"<Item name=\"Diamond\" id=\"264\" />" +
 			"<Item name=\"Orange Clay\" id=\"159:1\" emcNames=\"Orange Stclay\" />" +
@@ -49,7 +51,7 @@ public class ItemIndexTest {
 		//@formatter:on
 
 		try {
-			mockIndex = new ItemIndex(new ByteArrayInputStream(sample.getBytes()));
+			mockIndex = new ItemIndex(new ByteArrayInputStream(sample.getBytes(StandardCharsets.UTF_8)));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
