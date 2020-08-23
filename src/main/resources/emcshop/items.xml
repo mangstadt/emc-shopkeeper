@@ -864,7 +864,6 @@
 	<Item name="Empire Firework" nameColored="§aEmpire Firework" image="firework_rocket.png" emcNames="Firework - §aEmpire Firework,§aEmpire Firework - §aEmpire Firework" categories="5" />
 	<Item name="Empire Firework (New Year 2014)" nameColored="§b§l*§9§lEmpire Firework§b§l*" image="firework_rocket.png" emcNames="Firework - §b§l*§9§lEmpire Firework§b§l*,§b§l*§9§lEmpire Firework§b§l* - §b§l*§9§lEmpire Firework§b§l*" categories="5" />
 	<Item name="Empire Firework (New Year 2015)" nameColored="§a#§2§lEmpire Firework§a#" image="firework_rocket.png" emcNames="Firework - §a#§2§lEmpire Firework§a#,§a#§2§lEmpire Firework§a# - §a#§2§lEmpire Firework§a#" categories="5" />
-	<Item name="*Empire Firework*" nameColored="§5§l*§e§lEmpire Firework§5§l*" image="firework_rocket.png" emcNames="Firework - §5§l*§e§lEmpire Firework§5§l*" categories="5" />
 	<Item name="Independence Day Firework" nameColored="§cIndependence §fDay §9Firework" image="firework_rocket.png" emcNames="Firework - §cIndependence §fDay §9Firework,§cIndependence §fDay §9Firework - §cIndependence §fDay §9Firework" categories="5" />
 	<!-- 
 	Don't know what year these are for:
