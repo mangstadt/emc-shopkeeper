@@ -22,6 +22,7 @@ import java.sql.Types;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -126,10 +127,10 @@ public class DirbyDbDaoTest {
 
 		DateGenerator dg = new DateGenerator();
 		updateLog().ts(dg.next()).insert();
-		assertEquals(dg.getGenerated(0), dao.getLatestUpdateDate());
+		assertTimestampEquals(dg.getGenerated(0), dao.getLatestUpdateDate());
 
 		updateLog().ts(dg.next()).insert();
-		assertEquals(dg.getGenerated(1), dao.getLatestUpdateDate());
+		assertTimestampEquals(dg.getGenerated(1), dao.getLatestUpdateDate());
 	}
 
 	@Test
@@ -141,7 +142,7 @@ public class DirbyDbDaoTest {
 		assertNull(dao.getSecondLatestUpdateDate());
 
 		updateLog().ts(dg.next()).insert();
-		assertEquals(dg.getGenerated(0), dao.getSecondLatestUpdateDate());
+		assertTimestampEquals(dg.getGenerated(0), dao.getSecondLatestUpdateDate());
 	}
 
 	@Test
@@ -1337,6 +1338,15 @@ public class DirbyDbDaoTest {
 		bonusesFees().test();
 	}
 
+	/**
+	 * Timestamp values in the database are stored with millisecond-precision, whereas Java uses nanosecond-precision.
+	 * @param expected
+	 * @param actual
+	 */
+	private static void assertTimestampEquals(LocalDateTime expected, LocalDateTime actual) {
+		assertEquals(expected.truncatedTo(ChronoUnit.MILLIS), actual);
+	}
+
 	private static MetaHelper meta() {
 		return new MetaHelper();
 	}
@@ -1410,7 +1420,7 @@ public class DirbyDbDaoTest {
 		public void test() throws SQLException {
 			ResultSet rs = query("SELECT * FROM update_log");
 			rs.next();
-			assertEquals(timestamp(ts), rs.getTimestamp("ts"));
+			assertTimestampEquals(ts, toLocalDateTime(rs.getTimestamp("ts")));
 			assertEquals(rupeeBalance, rs.getInt("rupee_balance"));
 			assertEquals(shopTransactionCount, rs.getInt("transaction_count"));
 			assertEquals(paymentTransactionCount, rs.getInt("payment_transaction_count"));
@@ -1775,7 +1785,7 @@ public class DirbyDbDaoTest {
 		}
 
 		public void test(ResultSet rs) throws SQLException {
-			assertEquals(ts, toLocalDateTime(rs.getTimestamp("ts")));
+			assertTimestampEquals(ts, toLocalDateTime(rs.getTimestamp("ts")));
 			assertEquals(item, rs.getInt("item"));
 			assertEquals(player, rs.getObject("player"));
 			assertEquals(balance, rs.getInt("balance"));
@@ -1784,7 +1794,7 @@ public class DirbyDbDaoTest {
 		}
 
 		public void test(ShopTransactionDb transaction) {
-			assertEquals(ts, transaction.getTs());
+			assertTimestampEquals(ts, transaction.getTs());
 			assertEquals(itemStr, transaction.getItem());
 			assertEquals(playerStr, transaction.getShopCustomer());
 			assertEquals(quantity, transaction.getQuantity());
@@ -1908,7 +1918,7 @@ public class DirbyDbDaoTest {
 			if (id != null) {
 				assertIntEquals(id, rs.getInt("id"));
 			}
-			assertEquals(ts, toLocalDateTime(rs.getTimestamp("ts")));
+			assertTimestampEquals(ts, toLocalDateTime(rs.getTimestamp("ts")));
 			assertEquals(player, rs.getInt("player"));
 			assertEquals(balance, rs.getInt("balance"));
 			assertEquals(amount, rs.getInt("amount"));
@@ -1920,7 +1930,7 @@ public class DirbyDbDaoTest {
 			if (id != null) {
 				assertEquals(id, transaction.getId());
 			}
-			assertEquals(ts, transaction.getTs());
+			assertTimestampEquals(ts, transaction.getTs());
 			assertEquals(playerStr, transaction.getPlayer());
 			assertEquals(balance, transaction.getBalance());
 			assertEquals(amount, transaction.getAmount());
