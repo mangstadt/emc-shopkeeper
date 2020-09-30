@@ -345,7 +345,7 @@ public class BackupManagerTest {
 		try {
 			bm.restore(LocalDateTime.of(2013, 1, 1, 0, 0, 0));
 			fail();
-		} catch (FileSystemNotFoundException expected) {
+		} catch (FileSystemNotFoundException | NoSuchFileException expected) {
 		}
 
 		assertDirectoryContents(root, dbDir.getFileName().toString(), dbBackupDir.getFileName().toString());
