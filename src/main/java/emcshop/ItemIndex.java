@@ -1,7 +1,21 @@
 package emcshop;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import emcshop.gui.images.Images;
+import emcshop.util.Leaf;
+import org.xml.sax.SAXException;
+
+import javax.swing.ImageIcon;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,20 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.swing.ImageIcon;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-
-import emcshop.gui.images.Images;
-import emcshop.util.Leaf;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * DAO for accessing the display names, transaction page names, and image file
@@ -60,8 +63,20 @@ public class ItemIndex {
 		.put("o", "i")
 	.build(); //@formatter:on
 
+	/*
+	 * Items indexed by name. Key is in lowercase.
+	 */
 	private final Map<String, ItemInfo> byName;
-	private final Map<String, ItemInfo> byEmcName;
+
+	/**
+	 * Items indexed by emcName (alias). Key is in lowercase.
+	 * This is a multimap because the same alias can be used by multiple items at different points in time.
+	 */
+	private final Multimap<String, ItemInfo> byEmcName;
+
+	/**
+	 * Items indexed by Minecraft ID.
+	 */
 	private final Map<String, ItemInfo> byId;
 
 	private final Set<String> groups;
@@ -104,6 +119,20 @@ public class ItemIndex {
 			throw new RuntimeException(e);
 		}
 
+		//parse server update timestamps
+		Map<String, LocalDateTime> serverUpdates = new HashMap<>();
+		{
+			List<Leaf> elements = document.select("/Items/ServerUpdates/Update");
+			for (Leaf element : elements) {
+				String version = element.attribute("version");
+				if (version.contains("_")) {
+					throw new IllegalStateException("\"version\" attribute of \"Update\" element cannot contain underscores.");
+				}
+				LocalDateTime ts = parseISOInstant(element.attribute("ts"));
+				serverUpdates.put(version, ts);
+			}
+		}
+
 		//parse categories
 		Map<Integer, CategoryInfo> categoriesById = new HashMap<>();
 		{
@@ -123,23 +152,23 @@ public class ItemIndex {
 			List<Leaf> itemElements = document.select("/Items/Item");
 
 			ImmutableMap.Builder<String, ItemInfo> byName = ImmutableMap.builder();
-			ImmutableMap.Builder<String, ItemInfo> byEmcName = ImmutableMap.builder();
+			ImmutableMultimap.Builder<String, ItemInfo> byEmcName =	ImmutableMultimap.builder();
 			ImmutableMap.Builder<String, ItemInfo> byId = ImmutableMap.builder();
 			ImmutableSet.Builder<String> groups = ImmutableSet.builder();
 			for (Leaf itemElement : itemElements) {
-				ItemInfo info = parseItem(itemElement, categoriesById);
+				ItemInfo item = parseItem(itemElement, categoriesById, serverUpdates);
 
-				byName.put(info.name.toLowerCase(), info);
+				byName.put(item.name.toLowerCase(), item);
 
-				for (String emcName : info.emcNames) {
-					byEmcName.put(emcName.toLowerCase(), info);
+				for (EmcName emcName : item.emcNames) {
+					byEmcName.put(emcName.alias.toLowerCase(), item);
 				}
 
-				for (String id : info.ids) {
-					byId.put(id, info);
+				for (String id : item.ids) {
+					byId.put(id, item);
 				}
 
-				groups.add(info.groups);
+				groups.add(item.groups);
 			}
 
 			this.byName = byName.build();
@@ -147,6 +176,10 @@ public class ItemIndex {
 			this.byId = byId.build();
 			this.groups = groups.build();
 		}
+	}
+
+	private static LocalDateTime parseISOInstant(String timeStr) {
+		return Instant.parse(timeStr).atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 
 	private static CategoryInfo parseCategory(Leaf element) {
@@ -159,7 +192,7 @@ public class ItemIndex {
 		return new CategoryInfo(id, name, icon);
 	}
 
-	private static ItemInfo parseItem(Leaf element, Map<Integer, CategoryInfo> categoriesById) {
+	private static ItemInfo parseItem(Leaf element, Map<Integer, CategoryInfo> categoriesById, Map<String, LocalDateTime> serverUpdates) {
 		String name = element.attribute("name");
 
 		String nameColored = element.attribute("nameColored");
@@ -167,8 +200,37 @@ public class ItemIndex {
 			nameColored = name;
 		}
 
-		String value = element.attribute("emcNames");
-		String emcNames[] = splitValues(value);
+		List<EmcName> emcNames;
+		String value = element.attribute("emcNames").trim();
+		if (value.isEmpty()) {
+			emcNames = Collections.emptyList();
+		} else {
+			String splitValues[] = splitValues(value);
+			emcNames = new ArrayList<>(splitValues.length);
+			Pattern regex = Pattern.compile("^(\\[(.*?)_(.*?)\\])?(.*)$");
+			for (String aliasStr : splitValues) {
+				Matcher m = regex.matcher(aliasStr);
+				m.find();
+
+				LocalDateTime timeFrom = parseAliasTime(m.group(2), serverUpdates);
+				if (timeFrom == null) {
+					timeFrom = LocalDateTime.MIN;
+				}
+
+				LocalDateTime timeTo = parseAliasTime(m.group(3), serverUpdates);
+				if (timeTo == null) {
+					timeTo = LocalDateTime.MAX;
+				}
+
+				String alias = m.group(4);
+
+				if (!timeFrom.isBefore(timeTo)) {
+					throw new IllegalStateException("Start time in time-bounded emcName \"" + alias + "\" for item \"" + name + "\" does not come before the end time.");
+				}
+
+				emcNames.add(new EmcName(alias, timeFrom, timeTo));
+			}
+		}
 
 		value = element.attribute("id");
 		String ids[] = splitValues(value);
@@ -191,6 +253,19 @@ public class ItemIndex {
 		}
 
 		return new ItemInfo(name, nameColored, emcNames, ids, image, stackSize, groups, categories);
+	}
+
+	private static LocalDateTime parseAliasTime(String timeStr, Map<String, LocalDateTime> serverUpdates) {
+		if (timeStr == null || timeStr.isEmpty()) {
+			return null;
+		}
+
+		timeStr = timeStr.trim();
+		LocalDateTime ts = serverUpdates.get(timeStr);
+		if (ts == null) {
+			ts = parseISOInstant(timeStr);
+		}
+		return ts;
 	}
 
 	/**
@@ -275,14 +350,22 @@ public class ItemIndex {
 	}
 
 	/**
-	 * Gets the display name of an item.
+	 * Gets the display name of an item (also used when saving item names to the database).
 	 * @param emcName the name from the transaction history (e.g. "Potion:8193")
-	 * @return the display name (e.g. "Potion of Regeneration") or the
-	 * transaction history name if no mapping exists
+	 * @param transactionTs the timestamp of the transaction
+	 * @return the display name (e.g. "Potion of Regeneration") or the transaction history name if no mapping exists
 	 */
-	public String getDisplayName(String emcName) {
-		ItemInfo item = byEmcName.get(emcName.toLowerCase());
-		return (item == null) ? emcName : item.name;
+	public String getDisplayName(String emcName, LocalDateTime transactionTs) {
+		Collection<ItemInfo> possibleItemsWithThatAlias = byEmcName.get(emcName.toLowerCase());
+		for (ItemInfo item : possibleItemsWithThatAlias) {
+			for (EmcName alias : item.emcNames) {
+				if (transactionTs.isBefore(alias.timeTo) && transactionTs.compareTo(alias.timeFrom) >= 0) {
+					return item.name;
+				}
+			}
+		}
+
+		return emcName;
 	}
 
 	/**
@@ -352,7 +435,7 @@ public class ItemIndex {
 		int dashPos = displayName.indexOf('-');
 		if (dashPos > 0) {
 			String beforeDash = displayName.substring(0, dashPos).trim();
-			String displayNameBeforeDash = getDisplayName(beforeDash);
+			String displayNameBeforeDash = getDisplayName(beforeDash, LocalDateTime.now());
 			return getImageFileName(displayNameBeforeDash);
 		}
 
@@ -372,8 +455,8 @@ public class ItemIndex {
 	/**
 	 * <p>
 	 * Gets the names that the rupee transaction history page on the EMC website
-	 * uses for each item (for example, Black Terracotta was called "Black
-	 * Stclay" and "Black Hardened Clay" at various times in the past).
+	 * uses for each item. For example, Black Terracotta was called "Black
+	 * Stclay" and "Black Hardened Clay" at various times in the past.
 	 * </p>
 	 * <p>
 	 * Items whose names do not differ are not returned by this method (for
@@ -384,14 +467,14 @@ public class ItemIndex {
 	 * @return the item name mappings (key = EMC Shopkeeper display name; value
 	 * = rupee transaction history name(s))
 	 */
-	public Multimap<String, String> getDisplayNameToEmcNamesMapping() {
-		Multimap<String, String> mappings = ArrayListMultimap.create();
+	public Multimap<String, EmcName> getDisplayNameToEmcNamesMapping() {
+		ImmutableMultimap.Builder<String, EmcName> mappings = new ImmutableMultimap.Builder<>();
+
 		for (ItemInfo item : byName.values()) {
-			for (String emcName : item.emcNames) {
-				mappings.put(item.name, emcName);
-			}
+			mappings.putAll(item.name, item.emcNames);
 		}
-		return mappings;
+
+		return mappings.build();
 	}
 
 	/**
@@ -399,13 +482,10 @@ public class ItemIndex {
 	 * @return the item display names (sorted alphabetically)
 	 */
 	public List<String> getItemNames() {
-		List<String> names = new ArrayList<>(byName.size());
-		for (ItemInfo item : byName.values()) {
-			names.add(item.name);
-		}
-
-		Collections.sort(names);
-		return names;
+		return byName.values().stream() //@formatter:off
+			.map(item -> item.name)
+			.sorted()
+		.collect(Collectors.toList()); //@formatter:on
 	}
 
 	/**
@@ -445,22 +525,72 @@ public class ItemIndex {
 	}
 
 	/**
+	 * <p>
+	 * Represents an item name that is used in the EMC rupee transaction history which is different from the item name that EMC Shopkeeper uses for that particular item.
+	 * This is also used when I decide to change one of EMC Shopkeeper's item names.
+	 * </p>
+	 * <p>
+	 * For example, "Black Terracotta" used to be referred to as "Black Clay" in the rupee transaction history.
+	 * </p>
+	 * @author Michael Angstadt
+	 */
+	public static class EmcName {
+		private final String alias;
+		private final LocalDateTime timeFrom, timeTo;
+
+		/**
+		 * @param alias the item name used in the rupee transaction history
+		 * @param timeFrom when the rupee transaction history started using this name (inclusive)
+		 * @param timeTo when the rupee transaction history stopped using this name (exclusive)
+		 */
+		public EmcName(String alias, LocalDateTime timeFrom, LocalDateTime timeTo) {
+			this.alias = alias;
+			this.timeFrom = timeFrom;
+			this.timeTo = timeTo;
+		}
+
+		/**
+		 * Gets the item name used in the rupee transaction history.
+		 * @return the item name
+		 */
+		public String getAlias() {
+			return alias;
+		}
+
+		/**
+		 * Gets the point in time when the rupee transaction history started using this name (inclusive).
+		 * @return the start time
+		 */
+		public LocalDateTime getTimeFrom() {
+			return timeFrom;
+		}
+
+		/**
+		 * Gets the point in time when the rupee transaction history stopped using this name (inclusive).
+		 * @return the stop time
+		 */
+		public LocalDateTime getTimeTo() {
+			return timeTo;
+		}
+	}
+
+	/**
 	 * Holds the information on an item.
 	 */
 	private static class ItemInfo {
 		private final String name;
 		private final String nameColored;
-		private final String emcNames[];
+		private final List<EmcName> emcNames;
 		private final String ids[];
 		private final String image;
 		private final int stackSize;
 		private final String[] groups;
 		private final CategoryInfo[] categories;
 
-		public ItemInfo(String name, String nameColored, String[] emcNames, String[] ids, String image, int stackSize, String[] groups, CategoryInfo[] categories) {
+		public ItemInfo(String name, String nameColored, List<EmcName> emcNames, String[] ids, String image, int stackSize, String[] groups, CategoryInfo[] categories) {
 			this.name = name;
 			this.nameColored = nameColored;
-			this.emcNames = emcNames;
+			this.emcNames = Collections.unmodifiableList(emcNames);
 			this.ids = ids;
 			this.image = image;
 			this.stackSize = stackSize;

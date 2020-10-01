@@ -268,7 +268,7 @@ public class UpdateModelImpl implements IUpdateModel {
 
 						if (transaction instanceof ShopTransaction) {
 							ShopTransaction shopTransaction = (ShopTransaction) transaction;
-							String itemName = itemIndex.getDisplayName(shopTransaction.getItem());
+							String itemName = itemIndex.getDisplayName(shopTransaction.getItem(), shopTransaction.getTs());
 							dao.insertTransaction(new ShopTransactionDb(shopTransaction, itemName), true);
 							shopTransactionsCount++;
 							transactionsCount++;

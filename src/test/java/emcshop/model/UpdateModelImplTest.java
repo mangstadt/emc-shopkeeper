@@ -447,6 +447,74 @@ public class UpdateModelImplTest {
 	}
 
 	@Test
+	public void startDownload_time_scoped_emcName() throws Exception {
+		//before 3/15/2019, "Oak Wood" was an alias for "Oak Log"
+		ShopTransaction t1 = new ShopTransaction.Builder() //@formatter:off
+			.ts(LocalDateTime.of(2019, 3, 1, 0, 0, 0))
+			.item("Oak Wood")
+		.build(); //@formatter:on
+
+		//after 3/15/2019, "Oak Wood" was a new item
+		ShopTransaction t2 = new ShopTransaction.Builder() //@formatter:off
+			.ts(LocalDateTime.of(2019, 4, 1, 0, 0, 0))
+			.item("Oak Wood")
+		.build(); //@formatter:on
+
+		UpdateModelImpl model;
+		{
+			RupeeTransactionReader reader = new MockReaderBuilder() //@formatter:off
+				.page(t1, t2)
+			.build(); //@formatter:on
+			RupeeTransactionReader.Builder builder = new MockBuilder(reader);
+			model = new UpdateModelImpl(builder, null);
+		}
+
+		//register listeners
+		ActionListener badSessionListener = mock(ActionListener.class);
+		model.addBadSessionListener(badSessionListener);
+		ActionListener pageDownloadedListener = mock(ActionListener.class);
+		model.addPageDownloadedListener(pageDownloadedListener);
+		ActionListener downloadCompleteListener = mock(ActionListener.class);
+		model.addDownloadCompleteListener(downloadCompleteListener);
+		ActionListener downloadErrorListener = mock(ActionListener.class);
+		model.addDownloadErrorListener(downloadErrorListener);
+
+		model.startDownload().join();
+
+		//verify all the transactions were inserted into the DAO
+		verify(dao).insertTransaction(argThat(new ArgumentMatcher<ShopTransactionDb>() {
+			@Override
+			public boolean matches(Object argument) {
+				ShopTransactionDb arg = (ShopTransactionDb) argument;
+				return arg.getTs().equals(t1.getTs()) && arg.getItem().equals("Oak Log");
+			}
+		}), eq(true));
+		verify(dao).insertTransaction(argThat(new ArgumentMatcher<ShopTransactionDb>() {
+			@Override
+			public boolean matches(Object argument) {
+				ShopTransactionDb arg = (ShopTransactionDb) argument;
+				return arg.getTs().equals(t2.getTs()) && arg.getItem().equals("Oak Wood");
+			}
+		}), eq(true));
+
+		verifyNoMoreInteractions(dao);
+
+		//verify listeners
+		verify(badSessionListener, never()).actionPerformed(null);
+		verify(pageDownloadedListener).actionPerformed(null);
+		verify(downloadCompleteListener).actionPerformed(null);
+		verify(downloadErrorListener, never()).actionPerformed(null);
+
+		assertEquals(2, model.getShopTransactionsDownloaded());
+		assertEquals(0, model.getPaymentTransactionsDownloaded());
+		assertEquals(0, model.getBonusFeeTransactionsDownloaded());
+		assertEquals(1, model.getPagesDownloaded());
+		assertEquals(t2.getTs(), model.getOldestParsedTransactionDate());
+		assertNull(model.getDownloadError());
+		verfyUncaughtExceptionHandlerCalled(false);
+	}
+
+	@Test
 	public void stopDownload() throws Exception {
 		ShopTransaction t1 = shop();
 		RupeeTransaction t2 = raw();

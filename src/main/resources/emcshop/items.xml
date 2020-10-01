@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Items>
+	<ServerUpdates>
+		<!-- https://empireminecraft.com/threads/empire-update-to-1-15-the-aquatic-buzzy-village-update.81962/ -->
+		<Update version="1.13" ts="2019-03-15T17:30:00Z" />
+		<Update version="1.14" ts="2019-03-15T17:30:00Z" />
+		<Update version="1.15" ts="2019-03-15T17:30:00Z" />
+	</ServerUpdates>
+
 	<Categories>
 		<Category id="0" name="Animals" icon="sheep_egg.png" />
 		<Category id="2" name="Clay &amp; Terracotta" icon="clay_ball.png" />
@@ -30,7 +37,7 @@
 	<Item name="Acacia Fence" id="192" group="Wood" categories="17" />
 	<Item name="Acacia Gate" id="187" group="Wood" categories="17" emcNames="Acacia Fence Gate" />
 	<Item name="Acacia Leaves" id="161:0" categories="17" />
-	<Item name="Acacia Log" id="162:0" emcNames="Acacia Wood" group="Wood" categories="17" />
+	<Item name="Acacia Log" id="162:0" emcNames="[_1.13]Acacia Wood" group="Wood" categories="17" />
 	<Item name="Acacia Plank" id="5:4" group="Wood" categories="17" emcNames="Acacia Wood Planks,Acacia Planks" />
 	<Item name="Acacia Pressure Plate" group="Wood" categories="13,17" />
 	<Item name="Acacia Sapling" id="6:4" categories="6,17" />
@@ -66,7 +73,7 @@
 	<Item name="Birch Fence" id="189" group="Wood" categories="17" />
 	<Item name="Birch Gate" id="184" group="Wood" categories="17" emcNames="Birch Fence Gate" />
 	<Item name="Birch Leaves" id="18:2" categories="17" />
-	<Item name="Birch Log" id="17:2" group="Wood" categories="17" emcNames="Birch Wood" />
+	<Item name="Birch Log" id="17:2" group="Wood" categories="17" emcNames="[_1.13]Birch Wood" />
 	<Item name="Birch Plank" id="5:2" group="Wood" categories="17" emcNames="Birch Wood Planks,Birch Planks" />
 	<Item name="Birch Pressure Plate" group="Wood" categories="13,17" />
 	<Item name="Birch Sapling" id="6:2" categories="6,17" />
@@ -74,6 +81,7 @@
 	<Item name="Birch Slab" id="126:2" group="Wood" categories="17" emcNames="Birch Wood Slab" />
 	<Item name="Birch Stairs" id="135" group="Wood" categories="17" emcNames="Birch Wood Stairs" />
 	<Item name="Birch Trapdoor" group="Wood" categories="13,17" />
+	<Item name="Birch Wood" group="Wood" categories="17" />
 	<Item name="Black Bed" id="355:15" stack="1" />
 	<Item name="Black Concrete" id="251:15" categories="19" />
 	<Item name="Black Concrete Powder" id="252:15" categories="19" />
@@ -179,9 +187,9 @@
 	<Item name="Cracked Stone Brick" id="98:2" group="Stone" categories="14" emcNames="Cracked Stone Bricks,Cracked Stone" />
 	<Item name="Crafting Table" id="58" group="Wood" categories="16" emcNames="Workbench" />
 	<Item name="Creeper Head" id="397:4" group="Mob Heads" categories="9" />
-	<Item name="Cut Sandstone" id="24:2" emcNames="Smooth Sandston" /> <!-- This block used to be called "Smooth Sandstone" -->
+	<Item name="Cut Sandstone" id="24:2" emcNames="[_1.13]Smooth Sandstone,[_1.13]Smooth Sandston" />
 	<Item name="Cut Sandstone Slab" />
-	<Item name="Cut Red Sandstone" id="179:2" emcNames="Smth Rd Sandstn" /> <!-- This block used to be called "Smooth Red Sandstone" -->
+	<Item name="Cut Red Sandstone" id="179:2" emcNames="[_1.13]Smooth Red Sandstone,[_1.13]Smth Rd Sandstn" />
 	<Item name="Cut Red Sandstone Slab" />
 	<Item name="Cyan Bed" id="355:9" stack="1" />
 	<Item name="Cyan Concrete" id="251:9" categories="19" />
@@ -198,7 +206,7 @@
 	<Item name="Dark Oak Fence" id="191" group="Wood" categories="17" />
 	<Item name="Dark Oak Gate" id="186" group="Wood" categories="17" emcNames="Dark Oak Fence Gate" />
 	<Item name="Dark Oak Leaves" id="161:1" categories="17" />
-	<Item name="Dark Oak Log" emcNames="Dark Oak Wood" group="Wood" categories="17" />
+	<Item name="Dark Oak Log" emcNames="[_1.13]Dark Oak Wood" group="Wood" categories="17" />
 	<Item name="Dark Oak Plank" id="5:5" group="Wood" categories="17" emcNames="Dark Oak Wood Planks,Dark Oak Planks" />
 	<Item name="Dark Oak Pressure Plate" group="Wood" categories="13,17" />
 	<Item name="Dark Oak Sapling" id="6:5" emcNames="Darkoak Sapling" categories="6,17" />
@@ -206,6 +214,7 @@
 	<Item name="Dark Oak Slab" id="126:5" group="Wood" categories="17" emcNames="Dark Oak Wood Slab" />
 	<Item name="Dark Oak Stairs" id="164" group="Wood" categories="17" emcNames="Dark Oak Wood Stairs" />
 	<Item name="Dark Oak Trapdoor" group="Wood" categories="13,17" />
+	<Item name="Dark Oak Wood" group="Wood" categories="17" />
 	<Item name="Dark Prismarine" id="168:2" />
 	<Item name="Dark Prismarine Slab" />
 	<Item name="Dark Prismarine Stairs" />
@@ -360,7 +369,7 @@
 	<Item name="Jungle Fence" id="190" group="Wood" categories="17" />
 	<Item name="Jungle Gate" id="185" group="Wood" categories="17" emcNames="Jungle Fence Gate" />
 	<Item name="Jungle Leaves" id="18:3" categories="17" />
-	<Item name="Jungle Log" id="17:3" group="Wood" categories="17" emcNames="Jungle Wood" />
+	<Item name="Jungle Log" id="17:3" group="Wood" categories="17" emcNames="[_1.13]Jungle Wood" />
 	<Item name="Jungle Plank" id="5:3" group="Wood" categories="17" emcNames="Jungle Wood Planks,Jungle Planks" />
 	<Item name="Jungle Pressure Plate" group="Wood" categories="13,17" />
 	<Item name="Jungle Sapling" id="6:3" categories="6,17" />
@@ -464,7 +473,7 @@
 	<Item name="Oak Fence" id="85" group="Wood" emcNames="Fence" categories="17" />
 	<Item name="Oak Gate" id="107" group="Wood" emcNames="Fence Gate,Oak Fence Gate" categories="17" />
 	<Item name="Oak Leaves" id="18:0" emcNames="Leaves" categories="17" />
-	<Item name="Oak Log" id="17:0" group="Wood" categories="17" emcNames="Oak Wood" />
+	<Item name="Oak Log" id="17:0" group="Wood" categories="17" emcNames="[_1.13]Oak Wood" />
 	<Item name="Oak Plank" id="5:0" group="Wood" categories="17" emcNames="Oak Wood Planks,Oak Planks" />
 	<Item name="Oak Pressure Plate" group="Wood" categories="13,17" emcNames="Wood Plate,Wooden Plate,Wooden Pressure Plate" />
 	<Item name="Oak Sapling" id="6:0" categories="6,17" />
@@ -472,6 +481,7 @@
 	<Item name="Oak Sign" stack="16" group="Wood" categories="17" emcNames="Sign" />
 	<Item name="Oak Stairs" id="53" emcNames="Wood Stairs,Oak Wood Stairs" group="Wood" categories="17" />
 	<Item name="Oak Trapdoor" id="96" group="Wood" categories="13,17" emcNames="Trapdoor,Trap Door,Wooden Trap Door,Wooden Trapdoor" />
+	<Item name="Oak Wood" group="Wood" categories="17" />
 	<Item name="Observer" id="218" categories="13" />
 	<Item name="Obsidian" id="49" />
 	<Item name="Ocelot Spawn Egg" id="383:98" group="Spawn Eggs" categories="0" emcNames="Spawn Ocelot,Ocelot Egg" />
@@ -623,7 +633,7 @@
 	<Item name="Smooth Sandstone Slab" />
 	<Item name="Smooth Sandstone Stairs" />
 	<Item name="Smooth Stone" group="Stone" categories="14" />
-	<Item name="Smooth Stone Slab" id="44:0" group="Stone" categories="14" />
+	<Item name="Smooth Stone Slab" id="44:0" group="Stone" categories="14" emcNames="[_1.14]Stone Slab" />
 	<Item name="Snow" />
 	<Item name="Snow Ball" id="332" stack="16" categories="16" emcNames="Snowball" />
 	<Item name="Snow Block" id="80" />
@@ -636,7 +646,7 @@
 	<Item name="Spruce Fence" id="188" group="Wood" categories="17" />
 	<Item name="Spruce Gate" id="183" group="Wood" categories="17" emcNames="Spruce Fence Gate" />
 	<Item name="Spruce Leaves" id="18:1" emcNames="Pine Leaves" categories="17" />
-	<Item name="Spruce Log" id="17:1" group="Wood" categories="17" emcNames="Pine Log,Spruce Wood" />
+	<Item name="Spruce Log" id="17:1" group="Wood" categories="17" emcNames="Pine Log,[_1.13]Spruce Wood" />
 	<Item name="Spruce Plank" id="5:1" group="Wood" categories="17" emcNames="Pine Plank,Spruce Wood Planks,Spruce Planks" />
 	<Item name="Spruce Pressure Plate" group="Wood" categories="13,17" />
 	<Item name="Spruce Sapling" id="6:1" categories="6,17" emcNames="Pine Sapling" />
@@ -644,6 +654,7 @@
 	<Item name="Spruce Sign" stack="16" group="Wood" categories="17" />
 	<Item name="Spruce Stairs" id="134" group="Wood" emcNames="Pine Stairs,Spruce Wood Stairs" categories="17" />
 	<Item name="Spruce Trapdoor" group="Wood" categories="13,17" />
+	<Item name="Spruce Wood" group="Wood" categories="17" />
 	<Item name="Squid Spawn Egg" id="383:94" group="Spawn Eggs" categories="0" emcNames="Spawn Squid,Squid Egg" />
 	<Item name="Stal Disc" id="2263" stack="1" group="Discs" categories="3" emcNames="Record 8" />
 	<Item name="Stick" id="280" group="Wood" categories="17" />

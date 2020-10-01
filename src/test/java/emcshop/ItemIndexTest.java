@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,7 +21,10 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.google.common.collect.HashMultimap;
+import emcshop.util.DefaultTimezoneRule;
 import org.apache.commons.io.IOUtils;
+import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -33,20 +37,29 @@ import emcshop.util.Leaf;
  * @author Michael Angstadt
  */
 public class ItemIndexTest {
+	@Rule
+	public final DefaultTimezoneRule defaultTimeZoneRule = new DefaultTimezoneRule("UTC");
+
 	private final ItemIndex mockIndex;
 	{
 		//@formatter:off
 		String sample =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 		"<Items>" +
+			"<ServerUpdates>" +
+				"<Update version=\"1.13\" ts=\"2019-03-15T17:00:00Z\" />" +
+			"</ServerUpdates>" +
 			"<Item name=\"Diamond\" id=\"264\" />" +
 			"<Item name=\"Orange Clay\" id=\"159:1\" emcNames=\"Orange Stclay\" />" +
 			"<Item name=\"Potion of Fire Resistance\" id=\"373:8195,373:8227\" emcNames=\"Potion:8195,Potion:8227\" />" +
 			"<Item name=\"Zombie Potion\" image=\"water_bottle.png\" />" +
-			"<Item name=\"Oak Log\" id=\"17:0\" />" +
 			"<Item name=\"Ender Pearl\" id=\"368\" stack=\"16\" />" +
 			"<Item name=\"Diamond Chestplate\" emcNames=\"Diamond Chest\" />" +
 			"<Item name=\"Super Pick Axe\" nameColored=\"§lSuper§r §1§2Pick§r §2Axe\" />" +
+			"<Item name=\"Acacia Log\" emcNames=\"[_1.13]Acacia Wood\" />" +
+			"<Item name=\"Birch Log\" emcNames=\"[_2020-02-01T00:00:00Z]Birch Wood\" />" +
+			"<Item name=\"Dark Oak Log\" emcNames=\"[2020-02-01T00:00:00Z_]Dark Oak Wood\" />" +
+			"<Item name=\"Oak Log\" id=\"17:0\" emcNames=\"[2020-02-01T00:00:00Z_2020-03-01T00:00:00Z]Oak Wood\" />" +
 		"</Items>";
 		//@formatter:on
 
@@ -77,17 +90,37 @@ public class ItemIndexTest {
 		assertTrue(mockIndex.isEmcNameRecognized("Potion of Fire Resistance"));
 		assertTrue(mockIndex.isEmcNameRecognized("Potion:8195"));
 		assertFalse(mockIndex.isEmcNameRecognized("Potion:9999"));
+		assertTrue(mockIndex.isEmcNameRecognized("Oak Wood"));
+		assertTrue(mockIndex.isEmcNameRecognized("Oak Log"));
 	}
 
 	@Test
 	public void getDisplayName() {
-		assertEquals("Diamond", mockIndex.getDisplayName("Diamond"));
-		assertEquals("Orange Clay", mockIndex.getDisplayName("Orange Clay"));
-		assertEquals("Orange Clay", mockIndex.getDisplayName("Orange Stclay"));
-		assertEquals("Potion of Fire Resistance", mockIndex.getDisplayName("Potion:8195"));
-		assertEquals("Potion of Fire Resistance", mockIndex.getDisplayName("Potion:8227"));
-		assertEquals("Zombie Potion", mockIndex.getDisplayName("Zombie Potion"));
-		assertEquals("Iron Ingot", mockIndex.getDisplayName("Iron Ingot"));
+		assertEquals("Diamond", mockIndex.getDisplayName("Diamond", LocalDateTime.now()));
+		assertEquals("Orange Clay", mockIndex.getDisplayName("Orange Clay", LocalDateTime.now()));
+		assertEquals("Orange Clay", mockIndex.getDisplayName("Orange Stclay", LocalDateTime.now()));
+		assertEquals("Potion of Fire Resistance", mockIndex.getDisplayName("Potion:8195", LocalDateTime.now()));
+		assertEquals("Potion of Fire Resistance", mockIndex.getDisplayName("Potion:8227", LocalDateTime.now()));
+		assertEquals("Zombie Potion", mockIndex.getDisplayName("Zombie Potion", LocalDateTime.now()));
+		assertEquals("Iron Ingot", mockIndex.getDisplayName("Iron Ingot", LocalDateTime.now()));
+
+		assertEquals("Acacia Log", mockIndex.getDisplayName("Acacia Wood", LocalDateTime.of(2019,1,1,0,0,0)));
+		assertEquals("Acacia Wood", mockIndex.getDisplayName("Acacia Wood", LocalDateTime.of(2019,3,15,17,0,0)));
+		assertEquals("Acacia Wood", mockIndex.getDisplayName("Acacia Wood", LocalDateTime.of(2019,4,1,0,0,0)));
+
+		assertEquals("Birch Log", mockIndex.getDisplayName("Birch Wood", LocalDateTime.of(2020,1,1,0,0,0)));
+		assertEquals("Birch Wood", mockIndex.getDisplayName("Birch Wood", LocalDateTime.of(2020,2,1,0,0,0)));
+		assertEquals("Birch Wood", mockIndex.getDisplayName("Birch Wood", LocalDateTime.of(2020,3,1,0,0,0)));
+
+		assertEquals("Dark Oak Wood", mockIndex.getDisplayName("Dark Oak Wood", LocalDateTime.of(2020,1,1,0,0,0)));
+		assertEquals("Dark Oak Log", mockIndex.getDisplayName("Dark Oak Wood", LocalDateTime.of(2020,2,1,0,0,0)));
+		assertEquals("Dark Oak Log", mockIndex.getDisplayName("Dark Oak Wood", LocalDateTime.of(2020,3,1,0,0,0)));
+
+		assertEquals("Oak Wood", mockIndex.getDisplayName("Oak Wood", LocalDateTime.of(2020,1,1,0,0,0)));
+		assertEquals("Oak Log", mockIndex.getDisplayName("Oak Wood", LocalDateTime.of(2020,2,1,0,0,0)));
+		assertEquals("Oak Log", mockIndex.getDisplayName("Oak Wood", LocalDateTime.of(2020,2,15,0,0,0)));
+		assertEquals("Oak Wood", mockIndex.getDisplayName("Oak Wood", LocalDateTime.of(2020,3,1,0,0,0)));
+		assertEquals("Oak Wood", mockIndex.getDisplayName("Oak Wood", LocalDateTime.of(2020,4,1,0,0,0)));
 	}
 
 	@Test
@@ -114,8 +147,8 @@ public class ItemIndexTest {
 
 	@Test
 	public void getItemNames() {
-		Set<String> actual = new HashSet<>(mockIndex.getItemNames());
-		Set<String> expected = new HashSet<>(Arrays.asList("Diamond", "Orange Clay", "Potion of Fire Resistance", "Zombie Potion", "Oak Log", "Ender Pearl", "Diamond Chestplate", "Super Pick Axe"));
+		List<String> actual = mockIndex.getItemNames();
+		List<String> expected = Arrays.asList("Acacia Log", "Birch Log", "Dark Oak Log", "Diamond", "Diamond Chestplate", "Ender Pearl", "Oak Log", "Orange Clay", "Potion of Fire Resistance", "Super Pick Axe", "Zombie Potion");
 		assertEquals(expected, actual);
 	}
 
@@ -171,34 +204,51 @@ public class ItemIndexTest {
 	 */
 	@Test
 	public void validate_no_duplicate_emc_names() {
-		Multimap<String, String> emcNameToDisplayNames = ArrayListMultimap.create();
-		List<Leaf> itemElements = liveIndex.select("/Items/Item");
-		for (Leaf itemElement : itemElements) {
-			String emcNames = itemElement.attribute("emcNames");
-			if (emcNames.isEmpty()) {
-				continue;
+		Collection<ItemIndex.EmcName> allEmcNames = ItemIndex.instance().getDisplayNameToEmcNamesMapping().values();
+		Set<LocalDateTime> timePoints = new HashSet<>();
+		for (ItemIndex.EmcName emcName : allEmcNames) {
+			LocalDateTime timeFrom = emcName.getTimeFrom();
+			if (emcName.getTimeFrom() != LocalDateTime.MIN) {
+				timePoints.add(timeFrom);
 			}
 
-			String name = itemElement.attribute("name");
-			for (String emcName : emcNames.split("\\s*,\\s*")) {
-				emcNameToDisplayNames.put(emcName, name);
-			}
-		}
-
-		List<Map.Entry<String, Collection<String>>> problemItems = new ArrayList<>();
-		for (Map.Entry<String, Collection<String>> entry : emcNameToDisplayNames.asMap().entrySet()) {
-			Collection<String> displayNames = entry.getValue();
-			if (displayNames.size() > 1) {
-				problemItems.add(entry);
+			LocalDateTime timeTo = emcName.getTimeTo();
+			if (emcName.getTimeFrom() != LocalDateTime.MAX) {
+				timePoints.add(timeTo);
 			}
 		}
 
-		if (!problemItems.isEmpty()) {
-			StringBuilder sb = new StringBuilder();
-			for (Map.Entry<String, Collection<String>> item : problemItems) {
-				String emcName = item.getKey();
-				Collection<String> displayNames = item.getValue();
-				sb.append(displayNames).append(" all use the emcName \"").append(emcName).append("\".\n");
+		Multimap<LocalDateTime, String> timeline = ArrayListMultimap.create();
+		for (ItemIndex.EmcName emcName : allEmcNames) {
+			for (LocalDateTime time : timePoints) {
+				if (emcName.getTimeFrom().compareTo(time) <= 0 && emcName.getTimeTo().compareTo(time) >= 0) {
+					timeline.put(time, emcName.getAlias());
+				}
+			}
+		}
+
+		Multimap<LocalDateTime, String> duplicates = HashMultimap.create();
+		for (LocalDateTime time : timeline.keySet()) {
+			Collection<String> allNames = timeline.get(time);
+			Set<String> uniqueNames = new HashSet<>();
+			for (String name : allNames) {
+				boolean unique = uniqueNames.add(name.toLowerCase());
+				if (!unique) {
+					duplicates.put(time, name);
+				}
+			}
+		}
+
+		if (!duplicates.isEmpty()) {
+			StringBuilder sb = new StringBuilder("Duplicate emcNames detected: \n");
+			LocalDateTime prev = LocalDateTime.MIN;
+			for (LocalDateTime time : duplicates.keySet()) {
+				Collection<String> emcNames = duplicates.get(time);
+				for (String emcName : emcNames) {
+					sb.append("\"").append(emcName).append("\"").append(" is used by multiple items during the time period \"").append(prev).append("\" to \"").append(time).append("\".\n");
+				}
+
+				prev = time;
 			}
 
 			fail(sb.toString());

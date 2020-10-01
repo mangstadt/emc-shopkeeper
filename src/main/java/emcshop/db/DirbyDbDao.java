@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.derby.jdbc.EmbeddedDriver;
@@ -280,107 +281,29 @@ public abstract class DirbyDbDao implements DbDao {
 
 	@Override
 	public void updateItemNamesAndAliases() throws SQLException {
-		class Item {
-			Integer id;
-			String name;
-
-			Item(Integer id, String name) {
-				this.id = id;
-				this.name = name;
-			}
-		}
-
+		LocalDateTime now = LocalDateTime.now();
 		int dbVersion = selectDbVersion();
-		Multimap<String, String> aliases = ItemIndex.instance().getDisplayNameToEmcNamesMapping();
-		for (String displayName : aliases.keySet()) {
-			Item itemOfficial = new Item(getItemId(displayName), displayName);
 
-			List<Item> itemAliases = new ArrayList<>();
-			for (String name : aliases.get(displayName)) {
-				Integer id = getItemId(name);
-				if (id != null) {
-					itemAliases.add(new Item(id, name));
-				}
-			}
+		Multimap<String, ItemIndex.EmcName> mappings = ItemIndex.instance().getDisplayNameToEmcNamesMapping();
+		for (Map.Entry<String, ItemIndex.EmcName> mapping : mappings.entries()) {
+			String officialName = mapping.getKey();
+			ItemIndex.EmcName emcName = mapping.getValue();
 
-			if (itemAliases.isEmpty()) {
-				/*
-				 * Nothing needs to be changed because there are no aliases to
-				 * worry about.
-				 */
+			Integer aliasId = getItemId(emcName.getAlias());
+			if (aliasId == null) {
+				//alias isn't used anywhere
 				continue;
 			}
 
-			/*
-			 * Sort by item ID descending. Items with lower IDs are likely to
-			 * have been in the database longer and are therefore likely to have
-			 * been referenced by more rows throughout the database.
-			 */
-			itemAliases.sort(Comparator.comparingInt(o -> o.id));
+			Integer officialId = selsertItem(officialName);
 
-			/*
-			 * Determine what row in the "items" table will act as the
-			 * "official" row, and which rows need to be reassigned to point to
-			 * the "official" row and then deleted.
-			 */
-			List<Integer> idsToReassign = new ArrayList<>();
-			Integer newId;
-			if (itemOfficial.id == null) {
-				/*
-				 * The new item name doesn't exist in the table yet, so just
-				 * rename the row that's already there. Rename the row that has
-				 * been in the "items" table the longest so that we don't have
-				 * to update as many rows to use a new ID.
-				 */
-				Item oldestItem = itemAliases.get(0);
-				updateItemName(oldestItem.id, itemOfficial.name);
-				if (itemAliases.size() == 1) {
-					//no other aliases to worry about
-					continue;
-				}
-
-				for (Item item : itemAliases.subList(1, itemAliases.size())) {
-					idsToReassign.add(item.id);
-				}
-				newId = oldestItem.id;
-			} else {
-				if (itemOfficial.id < itemAliases.get(0).id) {
-					/*
-					 * If the row with the official name has a lower ID than any
-					 * of the aliases, then it has been here the longest. Simply
-					 * reassign everything to point to this row.
-					 */
-					idsToReassign = new ArrayList<>();
-					for (Item item : itemAliases) {
-						idsToReassign.add(item.id);
-					}
-					newId = itemOfficial.id;
-				} else {
-					/*
-					 * Rename the row that has been in the database the longest
-					 * so that we don't have to update as many rows to use a new
-					 * ID. Then, reassign everything to point to this row.
-					 */
-					Item oldestItem = itemAliases.get(0);
-					updateItemName(oldestItem.id, itemOfficial.name);
-
-					for (Item item : itemAliases.subList(1, itemAliases.size())) {
-						idsToReassign.add(item.id);
-					}
-					idsToReassign.add(itemOfficial.id);
-					newId = oldestItem.id;
-				}
+			updateTransactionItemName(aliasId, officialId, emcName.getTimeFrom(), emcName.getTimeTo());
+			if (dbVersion >= 7 && now.isBefore(emcName.getTimeTo()) && now.compareTo(emcName.getTimeFrom()) >= 0) {
+				updateInventoryItem(Arrays.asList(aliasId), officialId);
 			}
-
-			//reassign IDs to point to the new ID
-			updateTransactionItem(idsToReassign, newId);
-			if (dbVersion >= 7) {
-				updateInventoryItem(idsToReassign, newId);
-			}
-
-			//delete the rows from the items table that are now no longer being used
-			deleteItems(idsToReassign);
 		}
+
+		deleteUnusedItems();
 	}
 
 	private void updateItemName(Integer id, String newName) throws SQLException {
@@ -461,6 +384,38 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 	}
 
+	private void deleteUnusedItems() throws SQLException {
+		Set<Integer> nonStandardItemIds = new HashSet<>();
+		Set<String> standardItemNames = ItemIndex.instance().getItemNames().stream() //@formatter:off
+			.map(String::toLowerCase)
+		.collect(Collectors.toSet()); //@formatter:on
+		try (PreparedStatement stmt = stmt("SELECT id, name FROM items")) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				String name = rs.getString("name");
+				if (!standardItemNames.contains(name.toLowerCase())) {
+					nonStandardItemIds.add(rs.getInt("id"));
+				}
+			}
+		}
+
+		Set<Integer> nonStandardItemIdsThatAreNotBeingUsed = new HashSet<>(nonStandardItemIds);
+		try (PreparedStatement stmt = stmt("SELECT DISTINCT item FROM transactions")) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				nonStandardItemIdsThatAreNotBeingUsed.remove(rs.getInt("item"));
+			}
+		}
+		try (PreparedStatement stmt = stmt("SELECT DISTINCT item FROM inventory")) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				nonStandardItemIdsThatAreNotBeingUsed.remove(rs.getInt("item"));
+			}
+		}
+
+		deleteItems(nonStandardItemIdsThatAreNotBeingUsed);
+	}
+
 	@Override
 	public void populateItemsTable() throws SQLException {
 		//get all existing item names
@@ -535,6 +490,36 @@ public abstract class DirbyDbDao implements DbDao {
 			stmt.setInt(i++, newItemId);
 			for (Integer oldItemId : oldItemIds) {
 				stmt.setInt(i++, oldItemId);
+			}
+			stmt.executeUpdate();
+		}
+	}
+
+	/**
+	 * Changes the item that certain transactions are assigned to.
+	 * @param oldItemId only update transactions whose item ID matches this
+	 * @param newItemId the new item ID to assign to the matched transactions
+	 * @param timeFrom only update transactions whose timestamp is &gt;= this value
+	 * @param timeTo only update transactions whose timestamp is &lt; this value
+	 */
+	private void updateTransactionItemName(int oldItemId, int newItemId, LocalDateTime timeFrom, LocalDateTime timeTo) throws SQLException {
+		String sql = "UPDATE transactions SET item = ? WHERE item = ?";
+		if (timeFrom != LocalDateTime.MIN && timeTo == LocalDateTime.MAX) {
+			sql += " AND ts >= ?";
+		} else if (timeFrom == LocalDateTime.MIN && timeTo != LocalDateTime.MAX) {
+			sql += " AND ts < ?";
+		} else if (timeFrom != LocalDateTime.MIN && timeTo != LocalDateTime.MAX) {
+			sql += " AND ts < ? AND ts >= ?";
+		}
+		try (PreparedStatement stmt = stmt(sql)) {
+			int i = 1;
+			stmt.setInt(i++, newItemId);
+			stmt.setInt(i++, oldItemId);
+			if (timeTo != LocalDateTime.MAX) {
+				stmt.setTimestamp(i++, toTimestamp(timeTo));
+			}
+			if (timeFrom != LocalDateTime.MIN) {
+				stmt.setTimestamp(i++, toTimestamp(timeFrom));
 			}
 			stmt.executeUpdate();
 		}

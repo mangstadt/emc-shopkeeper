@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.LogManager;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -266,56 +267,74 @@ public class DirbyDbDaoTest {
 
 	@Test
 	public void updateItemNamesAndAliases() throws Exception {
-		int a = items().name("Splash Potion of Water Breathing").id();
-		int b = items().name("Potion:16397").insert();
-		int c = items().name("Potion:16429").insert();
-		int d = diamondId;
+		/*
+		 * Transaction that uses standard item name should not be touched.
+		 */
+		transactions().item("Diamond").insert();
+		inventory().item("Diamond").quantity(4).insert();
 
-		items().name("Carrot").delete();
-		int e = items().name("Carrot Item").insert();
-
+		/*
+		 * Rows for standard item names in the "items" table should never be deleted,
+		 * but in the event that they are, this item name should be re-inserted
+		 * because a transaction exists that uses one of its aliases.
+		 */
 		items().name("Splash Potion of Harming II").delete();
-		items().name("Potion:16428").insert();
-		items().name("Potion:16460").insert();
+		transactions().item("Potion:16428").insert(); //alias for above
 
-		transactions().item(a).insert();
-		transactions().item(b).insert();
-		transactions().item(c).insert();
-		transactions().item(d).insert();
+		/*
+		 * Transactions that use a mix of standard names and aliases.
+		 */
+		transactions().item("Splash Potion of Water Breathing").insert();
+		transactions().item("Potion:16397").insert(); //alias for above
+		transactions().item("Potion:16429").insert(); //alias for above
+		inventory().item("Splash Potion of Water Breathing").quantity(1).insert();
+		inventory().item("Potion:16397").quantity(2).insert(); //alias for above
+		inventory().item("Potion:16429").quantity(3).insert(); //alias for above
 
-		inventory().item(a).quantity(1).insert();
-		inventory().item(b).quantity(2).insert();
-		inventory().item(c).quantity(3).insert();
-		inventory().item(d).quantity(4).insert();
+		/*
+		 * Time-bound aliases.
+		 */
+		transactions().item("Acacia Wood").ts(LocalDateTime.of(2019, 3, 1, 0, 0, 0)).insert();
+		transactions().item("Acacia Wood").ts(LocalDateTime.of(2019, 4, 1, 0, 0, 0)).insert();
+
+		/*
+		 * Inventory items are checked for aliases that are timestamped to the current time.
+		 * Because "Acacia Wood" is only considered to be an alias before March 15, 2019, the item name in this inventory record will not change.
+		 */
+		inventory().item("Acacia Wood").insert();
 
 		dao.updateItemNamesAndAliases();
 
-		assertIntEquals(a, items().name("Splash Potion of Water Breathing").id());
-		assertNull(items().name("Potion:16397").id());
-		assertNull(items().name("Potion:16429").id());
+		assertNotNull(items().name("Splash Potion of Water Breathing").id());
+		assertNull(items().name("Potion:16397").id()); //deleted because it was an alias and it's no longer being referenced by any transactions
+		assertNull(items().name("Potion:16429").id()); //ditto
 
-		assertNull(items().name("Carrot Item").id());
-		assertIntEquals(e, items().name("Carrot").id());
-
-		assertNull(items().name("Potion:16428").id());
-		assertNull(items().name("Potion:16460").id());
 		assertNotNull(items().name("Splash Potion of Harming II").id());
+		assertNull(items().name("Potion:16428").id()); //deleted because it was an alias and it's no longer being referenced by any transactions
 
 		ResultSet rs = transactions().all();
 		rs.next();
-		assertEquals(a, rs.getInt("item"));
+		assertIntEquals(items().name("Diamond").id(), rs.getInt("item"));
 		rs.next();
-		assertEquals(a, rs.getInt("item"));
+		assertIntEquals(items().name("Splash Potion of Harming II").id(), rs.getInt("item"));
 		rs.next();
-		assertEquals(a, rs.getInt("item"));
+		assertIntEquals(items().name("Splash Potion of Water Breathing").id(), rs.getInt("item"));
 		rs.next();
-		assertEquals(d, rs.getInt("item"));
+		assertIntEquals(items().name("Splash Potion of Water Breathing").id(), rs.getInt("item"));
+		rs.next();
+		assertIntEquals(items().name("Splash Potion of Water Breathing").id(), rs.getInt("item"));
+		rs.next();
+		assertIntEquals(items().name("Acacia Log").id(), rs.getInt("item"));
+		rs.next();
+		assertIntEquals(items().name("Acacia Wood").id(), rs.getInt("item"));
 		assertFalse(rs.next());
 
 		Map<Integer, Integer> invActual = inventory().all();
-		Map<Integer, Integer> invExpected = new HashMap<>();
-		invExpected.put(a, 6);
-		invExpected.put(d, 4);
+		Map<Integer, Integer> invExpected = new ImmutableMap.Builder<Integer, Integer>() //@formatter:off
+			.put(items().name("Diamond").id(), 4)
+			.put(items().name("Splash Potion of Water Breathing").id(), 6)
+			.put(items().name("Acacia Wood").id(), 0)
+		.build(); //@formatter:on
 		assertEquals(invExpected, invActual);
 	}
 
@@ -1566,6 +1585,11 @@ public class DirbyDbDaoTest {
 			return this;
 		}
 
+		public int selsert() throws SQLException {
+			Integer id = id();
+			return (id == null) ? insert() : id;
+		}
+
 		public int insert() throws SQLException {
 			PreparedStatement stmt = conn.prepareStatement("INSERT INTO items (name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
 
@@ -1692,9 +1716,17 @@ public class DirbyDbDaoTest {
 
 	private static class InventoryTester {
 		private int item = appleId, quantity;
+		private String itemStr = "Apple";
 
 		public InventoryTester item(int item) {
 			this.item = item;
+			this.itemStr = null;
+			return this;
+		}
+
+		public InventoryTester item(String itemStr) {
+			this.item = 0;
+			this.itemStr = itemStr;
 			return this;
 		}
 
@@ -1704,6 +1736,10 @@ public class DirbyDbDaoTest {
 		}
 
 		public int insert() throws SQLException {
+			if (item == 0) {
+				item = items().name(itemStr).selsert();
+			}
+
 			PreparedStatement stmt = conn.prepareStatement("INSERT INTO inventory (item, quantity) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
 
 			int i = 1;
@@ -1802,6 +1838,10 @@ public class DirbyDbDaoTest {
 		}
 
 		public int insert() throws SQLException {
+			if (item == 0) {
+				item = items().name(itemStr).selsert();
+			}
+
 			PreparedStatement stmt = conn.prepareStatement("INSERT INTO transactions (ts, item, player, amount, quantity, balance) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
 			int i = 1;
