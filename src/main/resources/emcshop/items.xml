@@ -187,6 +187,7 @@
 	<Item name="Cracked Stone Brick" id="98:2" group="Stone" categories="14" emcNames="Cracked Stone Bricks,Cracked Stone" />
 	<Item name="Crafting Table" id="58" group="Wood" categories="16" emcNames="Workbench" />
 	<Item name="Creeper Head" id="397:4" group="Mob Heads" categories="9" />
+	<Item name="Crossbow" stack="1" categories="16" />
 	<Item name="Cut Sandstone" id="24:2" emcNames="[_1.13]Smooth Sandstone,[_1.13]Smooth Sandston" />
 	<Item name="Cut Sandstone Slab" />
 	<Item name="Cut Red Sandstone" id="179:2" emcNames="[_1.13]Smooth Red Sandstone,[_1.13]Smth Rd Sandstn" />
