@@ -44,7 +44,7 @@ public class ItemSuggestField extends JSuggestField {
 			@Override
 			public Component getListCellRendererComponent(JList<? extends String> list, String itemName, int index, boolean selected, boolean hasFocus) {
 				boolean includeColor = !selected;
-				label.setText(ItemIndex.instance().getItemNameFormatted(itemName, includeColor));
+				label.setText("<html>" + ItemIndex.instance().getItemNameFormatted(itemName, includeColor));
 
 				ImageIcon icon = itemIcons.get(itemName);
 				if (icon == null) {

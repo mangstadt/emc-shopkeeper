@@ -17,6 +17,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -65,7 +66,7 @@ import org.apache.commons.io.FileUtils;
 import emcshop.AppContext;
 import emcshop.ExportType;
 import emcshop.ItemIndex;
-import emcshop.ItemIndex.CategoryInfo;
+import emcshop.ItemIndex.Category;
 import emcshop.QueryExporter;
 import emcshop.Settings;
 import emcshop.db.DbDao;
@@ -84,9 +85,9 @@ public class InventoryTab extends JPanel implements ExportListener {
 	private static final Logger logger = Logger.getLogger(InventoryTab.class.getName());
 	private static final AppContext context = AppContext.instance();
 
-	private final CategoryInfo ALL = new CategoryInfo(-1, "ALL", null);
-	private final CategoryInfo MISC = new CategoryInfo(-1, "misc", null);
-	private final CategoryInfo LOW = new CategoryInfo(-1, "low in stock", null);
+	private final Category ALL = new Category(-1, "ALL", null);
+	private final Category MISC = new Category(-1, "misc", null);
+	private final Category LOW = new Category(-1, "low in stock", null);
 
 	private final MainFrame owner;
 	private final DbDao dao = context.get(DbDao.class);
@@ -461,7 +462,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 			model.setData(inventory);
 		}
 
-		private void filter(FilterList filterItems, final CategoryInfo filterCategory) {
+		private void filter(FilterList filterItems, final Category filterCategory) {
 			if (filterItems.isEmpty() && filterCategory == ALL) {
 				rowSorter.setRowFilter(null);
 				return;
@@ -491,13 +492,13 @@ public class InventoryTab extends JPanel implements ExportListener {
 						return rowObj.inventory.getQuantity() <= rowObj.inventory.getLowInStockThreshold();
 					}
 
-					CategoryInfo categories[] = index.getItemCategories(itemName);
-					if (filterCategory == MISC && categories.length == 0) {
+					Collection<Category> categories = index.getCategories(itemName);
+					if (filterCategory == MISC && categories.isEmpty()) {
 						return true;
 					}
 
-					for (CategoryInfo c : categories) {
-						if (c == filterCategory) {
+					for (Category category : categories) {
+						if (category == filterCategory) {
 							return true;
 						}
 					}
@@ -708,7 +709,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 						}
 					} else {
 						boolean includeColor = !rowObj.selected;
-						label.setText(ItemIndex.instance().getItemNameFormatted(inv.getItem(), includeColor));
+						label.setText("<html>" + ItemIndex.instance().getItemNameFormatted(inv.getItem(), includeColor));
 
 						ImageIcon img = Images.getItemImage(inv.getItem());
 						label.setIcon(img);
@@ -912,9 +913,9 @@ public class InventoryTab extends JPanel implements ExportListener {
 		return null;
 	}
 
-	private class CategoryComboBox extends JComboBox<CategoryInfo> {
+	private class CategoryComboBox extends JComboBox<Category> {
 		public CategoryComboBox() {
-			List<CategoryInfo> categories = new ArrayList<>(index.getCategories());
+			List<Category> categories = new ArrayList<>(index.getAllCategories());
 			categories.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
 			//add "all" and "misc" items
@@ -922,10 +923,10 @@ public class InventoryTab extends JPanel implements ExportListener {
 			categories.add(1, LOW);
 			categories.add(MISC);
 
-			setModel(new DefaultComboBoxModel<>(categories.toArray(new CategoryInfo[0])));
+			setModel(new DefaultComboBoxModel<>(categories.toArray(new Category[0])));
 			setEditable(false);
 
-			setRenderer(new ListCellRenderer<CategoryInfo>() {
+			setRenderer(new ListCellRenderer<Category>() {
 				private final Font orig;
 				private final Font bold;
 				private final JLabel label = new JLabel();
@@ -939,17 +940,15 @@ public class InventoryTab extends JPanel implements ExportListener {
 				}
 
 				@Override
-				public Component getListCellRendererComponent(JList<? extends CategoryInfo> list, CategoryInfo category, int index, boolean selected, boolean hasFocus) {
+				public Component getListCellRendererComponent(JList<? extends Category> list, Category category, int index, boolean selected, boolean hasFocus) {
 					if (category == null) {
 						return null;
 					}
 
 					label.setText(category.getName());
 
-					ImageIcon icon = category.getIcon();
-					if (icon != null) {
-						icon = Images.scale(icon, 16);
-					}
+					URL iconUrl = category.getIcon();
+					ImageIcon icon = (iconUrl == null) ? null : Images.scale(new ImageIcon(iconUrl), 16);
 					label.setIcon(icon);
 
 					Font font = (category == ALL || category == MISC || category == LOW) ? bold : orig;
@@ -963,8 +962,8 @@ public class InventoryTab extends JPanel implements ExportListener {
 		}
 
 		@Override
-		public CategoryInfo getSelectedItem() {
-			return (CategoryInfo) super.getSelectedItem();
+		public Category getSelectedItem() {
+			return (Category) super.getSelectedItem();
 		}
 	}
 
@@ -1033,7 +1032,7 @@ public class InventoryTab extends JPanel implements ExportListener {
 	}
 
 	private interface FilterListener {
-		void filterPerformed(FilterList items, CategoryInfo category);
+		void filterPerformed(FilterList items, Category category);
 	}
 
 	private class ChesterDialog extends JDialog {

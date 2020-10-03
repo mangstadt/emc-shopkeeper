@@ -100,12 +100,26 @@ public final class Images {
 	 * @return the item image or an empty image if none can be found
 	 */
 	public static ImageIcon getItemImage(String item) {
-		String imageFileName = itemIndex.getImageFileName(item);
-		ImageIcon image = imageCache.get(imageFileName, 16);
+		URL imageUrl = itemIndex.getImage(item);
+		if (imageUrl == null) {
+			return getEmptyImage();
+		}
+
+		String key = imageUrl.getFile();
+		ImageIcon image = imageCache.get(key, 16);
 		if (image == null) {
-			image = get("items/" + imageFileName);
-			image = (image == null) ? getItemImage("_empty") : scale(image, 16);
-			imageCache.put(item, 16, image);
+			image = scale(new ImageIcon(imageUrl), 16);
+			imageCache.put(key, 16, image);
+		}
+		return image;
+	}
+
+	private static ImageIcon getEmptyImage() {
+		String key = "_empty";
+		ImageIcon image = imageCache.get(key, 16);
+		if (image == null) {
+			image = scale(get("items/_empty.png"), 16);
+			imageCache.put(key, 16, image);
 		}
 		return image;
 	}

@@ -284,7 +284,7 @@ public class TransactionsTable extends JTable {
 				component = label;
 
 				String name = transaction.getItem();
-				label.setText(ItemIndex.instance().getItemNameFormatted(name, true));
+				label.setText("<html>" + ItemIndex.instance().getItemNameFormatted(name, true));
 
 				ImageIcon icon = Images.getItemImage(transaction.getItem());
 				label.setIcon(icon);

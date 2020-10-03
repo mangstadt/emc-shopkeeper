@@ -200,7 +200,7 @@ public class ChartsTab extends JPanel {
 		showPanel = new JPanel(new MigLayout("insets 0"));
 
 		ActionListener checkboxListener = event -> refreshChart();
-		List<String> groupNames = new ArrayList<>(index.getItemGroupNames());
+		List<String> groupNames = new ArrayList<>(index.getAllGroups());
 		Collections.sort(groupNames);
 		for (String group : groupNames) {
 			ImageIcon icon = groupIcons.get(group);
