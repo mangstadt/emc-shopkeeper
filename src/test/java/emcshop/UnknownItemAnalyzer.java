@@ -81,6 +81,6 @@ public class UnknownItemAnalyzer {
 	}
 
 	private static boolean isNotInKnownItemsList(String name) {
-		return !ItemIndex.instance().isEmcNameRecognized(name);
+		return !ItemIndex.instance().isItemNameRecognized(name);
 	}
 }
