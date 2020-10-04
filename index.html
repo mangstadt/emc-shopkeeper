@@ -225,7 +225,7 @@
       <div id="main" role="main">
         <div class="download-bar">
         <div class="inner">
-          <span style="color:#aaa; float:left;">Latest version: 0.5.22 (August 23, 2020)</span>
+          <span style="color:#aaa; float:left;">Latest version: 0.5.23 (October 4, 2020)</span>
           <a href="https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper-full.jar" class="download-button tar"><span>Download JAR</span></a>
           <a href="https://github.com/mangstadt/emc-shopkeeper/raw/master/dist/emc-shopkeeper.jnlp" class="download-button zip"><span>Auto-run</span></a>
         </div>
@@ -313,6 +313,20 @@
 </ul>
 
 <h1><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Changelog</h1>
+
+<div>
+	<b>0.5.23</b> - <i>October 4, 2020</i><br>
+	<ul>
+		<li>Fixed an issue where Wood blocks were being treated as if they were Log blocks when parsed from the rupee transaction history (e.g. "Oak Wood" was being converted to "Oak Log") (related to next bullet point).</li>
+		<li>Added time-bounded item name mappings to the rupee transaction history parsing logic. This increases the accuracy of item name detection by allowing it to be cognisant of the different names an item has been called throughout time.
+			<ul>
+				<li>For example, in the past, Oak Logs were referred to as "Oak Wood" in the transaction history. However, with the release of 1.13, "Oak Wood" became a new, separate item. It now knows that all "Oak Wood" transactions <i>before</i> EMC's 1.13 upgrade refer to the "Oak Log" block, whereas all such transactions <i>after</i> EMC's upgrade refer to the "Oak Wood" block.</li>
+				<li>Another example is Smooth Sandstone: In 1.13, the block was renamed to "Cut Sandstone" and an entirely new block called "Smooth Sandstone" was added. It now knows that all "Smooth Sandstone" transactions <i>before</i> EMC's 1.13 upgrade actually refer to the "Cut Sandstone" block.</li>
+			</ul>
+		</li>
+		<li>A few item name fixes.</li>
+	</ul>
+</div>
 
 <div>
 	<b>0.5.22</b> - <i>August 23, 2020</i><br>
