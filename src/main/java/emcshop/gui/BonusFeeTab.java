@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -68,7 +69,7 @@ public class BonusFeeTab extends JPanel {
 		add(since, "wrap");
 
 		tableScrollPane = new MyJScrollPane(table);
-		add(tableScrollPane, "align center");
+		add(tableScrollPane, "w 100%, align center");
 
 		refresh();
 	}
@@ -131,10 +132,12 @@ public class BonusFeeTab extends JPanel {
 					switch (column) {
 					case DESCRIPTION:
 						label.setText(rowObj.description);
+						label.setHorizontalAlignment(SwingConstants.RIGHT);
 						break;
 
 					case TOTAL:
 						label.setText("<html>" + rowObj.text + "</html>");
+						label.setHorizontalAlignment(SwingConstants.LEFT);
 						break;
 					}
 
