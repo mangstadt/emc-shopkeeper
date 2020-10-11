@@ -93,8 +93,20 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		p.add(new JLabel("Password:"), "align right");
 		p.add(password, "w 150, wrap");
 
+		/*
+		 * The pack() method does not take multi-line labels into account when calculating the window height.
+		 * Separate the text into multiple label objects so that the window height is calculated correctly.
+		 */
+		JLabel l1 = new JLabel("If your account uses two-factor");
+		l1.setHorizontalAlignment(SwingConstants.CENTER);
+		GuiUtils.unboldFont(l1);
+		JLabel l2 = new JLabel("authentication, enter the code below:");
+		l2.setHorizontalAlignment(SwingConstants.CENTER);
+		GuiUtils.unboldFont(l2);
+
 		JPanel twoFactorAuthPanel = new GroupPanel("");
-		twoFactorAuthPanel.add(new JLabel("<html><p align=\"center\">If your account uses two-factor authentication, enter the code below:</p>"), "w 100%, wrap");
+		twoFactorAuthPanel.add(l1, "w 100%, wrap");
+		twoFactorAuthPanel.add(l2, "w 100%, wrap");
 		twoFactorAuthPanel.add(new JLabel("2FA Code:"), "split 2, align right");
 		twoFactorAuthPanel.add(twoFactorAuthCode, "w 150, align left, wrap");
 		p.add(twoFactorAuthPanel, "span 2");
@@ -108,13 +120,6 @@ public class LoginViewImpl extends JDialog implements ILoginView {
 		add(cancel);
 
 		pack();
-
-		/*
-		 * The label in the 2FA panel wraps to two lines. The pack() method does
-		 * not take this into account, so underestimates the height of the
-		 * window.
-		 */
-		setSize(getWidth(), getHeight() + 20);
 
 		setLocationRelativeTo(owner);
 	}
