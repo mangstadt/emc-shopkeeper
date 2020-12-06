@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -233,7 +234,12 @@ public final class ZipUtils {
 	}
 
 	private static FileSystem openZipFile(Path file, boolean create) throws IOException {
-		URI uri = URI.create("jar:file:" + file.toUri().getPath());
+		URI uri;
+		try {
+			uri = new URI("jar:file", file.toUri().getPath(), null);
+		} catch (URISyntaxException e) {
+			throw new IOException(e);
+		}
 
 		Map<String, String> env = new HashMap<>();
 		if (create) {
