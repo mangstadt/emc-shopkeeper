@@ -20,6 +20,7 @@
 		<jar href="deps/commons-logging-1.2.jar"/>
 		<jar href="deps/derby-10.11.1.1.jar"/>
 		<jar href="deps/emc-rupee-transaction-downloader-2.1.1.jar"/>
+		<jar href="deps/gson-2.8.0.jar"/>
 		
 		<jar href="deps/guava-29.0-jre.jar"/>
 		<jar href="deps/checker-qual-2.11.1.jar"/>
