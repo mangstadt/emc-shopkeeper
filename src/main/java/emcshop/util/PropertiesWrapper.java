@@ -12,11 +12,11 @@ import java.nio.file.StandardOpenOption;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import emcshop.gui.WindowState;
 
@@ -48,6 +49,10 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 
 	public String get(String key) {
 		return properties.getProperty(key);
+	}
+
+	public String get(String key, String defaultValue) {
+		return properties.getProperty(key, defaultValue);
 	}
 
 	public List<String> list(String key) {
@@ -78,10 +83,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 
 	public Integer getInteger(String key, Integer defaultValue) {
 		String value = get(key);
-		if (value == null) {
-			return defaultValue;
-		}
-		return Integer.valueOf(value);
+		return (value == null) ? defaultValue : Integer.valueOf(value);
 	}
 
 	public void setInteger(String key, Integer value) {
@@ -90,10 +92,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 
 	public LocalDateTime getDate(String key) throws DateTimeException {
 		String value = get(key);
-		if (value == null) {
-			return null;
-		}
-		return LocalDateTime.from(df.parse(value));
+		return (value == null) ? null : LocalDateTime.from(df.parse(value));
 	}
 
 	public void setDate(String key, LocalDateTime value) {
@@ -102,10 +101,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 
 	public Boolean getBoolean(String key, Boolean defaultValue) {
 		String value = get(key);
-		if (value == null) {
-			return defaultValue;
-		}
-		return Boolean.valueOf(value);
+		return (value == null) ? defaultValue : Boolean.valueOf(value);
 	}
 
 	public void setBoolean(String key, Boolean value) {
@@ -139,14 +135,8 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	 */
 	public WindowState getWindowState(String key) {
 		//first, check to see if any properties exist
-		boolean found = false;
 		String find = key + '.';
-		for (String k : keySet()) {
-			if (k.startsWith(find)) {
-				found = true;
-				break;
-			}
-		}
+		boolean found = keySet().stream().anyMatch(k -> k.startsWith(find));
 		if (!found) {
 			return null;
 		}
@@ -208,11 +198,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 		if (state == null) {
 			//remove it
 			String find = key + ".";
-			for (String k : keySet()) {
-				if (k.startsWith(find)) {
-					remove(k);
-				}
-			}
+			keySet().stream().filter(k -> k.startsWith(find)).forEach(this::remove);
 			return;
 		}
 
@@ -260,11 +246,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 	 */
 	public Set<String> keySet() {
 		Set<Object> keySet = properties.keySet();
-		Set<String> set = new HashSet<>(keySet.size());
-		for (Object k : keySet) {
-			set.add((String) k);
-		}
-		return set;
+		return keySet.stream().map(k -> (String)k).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -280,7 +262,7 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 			@Override
 			public Entry<String, String> next() {
 				Entry<Object, Object> entry = it.next();
-				return new EntryImpl(entry);
+				return new AbstractMap.SimpleEntry(entry.getKey(), entry.getValue());
 			}
 
 			@Override
@@ -288,28 +270,5 @@ public class PropertiesWrapper implements Iterable<Map.Entry<String, String>> {
 				it.remove();
 			}
 		};
-	}
-
-	private static class EntryImpl implements Entry<String, String> {
-		private final Entry<Object, Object> entry;
-
-		public EntryImpl(Entry<Object, Object> entry) {
-			this.entry = entry;
-		}
-
-		@Override
-		public String getKey() {
-			return (String) entry.getKey();
-		}
-
-		@Override
-		public String getValue() {
-			return (String) entry.getValue();
-		}
-
-		@Override
-		public String setValue(String value) {
-			return (String) entry.setValue(value);
-		}
 	}
 }

@@ -25,7 +25,7 @@ public class Settings {
 
 	private final Path file;
 
-	private Integer version, rupeeBalance, backupFrequency, maxBackups;
+	private Integer version, rupeeBalance, backupFrequency, maxBackups, downloadThreads;
 	private WindowState windowState;
 	private LocalDateTime previousUpdate, lastUpdated;
 	private String username, password;
@@ -165,6 +165,26 @@ public class Settings {
 		reportedUnknownItems = reported;
 	}
 
+	public int getDownloadThreads() {
+		if (getUseRecommendedDownloadThreads()) {
+			int cores = Runtime.getRuntime().availableProcessors();
+			return (cores < 4) ? 4 : cores;
+		}
+		return downloadThreads;
+	}
+
+	public void setDownloadThreads(int downloadThreads) {
+		this.downloadThreads = downloadThreads;
+	}
+
+	public boolean getUseRecommendedDownloadThreads() {
+		return (downloadThreads == null);
+	}
+
+	public void setUseRecommendedDownloadThreads() {
+		this.downloadThreads = null;
+	}
+
 	private void defaults() {
 		version = CURRENT_VERSION;
 		windowState = null;
@@ -182,6 +202,7 @@ public class Settings {
 		backupsEnabled = true;
 		backupFrequency = 7;
 		maxBackups = 10;
+		downloadThreads = null;
 
 		chatLogDir = MinecraftUtils.getLogFolder();
 		if (chatLogDir == null) {
@@ -311,6 +332,18 @@ public class Settings {
 			maxBackups = 10;
 		}
 
+		String downloadThreadsStr = props.get("download.threads", "recommended");
+		if ("recommended".equals(downloadThreadsStr)) {
+			downloadThreads = null;
+		} else {
+			try {
+				downloadThreads = Integer.valueOf(downloadThreadsStr);
+			} catch (NumberFormatException e) {
+				logger.log(Level.WARNING, "Problem parsing download.threads: ", e);
+				downloadThreads = null;
+			}
+		}
+
 		String value = props.get("chatLogDir");
 		if (value == null) {
 			chatLogDir = MinecraftUtils.getLogFolder();
@@ -337,6 +370,7 @@ public class Settings {
 		props.setBoolean("backup.enabled", backupsEnabled);
 		props.setInteger("backup.frequency", backupFrequency);
 		props.setInteger("backup.max", maxBackups);
+		props.set("download.threads", (downloadThreads == null) ? "recommended" : downloadThreads);
 
 		try {
 			props.store(file, "EMC Shopkeeper settings");

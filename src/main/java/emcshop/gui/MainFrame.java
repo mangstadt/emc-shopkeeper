@@ -298,6 +298,59 @@ public class MainFrame extends JFrame {
 				settings.save();
 			});
 			reportUnknownItems.setSelected(settings.isReportUnknownItems());
+
+			menu.addMenuItem("Set Download Threads...")
+			.parent(settingsMenu)
+			.add(event -> {
+				final String valueForRecommended = "recommended";
+				String textboxValue = settings.getUseRecommendedDownloadThreads() ? valueForRecommended : (settings.getDownloadThreads() + "");
+				int cores = Runtime.getRuntime().availableProcessors();
+
+				while (true) {
+					String answer = DialogBuilder.question() //@formatter:off
+						.title("Download Threads")
+						.text("THIS SETTING IS FOR POWER USERS ONLY! :)",
+							"How many threads do you want to use for downloading and parsing rupee transactions?",
+							"",
+							"Each thread is responsible for downloading a rupee history transaction page and then",
+							"extracting the transactions out of the page. Another thread (not included in this count)",
+							"is responsible for inserting the transactions into the EMC Shopkeeper database.",
+							"",
+							"Your computer has " + cores + " logical cores. It is recommended that this setting be set to the number",
+							"of logic cores you computer has, or 4 if your computer has less than 4 cores.",
+							//using the string "recommended" allows the setting to be transferable between computers
+							"Type \"" + valueForRecommended + "\" to use the recommended value.")
+						.showInput(textboxValue); //@formatter:on
+
+					boolean dialogWasCanceled = (answer == null);
+					if (dialogWasCanceled) {
+						return;
+					}
+
+					if (valueForRecommended.equalsIgnoreCase(answer)) {
+						settings.setUseRecommendedDownloadThreads();
+						break;
+					} else {
+						int newValue;
+						try {
+							newValue = Integer.parseInt(answer);
+						} catch (NumberFormatException e) {
+							//bad input, ask again
+							continue;
+						}
+
+						if (newValue <= 0) {
+							//bad input, ask again
+							continue;
+						}
+
+						settings.setDownloadThreads(newValue);
+						break;
+					}
+				}
+
+				settings.save();
+			});
 		}
 
 		menu.addSeparator();
@@ -428,6 +481,7 @@ public class MainFrame extends JFrame {
 		clearSessionMenuItem.setEnabled(true);
 
 		RupeeTransactionReader.Builder builder = new RupeeTransactionReader.Builder(session.getCookieStore());
+		builder.threads(settings.getDownloadThreads());
 		if (stopAtPage != null) {
 			builder.stop(stopAtPage);
 		}

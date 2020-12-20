@@ -211,8 +211,7 @@ public class DialogBuilder {
 	}
 
 	/**
-	 * Creates the dialog box as an input dialog and displays it. This method is
-	 * blocking.
+	 * Creates an input dialog and displays it. This method is blocking.
 	 * @return the value the user entered or null if they cancelled it
 	 */
 	public String showInput() {
@@ -224,6 +223,24 @@ public class DialogBuilder {
 			icon,
 			choices,
 			defaultChoice
+		); //@formatter:on
+	}
+
+	/**
+	 * Creates an input dialog with a textbox and displays it. This method is
+	 * blocking.
+	 * @param initialValue the initial value of the textbox
+	 * @return the value the user entered or null if they cancelled it
+	 */
+	public String showInput(String initialValue) {
+		return (String) JOptionPane.showInputDialog( //@formatter:off
+			parent,
+			text,
+			title,
+			messageType,
+			icon,
+			null,
+			initialValue
 		); //@formatter:on
 	}
 }
