@@ -7,14 +7,13 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-
-import emcshop.gui.images.Images;
 
 /**
  * Resizes all of the PNG images in a given directory.
@@ -34,15 +33,24 @@ public class ResizeImages {
 		.collect(Collectors.toList()); //@formatter:on
 
 		for (Path file : files) {
+			System.out.print(file.getFileName() + " ... ");
+
+			Path dest = destDir.resolve(file.getFileName().toString().toLowerCase());
+
 			ImageIcon icon = new ImageIcon(Files.readAllBytes(file));
-			if (icon.getIconHeight() <= size && icon.getIconWidth() <= size) {
-				return;
+			int iconHeight = icon.getIconHeight();
+			int iconWidth = icon.getIconWidth();
+			if (iconHeight == -1 || iconWidth == -1) {
+				throw new IllegalArgumentException("Java cannot read image \"" + file.getFileName() + "\". This image may have been downloaded directly from the Wiki. Try opening the image in Paint.net and re-saving it.");
+			}
+			if (iconHeight <= size && iconWidth <= size) {
+				Files.copy(file, dest, StandardCopyOption.REPLACE_EXISTING);
+				System.out.println("resize not needed");
+				continue;
 			}
 
-			System.out.println(file.getFileName());
-
 			//scale image
-			icon = Images.scale(icon, size);
+			icon = scaleImage(icon, size);
 			Image img = icon.getImage();
 
 			//convert to buffered image
@@ -52,13 +60,37 @@ public class ResizeImages {
 			g2.dispose();
 
 			//write scaled image to file
-			Path dest = destDir.resolve(file.getFileName().toString().toLowerCase());
 			try (OutputStream out = Files.newOutputStream(dest, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 				ImageIO.write(bi, "png", out);
 			}
+			System.out.println("resized");
 		}
 
 		System.out.println("Done.");
+	}
+
+	public static ImageIcon scaleImage(ImageIcon image, int maxSize) {
+		int width = image.getIconWidth();
+		int height = image.getIconHeight();
+
+		if (height <= maxSize && width <= maxSize) {
+			return image;
+		}
+
+		int scaledWidth, scaledHeight;
+		if (width > height) {
+			double ratio = (double) height / width;
+			scaledWidth = maxSize;
+			scaledHeight = (int) (scaledWidth * ratio);
+		} else if (height > width) {
+			double ratio = (double) width / height;
+			scaledHeight = maxSize;
+			scaledWidth = (int) (scaledHeight * ratio);
+		} else {
+			scaledWidth = scaledHeight = maxSize;
+		}
+
+		return new ImageIcon(image.getImage().getScaledInstance(scaledWidth, scaledHeight, java.awt.Image.SCALE_SMOOTH));
 	}
 
 	private static Path getSrcDir(String[] args) {
