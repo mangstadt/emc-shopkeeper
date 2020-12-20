@@ -1,4 +1,13 @@
 <div>
+	<b>0.5.25</b> - <i>December 20, 2020</i><br>
+	<ul>
+		<li>Added 1.16 items.</li>
+		<li>Tweaked transaction download performance: Multiple threads are created to download and parse the rupee transaction pages from the EMC website. Before, the number of threads was hard-coded to 4. Now, it sets the thread count to match the number of logical cores on your computer (which for some people, may be higher than 4). If your computer has fewer than 4 cores, the thread count is set to 4 as before.</li>
+		<li>Added the ability to define your own download thread count from the Settings menu (not necessary for most people, for power users only).</li>
+	</ul>
+</div>
+
+<div>
 	<b>0.5.24</b> - <i>December 6, 2020</i><br>
 	<ul>
 		<li>Fixed an issue where parts of the login dialog and bonus/fee table were being cut off.</li>
