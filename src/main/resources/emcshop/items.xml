@@ -5,6 +5,9 @@
 		<Update version="1.13" ts="2019-03-15T17:30:00Z" />
 		<Update version="1.14" ts="2019-03-15T17:30:00Z" />
 		<Update version="1.15" ts="2019-03-15T17:30:00Z" />
+
+		<!-- https://empireminecraft.com/threads/1-16-4-nether-update-12-19-20.83817/ -->
+		<Update version="1.16" ts="2020-12-19T07:30:00Z" />
 	</ServerUpdates>
 
 	<Categories>
@@ -340,7 +343,8 @@
 		<Item name="Granite Slab" />
 		<Item name="Granite Stairs" />
 		<Item name="Granite Wall" />
-		<Item name="Grass" id="2" emcNames="Grass Block" />
+		<Item name="Grass" id="31:1" emcNames="Tall Grass,Long Grass" categories="6" />
+		<Item name="Grass Block" id="2" emcNames="[_1.13]Grass" />
 		<Item name="Gravel" id="13" />
 		<Item name="Gray Bed" id="355:7" stack="1" />
 		<Item name="Gray Concrete" id="251:7" categories="19" />
@@ -454,7 +458,6 @@
 		<Item name="Lime Wool" id="35:5" group="Wool" categories="18" />
 		<Item name="Llama Spawn Egg" group="Spawn Eggs" categories="0" emcNames="Spawn Llama,Llama Egg,Llama - Llama,Spawn Llama - Spawn Llama" />
 		<Item name="Lodestone" categories="15" />
-		<Item name="Long Grass" id="31:1" emcNames="Tall Grass" categories="6" />
 		<Item name="Loom" />
 		<Item name="Magenta Bed" id="355:2" stack="1" />
 		<Item name="Magenta Concrete" id="251:2" categories="19" />
@@ -679,7 +682,7 @@
 		<Item name="Slime Block" id="165" />
 		<Item name="Smithing Table" />
 		<Item name="Smoker" />
-		<Item name="Smooth Quartz" group="Quartz" categories="10,11" />
+		<Item name="Smooth Quartz" group="Quartz" categories="10,11" emcNames="Smooth Quartz Block" />
 		<Item name="Smooth Quartz Slab" group="Quartz" categories="10,11" />
 		<Item name="Smooth Quartz Stairs" group="Quartz" categories="10,11" />
 		<Item name="Smooth Red Sandstone" />
@@ -695,6 +698,7 @@
 		<Item name="Snow Block" id="80" />
 		<Item name="Soul Campfire" />
 		<Item name="Soul Sand" id="88" categories="10" />
+		<Item name="Soul Soil" categories="10" />
 		<Item name="Soul Torch" />
 		<Item name="Spider Eye" id="375" categories="9,12" />
 		<Item name="Sponge" id="19" />
@@ -734,6 +738,7 @@
 		<Item name="Stonecutter" />
 		<Item name="Storage Minecart" id="342" stack="1" group="Iron" categories="15" emcNames="Minecart with Chest" />
 		<Item name="Strad Disc" id="2264" stack="1" group="Discs" categories="3" emcNames="Record 9" />
+		<Item name="Strider Spawn Egg" group="Spawn Eggs" categories="0" />
 		<Item name="String" id="287" categories="9,13" />
 		<Item name="Stripped Acacia Log" group="Wood" categories="17" />
 		<Item name="Stripped Acacia Wood" group="Wood" categories="17" />

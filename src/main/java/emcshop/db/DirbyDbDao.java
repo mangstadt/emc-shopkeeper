@@ -61,7 +61,7 @@ public abstract class DirbyDbDao implements DbDao {
 	 * directly. Use {@link #getAppDbVersion()} instead, because this method
 	 * gets overridden in unit tests.
 	 */
-	public static final int schemaVersion = 48;
+	public static final int schemaVersion = 49;
 
 	protected Connection conn;
 	protected String jdbcUrl;
@@ -288,6 +288,10 @@ public abstract class DirbyDbDao implements DbDao {
 		for (Map.Entry<String, ItemIndex.EmcName> mapping : mappings.entries()) {
 			String officialName = mapping.getKey();
 			ItemIndex.EmcName emcName = mapping.getValue();
+			if (aliasShouldBeSkipped(officialName, emcName)) {
+				continue;
+			}
+
 
 			Integer aliasId = getItemId(emcName.getAlias());
 			if (aliasId == null) {
@@ -304,6 +308,21 @@ public abstract class DirbyDbDao implements DbDao {
 		}
 
 		deleteUnusedItems();
+	}
+
+	private boolean aliasShouldBeSkipped(String officialName, ItemIndex.EmcName emcName) {
+		/*
+		 * Grass Blocks used to be called "Grass" before 1.13.
+		 * Since "Grass" is a valid item that existed before 1.13, we do not
+		 * want to rename all existing "Grass" transactions that took place
+		 * before 1.13 to "Grass Block" (which is how the alias is defined in
+		 * items.xml), so do not process this alias.
+		 */
+		if ("Grass Block".equals(officialName) && "Grass".equals(emcName.getAlias())) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private void updateItemName(Integer id, String newName) throws SQLException {
