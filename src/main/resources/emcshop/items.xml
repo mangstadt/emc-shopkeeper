@@ -502,6 +502,7 @@
 		<Item name="Nether Star" id="399" categories="9" />
 		<Item name="Nether Wart" id="372" categories="6,10,12" emcNames="Nether Stalk" />
 		<Item name="Nether Wart Block" id="214" categories="10" />
+		<Item name="Netherite Block" categories="16" emcNames="Block of Netherite" />
 		<Item name="Netherite Chestplate" categories="16" />
 		<Item name="Netherite Helmet" categories="16" />
 		<Item name="Netherite Hoe" categories="16" />
