@@ -273,7 +273,7 @@
 		<Item name="Dirt" id="3" />
 		<Item name="Dispenser" id="23" group="Stone" categories="13" />
 		<Item name="Dolphin Spawn Egg" group="Spawn Eggs" categories="0" emcNames="Dolphin Egg" />
-		<Item name="Donkey Spawn Egg" id="383:31" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Donkey,Donkey Egg,Horse Egg - Donkey" />
+		<Item name="Donkey Spawn Egg" id="383:31" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Donkey,Donkey Egg,Horse Egg - Donkey,Donkey - Donkey" />
 		<Item name="Dragon Head" id="397:5" group="Mob Heads" categories="9" />
 		<Item name="Dragon Egg" id="122" />
 		<Item name="Dragon Stone" nameColored="§5§lDragon Stone" emcNames="Coal - §5§lDragon Stone,§5§lDragon Stone - §5§lDragon Stone" categories="5" />
@@ -374,7 +374,7 @@
 		<Item name="Honeycomb Block" />
 		<Item name="Hopper" id="154" group="Iron" categories="13" />
 		<Item name="Hopper Minecart" id="408" stack="1" group="Iron" categories="13,15" emcNames="Minecart with Hopper" />
-		<Item name="Horse Spawn Egg" id="383:100" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Horse,Horse - Horse,Horse Egg,Horse Egg - Horse,Horse Spawn Egg - Horse" />
+		<Item name="Horse Spawn Egg" id="383:100" stack="1" group="Spawn Eggs" categories="0" emcNames="Spawn Horse,Horse - Horse,Horse Egg,Horse Egg - Horse,Horse Spawn Egg - Horse,Horse Egg - Spawn Horse" />
 		<Item name="Ice" id="79" />
 		<Item name="Ink Sac" id="351:0" categories="9" emcNames="Ink Sack" />
 		<Item name="Iron Axe" id="258" stack="1" group="Iron" categories="16" />
@@ -502,7 +502,9 @@
 		<Item name="Nether Star" id="399" categories="9" />
 		<Item name="Nether Wart" id="372" categories="6,10,12" emcNames="Nether Stalk" />
 		<Item name="Nether Wart Block" id="214" categories="10" />
+		<Item name="Netherite Axe" categories="16" />
 		<Item name="Netherite Block" categories="16" emcNames="Block of Netherite" />
+		<Item name="Netherite Boots" categories="16" />
 		<Item name="Netherite Chestplate" categories="16" />
 		<Item name="Netherite Helmet" categories="16" />
 		<Item name="Netherite Hoe" categories="16" />
@@ -576,6 +578,7 @@
 		<Item name="Polished Blackstone Button" categories="13" />
 		<Item name="Polished Blackstone Pressure Plate" categories="13" />
 		<Item name="Polished Blackstone Slab" categories="10" />
+		<Item name="Polished Blackstone Stairs" categories="10" />
 		<Item name="Polished Blackstone Wall" categories="10" />
 		<Item name="Polished Diorite" id="1:4" emcNames="Pol. Diorite" />
 		<Item name="Polished Diorite Slab" />
@@ -698,6 +701,7 @@
 		<Item name="Snow Ball" id="332" stack="16" categories="16" emcNames="Snowball" />
 		<Item name="Snow Block" id="80" />
 		<Item name="Soul Campfire" />
+		<Item name="Soul Lantern" />
 		<Item name="Soul Sand" id="88" categories="10" />
 		<Item name="Soul Soil" categories="10" />
 		<Item name="Soul Torch" />
