@@ -34,7 +34,7 @@
 		<jar href="deps/httpcore-4.4.1.jar"/>
 		<jar href="deps/jackson-annotations-2.9.10.jar"/>
 		<jar href="deps/jackson-core-2.9.10.jar"/>
-		<jar href="deps/jackson-databind-2.9.10.5.jar"/>
+		<jar href="deps/jackson-databind-2.9.10.7.jar"/>
 		<jar href="deps/jcommon-1.0.23.jar"/>
 		<jar href="deps/jfreechart-1.0.19.jar"/>
 		<jar href="deps/jopt-simple-4.9.jar"/>
